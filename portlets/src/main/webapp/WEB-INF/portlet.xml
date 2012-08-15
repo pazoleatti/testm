@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd" version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_1_0.xsd" id="com.ibm.faces.portlet.FacesPortlet.b33ee88293">
+<portlet-app 
+	xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" 
+	version="2.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+	id="aplana.sbrf.taxaccounting.portlets"
+>
 	<portlet>
 		<portlet-name>forms</portlet-name>
 		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
@@ -8,7 +14,8 @@
 			<portlet-mode>view</portlet-mode>
 		</supports>
 		<portlet-info>
-			<title>Налоговые формы</title>
+			<title>АС УН: Налоговые формы</title>
+			<short-title>Налоговые формы</short-title>
 		</portlet-info>
 	</portlet>
 </portlet-app>
