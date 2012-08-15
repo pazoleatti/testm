@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<?eclipse.ant.import?>
+<project default="redeploy" name="Deploy to Local WebSphere Portal">
+	<property environment="env"/>
+	<property file="deploy.${env.COMPUTERNAME}.properties"/>
+	<property file="deploy.properties"/>
+
+	<macrodef name="runXmlAccessScript">
+		<attribute name="scriptDirName"/>		
+		<attribute name="scriptName"/>
+		<sequential>
+			<echo>Running script @{scriptName}</echo>
+			<exec executable="${env.ComSpec}" dir="@{scriptDirName}" failonerror="true">
+				<arg value="/c"/>
+				<arg value="${WPS.location}/bin/xmlaccess"/>
+				<arg line="-user ${Deploy.WPS.User}"/>
+				<arg line="-password ${Deploy.WPS.Password}"/>
+				<arg line="-url http://${Deploy.WPS.Host}:${Deploy.WPS.Config.Port}/wps/config"/>
+				<arg line="-in @{scriptName}"/>
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="deployApplication">
+		<attribute name="appArchiveName"/>
+		<attribute name="appDeployName"/>
+		<attribute name="additionalKeys" default=""/>
+		<attribute name="host"/>
+		<attribute name="port"/>
+		<attribute name="user"/>
+		<attribute name="password"/>
+		<sequential>
+			<echo>Deploying application archive @{appArchiveName} with additional keys '@{additionalKeys}'</echo>
+			<exec executable="${env.ComSpec}" dir="${Target.location}" failonerror="true">
+				<arg value="/c"/>
+				<arg value="${WAS.location}/bin/wsadmin"/>
+				<arg line="-host @{host}"/>
+				<arg line="-port @{port}"/>
+				<arg line="-user @{user}"/>
+				<arg line="-password @{password}"/>
+				<arg value="-c"/>
+				<arg value="$AdminApp install @{appArchiveName} {-appname @{appDeployName} @{additionalKeys}}"/>
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="deployApplicationOnWAS">
+		<attribute name="appArchiveName"/>
+		<attribute name="appDeployName"/>
+		<attribute name="additionalKeys" default=""/>		
+		<sequential>
+			<deployApplication 
+				appArchiveName="@{appArchiveName}"
+				appDeployName="@{appDeployName}"
+				additionalKeys="@{additionalKeys}"
+				host="${Deploy.WAS.Host}"
+				port="${Deploy.WAS.Port}"
+				user="${Deploy.WAS.User}"
+				password="${Deploy.WAS.Password}"/>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="deployApplicationOnWPS">
+		<attribute name="appArchiveName"/>
+		<attribute name="appDeployName"/>
+		<attribute name="additionalKeys" default=""/>		
+		<sequential>
+			<deployApplication 
+				appArchiveName="@{appArchiveName}"
+				appDeployName="@{appDeployName}"
+				additionalKeys="@{additionalKeys}"
+				host="${Deploy.WPS.Host}"
+				port="${Deploy.WPS.Port}"
+				user="${Deploy.WPS.User}"
+				password="${Deploy.WPS.Password}"/>
+		</sequential>
+	</macrodef>
+	
+	<target name="redeploy">
+		<deployApplicationOnWPS additionalkeys="-update" apparchivename="taxaccounting.ear" appdeployname="TaxAccounting"/>
+	</target>
+</project>
