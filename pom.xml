@@ -11,7 +11,7 @@
 		<module>model</module>
 		<module>portlets</module>
 		<module>dao</module>
-		<module>portlets-ear</module>
+		<module>taxaccounting-ear</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
