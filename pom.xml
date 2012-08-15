@@ -11,11 +11,13 @@
 		<module>model</module>
 		<module>portlets</module>
 		<module>dao</module>
+		<module>portlets-ear</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.version>0.0.1-SNAPSHOT</project.version>
 		<org.springframework.version>3.1.2.RELEASE</org.springframework.version>
+		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<dependencies>
 		<dependency>
