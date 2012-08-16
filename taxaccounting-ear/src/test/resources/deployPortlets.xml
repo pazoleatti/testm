@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<request type="update" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PortalConfig_6.1.0.xsd">
+  <portal action="locate">
+    <web-app action="update" active="true" uid="com.aplana.sbrf.taxaccounting.portlets.webapp" predeployed="true">
+      <url>file:///$installedApps$/taxaccounting.ear/portlets.war</url>
+      <context-root>/taxaccounting/portlets</context-root>
+      <display-name>Tax Accounting Portlets</display-name>
+      <portlet-app action="update" active="true" name="portlets.war" uid="com.aplana.sbrf.taxaccounting.portlets.portletapp">
+        <access-control>
+          <role actionset="Privileged User" update="set">
+            <mapping subjectid="all authenticated portal users" subjecttype="user_group" update="set"/>
+          </role>
+        </access-control>
+        <portlet action="update" active="true" name="forms" provided="false"/>
+      </portlet-app>
+    </web-app>
+  </portal>
+</request>
