@@ -10,7 +10,6 @@ import java.util.List;
 public class Form {
 	private Integer id;
 	private final List<Column> columns = new ArrayList<Column>();
-	private final List<Row> rows = new ArrayList<Row>();
 	
 	public Integer getId() {
 		return id;
@@ -20,8 +19,5 @@ public class Form {
 	}
 	public List<Column> getColumns() {
 		return columns;
-	}
-	public List<Row> getRows() {
-		return rows;
 	}
 }
