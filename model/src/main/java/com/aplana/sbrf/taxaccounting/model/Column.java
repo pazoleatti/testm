@@ -5,10 +5,22 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author dsultanbekov
  */
 public class Column {
+	public static enum Types {
+		NUMBER('N'),
+		STRING('S');
+		private char code;
+		Types(char code) {
+			this.code = code;
+		}
+		public char getCode() {
+			return code;
+		}
+	}
 	private Integer id;
 	private String name;
 	private int formId;
 	private int order;
+	private Types type;
 	private String alias;
 	
 	public Integer getId() {
@@ -40,5 +52,11 @@ public class Column {
 	}
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+	public Types getType() {
+		return type;
+	}
+	public void setType(Types type) {
+		this.type = type;
 	}
 }

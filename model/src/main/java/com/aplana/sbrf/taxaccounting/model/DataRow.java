@@ -11,10 +11,10 @@ import java.util.Map;
  */
 public class DataRow {
 	private final Map<String, BigDecimal> data;
-	private final Row row;
+	private String code;
+	private int order;
 	
-	public DataRow(Row row, List<Column> columns) {
-		this.row = row;
+	public DataRow(String code, List<Column> columns) {
 		this.data = new HashMap<String, BigDecimal>(columns.size());
 	}
 	
@@ -30,7 +30,19 @@ public class DataRow {
 		}
 	}
 
-	public Row getRow() {
-		return row;
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 }
