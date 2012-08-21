@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.controller.forms;
+package com.aplana.sbrf.taxaccounting.controller.formdata;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -6,9 +6,10 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 @Controller
 @RequestMapping("VIEW")
-public class FormsController {
+public class ListFormDataController {
+	
 	@RenderMapping
-	String showList() {
-		return "list";
+	public String list() {
+		return "formData/list";
 	}
 }

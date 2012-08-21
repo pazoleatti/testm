@@ -7,7 +7,7 @@
 	id="aplana.sbrf.taxaccounting.portlets"
 >
 	<portlet>
-		<portlet-name>forms</portlet-name>
+		<portlet-name>form</portlet-name>
 		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
 		<supports>
 			<mime-type>text/html</mime-type>
@@ -18,4 +18,19 @@
 			<short-title>Налоговые формы</short-title>
 		</portlet-info>
 	</portlet>
+	
+	<portlet>
+		<portlet-name>formData</portlet-name>
+		<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+			<portlet-mode>edit</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>АС УН: Данные по налоговым формам</title>
+			<short-title>Данные по налоговым формам</short-title>
+		</portlet-info>
+	</portlet>
+	
 </portlet-app>

@@ -3,6 +3,7 @@
 	<name>taxaccounting-ear</name>
 	<comment></comment>
 	<projects>
+		<project>dao</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -7,13 +7,22 @@ package com.aplana.sbrf.taxaccounting.model;
 public class Column {
 	public static enum Types {
 		NUMBER('N'),
-		STRING('S');
+		STRING('S'),
+		DATE('D');
 		private char code;
 		Types(char code) {
 			this.code = code;
 		}
 		public char getCode() {
 			return code;
+		}
+		public static Types getType(char code) {
+			for(Types t: Types.values()) {
+				if (code == t.getCode()) {
+					return t;
+				}
+			}
+			throw new IllegalArgumentException("Unknown column type: " + code);
 		}
 	}
 	private Integer id;
