@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.Form;
@@ -19,9 +20,11 @@ import com.aplana.sbrf.taxaccounting.model.Form;
 public class FormDaoImpl extends AbstractDao implements FormDao {
 	@Autowired
 	private FormTypeDao formTypeDao;
+	@Autowired
+	private ColumnDao columnDao;
+	
 	
 	private class FormMapper implements RowMapper<Form> {
-		@Override
 		public Form mapRow(ResultSet rs, int index) throws SQLException {
 			Form form = new Form();
 			form.setId(rs.getInt("id"));
@@ -31,23 +34,22 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 		}
 	}
 	
-	@Override
 	public Form getForm(int formId) {
-		return getJdbcTemplate().queryForObject(
+		Form form = getJdbcTemplate().queryForObject(
 			"select * from form where id = ?",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			new FormMapper()
 		);
+		form.getColumns().addAll(columnDao.getFormColumns(formId));
+		return form;
 	}
 
-	@Override
 	@Transactional(readOnly=false)
 	public int saveForm(Form form) {
 		return 0;
 	}
 
-	@Override
 	public List<Form> listForms() {
 		return getJdbcTemplate().query("select * from form", new FormMapper());
 	}

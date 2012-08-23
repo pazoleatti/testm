@@ -7,7 +7,6 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 @Controller
 @RequestMapping("VIEW")
 public class ListFormDataController {
-	
 	@RenderMapping
 	public String list() {
 		return "formData/list";

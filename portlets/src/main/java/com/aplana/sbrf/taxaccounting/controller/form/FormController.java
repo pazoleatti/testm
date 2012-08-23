@@ -19,7 +19,7 @@ public class FormController {
 	
 	@RenderMapping
 	String showList() {
-		return "forms/list";
+		return "form/list";
 	}
 	
 	@ModelAttribute("forms")

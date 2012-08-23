@@ -11,8 +11,7 @@
 	<artifactId>taxaccounting-ear</artifactId>
 	<packaging>ear</packaging>
 
-	<name>portlets-ear</name>
-	<url>http://maven.apache.org</url>
+	<name>taxaccounting-ear</name>
 
 	<dependencies>
 		<dependency>

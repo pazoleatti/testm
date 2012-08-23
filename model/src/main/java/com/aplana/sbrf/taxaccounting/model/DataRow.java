@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,19 +9,26 @@ import java.util.Map;
  * @author dsultanbekov
  */
 public class DataRow {
-	private final Map<String, BigDecimal> data;
+	private final Map<String, Object> data;
 	private String code;
 	private int order;
 	
-	public DataRow(String code, List<Column> columns) {
-		this.data = new HashMap<String, BigDecimal>(columns.size());
+	public DataRow(String code, List<Column<?>> columns) {
+		data = new HashMap<String, Object>(columns.size());
+		for (Column<?> col: columns) {
+			data.put(col.getAlias(), null);
+		}
 	}
 	
-	public BigDecimal getData(String columnAlias) {
+	public Map<String, Object> getData() {
+		return data;
+	}
+
+	public Object getColumnValue(String columnAlias) {
 		return data.get(columnAlias);
 	}
 	
-	public void setData(String columnAlias, BigDecimal value) {
+	public void setColumnValue(String columnAlias, Object value) {
 		if (value == null) {
 			data.remove(columnAlias);
 		} else {
