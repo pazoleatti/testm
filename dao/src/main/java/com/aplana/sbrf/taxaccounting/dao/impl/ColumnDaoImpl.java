@@ -25,6 +25,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			String type = rs.getString("type");
 			if ("N".equals(type)) {
 				result = new NumericColumn();
+				((NumericColumn)result).setPrecision(rs.getInt("precision"));
 			} else if ("D".equals(type)) {
 				result = new DateColumn();
 			} else if ("S".equals(type)) {
@@ -37,13 +38,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setFormId(rs.getInt("form_id"));
 			result.setName(rs.getString("name"));
 			result.setOrder(rs.getInt("order"));
+			result.setWidth(rs.getInt("width"));
 			return result;
 		}
 	}
 	
 	public List<Column<?>> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
-			"select * from form_column where form_id = ?",
+			"select * from form_column where form_id = ? order by order",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			new ColumnMapper()

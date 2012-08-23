@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.math.BigDecimal;
 
 public class NumericColumn extends Column<BigDecimal> {
-	private int precision;
+	private int precision = 0;
 
 	public int getPrecision() {
 		return precision;

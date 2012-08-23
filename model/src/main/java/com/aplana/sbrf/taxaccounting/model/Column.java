@@ -10,6 +10,7 @@ public abstract class Column<T> {
 	private int formId;
 	private int order;
 	private String alias;
+	private int width;
 	
 	public Integer getId() {
 		return id;
@@ -40,5 +41,11 @@ public abstract class Column<T> {
 	}
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
 	}
 }
