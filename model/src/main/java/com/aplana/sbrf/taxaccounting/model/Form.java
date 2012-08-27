@@ -27,4 +27,12 @@ public class Form {
 	public FormType getType() {
 		return type;
 	}
+	public Column<?> getColumn(int columnId) {
+		for (Column<?> col: columns) {
+			if (col.getId() == columnId) {
+				return col;
+			}
+		}
+		throw new IllegalArgumentException("Wrong columnId: " + columnId);
+	}
 }

@@ -33,14 +33,21 @@ public class FormData {
 		return dataRows;
 	}
 	
-	public DataRow appendDataRow() {
-		String rowAlias = String.valueOf(dataRows.size() + 1);
-		return appendDataRow(rowAlias);
-	}
-	
 	public DataRow appendDataRow(String rowAlias) {
 		DataRow row = new DataRow(rowAlias, form.getColumns());
 		dataRows.add(row);
 		return row;
+	}
+	
+	public DataRow getDataRow(String rowAlias) {
+		if (rowAlias == null) {
+			throw new NullPointerException("Row alias cannot be null");
+		}
+		for (DataRow row: dataRows) {
+			if (rowAlias.equals(row.getAlias())) {
+				return row;
+			}
+		}
+		throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
 	}
 }
