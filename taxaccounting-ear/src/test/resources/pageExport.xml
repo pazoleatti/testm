@@ -1,0 +1,84 @@
+<!-- 1 [content-node Z6_000000000000000000000000A0] -->
+<!-- 2 [content-node Z6_QAFBGJ008GGHF0IJ6JQSG10086] -->
+<!-- 3 [component Z7_QAFBGJ008GGHF0IJ6JQSG10081] -->
+<!-- 4 [component Z7_QAFBGJ008GGHF0IJ6JQSG10085] -->
+<!-- 5 [component Z7_QAFBGJ008GGHF0IJ6JQSG100O2] -->
+<!-- 6 [web-app Z1_QAFBGJ008GGHF0IJ6JQSG10006 uid=aplana.sbrf.taxaccounting.portlets.webmod] -->
+<!-- 7 [portlet-app Z2_QAFBGJ008GGHF0IJ6JQSG10001 name=aplana.sbrf.taxaccounting.portlets uid=aplana.sbrf.taxaccounting.portlets] -->
+<!-- 8 [servlet ZV_QAFBGJ008GGHF0IJ6JQSG10007] -->
+<!-- 9 [portlet Z3_QAFBGJ008GGHF0IJ6JQSG100G0 name=formData] -->
+<!-- 10 [portletinstance Z5_QAFBGJ008GGHF0IJ6JQSG100O6] -->
+<!-- 11 [content-node Z6_QAFBGJ008GGHF0IJ6JQSG100G7] -->
+<!-- 12 [component Z7_QAFBGJ008GGHF0IJ6JQSG10080] -->
+<!-- 13 [component Z7_QAFBGJ008GGHF0IJ6JQSG10084] -->
+<!-- 14 [component Z7_QAFBGJ008GGHF0IJ6JQSG100O0] -->
+<!-- 15 [servlet ZV_QAFBGJ008GGHF0IJ6JQSG10005] -->
+<!-- 16 [portlet Z3_QAFBGJ008GGHF0IJ6JQSG10003 name=form] -->
+<!-- 17 [portletinstance Z5_QAFBGJ008GGHF0IJ6JQSG100O4] -->
+<!-- 18 [content-node Z6_QAFBGJ0080UA70IJKTSG4220K6 uniquename=aplana.taxaccounting] -->
+<request build="wpnext_528_01" type="update" version="7.0.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PortalConfig_7.0.0.xsd">
+    <portal action="locate">
+        <web-app action="locate" domain="rel" objectid="Z1_QAFBGJ008GGHF0IJ6JQSG10006" uid="aplana.sbrf.taxaccounting.portlets.webmod">
+            <servlet action="locate" domain="rel" name="formData" objectid="ZV_QAFBGJ008GGHF0IJ6JQSG10007"/>
+            <servlet action="locate" domain="rel" name="form" objectid="ZV_QAFBGJ008GGHF0IJ6JQSG10005"/>
+            <portlet-app action="locate" domain="rel" name="aplana.sbrf.taxaccounting.portlets" objectid="Z2_QAFBGJ008GGHF0IJ6JQSG10001" uid="aplana.sbrf.taxaccounting.portlets">
+                <portlet action="locate" domain="rel" name="formData" objectid="Z3_QAFBGJ008GGHF0IJ6JQSG100G0"/>
+                <portlet action="locate" domain="rel" name="form" objectid="Z3_QAFBGJ008GGHF0IJ6JQSG10003"/>
+            </portlet-app>
+        </web-app>
+        <content-node action="locate" domain="rel" objectid="Z6_000000000000000000000000A0" uniquename="wps.content.root"/>
+        <content-node action="update" active="true" content-parentref="Z6_000000000000000000000000A0" domain="rel" objectid="Z6_QAFBGJ0080UA70IJKTSG4220K6" ordinal="4300" type="label" uniquename="aplana.taxaccounting">
+            <supported-markup markup="html" update="set"/>
+            <localedata locale="ru">
+                <title>Учёт налогов</title>
+            </localedata>
+            <parameter name="com.ibm.portal.IgnoreAccessControlInCaches" type="string" update="set"><![CDATA[false]]></parameter>
+            <parameter name="com.ibm.portal.feed.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.friendly.name" type="string" update="set"><![CDATA[taxaccounting]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-scope" type="string" update="set"><![CDATA[NON-SHARED]]></parameter>
+            <access-control externalized="false" owner="uid=wpsadmin,o=defaultWIMFileBasedRealm" private="false"/>
+        </content-node>
+        <content-node action="update" active="true" allportletsallowed="true" content-parentref="Z6_QAFBGJ0080UA70IJKTSG4220K6" create-type="explicit" domain="rel" objectid="Z6_QAFBGJ008GGHF0IJ6JQSG10086" ordinal="400" type="page" uniquename="aplana.taxaccounting.formData">
+            <supported-markup markup="html" update="set"/>
+            <localedata locale="ru">
+                <title>Данные по налоговым формам</title>
+            </localedata>
+            <parameter name="com.ibm.portal.IgnoreAccessControlInCaches" type="string" update="set"><![CDATA[false]]></parameter>
+            <parameter name="com.ibm.portal.bookmarkable" type="string" update="set"><![CDATA[Yes]]></parameter>
+            <parameter name="com.ibm.portal.feed.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.friendly.name" type="string" update="set"><![CDATA[formData]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-scope" type="string" update="set"><![CDATA[NON-SHARED]]></parameter>
+            <access-control externalized="false" owner="uid=wpsadmin,o=defaultWIMFileBasedRealm" private="false"/>
+            <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG10081" ordinal="100" orientation="H" skinref="undefined" type="container" width="undefined">
+                <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG10085" ordinal="100" orientation="V" skinref="undefined" type="container" width="undefined">
+                    <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG100O2" ordinal="100" skinref="undefined" type="control" width="undefined">
+                        <portletinstance action="update" domain="rel" objectid="Z5_QAFBGJ008GGHF0IJ6JQSG100O6" portletref="Z3_QAFBGJ008GGHF0IJ6JQSG100G0"/>
+                    </component>
+                </component>
+            </component>
+        </content-node>
+        <content-node action="update" active="true" allportletsallowed="true" content-parentref="Z6_QAFBGJ0080UA70IJKTSG4220K6" create-type="explicit" domain="rel" objectid="Z6_QAFBGJ008GGHF0IJ6JQSG100G7" ordinal="300" type="page" uniquename="aplana.taxaccounting.form">
+            <supported-markup markup="html" update="set"/>
+            <localedata locale="ru">
+                <title>Налоговые формы</title>
+            </localedata>
+            <parameter name="com.ibm.portal.IgnoreAccessControlInCaches" type="string" update="set"><![CDATA[false]]></parameter>
+            <parameter name="com.ibm.portal.bookmarkable" type="string" update="set"><![CDATA[Yes]]></parameter>
+            <parameter name="com.ibm.portal.feed.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.friendly.name" type="string" update="set"><![CDATA[form]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-expiry" type="string" update="set"><![CDATA[86400]]></parameter>
+            <parameter name="com.ibm.portal.remote-cache-scope" type="string" update="set"><![CDATA[NON-SHARED]]></parameter>
+            <access-control externalized="false" owner="uid=wpsadmin,o=defaultWIMFileBasedRealm" private="false"/>
+            <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG10080" ordinal="100" orientation="H" skinref="undefined" type="container" width="undefined">
+                <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG10084" ordinal="100" orientation="V" skinref="undefined" type="container" width="undefined">
+                    <component action="update" active="true" deletable="undefined" domain="rel" modifiable="undefined" objectid="Z7_QAFBGJ008GGHF0IJ6JQSG100O0" ordinal="100" skinref="undefined" type="control" width="undefined">
+                        <portletinstance action="update" domain="rel" objectid="Z5_QAFBGJ008GGHF0IJ6JQSG100O4" portletref="Z3_QAFBGJ008GGHF0IJ6JQSG10003"/>
+                    </component>
+                </component>
+            </component>
+        </content-node>
+    </portal>
+    <status element="all" result="ok"/>
+</request>

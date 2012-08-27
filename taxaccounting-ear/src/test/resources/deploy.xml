@@ -82,8 +82,7 @@
 		<replace file="${Target.location}/deployPortlets.xml" summary="true">
 			<replacefilter token="$installedApps$" value="${WPS.profile.location}/installedApps/${WPS.node.name}"/>
 		</replace>
-		<!--
 		<runXmlAccessScript scriptdirname="${Target.location}" scriptname="deployPortlets.xml"/>
-		-->
+		<runXmlAccessScript scriptdirname="./" scriptname="pageExport.xml"/>
 	</target>
 </project>
