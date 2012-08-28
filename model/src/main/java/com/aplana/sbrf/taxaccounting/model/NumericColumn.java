@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.math.BigDecimal;
 
-public class NumericColumn extends Column<BigDecimal> {
+public class NumericColumn extends Column {
 	private int precision = 0;
 
 	public int getPrecision() {

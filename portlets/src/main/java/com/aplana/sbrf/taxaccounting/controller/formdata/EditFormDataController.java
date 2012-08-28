@@ -55,7 +55,7 @@ public class EditFormDataController {
 	protected FormData getFormData(@ModelAttribute("form") Form form) {
 		FormData formData = new FormData(null, form);
 		DataRow r = formData.appendDataRow("1");
-		for (Column<?> col: form.getColumns()) {
+		for (Column col: form.getColumns()) {
 			if (col.getClass().equals(DateColumn.class)) {
 				r.setColumnValue(col.getAlias(), new Date());
 			} else if (col.getClass().equals(NumericColumn.class)) {
@@ -65,7 +65,7 @@ public class EditFormDataController {
 			}
 		}
 		r = formData.appendDataRow("2");
-		for (Column<?> col: form.getColumns()) {
+		for (Column col: form.getColumns()) {
 			if (col.getClass().equals(DateColumn.class)) {
 				r.setColumnValue(col.getAlias(), new Date());
 			} else if (col.getClass().equals(NumericColumn.class)) {
@@ -80,7 +80,7 @@ public class EditFormDataController {
 	
 	@ModelAttribute("gridLayout")
 	protected String getGridLayout(@ModelAttribute("formData") FormData formData) throws JsonGenerationException, JsonMappingException, IOException {
-		List<Column<?>> columns = formData.getForm().getColumns();
+		List<Column> columns = formData.getForm().getColumns();
 		return getObjectMapper().writeValueAsString(columns);
 	}
 	

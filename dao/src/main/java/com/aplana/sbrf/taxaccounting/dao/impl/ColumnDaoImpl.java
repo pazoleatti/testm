@@ -19,9 +19,9 @@ import com.aplana.sbrf.taxaccounting.model.StringColumn;
 @Transactional(readOnly=true)
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
-	private final static class ColumnMapper implements RowMapper<Column<?>> {
-		public Column<?> mapRow(ResultSet rs, int index) throws SQLException {
-			final Column<?> result;
+	private final static class ColumnMapper implements RowMapper<Column> {
+		public Column mapRow(ResultSet rs, int index) throws SQLException {
+			final Column result;
 			String type = rs.getString("type");
 			if ("N".equals(type)) {
 				result = new NumericColumn();
@@ -43,7 +43,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 	}
 	
-	public List<Column<?>> getFormColumns(int formId) {
+	public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
 			"select * from form_column where form_id = ? order by order",
 			new Object[] { formId },

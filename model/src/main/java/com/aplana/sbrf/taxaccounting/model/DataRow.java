@@ -12,10 +12,10 @@ public class DataRow {
 	private final Map<String, Object> data;
 	private String alias;
 
-	public DataRow(String alias, List<Column<?>> columns) {
+	public DataRow(String alias, List<Column> columns) {
 		this.alias = alias;
 		data = new HashMap<String, Object>(columns.size());
-		for (Column<?> col: columns) {
+		for (Column col: columns) {
 			data.put(col.getAlias(), null);
 		}
 	}

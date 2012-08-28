@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Столбец таблицы в объявлении налоговой формы
  * @author dsultanbekov
  */
-public abstract class Column<T> {
+public abstract class Column {
 	private Integer id;
 	private String name;
 	private int formId;

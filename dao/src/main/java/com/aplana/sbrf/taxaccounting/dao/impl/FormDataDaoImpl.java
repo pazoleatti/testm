@@ -133,7 +133,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				ps.setString(1, rowAlias);
 				ps.setInt(2, index);
 				
-				for (Column<?> col: formData.getForm().getColumns()) {
+				for (Column col: formData.getForm().getColumns()) {
 					Object val = dr.getColumnValue(col.getAlias());
 					if (val == null) {
 						continue;
