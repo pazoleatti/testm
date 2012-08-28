@@ -16,6 +16,10 @@ public class FormData {
 		this.id = id;
 		this.form = form;
 	}
+	
+	public FormData(Form form) {
+		this(null, form);
+	}
 
 	public Long getId() {
 		return id;

@@ -63,10 +63,12 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 					} else {
 						stDate = jp.getText();
 					}
-					try {
-						result.setColumnValue(fieldName, isoFormat.parseObject(stDate));
-					} catch (ParseException e) {
-						throw new IOException("Wrong date format: " + stDate, e);
+					if (!"null".equals(stDate)) {
+						try {
+							result.setColumnValue(fieldName, isoFormat.parseObject(stDate));
+						} catch (ParseException e) {
+							throw new IOException("Wrong date format: " + stDate, e);
+						}
 					}
 				} else if (col instanceof StringColumn) {
 					result.setColumnValue(fieldName, jp.getText());

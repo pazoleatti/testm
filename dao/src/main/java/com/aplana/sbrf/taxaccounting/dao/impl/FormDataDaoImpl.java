@@ -32,6 +32,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private FormDao formDao;
 	
+	private class FormDataRowMapper implements RowMapper<FormData> {
+		public FormData mapRow(ResultSet rs, int index) throws SQLException {
+			long formDataId = rs.getLong("id");
+			int formId = rs.getInt("form_id");
+			Form form = formDao.getForm(formId);
+			return new FormData(formDataId, form);
+		}
+	}
+	
 	private static class ValueRecord<T> {
 		private T value;
 		private String rowAlias;
@@ -50,13 +59,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			"select * from form_data where id = ?",
 			new Object[] { formDataId },
 			new int[] { Types.NUMERIC },
-			new RowMapper<FormData>() {
-				public FormData mapRow(ResultSet rs, int index)	throws SQLException {
-					int formId = rs.getInt("form_id");
-					Form form = formDao.getForm(formId);
-					return new FormData(formDataId, form);
-				}
-			}
+			new FormDataRowMapper()
 		);
 		
 		final Map<Long, String> rowIdToAlias = new HashMap<Long, String>();
@@ -184,6 +187,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					java.sql.Date sqlDate = new java.sql.Date(((Date)rec.value).getTime());
 					ps.setDate(3, sqlDate);	
 				} else if (rec.value instanceof BigDecimal) {
+					// TODO: Добавить округление данных в соответствии с точностью, указанной в объекте Column
 					ps.setBigDecimal(3, (BigDecimal)rec.value);
 				} else if (rec.value instanceof String) {
 					ps.setString(3, (String)rec.value);
@@ -198,6 +202,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		getJdbcTemplate().batchUpdate(
 			"insert into " + tableName + " (row_id, column_id, value) values (?, ?, ?)",
 			bpss
+		);		
+	}
+
+	@Override
+	public List<FormData> getAll() {
+		return getJdbcTemplate().query(
+			"select * from form_data",
+			new FormDataRowMapper()
 		);		
 	}
 }

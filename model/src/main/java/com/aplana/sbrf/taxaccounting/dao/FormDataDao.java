@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormData;
 
 /**
@@ -20,4 +22,10 @@ public interface FormDataDao {
 	 * в случае уже существующей - совпадает с полем id объекта formData
 	 */
 	long save(FormData formData);
+
+	/**
+	 * Возвращает информацию по всем, имеющимся в наличии заполенным формам
+	 * @return
+	 */
+	List<FormData> getAll();
 }
