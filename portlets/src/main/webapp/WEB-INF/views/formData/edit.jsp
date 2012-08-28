@@ -15,29 +15,12 @@
 	
 	dojo.addOnLoad(function() {
 		dojo.parser.parse();
-		formatDate = function(inDatum){
-			if (inDatum == null) {
+		function formatDate(inDatum){
+			if (inDatum == null || inDatum == '') {
 				return '';
 			}
 			return dojo.date.locale.format(new Date(inDatum), this.constraint);
 		};
-		
-		getNumberFormatter = function(precision) {
-			return function(inDatum) {
-				var widget = new dijit.form.NumberTextBox({
-					constraints: { places: precision },
-					value: isNaN(inDatum) ? null : inDatum,
-					style: 'width: 100%;'
-				});
-				return widget; 
-			}
-		};
-
-		getNumber = function(value) {
-			console.log(dojo.toJson(value));
-			return value;
-		}
-		
 		${namespace}_grid = new dojox.grid.DataGrid({
 			id: '${namespace}_grid',
 			store: ${namespace}_store,
