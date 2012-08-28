@@ -180,7 +180,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				ValueRecord<T> rec = values.get(index);
 				ps.setLong(1, rowsAliasToId.get(rec.rowAlias));
 				ps.setInt(2, rec.columnId);
-				ps.setObject(3, rec.value);
+				if (rec.value instanceof Date) {
+					java.sql.Date sqlDate = new java.sql.Date(((Date)rec.value).getTime());
+					ps.setDate(3, sqlDate);	
+				} else if (rec.value instanceof BigDecimal) {
+					ps.setBigDecimal(3, (BigDecimal)rec.value);
+				} else if (rec.value instanceof String) {
+					ps.setString(3, (String)rec.value);
+				} else {
+					assert false;
+				}
 			}
 			public int getBatchSize() {
 				return values.size();
