@@ -11,7 +11,7 @@ public class FormatUtils {
 		DateFormat result = isoDateFormat.get(); 
 		if (result == null) {
 			TimeZone tz = TimeZone.getTimeZone("UTC");
-			result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+			result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			result.setTimeZone(tz);
 			isoDateFormat.set(result);
 		}

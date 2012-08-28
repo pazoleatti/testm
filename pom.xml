@@ -41,4 +41,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<repositories>
+		<repository>
+			<id>codehaus.repo</id>
+			<name>Codehaus repository (for latest groovy, jackson, etc.)</name>
+			<url>http://repository.codehaus.org</url>
+		</repository>
+	</repositories>
 </project>

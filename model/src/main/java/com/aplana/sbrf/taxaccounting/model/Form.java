@@ -35,4 +35,15 @@ public class Form {
 		}
 		throw new IllegalArgumentException("Wrong columnId: " + columnId);
 	}
+	public Column getColumn(String columnAlias) {
+		if (columnAlias == null) {
+			throw new NullPointerException("Column alias cannot be null");
+		}
+		for (Column col: columns) {
+			if (columnAlias.equals(col.getAlias())) {
+				return col;
+			}
+		}
+		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
+	}	
 }

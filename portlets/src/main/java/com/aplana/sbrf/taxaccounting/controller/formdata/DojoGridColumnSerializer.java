@@ -32,8 +32,9 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeRawValue("formatDate");
 			jg.writeFieldName("constraint");
 			jg.writeStartObject();
-			jg.writeStringField("formatLength", "short");
+			jg.writeStringField("datePattern", "dd.MM.yyyy");
 			jg.writeStringField("selector", "date");
+			
 			jg.writeEndObject();
 		} else if (col instanceof NumericColumn) {
 			NumericColumn nc = (NumericColumn)col;
@@ -41,9 +42,11 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeRawValue("dojox.grid.cells._Widget");
 			jg.writeFieldName("widgetClass");
 			jg.writeRawValue("dijit.form.NumberTextBox");
-			jg.writeFieldName("constraints");
+			jg.writeFieldName("constraint");
 			jg.writeStartObject();
 			jg.writeNumberField("places", nc.getPrecision());
+			jg.writeFieldName("formatter");
+			jg.writeRawValue("formatNumber");			
 			jg.writeEndObject();
 		}
 		jg.writeEndObject();

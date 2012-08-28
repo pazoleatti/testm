@@ -6,7 +6,7 @@ import java.util.Collection;
  * Ответ для dojo.FileReadStore/FileWriteStore
  * @param <T> - тип объектов для сериализации
  */
-public class DojoFileStoreResponse<T> {
+public class DojoFileStoreData<T> {
 	private String identifier;
 	private Collection<T> items;
 	

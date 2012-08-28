@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.controller.formdata;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import javax.portlet.ResourceResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -31,13 +34,17 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.util.DojoFileStoreResponse;
+import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 
 @Controller
 @SessionAttributes({"formData", "form"})
 @RequestMapping("EDIT")
 public class EditFormDataController {
 	private Log logger = LogFactory.getLog(getClass());
+	
+	private static class DataRowFileStoreData extends DojoFileStoreData<DataRow> {
+		
+	};
 	
 	@Autowired
 	private FormDao formDao;
@@ -81,7 +88,7 @@ public class EditFormDataController {
 	@ModelAttribute("gridLayout")
 	protected String getGridLayout(@ModelAttribute("formData") FormData formData) throws JsonGenerationException, JsonMappingException, IOException {
 		List<Column> columns = formData.getForm().getColumns();
-		return getObjectMapper().writeValueAsString(columns);
+		return getObjectMapper(formData.getForm()).writeValueAsString(columns);
 	}
 	
 	@ActionMapping(params="action=new")
@@ -97,25 +104,31 @@ public class EditFormDataController {
 	@ResourceMapping("dataRows")
 	public void getDataRows(@ModelAttribute("formData") FormData formData, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
 		List<DataRow> dataRows = formData.getDataRows();
-		DojoFileStoreResponse<DataRow> data = new DojoFileStoreResponse<DataRow>();
+		DojoFileStoreData<DataRow> data = new DojoFileStoreData<DataRow>();
 		data.setIdentifier("alias");
 		data.setItems(dataRows);
 
 		response.setContentType("application/json");
-		getObjectMapper().writeValue(response.getPortletOutputStream(), data);
+		getObjectMapper(formData.getForm()).writeValue(response.getPortletOutputStream(), data);
 	}
 	
-	@ActionMapping("save")
-	public void saveFormData(@ModelAttribute("formData") FormData formData) {
+	@ResourceMapping("saveRows")
+	
+	public void saveDataRows(@ModelAttribute("formData") FormData formData, @RequestParam("data") String json) throws JsonProcessingException, UnsupportedEncodingException, IOException {
 		logger.info("Trying to save form data");
+		ObjectMapper objectMapper = getObjectMapper(formData.getForm());
+		DataRowFileStoreData data = objectMapper.readValue(json, DataRowFileStoreData.class);
+		formData.getDataRows().clear();
+		formData.getDataRows().addAll(data.getItems());
 		long formDataId = formDataDao.save(formData);
 		logger.info("Form data saved, formDataId = " + formDataId);
 	}
 	
-	private ObjectMapper getObjectMapper() {
+	private ObjectMapper getObjectMapper(Form form) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
 		module.addSerializer(DataRow.class, new DataRowSerializer());
+		module.addDeserializer(DataRow.class, new DataRowDeserializer(form));
 		module.addSerializer(Column.class, new DojoGridColumnSerializer());
 		objectMapper.registerModule(module);
 		return objectMapper;
