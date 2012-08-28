@@ -52,8 +52,7 @@ public class EditFormDataController {
 	}
 	
 	@ModelAttribute("formData")
-	FormData getFormData(@ModelAttribute("form") Form form) {
-		/*
+	protected FormData getFormData(@ModelAttribute("form") Form form) {
 		FormData formData = new FormData(null, form);
 		DataRow r = formData.appendDataRow("1");
 		for (Column<?> col: form.getColumns()) {
@@ -76,8 +75,13 @@ public class EditFormDataController {
 			}
 		}
 		return formData;
-		*/
-		return formDataDao.get(2);
+		//return formDataDao.get(2);
+	}
+	
+	@ModelAttribute("gridLayout")
+	protected String getGridLayout(@ModelAttribute("formData") FormData formData) throws JsonGenerationException, JsonMappingException, IOException {
+		List<Column<?>> columns = formData.getForm().getColumns();
+		return getObjectMapper().writeValueAsString(columns);
 	}
 	
 	@ActionMapping(params="action=new")
@@ -97,13 +101,8 @@ public class EditFormDataController {
 		data.setIdentifier("alias");
 		data.setItems(dataRows);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
-		module.addSerializer(DataRow.class, new DataRowSerializer());
-		objectMapper.registerModule(module);
-
 		response.setContentType("application/json");
-		objectMapper.writeValue(response.getPortletOutputStream(), data);
+		getObjectMapper().writeValue(response.getPortletOutputStream(), data);
 	}
 	
 	@ActionMapping("save")
@@ -111,5 +110,14 @@ public class EditFormDataController {
 		logger.info("Trying to save form data");
 		long formDataId = formDataDao.save(formData);
 		logger.info("Form data saved, formDataId = " + formDataId);
+	}
+	
+	private ObjectMapper getObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
+		module.addSerializer(DataRow.class, new DataRowSerializer());
+		module.addSerializer(Column.class, new DojoGridColumnSerializer());
+		objectMapper.registerModule(module);
+		return objectMapper;
 	}
 }
