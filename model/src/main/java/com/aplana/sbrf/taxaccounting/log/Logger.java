@@ -9,11 +9,13 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Объект для логирования информации в ходе расчётов, проверок и других операций
  * В ходе выполнения операции пользователь добавляет в журнал сообщения при помощи методов {@link #info(String, Object...)}, 
- * {@link #warning(String, Object...)}, {@link #error(String, Object...)}
+ * {@link #warn(String, Object...)}, {@link #error(String, Object...)}
  * Вся информация, записываемая в журал будет дублироваться в журнал сервера приложений средствами Commons.Logging
  */
 public class Logger {
 	private Log logger = LogFactory.getLog(getClass());
+	
+	private LogMessageDecorator messageDecorator;
 	
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
 	/**
@@ -29,7 +31,7 @@ public class Logger {
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)} 
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
-	public void warning(String message, Object...args) {
+	public void warn(String message, Object...args) {
 		log(LogLevel.WARNING, message, args);
 	}
 	/**
@@ -53,11 +55,9 @@ public class Logger {
 
 	private void log(LogLevel level, String message, Object...args) {
 		String extMessage = String.format(message, args);
-		
-		if (level == LogLevel.ERROR) {
-			
+		if (messageDecorator != null) {
+			extMessage = messageDecorator.getDecoratedMessage(extMessage);
 		}
-		
 		LogEntry entry = new LogEntry(level, extMessage);
 		entries.add(entry);
 	}
@@ -82,5 +82,15 @@ public class Logger {
 	 */
 	public List<LogEntry> getEntries() {
 		return entries;
+	}
+
+	/**
+	 * Установить декоратор для текста сообщений.
+	 * Если установлен в null, то сообщения пишутся в неизменном виде,
+	 * в противном случае к строке будет применено преобразование, выполняемое методом {@LogMessageDecorator#getDecoratedMessage} 
+	 * @param messageDecorator декоратор, может быть null
+	 */
+	public void setMessageDecorator(LogMessageDecorator messageDecorator) {
+		this.messageDecorator = messageDecorator;
 	}
 }

@@ -2,9 +2,18 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
 <portlet:defineObjects />
+<c:if test="${not empty gridLayout}"><%-- main check --%>
+<c:url value="/js/LoggerPane.js" var="loggerJsUrl"/>
+<script type="text/javascript" src="${loggerJsUrl}"></script>
+<c:url value="/css/LoggerPane.css" var="loggerCssUrl"/>
+<style type="text/css"><%-- TODO: переделать импорт CSS --%>
+	@import "/portal_dojo/v1.4.3/dojox/grid/resources/Grid.css";
+	@import "/portal_dojo/v1.4.3/dojox/grid/resources/tundraGrid.css";
+	@import "${loggerCssUrl}";
+</style>
 <c:set var="namespace"><portlet:namespace/></c:set>
-<portlet:resourceURL id="dataRows" var="storeURL"/>
-<portlet:resourceURL id="saveRows" var="saveURL"/>
+<portlet:resourceURL id="dataRows" var="storeUrl"/>
+<portlet:resourceURL id="saveRows" var="saveUrl"/>
 <script type="text/javascript">
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
@@ -31,16 +40,23 @@
 		};		
 		
 		${namespace}_store = new dojo.data.ItemFileWriteStore({
-			url: '${storeURL}'
+			clearOnClose: true,
+			url: '${storeUrl}'
 		});
 		
 		${namespace}_store._saveEverything = function(successCallback, failureCallback, newContentString) {
+			var processLog = function(logEntries) {
+				${namespace}_loggerPane.setEntries(logEntries);
+				successCallback(logEntries);
+			}
 			dojo.xhrPost({
-				url: '${saveURL}',
+				url: '${saveUrl}',
+				handleAs: 'json',
 				content: {
 					data: newContentString
 				},
-				load: successCallback,
+				sync: true,
+				load: processLog,
 				error: failureCallback
 		    });
 		};
@@ -49,28 +65,29 @@
 			id: '${namespace}_grid',
 			store: ${namespace}_store,
 			structure: [${gridLayout}],
-			rowSelector: '2em',
+			rowSelector: '1em',
 			rowsPerPage: 100,
-			autoHeight: true			
+			autoHeight: true,
+			canSort: function(index) { return false; }			
 		});		
         ${namespace}_grid.placeAt('${namespace}_gridDiv');
         ${namespace}_grid.startup();
 	});
 	function ${namespace}_addNewRow() {
-		${namespace}_store.newItem({alias: (${namespace}_grid.rowCount + 1)});
+		${namespace}_store.newItem({alias: '' + (${namespace}_grid.rowCount + 1)});
 	}
 	function ${namespace}_save() {
 		${namespace}_store.save();
+		${namespace}_store.close();
+		${namespace}_grid._refresh();
 	}
 </script>
-<style type="text/css"><%-- TODO: переделать импорт CSS --%>
-	@import "/portal_dojo/v1.4.3/dojox/grid/resources/Grid.css";
-	@import "/portal_dojo/v1.4.3/dojox/grid/resources/tundraGrid.css";
-</style>
+<div jsid="${namespace}_loggerPane" dojoType="com.aplana.taxaccounting.LoggerPane"></div>
 <div id="${namespace}_gridDiv"></div>
 <button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">Добавить строку</button>
-<portlet:actionURL name="save" var="saveURL"/>
+<portlet:actionURL name="save" var="saveUrl"/>
 <button dojoType="dijit.form.Button" onClick="${namespace}_save">Сохранить</button>
-<div><portlet:renderURL portletMode="view" windowState="normal" var="backURL" />
-<a href="${backURL}">Назад</a>
+</c:if><%-- main check --%>
+<div><portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
+<a href="${backUrl}">Назад</a>
 </div>

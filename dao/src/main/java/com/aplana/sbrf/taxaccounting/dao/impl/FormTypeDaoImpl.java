@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 		}
 	}
 
+	@Cacheable("FormType")
 	public FormType getType(int typeId) {
+		logger.info("Fetching FormType with id = " + typeId);
 		return getJdbcTemplate().queryForObject(
 			"select * from form_type where id = ?",
 			new Object[] { typeId },

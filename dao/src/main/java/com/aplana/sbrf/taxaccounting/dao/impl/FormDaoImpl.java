@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.RowCheckDao;
 import com.aplana.sbrf.taxaccounting.model.Form;
 
 @Repository
@@ -22,7 +24,8 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private ColumnDao columnDao;
-	
+	@Autowired
+	private RowCheckDao rowCheckDao;
 	
 	private class FormMapper implements RowMapper<Form> {
 		public Form mapRow(ResultSet rs, int index) throws SQLException {
@@ -34,7 +37,9 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 		}
 	}
 	
+	@Cacheable("Form")
 	public Form getForm(int formId) {
+		logger.info("Fetching Form with id = " + formId);
 		Form form = getJdbcTemplate().queryForObject(
 			"select * from form where id = ?",
 			new Object[] { formId },
@@ -42,6 +47,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 			new FormMapper()
 		);
 		form.getColumns().addAll(columnDao.getFormColumns(formId));
+		form.getRowChecks().addAll(rowCheckDao.getFormRowChecks(formId));
 		return form;
 	}
 

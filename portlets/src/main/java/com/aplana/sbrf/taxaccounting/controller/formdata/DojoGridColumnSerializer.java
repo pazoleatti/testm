@@ -24,7 +24,8 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 		jg.writeStringField("name", col.getName());
 		jg.writeStringField("field", col.getAlias());
 		jg.writeStringField("width", col.getWidth() + "em");
-		jg.writeBooleanField("editable", true);
+		jg.writeBooleanField("editable", col.isEditable());
+		jg.writeBooleanField("sortable", false);
 		if (col instanceof DateColumn) {
 			jg.writeFieldName("type");
 			jg.writeRawValue("dojox.grid.cells.DateTextBox");
@@ -34,7 +35,6 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeStartObject();
 			jg.writeStringField("datePattern", "dd.MM.yyyy");
 			jg.writeStringField("selector", "date");
-			
 			jg.writeEndObject();
 		} else if (col instanceof NumericColumn) {
 			NumericColumn nc = (NumericColumn)col;
@@ -49,7 +49,7 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeRawValue("formatNumber");			
 			jg.writeEndObject();
 		}
-		jg.writeEndObject();
+		jg.writeEndObject();		
 	}
 
 }

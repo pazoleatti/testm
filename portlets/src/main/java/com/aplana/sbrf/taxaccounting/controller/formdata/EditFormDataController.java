@@ -27,6 +27,8 @@ import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
@@ -44,6 +46,8 @@ public class EditFormDataController {
 	private FormDao formDao;
 	@Autowired
 	private FormDataDao formDataDao;
+	@Autowired
+	private FormDataService formDataService;
 	
 	@ModelAttribute("formBean")
 	protected EditFormDataBean getFormBean() {
@@ -66,6 +70,9 @@ public class EditFormDataController {
 	@RenderMapping
 	public ModelAndView showEdit(@ModelAttribute("formBean") EditFormDataBean formBean) throws JsonGenerationException, JsonMappingException, IOException {
 		ModelAndView result = new ModelAndView("formData/edit");
+		if (formBean == null || formBean.getFormData() == null) {
+			return result;
+		}
 		Form form = formBean.getForm();
 		List<Column> columns = form.getColumns();
 		String gridLayout = getObjectMapper(form).writeValueAsString(columns);
@@ -86,14 +93,26 @@ public class EditFormDataController {
 	}
 	
 	@ResourceMapping("saveRows")
-	public void saveDataRows(@ModelAttribute("formBean") EditFormDataBean formBean, @RequestParam("data") String json) throws JsonProcessingException, UnsupportedEncodingException, IOException {
+	public void saveDataRows(
+			@ModelAttribute("formBean") EditFormDataBean formBean, 
+			@RequestParam("data") String json,
+			ResourceResponse response
+	) throws JsonProcessingException, UnsupportedEncodingException, IOException {
 		FormData formData = formBean.getFormData();
 		ObjectMapper objectMapper = getObjectMapper(formData.getForm());
 		DataRowFileStoreData data = objectMapper.readValue(json, DataRowFileStoreData.class);
 		formData.getDataRows().clear();
 		formData.getDataRows().addAll(data.getItems());
-		long formDataId = formDataDao.save(formData);
-		logger.info("Form data saved, formDataId = " + formDataId);
+		
+		Logger log = formDataService.validateFormData(formData);
+		if (!log.containsLevel(LogLevel.ERROR)) {
+			long formDataId = formDataDao.save(formData);
+			log.info("Данные успешно записаны, идентификтор: %d", formDataId);
+			logger.info("Form data saved, formDataId = " + formDataId);
+		} else {
+			log.warn("Данные формы не сохранены, так как обнаружены ошибки");
+		}
+		objectMapper.writeValue(response.getWriter(), log.getEntries());
 	}
 	
 	private ObjectMapper getObjectMapper(Form form) {

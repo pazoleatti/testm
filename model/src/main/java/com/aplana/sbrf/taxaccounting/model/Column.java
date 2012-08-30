@@ -11,6 +11,7 @@ public abstract class Column {
 	private int order;
 	private String alias;
 	private int width;
+	private boolean editable;
 	
 	public Integer getId() {
 		return id;
@@ -47,5 +48,11 @@ public abstract class Column {
 	}
 	public void setWidth(int width) {
 		this.width = width;
+	}
+	public boolean isEditable() {
+		return editable;
+	}
+	public void setEditable(boolean editable) {
+		this.editable = editable;
 	}
 }

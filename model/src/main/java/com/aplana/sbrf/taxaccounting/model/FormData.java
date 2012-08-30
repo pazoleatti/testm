@@ -38,7 +38,7 @@ public class FormData {
 	}
 	
 	public DataRow appendDataRow(String rowAlias) {
-		DataRow row = new DataRow(rowAlias, form.getColumns());
+		DataRow row = new DataRow(rowAlias, form);
 		dataRows.add(row);
 		return row;
 	}

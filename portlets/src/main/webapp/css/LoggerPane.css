@@ -1,0 +1,9 @@
+.aplanaLoggerPane ul li.ERROR {
+	color: red;
+}
+.aplanaLoggerPane ul li.WARNING {
+	color: orange;
+}
+.aplanaLoggerPane ul li.INFO {
+	color: green;
+}

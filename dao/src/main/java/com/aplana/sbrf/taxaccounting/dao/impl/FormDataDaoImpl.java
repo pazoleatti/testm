@@ -115,6 +115,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				"insert into form_data (id, form_id) values (?, ?)",
 				new Object[] { formDataId, formData.getForm().getId()}
 			);
+			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();
 			jt.update(
