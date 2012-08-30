@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.RowCheck;
-
 /**
  * Описание налоговой формы
  * @author dsultanbekov
@@ -13,7 +11,6 @@ public class Form {
 	private Integer id;
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;
-	private final List<RowCheck> rowChecks = new ArrayList<RowCheck>(); 
 	
 	public Integer getId() {
 		return id;
@@ -30,9 +27,6 @@ public class Form {
 	public FormType getType() {
 		return type;
 	}
-	public List<RowCheck> getRowChecks() {
-		return rowChecks;
-	}	
 	public Column getColumn(int columnId) {
 		for (Column col: columns) {
 			if (col.getId() == columnId) {

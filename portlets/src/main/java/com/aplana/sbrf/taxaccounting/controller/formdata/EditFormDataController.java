@@ -33,6 +33,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.script.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 
 @Controller
@@ -47,7 +48,7 @@ public class EditFormDataController {
 	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
-	private FormDataService formDataService;
+	private FormDataScriptingService formDataService;
 	
 	@ModelAttribute("formBean")
 	protected EditFormDataBean getFormBean() {
@@ -104,7 +105,8 @@ public class EditFormDataController {
 		formData.getDataRows().clear();
 		formData.getDataRows().addAll(data.getItems());
 		
-		Logger log = formDataService.validateFormData(formData);
+		Logger log = new Logger();
+		formDataService.processFormData(log, formData);
 		if (!log.containsLevel(LogLevel.ERROR)) {
 			long formDataId = formDataDao.save(formData);
 			log.info("Данные успешно записаны, идентификтор: %d", formDataId);

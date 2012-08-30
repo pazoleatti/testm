@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.RowCheckDao;
 import com.aplana.sbrf.taxaccounting.model.Form;
 
 @Repository
@@ -24,8 +23,6 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private ColumnDao columnDao;
-	@Autowired
-	private RowCheckDao rowCheckDao;
 	
 	private class FormMapper implements RowMapper<Form> {
 		public Form mapRow(ResultSet rs, int index) throws SQLException {
@@ -47,7 +44,6 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 			new FormMapper()
 		);
 		form.getColumns().addAll(columnDao.getFormColumns(formId));
-		form.getRowChecks().addAll(rowCheckDao.getFormRowChecks(formId));
 		return form;
 	}
 
