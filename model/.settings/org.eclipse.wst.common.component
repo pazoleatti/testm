@@ -2,5 +2,6 @@
     <wb-module deploy-name="model">
         <wb-resource deploy-path="/" source-path="/src/main/java"/>
         <wb-resource deploy-path="/" source-path="/.apt_generated"/>
+        <wb-resource deploy-path="/" source-path="/src/test/java"/>
     </wb-module>
 </project-modules>

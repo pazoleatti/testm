@@ -40,6 +40,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setOrder(rs.getInt("order"));
 			result.setWidth(rs.getInt("width"));
 			result.setEditable(rs.getBoolean("editable"));
+			result.setMandatory(rs.getBoolean("mandatory"));
 			return result;
 		}
 	}

@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.log.LogMessageDecorator;
  * Декоратор сообщений журнала, используемый при выполеннии проверок по строкам таблицы
  * Добавляет к каждому сообщению имя проверки и номер строки, в которой она произошла
  */
-public class RowCheckLogMessageDecorator implements LogMessageDecorator {
+public class RowMessageDecorator implements LogMessageDecorator {
 	private int rowIndex;
 	private String operationName;
 	

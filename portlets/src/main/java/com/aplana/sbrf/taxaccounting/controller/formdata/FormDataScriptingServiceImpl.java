@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportOkatoDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.script.FormDataScriptingService;
@@ -28,7 +29,7 @@ import com.aplana.sbrf.taxaccounting.script.RowScript;
 @Service
 public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	Log logger = LogFactory.getLog(getClass());
-	private final static String ROOT = "C:/Work/TaxAccounting";
+	private final static String ROOT = "C:/workspace/scripts/src/groovy";
 	
 	@Autowired
 	private TransportOkatoDao transportOkatoDao;
@@ -37,18 +38,21 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");		
 		engine.put("logger", logger);
+		// TODO: продумать способ, для публикации DAO-объектов в скриптах
+		// давать всё сразу как-то нехорошо
 		engine.put("transportOkatoDao", transportOkatoDao);
-		RowCheckLogMessageDecorator rowMessageDecorator = new RowCheckLogMessageDecorator();
+		RowMessageDecorator rowMessageDecorator = new RowMessageDecorator();
 		logger.setMessageDecorator(rowMessageDecorator);
 		List<RowScript> rowScripts = getFormRowScripts(formData.getForm().getId());
 		for (RowScript rowScript: rowScripts) {
-			performRowCheck(rowScript, formData, engine, logger, rowMessageDecorator);
+			performRowScript(rowScript, formData, engine, logger, rowMessageDecorator);
 		}
+		checkMandatoryColumns(formData, logger, rowMessageDecorator);
 		logger.setMessageDecorator(null);
 	}
 
-	private void performRowCheck(RowScript check, FormData formData, ScriptEngine engine, Logger logger, RowCheckLogMessageDecorator messageDecorator) {
-		messageDecorator.setOperationName(check.getName());
+	private void performRowScript(RowScript rowScript, FormData formData, ScriptEngine engine, Logger logger, RowMessageDecorator messageDecorator) {
+		messageDecorator.setOperationName(rowScript.getName());
 		int rowIndex = 0;
 		for (DataRow row: formData.getDataRows()) {
 			++rowIndex;
@@ -57,10 +61,29 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
 			try {
-				engine.eval(check.getScript());
+				engine.eval(rowScript.getScript());
 			} catch (Exception e) {
 				logger.error(e);
 				break;
+			}
+		}
+	}
+	
+	private void checkMandatoryColumns(FormData formData, Logger logger, RowMessageDecorator messageDecorator) {
+		List<Column> columns = formData.getForm().getColumns();
+		messageDecorator.setOperationName("Проверка обязательных полей");
+		int rowIndex = 0;
+		for (DataRow row: formData.getDataRows()) {
+			++rowIndex;
+			messageDecorator.setRowIndex(rowIndex);
+			List<String> columnNames = new ArrayList<String>();
+			for (Column col: columns) {
+				if (col.isMandatory() && row.getColumnValue(col.getAlias()) == null) {
+					columnNames.add(col.getName());
+				}
+			}
+			if (!columnNames.isEmpty()) {
+				logger.error("Не заполнены столбцы %s", columnNames.toString());
 			}
 		}
 	}
@@ -84,7 +107,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			InputStream is = null;
 			try {
 				is = new FileInputStream(dir.getAbsoluteFile() + "/" + fileName);
-				rc.setScript(IOUtils.toString(is, "WINDOWS-1251"));
+				rc.setScript(IOUtils.toString(is, "UTF-8"));
 			} catch (IOException e) {
 				logger.error(e);
 			} finally {

@@ -12,6 +12,7 @@ public abstract class Column {
 	private String alias;
 	private int width;
 	private boolean editable;
+	private boolean mandatory;
 	
 	public Integer getId() {
 		return id;
@@ -54,5 +55,11 @@ public abstract class Column {
 	}
 	public void setEditable(boolean editable) {
 		this.editable = editable;
+	}
+	public boolean isMandatory() {
+		return mandatory;
+	}
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 }
