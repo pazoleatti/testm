@@ -3,15 +3,20 @@ package com.aplana.sbrf.taxaccounting.controller.formdata;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.RowCheck;
+import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportOkatoDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 
 @Service
 public class FormDataService {
+	@Autowired
+	private TransportOkatoDao transportOkatoDao;
+	
 	public Logger validateFormData(FormData formData) {
 		Logger logger = new Logger();
 		checkRows(formData, logger);
@@ -26,6 +31,7 @@ public class FormDataService {
 			messageDecorator.setRowIndex(rowIndex);
 		    engine.put("row", row.getData());
 	        engine.put("rowIndex", rowIndex);
+	        engine.put("rowAlias", row.getAlias());
 	        try {
 	        	engine.eval(check.getScript());
 	        } catch (Exception e) {
@@ -39,7 +45,8 @@ public class FormDataService {
 	private void checkRows(FormData formData, Logger logger) {
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("groovy");		
-		engine.put("logger", logger);		
+		engine.put("logger", logger);
+		engine.put("transportOkatoDao", transportOkatoDao);
 		RowCheckLogMessageDecorator rowMessageDecorator = new RowCheckLogMessageDecorator();
 		logger.setMessageDecorator(rowMessageDecorator);
 		for (RowCheck rowCheck: formData.getForm().getRowChecks()) {

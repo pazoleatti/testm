@@ -39,6 +39,7 @@
 	<tx:annotation-driven/>
 	
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.dictionary.impl"/>
 
 	<!--  MyBatis configuration 	
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
