@@ -3,12 +3,16 @@
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 <script type="text/javascript">
 	dojo.require('dijit.form.Button');
+	dojo.require('dijit.form.Select');
 	dojo.require('dojo.parser');
+	dojo.addOnLoad(function() {
+		dojo.parser.parse();
+	});
 </script>
 <table>
 	<thead>
 		<th style="width: 5em;">Id</th>
-		<th style="width: 30em;">Тип формы</th>
+		<th style="width: 60em;">Тип формы</th>
 	</thead>
 	<tbody>	
 <c:forEach items="${data}" var="item">
@@ -22,7 +26,11 @@
 </c:forEach>
 	</tbody>
 </table>
-<portlet:actionURL var="createNewURL" name="new" portletMode="edit">
-	<portlet:param name="formId" value="1"/>
-</portlet:actionURL>
-<button dojoType="dijit.form.Button" onClick="window.location.href = '${createNewURL}'">Добавить</button>
+<portlet:actionURL var="createNewUrl" name="new" portletMode="edit"/>
+<form action="${createNewUrl}" method="post" id="${namespace}_createNewForm">
+	<label for="${namespace}_formSelect">Создать новую форму, тип: </label>
+	<select dojoType="dijit.form.Select" name="formId" id="${namespace}_formSelect"><c:forEach items="${forms}" var="form">
+		<option value="${form.id}">${form.type.name}</option>
+	</c:forEach></select>
+	<button dojoType="dijit.form.Button" onClick="dojo.byId('${namespace}_createNewForm').submit()">Создать</button>
+</form>

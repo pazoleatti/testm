@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 
 @Controller
@@ -16,6 +18,9 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 public class ListFormDataController {
 	@Autowired
 	private FormDataDao formDataDao;
+	
+	@Autowired 
+	FormDao formDao;
 	
 	@RenderMapping
 	public String list() {
@@ -25,5 +30,10 @@ public class ListFormDataController {
 	@ModelAttribute("data")
 	protected List<FormData> getData() {
 		return formDataDao.getAll();
+	}
+	
+	@ModelAttribute("forms")
+	protected List<Form> getForms() {
+		return formDao.listForms();
 	}
 }
