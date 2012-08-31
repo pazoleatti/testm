@@ -28,4 +28,11 @@ public interface FormDataDao {
 	 * @return
 	 */
 	List<FormData> getAll();
+	
+	/**
+	 * Возвращает список идентификаторов данных по налоговым формам, имеющих указанный тип 
+	 * @param typeId тип налоговой формы
+	 * @return список идентификаторов данных по налоговым формам, удовлетворяющих запросу
+	 */
+	List<Long> listFormDataIdByType(int typeId);
 }
