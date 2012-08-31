@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.script;
 /**
  * Скрипт, выполняющийся для отдельной строки формы
  */
-public class RowScript {
+public class RowScript extends Script {
 	/**
 	 * Имя скрипта
 	 */
@@ -12,10 +12,6 @@ public class RowScript {
 	 * Условие, которое должно выполняться, чтобы скрипт можно было выполнить для строки
 	 */
 	private String condition;
-	/**
-	 * Сам скрипт
-	 */
-	private String script;
 	
 	public String getName() {
 		return name;
@@ -28,11 +24,5 @@ public class RowScript {
 	}
 	public void setCondition(String condition) {
 		this.condition = condition;
-	}
-	public String getScript() {
-		return script;
-	}
-	public void setScript(String script) {
-		this.script = script;
 	}
 }

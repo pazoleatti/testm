@@ -25,7 +25,6 @@ import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.log.Logger;
@@ -44,8 +43,6 @@ public class EditFormDataController {
 	private static class DataRowFileStoreData extends DojoFileStoreData<DataRow> {};
 	
 	@Autowired
-	private FormDao formDao;
-	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
 	private FormDataScriptingService formDataService;
@@ -58,8 +55,9 @@ public class EditFormDataController {
 	@ActionMapping("new")
 	public void processNew(@RequestParam("formId") int formId, @ModelAttribute("formBean") EditFormDataBean formBean) {
 		logger.info("Creating new form data, formId = " + formId);
-		Form form = formDao.getForm(formId);
-		formBean.setFormData(new FormData(form));
+		Logger logger = new Logger();
+		FormData formData = formDataService.createForm(logger, formId);
+		formBean.setFormData(formData);
 	}
 	
 	@ActionMapping("view")

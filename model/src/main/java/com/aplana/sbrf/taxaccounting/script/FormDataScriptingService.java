@@ -19,4 +19,16 @@ public interface FormDataScriptingService {
 	 * @param formData данные по налоговой форме для обработки
 	 */	
 	void processFormData(Logger logger, FormData formData);
+	
+	/**
+	 * Получить скрипт для консолидации данных
+	 * @param formId
+	 * @return скрипт, используемый при формировании консолидированных/сводных форм
+	 */
+	Script getCreationScript(int formId);
+	
+	/**
+	 * Создать консолидированную или сводную форму указанного типа
+	 */
+	FormData createForm(Logger logger, int formId);
 }

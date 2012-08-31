@@ -1,30 +1,34 @@
 package com.aplana.sbrf.taxaccounting.controller.formdata;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportOkatoDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.script.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.script.RowScript;
+import com.aplana.sbrf.taxaccounting.script.Script;
 
 @Service
 public class FormDataScriptingServiceImpl implements FormDataScriptingService {
@@ -32,7 +36,34 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	private final static String ROOT = "C:/workspace/scripts/src/groovy";
 	
 	@Autowired
+	private FormDao formDao;
+	
+	@Autowired
+	private FormDataDao formDataDao;	
+	
+	@Autowired
 	private TransportOkatoDao transportOkatoDao;
+	
+	@Override
+	public FormData createForm(Logger logger, int formId) {
+		Form form = formDao.getForm(formId);
+		FormData result = new FormData(form);
+		
+		Script createScript = getCreationScript(formId);
+		if (createScript != null) {
+			ScriptEngineManager factory = new ScriptEngineManager();
+			ScriptEngine engine = factory.getEngineByName("groovy");		
+			engine.put("logger", logger);
+			engine.put("formData", result);
+			engine.put("formDataDao", formDataDao);
+			try {
+				engine.eval(createScript.getScript());
+			} catch (ScriptException e) {
+				logger.error(e);
+			}
+		}
+		return result;
+	}
 
 	public void processFormData(Logger logger, FormData formData) {
 		ScriptEngineManager factory = new ScriptEngineManager();
@@ -87,6 +118,15 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			}
 		}
 	}
+	
+	private String getFileContent(File file) {
+		try {
+			return FileUtils.readFileToString(file, "UTF-8");
+		} catch (IOException e) {
+			logger.error("Failed to read file content", e);
+			return null;
+		}
+	}
 
 	@Override
 	public List<RowScript> getFormRowScripts(int formId) {
@@ -94,28 +134,32 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 		if (!dir.exists() || !dir.isDirectory()) {
 			return Collections.emptyList();
 		}
-		String[] scriptNames = dir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".groovy");
-			}
-		});
-		List<RowScript> result =new ArrayList<RowScript>(scriptNames.length);
-		for (String fileName: scriptNames) {
+		Collection<File> scriptNames = FileUtils.listFiles(dir, new String[] {"groovy"}, false);
+		List<RowScript> result = new ArrayList<RowScript>(scriptNames.size());
+		for (File file: scriptNames) {
 			RowScript rc = new RowScript();
-			rc.setName(fileName.substring(0, fileName.length() - 7));
-			InputStream is = null;
-			try {
-				is = new FileInputStream(dir.getAbsoluteFile() + "/" + fileName);
-				rc.setScript(IOUtils.toString(is, "UTF-8"));
-			} catch (IOException e) {
-				logger.error(e);
-			} finally {
-				IOUtils.closeQuietly(is);
-			}
+			String filename = file.getName();
+			rc.setName(FilenameUtils.removeExtension(filename));
+			rc.setScript(getFileContent(file));
 			result.add(rc);
 		}
 		return result;
 
+	}
+
+	@Override
+	public Script getCreationScript(int formId) {
+		File f = new File(ROOT + "/" + formId + "/create.groovy");
+		if (f.exists()) {
+			return null;
+		}
+		String scriptText = getFileContent(f);
+		if (scriptText == null) {
+			return null;
+		} else {
+			Script result = new Script();
+			result.setScript(scriptText);
+			return result;
+		}
 	}
 }
