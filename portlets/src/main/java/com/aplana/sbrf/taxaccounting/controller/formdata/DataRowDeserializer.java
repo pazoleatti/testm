@@ -57,10 +57,10 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 			} else {				
 				Column col = form.getColumn(fieldName);
 				if (token == JsonToken.VALUE_NULL) {
-					result.setColumnValue(fieldName, null);
+					result.put(fieldName, null);
 				} else if (col instanceof NumericColumn) {
 					BigDecimal value = jp.getDecimalValue();					
-					result.setColumnValue(fieldName, value);
+					result.put(fieldName, value);
 				} else if (col instanceof DateColumn) {
 					// Даты могут передаваться как в виде строк ISO-формата, так и  виде объектов
 					String stDate;
@@ -79,12 +79,12 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 						stDate = jp.getText();
 					}
 					try {
-						result.setColumnValue(fieldName, isoFormat.parseObject(stDate));
+						result.put(fieldName, isoFormat.parseObject(stDate));
 					} catch (ParseException e) {
 						throw new IOException("Wrong date format: " + stDate, e);
 					}
 				} else if (col instanceof StringColumn) {
-					result.setColumnValue(fieldName, jp.getText());
+					result.put(fieldName, jp.getText());
 				}
 			}
 			token = jp.nextToken();

@@ -97,7 +97,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					if (value != null) {
 						String rowAlias = rowIdToAlias.get(rowId);
 						String columnAlias = formData.getForm().getColumn(columnId).getAlias();
-						formData.getDataRow(rowAlias).setColumnValue(columnAlias, value);
+						formData.getDataRow(rowAlias).put(columnAlias, value);
 					}
 				}
 			}
@@ -138,7 +138,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				ps.setInt(2, index);
 				
 				for (Column col: formData.getForm().getColumns()) {
-					Object val = dr.getColumnValue(col.getAlias());
+					Object val = dr.get(col.getAlias());
 					if (val == null) {
 						continue;
 					} else if (val instanceof BigDecimal) {
@@ -212,5 +212,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			"select * from form_data",
 			new FormDataRowMapper()
 		);		
+	}
+
+	@Override
+	public List<Long> listFormDataIdByType(int typeId) {
+		return getJdbcTemplate().queryForList(
+			"select id from form_data fd where exists (select 1 from form f where f.id = fd.form_id and f.type_id = ?)",
+			new Object[] { typeId },
+			new int[] { Types.NUMERIC },
+			Long.class
+		);
 	}
 }

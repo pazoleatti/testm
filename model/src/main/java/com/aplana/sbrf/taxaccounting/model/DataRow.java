@@ -10,125 +10,29 @@ import java.util.Set;
 
 /**
  * Строка данных отчётной формы
- * @author dsultanbekov
+ * Для упрощения скриптинга, класс реализует интерфейс Map<String, Object>, чтобы в скриптах можно было писать
+ * конструкции вида <code>row["property"] = anotherRow["property"]</code>
+ * Можно считать что строка данных - это Map, в котором ключи - {@link Column#getAlias алиасы столбцов}, а значение -
+ * значения содержащиеся в соответствующих столбцах.
+ * 
+ * Обращаю внимание, что часть методов интерфейса не реализована, при их вызове будет возникать UnsupportedOperationException.
+ *
+ * Фактически класс является обёрткой над обычным HashMap, но при этом содержит ряд дополнительных атрибутов,
+ * содержащих информацию о строке в отчётной форме, а также операции по работе с Map реализованы таким образом,
+ * чтобы предотвратить заполнение строки данными неверного типа. При использовании метода put проводится проверка данных
+ * на соответствие типу соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не позволяет 
+ * добавлять в строку данные по столбцам, которые отсутствуют в определении формы
+ * Для некоторых числовых типов реализовано автоматическое приведение к BigDecimal.
  */
-public class DataRow {
-	/**
-	 * Обёртка над обычным HashMap, основная цель которой - предотвратить заполнение строки данными неверного типа
-	 * Поддерживаются строки, даты, BigDecimal, для некоторых числовых типов реализовано автоматическое приведение к BigDecimal
-	 * Также не позволяет добавлять в строку данные по столбцам, которые отсутствуют в определении формы 
-	 */
-	private class DataRowValuesMap implements Map<String, Object> {
-		final Map<String, Object> store;
-		final Form form;
-		
-		public DataRowValuesMap(Form form) {
-			this.form = form;
-			this.store = new HashMap<String, Object>(form.getColumns().size());
-		}
-		
-		public void clear() {
-			store.clear();
-		}
-
-		@Override
-		public boolean containsKey(Object key) {
-			return store.containsKey(key);
-		}
-
-		@Override
-		public boolean containsValue(Object value) {
-			return store.containsValue(value);
-		}
-
-		@Override
-		public Set<java.util.Map.Entry<String, Object>> entrySet() {
-			return store.entrySet();
-		}
-
-		@Override
-		public Object get(Object key) {
-			return store.get(key);
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return store.isEmpty();
-		}
-
-		@Override
-		public Set<String> keySet() {
-			return store.keySet();
-		}
-
-		@Override
-		public Object put(String key, Object value) {
-			// Если столбец не удастся найти, то получим исключение
-			// Это нормально			
-			Column col = form.getColumn(key);
-			
-			if (value instanceof Integer) {
-				value = new BigDecimal((Integer)value);
-			} else if (value instanceof Double) {
-				value = new BigDecimal((Double)value);
-			} else if (value instanceof Long) {
-				value = new BigDecimal((Long)value);
-			}
-			
-			if (col instanceof NumericColumn) {
-				value = ((BigDecimal)value).setScale(((NumericColumn) col).getPrecision(), RoundingMode.HALF_UP); 
-			}
-			
-			if (value == null || value instanceof BigDecimal || value instanceof String || value instanceof Date) {
-				return store.put(key, value);				
-			} else {
-				throw new IllegalArgumentException("Values of type " + value.getClass().getName() + " are not supported");
-			}
-		}
-
-		@Override
-		public void putAll(Map<? extends String, ? extends Object> map) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Object remove(Object key) {
-			return store.remove(key);
-		}
-
-		@Override
-		public int size() {
-			return store.size();
-		}
-
-		@Override
-		public Collection<Object> values() {
-			return store.values();
-		}
-	}
-	
+public class DataRow implements Map<String, Object> {
+	private final Form form;
 	private final Map<String, Object> data;
 	private String alias;
 
 	public DataRow(String alias, Form form) {
 		this.alias = alias;
-		data = new DataRowValuesMap(form);
-	}
-
-	public Map<String, Object> getData() {
-		return data;
-	}
-
-	public Object getColumnValue(String columnAlias) {
-		return data.get(columnAlias);
-	}
-
-	public void setColumnValue(String columnAlias, Object value) {
-		if (value == null) {
-			data.remove(columnAlias);
-		} else {
-			data.put(columnAlias, value);
-		}
+		this.form = form;
+		data = new HashMap<String, Object>();
 	}
 
 	public String getAlias() {
@@ -137,5 +41,88 @@ public class DataRow {
 
 	public void setAlias(String code) {
 		this.alias = code;
+	}
+	
+	/**
+	 * Методы, реализующие интефрейс Map<String, Object>
+	 */
+	public void clear() {
+		data.clear();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return data.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return data.containsValue(value);
+	}
+
+	@Override
+	public Set<java.util.Map.Entry<String, Object>> entrySet() {
+		return data.entrySet();
+	}
+
+	@Override
+	public Object get(Object key) {
+		return data.get(key);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return data.isEmpty();
+	}
+
+	@Override
+	public Set<String> keySet() {
+		return data.keySet();
+	}
+
+	@Override
+	public Object put(String key, Object value) {
+		// Если столбец не удастся найти, то получим исключение
+		// Это нормально - пользователь поймёт, что в скрипте ошибка
+		Column col = form.getColumn(key);
+		
+		if (value instanceof Integer) {
+			value = new BigDecimal((Integer)value);
+		} else if (value instanceof Double) {
+			value = new BigDecimal((Double)value);
+		} else if (value instanceof Long) {
+			value = new BigDecimal((Long)value);
+		}
+		
+		if (col instanceof NumericColumn && value != null) {
+			int precision = ((NumericColumn) col).getPrecision();
+			value = ((BigDecimal)value).setScale(precision, RoundingMode.HALF_UP); 
+		}
+		
+		if (value == null || value instanceof BigDecimal || value instanceof String || value instanceof Date) {
+			return data.put(key, value);				
+		} else {
+			throw new IllegalArgumentException("Values of type " + value.getClass().getName() + " are not supported");
+		}
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> map) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Object remove(Object key) {
+		return data.remove(key);
+	}
+
+	@Override
+	public int size() {
+		return data.size();
+	}
+
+	@Override
+	public Collection<Object> values() {
+		return data.values();
 	}
 }

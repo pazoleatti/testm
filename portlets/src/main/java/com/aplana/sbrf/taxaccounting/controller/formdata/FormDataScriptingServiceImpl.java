@@ -88,7 +88,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 		for (DataRow row: formData.getDataRows()) {
 			++rowIndex;
 			messageDecorator.setRowIndex(rowIndex);
-			engine.put("row", row.getData());
+			engine.put("row", row);
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
 			try {
@@ -109,7 +109,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			messageDecorator.setRowIndex(rowIndex);
 			List<String> columnNames = new ArrayList<String>();
 			for (Column col: columns) {
-				if (col.isMandatory() && row.getColumnValue(col.getAlias()) == null) {
+				if (col.isMandatory() && row.get(col.getAlias()) == null) {
 					columnNames.add(col.getName());
 				}
 			}
@@ -150,7 +150,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	@Override
 	public Script getCreationScript(int formId) {
 		File f = new File(ROOT + "/" + formId + "/create.groovy");
-		if (f.exists()) {
+		if (!f.exists()) {
 			return null;
 		}
 		String scriptText = getFileContent(f);

@@ -74,7 +74,10 @@
         ${namespace}_grid.startup();
 	});
 	function ${namespace}_addNewRow() {
-		${namespace}_store.newItem({alias: '' + (${namespace}_grid.rowCount + 1)});
+		var newItem = {
+			alias: '' + (${namespace}_grid.rowCount + 1)
+		};
+		${namespace}_store.newItem(newItem); 
 	}
 	function ${namespace}_save() {
 		${namespace}_store.save();

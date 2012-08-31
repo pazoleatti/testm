@@ -36,9 +36,18 @@ public class FormData {
 	public List<DataRow> getDataRows() {
 		return dataRows;
 	}
-	
-	public DataRow appendDataRow(String rowAlias) {
-		DataRow row = new DataRow(rowAlias, form);
+
+	/**
+	 * Добавляет строку в таблицу данных
+	 * Каждая строка обязательно должна содержать уникальный алиас, для возможности
+	 * идентификации её в скриптах
+	 * @param rowAlias значение, задающее алиас.
+	 * в большинстве случае должен быть строкой, но для удобства написания скриптов, принимает Object.
+	 * Значением алиаса будет результат операции <code>rowAlias.toString()</code>
+	 * @return добавленная строка с установленным алиасом
+	 */
+	public DataRow appendDataRow(Object rowAlias) {
+		DataRow row = new DataRow(rowAlias.toString(), form);
 		dataRows.add(row);
 		return row;
 	}

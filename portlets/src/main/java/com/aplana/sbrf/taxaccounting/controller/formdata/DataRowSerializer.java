@@ -21,7 +21,7 @@ public class DataRowSerializer extends JsonSerializer<DataRow> {
 		jg.writeStringField("alias", dataRow.getAlias());
 		DateFormat isoDateFormat = FormatUtils.getIsoDateFormat();
 		
-		for (Map.Entry<String, Object> entry: dataRow.getData().entrySet()) {
+		for (Map.Entry<String, Object> entry: dataRow.entrySet()) {
 			Object val = entry.getValue();
 			String alias = entry.getKey();
 			if (val == null) {
