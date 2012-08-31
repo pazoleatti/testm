@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportOkatoDao;
+import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -42,7 +42,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	private FormDataDao formDataDao;	
 	
 	@Autowired
-	private TransportOkatoDao transportOkatoDao;
+	private TransportTaxDao transportTaxDao;
 	
 	@Override
 	public FormData createForm(Logger logger, int formId) {
@@ -51,11 +51,9 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 		
 		Script createScript = getCreationScript(formId);
 		if (createScript != null) {
-			ScriptEngineManager factory = new ScriptEngineManager();
-			ScriptEngine engine = factory.getEngineByName("groovy");		
+			ScriptEngine engine = getScriptEngine();		
 			engine.put("logger", logger);
 			engine.put("formData", result);
-			engine.put("formDataDao", formDataDao);
 			try {
 				engine.eval(createScript.getScript());
 			} catch (ScriptException e) {
@@ -66,12 +64,8 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	}
 
 	public void processFormData(Logger logger, FormData formData) {
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName("groovy");		
+		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
-		// TODO: продумать способ, для публикации DAO-объектов в скриптах
-		// давать всё сразу как-то нехорошо
-		engine.put("transportOkatoDao", transportOkatoDao);
 		RowMessageDecorator rowMessageDecorator = new RowMessageDecorator();
 		logger.setMessageDecorator(rowMessageDecorator);
 		List<RowScript> rowScripts = getFormRowScripts(formData.getForm().getId());
@@ -161,5 +155,15 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			result.setScript(scriptText);
 			return result;
 		}
+	}
+	
+	private ScriptEngine getScriptEngine() {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName("groovy");
+		// TODO: продумать способ, для публикации DAO-объектов в скриптах
+		// давать всё сразу как-то нехорошо
+		engine.put("transportTaxDao", transportTaxDao);
+		engine.put("formDataDao", formDataDao);		
+		return engine;
 	}
 }

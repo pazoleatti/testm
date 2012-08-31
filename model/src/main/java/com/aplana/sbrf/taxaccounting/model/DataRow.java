@@ -67,6 +67,8 @@ public class DataRow implements Map<String, Object> {
 
 	@Override
 	public Object get(Object key) {
+		// Проверяем, что такой столбец есть, если нет, то получим IllegalArgumentException
+		form.getColumn((String)key);
 		return data.get(key);
 	}
 
