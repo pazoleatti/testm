@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.dictionary;
 
+import java.math.BigDecimal;
+
 public interface TransportTaxDao {
 	/**
 	 * Возращает имя муниципального отделения по коду ОКАТО 
@@ -14,5 +16,5 @@ public interface TransportTaxDao {
 	 * @param power мощность в л.с.
 	 * @return значение ставки налога в рублях
 	 */
-	int getTaxRate(String code, int age, int power);
+	int getTaxRate(String code, BigDecimal age, BigDecimal power);
 }

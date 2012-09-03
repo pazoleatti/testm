@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.dictionary.impl;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 
 import org.springframework.dao.DataAccessException;
@@ -28,7 +29,7 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	}
 
 	@Override
-	public int getTaxRate(String code, int age, int power) {
+	public int getTaxRate(String code, BigDecimal age, BigDecimal power) {
 		String sql = "select value from transport_tax_rate " +
 				"where code = ? " +
 				"and (min_age is null or min_age <= ?) and (max_age is null or max_age >= ?)" +
