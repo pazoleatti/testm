@@ -13,6 +13,7 @@
 </style>
 <c:set var="namespace"><portlet:namespace/></c:set>
 <portlet:resourceURL id="dataRows" var="storeUrl"/>
+<portlet:resourceURL id="log" var="logUrl"/>
 <portlet:resourceURL id="saveRows" var="saveUrl"/>
 <script type="text/javascript">
 	dojo.require('dojo.data.ItemFileWriteStore');
@@ -24,6 +25,7 @@
 	
 	var ${namespace}_grid;
 	var ${namespace}_store;
+	var ${namespace}_loggerPane;
 	dojo.addOnLoad(function() {
 		dojo.parser.parse();
 		function formatDate(inDatum){
@@ -46,7 +48,7 @@
 		
 		${namespace}_store._saveEverything = function(successCallback, failureCallback, newContentString) {
 			var processLog = function(logEntries) {
-				${namespace}_loggerPane.setEntries(logEntries);
+				
 				successCallback(logEntries);
 			}
 			dojo.xhrPost({
@@ -72,6 +74,12 @@
 		});		
         ${namespace}_grid.placeAt('${namespace}_gridDiv');
         ${namespace}_grid.startup();
+        
+		${namespace}_loggerPane = new com.aplana.taxaccounting.LoggerPane({
+			url: '${logUrl}'
+		}, dojo.byId('${namespace}_loggerPane'));
+        
+        ${namespace}_loggerPane.reload();
 	});
 	function ${namespace}_addNewRow() {
 		var newItem = {
@@ -83,9 +91,10 @@
 		${namespace}_store.save();
 		${namespace}_store.close();
 		${namespace}_grid._refresh();
+		${namespace}_loggerPane.reload();
 	}
 </script>
-<div jsid="${namespace}_loggerPane" dojoType="com.aplana.taxaccounting.LoggerPane"></div>
+<div id="${namespace}_loggerPane"></div>
 <div id="${namespace}_gridDiv"></div>
 <button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">Добавить строку</button>
 <portlet:actionURL name="save" var="saveUrl"/>

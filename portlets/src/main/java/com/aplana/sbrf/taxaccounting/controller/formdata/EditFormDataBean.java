@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.controller.formdata;
 
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 
@@ -9,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 public class EditFormDataBean {
 	private FormData formData;
 
+	private Logger logger = new Logger();
+	
 	public FormData getFormData() {
 		return formData;
 	}
@@ -19,5 +22,13 @@ public class EditFormDataBean {
 	
 	public Form getForm() {
 		return formData.getForm();
+	}
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 }

@@ -40,6 +40,7 @@ import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 @RequestMapping("EDIT")
 public class EditFormDataController {
 	private Log logger = LogFactory.getLog(getClass());
+	
 	private static class DataRowFileStoreData extends DojoFileStoreData<DataRow> {};
 	
 	@Autowired
@@ -55,14 +56,15 @@ public class EditFormDataController {
 	@ActionMapping("new")
 	public void processNew(@RequestParam("formId") int formId, @ModelAttribute("formBean") EditFormDataBean formBean) {
 		logger.info("Creating new form data, formId = " + formId);
-		Logger logger = new Logger();
-		FormData formData = formDataService.createForm(logger, formId);
+		formBean.getLogger().clear();
+		FormData formData = formDataService.createForm(formBean.getLogger(), formId);
 		formBean.setFormData(formData);
 	}
 	
 	@ActionMapping("view")
 	public void processView(@RequestParam("id") long formDataId, @ModelAttribute("formBean") EditFormDataBean formBean) {
 		logger.info("Opening form data for view, formDataId = " + formDataId);
+		formBean.getLogger().clear();
 		formBean.setFormData(formDataDao.get(formDataId));
 	}
 	
@@ -83,12 +85,18 @@ public class EditFormDataController {
 	public void getDataRows(@ModelAttribute("formBean") EditFormDataBean formBean, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
 		FormData formData = formBean.getFormData();
 		List<DataRow> dataRows = formData.getDataRows();
-		DojoFileStoreData<DataRow> data = new DojoFileStoreData<DataRow>();
+		DataRowFileStoreData data = new DataRowFileStoreData();
 		data.setIdentifier("alias");
 		data.setItems(dataRows);
-
 		response.setContentType("application/json");
 		getObjectMapper(formData.getForm()).writeValue(response.getPortletOutputStream(), data);
+	}
+	
+	@ResourceMapping("log")
+	public void getLogEntries(@ModelAttribute("formBean") EditFormDataBean formBean, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
+		Form form = formBean.getFormData().getForm();
+		response.setContentType("application/json");
+		getObjectMapper(form).writeValue(response.getPortletOutputStream(), formBean.getLogger().getEntries());
 	}
 	
 	@ResourceMapping("saveRows")
@@ -103,12 +111,12 @@ public class EditFormDataController {
 		formData.getDataRows().clear();
 		formData.getDataRows().addAll(data.getItems());
 		
-		Logger log = new Logger();
+		Logger log = formBean.getLogger();
+		log.clear();
 		formDataService.processFormData(log, formData);
 		if (!log.containsLevel(LogLevel.ERROR)) {
 			long formDataId = formDataDao.save(formData);
 			log.info("Данные успешно записаны, идентификтор: %d", formDataId);
-			logger.info("Form data saved, formDataId = " + formDataId);
 		} else {
 			log.warn("Данные формы не сохранены, так как обнаружены ошибки");
 		}

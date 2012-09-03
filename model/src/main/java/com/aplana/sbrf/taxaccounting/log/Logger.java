@@ -49,7 +49,7 @@ public class Logger {
 	 * @param e исключение
 	 */
 	public void error(Exception e) {
-		log(LogLevel.ERROR, "При выполнении операции произошла непредвиденная ошибка: %s", e.getMessage());
+		log(LogLevel.ERROR, "Ошибка: %s", e.getMessage());
 		logger.error("Unexpected exception: " + e.getMessage(), e);
 	}
 
@@ -92,5 +92,12 @@ public class Logger {
 	 */
 	public void setMessageDecorator(LogMessageDecorator messageDecorator) {
 		this.messageDecorator = messageDecorator;
+	}
+	
+	/**
+	 * Очистить содержимое журнала
+	 */
+	public void clear() {
+		entries.clear();
 	}
 }
