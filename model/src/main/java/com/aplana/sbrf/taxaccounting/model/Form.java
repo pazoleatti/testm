@@ -11,6 +11,7 @@ public class Form {
 	private Integer id;
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;
+	private boolean predefinedRows;
 	
 	public Integer getId() {
 		return id;
@@ -27,6 +28,12 @@ public class Form {
 	public FormType getType() {
 		return type;
 	}
+	/**
+	 * Получить определение столбца по числовому идентификатору
+	 * @param columnId идентификатор столбца
+	 * @return определение столбца
+	 * @throws IllegalArgumentException если в определении формы отсутствует столбец с указанным <code>id</code>
+	 */
 	public Column getColumn(int columnId) {
 		for (Column col: columns) {
 			if (col.getId() == columnId) {
@@ -35,6 +42,14 @@ public class Form {
 		}
 		throw new IllegalArgumentException("Wrong columnId: " + columnId);
 	}
+	
+	/**
+	 * Получить определение столбца налоговой формы по алиасу
+	 * @param columnAlias
+	 * @return определение столбца
+	 * @throws NullPointerException если <code>alias == null</code>
+	 * @throws IllegalArgumentException если указан алиас, отсутствующий в определении формы
+	 */
 	public Column getColumn(String columnAlias) {
 		if (columnAlias == null) {
 			throw new NullPointerException("Column alias cannot be null");
@@ -45,5 +60,22 @@ public class Form {
 			}
 		}
 		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
+	}
+	
+	/**
+	 * Значение признака, определяющего, используется ли в форме предопределённый набор строк, или же
+	 * строки могут добавляться пользователем
+	 * @return true - если набор строк предопределён, false - в противном случае
+	 */
+	public boolean isPredefinedRows() {
+		return predefinedRows;
+	}
+	
+	/**
+	 * Установить значение флага об использовании предопределённого набора строк
+	 * @param predefinedRows желаемое значение флага
+	 */
+	public void setPredefinedRows(boolean predefinedRows) {
+		this.predefinedRows = predefinedRows;
 	}
 }

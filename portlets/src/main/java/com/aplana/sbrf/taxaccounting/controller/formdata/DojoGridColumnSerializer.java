@@ -25,7 +25,6 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 		jg.writeStringField("field", col.getAlias());
 		jg.writeStringField("width", col.getWidth() + "em");
 		jg.writeBooleanField("editable", col.isEditable());
-		jg.writeBooleanField("sortable", false);
 		if (col instanceof DateColumn) {
 			jg.writeFieldName("type");
 			jg.writeRawValue("dojox.grid.cells.DateTextBox");

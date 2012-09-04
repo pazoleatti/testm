@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.Form;
 
 @Controller
 @RequestMapping("VIEW")
-public class FormController {
+public class ListFormController {
 	@Autowired
 	private FormDao formDao;
 	
