@@ -2,7 +2,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
 <portlet:defineObjects />
-<c:if test="${not empty gridLayout}"><%-- main check --%>
 <c:url value="/js/LoggerPane.js" var="loggerJsUrl"/>
 <script type="text/javascript" src="${loggerJsUrl}"></script>
 <c:url value="/css/LoggerPane.css" var="loggerCssUrl"/>
@@ -99,7 +98,6 @@
 <button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">Добавить строку</button>
 <portlet:actionURL name="save" var="saveUrl"/>
 <button dojoType="dijit.form.Button" onClick="${namespace}_save">Сохранить</button>
-</c:if><%-- main check --%>
 <div><portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
 <a href="${backUrl}">Назад</a>
 </div>

@@ -70,10 +70,10 @@ public class EditFormDataController {
 	
 	@RenderMapping
 	public ModelAndView showEdit(@ModelAttribute("formBean") EditFormDataBean formBean) throws JsonGenerationException, JsonMappingException, IOException {
-		ModelAndView result = new ModelAndView("formData/edit");
 		if (formBean == null || formBean.getFormData() == null) {
-			return result;
+			return new ModelAndView("emptySession");
 		}
+		ModelAndView result = new ModelAndView("formData/edit");
 		Form form = formBean.getForm();
 		List<Column> columns = form.getColumns();
 		String gridLayout = getObjectMapper(form).writeValueAsString(columns);
