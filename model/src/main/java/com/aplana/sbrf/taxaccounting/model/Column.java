@@ -5,18 +5,27 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author dsultanbekov
  */
 public abstract class Column {
-	private Integer id;
+	private int id;
 	private String name;
 	private int formId;
-	private int order;
 	private String alias;
 	private int width;
 	private boolean editable;
 	private boolean mandatory;
 	
-	public Integer getId() {
+	/**
+	 * Идентификатор столбца в БД
+	 * Если значение < 0, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
+	 * @return идентификатор столбца
+	 */
+	public int getId() {
 		return id;
 	}
+	
+	/**
+	 * Задать значение идентификатора столбца
+	 * @param id значение идентификатора, для новых столбцов нужно задавать отрицательные значения
+	 */
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -31,12 +40,6 @@ public abstract class Column {
 	}
 	public void setFormId(int formId) {
 		this.formId = formId;
-	}
-	public int getOrder() {
-		return order;
-	}
-	public void setOrder(int order) {
-		this.order = order;
 	}
 	public String getAlias() {
 		return alias;
