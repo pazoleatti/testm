@@ -1,10 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,5 +59,119 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			new ColumnMapper()
 		);
 	}
+
+	@Override
+	public void saveFormColumns(int formId, List<Column> columns) {
+		JdbcTemplate jt = getJdbcTemplate();
+		
+		final Set<Integer> removedColumns = new HashSet<Integer>(jt.queryForList(
+			"select id from form_column where form_id = ?",
+			new Object[] { formId },
+			new int[] { Types.NUMERIC },
+			Integer.class
+		));
+		
+		final List<Column> newColumns = new ArrayList<Column>();
+		final List<Column> oldColumns = new ArrayList<Column>();
+		
+		for (Column col: columns) {
+			if (col.getId() < 0) {
+				newColumns.add(col);
+			} else {
+				oldColumns.add(col);
+			}
+			removedColumns.remove(col.getId());
+		}
+		
+		jt.batchUpdate(
+			"delete from form_column where id = ?",
+			new BatchPreparedStatementSetter() {
+				
+				@Override
+				public void setValues(PreparedStatement ps, int index) throws SQLException {
+					ps.setInt(1, iterator.next());
+				}
+				
+				@Override
+				public int getBatchSize() {
+					return removedColumns.size();
+				}
+				
+				private Iterator<Integer> iterator = removedColumns.iterator();
+			}
+		);		
+		
+		
+		BatchPreparedStatementSetter insertBpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				Column col = newColumns.get(index);
+				ps.setString(1, col.getName());
+				ps.setString(2, col.getAlias());
+				ps.setString(3, getType(col));
+				ps.setInt(4, col.isEditable() ? 1 : 0);
+				ps.setInt(5, col.isMandatory() ? 1 : 0);
+				ps.setInt(6, col.getWidth());
+				
+				if (col instanceof NumericColumn) {
+					ps.setInt(7, ((NumericColumn)col).getPrecision());
+				} else {
+					ps.setNull(7, Types.NUMERIC);
+				}
+				ps.setInt(8, index);
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return newColumns.size();
+			}
+		};
+		
+		jt.batchUpdate(
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, order) " +
+			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?)", insertBpss);
+		
+		BatchPreparedStatementSetter updateBpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				Column col = oldColumns.get(index);
+				ps.setString(1, col.getName());
+				ps.setString(2, col.getAlias());
+				ps.setString(3, getType(col));
+				ps.setInt(4, col.isEditable() ? 1 : 0);
+				ps.setInt(5, col.isMandatory() ? 1 : 0);
+				ps.setInt(6, col.getWidth());
+				if (col instanceof NumericColumn) {
+					ps.setInt(7, ((NumericColumn)col).getPrecision());
+				} else {
+					ps.setNull(7, Types.NUMERIC);
+				}
+				ps.setInt(8, index);
+				ps.setInt(9, col.getId());
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return oldColumns.size();
+			}
+		};
+		
+		jt.batchUpdate(
+			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, order = ? " +
+			"where id = ?",
+			updateBpss
+		);
+	}
 	
+	private String getType(Column col) {
+		if (col instanceof NumericColumn) {
+			return "N";
+		} else if (col instanceof StringColumn) {
+			return "S";
+		} else if (col instanceof DateColumn) {
+			return "D";
+		} else {
+			throw new IllegalArgumentException("Unknown column type: " + col.getClass().getName());
+		}
+	}
 }

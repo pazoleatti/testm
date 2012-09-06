@@ -11,6 +11,7 @@ public class Form {
 	private Integer id;
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;
+	private String version;	
 	private boolean predefinedRows;
 	
 	public Integer getId() {
@@ -77,5 +78,21 @@ public class Form {
 	 */
 	public void setPredefinedRows(boolean predefinedRows) {
 		this.predefinedRows = predefinedRows;
+	}
+	
+	/**
+	 * Получить версию формы: для каждого типа формы может существовать несколько версий
+	 * @return версия формы
+	 */
+	public String getVersion() {
+		return version;
+	}
+	
+	/**
+	 * Установить версию для формы
+	 * @param version номер версии
+	 */
+	public void setVersion(String version) {
+		this.version = version;
 	}
 }

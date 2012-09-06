@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <faceted-project>
+  <runtime name="wps.base.v70"/>
   <installed facet="jst.ear" version="5.0"/>
 </faceted-project>

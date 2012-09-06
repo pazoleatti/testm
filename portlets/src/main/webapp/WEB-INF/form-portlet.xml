@@ -6,5 +6,16 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd"
 >
-    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.controller.form"/>
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.controller.form"/>
+	<bean class="com.aplana.sbrf.taxaccounting.util.JsonModuleBean">
+		<constructor-arg index="0" value="taxaccounting-form"/>
+		<property name="mixIns">
+			<map>
+				<entry key="com.aplana.sbrf.taxaccounting.model.Column" value="com.aplana.sbrf.taxaccounting.controller.form.ColumnMixIn"/>
+				<entry key="com.aplana.sbrf.taxaccounting.model.NumericColumn" value="com.aplana.sbrf.taxaccounting.controller.form.ColumnMixIn"/>
+				<entry key="com.aplana.sbrf.taxaccounting.model.StringColumn" value="com.aplana.sbrf.taxaccounting.controller.form.ColumnMixIn"/>
+				<entry key="com.aplana.sbrf.taxaccounting.model.DateColumn" value="com.aplana.sbrf.taxaccounting.controller.form.ColumnMixIn"/>
+			</map>
+		</property>
+	</bean>
 </beans>

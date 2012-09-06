@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -23,17 +24,16 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private ColumnDao columnDao;
-	
+
 	private class FormMapper implements RowMapper<Form> {
 		public Form mapRow(ResultSet rs, int index) throws SQLException {
 			Form form = new Form();
 			form.setId(rs.getInt("id"));
-			// TODO: очень неоптимально, нужно переделать
 			form.setType(formTypeDao.getType(rs.getInt("type_id")));
 			return form;
 		}
 	}
-	
+
 	@Cacheable("Form")
 	public Form getForm(int formId) {
 		logger.info("Fetching Form with id = " + formId);
@@ -48,8 +48,11 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	}
 
 	@Transactional(readOnly=false)
+	@CacheEvict(value="Form", key="#form.id")
 	public int saveForm(Form form) {
-		return 0;
+		// TODO: обновление записи в form
+		columnDao.saveFormColumns(form.getId(), form.getColumns());
+		return form.getId().intValue();
 	}
 
 	public List<Form> listForms() {
