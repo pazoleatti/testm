@@ -32,7 +32,6 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.script.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 
 @Controller

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.Form;
 
 /**
  * Dao для работы с объявлениями столбцов формы
@@ -17,8 +18,7 @@ public interface ColumnDao {
 	List<Column> getFormColumns(int formId);
 	/**
 	 * Сохранить список столбцов формы
-	 * @param formId идентификатор формы
-	 * @param columns список столбцов формы
+	 * @param form форма
 	 */
-	void saveFormColumns(int formId, List<Column> columns);
+	void saveFormColumns(Form form);
 }

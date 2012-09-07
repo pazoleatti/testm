@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.model.Form;
 
 @Repository
@@ -24,6 +25,8 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private ColumnDao columnDao;
+	@Autowired
+	private ScriptDao scriptDao;
 
 	private class FormMapper implements RowMapper<Form> {
 		public Form mapRow(ResultSet rs, int index) throws SQLException {
@@ -44,6 +47,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 			new FormMapper()
 		);
 		form.getColumns().addAll(columnDao.getFormColumns(formId));
+		scriptDao.fillFormScripts(form);
 		return form;
 	}
 
@@ -51,7 +55,8 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	@CacheEvict(value="Form", key="#form.id")
 	public int saveForm(Form form) {
 		// TODO: обновление записи в form
-		columnDao.saveFormColumns(form.getId(), form.getColumns());
+		columnDao.saveFormColumns(form);
+		scriptDao.saveFormScripts(form);
 		return form.getId().intValue();
 	}
 

@@ -7,11 +7,11 @@ package com.aplana.sbrf.taxaccounting.model;
 public abstract class Column {
 	private int id;
 	private String name;
-	private int formId;
 	private String alias;
 	private int width;
 	private boolean editable;
 	private boolean mandatory;
+	private ValueScript valueScript;
 	
 	/**
 	 * Идентификатор столбца в БД
@@ -34,12 +34,6 @@ public abstract class Column {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public int getFormId() {
-		return formId;
-	}
-	public void setFormId(int formId) {
-		this.formId = formId;
 	}
 	public String getAlias() {
 		return alias;
@@ -64,5 +58,13 @@ public abstract class Column {
 	}
 	public void setMandatory(boolean mandatory) {
 		this.mandatory = mandatory;
+	}
+
+	public ValueScript getValueScript() {
+		return valueScript;
+	}
+
+	public void setValueScript(ValueScript valueScript) {
+		this.valueScript = valueScript;
 	}
 }

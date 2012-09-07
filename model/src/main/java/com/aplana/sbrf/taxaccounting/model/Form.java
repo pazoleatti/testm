@@ -12,7 +12,10 @@ public class Form {
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;
 	private String version;	
-	private boolean predefinedRows;
+	private Script calcScript;
+	private Script createScript;
+	private final List<RowScript> rowScripts = new ArrayList<RowScript>();
+	private final List<DataRow> predefinedRows = new ArrayList<DataRow>();
 	
 	public Integer getId() {
 		return id;
@@ -62,24 +65,7 @@ public class Form {
 		}
 		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
 	}
-	
-	/**
-	 * Значение признака, определяющего, используется ли в форме предопределённый набор строк, или же
-	 * строки могут добавляться пользователем
-	 * @return true - если набор строк предопределён, false - в противном случае
-	 */
-	public boolean isPredefinedRows() {
-		return predefinedRows;
-	}
-	
-	/**
-	 * Установить значение флага об использовании предопределённого набора строк
-	 * @param predefinedRows желаемое значение флага
-	 */
-	public void setPredefinedRows(boolean predefinedRows) {
-		this.predefinedRows = predefinedRows;
-	}
-	
+
 	/**
 	 * Получить версию формы: для каждого типа формы может существовать несколько версий
 	 * @return версия формы
@@ -94,5 +80,23 @@ public class Form {
 	 */
 	public void setVersion(String version) {
 		this.version = version;
+	}
+	public Script getCalcScript() {
+		return calcScript;
+	}
+	public void setCalcScript(Script calcScript) {
+		this.calcScript = calcScript;
+	}
+	public Script getCreateScript() {
+		return createScript;
+	}
+	public void setCreateScript(Script createScript) {
+		this.createScript = createScript;
+	}
+	public List<RowScript> getRowScripts() {
+		return rowScripts;
+	}
+	public List<DataRow> getPredefinedRows() {
+		return predefinedRows;
 	}
 }

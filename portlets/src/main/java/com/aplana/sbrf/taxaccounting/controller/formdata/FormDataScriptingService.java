@@ -1,18 +1,12 @@
 package com.aplana.sbrf.taxaccounting.controller.formdata;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +20,12 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.script.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.script.RowScript;
-import com.aplana.sbrf.taxaccounting.script.Script;
+import com.aplana.sbrf.taxaccounting.model.RowScript;
+import com.aplana.sbrf.taxaccounting.model.Script;
 
 @Service
-public class FormDataScriptingServiceImpl implements FormDataScriptingService {
+public class FormDataScriptingService {
 	Log logger = LogFactory.getLog(getClass());
-	private final static String ROOT = "C:/workspace/scripts/src/groovy";
 	
 	@Autowired
 	private FormDao formDao;
@@ -44,18 +36,17 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	@Autowired
 	private TransportTaxDao transportTaxDao;
 	
-	@Override
 	public FormData createForm(Logger logger, int formId) {
 		Form form = formDao.getForm(formId);
 		FormData result = new FormData(form);
 		
-		Script createScript = getCreationScript(formId);
-		if (createScript != null) {
+		Script createScript = form.getCreateScript();
+		if (createScript != null && createScript.getBody() != null) {
 			ScriptEngine engine = getScriptEngine();		
 			engine.put("logger", logger);
 			engine.put("formData", result);
 			try {
-				engine.eval(createScript.getScript());
+				engine.eval(createScript.getBody());
 			} catch (ScriptException e) {
 				logger.error(e);
 			}
@@ -64,15 +55,27 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 	}
 
 	public void processFormData(Logger logger, FormData formData) {
+		Form form = formData.getForm();
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
 		RowMessageDecorator rowMessageDecorator = new RowMessageDecorator();
 		logger.setMessageDecorator(rowMessageDecorator);
-		List<RowScript> rowScripts = getFormRowScripts(formData.getForm().getId());
+		List<RowScript> rowScripts = form.getRowScripts();
 		for (RowScript rowScript: rowScripts) {
 			performRowScript(rowScript, formData, engine, logger, rowMessageDecorator);
 		}
 		checkMandatoryColumns(formData, logger, rowMessageDecorator);
+		logger.setMessageDecorator(null);
+		
+		if (form.getCalcScript() != null) {
+			engine.put("formData", formData);
+			try {
+				engine.eval(form.getCalcScript().getBody());
+			} catch (Exception e) {
+				logger.error(e);
+			}
+		}
+		
 		logger.setMessageDecorator(null);
 	}
 
@@ -86,7 +89,7 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
 			try {
-				engine.eval(rowScript.getScript());
+				engine.eval(rowScript.getBody());
 			} catch (Exception e) {
 				logger.error(e);
 				break;
@@ -110,50 +113,6 @@ public class FormDataScriptingServiceImpl implements FormDataScriptingService {
 			if (!columnNames.isEmpty()) {
 				logger.error("Не заполнены столбцы %s", columnNames.toString());
 			}
-		}
-	}
-	
-	private String getFileContent(File file) {
-		try {
-			return FileUtils.readFileToString(file, "UTF-8");
-		} catch (IOException e) {
-			logger.error("Failed to read file content", e);
-			return null;
-		}
-	}
-
-	@Override
-	public List<RowScript> getFormRowScripts(int formId) {
-		File dir = new File(ROOT + "/" + formId + "/rows");
-		if (!dir.exists() || !dir.isDirectory()) {
-			return Collections.emptyList();
-		}
-		Collection<File> scriptNames = FileUtils.listFiles(dir, new String[] {"groovy"}, false);
-		List<RowScript> result = new ArrayList<RowScript>(scriptNames.size());
-		for (File file: scriptNames) {
-			RowScript rc = new RowScript();
-			String filename = file.getName();
-			rc.setName(FilenameUtils.removeExtension(filename));
-			rc.setScript(getFileContent(file));
-			result.add(rc);
-		}
-		return result;
-
-	}
-
-	@Override
-	public Script getCreationScript(int formId) {
-		File f = new File(ROOT + "/" + formId + "/create.groovy");
-		if (!f.exists()) {
-			return null;
-		}
-		String scriptText = getFileContent(f);
-		if (scriptText == null) {
-			return null;
-		} else {
-			Script result = new Script();
-			result.setScript(scriptText);
-			return result;
 		}
 	}
 	

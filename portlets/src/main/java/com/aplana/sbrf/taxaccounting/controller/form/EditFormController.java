@@ -54,7 +54,8 @@ public class EditFormController {
 		objectMapper.getDeserializationConfig().addMixInAnnotations(Column.class, ColumnMixIn.class);
 		
 		Form f = objectMapper.readValue(formJson, Form.class);
-		formDao.saveForm(f);
+		int formId = formDao.saveForm(f);
+		formBean.setForm(formDao.getForm(formId));
 	}	
 	
 	@ModelAttribute("formBean")
@@ -65,6 +66,7 @@ public class EditFormController {
 	@ActionMapping("edit")
 	protected void editForm(@RequestParam("formId") int formId, @ModelAttribute("formBean") EditFormBean formBean) {
 		logger.info("Starting editing form: formId = " + formId);
-		formBean.setForm(formDao.getForm(formId));
+		Form form = formDao.getForm(formId);
+		formBean.setForm(form);
 	}
 }
