@@ -36,6 +36,8 @@
 	dojo.require('dijit.form.CheckBox');
 	dojo.require('dijit.form.Textarea');	
 	dojo.require('dijit.form.Select');
+	dojo.require('dijit.layout.AccordionContainer');
+	dojo.require('dijit.layout.AccordionPane');
 	dojo.require('dijit.layout.BorderContainer');
 	dojo.require('dijit.layout.TabContainer');
 	dojo.require('dijit.layout.ContentPane');
@@ -44,25 +46,47 @@
 	var ${namespace}_form = null;
 	var ${namespace}_columnsGrid = null;
 	var ${namespace}_createScriptEditor = null;
+	var ${namespace}_calcScriptsGrid = null;
+	var ${namespace}_calcScriptConditionEditor = null;
 	var ${namespace}_calcScriptEditor = null;
-	var ${namespace}_rowScriptsGrid = null;
-	var ${namespace}_rowScriptConditionEditor = null;
-	var ${namespace}_rowScriptEditor = null;
 	var ${namespace}_idCounter = 0;
+	
+	<%--
+		Сгенерировать идентификатор
+	--%>
+	var ${namespace}_generateId = function() {
+		return --${namespace}_idCounter;
+	}
+	
+	<%--
+		Возвращает item, соответствующий выбранному в гриде элементу, или null,
+		если не выбрано ни одного элемента, или, напротив, выбрано более одного элемента \
+		(вообще говоря, такое невозможно, так как во всех таблицах стоит single-выбор)
+	--%>
+	var ${namespace}_getGridSelectedItem = function(grid) {
+		var selectedItems = grid.selection.getSelected();
+		if (selectedItems == null || selectedItems.length != 1) {
+			return null;
+		}
+		return selectedItems[0];
+	}
+
 	<%--
 		Функция загружает информацию о выбранном столбце в панель для редактирования свойств столбца
 		Используется при выборе строки в таблице столбцов, а также для того, чтобы отказаться от сделанных изменений
 	--%>
 	var ${namespace}_selectColumn = function() {
-		var selectedItems = ${namespace}_columnsGrid.selection.getSelected();
-		var columnItem = null;
-		if (selectedItems != null && selectedItems.length == 1) {
-			columnItem = selectedItems[0];
-		}
+		${namespace}_columnsGrid.acceptChanges();
+		var columnItem = ${namespace}_getGridSelectedItem(${namespace}_columnsGrid);
 		var div = dojo.byId('${namespace}_columnPropPaneDiv');
 		if (columnItem == null) {
 			div.style.display = 'none';
+			${namespace}_columnUpButton.attr('disabled', true);
+			${namespace}_columnDownButton.attr('disabled', true);			
 		} else {
+			var rowIndex = ${namespace}_columnsGrid.getItemIndex(columnItem);
+			${namespace}_columnUpButton.attr('disabled', rowIndex == 0);
+			${namespace}_columnDownButton.attr('disabled', rowIndex == ${namespace}_columnsGrid.rowCount);
 			var store = ${namespace}_columnsGrid.store;
 			div.style.display = 'block';
 			${namespace}_columnName.attr('value', store.getValue(columnItem, 'name'));
@@ -72,47 +96,30 @@
 			${namespace}_columnMandatory.attr('value', store.getValue(columnItem, 'mandatory'));
 			${namespace}_columnType.attr('value', store.getValue(columnItem, 'type'));
 		}
+		${namespace}_columnsGrid.selectedColumnItem = columnItem;
 	};
 	
 	<%--
-		Функция принимает значения из формы редактирования параметров столбца и сохраняет их в DataStore
-	--%>
-	var ${namespace}_acceptColumn = function() {
-		var selectedItems = ${namespace}_columnsGrid.selection.getSelected();
-		if (selectedItems == null || selectedItems.length != 1) {
-			alert('Не выбран столбец!');
-			return;
-		}
-		var columnItem = selectedItems[0];
-		var store = ${namespace}_columnsGrid.store; 
-		store.setValue(columnItem, 'name', ${namespace}_columnName.attr('value'));
-		store.setValue(columnItem, 'alias', ${namespace}_columnAlias.attr('value'));
-		store.setValue(columnItem, 'width', ${namespace}_columnWidth.attr('value'));
-		store.setValue(columnItem, 'editable', ${namespace}_columnEditable.attr('value'));
-		store.setValue(columnItem, 'mandatory', ${namespace}_columnMandatory.attr('value'));
-		
-		var type = ${namespace}_columnType.attr('value');
-		store.setValue(columnItem, 'type', type);
-	};
-	
-	<%-- 
 		Сохранение формы
 	--%>
 	${namespace}_saveForm = function() {		
 		var form = ${namespace}_form; 
 		${namespace}_columnsGrid.store.save();
-
+		
+		if (${namespace}_calcScriptsGrid != null) {
+			${namespace}_calcScriptsGrid.acceptChanges();
+			${namespace}_calcScriptsGrid.store.save();
+		}
+		
 		if (${namespace}_createScriptEditor != null) {
-			form.createScript = {
-				body: ${namespace}_createScriptEditor.getValue()
+			if (form.createScript == null) {
+				form.createScript = {
+					id: ${namespace}_generateId()
+				};			
 			}
+			form.createScript.body = ${namespace}_createScriptEditor.getValue();
 		}
-		if (${namespace}_calcScriptEditor != null) {
-			form.calcScript = {
-				body: ${namespace}_calcScriptEditor.getValue()
-			}
-		}
-				
+		
 		dojo.xhrPost({
 			url: '${saveFormUrl}',
 			content: {
@@ -128,7 +135,7 @@
 		});
 	}
 	
-	<%-- 
+	<%--
 		Создание редактора кода
 	--%>
 	var ${namespace}_createCodeEditor = function(textAreaId, script) {
@@ -150,6 +157,35 @@
 		result.setValue(scriptBody);
 		return result;
 	};
+	
+	<%--
+		Берёт два элемента таблицы: выбранный и элемент, стоящий в строке с номером "выбранная строка + step",
+		меняет у них значение столбца fieldName местами и пересортировывает таблицу.
+		Используется для того, чтобы поменять две строки в таблице местами, также для этого нужно, чтобы
+		в таблице была установлена сортировка по столбцу fieldName 
+	--%>
+	var ${namespace}_swapSelectedItem = function(grid, fieldName, step) {
+		var store = grid.store;
+		var selectedItem = ${namespace}_getGridSelectedItem(grid);
+		if (selectedItem == null) {
+			alert('Не выбрана строка в таблице!');
+		}
+		
+		var selectedItemValue = store.getValue(selectedItem, fieldName); 
+		var selectedItemIndex = grid.getItemIndex(selectedItem);
+
+		var movedItemIndex = selectedItemIndex + step;
+		if (movedItemIndex < 0 || movedItemIndex > grid.rowCount) {
+			alert('Невозможно выполнить запрошенную операцию!');
+		}
+		var movedItem = grid.getItem(movedItemIndex);
+		var movedItemValue = store.getValue(movedItem, fieldName);
+		store.setValue(selectedItem, fieldName, movedItemValue);
+		store.setValue(movedItem, fieldName, selectedItemValue);
+		grid.sort();
+		grid.resize();
+		grid.selection.select(movedItemIndex);
+	}
 
 	dojo.addOnLoad(function(){
 		dojo.parser.parse();
@@ -180,8 +216,10 @@
 			store: store,
 			structure: [[
 				{field: 'alias', width: '25em', name: 'Алиас'},
-				{field: 'name', width: '25em', name: 'Наименование'}
+				{field: 'name', width: '25em', name: 'Наименование'},
+				{field: 'order', width: '1em', name: 'Порядок', styles: 'display: none;'}
 			]],
+			sortInfo: '3',
 			autoHeight: true,
 			autoWidth: true,
 			canSort: function(index) {
@@ -189,7 +227,21 @@
 			},
 			selectionMode: 'single',
 			onSelected: ${namespace}_selectColumn
-		});		
+		});
+		${namespace}_columnsGrid.selectedColumnItem = null;
+		${namespace}_columnsGrid.acceptChanges = function() {
+			var columnItem = this.selectedColumnItem;
+			if (columnItem == null) {
+				return;
+			}
+			var store = this.store;
+			store.setValue(columnItem, 'name', ${namespace}_columnName.attr('value'));
+			store.setValue(columnItem, 'alias', ${namespace}_columnAlias.attr('value'));
+			store.setValue(columnItem, 'width', ${namespace}_columnWidth.attr('value'));
+			store.setValue(columnItem, 'editable', ${namespace}_columnEditable.attr('value'));
+			store.setValue(columnItem, 'mandatory', ${namespace}_columnMandatory.attr('value'));
+			store.setValue(columnItem, 'type', ${namespace}_columnType.attr('value'));
+		}
 		${namespace}_columnsGrid.placeAt('${namespace}_columnsGridDiv');
 		${namespace}_columnsGrid.startup();
 		${namespace}_selectColumn();
@@ -212,9 +264,10 @@
 					Список столбцов
 					<div style="float: right;">
 						<button dojoType="dijit.form.Button">
+							Добавить столбец
 							<script type="dojo/connect" event="onClick">
 								var col = {
-									id: --${namespace}_idCounter,
+									id: ${namespace}_generateId(),
 									name: 'Новый столбец',
 									alias: 'column',
 									type: 'string',
@@ -224,17 +277,12 @@
 								};
 								var item = ${namespace}_columnsGrid.store.newItem(col);
 								${namespace}_columnsGrid.selection.select(${namespace}_columnsGrid.rowCount);
-							</script>
-							Добавить столбец
+							</script>							
 						</button>
 						<button jsId="${namespace}_removeColumnButton" dojoType="dijit.form.Button">
+							Удалить столбец
 							<script type="dojo/connect" event="onClick">
-								var selectedItems = ${namespace}_columnsGrid.selection.getSelected();
-								if (selectedItems == null || selectedItems.length != 1) {
-									alert('Не выбран столбец!');
-									return;
-								}
-								var columnItem = selectedItems[0];
+								var columnItem = ${namespace}_getGridSelectedItem(${namespace}_columnsGrid);
 								var store = ${namespace}_columnsGrid.store;
 								var name = store.getValue(columnItem, 'name');
 								if (confirm('Вы уверены, что хотите удалить столбец "' + name + '"?')) {
@@ -242,8 +290,19 @@
 									${namespace}_selectColumn();
 								}								
 							</script>
-							Удалить столбец
-						</button>						
+						</button>
+						<button jsId="${namespace}_columnUpButton" dojoType="dijit.form.Button" disabled="true">
+							Вверх
+							<script type="dojo/connect" event="onClick">
+								${namespace}_swapSelectedItem(${namespace}_columnsGrid, 'order', -1);
+							</script>
+						</button>
+						<button jsId="${namespace}_columnDownButton" dojoType="dijit.form.Button" disabled="true">
+							Вниз
+							<script type="dojo/connect" event="onClick">
+								${namespace}_swapSelectedItem(${namespace}_columnsGrid, 'order', 1);
+							</script>
+						</button>
 					</div>
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="right" style="width: 250px"><div id="${namespace}_columnPropPaneDiv" style="display:none;">
@@ -282,8 +341,6 @@
 							</tr>
 						</tbody>
 					</table>
-					<button dojoType="dijit.form.Button" onClick="${namespace}_acceptColumn">Применить</button>
-					<button dojoType="dijit.form.Button" onClick="${namespace}_selectColumn">Отменить изменения</button>
 				</div></div>			
 				<div dojoType="dijit.layout.ContentPane" region="center">
 					<div id="${namespace}_columnsGridDiv"></div>
@@ -302,67 +359,118 @@
 			</script>
 			<textarea id="${namespace}_createScript"></textarea>
 		</div>
-		<div dojoType="dijit.layout.ContentPane" title="Скрипт расчёта">
+		<div dojoType="dijit.layout.ContentPane" title="Расчётные скрипты">
 			<script type="dojo/connect" event="onShow">
-				if (${namespace}_calcScriptEditor != null) {
+				if (${namespace}_calcScriptsGrid != null) {
 					return;
 				}
-      			${namespace}_calcScriptEditor = ${namespace}_createCodeEditor(
-					'${namespace}_calcScript',
-					${namespace}_form.calcScript
-				);
-			</script>
-			<textarea id="${namespace}_calcScript"></textarea>
-		</div>
-		<div dojoType="dijit.layout.ContentPane" title="Скрипты по строкам">
-			<script type="dojo/connect" event="onShow">
-				if (${namespace}_rowScriptsGrid != null) {
-					return;
+				var calcScriptsData = {
+					identifier: 'id',
+					items: ${namespace}_form.calcScripts
 				}
-				var rowScriptsData = {
-					identifier: 'name',
-					items: ${namespace}_form.rowScripts
-				}
-				var store = new dojo.data.ItemFileWriteStore({data: rowScriptsData});
+				var store = new dojo.data.ItemFileWriteStore({data: calcScriptsData});
 				store._saveEverything = function(saveCompleteCallback, saveFailedCallback, newFileContentString) {
-					${namespace}_form.rowScripts = dojo.fromJson(newFileContentString).items;
+					${namespace}_form.calcScripts = dojo.fromJson(newFileContentString).items;
 				}
-				${namespace}_rowScriptsGrid = new dojox.grid.DataGrid({
+				${namespace}_calcScriptsGrid = new dojox.grid.DataGrid({
 					store: store,
 					structure: [[
-						{field: 'name', width: '25em', name: 'Наименование'}
+						{field: 'name', width: '25em', name: 'Наименование', editable: true},
+						{field: 'order', width: '1em', name: 'Порядок', styles: 'display: none;'}
 					]],
+					sortInfo: '2', <%-- сортируем по скрытому полю order --%>
 					autoHeight: true,
 					autoWidth: true,
 					canSort: function(index) {
 						return false;
 					},
-					selectionMode: 'single'
-				});		
-				${namespace}_rowScriptsGrid.placeAt('${namespace}_rowScriptsGridDiv');
-				${namespace}_rowScriptsGrid.startup();
+					selectionMode: 'single',
+					onSelected: function(rowIndex) {
+						this.acceptChanges();
+						${namespace}_calcScriptUpButton.attr('disabled', rowIndex == 0);
+						${namespace}_calcScriptDownButton.attr('disabled', rowIndex == this.rowCount - 1);
+						${namespace}_removeRowScriptButton.attr('disabled', true);
+						var item = this.getItem(rowIndex);
+						var condition = this.store.getValue(item, 'condition');
+						if (condition == null) {
+							condition = '';
+						}
+						${namespace}_calcScriptConditionEditor.setValue(condition);
+						var body = this.store.getValue(item, 'body');
+						if (body == null) {
+							body = '';
+						}
+						${namespace}_calcScriptEditor.setValue(body);
+						this.selectedScriptItem = item;
+					}
+				});
+				${namespace}_calcScriptsGrid.selectedScriptItem = null;
+				${namespace}_calcScriptsGrid.acceptChanges = function() {
+					if (this.selectedScriptItem != null) {
+						this.store.setValue(this.selectedScriptItem, 'rowScript', ${namespace}_rowScriptCheckbox.getValue());
+						this.store.setValue(this.selectedScriptItem, 'condition', ${namespace}_calcScriptConditionEditor.getValue());
+						this.store.setValue(this.selectedScriptItem, 'body', ${namespace}_calcScriptEditor.getValue());
+					}
+				};
+				${namespace}_calcScriptsGrid.placeAt('${namespace}_calcScriptsGridDiv');
+				${namespace}_calcScriptsGrid.startup();
 
-      			${namespace}_rowScriptConditionEditor = ${namespace}_createCodeEditor(
-					'${namespace}_rowScriptCondition',
+				${namespace}_calcScriptConditionEditor = ${namespace}_createCodeEditor(
+					'${namespace}_calcScriptCondition',
 					null
 				);
-      			${namespace}_rowScriptEditor = ${namespace}_createCodeEditor(
-					'${namespace}_rowScript',
+				${namespace}_calcScriptEditor = ${namespace}_createCodeEditor(
+					'${namespace}_calcScript',
 					null
 				);
 			</script>
 			<div dojoType="dijit.layout.BorderContainer" style="width: 980px; height: 670px">
-				<div dojoType="dijit.layout.ContentPane" region="left" style="width: 26em;" title="Список скриптов">
-					<div id="${namespace}_rowScriptsGridDiv"></div>
+				<div dojoType="dijit.layout.ContentPane" region="left" style="width: 270px;">
+					<button jsId="${namespace}_addRowScriptButton" dojoType="dijit.form.Button">
+						Добавить
+						<script type="dojo/connect" event="onClick">
+							alert('Not implemented!');
+						</script>
+					</button>
+					<button jsId="${namespace}_removeRowScriptButton" dojoType="dijit.form.Button" disabled="true">
+						Удалить
+						<script type="dojo/connect" event="onClick">
+							alert('Not implemented!');
+						</script>
+					</button>
+					<button jsId="${namespace}_calcScriptUpButton" dojoType="dijit.form.Button" disabled="true">
+						Вверх
+						<script type="dojo/connect" event="onClick">
+							${namespace}_swapSelectedItem(${namespace}_calcScriptsGrid, 'order', -1);
+						</script>
+					</button>
+					<button jsId="${namespace}_calcScriptDownButton" dojoType="dijit.form.Button" disabled="true">
+						Вниз
+						<script type="dojo/connect" event="onClick">
+							${namespace}_swapSelectedItem(${namespace}_calcScriptsGrid, 'order', 1);
+						</script>
+					</button>
+					<div id="${namespace}_calcScriptsGridDiv"></div>
 				</div>
-				<div dojoType="dijit.layout.ContentPane" region="top" style="height: 60px;" title="Условие исполнения скрипта">
-					<textarea id="${namespace}_rowScriptCondition"></textarea>
-				</div>
-				<div dojoType="dijit.layout.ContentPane" region="center" title="Скрипт">
-					<textarea id="${namespace}_rowScript"></textarea>
+				<div dojoType="dijit.layout.ContentPane" region="center">
+					<div dojoType="dijit.layout.BorderContainer" style="width: 100%; height: 100%;">
+						<div dojoType="dijit.layout.ContentPane" region="top" style="height: 110px;">
+							<div>
+								Строковый скрипт
+								<input jsId="${namespace}_rowScriptCheckbox" dojoType="dijit.form.CheckBox" value="true"/>
+							</div>
+							<div style="height: 80px; overflow: scroll;">
+								Условие выполнения скрипта
+								<textarea id="${namespace}_calcScriptCondition" style="height: 80px;"></textarea>
+							</div>
+						</div>					
+						<div dojoType="dijit.layout.ContentPane" region="center">
+							Тело скрипта
+							<textarea id="${namespace}_calcScript"></textarea>
+						</div>						
+					</div>
 				</div>
 			</div>
-			<table id="${namespace}_scriptsGrid"></table>
 		</div>
 		<div dojoType="dijit.layout.ContentPane" title="Строки">
 			Описание строк формы

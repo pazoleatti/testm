@@ -20,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.RowScript;
 import com.aplana.sbrf.taxaccounting.model.Script;
 
 @Service
@@ -58,29 +57,27 @@ public class FormDataScriptingService {
 		Form form = formData.getForm();
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
-		RowMessageDecorator rowMessageDecorator = new RowMessageDecorator();
-		logger.setMessageDecorator(rowMessageDecorator);
-		List<RowScript> rowScripts = form.getRowScripts();
-		for (RowScript rowScript: rowScripts) {
-			performRowScript(rowScript, formData, engine, logger, rowMessageDecorator);
-		}
-		checkMandatoryColumns(formData, logger, rowMessageDecorator);
-		logger.setMessageDecorator(null);
-		
-		if (form.getCalcScript() != null) {
-			engine.put("formData", formData);
-			try {
-				engine.eval(form.getCalcScript().getBody());
-			} catch (Exception e) {
-				logger.error(e);
+		List<Script> calcScripts = form.getCalcScripts();
+		for (Script calcScript: calcScripts) {
+			if (calcScript.isRowScript()) {
+				performRowScript(calcScript, formData, engine, logger);
+			} else {
+				engine.put("formData", formData);
+				try {
+					engine.eval(calcScript.getBody());
+				} catch (Exception e) {
+					logger.error(e);
+				}
 			}
 		}
-		
+		checkMandatoryColumns(formData, logger);
 		logger.setMessageDecorator(null);
 	}
 
-	private void performRowScript(RowScript rowScript, FormData formData, ScriptEngine engine, Logger logger, RowMessageDecorator messageDecorator) {
+	private void performRowScript(Script rowScript, FormData formData, ScriptEngine engine, Logger logger) {
+		RowMessageDecorator messageDecorator = new RowMessageDecorator();
 		messageDecorator.setOperationName(rowScript.getName());
+		logger.setMessageDecorator(messageDecorator);
 		int rowIndex = 0;
 		for (DataRow row: formData.getDataRows()) {
 			++rowIndex;
@@ -95,10 +92,12 @@ public class FormDataScriptingService {
 				break;
 			}
 		}
+		logger.setMessageDecorator(null);
 	}
 	
-	private void checkMandatoryColumns(FormData formData, Logger logger, RowMessageDecorator messageDecorator) {
+	private void checkMandatoryColumns(FormData formData, Logger logger) {
 		List<Column> columns = formData.getForm().getColumns();
+		RowMessageDecorator messageDecorator = new RowMessageDecorator();
 		messageDecorator.setOperationName("Проверка обязательных полей");
 		int rowIndex = 0;
 		for (DataRow row: formData.getDataRows()) {

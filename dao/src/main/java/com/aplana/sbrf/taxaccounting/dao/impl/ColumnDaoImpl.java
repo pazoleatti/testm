@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -25,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.taxaccounting.util.OrderUtils;
 
 @Repository
 @Transactional(readOnly=true)
@@ -50,6 +49,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setWidth(rs.getInt("width"));
 			result.setEditable(rs.getBoolean("editable"));
 			result.setMandatory(rs.getBoolean("mandatory"));
+			result.setOrder(rs.getInt("order"));
 			return result;
 		}
 	}
@@ -76,17 +76,19 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			Integer.class
 		));
 		
-		final List<Pair<Integer, Column>> newColumns = new ArrayList<Pair<Integer, Column>>();
-		final List<Pair<Integer, Column>> oldColumns = new ArrayList<Pair<Integer, Column>>();
+		final List<Column> newColumns = new ArrayList<Column>();
+		final List<Column> oldColumns = new ArrayList<Column>();
+		
+		List<Column> columns = form.getColumns();
+		OrderUtils.reorder(columns);
 		
 		int order = 0;
-		for (Column col: form.getColumns()) {
-			++order;
-			Pair<Integer, Column> pair = new ImmutablePair<Integer, Column>(order, col);
+		for (Column col: columns) {
+			col.setOrder(++order);
 			if (col.getId() < 0) {
-				newColumns.add(pair);
+				newColumns.add(col);
 			} else {
-				oldColumns.add(pair);
+				oldColumns.add(col);
 			}
 			removedColumns.remove(col.getId());
 		}
@@ -114,9 +116,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					Pair<Integer, Column> pair = newColumns.get(index); 
-					Column col = pair.getRight();
+				public void setValues(PreparedStatement ps, int index) throws SQLException {					 
+					Column col = newColumns.get(index);
 					ps.setString(1, col.getName());
 					ps.setString(2, col.getAlias());
 					ps.setString(3, getTypeFromCode(col));
@@ -129,7 +130,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
-					ps.setInt(8, pair.getLeft());
+					ps.setInt(8, col.getOrder());
 				}
 				
 				@Override
@@ -146,8 +147,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					Pair<Integer, Column> pair = oldColumns.get(index); 
-					Column col = pair.getRight();
+					Column col = oldColumns.get(index);
 					ps.setString(1, col.getName());
 					ps.setString(2, col.getAlias());
 					ps.setString(3, getTypeFromCode(col));
@@ -159,7 +159,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
-					ps.setInt(8, pair.getLeft());
+					ps.setInt(8, col.getOrder());
 					ps.setInt(9, col.getId());
 				}
 				

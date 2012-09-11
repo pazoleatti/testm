@@ -12,9 +12,8 @@ public class Form {
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;
 	private String version;	
-	private Script calcScript;
 	private Script createScript;
-	private final List<RowScript> rowScripts = new ArrayList<RowScript>();
+	private final List<Script> calcScripts = new ArrayList<Script>();
 	private final List<DataRow> predefinedRows = new ArrayList<DataRow>();
 	
 	public Integer getId() {
@@ -81,20 +80,14 @@ public class Form {
 	public void setVersion(String version) {
 		this.version = version;
 	}
-	public Script getCalcScript() {
-		return calcScript;
-	}
-	public void setCalcScript(Script calcScript) {
-		this.calcScript = calcScript;
-	}
 	public Script getCreateScript() {
 		return createScript;
 	}
 	public void setCreateScript(Script createScript) {
 		this.createScript = createScript;
 	}
-	public List<RowScript> getRowScripts() {
-		return rowScripts;
+	public List<Script> getCalcScripts() {
+		return calcScripts;
 	}
 	public List<DataRow> getPredefinedRows() {
 		return predefinedRows;

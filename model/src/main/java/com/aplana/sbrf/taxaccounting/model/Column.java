@@ -1,17 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.taxaccounting.util.Ordered;
+
 /**
  * Столбец таблицы в объявлении налоговой формы
  * @author dsultanbekov
  */
-public abstract class Column {
+public abstract class Column implements Ordered {
 	private int id;
 	private String name;
 	private String alias;
 	private int width;
 	private boolean editable;
 	private boolean mandatory;
-	private ValueScript valueScript;
+	private int order;
 	
 	/**
 	 * Идентификатор столбца в БД
@@ -60,11 +62,11 @@ public abstract class Column {
 		this.mandatory = mandatory;
 	}
 
-	public ValueScript getValueScript() {
-		return valueScript;
+	public int getOrder() {
+		return order;
 	}
 
-	public void setValueScript(ValueScript valueScript) {
-		this.valueScript = valueScript;
+	public void setOrder(int order) {
+		this.order = order;
 	}
 }

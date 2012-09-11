@@ -5,7 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,41 +18,35 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.Form;
-import com.aplana.sbrf.taxaccounting.model.RowScript;
 import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.model.ValueScript;
 
 @Repository
 public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	private static final int CREATE = 1;
 	private static final int CALC = 2;
 	private static final int ROW = 3;
-	private static final int VALUE = 4;
 
 	private static class ScriptRecord {
+		int id;
 		int type;
-		String script;
+		String body;
 		String condition;
 		String name;
-		Integer columnId;
+		Integer order;
 		
-		ScriptRecord(int type, String script) {
+		ScriptRecord(int id, int type, String script) {
+			this.id = id;
 			this.type = type;
-			this.script = script;
+			this.body = script;
 		}
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public void fillFormScripts(final Form form) {
-		form.setCalcScript(null);
 		form.setCreateScript(null);
-		form.getRowScripts().clear();
-		for (Column col: form.getColumns()) {
-			col.setValueScript(null);
-		}
+		form.getCalcScripts().clear();
 		
 		getJdbcTemplate().query(
 			"select * from form_script where form_id = ?",
@@ -59,40 +56,29 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					int type = rs.getInt("type");
-					
-					Script script;
+					final Script script = new Script();
+					script.setCondition(rs.getString("condition"));
 					switch (type) {
 					case CREATE:
 						if (form.getCreateScript() != null) {
 							throw new DaoException("Обнаружено несколько скриптов с типом CREATE");
 						}						
-						script = new Script();
 						form.setCreateScript(script);
 						break;
 					case CALC:
-						if (form.getCalcScript() != null) {
-							throw new DaoException("Обнаружено несколько скриптов с типом CALC");
-						}
-						script = new Script();
-						form.setCalcScript(script);
+						script.setRowScript(false);
+						form.getCalcScripts().add(script);
 						break;
-					case ROW:
-						RowScript rowScript = new RowScript();
-						rowScript.setName(rs.getString("name"));
-						rowScript.setCondition(rs.getString("condition"));
-						form.getRowScripts().add(rowScript);
-						script = rowScript;
-						break;
-					case VALUE:
-						ValueScript valueScript = new ValueScript();
-						valueScript.setCondition(rs.getString("condition"));
-						int columnId = rs.getInt("column_id");
-						form.getColumn(columnId).setValueScript(valueScript);
-						script = valueScript;
+					case ROW:						
+						script.setRowScript(true);
+						form.getCalcScripts().add(script);
 						break;
 					default:
 						throw new IllegalArgumentException("Unknown script type: " + type);
 					}
+					script.setOrder(rs.getInt("order"));
+					script.setName(rs.getString("name"));
+					script.setId(rs.getInt("id"));
 					script.setBody(rs.getString("body"));						
 				}
 			}
@@ -103,59 +89,107 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	@Transactional(readOnly = false)
 	public void saveFormScripts(Form form) {
 		int formId = form.getId();
-		
 		JdbcTemplate jt = getJdbcTemplate();
-		jt.update(
-			"delete from form_script where form_id = ?",
+		
+		final Set<Integer> removedScriptIds = new HashSet<Integer>();		
+		removedScriptIds.addAll(jt.queryForList(
+			"select id from form_script where form_id = ?",
 			new Object[] { formId },
-			new int[] { Types.NUMERIC }
-		);
+			new int[] { Types.NUMERIC },
+			Integer.class
+		));
 		
-		final List<ScriptRecord> scripts = new ArrayList<ScriptRecord>();
-		if (form.getCreateScript() != null && form.getCreateScript().getBody() != null) {
-			scripts.add(new ScriptRecord(CREATE, form.getCreateScript().getBody()));
-		}
-		if (form.getCalcScript() != null && form.getCalcScript().getBody() != null) {
-			scripts.add(new ScriptRecord(CALC, form.getCalcScript().getBody()));
-		}
-		for (RowScript rowScript: form.getRowScripts()) {
-			ScriptRecord rec = new ScriptRecord(ROW, rowScript.getBody());
-			rec.name = rowScript.getName();
-			rec.condition = rowScript.getCondition();
-			scripts.add(rec);
-		}
-		for (Column col: form.getColumns()) {
-			ValueScript valScript = col.getValueScript();
-			if (valScript != null) {
-				ScriptRecord rec = new ScriptRecord(VALUE, valScript.getBody());
-				rec.condition = valScript.getCondition();
-				scripts.add(rec);
+		final List<ScriptRecord> oldScripts = new ArrayList<ScriptRecord>();
+		final List<ScriptRecord> newScripts = new ArrayList<ScriptRecord>();
+		
+		Script createScript = form.getCreateScript(); 
+		if (createScript != null && createScript.getBody() != null) {
+			ScriptRecord scriptRecord = new ScriptRecord(createScript.getId(), CREATE, form.getCreateScript().getBody());
+			if (createScript.getId() <= 0) {
+				newScripts.add(scriptRecord);
+			} else {
+				oldScripts.add(scriptRecord);
+				removedScriptIds.remove(createScript.getId());
 			}
+		} else {
+			removedScriptIds.remove(createScript.getId());
 		}
-		
-		jt.batchUpdate(
-			"insert into form_script (form_id, type, name, column_id, body, condition) " +
-			"values (" + formId + ", ?, ?, ?, ?, ?)",
-			new BatchPreparedStatementSetter() {
-				@Override
-				public int getBatchSize() {
-					return scripts.size();
-				}
 
-				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					ScriptRecord rec = scripts.get(index);
-					ps.setInt(1, rec.type);
-					ps.setString(2, rec.name);
-					if (rec.columnId == null) {
-						ps.setNull(3, Types.NUMERIC);	
-					} else {
-						ps.setInt(3, rec.columnId.intValue());
-					}
-					ps.setString(4, rec.script);
-					ps.setString(5, rec.condition);
-				}
+		for (Script calcScript: form.getCalcScripts()) {
+			int type = calcScript.isRowScript() ? ROW : CALC;
+			ScriptRecord rec = new ScriptRecord(calcScript.getId(), type, calcScript.getBody());
+			rec.name = calcScript.getName();
+			rec.condition = calcScript.getCondition();
+			rec.order = calcScript.getOrder();
+			if (rec.id <= 0) {
+				newScripts.add(rec);
+			} else {
+				removedScriptIds.remove(rec.id);
+				oldScripts.add(rec);
 			}
-		);
+		}
+		
+		if (!newScripts.isEmpty()) {
+			jt.batchUpdate(
+				"insert into form_script (id, form_id, type, name, order, body, condition) " +
+				"values (nextval for seq_form_script, " + formId + ", ?, ?, ?, ?, ?)",
+				new BatchPreparedStatementSetter() {
+					@Override
+					public int getBatchSize() {
+						return newScripts.size();
+					}
+	
+					@Override
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						ScriptRecord rec = newScripts.get(index);
+						ps.setInt(1, rec.type);
+						ps.setString(2, rec.name);
+						ps.setObject(3, rec.order, Types.NUMERIC);
+						ps.setString(4, rec.body);
+						ps.setString(5, rec.condition);
+					}
+				}
+			);
+		}
+		
+		if (!oldScripts.isEmpty()) {
+			jt.batchUpdate(
+				"update form_script set (name, order, body, condition) = " +
+				"(?, ?, ?, ?) where id = ?",
+				new BatchPreparedStatementSetter() {
+					@Override
+					public int getBatchSize() {
+						return oldScripts.size();
+					}
+					@Override
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						ScriptRecord rec = oldScripts.get(index);
+						ps.setString(1, rec.name);
+						ps.setObject(2, rec.order, Types.NUMERIC);
+						ps.setString(3, rec.body);
+						ps.setString(4, rec.condition);
+						ps.setInt(5, rec.id);
+					}
+				}
+			);
+		}
+		
+		if (!removedScriptIds.isEmpty()) {
+			jt.batchUpdate(
+				"delete from form_script where script_id = ?",
+				new BatchPreparedStatementSetter() {
+					Iterator<Integer> iterator = removedScriptIds.iterator();
+					@Override
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						ps.setInt(1, iterator.next());
+					}
+					
+					@Override
+					public int getBatchSize() {
+						return removedScriptIds.size();
+					}
+				}
+			);
+		}
 	}
 }
