@@ -154,8 +154,8 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		
 		if (!oldScripts.isEmpty()) {
 			jt.batchUpdate(
-				"update form_script set (name, order, body, condition) = " +
-				"(?, ?, ?, ?) where id = ?",
+				"update form_script set (type, name, order, body, condition) = " +
+				"(?, ?, ?, ?, ?) where id = ?",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public int getBatchSize() {
@@ -164,11 +164,12 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
 						ScriptRecord rec = oldScripts.get(index);
-						ps.setString(1, rec.name);
-						ps.setObject(2, rec.order, Types.NUMERIC);
-						ps.setString(3, rec.body);
-						ps.setString(4, rec.condition);
-						ps.setInt(5, rec.id);
+						ps.setInt(1, rec.type);
+						ps.setString(2, rec.name);
+						ps.setObject(3, rec.order, Types.NUMERIC);
+						ps.setString(4, rec.body);
+						ps.setString(5, rec.condition);
+						ps.setInt(6, rec.id);
 					}
 				}
 			);
