@@ -176,7 +176,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		
 		if (!removedScriptIds.isEmpty()) {
 			jt.batchUpdate(
-				"delete from form_script where script_id = ?",
+				"delete from form_script where id = ?",
 				new BatchPreparedStatementSetter() {
 					Iterator<Integer> iterator = removedScriptIds.iterator();
 					@Override
