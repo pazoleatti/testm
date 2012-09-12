@@ -387,10 +387,13 @@
 					selectionMode: 'single',
 					onSelected: function(rowIndex) {
 						this.acceptChanges();
+						dojo.byId('${namespace}_calcScriptProperiesPane').style.display = 'block';
 						${namespace}_calcScriptUpButton.attr('disabled', rowIndex == 0);
 						${namespace}_calcScriptDownButton.attr('disabled', rowIndex == this.rowCount - 1);
-						${namespace}_removeRowScriptButton.attr('disabled', true);
+						${namespace}_removeCalcScriptButton.attr('disabled', false);
 						var item = this.getItem(rowIndex);
+						
+						${namespace}_rowScriptCheckbox.attr('value', this.store.getValue(item, 'rowScript'));
 						var condition = this.store.getValue(item, 'condition');
 						if (condition == null) {
 							condition = '';
@@ -402,12 +405,15 @@
 						}
 						${namespace}_calcScriptEditor.setValue(body);
 						this.selectedScriptItem = item;
+					},
+					onApplyEdit: function(rowIndex) {
+						this.selectedScriptItem = this.getItem(rowIndex);
 					}
 				});
 				${namespace}_calcScriptsGrid.selectedScriptItem = null;
 				${namespace}_calcScriptsGrid.acceptChanges = function() {
 					if (this.selectedScriptItem != null) {
-						this.store.setValue(this.selectedScriptItem, 'rowScript', ${namespace}_rowScriptCheckbox.getValue());
+						this.store.setValue(this.selectedScriptItem, 'rowScript', ${namespace}_rowScriptCheckbox.attr('value'));
 						this.store.setValue(this.selectedScriptItem, 'condition', ${namespace}_calcScriptConditionEditor.getValue());
 						this.store.setValue(this.selectedScriptItem, 'body', ${namespace}_calcScriptEditor.getValue());
 					}
@@ -428,14 +434,48 @@
 				<div dojoType="dijit.layout.ContentPane" region="left" style="width: 270px;">
 					<button jsId="${namespace}_addRowScriptButton" dojoType="dijit.form.Button">
 						Добавить
-						<script type="dojo/connect" event="onClick">
-							alert('Not implemented!');
+						<script type="dojo/connect" event="onClick">							
+							${namespace}_calcScriptsGrid.store.fetch(
+								{
+									maxOrder: 1,
+									onItem: function(item, request) {
+										var ord = ${namespace}_calcScriptsGrid.store.getValue(item, 'order');
+										if (request.maxOrder < ord) {
+											request.maxOrder = ord;
+										}
+									},
+									onComplete: function(items, request) {
+										var newScript = {
+											id: ${namespace}_generateId(),
+											name: 'Новый скрипт',
+											rowScript: true,
+											condition: '',
+											order: request.maxOrder + 1,
+											body: ''
+										}
+										var newItem = ${namespace}_calcScriptsGrid.store.newItem(newScript);
+										var newItemRowIndex = ${namespace}_calcScriptsGrid.getItemIndex(newItem);
+										${namespace}_calcScriptsGrid.selection.select(newItemRowIndex);
+									}
+								}
+							);
 						</script>
 					</button>
-					<button jsId="${namespace}_removeRowScriptButton" dojoType="dijit.form.Button" disabled="true">
+					<button jsId="${namespace}_removeCalcScriptButton" dojoType="dijit.form.Button" disabled="true">
 						Удалить
 						<script type="dojo/connect" event="onClick">
-							alert('Not implemented!');
+							var rowIndex = ${namespace}_calcScriptsGrid.getItemIndex(${namespace}_calcScriptsGrid.selectedScriptItem);
+							${namespace}_calcScriptsGrid.store.deleteItem(${namespace}_calcScriptsGrid.selectedScriptItem);
+							${namespace}_calcScriptsGrid.selectedScriptItem = null;
+							if (${namespace}_calcScriptsGrid.rowCount > 0) {
+								if (rowIndex == 0) {
+									${namespace}_calcScriptsGrid.selection.select(0);
+								} else {
+									${namespace}_calcScriptsGrid.selection.select(rowIndex - 1);
+								}
+							} else {								
+								dojo.byId('${namespace}_calcScriptProperiesPane').style.display = 'none';	
+							}
 						</script>
 					</button>
 					<button jsId="${namespace}_calcScriptUpButton" dojoType="dijit.form.Button" disabled="true">
@@ -453,21 +493,19 @@
 					<div id="${namespace}_calcScriptsGridDiv"></div>
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="center">
-					<div dojoType="dijit.layout.BorderContainer" style="width: 100%; height: 100%;">
-						<div dojoType="dijit.layout.ContentPane" region="top" style="height: 110px;">
-							<div>
-								Строковый скрипт
-								<input jsId="${namespace}_rowScriptCheckbox" dojoType="dijit.form.CheckBox" value="true"/>
-							</div>
-							<div style="height: 80px; overflow: scroll;">
-								Условие выполнения скрипта
-								<textarea id="${namespace}_calcScriptCondition" style="height: 80px;"></textarea>
-							</div>
-						</div>					
-						<div dojoType="dijit.layout.ContentPane" region="center">
+					<div id="${namespace}_calcScriptProperiesPane" style="display: none;">
+						<div>
+							Строковый скрипт
+							<input jsId="${namespace}_rowScriptCheckbox" dojoType="dijit.form.CheckBox" value="true"/>
+						</div>
+						<div>
+							Условие выполнения скрипта
+							<textarea id="${namespace}_calcScriptCondition" style="height: 80px;"></textarea>
+						</div>
+						<div>
 							Тело скрипта
 							<textarea id="${namespace}_calcScript"></textarea>
-						</div>						
+						</div>
 					</div>
 				</div>
 			</div>
