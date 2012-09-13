@@ -7,7 +7,10 @@
 		var rows = ${namespace}_form.predefinedRows;
 		if (rows == null) {
 			rows = [];
+		} else {
+			dojo.forEach(rows, function(row, index) { row.id = ${namespace}_generateId();});
 		}
+
 		var rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: rows}});
 			${namespace}_columnsGrid.store.fetch({
 			columnDescriptors : [
@@ -21,22 +24,35 @@
 					width: ${namespace}_columnsGrid.store.getValue(item, 'width'),
 					editable: true
 				};
+				// TODO: функции форматтеры скопированы из страницы редактирования данных формы
+				// чтобы избежать копипасты хорошо бы вынести в js-файл
+				var formatDate = function(inDatum){
+					if (inDatum == null || inDatum == '') {
+						return '';
+					}
+					return dojo.date.locale.format(new Date(inDatum), this.constraint);
+				};
+				var formatNumber = function(inDatum){
+					if (null == inDatum || '' == inDatum || isNaN(inDatum)) {
+						return '';
+					}
+					return inDatum;
+				};
 				var type = ${namespace}_columnsGrid.store.getValue(item, 'type');
 				if (type == 'numeric') {
 					d.type = dojox.grid.cells._Widget;
 					d.widgetClass = dijit.form.NumberTextBox;
 					d.constraint = {
-						places: ${namespace}_columnsGrid.store.getValue(item, 'precision')
-						// TODO: formatter?
-					}
+						places: ${namespace}_columnsGrid.store.getValue(item, 'precision'),
+						formatter: formatNumber
+					};
 				} else if (type == 'date') {
-					d.type = dojox.grid.cells._Widget;
-					d.widgetClass = dijit.form.DateTextBox;
+					d.type = dojox.grid.cells.DateTextBox;
 					d.constraint = {
 						datePattern: 'dd.MM.yyyy',
-						selector: 'date'
-						// TODO: formatter?
-					}
+						selector: 'date',
+						formatter: formatDate
+					};
 				}
 				request.columnDescriptors[request.columnDescriptors.length] = d;
 			},
@@ -58,6 +74,24 @@
 	</script>
 	<button dojoType="dijit.form.Button">
 		Добавить строку
+		<script jsId="${namespace}_addRowButton" type="dojo/connect" event="onClick">
+			${namespace}_rowsGrid.store.fetch({
+				maxOrder: 1,
+				onItem: function(item, request) {
+					var ord = ${namespace}_rowsGrid.store.getValue(item, 'order');
+					if (request.maxOrder < ord) {
+						request.maxOrder = ord;
+					}
+				},
+				onComplete: function(items, request) {
+					${namespace}_rowsGrid.store.newItem({
+						id: ${namespace}_generateId(),
+						alias: 'alias' + request.maxOrder,
+						order: request.maxOrder + 1
+					});
+				}
+			});
+		</script>
 	</button>
 	<div id="${namespace}_rowsGridDiv"></div>
 </div>

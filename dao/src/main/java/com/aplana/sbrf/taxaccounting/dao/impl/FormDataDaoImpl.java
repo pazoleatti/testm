@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.taxaccounting.util.OrderUtils;
 
 @Repository
 @Transactional(readOnly=true)
@@ -73,7 +74,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					Long rowId = rs.getLong("id");
 					String alias = rs.getString("alias");
 					rowIdToAlias.put(rowId, alias);
-					formData.appendDataRow(alias);
+					DataRow row = formData.appendDataRow(alias);
+					row.setOrder(rs.getInt("order"));
 				}
 			}
 		);
@@ -125,6 +127,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			);
 		}
 		final List<DataRow> dataRows = formData.getDataRows();
+		OrderUtils.reorder(dataRows);
 		final List<ValueRecord<BigDecimal>> numericValues = new ArrayList<ValueRecord<BigDecimal>>();
 		final List<ValueRecord<String>> stringValues = new ArrayList<ValueRecord<String>>();
 		final List<ValueRecord<Date>> dateValues = new ArrayList<ValueRecord<Date>>();
@@ -135,7 +138,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				DataRow dr = dataRows.get(index);
 				String rowAlias = dr.getAlias();
 				ps.setString(1, rowAlias);
-				ps.setInt(2, index);
+				ps.setInt(2, dr.getOrder());
 				
 				for (Column col: formData.getForm().getColumns()) {
 					Object val = dr.get(col.getAlias());

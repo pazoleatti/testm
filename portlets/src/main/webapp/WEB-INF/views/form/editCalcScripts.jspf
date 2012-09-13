@@ -26,13 +26,16 @@
 			},
 			selectionMode: 'single',
 			onSelected: function(rowIndex) {
+				if (rowIndex < 0) {
+					return; // отрицательный номер строки приходит, когда onSelected вызывается после завершения редактирования строки
+							// в этом случае ничего не делаем, так как выбранная строка реально не изменилась 
+				}
 				this.acceptChanges();
 				dojo.byId('${namespace}_calcScriptProperiesPane').style.display = 'block';
 				${namespace}_calcScriptUpButton.attr('disabled', rowIndex == 0);
 				${namespace}_calcScriptDownButton.attr('disabled', rowIndex == this.rowCount - 1);
 				${namespace}_removeCalcScriptButton.attr('disabled', false);
 				var item = this.getItem(rowIndex);
-
 				${namespace}_rowScriptCheckbox.attr('value', this.store.getValue(item, 'rowScript'));
 				var condition = this.store.getValue(item, 'condition');
 				if (condition == null) {
@@ -45,10 +48,10 @@
 				}
 				${namespace}_calcScriptEditor.setValue(body);
 				this.selectedScriptItem = item;
-			},
+			}/*,
 			onApplyEdit: function(rowIndex) {
 				this.selectedScriptItem = this.getItem(rowIndex);
-			}
+			}*/
 		});
 		${namespace}_calcScriptsGrid.selectedScriptItem = null;
 		${namespace}_calcScriptsGrid.acceptChanges = function() {

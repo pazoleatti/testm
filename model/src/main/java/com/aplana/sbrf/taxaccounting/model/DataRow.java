@@ -8,10 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.aplana.taxaccounting.util.Ordered;
+
 /**
  * Строка данных отчётной формы
  * Для упрощения скриптинга, класс реализует интерфейс Map<String, Object>, чтобы в скриптах можно было писать
- * конструкции вида <code>row["property"] = anotherRow["property"]</code>
+ * конструкции вида <code>row.property = anotherRow.property</code>
  * Можно считать что строка данных - это Map, в котором ключи - {@link Column#getAlias алиасы столбцов}, а значение -
  * значения содержащиеся в соответствующих столбцах.
  * 
@@ -24,10 +26,11 @@ import java.util.Set;
  * добавлять в строку данные по столбцам, которые отсутствуют в определении формы
  * Для некоторых числовых типов реализовано автоматическое приведение к BigDecimal.
  */
-public class DataRow implements Map<String, Object> {
+public class DataRow implements Map<String, Object>, Ordered {
 	private final Form form;
 	private final Map<String, Object> data;
 	private String alias;
+	private int order;
 
 	public DataRow(String alias, Form form) {
 		this.alias = alias;
@@ -126,5 +129,15 @@ public class DataRow implements Map<String, Object> {
 	@Override
 	public Collection<Object> values() {
 		return data.values();
+	}
+
+	@Override
+	public int getOrder() {
+		return order;
+	}
+
+	@Override
+	public void setOrder(int order) {
+		this.order = order;
 	}
 }

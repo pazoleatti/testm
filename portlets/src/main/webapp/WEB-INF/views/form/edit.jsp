@@ -41,6 +41,7 @@
 	dojo.require('dijit.layout.TabContainer');
 	dojo.require('dijit.layout.ContentPane');
 	dojo.require('dojox.grid.DataGrid');
+	dojo.require('dojox.grid.cells.dijit');
 
 	var ${namespace}_form = null;
 	var ${namespace}_columnsGrid = null;
@@ -278,7 +279,7 @@
 										var col = {
 											id: ${namespace}_generateId(),
 											name: 'Новый столбец',
-											alias: 'column',
+											alias: 'column' + request.maxOrder,
 											type: 'string',
 											width: 5,
 											mandatory: false,
