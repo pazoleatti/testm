@@ -1,0 +1,13 @@
+<%@ page contentType="text/html; UTF-8" pageEncoding="UTF-8"%>
+<div dojoType="dijit.layout.ContentPane" title="Скрипт создания">
+	<script type="dojo/connect" event="onShow">
+		if (${namespace}_createScriptEditor != null) {
+			return;
+		}
+		${namespace}_createScriptEditor = ${namespace}_createCodeEditor(
+			'${namespace}_createScript',
+			${namespace}_form.createScript
+		);
+	</script>
+	<textarea id="${namespace}_createScript"></textarea>
+</div>
