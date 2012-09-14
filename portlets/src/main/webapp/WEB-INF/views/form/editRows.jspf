@@ -1,22 +1,12 @@
 <%@ page contentType="text/html; UTF-8" pageEncoding="UTF-8"%>
 <div dojoType="dijit.layout.ContentPane" title="Начальные данные">
 	<script type="dojo/connect" event="onShow">
-		if (${namespace}_rowsGrid != null) {
-			return;
-		}
-		var rows = ${namespace}_form.predefinedRows;
-		if (rows == null) {
-			rows = [];
-		} else {
-			dojo.forEach(rows, function(row, index) { row.id = ${namespace}_generateId();});
-		}
-
-		var rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: rows}});
-			${namespace}_columnsGrid.store.fetch({
+		${namespace}_columnsGrid.store.fetch({
 			columnDescriptors : [
 				{field: 'alias', width: 10, name: 'Код строки', editable: true},
 				{field: 'order', width: '1em', name: 'Порядок', styles: 'display: none;'}
 			],
+			sort: [{attribute: 'order'}],
 			onItem: function(item, request) {
 				var d = {
 					name: ${namespace}_columnsGrid.store.getValue(item, 'name'),
@@ -27,6 +17,7 @@
 				// TODO: функции форматтеры скопированы из страницы редактирования данных формы
 				// чтобы избежать копипасты хорошо бы вынести в js-файл
 				var formatDate = function(inDatum){
+					console.log('date = ' + inDatum);
 					if (inDatum == null || inDatum == '') {
 						return '';
 					}
@@ -43,32 +34,43 @@
 					d.type = dojox.grid.cells._Widget;
 					d.widgetClass = dijit.form.NumberTextBox;
 					d.constraint = {
-						places: ${namespace}_columnsGrid.store.getValue(item, 'precision'),
-						formatter: formatNumber
+						places: ${namespace}_columnsGrid.store.getValue(item, 'precision')						
 					};
+					d.formatter = formatNumber;
 				} else if (type == 'date') {
 					d.type = dojox.grid.cells.DateTextBox;
 					d.constraint = {
 						datePattern: 'dd.MM.yyyy',
-						selector: 'date',
-						formatter: formatDate
+						selector: 'date'
 					};
+					d.formatter = formatDate;
 				}
-				request.columnDescriptors[request.columnDescriptors.length] = d;
+				request.columnDescriptors.push(d);
 			},
 			onComplete: function(items, request) {
-				${namespace}_rowsGrid = new dojox.grid.DataGrid({
-					store: rowsStore,
-					structure: [request.columnDescriptors],
-					sortInfo: '2', <%-- сортируем по скрытому полю order --%>
-					autoHeight: true,
-					canSort: function(index) {
-						return false;
-					},
-					selectionMode: 'single'
-				});
-				${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
-				${namespace}_rowsGrid.startup();
+				if (${namespace}_rowsGrid == null) {
+					var rows = ${namespace}_form.predefinedRows;
+					if (rows == null) {
+						rows = [];
+					} else {
+						dojo.forEach(rows, function(row, index) { row.id = ${namespace}_generateId();});
+					}
+					var rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: rows}});
+					${namespace}_rowsGrid = new dojox.grid.DataGrid({
+						store: rowsStore,
+						structure: [request.columnDescriptors],
+						sortInfo: '2', <%-- сортируем по скрытому полю order --%>
+						autoHeight: true,
+						canSort: function(index) {
+							return false;
+						},
+						selectionMode: 'single'
+					});
+					${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
+					${namespace}_rowsGrid.startup();
+				} else {
+					${namespace}_rowsGrid.attr('structure', [request.columnDescriptors]);
+				}
 			}
 		});
 	</script>
@@ -92,6 +94,15 @@
 				}
 			});
 		</script>
+	</button>
+	<button dojoType="dijit.form.Button" disabled="true">
+		Удалить
+	</button>
+	<button dojoType="dijit.form.Button" disabled="true">
+		Вверх
+	</button>	
+	<button dojoType="dijit.form.Button" disabled="true">
+		Вниз
 	</button>
 	<div id="${namespace}_rowsGridDiv"></div>
 </div>
