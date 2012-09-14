@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,12 +41,14 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	@Cacheable("Form")
 	public Form getForm(int formId) {
 		logger.info("Fetching Form with id = " + formId);
-		Form form = getJdbcTemplate().queryForObject(
+		JdbcTemplate jt = getJdbcTemplate();
+		final Form form = jt.queryForObject(
 			"select * from form where id = ?",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			new FormMapper()
 		);
+		
 		form.getColumns().addAll(columnDao.getFormColumns(formId));
 		scriptDao.fillFormScripts(form);
 		return form;
@@ -53,10 +56,13 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 
 	@Transactional(readOnly=false)
 	@CacheEvict(value="Form", key="#form.id")
-	public int saveForm(Form form) {
-		// TODO: обновление записи в form
+	public int saveForm(final Form form) {
+		// TODO: обновление/вставка записи в form
 		columnDao.saveFormColumns(form);
 		scriptDao.saveFormScripts(form);
+		
+		int formId = form.getId();
+		getJdbcTemplate().update("delete from form_row where form_id = ?", new Object[] { formId }, new int[] { Types.INTEGER });
 		return form.getId().intValue();
 	}
 

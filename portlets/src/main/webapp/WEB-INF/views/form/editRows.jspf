@@ -48,13 +48,17 @@
 			},
 			onComplete: function(items, request) {
 				if (${namespace}_rowsGrid == null) {
-					var rows = ${namespace}_form.predefinedRows;
+					var rows = ${namespace}_predefinedRows;
 					if (rows == null) {
 						rows = [];
 					} else {
 						dojo.forEach(rows, function(row, index) { row.id = ${namespace}_generateId();});
 					}
 					var rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: rows}});
+					rowsStore._saveEverything = function(saveCompleteCallback, saveFailedCallback, newFileContentString) {
+						${namespace}_predefinedRows = dojo.fromJson(newFileContentString).items;
+					}
+
 					${namespace}_rowsGrid = new dojox.grid.DataGrid({
 						store: rowsStore,
 						structure: [request.columnDescriptors],

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.controller.formdata;
+package com.aplana.sbrf.taxaccounting.util;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,7 +12,6 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 public class DataRowSerializer extends JsonSerializer<DataRow> {
 	@Override

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.PredefinedRowsDao;
 import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
@@ -30,6 +31,9 @@ public class FormDataScriptingService {
 	private FormDao formDao;
 	
 	@Autowired
+	PredefinedRowsDao predefinedRowsDao;
+	
+	@Autowired
 	private FormDataDao formDataDao;	
 	
 	@Autowired
@@ -38,6 +42,11 @@ public class FormDataScriptingService {
 	public FormData createForm(Logger logger, int formId) {
 		Form form = formDao.getForm(formId);
 		FormData result = new FormData(form);
+		List<DataRow> predefinedRows = predefinedRowsDao.getPredefinedRows(form);
+		for (DataRow predefinedRow: predefinedRows) {
+			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
+			// TODO: копирование данных по столбцам
+		}
 		
 		Script createScript = form.getCreateScript();
 		if (createScript != null && createScript.getBody() != null) {

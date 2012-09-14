@@ -22,6 +22,7 @@
 <script src="<c:url value="/js/codemirror/mode/groovy/groovy.js"/>"></script>
 
 <portlet:resourceURL var="getFormUrl" id="getForm"/>
+<portlet:resourceURL var="getPredefinedRowsUrl" id="getPredefinedRows"/>
 <portlet:resourceURL var="saveFormUrl" id="saveForm"/>
 <portlet:renderURL var="refreshUrl"/>
 <script type="text/javascript">
@@ -42,6 +43,7 @@
 	dojo.require('dojox.grid.cells.dijit');
 
 	var ${namespace}_form = null;
+	var ${namespace}_predefinedRows = null;
 	var ${namespace}_columnsGrid = null;
 	var ${namespace}_rowsGrid = null;
 	var ${namespace}_createScriptEditor = null;
@@ -109,7 +111,11 @@
 			${namespace}_calcScriptsGrid.acceptChanges();
 			${namespace}_calcScriptsGrid.store.save();
 		}
-		
+
+		if (${namespace}_rowsGrid != null) {
+			${namespace}_rowsGrid.store.save();
+		}
+
 		if (${namespace}_createScriptEditor != null) {
 			if (form.createScript == null) {
 				form.createScript = {
@@ -118,11 +124,12 @@
 			}
 			form.createScript.body = ${namespace}_createScriptEditor.getValue();
 		}
-		
+
 		dojo.xhrPost({
 			url: '${saveFormUrl}',
 			content: {
-				formData: dojo.toJson(${namespace}_form)
+				formData: dojo.toJson(${namespace}_form),
+				predefinedRows: dojo.toJson(${namespace}_predefinedRows)
 			},
 			sync: true,
 			load: function(data) {
@@ -201,6 +208,19 @@
 				alert(error);
 			}
 		});
+		
+		dojo.xhrGet({
+			url: '${getPredefinedRowsUrl}',
+			handleAs: 'json',
+			sync: true,
+			preventCache: true,
+			load: function(data) {
+				${namespace}_predefinedRows = data;
+			},
+			error: function(error) {
+				alert(error);
+			}
+		});		
 		
 		var columnsData = {
 			identifier: 'id',

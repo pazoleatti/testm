@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.controller.formdata;
+package com.aplana.sbrf.taxaccounting.util;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,15 +19,17 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 /**
  * Преобразует данные JSON в набор строк {@link данных DataRow}
  */
 public class DataRowDeserializer extends JsonDeserializer<DataRow>{
-	Form form;
-	public DataRowDeserializer(Form form) {
+	private Form form;
+	private boolean failOnWrongFields;
+	
+	public DataRowDeserializer(Form form, boolean failOnWrongFields) {
 		this.form = form;
+		this.failOnWrongFields = failOnWrongFields;
 	}
 	
 	private void validateToken(JsonToken token, JsonToken  expectedToken, JsonParser jp) throws JsonParseException, IOException {
@@ -55,7 +57,18 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 				String alias = jp.getText();
 				result = new DataRow(alias, form); 
 			} else {				
-				Column col = form.getColumn(fieldName);
+				Column col;
+				try {
+					col = form.getColumn(fieldName);
+				} catch (IllegalArgumentException e) {
+					if (failOnWrongFields) {
+						throw e;
+					} else {
+						jp.skipChildren();
+						token = jp.nextToken();
+						continue;
+					}
+				}
 				if (token == JsonToken.VALUE_NULL) {
 					result.put(fieldName, null);
 				} else if (col instanceof NumericColumn) {

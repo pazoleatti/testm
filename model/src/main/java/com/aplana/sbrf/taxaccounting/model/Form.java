@@ -14,7 +14,6 @@ public class Form {
 	private String version;	
 	private Script createScript;
 	private final List<Script> calcScripts = new ArrayList<Script>();
-	private final List<DataRow> predefinedRows = new ArrayList<DataRow>();
 	
 	public Integer getId() {
 		return id;
@@ -88,8 +87,5 @@ public class Form {
 	}
 	public List<Script> getCalcScripts() {
 		return calcScripts;
-	}
-	public List<DataRow> getPredefinedRows() {
-		return predefinedRows;
 	}
 }

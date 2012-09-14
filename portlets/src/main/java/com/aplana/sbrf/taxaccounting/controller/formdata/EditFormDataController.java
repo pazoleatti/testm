@@ -32,6 +32,8 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.util.DataRowDeserializer;
+import com.aplana.sbrf.taxaccounting.util.DataRowSerializer;
 import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 
 @Controller
@@ -126,7 +128,7 @@ public class EditFormDataController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
 		module.addSerializer(DataRow.class, new DataRowSerializer());
-		module.addDeserializer(DataRow.class, new DataRowDeserializer(form));
+		module.addDeserializer(DataRow.class, new DataRowDeserializer(form, true));
 		module.addSerializer(Column.class, new DojoGridColumnSerializer());
 		objectMapper.registerModule(module);
 		return objectMapper;

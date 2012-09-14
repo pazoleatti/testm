@@ -47,8 +47,9 @@ public class FormData {
 	 * @return добавленная строка с установленным алиасом
 	 */
 	public DataRow appendDataRow(Object rowAlias) {
-		DataRow row = new DataRow(rowAlias.toString(), form);
+		DataRow row = new DataRow(rowAlias.toString(), form);		
 		dataRows.add(row);
+		row.setOrder(dataRows.size() + 1);
 		return row;
 	}
 	
