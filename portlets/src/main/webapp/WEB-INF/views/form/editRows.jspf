@@ -17,7 +17,6 @@
 				// TODO: функции форматтеры скопированы из страницы редактирования данных формы
 				// чтобы избежать копипасты хорошо бы вынести в js-файл
 				var formatDate = function(inDatum){
-					console.log('date = ' + inDatum);
 					if (inDatum == null || inDatum == '') {
 						return '';
 					}

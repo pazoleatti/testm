@@ -18,11 +18,9 @@
 		height: 100%;
 	}
 </style>
-
-<%-- CodeMirror imports --%>
 <script src="<c:url value="/js/codemirror/lib/codemirror.js"/>"></script>
 <script src="<c:url value="/js/codemirror/mode/groovy/groovy.js"/>"></script>
-<%-- End of CodeMirror imports --%>
+
 <portlet:resourceURL var="getFormUrl" id="getForm"/>
 <portlet:resourceURL var="saveFormUrl" id="saveForm"/>
 <portlet:renderURL var="refreshUrl"/>
@@ -267,10 +265,10 @@
 						<button dojoType="dijit.form.Button">
 							Добавить столбец
 							<script type="dojo/connect" event="onClick">
-								${namespace}_columnsScriptsGrid.store.fetch({
+								${namespace}_columnsGrid.store.fetch({
 									maxOrder: 1,
 									onItem: function(item, request) {
-										var ord = ${namespace}_columnsScriptsGrid.store.getValue(item, 'order');
+										var ord = ${namespace}_columnsGrid.store.getValue(item, 'order');
 										if (request.maxOrder < ord) {
 											request.maxOrder = ord;
 										}
