@@ -24,7 +24,6 @@ public class ColumnJsonTest {
 		om.getSerializationConfig().addMixInAnnotations(Column.class, ColumnMixIn.class);
 		
 		String st = om.writeValueAsString(col);
-		System.out.println(st);
 		assert st.contains("numeric");
 	}
 	
@@ -34,10 +33,6 @@ public class ColumnJsonTest {
 		col.setName("Тестовый столбец");		
 		col.setAlias("testColumn");
 		((NumericColumn)col).setPrecision(3);
-		
-		//DojoFileStoreData<Column> data = new DojoFileStoreData<Column>();
-		//data.setItems(Collections.singletonList(col));
-		
 		Form form = new Form();
 		form.getColumns().add(col);
 		
@@ -45,7 +40,6 @@ public class ColumnJsonTest {
 		om.getSerializationConfig().addMixInAnnotations(Column.class, ColumnMixIn.class);
 		
 		String st = om.writeValueAsString(form);
-		System.out.println(st);
 		assert st.contains("numeric");
 	}
 	
