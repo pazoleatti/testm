@@ -29,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.dao.PredefinedRowsDao;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.util.json.DataRowDeserializer;
 import com.aplana.sbrf.taxaccounting.util.json.DataRowSerializer;
 
@@ -64,7 +65,7 @@ public class EditFormController {
 	protected void getPredefinedRows(@ModelAttribute("formBean") EditFormBean formBean, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
-		module.addSerializer(DataRow.class, new DataRowSerializer());
+		module.addSerializer(DataRow.class, new DataRowSerializer(FormatUtils.getIsoDateFormat()));
 		objectMapper.registerModule(module);
 		objectMapper.writeValue(response.getWriter(), predefinedRowsDao.getPredefinedRows(formBean.getForm()));
 	}
@@ -87,7 +88,7 @@ public class EditFormController {
 		
 		ObjectMapper dataRowsMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
-		module.addDeserializer(DataRow.class, new DataRowDeserializer(form, false));
+		module.addDeserializer(DataRow.class, new DataRowDeserializer(form, FormatUtils.getIsoDateFormat(), false));
 		dataRowsMapper.registerModule(module);
 		List<DataRow> predefinedRows = dataRowsMapper.readValue(predefinedRowsJson, new TypeReference<List<DataRow>>() {});
 		predefinedRowsDao.savePredefinedRows(form, predefinedRows);

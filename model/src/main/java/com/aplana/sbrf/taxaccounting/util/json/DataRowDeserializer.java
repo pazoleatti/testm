@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.util.json;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonParser.Feature;
@@ -19,18 +20,21 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 /**
  * Преобразует данные JSON в набор строк {@link данных DataRow}
  */
 public class DataRowDeserializer extends JsonDeserializer<DataRow>{
+	private Log logger = LogFactory.getLog(getClass());
+	
 	private Form form;
 	private boolean failOnWrongFields;
+	private DateFormat dateFormat;
 	
-	public DataRowDeserializer(Form form, boolean failOnWrongFields) {
+	public DataRowDeserializer(Form form, DateFormat dateFormat, boolean failOnWrongFields) {
 		this.form = form;
 		this.failOnWrongFields = failOnWrongFields;
+		this.dateFormat = dateFormat;
 	}
 	
 	private void validateToken(JsonToken token, JsonToken  expectedToken, JsonParser jp) throws JsonParseException, IOException {
@@ -43,7 +47,6 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 	public DataRow deserialize(JsonParser jp, DeserializationContext ctx) throws IOException, JsonProcessingException {
 
 		DataRow result = null;
-		DateFormat isoFormat = FormatUtils.getIsoDateFormat();
 		jp.enable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
 
 		JsonToken token = jp.nextToken();
@@ -57,7 +60,7 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 				validateToken(token, JsonToken.VALUE_STRING, jp);
 				String alias = jp.getText();
 				result = new DataRow(alias, form); 
-			} if ("order".equals(fieldName)) {
+			} else if ("order".equals(fieldName)) {
 				validateToken(token, JsonToken.VALUE_NUMBER_INT, jp);
 				int order = jp.getIntValue();
 				result.setOrder(order);
@@ -74,11 +77,17 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 						continue;
 					}
 				}
+				Object value;
+				
 				if (token == JsonToken.VALUE_NULL) {
-					result.put(fieldName, null);
+					value = null;
 				} else if (col instanceof NumericColumn) {
-					BigDecimal value = jp.getDecimalValue();					
-					result.put(fieldName, value);
+					try {
+						value = jp.getDecimalValue();
+					} catch (JsonParseException e) {
+						logger.warn("Failed to parse numeric value " + jp.getText() + ", assuming null");
+						value = null;
+					}
 				} else if (col instanceof DateColumn) {
 					// Даты могут передаваться как в виде строк ISO-формата, так и  виде объектов
 					String stDate;
@@ -97,13 +106,17 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 						stDate = jp.getText();
 					}
 					try {
-						result.put(fieldName, isoFormat.parseObject(stDate));
+						value = dateFormat.parseObject(stDate);
 					} catch (ParseException e) {
-						throw new IOException("Wrong date format: " + stDate, e);
+						logger.warn("Failed to parse date: " + stDate + ", assuming null");
+						value = null;
 					}
 				} else if (col instanceof StringColumn) {
-					result.put(fieldName, jp.getText());
+					value = jp.getText();
+				} else {
+					throw new IllegalArgumentException("Unknown column type: " + col.getClass());
 				}
+				result.put(fieldName, value);
 			}
 			token = jp.nextToken();
 		}
