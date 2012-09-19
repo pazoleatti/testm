@@ -105,6 +105,12 @@
 	</button>
 	<button jsId="${namespace}_removeRowButton" dojoType="dijit.form.Button" disabled="true">
 		Удалить
+		<script type="dojo/connect" event="onClick">
+			var item = ${namespace}_getGridSelectedItem(${namespace}_rowsGrid);
+			if (item != null) {
+				${namespace}_rowsGrid.store.deleteItem(item);
+			}
+		</script>
 	</button>
 	<button jsId="${namespace}_rowUpButton" dojoType="dijit.form.Button" disabled="true">
 		Вверх
