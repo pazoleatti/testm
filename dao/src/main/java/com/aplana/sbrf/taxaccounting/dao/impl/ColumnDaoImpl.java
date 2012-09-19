@@ -23,7 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.taxaccounting.util.OrderUtils;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
 @Transactional(readOnly=true)

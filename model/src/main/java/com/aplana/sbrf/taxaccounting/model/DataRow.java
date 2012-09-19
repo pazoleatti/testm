@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.aplana.taxaccounting.util.Ordered;
+import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Строка данных отчётной формы

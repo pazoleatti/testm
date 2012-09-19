@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.taxaccounting.util.Ordered;
+import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Столбец таблицы в объявлении налоговой формы

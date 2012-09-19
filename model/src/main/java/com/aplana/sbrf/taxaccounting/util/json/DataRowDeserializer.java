@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.util;
+package com.aplana.sbrf.taxaccounting.util.json;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 /**
  * Преобразует данные JSON в набор строк {@link данных DataRow}

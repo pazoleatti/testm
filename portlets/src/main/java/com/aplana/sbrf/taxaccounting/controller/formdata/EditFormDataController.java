@@ -32,9 +32,9 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.util.DataRowDeserializer;
-import com.aplana.sbrf.taxaccounting.util.DataRowSerializer;
 import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
+import com.aplana.sbrf.taxaccounting.util.json.DataRowDeserializer;
+import com.aplana.sbrf.taxaccounting.util.json.DataRowSerializer;
 
 @Controller
 @SessionAttributes("formBean")
