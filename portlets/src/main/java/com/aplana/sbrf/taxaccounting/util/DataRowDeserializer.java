@@ -56,7 +56,11 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 				validateToken(token, JsonToken.VALUE_STRING, jp);
 				String alias = jp.getText();
 				result = new DataRow(alias, form); 
-			} else {				
+			} if ("order".equals(fieldName)) {
+				validateToken(token, JsonToken.VALUE_NUMBER_INT, jp);
+				int order = jp.getIntValue();
+				result.setOrder(order);
+			} else {
 				Column col;
 				try {
 					col = form.getColumn(fieldName);

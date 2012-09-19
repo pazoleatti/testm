@@ -67,7 +67,12 @@
 						canSort: function(index) {
 							return false;
 						},
-						selectionMode: 'single'
+						selectionMode: 'single',
+						onSelected: function(rowIndex) {
+							${namespace}_rowUpButton.attr('disabled', rowIndex == 0);
+							${namespace}_rowDownButton.attr('disabled', rowIndex == this.rowCount - 1);
+							${namespace}_removeRowButton.attr('disabled', false);
+						}
 					});
 					${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
 					${namespace}_rowsGrid.startup();
@@ -98,14 +103,20 @@
 			});
 		</script>
 	</button>
-	<button dojoType="dijit.form.Button" disabled="true">
+	<button jsId="${namespace}_removeRowButton" dojoType="dijit.form.Button" disabled="true">
 		Удалить
 	</button>
-	<button dojoType="dijit.form.Button" disabled="true">
+	<button jsId="${namespace}_rowUpButton" dojoType="dijit.form.Button" disabled="true">
 		Вверх
+		<script type="dojo/connect" event="onClick">
+			${namespace}_swapSelectedItem(${namespace}_rowsGrid, 'order', -1);
+		</script>
 	</button>	
-	<button dojoType="dijit.form.Button" disabled="true">
+	<button jsId="${namespace}_rowDownButton" dojoType="dijit.form.Button" disabled="true">
 		Вниз
+		<script type="dojo/connect" event="onClick">
+			${namespace}_swapSelectedItem(${namespace}_rowsGrid, 'order', 1);
+		</script>		
 	</button>
 	<div id="${namespace}_rowsGridDiv"></div>
 </div>

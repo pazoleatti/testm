@@ -18,6 +18,7 @@ public class DataRowSerializer extends JsonSerializer<DataRow> {
 	public void serialize(DataRow dataRow, JsonGenerator jg, SerializerProvider p) throws IOException, JsonProcessingException {
 		jg.writeStartObject();
 		jg.writeStringField("alias", dataRow.getAlias());
+		jg.writeNumberField("order", dataRow.getOrder());
 		DateFormat isoDateFormat = FormatUtils.getIsoDateFormat();
 		
 		for (Map.Entry<String, Object> entry: dataRow.entrySet()) {

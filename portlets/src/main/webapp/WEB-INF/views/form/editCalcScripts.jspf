@@ -48,10 +48,7 @@
 				}
 				${namespace}_calcScriptEditor.setValue(body);
 				this.selectedScriptItem = item;
-			}/*,
-			onApplyEdit: function(rowIndex) {
-				this.selectedScriptItem = this.getItem(rowIndex);
-			}*/
+			}
 		});
 		${namespace}_calcScriptsGrid.selectedScriptItem = null;
 		${namespace}_calcScriptsGrid.acceptChanges = function() {
