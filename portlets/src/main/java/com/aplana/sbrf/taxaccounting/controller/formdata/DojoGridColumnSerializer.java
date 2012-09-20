@@ -29,7 +29,7 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeFieldName("type");
 			jg.writeRawValue("dojox.grid.cells.DateTextBox");
 			jg.writeFieldName("formatter");
-			jg.writeRawValue("formatDate");
+			jg.writeRawValue("aplana_formatDate");
 			jg.writeFieldName("constraint");
 			jg.writeStartObject();
 			jg.writeStringField("datePattern", "dd.MM.yyyy");
@@ -44,7 +44,7 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeFieldName("constraint");
 			jg.writeStartObject();
 			jg.writeNumberField("places", nc.getPrecision());
-			jg.writeFieldName("formatter");
+			jg.writeFieldName("aplana_formatter");
 			jg.writeRawValue("formatNumber");			
 			jg.writeEndObject();
 		}

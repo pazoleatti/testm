@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; UTF-8" pageEncoding="UTF-8"%>
 <div dojoType="dijit.layout.ContentPane" title="Начальные данные">
 	<script type="dojo/connect" event="onShow">
+		${namespace}_columnsGrid.acceptChanges();
 		${namespace}_columnsGrid.store.fetch({
 			columnDescriptors : [
 				{field: 'alias', width: 10, name: 'Код строки', editable: true},
@@ -14,20 +15,6 @@
 					width: ${namespace}_columnsGrid.store.getValue(item, 'width'),
 					editable: true
 				};
-				// TODO: функции форматтеры скопированы из страницы редактирования данных формы
-				// чтобы избежать копипасты хорошо бы вынести в js-файл
-				var formatDate = function(inDatum){
-					if (inDatum == null || inDatum == '') {
-						return '';
-					}
-					return dojo.date.locale.format(new Date(inDatum), this.constraint);
-				};
-				var formatNumber = function(inDatum){
-					if (null == inDatum || '' == inDatum || isNaN(inDatum)) {
-						return '';
-					}
-					return inDatum;
-				};
 				var type = ${namespace}_columnsGrid.store.getValue(item, 'type');
 				if (type == 'numeric') {
 					d.type = dojox.grid.cells._Widget;
@@ -35,32 +22,21 @@
 					d.constraint = {
 						places: ${namespace}_columnsGrid.store.getValue(item, 'precision')						
 					};
-					d.formatter = formatNumber;
+					d.formatter = aplana_formatNumber;
 				} else if (type == 'date') {
 					d.type = dojox.grid.cells.DateTextBox;
 					d.constraint = {
 						datePattern: 'dd.MM.yyyy',
 						selector: 'date'
 					};
-					d.formatter = formatDate;
+					d.formatter = aplana_formatDate;
 				}
 				request.columnDescriptors.push(d);
 			},
 			onComplete: function(items, request) {
 				if (${namespace}_rowsGrid == null) {
-					var rows = ${namespace}_predefinedRows;
-					if (rows == null) {
-						rows = [];
-					} else {
-						dojo.forEach(rows, function(row, index) { row.id = ${namespace}_generateId();});
-					}
-					var rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: rows}});
-					rowsStore._saveEverything = function(saveCompleteCallback, saveFailedCallback, newFileContentString) {
-						${namespace}_predefinedRows = dojo.fromJson(newFileContentString).items;
-					}
-
 					${namespace}_rowsGrid = new dojox.grid.DataGrid({
-						store: rowsStore,
+						store: ${namespace}_rowsStore,
 						structure: [request.columnDescriptors],
 						sortInfo: '2', <%-- сортируем по скрытому полю order --%>
 						autoHeight: true,

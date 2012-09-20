@@ -33,7 +33,11 @@ public class DataRow implements Map<String, Object>, Ordered {
 	private int order;
 
 	public DataRow(String alias, Form form) {
+		this(form);
 		this.alias = alias;
+	}
+	
+	public DataRow(Form form) {
 		this.form = form;
 		data = new HashMap<String, Object>();
 	}

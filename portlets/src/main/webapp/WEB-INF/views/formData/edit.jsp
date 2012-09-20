@@ -14,6 +14,7 @@
 <portlet:resourceURL id="dataRows" var="storeUrl"/>
 <portlet:resourceURL id="log" var="logUrl"/>
 <portlet:resourceURL id="saveRows" var="saveUrl"/>
+<script src="<c:url value="/js/aplana_format.js"/>"></script>
 <script type="text/javascript">
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
@@ -27,19 +28,7 @@
 	var ${namespace}_loggerPane;
 	dojo.addOnLoad(function() {
 		dojo.parser.parse();
-		function formatDate(inDatum){
-			if (inDatum == null || inDatum == '') {
-				return '';
-			}
-			return dojo.date.locale.format(new Date(inDatum), this.constraint);
-		};
-		function formatNumber(inDatum){
-			if (null == inDatum || '' == inDatum || isNaN(inDatum)) {
-				return '';
-			}
-			return inDatum;
-		};		
-		
+
 		${namespace}_store = new dojo.data.ItemFileWriteStore({
 			clearOnClose: true,
 			url: '${storeUrl}'
@@ -47,7 +36,6 @@
 		
 		${namespace}_store._saveEverything = function(successCallback, failureCallback, newContentString) {
 			var processLog = function(logEntries) {
-				
 				successCallback(logEntries);
 			}
 			dojo.xhrPost({
@@ -80,24 +68,28 @@
         
         ${namespace}_loggerPane.reload();
 	});
-	function ${namespace}_addNewRow() {
+</script>
+<div id="${namespace}_loggerPane"></div>
+<div id="${namespace}_gridDiv"></div>
+<button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">
+	Добавить строку
+	<script type="dojo/connect" event="onClick">
 		var newItem = {
 			alias: '' + (${namespace}_grid.rowCount + 1)
 		};
-		${namespace}_store.newItem(newItem); 
-	}
-	function ${namespace}_save() {
+		${namespace}_store.newItem(newItem);
+	</script>
+</button>
+<portlet:actionURL name="save" var="saveUrl"/>
+<button dojoType="dijit.form.Button" onClick="${namespace}_save">
+	Сохранить
+	<script type="dojo/connect" event="onClick">
 		${namespace}_store.save();
 		${namespace}_store.close();
 		${namespace}_grid._refresh();
 		${namespace}_loggerPane.reload();
-	}
-</script>
-<div id="${namespace}_loggerPane"></div>
-<div id="${namespace}_gridDiv"></div>
-<button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">Добавить строку</button>
-<portlet:actionURL name="save" var="saveUrl"/>
-<button dojoType="dijit.form.Button" onClick="${namespace}_save">Сохранить</button>
+	</script>
+</button>
 <div><portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
 <a href="${backUrl}">Назад</a>
 </div>

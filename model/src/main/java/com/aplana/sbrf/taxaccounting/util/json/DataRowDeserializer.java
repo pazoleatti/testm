@@ -45,21 +45,16 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 	
 	@Override
 	public DataRow deserialize(JsonParser jp, DeserializationContext ctx) throws IOException, JsonProcessingException {
-
-		DataRow result = null;
+		DataRow result = new DataRow(form);
 		jp.enable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
-
 		JsonToken token = jp.nextToken();
 		while (token != JsonToken.END_OBJECT && token != null) {
 			validateToken(token, JsonToken.FIELD_NAME, jp);
 			String fieldName = jp.getText();
 			token = jp.nextToken();
 			if ("alias".equals(fieldName)) {
-				// требуется, что alias был первым полем в json-представлении объекта
-				// в противном случае возможны NullPointerException'ы
 				validateToken(token, JsonToken.VALUE_STRING, jp);
-				String alias = jp.getText();
-				result = new DataRow(alias, form); 
+				result.setAlias(jp.getText()); 
 			} else if ("order".equals(fieldName)) {
 				validateToken(token, JsonToken.VALUE_NUMBER_INT, jp);
 				int order = jp.getIntValue();
@@ -121,6 +116,9 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 			token = jp.nextToken();
 		}
 		jp.disable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
+		if (result.getAlias() == null) {
+			throw new IllegalArgumentException("Alias is not specified in json string representing data row");
+		}
 		return result;
 	}
 }
