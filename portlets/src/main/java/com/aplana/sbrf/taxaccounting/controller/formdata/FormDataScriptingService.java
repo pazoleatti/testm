@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +25,6 @@ import com.aplana.sbrf.taxaccounting.model.Script;
 
 @Service
 public class FormDataScriptingService {
-	Log logger = LogFactory.getLog(getClass());
-	
 	@Autowired
 	private FormDao formDao;
 	
@@ -64,16 +62,28 @@ public class FormDataScriptingService {
 		Form form = formData.getForm();
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
+		engine.put("formData", formData);
 		List<Script> calcScripts = form.getCalcScripts();
+		ScriptMessageDecorator d = new ScriptMessageDecorator();
 		for (Script calcScript: calcScripts) {
 			if (calcScript.isRowScript()) {
 				performRowScript(calcScript, formData, engine, logger);
 			} else {
-				engine.put("formData", formData);
 				try {
+					logger.setMessageDecorator(d);
+					if (calcScript.getCondition() != null) {
+						d.setScriptName(calcScript.getName() + " - Условие исполнения");
+						boolean check = (Boolean)engine.eval(calcScript.getCondition());
+						if (!check) {
+							continue;
+						}
+					}
+					d.setScriptName(calcScript.getName());
 					engine.eval(calcScript.getBody());
 				} catch (Exception e) {
 					logger.error(e);
+				} finally {
+					logger.setMessageDecorator(null);
 				}
 			}
 		}
@@ -82,21 +92,35 @@ public class FormDataScriptingService {
 	}
 
 	private void performRowScript(Script rowScript, FormData formData, ScriptEngine engine, Logger logger) {
-		RowMessageDecorator messageDecorator = new RowMessageDecorator();
-		messageDecorator.setOperationName(rowScript.getName());
-		logger.setMessageDecorator(messageDecorator);
+		RowScriptMessageDecorator d = new RowScriptMessageDecorator();
+		logger.setMessageDecorator(d);
 		int rowIndex = 0;
 		for (DataRow row: formData.getDataRows()) {
 			++rowIndex;
-			messageDecorator.setRowIndex(rowIndex);
+			d.setRowIndex(rowIndex);
 			engine.put("row", row);
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
 			try {
+				if (rowScript.getCondition() != null) {
+					d.setScriptName(rowScript.getName() + " - Условие исполнения");
+					boolean check = (Boolean)engine.eval(rowScript.getCondition());
+					if (!check) {
+						continue;
+					}
+				}
+				d.setScriptName(rowScript.getName());
 				engine.eval(rowScript.getBody());
 			} catch (Exception e) {
 				logger.error(e);
+				// TODO: возможно не стоит делать брек, а ограничится выводом сообщения?
+				// или даже сделать опцию в скрипте, определяющую данное поведение
 				break;
+			} finally {
+				Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+				bindings.remove("row");
+				bindings.remove("rowIndex");
+				bindings.remove("rowAlias");
 			}
 		}
 		logger.setMessageDecorator(null);
@@ -104,8 +128,9 @@ public class FormDataScriptingService {
 	
 	private void checkMandatoryColumns(FormData formData, Logger logger) {
 		List<Column> columns = formData.getForm().getColumns();
-		RowMessageDecorator messageDecorator = new RowMessageDecorator();
-		messageDecorator.setOperationName("Проверка обязательных полей");
+		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
+		messageDecorator.setScriptName("Проверка обязательных полей");
+		logger.setMessageDecorator(messageDecorator);
 		int rowIndex = 0;
 		for (DataRow row: formData.getDataRows()) {
 			++rowIndex;
@@ -120,13 +145,15 @@ public class FormDataScriptingService {
 				logger.error("Не заполнены столбцы %s", columnNames.toString());
 			}
 		}
+		logger.setMessageDecorator(null);
 	}
 	
 	private ScriptEngine getScriptEngine() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");
 		// TODO: продумать способ, для публикации DAO-объектов в скриптах
-		// давать всё сразу как-то нехорошо
+		// давать всё вручную как-то нехорошо
+		// Возможно стоит сделать лукап по beanFactory
 		engine.put("transportTaxDao", transportTaxDao);
 		engine.put("formDataDao", formDataDao);		
 		return engine;

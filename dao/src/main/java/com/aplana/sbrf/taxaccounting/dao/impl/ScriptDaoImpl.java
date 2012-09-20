@@ -35,10 +35,10 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		String name;
 		Integer order;
 		
-		ScriptRecord(int id, int type, String script) {
+		ScriptRecord(int id, int type, String body) {
 			this.id = id;
 			this.type = type;
-			this.body = script;
+			this.body = body == null ? "" : body.trim();
 		}
 	}
 	
@@ -103,7 +103,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		final List<ScriptRecord> newScripts = new ArrayList<ScriptRecord>();
 		
 		Script createScript = form.getCreateScript(); 
-		if (createScript != null && createScript.getBody() != null) {
+		if (createScript != null && createScript.getBody() != null && !"".equals(createScript.getBody().trim())) {
 			ScriptRecord scriptRecord = new ScriptRecord(createScript.getId(), CREATE, form.getCreateScript().getBody());
 			if (createScript.getId() <= 0) {
 				newScripts.add(scriptRecord);
@@ -119,7 +119,9 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 			int type = calcScript.isRowScript() ? ROW : CALC;
 			ScriptRecord rec = new ScriptRecord(calcScript.getId(), type, calcScript.getBody());
 			rec.name = calcScript.getName();
-			rec.condition = calcScript.getCondition();
+			if (calcScript.getCondition() != null && !"".equals(calcScript.getCondition())) {
+				rec.condition = calcScript.getCondition().trim();
+			}
 			rec.order = calcScript.getOrder();
 			if (rec.id <= 0) {
 				newScripts.add(rec);
