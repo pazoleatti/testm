@@ -57,6 +57,7 @@
 			rowSelector: '1em',
 			rowsPerPage: 100,
 			autoHeight: true,
+			autoWidth: true,
 			canSort: function(index) { return false; }			
 		});		
         ${namespace}_grid.placeAt('${namespace}_gridDiv');
@@ -69,8 +70,7 @@
         ${namespace}_loggerPane.reload();
 	});
 </script>
-<div id="${namespace}_loggerPane"></div>
-<div id="${namespace}_gridDiv"></div>
+<div>
 <button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">
 	Добавить строку
 	<script type="dojo/connect" event="onClick">
@@ -86,10 +86,11 @@
 	<script type="dojo/connect" event="onClick">
 		${namespace}_store.save();
 		${namespace}_store.close();
-		${namespace}_grid._refresh();
+		${namespace}_grid._refresh(true);
 		${namespace}_loggerPane.reload();
 	</script>
 </button>
-<div><portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
-<a href="${backUrl}">Назад</a>
-</div>
+<portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
+<button dojoType="dijit.form.Button" onClick="window.location.href = '${backUrl}'">Отмена</button>
+<div id="${namespace}_loggerPane"></div>
+<div id="${namespace}_gridDiv"></div>
