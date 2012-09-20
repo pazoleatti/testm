@@ -1,7 +1,7 @@
-#Fri Aug 31 10:40:26 YEKT 2012
+#Thu Sep 20 13:03:22 YEKT 2012
 elemUnnecessaryEnd=2
 elemCoexistence=2
-attrUndefValue=2
+attrUndefValue=-1
 attrUndefName=-1
 piInvalidContent=2
 elemMissingStart=2
