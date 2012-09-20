@@ -68,10 +68,11 @@ public class EditFormController {
 		objectMapper.writeValue(response.getWriter(), form);
 	}
 	
-	@ResourceMapping("saveForm")
+	@ActionMapping("saveForm")
 	protected void saveForm(
 		@RequestParam("form") String formJson,
-		@RequestParam("formRows") String formRowsJson) 
+		@RequestParam("rows") String rowsJson,
+		ActionResponse response) 
 	throws JsonGenerationException, JsonMappingException, IOException {
 		// TODO: кто-то накладывает HTML-escaping на передаваемые данные
 		// найти точку, где это происходит пока не удалось, поэтому временное решение - принудительный Unescape
@@ -84,11 +85,11 @@ public class EditFormController {
 		SimpleModule module = new SimpleModule("taxaccounting-form", new Version(1, 0, 0, null));
 		module.addDeserializer(DataRow.class, new DataRowDeserializer(form, FormatUtils.getIsoDateFormat(), false));
 		dataRowsMapper.registerModule(module);
-		List<DataRow> formRows = dataRowsMapper.readValue(formRowsJson, new TypeReference<List<DataRow>>() {});
+		List<DataRow> formRows = dataRowsMapper.readValue(rowsJson, new TypeReference<List<DataRow>>() {});
 		form.getRows().addAll(formRows);
 		
 		int formId = formDao.saveForm(form);
-		form = formDao.getForm(formId);
+		response.setRenderParameter("formId", String.valueOf(formId));
 	}	
 	
 	@ActionMapping("edit")

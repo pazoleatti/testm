@@ -23,8 +23,7 @@
 <script src="<c:url value="/js/codemirror/mode/groovy/groovy.js"/>"></script>
 
 <portlet:resourceURL var="getFormUrl" id="getForm"/>
-<portlet:resourceURL var="saveFormUrl" id="saveForm"/>
-<portlet:renderURL var="refreshUrl"/>
+<portlet:actionURL var="saveFormUrl" name="saveForm"/>
 <script type="text/javascript">
 	dojo.require('dojo.parser');
 	dojo.require('dojo.data.ItemFileWriteStore');
@@ -87,9 +86,7 @@
 			${namespace}_calcScriptsGrid.store.save();
 		}
 
-		if (${namespace}_rowsGrid != null) {
-			${namespace}_rowsGrid.store.save();
-		}
+		${namespace}_rowsStore.save();
 
 		if (${namespace}_createScriptEditor != null) {
 			if (form.createScript == null) {
@@ -99,22 +96,11 @@
 			}
 			form.createScript.body = ${namespace}_createScriptEditor.getValue();
 		}
-
-		dojo.xhrPost({
-			url: '${saveFormUrl}',
-			content: {
-				form: dojo.toJson(${namespace}_form),
-				formRows: dojo.toJson(${namespace}_formRows)
-			},
-			sync: true,
-			load: function(data) {
-				// TODO: убрать перезагрузку - обновлять UI
-				window.location.href = '${refreshUrl}';
-			},
-			error: function(error) {
-				alert(error);
-			}
-		});
+		
+		var form = dojo.byId('${namespace}_saveForm');
+		form.form.value = dojo.toJson(${namespace}_form);
+		form.rows.value = dojo.toJson(${namespace}_formRows);
+		form.submit(); 
 	};
 	
 	<%--
@@ -197,7 +183,10 @@
 		};
 	});
 </script>
-
+<form id="${namespace}_saveForm" action="${saveFormUrl}" method="post">
+	<input type="hidden" name="form"/>
+	<input type="hidden" name="rows"/>
+</form>
 <div dojoType="dijit.layout.BorderContainer" style="width: 1000px; height: 750px">
 	<div dojoType="dijit.layout.ContentPane" region="top">
 		Параметры формы
