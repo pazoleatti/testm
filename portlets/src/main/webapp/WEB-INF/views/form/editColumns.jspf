@@ -76,12 +76,12 @@
 				${namespace}_rowsStore.fetch({
 					onItem: function(item, request) {
 						if (oldType != type) {
-							store.setValue(item, oldAlias, null);
+							${namespace}_rowsStore.setValue(item, oldAlias, null);
 						}
 						if (oldAlias != alias) {
 							var value = store.getValue(item, oldAlias);
-							store.unsetAttribute(item, oldAlias);
-							store.setValue(item, alias, value);
+							${namespace}_rowsStore.unsetAttribute(item, oldAlias);
+							${namespace}_rowsStore.setValue(item, alias, value);
 						}
 					}
 				});
