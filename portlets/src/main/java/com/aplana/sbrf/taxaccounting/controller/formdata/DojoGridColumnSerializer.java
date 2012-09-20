@@ -44,8 +44,8 @@ public class DojoGridColumnSerializer extends JsonSerializer<Column> {
 			jg.writeFieldName("constraint");
 			jg.writeStartObject();
 			jg.writeNumberField("places", nc.getPrecision());
-			jg.writeFieldName("aplana_formatter");
-			jg.writeRawValue("formatNumber");			
+			jg.writeFieldName("formatter");
+			jg.writeRawValue("aplana_formatNumber");			
 			jg.writeEndObject();
 		}
 		jg.writeEndObject();		
