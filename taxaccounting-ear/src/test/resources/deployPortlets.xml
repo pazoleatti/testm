@@ -1,5 +1,19 @@
 <request xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="update" create-oids="true" xsi:noNamespaceSchemaLocation="PortalConfig_7.0.0.xsd">
 	<portal action="locate">
+		<!-- 
+		<skin action="update" active="true" objectid="NoSkin" uniquename="wps.skin.noSkin" resourceroot="NoSkin" >
+			<localedata locale="en">
+				<title>NoSkin</title>
+				<description>A skin with no skin</description>
+			</localedata>
+		</skin>
+		<theme action="update" active="true" defaultskinref="NoSkin" uniquename="com.aplana.taxaccounting.theme" resourceroot="taxaccounting/theme" context-root="/taxaccounting/theme">
+			<localedata locale="en">
+				<title>taxaccounting theme</title>
+			</localedata>
+			<allowed-skin skin="NoSkin" update="set"/>
+		</theme>
+		 -->
 		<!-- web-app action="delete" uid="aplana.sbrf.taxaccounting.portlets.webmod" /-->
 		<web-app action="update" active="true"
 			uid="aplana.sbrf.taxaccounting.portlets.webmod" predeployed="true">

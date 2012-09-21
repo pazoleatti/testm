@@ -20,6 +20,14 @@
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>com.aplana.taxaccounting</groupId>
+			<artifactId>theme</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+		 -->
 	</dependencies>
 
 	<build>
@@ -39,6 +47,14 @@
 							<bundleFileName>portlets.war</bundleFileName>
 							<contextRoot>/taxaccounting/portlets</contextRoot>
 						</webModule>
+						<!-- 
+						<webModule>
+							<groupId>com.aplana.taxaccounting</groupId>
+							<artifactId>theme</artifactId>
+							<bundleFileName>theme.war</bundleFileName>
+							<contextRoot>/taxaccounting/theme</contextRoot>
+						</webModule>
+						 -->
 					</modules>
 				</configuration>
 			</plugin>
