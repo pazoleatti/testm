@@ -79,7 +79,7 @@
 							${namespace}_rowsStore.setValue(item, oldAlias, null);
 						}
 						if (oldAlias != alias) {
-							var value = store.getValue(item, oldAlias);
+							var value = ${namespace}_rowsStore.getValue(item, oldAlias);
 							${namespace}_rowsStore.unsetAttribute(item, oldAlias);
 							${namespace}_rowsStore.setValue(item, alias, value);
 						}
