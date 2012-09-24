@@ -3,29 +3,26 @@ package com.aplana.sbrf.taxaccounting.dao.dictionary.impl;
 import java.math.BigDecimal;
 import java.sql.Types;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
+import com.aplana.sbrf.taxaccounting.dao.dictionary.mapper.TransportTaxMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 
 @Repository
 @Transactional(readOnly = true)
 public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
+	@Autowired
+	private TransportTaxMapper transportTaxMapper;
+	
 	@Override
 	public String getRegionName(String okato) {
-		try {
-			return getJdbcTemplate().queryForObject(
-				"select name from okato where okato = ?", 
-				new Object[] { okato },
-				new int[] { Types.VARCHAR },
-				String.class
-			);
-		} catch (EmptyResultDataAccessException e) {
-			return null;
-		}
+		return transportTaxMapper.getRegionName(okato);
 	}
 
 	@Override
