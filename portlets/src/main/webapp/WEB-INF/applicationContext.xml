@@ -38,8 +38,11 @@
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="java:comp/env/jdbc/TaxAccDS"/>
 	</bean>
+	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+		<constructor-arg index="0" ref="dataSource"/>
+	</bean>
 	<tx:jta-transaction-manager/>	
-	<tx:annotation-driven/>
+	<tx:annotation-driven/>	
 	
 	<!-- JDBC-based DAOs -->
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
