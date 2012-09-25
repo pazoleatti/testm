@@ -9,7 +9,7 @@
 		var columnItem = ${namespace}_getGridSelectedItem(${namespace}_columnsGrid);
 		var div = dojo.byId('${namespace}_columnPropPaneDiv');
 		if (columnItem == null) {
-			div.style.display = 'none';
+			dojo.style(div, 'display', 'none');
 			${namespace}_columnUpButton.attr('disabled', true);
 			${namespace}_columnDownButton.attr('disabled', true);			
 		} else {
@@ -17,13 +17,19 @@
 			${namespace}_columnUpButton.attr('disabled', rowIndex == 0);
 			${namespace}_columnDownButton.attr('disabled', rowIndex == ${namespace}_columnsGrid.rowCount);
 			var store = ${namespace}_columnsGrid.store;
-			div.style.display = 'block';
+			dojo.style(div, 'display', 'block');
 			${namespace}_columnName.attr('value', store.getValue(columnItem, 'name'));
 			${namespace}_columnAlias.attr('value', store.getValue(columnItem, 'alias'));
 			${namespace}_columnWidth.attr('value', store.getValue(columnItem, 'width'));
 			${namespace}_columnEditable.attr('value', store.getValue(columnItem, 'editable'));
 			${namespace}_columnMandatory.attr('value', store.getValue(columnItem, 'mandatory'));
-			${namespace}_columnType.attr('value', store.getValue(columnItem, 'type'));
+			var type = store.getValue(columnItem, 'type');
+			${namespace}_columnType.attr('value', type);
+			if (type == 'numeric') {
+				${namespace}_columnPrecision.attr('value', store.getValue(columnItem, 'precision'));
+			} else if (type == 'string') {
+				// TODO: установка значения в справочнике
+			}
 		}
 		${namespace}_columnsGrid.selectedColumnItem = columnItem;
 	};
@@ -68,9 +74,10 @@
 			store.setValue(columnItem, 'mandatory', ${namespace}_columnMandatory.attr('value'));
 			var type = ${namespace}_columnType.attr('value');
 			store.setValue(columnItem, 'type', type);
-						
 			if (type != 'numeric') {
 				store.unsetAttribute(columnItem, 'precision');
+			} else {
+				store.setValue(columnItem, 'precision', ${namespace}_columnPrecision.attr('value'));
 			}
 			if (oldType != type || oldAlias != alias) {
 				${namespace}_rowsStore.fetch({
@@ -185,9 +192,33 @@
 						<td>Тип</td>
 						<td>
 							<select jsId="${namespace}_columnType" dojoType="dijit.form.Select" class="value">
+								<script type="dojo/connect" event="onChange" args="newValue">
+									dojo.style(dojo.byId('${namespace}_columnPrecisionRow'), 'display', newValue == 'numeric' ? '' : 'none');
+									dojo.style(dojo.byId('${namespace}_columnStringDictionaryRow'), 'display', newValue == 'string' ? '' : 'none');
+								</script>
 								<option value="string">Строка/Текст</option>
 								<option value="date">Дата</option>
 								<option value="numeric">Число</option>
+							</select>
+						</td>
+					</tr>
+					<tr id="${namespace}_columnPrecisionRow" style="display: none;">
+						<td>Точность</td>
+						<td>
+							<select jsId="${namespace}_columnPrecision" dojoType="dijit.form.Select" class="value">
+								<option value="0">Целое</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+							</select>
+						</td>
+					</tr>
+					<tr id="${namespace}_columnStringDictionaryRow" style="display: none;">
+						<td>Справочник</td>
+						<td>
+							<select jsId="${namespace}_columnStringDictionary" dojoType="dijit.form.Select" class="value">
+								<option value="">transportTaxCode</option>
 							</select>
 						</td>
 					</tr>
