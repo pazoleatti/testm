@@ -111,8 +111,6 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 				oldScripts.add(scriptRecord);
 				removedScriptIds.remove(createScript.getId());
 			}
-		} else {
-			removedScriptIds.remove(createScript.getId());
 		}
 
 		for (Script calcScript: form.getCalcScripts()) {
