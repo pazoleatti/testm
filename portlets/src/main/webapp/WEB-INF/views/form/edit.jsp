@@ -33,8 +33,6 @@
 	dojo.require('dijit.form.CheckBox');
 	dojo.require('dijit.form.Textarea');	
 	dojo.require('dijit.form.Select');
-	dojo.require('dijit.layout.AccordionContainer');
-	dojo.require('dijit.layout.AccordionPane');
 	dojo.require('dijit.layout.BorderContainer');
 	dojo.require('dijit.layout.TabContainer');
 	dojo.require('dijit.layout.ContentPane');
@@ -85,9 +83,7 @@
 			${namespace}_calcScriptsGrid.acceptChanges();
 			${namespace}_calcScriptsGrid.store.save();
 		}
-
 		${namespace}_rowsStore.save();
-
 		if (${namespace}_createScriptEditor != null) {
 			if (form.createScript == null) {
 				form.createScript = {
@@ -181,6 +177,12 @@
 		${namespace}_rowsStore._saveEverything = function(saveCompleteCallback, saveFailedCallback, newFileContentString) {
 			${namespace}_formRows = dojo.fromJson(newFileContentString).items;
 		};
+		<%--
+			Фетчим данные по предопределённым строкам формы. Если этого не сделать, то при вызове _saveEverything содержимое store
+			будет пустым. Вообще фетч произойдёт, если открыть закладку со списком строк, проблема в том, что пользователь может
+			не открывать эту закладку, из-за этого и необходим данный код 
+		--%>
+		${namespace}_rowsStore.fetch({ onComplete: function(items, request) { }});
 	});
 </script>
 <form id="${namespace}_saveForm" action="${saveFormUrl}" method="post">
