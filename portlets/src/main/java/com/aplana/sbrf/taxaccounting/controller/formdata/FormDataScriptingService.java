@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.controller.formdata;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -10,29 +11,30 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 @Service
-public class FormDataScriptingService {
+public class FormDataScriptingService implements ApplicationContextAware {
 	@Autowired
 	private FormDao formDao;
-	
 	@Autowired
-	private FormDataDao formDataDao;	
+	private FormDataDao formDataDao;
 	
-	@Autowired
-	private TransportTaxDao transportTaxDao;
+	private Map<String, Object> scriptExposedBeans;
 	
 	public FormData createForm(Logger logger, int formId) {
 		Form form = formDao.getForm(formId);
@@ -151,11 +153,26 @@ public class FormDataScriptingService {
 	private ScriptEngine getScriptEngine() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");
-		// TODO: продумать способ, для публикации DAO-объектов в скриптах
-		// давать всё вручную как-то нехорошо
-		// Возможно стоит сделать лукап по beanFactory
-		engine.put("transportTaxDao", transportTaxDao);
-		engine.put("formDataDao", formDataDao);		
+		Bindings b = engine.createBindings();
+		b.putAll(scriptExposedBeans);
+		engine.put("formDataDao", formDataDao);
+		engine.setBindings(b, ScriptContext.ENGINE_SCOPE);
 		return engine;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext context) throws BeansException {
+		context = context.getParent();
+		scriptExposedBeans = new ConcurrentHashMap<String, Object>();
+		scriptExposedBeans.putAll(context.getBeansOfType(ScriptExposed.class));
+		/*
+		String[] beanNames = context.getBeanDefinitionNames();
+		for (String beanName: beanNames) {
+			Object bean = context.getBean(beanName);
+			if (bean instanceof ScriptExposed) {
+				scriptExposedBeans.put(beanName, bean);
+				System.out.println("--> name: " + beanName + ", class = " + bean.getClass().getName());
+			}
+		}*/		
 	}
 }

@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.dictionary;
 
 import java.math.BigDecimal;
 
-public interface TransportTaxDao {
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
+public interface TransportTaxDao extends ScriptExposed {
 	/**
 	 * Возращает имя муниципального отделения по коду ОКАТО 
 	 * @param okato код ОКАТО
