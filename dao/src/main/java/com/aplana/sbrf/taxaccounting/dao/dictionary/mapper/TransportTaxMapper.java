@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 public interface TransportTaxMapper {
-	@Select("select name from okato where okato = #{okato}")
+	@Select("select name from transport_okato where okato = #{okato}")
 	String getRegionName(@Param("okato")String okato);
 	
 	@Select({
