@@ -2,11 +2,16 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:context="http://www.springframework.org/schema/context" 
 	xmlns:tx="http://www.springframework.org/schema/tx"
 	xmlns:cache="http://www.springframework.org/schema/cache"
+	
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
 		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd">
@@ -35,9 +40,7 @@
 	</bean>
 	
 	<!-- Database and transactions -->
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jdbc/TaxAccDS"/>
-	</bean>
+	<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS"/>
 	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
@@ -54,5 +57,24 @@
 	</bean>
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
   		<property name="basePackage" value="com.aplana.sbrf.taxaccounting.dao.dictionary.mapper" />
+	</bean>
+
+	<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryManager">
+		<property name="dataProviders">
+			<map>
+				<entry key="transportTypeCode">
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
+						p:dictionaryName="Коды видов ТС"
+						p:sqlQuery="select code as value, name from transport_type_code order by code"
+					/>
+				</entry>
+				<entry key="transportOkato">				
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
+						p:dictionaryName="Коды ОКАТО"
+						p:sqlQuery="select okato as value, name from transport_okato order by okato"
+					/>
+				</entry>
+			</map>
+		</property>
 	</bean>
 </beans>

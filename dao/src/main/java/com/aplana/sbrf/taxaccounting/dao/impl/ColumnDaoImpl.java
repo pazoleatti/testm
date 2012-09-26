@@ -40,6 +40,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				result = new DateColumn();
 			} else if ("S".equals(type)) {
 				result = new StringColumn();
+				((StringColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
 			} else {
 				throw new IllegalArgumentException("Unknown column type: " + type);
 			}
@@ -112,8 +113,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 		
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, order) " +
-			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, order) " +
+			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {					 
@@ -130,7 +131,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
-					ps.setInt(8, col.getOrder());
+					
+					if (col instanceof StringColumn) {
+						ps.setString(8, ((StringColumn)col).getDictionaryCode());
+					} else {
+						ps.setNull(8, Types.VARCHAR);
+					}
+					
+					ps.setInt(9, col.getOrder());
 				}
 				
 				@Override
@@ -142,7 +150,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		
 		
 		jt.batchUpdate(
-			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, order = ? " +
+			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, order = ? " +
 			"where id = ?",
 			new BatchPreparedStatementSetter() {
 				@Override
@@ -159,8 +167,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
-					ps.setInt(8, col.getOrder());
-					ps.setInt(9, col.getId());
+					if (col instanceof StringColumn) {
+						ps.setString(8, ((StringColumn)col).getDictionaryCode());
+					} else {
+						ps.setNull(8, Types.VARCHAR);
+					}
+					ps.setInt(9, col.getOrder());
+					ps.setInt(10, col.getId());
 				}
 				
 				@Override

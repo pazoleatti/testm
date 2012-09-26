@@ -1,4 +1,9 @@
-var aplana_createGridColumnDescriptors = function(columnsStore) {
+dojo.require('dijit.form.Select');
+dojo.require('dojox.data.JsonRestStore');
+dojo.require('dijit.form.NumberTextBox');
+dojo.require('dojox.grid.cells.dijit');
+
+var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 	var formatDate = function(inDatum){
 		if (!inDatum || inDatum == null || inDatum == '') {
 			return '';
@@ -37,6 +42,20 @@ var aplana_createGridColumnDescriptors = function(columnsStore) {
 					selector: 'date'
 				};
 				d.formatter = formatDate;
+			} else if (type == 'string') {
+				var dictionaryCode = columnsStore.getValue(item, 'dictionaryCode');
+				if (dictionaryCode) {
+					var store = new dojox.data.JsonRestStore({
+						target: context + '/dictionary/string/' + dictionaryCode, 
+						idAttribute: 'value'
+					});
+					d.type = dojox.grid.cells._Widget;
+					d.widgetClass = dijit.form.Select;
+					d.widgetProps = {
+						store: store,
+						valueAttr: 'value'
+					}
+				}
 			}
 			columnDescriptors.push(d);
 		},

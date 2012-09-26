@@ -29,7 +29,6 @@
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
 	dojo.require('dijit.form.TextBox');
-	dojo.require('dijit.form.NumberTextBox');
 	dojo.require('dijit.form.CheckBox');
 	dojo.require('dijit.form.Textarea');	
 	dojo.require('dijit.form.Select');
@@ -37,7 +36,6 @@
 	dojo.require('dijit.layout.TabContainer');
 	dojo.require('dijit.layout.ContentPane');
 	dojo.require('dojox.grid.DataGrid');
-	dojo.require('dojox.grid.cells.dijit');
 
 	var ${namespace}_form = null;
 	var ${namespace}_formRows = null;

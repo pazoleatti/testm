@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <script type="text/javascript">
 	<%--
 		Функция загружает информацию о выбранном столбце в панель для редактирования свойств столбца
@@ -28,11 +29,21 @@
 			if (type == 'numeric') {
 				${namespace}_columnPrecision.attr('value', store.getValue(columnItem, 'precision'));
 			} else if (type == 'string') {
-				// TODO: установка значения в справочнике
+				var dictionaryCode = store.getValue(columnItem, 'dictionaryCode');
+				if (!dictionaryCode) {
+					dictionaryCode = 'NONE'
+				}
+				${namespace}_columnStringDictionary.attr('value', dictionaryCode);
 			}
+			${namespace}_showColumnProperties(type);
 		}
 		${namespace}_columnsGrid.selectedColumnItem = columnItem;
 	};
+	
+	var ${namespace}_showColumnProperties = function(type) {
+		dojo.style(dojo.byId('${namespace}_columnPrecisionRow'), 'display', type == 'numeric' ? '' : 'none');
+		dojo.style(dojo.byId('${namespace}_columnStringDictionaryRow'), 'display', type == 'string' ? '' : 'none');
+	}
 
 	dojo.addOnLoad(function() {
 		var store = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: ${namespace}_form.columns}});
@@ -79,6 +90,15 @@
 			} else {
 				store.setValue(columnItem, 'precision', ${namespace}_columnPrecision.attr('value'));
 			}
+			if (type != 'string') {
+				store.unsetAttribute(columnItem, 'dictionaryCode');
+			} else {
+				var dictionaryCode = ${namespace}_columnStringDictionary.attr('value');
+				if (dictionaryCode == 'NONE') {
+					dictionaryCode = null;
+				}
+				store.setValue(columnItem, 'dictionaryCode', dictionaryCode);
+			}			
 			if (oldType != type || oldAlias != alias) {
 				${namespace}_rowsStore.fetch({
 					onItem: function(item, request) {
@@ -191,11 +211,7 @@
 					<tr>
 						<td>Тип</td>
 						<td>
-							<select jsId="${namespace}_columnType" dojoType="dijit.form.Select" class="value">
-								<script type="dojo/connect" event="onChange" args="newValue">
-									dojo.style(dojo.byId('${namespace}_columnPrecisionRow'), 'display', newValue == 'numeric' ? '' : 'none');
-									dojo.style(dojo.byId('${namespace}_columnStringDictionaryRow'), 'display', newValue == 'string' ? '' : 'none');
-								</script>
+							<select jsId="${namespace}_columnType" dojoType="dijit.form.Select" class="value" onChange="${namespace}_showColumnProperties">
 								<option value="string">Строка/Текст</option>
 								<option value="date">Дата</option>
 								<option value="numeric">Число</option>
@@ -218,7 +234,10 @@
 						<td>Справочник</td>
 						<td>
 							<select jsId="${namespace}_columnStringDictionary" dojoType="dijit.form.Select" class="value">
-								<option value="">transportTaxCode</option>
+								<option value="NONE">Нет</option>
+								<c:forEach items="${simpleStringDictionaries}" var="item">
+									<option value="${item.value}">${item.name}</option>
+								</c:forEach>
 							</select>
 						</td>
 					</tr>

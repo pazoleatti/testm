@@ -25,6 +25,7 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryManager;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
@@ -38,6 +39,9 @@ import com.aplana.sbrf.taxaccounting.util.json.DataRowSerializer;
 public class EditFormController {
 	private Log logger = LogFactory.getLog(getClass());
 	
+	@Autowired 
+	private StringDictionaryManager simpleStringDictionaryManager;
+	
 	@Autowired
 	private FormDao formDao;
 	
@@ -48,9 +52,10 @@ public class EditFormController {
 		}
 		ModelAndView mv = new ModelAndView("form/edit");
 		mv.addObject("formId", formId);
+		mv.addObject("simpleStringDictionaries", simpleStringDictionaryManager.getAvailableDictionaries());
 		return mv;
 	}
-	
+
 	@ResourceMapping("getForm")
 	protected void getForm(@RequestParam("formId") Integer formId, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
 		Form form;

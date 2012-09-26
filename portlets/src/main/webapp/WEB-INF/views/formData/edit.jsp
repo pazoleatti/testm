@@ -53,7 +53,7 @@
 		var columnsStore = new dojo.data.ItemFileReadStore({
 			data: ${formColumnsData}
 		});
-		aplana_createGridColumnDescriptors(columnsStore).addCallback(function(columnDescriptors){
+		aplana_createGridColumnDescriptors(columnsStore, '<%=request.getContextPath()%>').addCallback(function(columnDescriptors){
 			columnsStore.close();
 			${namespace}_grid = new dojox.grid.DataGrid({
 				id: '${namespace}_grid',

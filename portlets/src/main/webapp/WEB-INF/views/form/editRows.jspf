@@ -2,7 +2,7 @@
 <div dojoType="dijit.layout.ContentPane" title="Начальные данные">
 	<script type="dojo/connect" event="onShow">
 		${namespace}_columnsGrid.acceptChanges();
-		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store).addCallback(function(columnDescriptors) {
+		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store, '<%=request.getContextPath()%>').addCallback(function(columnDescriptors) {
 			columnDescriptors.splice(
 				0, 
 				0, 
@@ -32,6 +32,7 @@
 				${namespace}_rowsGrid.startup();
 			} else {
 				${namespace}_rowsGrid.attr('structure', [columnDescriptors]);
+				${namespace}_rowsGrid._refresh(true);
 			}
 			return columnDescriptors;
 		});
