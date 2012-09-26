@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.controller.formdata;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -9,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
  */
 public class EditFormDataBean {
 	private FormData formData;
-
+	private ObjectMapper objectMapper;
 	private Logger logger = new Logger();
 	
 	public FormData getFormData() {
@@ -30,5 +32,13 @@ public class EditFormDataBean {
 
 	public void setLogger(Logger logger) {
 		this.logger = logger;
+	}
+
+	public ObjectMapper getObjectMapper() {
+		return objectMapper;
+	}
+
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 	}
 }

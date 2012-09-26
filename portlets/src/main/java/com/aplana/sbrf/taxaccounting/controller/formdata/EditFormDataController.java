@@ -32,6 +32,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.util.ColumnMixIn;
 import com.aplana.sbrf.taxaccounting.util.DojoFileStoreData;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.util.json.DataRowDeserializer;
@@ -44,6 +45,7 @@ public class EditFormDataController {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private static class DataRowFileStoreData extends DojoFileStoreData<DataRow> {};
+	private static class ColumnsDojoFileStoreData extends DojoFileStoreData<Column> {};
 	
 	@Autowired
 	private FormDataDao formDataDao;
@@ -61,13 +63,16 @@ public class EditFormDataController {
 		formBean.getLogger().clear();
 		FormData formData = formDataService.createForm(formBean.getLogger(), formId);
 		formBean.setFormData(formData);
+		formBean.setObjectMapper(createObjectMapper(formData.getForm()));
 	}
 	
 	@ActionMapping("view")
 	public void processView(@RequestParam("id") long formDataId, @ModelAttribute("formBean") EditFormDataBean formBean) {
 		logger.info("Opening form data for view, formDataId = " + formDataId);
 		formBean.getLogger().clear();
-		formBean.setFormData(formDataDao.get(formDataId));
+		FormData formData = formDataDao.get(formDataId);
+		formBean.setFormData(formData);
+		formBean.setObjectMapper(createObjectMapper(formData.getForm()));
 	}
 	
 	@RenderMapping
@@ -77,9 +82,11 @@ public class EditFormDataController {
 		}
 		ModelAndView result = new ModelAndView("formData/edit");
 		Form form = formBean.getForm();
-		List<Column> columns = form.getColumns();
-		String gridLayout = getObjectMapper(form).writeValueAsString(columns);
-		result.addObject("gridLayout", gridLayout);
+		ColumnsDojoFileStoreData columnsData = new ColumnsDojoFileStoreData();
+		columnsData.setIdentifier("id");
+		columnsData.setItems(form.getColumns());
+		String formColumnsDataJson = formBean.getObjectMapper().writeValueAsString(columnsData);
+		result.addObject("formColumnsData", formColumnsDataJson);
 		return result;
 	}
 	
@@ -91,14 +98,13 @@ public class EditFormDataController {
 		data.setIdentifier("alias");
 		data.setItems(dataRows);
 		response.setContentType("application/json");
-		getObjectMapper(formData.getForm()).writeValue(response.getPortletOutputStream(), data);
+		formBean.getObjectMapper().writeValue(response.getPortletOutputStream(), data);
 	}
 	
 	@ResourceMapping("log")
 	public void getLogEntries(@ModelAttribute("formBean") EditFormDataBean formBean, ResourceResponse response) throws JsonGenerationException, JsonMappingException, IOException {
-		Form form = formBean.getFormData().getForm();
 		response.setContentType("application/json");
-		getObjectMapper(form).writeValue(response.getPortletOutputStream(), formBean.getLogger().getEntries());
+		formBean.getObjectMapper().writeValue(response.getPortletOutputStream(), formBean.getLogger().getEntries());
 	}
 	
 	@ResourceMapping("saveRows")
@@ -108,7 +114,7 @@ public class EditFormDataController {
 			ResourceResponse response
 	) throws JsonProcessingException, UnsupportedEncodingException, IOException {
 		FormData formData = formBean.getFormData();
-		ObjectMapper objectMapper = getObjectMapper(formData.getForm());
+		ObjectMapper objectMapper = formBean.getObjectMapper();
 		DataRowFileStoreData data = objectMapper.readValue(json, DataRowFileStoreData.class);
 		formData.getDataRows().clear();
 		formData.getDataRows().addAll(data.getItems());
@@ -125,13 +131,13 @@ public class EditFormDataController {
 		objectMapper.writeValue(response.getWriter(), log.getEntries());
 	}
 	
-	private ObjectMapper getObjectMapper(Form form) {
+	private ObjectMapper createObjectMapper(Form form) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting", new Version(1, 0, 0, null));
 		module.addSerializer(DataRow.class, new DataRowSerializer(FormatUtils.getIsoDateFormat()));
 		module.addDeserializer(DataRow.class, new DataRowDeserializer(form, FormatUtils.getIsoDateFormat(), true));
-		module.addSerializer(Column.class, new DojoGridColumnSerializer());
 		objectMapper.registerModule(module);
+		objectMapper.getSerializationConfig().addMixInAnnotations(Column.class, ColumnMixIn.class);		
 		return objectMapper;
 	}
 }

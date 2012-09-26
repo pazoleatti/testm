@@ -7,10 +7,10 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
-import com.aplana.sbrf.taxaccounting.controller.form.ColumnMixIn;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.util.ColumnMixIn;
 
 public class ColumnJsonTest {
 	@Test

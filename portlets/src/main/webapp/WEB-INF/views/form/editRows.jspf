@@ -2,60 +2,38 @@
 <div dojoType="dijit.layout.ContentPane" title="Начальные данные">
 	<script type="dojo/connect" event="onShow">
 		${namespace}_columnsGrid.acceptChanges();
-		${namespace}_columnsGrid.store.fetch({
-			columnDescriptors : [
-				{field: 'alias', width: 10, name: 'Код строки', editable: true},
-				{field: 'order', width: '1em', name: 'Порядок', styles: 'display: none;'}
-			],
-			sort: [{attribute: 'order'}],
-			onItem: function(item, request) {
-				var d = {
-					name: ${namespace}_columnsGrid.store.getValue(item, 'name'),
-					field: ${namespace}_columnsGrid.store.getValue(item, 'alias'),
-					width: ${namespace}_columnsGrid.store.getValue(item, 'width'),
-					editable: true
-				};
-				var type = ${namespace}_columnsGrid.store.getValue(item, 'type');
-				if (type == 'numeric') {
-					d.type = dojox.grid.cells._Widget;
-					d.widgetClass = dijit.form.NumberTextBox;
-					d.constraint = {
-						places: ${namespace}_columnsGrid.store.getValue(item, 'precision')						
-					};
-					d.formatter = aplana_formatNumber;
-				} else if (type == 'date') {
-					d.type = dojox.grid.cells.DateTextBox;
-					d.constraint = {
-						datePattern: 'dd.MM.yyyy',
-						selector: 'date'
-					};
-					d.formatter = aplana_formatDate;
-				}
-				request.columnDescriptors.push(d);
-			},
-			onComplete: function(items, request) {
-				if (${namespace}_rowsGrid == null) {
-					${namespace}_rowsGrid = new dojox.grid.DataGrid({
-						store: ${namespace}_rowsStore,
-						structure: [request.columnDescriptors],
-						sortInfo: '2', <%-- сортируем по скрытому полю order --%>
-						autoHeight: true,
-						canSort: function(index) {
-							return false;
-						},
-						selectionMode: 'single',
-						onSelected: function(rowIndex) {
-							${namespace}_rowUpButton.attr('disabled', rowIndex == 0);
-							${namespace}_rowDownButton.attr('disabled', rowIndex == this.rowCount - 1);
-							${namespace}_removeRowButton.attr('disabled', false);
-						}
-					});
-					${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
-					${namespace}_rowsGrid.startup();
-				} else {
-					${namespace}_rowsGrid.attr('structure', [request.columnDescriptors]);
-				}
+		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store).addCallback(function(columnDescriptors) {
+			columnDescriptors.splice(
+				0, 
+				0, 
+				{field: 'alias', width: 10, name: 'Код строки', editable: true}, 
+				{field: 'order', width: 1, name: 'Порядок', styles: 'display: none;'}
+			);
+			<%-- В режиме редактирования формы мы должны иметь возможность отредактировать любую ячейку в таблице--%>
+			dojo.forEach(columnDescriptors, function(item) { item.editable = true; });
+			if (${namespace}_rowsGrid == null) {
+				${namespace}_rowsGrid = new dojox.grid.DataGrid({
+					store: ${namespace}_rowsStore,
+					structure: [columnDescriptors],
+					sortInfo: '2', <%-- сортируем по скрытому полю order --%>
+					autoHeight: true,
+					autoWidth: true,
+					canSort: function(index) {
+						return false;
+					},
+					selectionMode: 'single',
+					onSelected: function(rowIndex) {
+						${namespace}_rowUpButton.attr('disabled', rowIndex == 0);
+						${namespace}_rowDownButton.attr('disabled', rowIndex == this.rowCount - 1);
+						${namespace}_removeRowButton.attr('disabled', false);
+					}
+				});
+				${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
+				${namespace}_rowsGrid.startup();
+			} else {
+				${namespace}_rowsGrid.attr('structure', [columnDescriptors]);
 			}
+			return columnDescriptors;
 		});
 	</script>
 	<button dojoType="dijit.form.Button">

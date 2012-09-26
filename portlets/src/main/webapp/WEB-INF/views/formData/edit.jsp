@@ -4,6 +4,7 @@
 <portlet:defineObjects />
 <c:url value="/js/LoggerPane.js" var="loggerJsUrl"/>
 <script type="text/javascript" src="${loggerJsUrl}"></script>
+<script src="<c:url value="/js/aplana_datagrid_utils.js"/>"></script>
 <c:url value="/css/LoggerPane.css" var="loggerCssUrl"/>
 <style type="text/css"><%-- TODO: переделать импорт CSS --%>
 	@import "/portal_dojo/v1.4.3/dojox/grid/resources/Grid.css";
@@ -14,8 +15,8 @@
 <portlet:resourceURL id="dataRows" var="storeUrl"/>
 <portlet:resourceURL id="log" var="logUrl"/>
 <portlet:resourceURL id="saveRows" var="saveUrl"/>
-<script src="<c:url value="/js/aplana_format.js"/>"></script>
 <script type="text/javascript">
+	dojo.require('dojo.data.ItemFileReadStore');
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
 	dojo.require('dojox.grid.DataGrid');
@@ -49,24 +50,27 @@
 				error: failureCallback
 		    });
 		};
-		
-		${namespace}_grid = new dojox.grid.DataGrid({
-			id: '${namespace}_grid',
-			store: ${namespace}_store,
-			structure: [${gridLayout}],
-			rowSelector: '1em',
-			rowsPerPage: 100,
-			autoHeight: true,
-			autoWidth: true,
-			canSort: function(index) { return false; }			
-		});		
-        ${namespace}_grid.placeAt('${namespace}_gridDiv');
-        ${namespace}_grid.startup();
+		var columnsStore = new dojo.data.ItemFileReadStore({
+			data: ${formColumnsData}
+		});
+		aplana_createGridColumnDescriptors(columnsStore).addCallback(function(columnDescriptors){
+			columnsStore.close();
+			${namespace}_grid = new dojox.grid.DataGrid({
+				id: '${namespace}_grid',
+				store: ${namespace}_store,
+				structure: [columnDescriptors],
+				autoHeight: true,
+				autoWidth: true,
+				canSort: function(index) { return false; }			
+			});		
+        	${namespace}_grid.placeAt('${namespace}_gridDiv');
+        	${namespace}_grid.startup();
+		});
         
-		${namespace}_loggerPane = new com.aplana.taxaccounting.LoggerPane({
-			url: '${logUrl}'
-		}, dojo.byId('${namespace}_loggerPane'));
-        
+		${namespace}_loggerPane = new com.aplana.taxaccounting.LoggerPane(
+			{ url: '${logUrl}'}, 
+			dojo.byId('${namespace}_loggerPane')
+		);
         ${namespace}_loggerPane.reload();
 	});
 </script>

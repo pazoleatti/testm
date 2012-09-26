@@ -18,7 +18,7 @@
 		height: 100%;
 	}
 </style>
-<script src="<c:url value="/js/aplana_format.js"/>"></script>
+<script src="<c:url value="/js/aplana_datagrid_utils.js"/>"></script>
 <script src="<c:url value="/js/codemirror/lib/codemirror.js"/>"></script>
 <script src="<c:url value="/js/codemirror/mode/groovy/groovy.js"/>"></script>
 
