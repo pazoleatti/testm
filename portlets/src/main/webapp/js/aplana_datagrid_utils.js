@@ -6,13 +6,13 @@ dojo.require('dojox.grid.cells.dijit');
 var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 	var formatDate = function(inDatum){
 		if (!inDatum || inDatum == null || inDatum == '') {
-			return ' ';
+			return '';
 		}
 		return dojo.date.locale.format(new Date(inDatum), this.constraint);
 	};
 	var formatNumber = function(inDatum){
 		if (!inDatum || null == inDatum || '' == inDatum || isNaN(inDatum)) {
-			return ' ';
+			return '';
 		}
 		return inDatum;
 	};
