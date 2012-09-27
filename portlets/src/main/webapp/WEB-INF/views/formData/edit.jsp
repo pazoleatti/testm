@@ -2,20 +2,21 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
 <portlet:defineObjects />
-<c:url value="/js/LoggerPane.js" var="loggerJsUrl"/>
+
 <script type="text/javascript" src="${loggerJsUrl}"></script>
 <script src="<c:url value="/js/aplana_datagrid_utils.js"/>"></script>
-<c:url value="/css/LoggerPane.css" var="loggerCssUrl"/>
+
 <style type="text/css"><%-- TODO: переделать импорт CSS --%>
-	@import "/portal_dojo/v1.4.3/dojox/grid/resources/Grid.css";
-	@import "/portal_dojo/v1.4.3/dojox/grid/resources/tundraGrid.css";
-	@import "${loggerCssUrl}";
+	@import '/portal_dojo/v1.4.3/dojox/grid/resources/Grid.css';
+	@import '/portal_dojo/v1.4.3/dojox/grid/resources/tundraGrid.css';
+	@import '<c:url value="/js/aplana/LoggerPane.css"/>';
 </style>
 <c:set var="namespace"><portlet:namespace/></c:set>
 <portlet:resourceURL id="dataRows" var="storeUrl"/>
 <portlet:resourceURL id="log" var="logUrl"/>
 <portlet:resourceURL id="saveRows" var="saveUrl"/>
 <script type="text/javascript">
+ 	dojo.registerModulePath('aplana', '<c:url value="/js/aplana"/>');
 	dojo.require('dojo.data.ItemFileReadStore');
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
@@ -23,6 +24,7 @@
 	dojo.require('dojox.grid.cells.dijit');
 	dojo.require('dojo.parser');
 	dojo.require('dijit.form.NumberTextBox');
+	dojo.require('aplana.LoggerPane');
 	
 	var ${namespace}_grid;
 	var ${namespace}_store;
@@ -67,7 +69,7 @@
         	${namespace}_grid.startup();
 		});
         
-		${namespace}_loggerPane = new com.aplana.taxaccounting.LoggerPane(
+		${namespace}_loggerPane = new aplana.LoggerPane(
 			{ url: '${logUrl}'}, 
 			dojo.byId('${namespace}_loggerPane')
 		);
