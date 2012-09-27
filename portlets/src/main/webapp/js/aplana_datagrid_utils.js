@@ -6,24 +6,27 @@ dojo.require('dojox.grid.cells.dijit');
 var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 	var formatDate = function(inDatum){
 		if (!inDatum || inDatum == null || inDatum == '') {
-			return '';
+			return ' ';
 		}
 		return dojo.date.locale.format(new Date(inDatum), this.constraint);
 	};
 	var formatNumber = function(inDatum){
 		if (!inDatum || null == inDatum || '' == inDatum || isNaN(inDatum)) {
-			return '';
+			return ' ';
 		}
 		return inDatum;
 	};
 	var dfd = new dojo.Deferred();
 	var columnDescriptors = new Array();
+	var rowItemPrototype = new Object();
 	columnsStore.fetch({
 		sort: [{attribute: 'order'}],
 		onItem: function(item, request) {
+			var field = columnsStore.getValue(item, 'alias');
+			rowItemPrototype[field] = null;
 			var d = {
 				name: columnsStore.getValue(item, 'name'),
-				field: columnsStore.getValue(item, 'alias'),
+				field: field,
 				width: columnsStore.getValue(item, 'width'),
 				editable: columnsStore.getValue(item, 'editable')
 			};
@@ -43,6 +46,7 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 				};
 				d.formatter = formatDate;
 			} else if (type == 'string') {
+				rowItemPrototype[field] = '';
 				var dictionaryCode = columnsStore.getValue(item, 'dictionaryCode');
 				if (dictionaryCode) {
 					var store = new dojox.data.JsonRestStore({
@@ -61,7 +65,10 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 			columnDescriptors.push(d);
 		},
 		onComplete: function(items, request) {
-			dfd.callback(columnDescriptors);
+			dfd.callback({
+				columnDescriptors: columnDescriptors, 
+				rowItemPrototype: rowItemPrototype
+			});
 		}
 	});
 	return dfd;

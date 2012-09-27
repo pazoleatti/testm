@@ -55,18 +55,20 @@
 		var columnsStore = new dojo.data.ItemFileReadStore({
 			data: ${formColumnsData}
 		});
-		aplana_createGridColumnDescriptors(columnsStore, '<%=request.getContextPath()%>').addCallback(function(columnDescriptors){
+		aplana_createGridColumnDescriptors(columnsStore, '<%=request.getContextPath()%>').addCallback(function(params){
 			columnsStore.close();
 			${namespace}_grid = new dojox.grid.DataGrid({
 				id: '${namespace}_grid',
 				store: ${namespace}_store,
-				structure: [columnDescriptors],
+				structure: [params.columnDescriptors],
+				rowHeight: 25,				
 				autoHeight: true,
 				autoWidth: true,
-				canSort: function(index) { return false; }			
+				canSort: function(index) { return false; }
 			});		
         	${namespace}_grid.placeAt('${namespace}_gridDiv');
         	${namespace}_grid.startup();
+        	${namespace}_grid.rowItemPrototype = params.rowItemPrototype; 
 		});
         
 		${namespace}_loggerPane = new aplana.LoggerPane(
@@ -80,10 +82,25 @@
 <button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">
 	Добавить строку
 	<script type="dojo/connect" event="onClick">
-		var newItem = {
-			alias: '' + (${namespace}_grid.rowCount + 1)
-		};
-		${namespace}_store.newItem(newItem);
+		var store = ${namespace}_grid.store; 
+		store.fetch({
+			maxOrder: 0,
+			onItem: function(item, request) {
+				var ord = store.getValue(item, 'order');
+				if (request.maxOrder < ord) {
+					request.maxOrder = ord;
+				}
+			},
+			onComplete: function(items, request) {
+				var order = request.maxOrder + 1;
+				var newItem = {
+					alias: '' + order,
+					order: order
+				};
+				dojo.mixin(newItem, ${namespace}_grid.rowItemPrototype);
+				store.newItem(newItem);
+			}
+		});
 	</script>
 </button>
 <portlet:actionURL name="save" var="saveUrl"/>
@@ -98,5 +115,6 @@
 </button>
 <portlet:renderURL portletMode="view" windowState="normal" var="backUrl" />
 <button dojoType="dijit.form.Button" onClick="window.location.href = '${backUrl}'">Отмена</button>
+</div>
 <div id="${namespace}_loggerPane"></div>
 <div id="${namespace}_gridDiv"></div>

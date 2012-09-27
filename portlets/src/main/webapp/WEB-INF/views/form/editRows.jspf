@@ -2,13 +2,10 @@
 <div dojoType="dijit.layout.ContentPane" title="Начальные данные">
 	<script type="dojo/connect" event="onShow">
 		${namespace}_columnsGrid.acceptChanges();
-		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store, '<%=request.getContextPath()%>').addCallback(function(columnDescriptors) {
-			var newRowPrototype = {};
+		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store, '<%=request.getContextPath()%>').addCallback(function(params) {
 			<%-- В режиме редактирования формы мы должны иметь возможность отредактировать любую ячейку в таблице--%>
-			dojo.forEach(columnDescriptors, function(item) { 
-				item.editable = true;
-				newRowPrototype[item.field] = null; 
-			});
+			var columnDescriptors = params.columnDescriptors; 
+			dojo.forEach(columnDescriptors, function(item) { item.editable = true; });
 			columnDescriptors.splice(
 				0, 
 				0, 
@@ -39,7 +36,7 @@
 				${namespace}_rowsGrid.attr('structure', [columnDescriptors]);
 				${namespace}_rowsGrid._refresh(true);
 			}
-			${namespace}_rowsGrid.newRowPrototype = newRowPrototype;
+			${namespace}_rowsGrid.rowItemPrototype = params.rowItemPrototype;
 			return columnDescriptors;
 		});
 	</script>
@@ -47,7 +44,7 @@
 		Добавить строку
 		<script jsId="${namespace}_addRowButton" type="dojo/connect" event="onClick">
 			${namespace}_rowsGrid.store.fetch({
-				maxOrder: 1,
+				maxOrder: 0,
 				onItem: function(item, request) {
 					var ord = ${namespace}_rowsGrid.store.getValue(item, 'order');
 					if (request.maxOrder < ord) {
@@ -55,12 +52,13 @@
 					}
 				},
 				onComplete: function(items, request) {
+					var order = request.maxOrder + 1;
 					var newItem = {
 						id: ${namespace}_generateId(),
-						alias: 'alias' + request.maxOrder,
-						order: request.maxOrder + 1
+						alias: 'alias' + order,
+						order: order
 					};
-					dojo.mixin(newItem, ${namespace}_rowsGrid.newRowPrototype);
+					dojo.mixin(newItem, ${namespace}_rowsGrid.rowItemPrototype);
 					${namespace}_rowsGrid.store.newItem(newItem);
 				}
 			});
