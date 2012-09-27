@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.SimpleDictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
 
@@ -14,20 +15,12 @@ public class StringDictionaryManager {
 		this.dataProviders = dataProviders;
 	}
 	
-	public List<SimpleDictionaryItem<String>> getValues(String dictionaryCode) {
+	public SimpleDictionaryDataProvider<String> getDataProvider(String dictionaryCode) {
 		SimpleStringDictionaryDataProvider dp = dataProviders.get(dictionaryCode);
 		if (dp == null) {
 			throw new DaoException("Неизвестный код справочника: " + dictionaryCode);
 		}
-		return dp.getValues();
-	}
-
-	public SimpleDictionaryItem<String> getItem(String dictionaryCode, String value) {
-		SimpleStringDictionaryDataProvider dp = dataProviders.get(dictionaryCode);
-		if (dp == null) {
-			throw new DaoException("Неизвестный код справочника: " + dictionaryCode);
-		}
-		return dp.getItem(value);
+		return dp;
 	}
 	
 	/**

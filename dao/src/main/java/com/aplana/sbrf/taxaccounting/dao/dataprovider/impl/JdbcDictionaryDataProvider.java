@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.dataprovider.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,9 +34,11 @@ public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao 
 	private String dictionaryName;
 	private String sqlQuery;
 	@Override
-	public List<SimpleDictionaryItem<ValueType>> getValues() {
+	public List<SimpleDictionaryItem<ValueType>> getValues(String valuePattern) {
 		return getJdbcTemplate().query(
-			sqlQuery,
+			"select * from (" + sqlQuery + ") where value like ?",
+			new Object[] { valuePattern },
+			new int[] { Types.VARCHAR },
 			new ItemRowMapper()
 		);
 	}

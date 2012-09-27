@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.SimpleDictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryManager;
 import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
 
@@ -21,8 +23,15 @@ public class SimpleStringDictionaryController {
 	
 	@RequestMapping("/string/{dictionaryCode}")
 	@ResponseBody
-	List<SimpleDictionaryItem<String>> getValues(@PathVariable String dictionaryCode) {
-		return dictionaryManager.getValues(dictionaryCode);
+	List<SimpleDictionaryItem<String>> getValues(
+			@PathVariable String dictionaryCode, 
+			@RequestParam(value = "value", defaultValue = "*") String valuePattern) 
+	{
+		SimpleDictionaryDataProvider<String> dp = dictionaryManager.getDataProvider(dictionaryCode);
+		if (valuePattern.endsWith("*")) {
+			valuePattern = valuePattern.substring(0, valuePattern.length() - 1) + "%";
+		}
+		return dp.getValues(valuePattern);
 	}
 	
 	@RequestMapping("/string/{dictionaryCode}/{value}")
@@ -31,6 +40,7 @@ public class SimpleStringDictionaryController {
 			@PathVariable("dictionaryCode") String dictionaryCode,
 			@PathVariable("value") String value) 
 	{
-		return dictionaryManager.getItem(dictionaryCode, value);
+		SimpleDictionaryDataProvider<String> dp = dictionaryManager.getDataProvider(dictionaryCode);
+		return dp.getItem(value);
 	}
 }
