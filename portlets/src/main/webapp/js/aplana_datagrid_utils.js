@@ -3,6 +3,15 @@ dojo.require('dojox.data.JsonRestStore');
 dojo.require('dijit.form.NumberTextBox');
 dojo.require('dojox.grid.cells.dijit');
 
+/**
+ * Метод формирует на основе данных о столбцах налоговой формы описатель
+ * для колонок dojo DataGrid, а также формирует шаблон объекта для добавления новой строки,
+ * в котором определены все поля, отображаемые в таблице
+ * 
+ * Возвращает Deferred-объект, в который передаётся объект с двумя полями:
+ * columnDescriptors - список описателей столбцов формы
+ * rowItemPrototype - шаблон объекта для добавления новой строки в таблицу
+ */
 var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 	var formatDate = function(inDatum){
 		if (!inDatum || inDatum == null || inDatum == '') {
@@ -72,4 +81,47 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 		}
 	});
 	return dfd;
+};
+
+/**
+ * Берёт два элемента таблицы: выбранный и элемент, стоящий в строке с номером "выбранная строка + step",
+ * меняет у них значение столбца fieldName местами и пересортировывает таблицу.
+ * Используется для того, чтобы поменять две строки в таблице местами, также для этого нужно, чтобы
+ * в таблице была установлена сортировка по столбцу fieldName 
+ */
+var aplana_moveGridSelectedItem = function(grid, fieldName, step) {
+	var store = grid.store;
+	var selectedItem = aplana_getGridSelectedItem(grid);
+	if (selectedItem == null) {
+		console.log('Не выбрана строка в таблице!');
+	}
+	var selectedItemValue = store.getValue(selectedItem, fieldName); 
+	var selectedItemIndex = grid.getItemIndex(selectedItem);
+	var movedItemIndex = selectedItemIndex + step;
+	if (movedItemIndex < 0 || movedItemIndex > grid.rowCount) {
+		console.log('Невозможно выполнить запрошенную операцию!');
+	}
+	var movedItem = grid.getItem(movedItemIndex);
+	var movedItemValue = store.getValue(movedItem, fieldName);
+	store.setValue(selectedItem, fieldName, movedItemValue);
+	store.setValue(movedItem, fieldName, selectedItemValue);
+	grid.sort();
+	grid.resize();
+	grid.selection.select(movedItemIndex);
+};
+
+/**
+ * Возвращает item, соответствующий выбранному в гриде элементу, или null,
+ * если не выбрано ни одного элемента, или, напротив, выбрано более одного элемента.
+ * (Данный метод предназначен для работы с таблицами, в которых стоит single-выбор)
+ */
+var aplana_getGridSelectedItem = function(grid) {
+	var selectedItems = grid.selection.getSelected();
+	if (selectedItems == null) {
+		if (selectedItems && selectedItems.length > 1) {
+			console.log('Multiple items selected in grid');
+		}		
+		return null;
+	}
+	return selectedItems[0];
 };

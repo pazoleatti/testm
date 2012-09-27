@@ -21,10 +21,8 @@
 	dojo.require('dojo.data.ItemFileWriteStore');
 	dojo.require('dijit.form.Button');
 	dojo.require('dojox.grid.DataGrid');
-	dojo.require('dojox.grid.cells.dijit');
+	dojo.require('aplana.LoggerPane');	
 	dojo.require('dojo.parser');
-	dojo.require('dijit.form.NumberTextBox');
-	dojo.require('aplana.LoggerPane');
 	
 	var ${namespace}_grid;
 	var ${namespace}_store;
@@ -79,7 +77,7 @@
 	});
 </script>
 <div>
-<button dojoType="dijit.form.Button" onClick="${namespace}_addNewRow">
+<button dojoType="dijit.form.Button">
 	Добавить строку
 	<script type="dojo/connect" event="onClick">
 		var store = ${namespace}_grid.store; 
@@ -101,6 +99,27 @@
 				store.newItem(newItem);
 			}
 		});
+	</script>
+</button>
+<button jsId="${namespace}_removeRowButton" dojoType="dijit.form.Button">
+	Удалить строку
+	<script type="dojo/connect" event="onClick">
+		var item = aplana_getGridSelectedItem(${namespace}_grid);
+		if (confirm('Вы уверены, что хотите удалить выбранную строку?')) {
+			${namespace}_grid.store.deleteItem(item);
+		}
+	</script>
+</button>
+<button jsId="${namespace}_rowUpButton" dojoType="dijit.form.Button" disabled="true">
+	Вверх
+	<script type="dojo/connect" event="onClick">
+		aplana_moveGridSelectedItem(${namespace}_grid, 'order', -1);
+	</script>
+</button>
+<button jsId="${namespace}_rowDownButton" dojoType="dijit.form.Button" disabled="true">
+	Вниз
+	<script type="dojo/connect" event="onClick">
+		aplana_moveGridSelectedItem(${namespace}_grid, 'order', 1);
 	</script>
 </button>
 <portlet:actionURL name="save" var="saveUrl"/>

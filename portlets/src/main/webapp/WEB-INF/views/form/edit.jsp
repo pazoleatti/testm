@@ -57,19 +57,6 @@
 	};
 	
 	<%--
-		Возвращает item, соответствующий выбранному в гриде элементу, или null,
-		если не выбрано ни одного элемента, или, напротив, выбрано более одного элемента \
-		(вообще говоря, такое невозможно, так как во всех таблицах стоит single-выбор)
-	--%>
-	var ${namespace}_getGridSelectedItem = function(grid) {
-		var selectedItems = grid.selection.getSelected();
-		if (selectedItems == null || selectedItems.length != 1) {
-			return null;
-		}
-		return selectedItems[0];
-	};
-	
-	<%--
 		Сохранение формы
 	--%>
 	${namespace}_saveForm = function() {		
@@ -118,35 +105,6 @@
      	);
 		result.setValue(scriptBody);
 		return result;
-	};
-	
-	<%--
-		Берёт два элемента таблицы: выбранный и элемент, стоящий в строке с номером "выбранная строка + step",
-		меняет у них значение столбца fieldName местами и пересортировывает таблицу.
-		Используется для того, чтобы поменять две строки в таблице местами, также для этого нужно, чтобы
-		в таблице была установлена сортировка по столбцу fieldName 
-	--%>
-	var ${namespace}_swapSelectedItem = function(grid, fieldName, step) {
-		var store = grid.store;
-		var selectedItem = ${namespace}_getGridSelectedItem(grid);
-		if (selectedItem == null) {
-			alert('Не выбрана строка в таблице!');
-		}
-		
-		var selectedItemValue = store.getValue(selectedItem, fieldName); 
-		var selectedItemIndex = grid.getItemIndex(selectedItem);
-
-		var movedItemIndex = selectedItemIndex + step;
-		if (movedItemIndex < 0 || movedItemIndex > grid.rowCount) {
-			alert('Невозможно выполнить запрошенную операцию!');
-		}
-		var movedItem = grid.getItem(movedItemIndex);
-		var movedItemValue = store.getValue(movedItem, fieldName);
-		store.setValue(selectedItem, fieldName, movedItemValue);
-		store.setValue(movedItem, fieldName, selectedItemValue);
-		grid.sort();
-		grid.resize();
-		grid.selection.select(movedItemIndex);
 	};
 
 	dojo.addOnLoad(function(){

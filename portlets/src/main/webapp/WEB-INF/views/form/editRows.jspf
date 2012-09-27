@@ -67,7 +67,7 @@
 	<button jsId="${namespace}_removeRowButton" dojoType="dijit.form.Button" disabled="true">
 		Удалить
 		<script type="dojo/connect" event="onClick">
-			var item = ${namespace}_getGridSelectedItem(${namespace}_rowsGrid);
+			var item = aplana_getGridSelectedItem(${namespace}_rowsGrid);
 			if (item != null) {
 				${namespace}_rowsGrid.store.deleteItem(item);
 			}
@@ -76,13 +76,13 @@
 	<button jsId="${namespace}_rowUpButton" dojoType="dijit.form.Button" disabled="true">
 		Вверх
 		<script type="dojo/connect" event="onClick">
-			${namespace}_swapSelectedItem(${namespace}_rowsGrid, 'order', -1);
+			aplana_moveGridSelectedItem(${namespace}_rowsGrid, 'order', -1);
 		</script>
 	</button>	
 	<button jsId="${namespace}_rowDownButton" dojoType="dijit.form.Button" disabled="true">
 		Вниз
 		<script type="dojo/connect" event="onClick">
-			${namespace}_swapSelectedItem(${namespace}_rowsGrid, 'order', 1);
+			aplana_moveGridSelectedItem(${namespace}_rowsGrid, 'order', 1);
 		</script>		
 	</button>
 	<div id="${namespace}_rowsGridDiv"></div>

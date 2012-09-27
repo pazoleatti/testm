@@ -118,13 +118,13 @@
 			<button jsId="${namespace}_calcScriptUpButton" dojoType="dijit.form.Button" disabled="true">
 				Вверх
 				<script type="dojo/connect" event="onClick">
-					${namespace}_swapSelectedItem(${namespace}_calcScriptsGrid, 'order', -1);
+					aplana_moveGridSelectedItem(${namespace}_calcScriptsGrid, 'order', -1);
 				</script>
 			</button>
 			<button jsId="${namespace}_calcScriptDownButton" dojoType="dijit.form.Button" disabled="true">
 				Вниз
 				<script type="dojo/connect" event="onClick">
-					${namespace}_swapSelectedItem(${namespace}_calcScriptsGrid, 'order', 1);
+					aplana_moveGridSelectedItem(${namespace}_calcScriptsGrid, 'order', 1);
 				</script>
 			</button>
 			<div id="${namespace}_calcScriptsGridDiv"></div>
