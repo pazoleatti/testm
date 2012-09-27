@@ -1,4 +1,4 @@
-dojo.require('dijit.form.Select');
+dojo.require('dijit.form.FilteringSelect');
 dojo.require('dojox.data.JsonRestStore');
 dojo.require('dijit.form.NumberTextBox');
 dojo.require('dojox.grid.cells.dijit');
@@ -50,11 +50,12 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 						idAttribute: 'value'
 					});
 					d.type = dojox.grid.cells._Widget;
-					d.widgetClass = dijit.form.Select;
+					d.widgetClass = dijit.form.FilteringSelect;
 					d.widgetProps = {
 						store: store,
+						searchAttr: 'value',
 						valueAttr: 'value'
-					}
+					};
 				}
 			}
 			columnDescriptors.push(d);
