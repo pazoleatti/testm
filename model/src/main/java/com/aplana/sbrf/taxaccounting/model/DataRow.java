@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,7 +40,11 @@ public class DataRow implements Map<String, Object>, Ordered {
 	
 	public DataRow(Form form) {
 		this.form = form;
-		data = new HashMap<String, Object>();
+		List<Column> columns = form.getColumns();
+		data = new HashMap<String, Object>(columns.size());
+		for (Column col: columns) {
+			data.put(col.getAlias(), null);
+		}
 	}
 
 	public String getAlias() {
