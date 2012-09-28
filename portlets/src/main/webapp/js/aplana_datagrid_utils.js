@@ -125,3 +125,28 @@ var aplana_getGridSelectedItem = function(grid) {
 	}
 	return selectedItems[0];
 };
+
+/**
+ * Осуществляет в хранилище данных поиск максимального значения числового поля
+ * Ожидается, что все значения этого поля в хранилище больше нуля, если хранилище пустое, то вернёт 0,
+ * также ожидается, что у всех объектов в хранилище значение этого поля будет определено.
+ * Параметры: store - хранилище, field - имя поля, значения которого будут просматриваться.
+ * Возвращает Deferred-объект, в который передаётся число - максимальное найденное значение поля field в хранилище
+ * store или 0, если хранилище пустое. 
+ */
+var aplana_findStoreMaxValue = function(store, field) {
+	var dfd = new dojo.Deferred();
+	store.fetch({
+		max: 0,
+		onItem: function(item, request) {
+			var val = store.getValue(item, field);
+			if (request.max < val) {
+				request.max = val;
+			}
+		},
+		onComplete: function(items, request) {
+			dfd.callback(request.max);
+		}
+	});
+	return dfd;
+};

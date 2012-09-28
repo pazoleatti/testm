@@ -73,28 +73,21 @@
 		<div dojoType="dijit.layout.ContentPane" region="left" style="width: 270px;">
 			<button jsId="${namespace}_addRowScriptButton" dojoType="dijit.form.Button">
 				Добавить
-				<script type="dojo/connect" event="onClick">							
-					${namespace}_calcScriptsGrid.store.fetch({
-						maxOrder: 1,
-						onItem: function(item, request) {
-							var ord = ${namespace}_calcScriptsGrid.store.getValue(item, 'order');
-							if (request.maxOrder < ord) {
-								request.maxOrder = ord;
-							}
-						},
-						onComplete: function(items, request) {
-							var newScript = {
-								id: ${namespace}_generateId(),
-								name: 'Новый скрипт',
-								rowScript: true,
-								condition: '',
-								order: request.maxOrder + 1,
-								body: ''
-							};
-							var newItem = ${namespace}_calcScriptsGrid.store.newItem(newScript);
-							var newItemRowIndex = ${namespace}_calcScriptsGrid.getItemIndex(newItem);
-							${namespace}_calcScriptsGrid.selection.select(newItemRowIndex);
-						}
+				<script type="dojo/connect" event="onClick">
+					var store = ${namespace}_calcScriptsGrid.store;
+					aplana_findStoreMaxValue(store, 'order').addCallback(function(maxOrder) {
+						++maxOrder;
+						var newScript = {
+							id: ${namespace}_generateId(),
+							name: 'Новый скрипт ' + maxOrder,
+							rowScript: true,
+							condition: '',
+							order: maxOrder + 1,
+							body: ''
+						};
+						var newItem = store.newItem(newScript);
+						var newItemRowIndex = ${namespace}_calcScriptsGrid.getItemIndex(newItem);
+						${namespace}_calcScriptsGrid.selection.select(newItemRowIndex);
 					});
 				</script>
 			</button>
@@ -102,6 +95,7 @@
 				Удалить
 				<script type="dojo/connect" event="onClick">
 					var rowIndex = ${namespace}_calcScriptsGrid.getItemIndex(${namespace}_calcScriptsGrid.selectedScriptItem);
+
 					${namespace}_calcScriptsGrid.store.deleteItem(${namespace}_calcScriptsGrid.selectedScriptItem);
 					${namespace}_calcScriptsGrid.selectedScriptItem = null;
 					if (${namespace}_calcScriptsGrid.rowCount > 0) {

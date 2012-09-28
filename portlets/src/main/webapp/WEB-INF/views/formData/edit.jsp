@@ -80,24 +80,15 @@
 <button dojoType="dijit.form.Button">
 	Добавить строку
 	<script type="dojo/connect" event="onClick">
-		var store = ${namespace}_grid.store; 
-		store.fetch({
-			maxOrder: 0,
-			onItem: function(item, request) {
-				var ord = store.getValue(item, 'order');
-				if (request.maxOrder < ord) {
-					request.maxOrder = ord;
-				}
-			},
-			onComplete: function(items, request) {
-				var order = request.maxOrder + 1;
-				var newItem = {
-					alias: '' + order,
-					order: order
-				};
-				dojo.mixin(newItem, ${namespace}_grid.rowItemPrototype);
-				store.newItem(newItem);
-			}
+		var store = ${namespace}_grid.store;
+		aplana_findStoreMaxValue(store, 'order').addCallback(function(maxOrder) { 
+			++maxOrder;
+			var newItem = {
+				alias: '' + maxOrder,
+				order: maxOrder
+			};
+			dojo.mixin(newItem, ${namespace}_grid.rowItemPrototype);
+			store.newItem(newItem);
 		});
 	</script>
 </button>

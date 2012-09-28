@@ -127,28 +127,21 @@
 				<button dojoType="dijit.form.Button">
 					Добавить столбец
 					<script type="dojo/connect" event="onClick">
-						${namespace}_columnsGrid.store.fetch({
-							maxOrder: 1,
-							onItem: function(item, request) {
-								var ord = ${namespace}_columnsGrid.store.getValue(item, 'order');
-								if (request.maxOrder < ord) {
-									request.maxOrder = ord;
-								}
-							},
-							onComplete: function(items, request) {
-								var col = {
-									id: ${namespace}_generateId(),
-									name: 'Новый столбец',
-									alias: 'column' + request.maxOrder,
-									type: 'string',
-									width: 5,
-									mandatory: false,
-									editable: true,
-									order: request.maxOrder + 1
-								};
-								var item = ${namespace}_columnsGrid.store.newItem(col);
-								${namespace}_columnsGrid.selection.select(${namespace}_columnsGrid.rowCount);
-							}
+						var store = ${namespace}_columnsGrid.store;
+						aplana_findStoreMaxValue(store, 'order').addCallback(function(maxOrder) {
+							++maxOrder;
+							var col = {
+								id: ${namespace}_generateId(),
+								name: 'Новый столбец',
+								alias: 'column' + maxOrder,
+								type: 'string',
+								width: 5,
+								mandatory: false,
+								editable: true,
+								order: maxOrder
+							};
+							var item = store.newItem(col);
+							${namespace}_columnsGrid.selection.select(${namespace}_columnsGrid.rowCount);
 						});
 					</script>							
 				</button>
@@ -163,7 +156,7 @@
 							store.deleteItem(columnItem);
 							${namespace}_selectColumn();
 						}
-							${namespace}_rowsStore.fetch({
+						${namespace}_rowsStore.fetch({
 							onItem: function(item, request) {
 								store.unsetAttribute(item, alias);
 							}
