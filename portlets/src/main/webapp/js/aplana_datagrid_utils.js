@@ -9,10 +9,10 @@ dojo.require('dojox.grid.cells.dijit');
  * в котором определены все поля, отображаемые в таблице
  * 
  * Возвращает Deferred-объект, в который передаётся объект с двумя полями:
- * columnDescriptors - список описателей столбцов формы
+ * structure - описатель структуры таблицы для создания DataGrid
  * rowItemPrototype - шаблон объекта для добавления новой строки в таблицу
  */
-var aplana_createGridColumnDescriptors = function(columnsStore, context) {
+var aplana_createGridColumnDescriptors = function(columnsStore, context, additionalColumns) {
 	var formatDate = function(inDatum){
 		if (!inDatum || inDatum == null || inDatum == '') {
 			return '';
@@ -26,13 +26,20 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 		return inDatum;
 	};
 	var dfd = new dojo.Deferred();
-	var columnDescriptors = new Array();
+	var columnDescriptors;
+	if (additionalColumns) {
+		columnDescriptors = additionalColumns;
+	} else {
+		columnDescriptors = new Array();
+	}
 	var rowItemPrototype = new Object();
+	var needGrouping = false;
 	columnsStore.fetch({
 		sort: [{attribute: 'order'}],
 		onItem: function(item, request) {
 			var field = columnsStore.getValue(item, 'alias');
 			rowItemPrototype[field] = null;
+
 			var d = {
 				name: columnsStore.getValue(item, 'name'),
 				field: field,
@@ -71,11 +78,67 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context) {
 					};
 				}
 			}
+			var groupName = columnsStore.getValue(item, 'groupName');
+			if (groupName) {
+				needGrouping = true;
+			}
+			d.groupName = groupName;
 			columnDescriptors.push(d);
 		},
 		onComplete: function(items, request) {
+			var structure;
+			if (needGrouping) {
+				var columnGroups = new Array();
+				/*
+					Для решения проблем с группировкой колонок в dojo используется хак: фиктивная строка с пустыми значениями,
+					см. http://dojo-toolkit.33424.n3.nabble.com/Dojo-Grid-Header-Column-Grouping-td926925.html
+				 */
+				var fakeColumns = new Array();				
+				var previousGroupName = null;
+				var currentGroup = null;
+				var i = 0;
+				dojo.forEach(columnDescriptors, function(cd) {
+					fakeColumns.push({
+						width: cd.width
+					});
+					if (cd.groupName) {
+						if (cd.groupName == previousGroupName) {
+							currentGroup.width += cd.width;
+							if (currentGroup.colSpan) {
+								++currentGroup.colSpan;	
+							} else {
+								currentGroup.colSpan = 2;
+							}							
+						} else {
+							currentGroup = {
+								styles: 'text-align: center;',
+								cellStyles: 'display: none;',
+								name: cd.groupName
+							};
+							columnGroups.push(currentGroup);
+						}						
+					} else {
+						columnGroups.push({cellStyles: 'display: none;'});						
+						currentGroup = null;
+					}
+					previousGroupName = cd.groupName;
+					delete cd.groupName;
+					++i;
+				});
+				structure = [{
+					cells: [fakeColumns, columnGroups, columnDescriptors],
+					onBeforeRow: function(inDataIndex, inSubRows){
+				        inSubRows[0].invisible = true;
+				    }
+				}];
+			} else {
+				structure = [{ 
+					cells: columnDescriptors 
+				}];
+			}
+			
 			dfd.callback({
-				columnDescriptors: columnDescriptors, 
+				structure: structure, 
 				rowItemPrototype: rowItemPrototype
 			});
 		}

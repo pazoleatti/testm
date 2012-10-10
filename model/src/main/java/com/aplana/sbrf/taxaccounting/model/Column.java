@@ -14,6 +14,7 @@ public abstract class Column implements Ordered {
 	private boolean editable;
 	private boolean mandatory;
 	private int order;
+	private String groupName;
 	
 	/**
 	 * Идентификатор столбца в БД
@@ -68,5 +69,13 @@ public abstract class Column implements Ordered {
 
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 }

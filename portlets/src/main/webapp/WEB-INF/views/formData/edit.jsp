@@ -53,12 +53,13 @@
 		var columnsStore = new dojo.data.ItemFileReadStore({
 			data: ${formColumnsData}
 		});
+
 		aplana_createGridColumnDescriptors(columnsStore, '<%=request.getContextPath()%>').addCallback(function(params){
 			columnsStore.close();
 			${namespace}_grid = new dojox.grid.DataGrid({
 				id: '${namespace}_grid',
 				store: ${namespace}_store,
-				structure: [params.columnDescriptors],
+				structure: params.structure,
 				rowHeight: 25,				
 				autoHeight: true,
 				autoWidth: true,
@@ -73,7 +74,7 @@
 			{ url: '${logUrl}'}, 
 			dojo.byId('${namespace}_loggerPane')
 		);
-        ${namespace}_loggerPane.reload();
+		${namespace}_loggerPane.reload();
 	});
 </script>
 <div>

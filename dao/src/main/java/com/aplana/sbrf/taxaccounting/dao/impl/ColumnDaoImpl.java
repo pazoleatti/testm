@@ -51,6 +51,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setEditable(rs.getBoolean("editable"));
 			result.setMandatory(rs.getBoolean("mandatory"));
 			result.setOrder(rs.getInt("order"));
+			result.setGroupName(rs.getString("group_name"));
 			return result;
 		}
 	}
@@ -113,8 +114,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 		
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, order) " +
-			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, order, group_name) " +
+			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {					 
@@ -139,6 +140,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					}
 					
 					ps.setInt(9, col.getOrder());
+					ps.setString(10, col.getGroupName());
 				}
 				
 				@Override
@@ -150,7 +152,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		
 		
 		jt.batchUpdate(
-			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, order = ? " +
+			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, order = ?, group_name = ? " +
 			"where id = ?",
 			new BatchPreparedStatementSetter() {
 				@Override
@@ -173,7 +175,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						ps.setNull(8, Types.VARCHAR);
 					}
 					ps.setInt(9, col.getOrder());
-					ps.setInt(10, col.getId());
+					ps.setString(10, col.getGroupName());
+					ps.setInt(11, col.getId());
 				}
 				
 				@Override

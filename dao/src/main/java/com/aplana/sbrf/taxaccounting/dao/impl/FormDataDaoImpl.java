@@ -63,7 +63,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			new FormDataRowMapper()
 		);
 		
-		final Map<Long, String> rowIdToAlias = new HashMap<Long, String>();
+		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
 		
 		jt.query(
 			"select * from data_row where form_data_id = ? order by order",
@@ -73,8 +73,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				public void processRow(ResultSet rs) throws SQLException {
 					Long rowId = rs.getLong("id");
 					String alias = rs.getString("alias");
-					rowIdToAlias.put(rowId, alias);
 					DataRow row = formData.appendDataRow(alias);
+					rowIdToAlias.put(rowId, row);
 					row.setOrder(rs.getInt("order"));
 				}
 			}
@@ -86,7 +86,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		return formData;
 	}
 	
-	private void readValues(String tableName, final Map<Long, String> rowIdToAlias, final FormData formData) {
+	private void readValues(String tableName, final Map<Long, DataRow> rowMap, final FormData formData) {
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 			new Object[] { formData.getId() },
@@ -97,9 +97,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					Long rowId = rs.getLong("row_id");
 					Object value = rs.getObject("value");
 					if (value != null) {
-						String rowAlias = rowIdToAlias.get(rowId);
+						DataRow row = rowMap.get(rowId);
 						String columnAlias = formData.getForm().getColumn(columnId).getAlias();
-						formData.getDataRow(rowAlias).put(columnAlias, value);
+						row.put(columnAlias, value);
 					}
 				}
 			}

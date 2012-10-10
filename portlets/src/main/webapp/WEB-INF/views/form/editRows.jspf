@@ -1,22 +1,25 @@
 <%@ page contentType="text/html; UTF-8" pageEncoding="UTF-8"%>
-<div dojoType="dijit.layout.ContentPane" title="Начальные данные">
-	<script type="dojo/connect" event="onShow">
+<script type="text/javascript">
+	var ${namespace}_onShowRowsPane = function() {
 		${namespace}_columnsGrid.acceptChanges();
-		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store, '<%=request.getContextPath()%>').addCallback(function(params) {
-			<%-- В режиме редактирования формы мы должны иметь возможность отредактировать любую ячейку в таблице--%>
-			var columnDescriptors = params.columnDescriptors; 
-			dojo.forEach(columnDescriptors, function(item) { item.editable = true; });
-			columnDescriptors.splice(
-				0, 
-				0, 
-				{field: 'alias', width: 10, name: 'Код строки', editable: true}, 
-				{field: 'order', width: 1, name: 'Порядок', styles: 'display: none;'}
-			);
+		var additionalColumns = [
+			{field: 'alias', width: 10, name: 'Код строки', editable: true, groupName: null}, 
+			{field: 'order', width: 1, name: 'Порядок', groupName: null}
+		];
+		aplana_createGridColumnDescriptors(${namespace}_columnsGrid.store, '<%=request.getContextPath()%>', additionalColumns).addCallback(function(params) {
+			// Прячём ячейку с полем order
+			dojo.forEach(params.structure[0].cells, function(row) {
+				row[1].styles = 'display: none;';
+				<%-- В режиме редактирования формы мы должны иметь возможность отредактировать любую ячейку в таблице--%>
+				dojo.forEach(row, function(item) {
+					item.editable = true; 
+				});				
+			});
 
 			if (${namespace}_rowsGrid == null) {
 				${namespace}_rowsGrid = new dojox.grid.DataGrid({
 					store: ${namespace}_rowsStore,
-					structure: [columnDescriptors],
+					structure: params.structure,
 					sortInfo: '2', <%-- сортируем по скрытому полю order --%>
 					autoHeight: true,
 					autoWidth: true,
@@ -33,13 +36,15 @@
 				${namespace}_rowsGrid.placeAt('${namespace}_rowsGridDiv');
 				${namespace}_rowsGrid.startup();
 			} else {
-				${namespace}_rowsGrid.attr('structure', [columnDescriptors]);
+				${namespace}_rowsGrid.attr('structure', params.structure);
 				${namespace}_rowsGrid._refresh(true);
 			}
 			${namespace}_rowsGrid.rowItemPrototype = params.rowItemPrototype;
-			return columnDescriptors;
+			return params;
 		});
-	</script>
+	}
+</script>
+<div dojoType="dijit.layout.ContentPane" title="Начальные данные" onShow="${namespace}_onShowRowsPane">
 	<button dojoType="dijit.form.Button">
 		Добавить строку
 		<script jsId="${namespace}_addRowButton" type="dojo/connect" event="onClick">

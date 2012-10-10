@@ -20,6 +20,7 @@
 			var store = ${namespace}_columnsGrid.store;
 			dojo.style(div, 'display', 'block');
 			${namespace}_columnName.attr('value', store.getValue(columnItem, 'name'));
+			${namespace}_columnGroupName.attr('value', store.getValue(columnItem, 'groupName'));
 			${namespace}_columnAlias.attr('value', store.getValue(columnItem, 'alias'));
 			${namespace}_columnWidth.attr('value', store.getValue(columnItem, 'width'));
 			${namespace}_columnEditable.attr('value', store.getValue(columnItem, 'editable'));
@@ -78,6 +79,7 @@
 			var oldType = store.getValue(columnItem, 'type');
 			
 			store.setValue(columnItem, 'name', ${namespace}_columnName.attr('value'));
+			store.setValue(columnItem, 'groupName', ${namespace}_columnGroupName.attr('value'));
 			var alias = ${namespace}_columnAlias.attr('value');
 			store.setValue(columnItem, 'alias', alias);
 			store.setValue(columnItem, 'width', ${namespace}_columnWidth.attr('value'));
@@ -185,6 +187,10 @@
 						<td>Название</td>
 						<td><input jsId="${namespace}_columnName" dojoType="dijit.form.Textarea" class="value"/></td>
 					</tr>
+					<tr>
+						<td>Группа</td>
+						<td><input jsId="${namespace}_columnGroupName" dojoType="dijit.form.Textarea" class="value"/></td>
+					</tr>					
 					<tr>
 						<td>Алиас</td>
 						<td><input jsId="${namespace}_columnAlias" dojoType="dijit.form.TextBox" class="value"/></td>
