@@ -9,7 +9,7 @@
 	<version>${project.version}</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>model</module>
+		<module>core</module>
 		<module>portlets</module>
 		<module>dao</module>
 		<module>taxaccounting-ear</module>
