@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>model</artifactId>
+			<artifactId>core</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
 		<dependency>

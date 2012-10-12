@@ -13,7 +13,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry excluding="**/*.java" including="**/*.java" kind="src" path="src/main/resources"/>
-	<classpathentry kind="src" path="/model"/>
+	<classpathentry kind="src" path="/core"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v70/wps.base.v70">
 		<attributes>
 			<attribute name="owner.project.facets" value="jst.web"/>
