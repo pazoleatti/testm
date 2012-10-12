@@ -48,7 +48,7 @@ public class FormDataScriptingService implements ApplicationContextAware {
 		
 		Script createScript = form.getCreateScript();
 		if (createScript != null && createScript.getBody() != null) {
-			ScriptEngine engine = getScriptEngine();		
+			ScriptEngine engine = getScriptEngine();
 			engine.put("logger", logger);
 			engine.put("formData", result);
 			try {
@@ -165,14 +165,5 @@ public class FormDataScriptingService implements ApplicationContextAware {
 		context = context.getParent();
 		scriptExposedBeans = new ConcurrentHashMap<String, Object>();
 		scriptExposedBeans.putAll(context.getBeansOfType(ScriptExposed.class));
-		/*
-		String[] beanNames = context.getBeanDefinitionNames();
-		for (String beanName: beanNames) {
-			Object bean = context.getBean(beanName);
-			if (bean instanceof ScriptExposed) {
-				scriptExposedBeans.put(beanName, bean);
-				System.out.println("--> name: " + beanName + ", class = " + bean.getClass().getName());
-			}
-		}*/		
 	}
 }
