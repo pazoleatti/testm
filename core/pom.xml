@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.aplana.taxaccounting</groupId>
-	<artifactId>model</artifactId>
-	<name>model</name>
+	<artifactId>core</artifactId>
+	<name>core</name>
 	<parent>
     	<groupId>com.aplana</groupId>
     	<artifactId>taxaccounting</artifactId>
