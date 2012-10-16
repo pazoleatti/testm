@@ -5,8 +5,6 @@
 	xmlns:jee="http://www.springframework.org/schema/jee"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:context="http://www.springframework.org/schema/context" 
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:cache="http://www.springframework.org/schema/cache"
 	
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -28,53 +26,6 @@
 	
 	<context:annotation-config/>
 
-	<!-- Caching -->
-	<cache:annotation-driven/>
-	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
-		<property name="caches">
-			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="FormType"/>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="Form"/>
-			</set>
-		</property>
-	</bean>
-	
-	<!-- Database and transactions -->
+	<!-- Datasource ref -->
 	<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS"/>
-	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-		<constructor-arg index="0" ref="dataSource"/>
-	</bean>
-	<tx:jta-transaction-manager/>	
-	<tx:annotation-driven/>	
-	
-	<!-- JDBC-based DAOs -->
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.dictionary.impl"/>
-
-	<!--  MyBatis configuration and DAOs--> 	
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-  		<property name="basePackage" value="com.aplana.sbrf.taxaccounting.dao.dictionary.mapper" />
-	</bean>
-
-	<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryManager">
-		<property name="dataProviders">
-			<map>
-				<entry key="transportTypeCode">
-					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
-						p:dictionaryName="Коды видов ТС"
-						p:sqlQuery="select code as value, name from transport_type_code order by code"
-					/>
-				</entry>
-				<entry key="transportOkato">				
-					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
-						p:dictionaryName="Коды ОКАТО"
-						p:sqlQuery="select okato as value, name from transport_okato order by okato"
-					/>
-				</entry>
-			</map>
-		</property>
-	</bean>
 </beans>
