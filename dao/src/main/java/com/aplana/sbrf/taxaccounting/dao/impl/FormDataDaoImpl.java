@@ -38,7 +38,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			long formDataId = rs.getLong("id");
 			int formId = rs.getInt("form_id");
 			Form form = formDao.getForm(formId);
-			return new FormData(formDataId, form);
+			FormData fd = new FormData();
+			fd.setForm(form);
+			fd.setId(formDataId);
+			return fd;
 		}
 	}
 	
