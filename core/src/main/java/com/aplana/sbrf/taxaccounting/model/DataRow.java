@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -26,13 +27,25 @@ import com.aplana.sbrf.taxaccounting.util.Ordered;
  * на соответствие типу соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не позволяет 
  * добавлять в строку данные по столбцам, которые отсутствуют в определении формы
  * Для некоторых числовых типов реализовано автоматическое приведение к BigDecimal.
+ *
+ * Для облегчения идентификации нужной строки среди строк данных по форме, можно использовать строковые алиасы. Их стоит использовать
+ * для строк, несущих особую смысловую нагрузку (например "Итого" и т.п.).
+ * 
+ * У объекта данного класса обязательно должно быть проинициализировано значение поля form. Этого можно достичь либо 
+ * создав объект вызовом конструктора, принимающего объект {@link Form}, либо использовать конструктор по-умолчанию и после этого
+ * вызвать метод {@linkplain #setForm}.
  */
-public class DataRow implements Map<String, Object>, Ordered {
-	private final Form form;
-	private final Map<String, Object> data;
+public class DataRow implements Map<String, Object>, Ordered, Serializable {
+	private static final long serialVersionUID = 1L;
+	private Form form;
+	private Map<String, Object> data;
 	private String alias;
 	private int order;
 
+	public DataRow() {
+		
+	}
+	
 	public DataRow(String alias, Form form) {
 		this(form);
 		this.alias = alias;
@@ -47,6 +60,10 @@ public class DataRow implements Map<String, Object>, Ordered {
 		}
 	}
 
+	public void setForm(Form form) {
+		this.form = form;
+	}
+	
 	public String getAlias() {
 		return alias;
 	}

@@ -1,12 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Столбец таблицы в объявлении налоговой формы
  * @author dsultanbekov
  */
-public abstract class Column implements Ordered {
+public abstract class Column implements Ordered, Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private int id;
 	private String name;
 	private String alias;

@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-public class FormType {
+import java.io.Serializable;
+
+public class FormType implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private int id;
 	private String name;
 	

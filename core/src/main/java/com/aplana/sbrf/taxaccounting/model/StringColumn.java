@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-public class StringColumn extends Column {
+import java.io.Serializable;
+
+public class StringColumn extends Column  implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private String dictionaryCode;
 
 	public String getDictionaryCode() {

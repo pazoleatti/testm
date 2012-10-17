@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,9 @@ import java.util.List;
  * Описание налоговой формы
  * @author dsultanbekov
  */
-public class Form {
+public class Form implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private Integer id;
 	private final List<Column> columns = new ArrayList<Column>();
 	private FormType type;

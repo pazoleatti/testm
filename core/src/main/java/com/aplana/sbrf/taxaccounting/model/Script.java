@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Скрипт 
  */
-public class Script implements Ordered {
+public class Script implements Ordered, Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private int id;
 	private String body;
 	

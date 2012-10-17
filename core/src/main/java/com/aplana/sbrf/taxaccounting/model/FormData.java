@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,20 +8,19 @@ import java.util.List;
  * Данные по отчётной форме
  * @author dsultanbekov
  */
-public class FormData {
+public class FormData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private Long id;
-	private final Form form;
-	private final List<DataRow> dataRows = new ArrayList<DataRow>();
-	
-	public FormData(Long id, Form form) {
-		this.id = id;
-		this.form = form;
+	private Form form;
+	private List<DataRow> dataRows;
+
+	public FormData() {
 	}
 	
 	public FormData(Form form) {
-		this(null, form);
+		setForm(form);
 	}
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -32,6 +32,23 @@ public class FormData {
 	public Form getForm() {
 		return form;
 	}
+
+	/**
+	 * Установить налоговую форму.
+	 * Этот метод нужно обязательно вызвать перед любым обращением к данным формы
+	 * Вызвать этот метод можно только один раз для каждого объекта, попытка вызвать его повторно приведёт к 
+	 * исключению IllegalStateException. 
+	 * @param form налоговая форма
+	 * @throws IllegalStateException если значение поля form уже было проинициализировано 
+	 */
+	public void setForm(Form form) {
+		if (form != null) {
+			throw new IllegalStateException("Form field is already initialized in this FormData instance");
+		}
+		dataRows = new ArrayList<DataRow>();
+		this.form = form;
+	}
+	
 
 	public List<DataRow> getDataRows() {
 		return dataRows;
