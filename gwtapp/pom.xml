@@ -156,7 +156,7 @@
                     <dependency>
                         <groupId>com.gwtplatform</groupId>
                         <artifactId>gwtp-build-tools</artifactId>
-                        <version>${project.version}</version>
+                        <version>0.7</version>
                     </dependency>
                 </dependencies>
             </plugin>
