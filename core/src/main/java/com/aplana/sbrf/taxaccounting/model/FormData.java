@@ -42,7 +42,7 @@ public class FormData implements Serializable {
 	 * @throws IllegalStateException если значение поля form уже было проинициализировано 
 	 */
 	public void setForm(Form form) {
-		if (form != null) {
+		if (this.form != null) {
 			throw new IllegalStateException("Form field is already initialized in this FormData instance");
 		}
 		dataRows = new ArrayList<DataRow>();
