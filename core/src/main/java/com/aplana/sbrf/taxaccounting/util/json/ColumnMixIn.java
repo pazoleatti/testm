@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.util;
+package com.aplana.sbrf.taxaccounting.util.json;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonSubTypes.Type;

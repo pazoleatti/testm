@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.util.ColumnMixIn;
+import com.aplana.sbrf.taxaccounting.util.json.ColumnMixIn;
 
 public class ColumnJsonTest {
 	@Test
