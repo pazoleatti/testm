@@ -28,7 +28,11 @@
 	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
-	<tx:jta-transaction-manager/>	
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<!-- <tx:jta-transaction-manager/>  --> 	
 	<tx:annotation-driven/>	
 	
 	<!-- JDBC-based DAOs -->
