@@ -1,13 +1,18 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
-import com.gwtplatform.mvp.client.ViewImpl;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewImpl;
 
 public class FormDataListView extends ViewImpl implements FormDataListPresenter.MyView {
 
@@ -22,7 +27,10 @@ public class FormDataListView extends ViewImpl implements FormDataListPresenter.
 			+ "  </tr>\n"
 			+ "  <tr>\n"
 			+ "    <td colspan=\"2\" style=\"color:red;\" id=\"errorLabelContainer\"></td>\n"
-			+ "  </tr>\n" + "</table>\n";
+			+ "  </tr>\n" 
+			+ "  <tr>\n"
+			+ "    <td colspan=\"2\" id=\"formDataListContainer\"></td>\n"
+			+ "  </tr>\n" +  "</table>\n";
 
 	private final HTMLPanel panel = new HTMLPanel(html);
 
@@ -72,5 +80,29 @@ public class FormDataListView extends ViewImpl implements FormDataListPresenter.
 	@Override
 	public void setError(String errorText) {
 		errorLabel.setText(errorText);
+	}
+
+	@Override
+	public void setFormDataList(List<FormData> records) {
+		System.out.println("records size is: " + records.size());
+		TextCell textCell = new TextCell();
+
+	    // Create a CellList that uses the cell.
+	    CellList<String> cellList = new CellList<String>(textCell);
+
+	    // Set the total row count. This isn't strictly necessary, but it affects
+	    // paging calculations, so its good habit to keep the row count up to date.
+	    cellList.setRowCount(records.size(), true);
+
+	    
+	    List<String> strings = new ArrayList<String>(records.size());
+	    for (FormData rec: records) {
+	    	strings.add(rec.getForm().getType().getName() + " " + rec.getId());
+	    }
+	    // Push the data into the widget.
+	    cellList.setRowData(0, strings);
+
+	    // Add it to the root panel.
+	    panel.add(cellList, "formDataListContainer");
 	}
 }

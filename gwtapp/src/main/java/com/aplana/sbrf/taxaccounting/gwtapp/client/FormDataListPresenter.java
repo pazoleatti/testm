@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.FieldVerifier;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataListResult;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataList;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.RecordList;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -40,6 +43,8 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 		void resetAndFocus();
 
 		void setError(String errorText);
+
+		void setFormDataList(List<FormData> records);
 	}
 
 	public static final String nameToken = "main";
@@ -102,20 +107,33 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 	protected void loadFormDataList() {
 		System.out.println("--> HERE!!! 1");
 		
-		dispatcher.execute(new GetFormDataList(), new AsyncCallback<RecordList<String>>() {
+		dispatcher.execute(new GetFormDataList(), new AsyncCallback<GetFormDataListResult>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				System.out.println("--> HERE!!! Failed: " + caught.getCause().getMessage());
+				System.out.println("--> HERE!!! Failed: " + caught.getMessage());
 				// TODO: log error
 				caught.printStackTrace();
 			}
 
 			@Override
-			public void onSuccess(RecordList<String> result) {
+			public void onSuccess(GetFormDataListResult result) {
 				// TODO: Заполнить табличку
-				System.out.println("--> HERE!!! 2: " + result.getRecords().size());
+				
+				if (result == null) {
+					System.out.println("RESULT IS NULL!!!");					
+				} else {
+					System.out.println("RESULT IS NOT NULL!!!");
+					if (result.getRecords() != null) {
+						getView().setFormDataList(result.getRecords());	
+					} else {
+						System.out.println("LIST IS NULL!!!");
+					}
+				}
+				
 			}
 		});
+		
+
 	}
 }
