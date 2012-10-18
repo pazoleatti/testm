@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
-import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Скрипт 

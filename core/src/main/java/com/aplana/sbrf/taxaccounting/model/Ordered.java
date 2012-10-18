@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.util;
+package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Интерфейс, представляющий сущность, у которой задан порядковый номер.

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.util;
 
 import java.util.Comparator;
 
+import com.aplana.sbrf.taxaccounting.model.Ordered;
+
 /**
  * Класс-компаратор для сортировки элементов, реализующих интерфейс {@link Ordered},
  * по возрастанию значения поля {@link Ordered#getOrder()}

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.util;
 import java.util.Collections;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.Ordered;
+
 public class OrderUtils {
 	/**
 	 * Сортирует коллекцию по возрастанию значения поля order,

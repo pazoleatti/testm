@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.util.Ordered;
 
 /**
  * Строка данных отчётной формы
