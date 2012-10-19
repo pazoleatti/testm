@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
 public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
@@ -49,7 +50,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		form.getCalcScripts().clear();
 		
 		getJdbcTemplate().query(
-			"select * from form_script where form_id = ?",
+			"select * from form_script where form_id = ? order by order",
 			new Object[] { form.getId() },
 			new int[] { Types.NUMERIC },
 			new RowCallbackHandler() {
@@ -113,6 +114,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 			}
 		}
 
+		OrderUtils.reorder(form.getCalcScripts());
 		for (Script calcScript: form.getCalcScripts()) {
 			int type = calcScript.isRowScript() ? ROW : CALC;
 			ScriptRecord rec = new ScriptRecord(calcScript.getId(), type, calcScript.getBody());
