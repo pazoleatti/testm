@@ -2,14 +2,15 @@ package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.FieldVerifier;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataListResult;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataList;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataListResult;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -36,15 +37,8 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataListPresenter}'s view.
 	 */
 	public interface MyView extends View {
-		String getName();
-
-		Button getSendButton();
-
-		void resetAndFocus();
-
-		void setError(String errorText);
-
 		void setFormDataList(List<FormData> records);
+		public <C> Column<FormData, C> addTableColumn(Cell<C> cell, String headerText, final ValueGetter<C> getter, FieldUpdater<FormData, C> fieldUpdater);
 	}
 
 	public static final String nameToken = "main";
@@ -54,8 +48,7 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 
 
 	@Inject
-	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher) {
+	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
@@ -64,20 +57,41 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 	@Override
 	protected void onBind() {
 		super.onBind();
-		registerHandler(getView().getSendButton().addClickHandler(
-				new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						sendNameToServer();
-					}
-				}));
+		// TODO: довольно коряво, проблема в том, у ActionCell нет методов для переопределения делегатов
+		// нужно как-то передалать.
+		// Также, нужно разобраться, нужно ли здесь делать registerHandler???
+		ActionCell<FormData> openFormDataCell = new ActionCell<FormData>(
+			"Открыть", 
+			new ActionCell.Delegate<FormData>() {
+				@Override
+				public void execute(FormData formData) {
+					String formDataId = formData.getId().toString();
+					Window.alert("Открываем запись с id = " + formDataId);
+					placeManager.revealPlace(
+						new PlaceRequest(FormDataPresenter.NAME_TOKEN).
+						with(FormDataPresenter.FORM_DATA_ID, formDataId)
+					);
+					
+				}
+			}
+		);
+		
+		getView().addTableColumn(
+			openFormDataCell,
+			"Action",
+			new ValueGetter<FormData>() {
+				@Override
+				public FormData getValue(FormData contact) {
+					return contact;
+				}
+			},
+			null
+		);
 	}
 
 	@Override
 	protected void onReset() {
 		super.onReset();
-		getView().resetAndFocus();
-		
 		loadFormDataList();
 	}
 
@@ -86,54 +100,17 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 		RevealRootContentEvent.fire(this, this);
 	}
 
-	/**
-	 * Send the name from the nameField to the server and wait for a response.
-	 */
-	protected void sendNameToServer() {
-		// First, we validate the input.
-		getView().setError("");
-		String textToServer = getView().getName();
-		if (!FieldVerifier.isValidName(textToServer)) {
-			getView().setError("Please enter at least four characters");
-			return;
-		}
-
-		// Then, we transmit it to the ResponsePresenter, which will do the server
-		// call
-		placeManager.revealPlace(new PlaceRequest(ResponsePresenter.NAME_TOKEN).with(
-			ResponsePresenter.textToServerParam, textToServer));
-	}
-	
 	protected void loadFormDataList() {
-		System.out.println("--> HERE!!! 1");
-		
 		dispatcher.execute(new GetFormDataList(), new AsyncCallback<GetFormDataListResult>() {
-
 			@Override
 			public void onFailure(Throwable caught) {
-				System.out.println("--> HERE!!! Failed: " + caught.getMessage());
-				// TODO: log error
 				caught.printStackTrace();
 			}
 
 			@Override
 			public void onSuccess(GetFormDataListResult result) {
-				// TODO: Заполнить табличку
-				
-				if (result == null) {
-					System.out.println("RESULT IS NULL!!!");					
-				} else {
-					System.out.println("RESULT IS NOT NULL!!!");
-					if (result.getRecords() != null) {
-						getView().setFormDataList(result.getRecords());	
-					} else {
-						System.out.println("LIST IS NULL!!!");
-					}
-				}
-				
+				getView().setFormDataList(result.getRecords());	
 			}
 		});
-		
-
 	}
 }

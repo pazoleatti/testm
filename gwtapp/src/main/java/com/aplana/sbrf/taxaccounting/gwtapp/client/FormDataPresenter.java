@@ -20,18 +20,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
 
-public class ResponsePresenter extends
-Presenter<ResponsePresenter.MyView, ResponsePresenter.MyProxy> {
+public class FormDataPresenter extends
+Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	/**
-	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.ResponsePresenter}'s proxy.
+	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataPresenter}'s proxy.
 	 */
 	@ProxyCodeSplit
 	@NameToken(NAME_TOKEN)
-	public interface MyProxy extends Proxy<ResponsePresenter>, Place {
+	public interface MyProxy extends Proxy<FormDataPresenter>, Place {
 	}
 
 	/**
-	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.ResponsePresenter}'s view.
+	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataPresenter}'s view.
 	 */
 	public interface MyView extends View {
 		Button getCloseButton();
@@ -41,9 +41,9 @@ Presenter<ResponsePresenter.MyView, ResponsePresenter.MyProxy> {
 		void setTextToServer(String textToServer);
 	}
 
-	public static final String NAME_TOKEN = "response";
+	public static final String NAME_TOKEN = "formData";
 
-	public static final String textToServerParam = "textToServer";
+	public static final String FORM_DATA_ID = "formDataId";
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
@@ -51,7 +51,7 @@ Presenter<ResponsePresenter.MyView, ResponsePresenter.MyProxy> {
 	private String textToServer;
 
 	@Inject
-	public ResponsePresenter(EventBus eventBus, MyView view, MyProxy proxy,
+	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
@@ -61,20 +61,19 @@ Presenter<ResponsePresenter.MyView, ResponsePresenter.MyProxy> {
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		textToServer = request.getParameter(textToServerParam, null);
+		textToServer = request.getParameter(FORM_DATA_ID, null);
 	}
 
 	@Override
 	protected void onBind() {
 		super.onBind();
 		registerHandler(getView().getCloseButton().addClickHandler(
-				new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						placeManager.revealPlace(new PlaceRequest(
-								FormDataListPresenter.nameToken));
-					}
-				}));
+			new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
+				}
+			}));
 	}
 
 	@Override
@@ -82,8 +81,7 @@ Presenter<ResponsePresenter.MyView, ResponsePresenter.MyProxy> {
 		super.onReset();
 		getView().setTextToServer(textToServer);
 		getView().setServerResponse("Waiting for response...");
-		dispatcher.execute(new SendTextToServer(textToServer),
-				new AsyncCallback<SendTextToServerResult>() {
+		dispatcher.execute(new SendTextToServer(textToServer), new AsyncCallback<SendTextToServerResult>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				getView().setServerResponse(

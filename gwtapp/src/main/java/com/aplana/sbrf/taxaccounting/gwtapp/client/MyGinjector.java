@@ -16,5 +16,5 @@ public interface MyGinjector extends Ginjector {
 
 	PlaceManager getPlaceManager();
 
-	AsyncProvider<ResponsePresenter> getResponsePresenter();
+	AsyncProvider<FormDataPresenter> getResponsePresenter();
 }

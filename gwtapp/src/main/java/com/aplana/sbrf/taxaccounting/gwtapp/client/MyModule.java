@@ -14,7 +14,7 @@ public class MyModule extends AbstractPresenterModule {
 		bindPresenter(FormDataListPresenter.class, FormDataListPresenter.MyView.class,
 				FormDataListView.class, FormDataListPresenter.MyProxy.class);
 
-		bindPresenter(ResponsePresenter.class, ResponsePresenter.MyView.class,
-				ResponseView.class, ResponsePresenter.MyProxy.class);
+		bindPresenter(FormDataPresenter.class, FormDataPresenter.MyView.class,
+				FormDataView.class, FormDataPresenter.MyProxy.class);
 	}
 }

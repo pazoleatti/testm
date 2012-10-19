@@ -9,9 +9,7 @@ public class TaxAccounting implements EntryPoint {
 	public final MyGinjector ginjector = GWT.create(MyGinjector.class);
 
 	public void onModuleLoad() {
-
 		DelayedBindRegistry.bind(ginjector);
-
 		ginjector.getPlaceManager().revealCurrentPlace();
 	}
 }

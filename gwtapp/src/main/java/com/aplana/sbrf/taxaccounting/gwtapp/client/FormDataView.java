@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-public class ResponseView extends ViewImpl implements ResponsePresenter.MyView {
+public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 
 	private static String html = "<h1>Remote Procedure Call</h1>\n"
 			+ "<table align=\"center\">\n" + "  <tr>\n"
@@ -30,7 +30,7 @@ public class ResponseView extends ViewImpl implements ResponsePresenter.MyView {
 	private final Label textToServerLabel;
 
 	@Inject
-	public ResponseView() {
+	public FormDataView() {
 		closeButton = new Button("Close");
 		// We can set the id of a widget by accessing its Element
 		closeButton.getElement().setId("closeButton");
