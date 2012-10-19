@@ -29,10 +29,6 @@
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
 	
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-  		<property name="dataSource" ref="dataSource"/>
-	</bean>
-	<!-- <tx:jta-transaction-manager/>  --> 	
 	<tx:annotation-driven/>	
 	
 	<!-- JDBC-based DAOs -->
