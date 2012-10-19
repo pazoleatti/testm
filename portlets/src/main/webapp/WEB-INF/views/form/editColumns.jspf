@@ -44,7 +44,7 @@
 	var ${namespace}_showColumnProperties = function(type) {
 		dojo.style(dojo.byId('${namespace}_columnPrecisionRow'), 'display', type == 'numeric' ? '' : 'none');
 		dojo.style(dojo.byId('${namespace}_columnStringDictionaryRow'), 'display', type == 'string' ? '' : 'none');
-	}
+	};
 
 	dojo.addOnLoad(function() {
 		var store = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: ${namespace}_form.columns}});

@@ -133,7 +133,7 @@ var aplana_createGridColumnDescriptors = function(columnsStore, context, additio
 				}];
 			} else {
 				structure = [{ 
-					cells: columnDescriptors 
+					cells: [columnDescriptors] 
 				}];
 			}
 			

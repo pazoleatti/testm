@@ -132,6 +132,8 @@
 		${namespace}_rowsStore = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: ${namespace}_formRows}});
 		${namespace}_rowsStore._saveEverything = function(saveCompleteCallback, saveFailedCallback, newFileContentString) {
 			${namespace}_formRows = dojo.fromJson(newFileContentString).items;
+			<%-- Удаляем ключи, добавленные для корректной работы dojo store --%>
+			dojo.forEach(${namespace}_formRows, function(row) { delete row.id; });
 		};
 		<%--
 			Фетчим данные по предопределённым строкам формы. Если этого не сделать, то при вызове _saveEverything содержимое store
