@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
-	private Form form;
+	private transient Form form;
 	private Map<String, Object> data;
 	private String alias;
 	private int order;
