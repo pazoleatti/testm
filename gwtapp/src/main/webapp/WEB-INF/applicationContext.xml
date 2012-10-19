@@ -33,8 +33,12 @@
 		<property name="password" value="taxuser"/>
 		<property name="connectionProperties" value="currentSchema=TAX;currentFunctionPath=TAX;"/>
 	</bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  		<property name="dataSource" ref="dataSource"/>
+	</bean>
 
-	<!-- Datasource ref 
+	<!-- Datasource ref - Конфигурация для прода
 	<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
+	<tx:jta-transaction-manager/>
 	-->
 </beans>
