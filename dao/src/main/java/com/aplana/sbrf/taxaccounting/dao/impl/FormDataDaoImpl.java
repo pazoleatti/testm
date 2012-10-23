@@ -102,6 +102,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					if (value != null) {
 						DataRow row = rowMap.get(rowId);
 						String columnAlias = formData.getForm().getColumn(columnId).getAlias();
+						
+						// TODO: думаю, стоит зарефакторить
+						if (value instanceof java.sql.Date) {
+							value = new java.util.Date(((java.sql.Date)value).getTime());
+						}
+						
 						row.put(columnAlias, value);
 					}
 				}

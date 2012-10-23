@@ -41,7 +41,7 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 		public <C> Column<FormData, C> addTableColumn(Cell<C> cell, String headerText, final ValueGetter<C> getter, FieldUpdater<FormData, C> fieldUpdater);
 	}
 
-	public static final String nameToken = "main";
+	public static final String nameToken = "formDataList";
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatcher;

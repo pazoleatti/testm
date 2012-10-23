@@ -45,7 +45,7 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 	
 	@Override
 	public DataRow deserialize(JsonParser jp, DeserializationContext ctx) throws IOException, JsonProcessingException {
-		DataRow result = new DataRow(form);
+		DataRow result = new DataRow(form.getColumns());
 		jp.enable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
 		JsonToken token = jp.nextToken();
 		while (token != JsonToken.END_OBJECT && token != null) {

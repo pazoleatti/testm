@@ -12,12 +12,12 @@ public class Form implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
-	private final List<Column> columns = new ArrayList<Column>();
+	private List<Column> columns = new ArrayList<Column>();
 	private FormType type;
 	private String version;	
 	private Script createScript;
-	private final List<Script> calcScripts = new ArrayList<Script>();
-	private final List<DataRow> rows = new ArrayList<DataRow>();
+	private List<Script> calcScripts = new ArrayList<Script>();
+	private List<DataRow> rows = new ArrayList<DataRow>();
 	
 	public Integer getId() {
 		return id;

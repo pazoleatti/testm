@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,14 +29,13 @@ import java.util.Set;
  * Для облегчения идентификации нужной строки среди строк данных по форме, можно использовать строковые алиасы. Их стоит использовать
  * для строк, несущих особую смысловую нагрузку (например "Итого" и т.п.).
  * 
- * У объекта данного класса обязательно должно быть проинициализировано значение поля form. Этого можно достичь либо 
- * создав объект вызовом конструктора, принимающего объект {@link Form}, либо использовать конструктор по-умолчанию и после этого
- * вызвать метод {@linkplain #setForm}.
+ * Данный объект обязательно должен обладать сведениями о столбцах формы, к которой принадлежит строка.Этого можно достичь либо 
+ * создав объект вызовом конструктора, принимающего список {@link Column столбцов}, либо использовать конструктор по-умолчанию и после этого
+ * вызвать метод {@linkplain #setFormColumns}.
  */
 public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
-	private transient Form form;
-	private Map<String, Object> data;
+	private Map<String, CellValue> data;
 	private String alias;
 	private int order;
 
@@ -45,22 +43,53 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		
 	}
 	
-	public DataRow(String alias, Form form) {
-		this(form);
+	static class MapEntry implements Map.Entry<String, Object> {
+
+		private Map.Entry<String, CellValue> sourceEntry;
+		
+		private MapEntry(Map.Entry<String, CellValue> sourceEntry) {
+			this.sourceEntry = sourceEntry;
+		}
+		
+		@Override
+		public String getKey() {
+			return sourceEntry.getKey();
+		}
+
+		@Override
+		public Object getValue() {
+			CellValue value = sourceEntry.getValue(); 
+			return value == null ? null : value.getValue();
+		}
+
+		@Override
+		public Object setValue(Object value) {
+			throw new UnsupportedOperationException("not implemented yet");
+		}
+		
+	}
+	
+	public DataRow(String alias, List<Column> formColumns) {
+		this(formColumns);
 		this.alias = alias;
 	}
 	
-	public DataRow(Form form) {
-		this.form = form;
-		List<Column> columns = form.getColumns();
-		data = new HashMap<String, Object>(columns.size());
-		for (Column col: columns) {
-			data.put(col.getAlias(), null);
-		}
+	public DataRow(List<Column> formColumns) {
+		setFormColumns(formColumns);
 	}
 
-	public void setForm(Form form) {
-		this.form = form;
+	/**
+	 * Задать информацию о столбцах, допустимых в строке
+	 * Внимание: использование данного метода сбрасывает значение всех столбцов в строке в null
+	 * @param formColumns список столбцов
+	 */
+	public void setFormColumns(List<Column> formColumns) {
+		data = new HashMap<String, CellValue>(formColumns.size());
+		for (Column col: formColumns) {
+			CellValue cellValue = new CellValue();
+			cellValue.setColumn(col);
+			data.put(col.getAlias(), cellValue);
+		}
 	}
 	
 	public String getAlias() {
@@ -89,15 +118,26 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<String, Object>> entrySet() {
-		return data.entrySet();
+	public Set<Map.Entry<String, Object>> entrySet() {
+		Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
+		for(Map.Entry<String, CellValue> entry: data.entrySet()) {
+			entries.add(new MapEntry(entry));
+		}
+		return entries;
 	}
 
+	private CellValue getCellValue(String columnAlias) {
+		CellValue cellValue = data.get(columnAlias);
+		if (cellValue == null) {
+			throw new IllegalArgumentException("Wrong column alias: " + columnAlias);
+		}
+		return cellValue;
+	}
+	
 	@Override
 	public Object get(Object key) {
-		// Проверяем, что такой столбец есть, если нет, то получим IllegalArgumentException
-		form.getColumn((String)key);
-		return data.get(key);
+		CellValue cellValue = getCellValue((String)key);
+		return cellValue.getValue();
 	}
 
 	@Override
@@ -112,28 +152,8 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Object put(String key, Object value) {
-		// Если столбец не удастся найти, то получим исключение
-		// Это нормально - пользователь поймёт, что в скрипте ошибка
-		Column col = form.getColumn(key);
-		
-		if (value instanceof Integer) {
-			value = new BigDecimal((Integer)value);
-		} else if (value instanceof Double) {
-			value = new BigDecimal((Double)value);
-		} else if (value instanceof Long) {
-			value = new BigDecimal((Long)value);
-		}
-		
-		if (col instanceof NumericColumn && value != null) {
-			int precision = ((NumericColumn) col).getPrecision();
-			value = ((BigDecimal)value).setScale(precision, RoundingMode.HALF_UP); 
-		}
-		
-		if (value == null || value instanceof BigDecimal || value instanceof String || value instanceof Date) {
-			return data.put(key, value);				
-		} else {
-			throw new IllegalArgumentException("Values of type " + value.getClass().getName() + " are not supported");
-		}
+		CellValue cellValue = getCellValue((String)key);
+		return cellValue.setValue(value);
 	}
 
 	@Override
@@ -153,7 +173,11 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Collection<Object> values() {
-		return data.values();
+		List<Object> values = new ArrayList<Object>(data.size());
+		for (Map.Entry<String, CellValue> entry: data.entrySet()) {
+			values.add(entry.getValue().getValue());
+		}
+		return values;
 	}
 
 	@Override

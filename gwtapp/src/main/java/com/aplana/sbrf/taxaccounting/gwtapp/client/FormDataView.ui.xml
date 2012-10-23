@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+	<g:DockLayoutPanel unit="EM">
+		<g:center>			
+			<c:DataGrid ui:field="formDataTable" focus="true"></c:DataGrid>
+		</g:center>
+		<g:north size="1.0">
+			<g:FlowPanel>
+				<g:Label text="Информация о данных по налоговой форме" height="26px"/>
+			</g:FlowPanel>
+		</g:north>
+		<g:south size="1.0">
+			<g:AbsolutePanel>
+				<g:at left="0" top="0">
+					<g:Button ui:field="cancelButton">Отмена</g:Button>
+				</g:at>
+			</g:AbsolutePanel>
+		</g:south>
+	</g:DockLayoutPanel>
+</ui:UiBinder>
