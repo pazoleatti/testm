@@ -45,6 +45,43 @@
 		dojo.style(dojo.byId('${namespace}_columnPrecisionRow'), 'display', type == 'numeric' ? '' : 'none');
 		dojo.style(dojo.byId('${namespace}_columnStringDictionaryRow'), 'display', type == 'string' ? '' : 'none');
 	};
+	
+	var ${namespace}_addColumn = function() {
+		var store = ${namespace}_columnsGrid.store;
+		aplana_findStoreMaxValue(store, 'order').addCallback(function(maxOrder) {
+			++maxOrder;
+			var col = {
+				id: ${namespace}_generateId(),
+				name: 'Новый столбец',
+				alias: 'column' + maxOrder,
+				type: 'string',
+				width: 5,
+				mandatory: false,
+				editable: true,
+				order: maxOrder
+			};
+			var item = store.newItem(col);
+			${namespace}_columnsGrid.selection.select(${namespace}_columnsGrid.rowCount);
+		});
+	};
+	
+	var ${namespace}_removeColumn = function() {
+		var columnItem = aplana_getGridSelectedItem(${namespace}_columnsGrid);
+		var store = ${namespace}_columnsGrid.store;
+		var alias = store.getValue(columnItem, 'alias');
+		var name = store.getValue(columnItem, 'name');
+		if (!confirm('Вы уверены, что хотите удалить столбец "' + name + '"?')) {
+			return;
+		}
+		store.deleteItem(columnItem);
+		${namespace}_columnsGrid.selectedColumnItem = null; <%-- Это нужно, чтобы нормально отработал acceptChanges в selectColumn --%>
+		${namespace}_selectColumn();
+		${namespace}_rowsStore.fetch({
+			onItem: function(item, request) {
+				${namespace}_rowsStore.unsetAttribute(item, alias);
+			}
+		});
+	};
 
 	dojo.addOnLoad(function() {
 		var store = new dojo.data.ItemFileWriteStore({data: { identifier: 'id', items: ${namespace}_form.columns}});
@@ -126,46 +163,13 @@
 		<div dojoType="dijit.layout.ContentPane" region="top">
 			Список столбцов
 			<div style="float: right;">
-				<button dojoType="dijit.form.Button">
+				<button dojoType="dijit.form.Button" onClick="${namespace}_addColumn">
 					Добавить столбец
-					<script type="dojo/connect" event="onClick">
-						var store = ${namespace}_columnsGrid.store;
-						aplana_findStoreMaxValue(store, 'order').addCallback(function(maxOrder) {
-							++maxOrder;
-							var col = {
-								id: ${namespace}_generateId(),
-								name: 'Новый столбец',
-								alias: 'column' + maxOrder,
-								type: 'string',
-								width: 5,
-								mandatory: false,
-								editable: true,
-								order: maxOrder
-							};
-							var item = store.newItem(col);
-							${namespace}_columnsGrid.selection.select(${namespace}_columnsGrid.rowCount);
-						});
-					</script>							
 				</button>
-				<button jsId="${namespace}_removeColumnButton" dojoType="dijit.form.Button">
+				<button jsId="${namespace}_removeColumnButton" dojoType="dijit.form.Button" onClick="${namespace}_removeColumn">
 					Удалить столбец
-					<script type="dojo/connect" event="onClick">
-						var columnItem = aplana_getGridSelectedItem(${namespace}_columnsGrid);
-						var store = ${namespace}_columnsGrid.store;
-						var alias = store.getValue(columnItem, 'alias');
-						var name = store.getValue(columnItem, 'name');
-						if (confirm('Вы уверены, что хотите удалить столбец "' + name + '"?')) {
-							store.deleteItem(columnItem);
-							${namespace}_selectColumn();
-						}
-						${namespace}_rowsStore.fetch({
-							onItem: function(item, request) {
-								store.unsetAttribute(item, alias);
-							}
-						});
-					</script>
 				</button>
-				<button jsId="${namespace}_columnUpButton" dojoType="dijit.form.Button" disabled="true">
+				<button jsId="${namespace}_columnUpButton" dojoType="dijit.form.Button" disabled="true" onClick="">
 					Вверх
 					<script type="dojo/connect" event="onClick">
 						aplana_moveGridSelectedItem(${namespace}_columnsGrid, 'order', -1);
