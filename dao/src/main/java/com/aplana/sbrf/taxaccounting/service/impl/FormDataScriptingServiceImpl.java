@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.controller.formdata;
+package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,18 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.log.RowScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.log.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 @Service
-public class FormDataScriptingService implements ApplicationContextAware {
+public class FormDataScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
 	@Autowired
 	private FormDao formDao;
 	@Autowired
@@ -36,6 +39,10 @@ public class FormDataScriptingService implements ApplicationContextAware {
 	
 	private Map<String, Object> scriptExposedBeans;
 	
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
+	 */
+	@Override
 	public FormData createForm(Logger logger, int formId) {
 		Form form = formDao.getForm(formId);
 		FormData result = new FormData(form);
@@ -60,6 +67,10 @@ public class FormDataScriptingService implements ApplicationContextAware {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#processFormData(com.aplana.sbrf.taxaccounting.log.Logger, com.aplana.sbrf.taxaccounting.model.FormData)
+	 */
+	@Override
 	public void processFormData(Logger logger, FormData formData) {
 		Form form = formData.getForm();
 		ScriptEngine engine = getScriptEngine();
@@ -162,7 +173,6 @@ public class FormDataScriptingService implements ApplicationContextAware {
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		context = context.getParent();
 		scriptExposedBeans = new ConcurrentHashMap<String, Object>();
 		scriptExposedBeans.putAll(context.getBeansOfType(ScriptExposed.class));
 	}

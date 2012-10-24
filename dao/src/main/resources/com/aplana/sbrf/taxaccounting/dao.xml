@@ -30,10 +30,6 @@
 	</bean>
 	
 	<tx:annotation-driven/>	
-	
-	<!-- JDBC-based DAOs -->
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.dictionary.impl"/>
 
 	<!--  MyBatis configuration and DAOs--> 	
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
@@ -62,4 +58,11 @@
 			</map>
 		</property>
 	</bean>
+	
+	<!-- JDBC-based DAOs -->
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.dictionary.impl"/>
+	<!-- Services -->
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.impl"/>
+	
 </beans>

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.controller.formdata;
+package com.aplana.sbrf.taxaccounting.log;
 
 /**
  * Декоратор сообщений журнала, используемый при выполеннии проверок по строкам таблицы
