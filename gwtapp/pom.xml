@@ -137,7 +137,7 @@
   					<compileSourcesArtifacts>
           				<compileSourcesArtifact>${project.groupId}:core</compileSourcesArtifact>
         			</compileSourcesArtifacts>
-                    <extraJvmArgs>-Xmx4g</extraJvmArgs>
+                    <extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
                 </configuration>
             </plugin>
 

@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
+import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditDateColumn;
+import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditNumericColumn;
 import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditTextColumn;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -11,11 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -50,7 +47,6 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	
 	public void loadFormData(FormData formData) {
 		Form form = formData.getForm();
-		final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd.MM.YYYY");
 		System.out.println("Adding columns to formDataTable");
 		for (Column col: form.getColumns()) {
 			final String alias = col.getAlias();
@@ -59,21 +55,9 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			if (col instanceof StringColumn) {
 				tableCol = new EditTextColumn(alias);
 			} else if (col instanceof NumericColumn) {
-				tableCol = new TextColumn<DataRow>() {
-					@Override
-					public String getValue(DataRow object) {
-						BigDecimal value = (BigDecimal)object.get(alias);
-						return value == null ? null : String.valueOf(value.doubleValue());
-					}
-				};
+				tableCol = new EditNumericColumn(alias);
 			} else if (col instanceof DateColumn) {
-				tableCol = new TextColumn<DataRow>() {
-					@Override
-					public String getValue(DataRow object) {
-						Date value = (Date)object.get(alias);
-						return value == null ? null : dateFormat.format(value);
-					}
-				};
+				tableCol = new EditDateColumn(alias);
 			}
 			formDataTable.addColumn(tableCol, col.getName());
 		}

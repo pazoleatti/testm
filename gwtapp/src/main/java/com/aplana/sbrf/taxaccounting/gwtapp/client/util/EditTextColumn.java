@@ -1,21 +1,17 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client.util;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.user.cellview.client.Column;
 
 /** @author Vitalii Samolovskikh */
-public class EditTextColumn extends Column<DataRow, String> {
-    private String alias;
+public class EditTextColumn extends AliasedColumn<String> {
 
     public EditTextColumn() {
         super(new EditTextCell());
     }
 
     public EditTextColumn(String alias) {
-        super(new EditTextCell());
-        this.alias = alias;
+        super(new EditTextCell(), alias);
     }
 
     @Override
@@ -23,11 +19,4 @@ public class EditTextColumn extends Column<DataRow, String> {
         return String.valueOf(dataRow.get(alias));
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
 }
