@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.gwtapp.client;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditTextColumn;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
@@ -56,12 +57,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
 			System.out.println("adding column: " + col.getAlias());
 			if (col instanceof StringColumn) {
-				tableCol = new TextColumn<DataRow>() {
-					@Override
-					public String getValue(DataRow object) {
-						return (String)object.get(alias);
-					}
-				};
+				tableCol = new EditTextColumn(alias);
 			} else if (col instanceof NumericColumn) {
 				tableCol = new TextColumn<DataRow>() {
 					@Override
