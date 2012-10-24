@@ -136,7 +136,8 @@
                     <module>com.aplana.sbrf.taxaccounting.gwtapp.TaxAccounting</module>
   					<compileSourcesArtifacts>
           				<compileSourcesArtifact>${project.groupId}:core</compileSourcesArtifact>
-        			</compileSourcesArtifacts>                    
+        			</compileSourcesArtifacts>
+                    <extraJvmArgs>-Xmx4g</extraJvmArgs>
                 </configuration>
             </plugin>
 
