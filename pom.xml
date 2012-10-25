@@ -10,10 +10,11 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>core</module>
-		<module>portlets</module>
 		<module>dao</module>
-		<module>taxaccounting-ear</module>
-		<!-- 
+        <module>gwtapp</module>
+		<!--
+        <module>portlets</module>
+        <module>taxaccounting-ear</module>
 		<module>theme</module>
 		 -->
 	</modules>

@@ -21,8 +21,11 @@ public class SaveDataHandler extends AbstractActionHandler<SaveDataAction, SaveD
 
     @Override
     public SaveDataResult execute(SaveDataAction action, ExecutionContext context) throws ActionException {
-        service.processFormData(new Logger(), action.getFormData());
-        return new SaveDataResult();
+        Logger logger = new Logger();
+        service.processFormData(logger, action.getFormData());
+        SaveDataResult result = new SaveDataResult();
+        result.setLogEntries(logger.getEntries());
+        return result;
     }
 
     @Override

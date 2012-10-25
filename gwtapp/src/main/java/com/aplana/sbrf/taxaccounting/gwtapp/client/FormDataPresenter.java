@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataAction;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataResult;
+import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -109,7 +110,18 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
                         dispatcher.execute(action, new AsyncCallbackAdapter<SaveDataResult>(){
                             @Override
                             public void onSuccess(SaveDataResult result) {
-                                Window.alert("Всё сохранено!");
+                                if(result.getLogEntries().isEmpty()){
+                                    Window.alert("Всё сохранено!");
+                                }else{
+                                    StringBuilder b = new StringBuilder();
+                                    for(LogEntry entry: result.getLogEntries()){
+                                        b.append(entry.getLevel().name());
+                                        b.append(": ");
+                                        b.append(entry.getMessage());
+                                        b.append("\n");
+                                    }
+                                    Window.alert(b.toString());
+                                }
                             }
 
                             @Override

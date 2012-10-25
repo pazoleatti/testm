@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.log;
 
+import java.io.Serializable;
+
 /**
  * Сообщение в журнале расчёта
  */
-public class LogEntry {
+public class LogEntry implements Serializable {
 	private LogLevel level;
 	private String message;
 	

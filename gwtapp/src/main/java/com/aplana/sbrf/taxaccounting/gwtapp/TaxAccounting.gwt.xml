@@ -10,6 +10,7 @@
 	<source path="client"/>
 	<source path="shared"/>
 	<source path="com.aplana.sbrf.taxaccounting.model"/>
+    <source path="com.aplana.sbrf.taxaccounting.log"/>
 	<define-configuration-property name="gin.ginjector" is-multi-valued="false" />
 	<set-configuration-property name="gin.ginjector" value="com.aplana.sbrf.taxaccounting.gwtapp.client.MyGinjector" />
 </module>
