@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
@@ -26,7 +27,13 @@ import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataPresenter extends
 Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
-	/**
+
+    /**
+     * Our data
+     */
+    private FormData formData;
+
+    /**
 	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataPresenter}'s proxy.
 	 */
 	@ProxyCodeSplit
@@ -73,7 +80,8 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 
 			@Override
 			public void onSuccess(GetFormDataResult result) {
-				getView().loadFormData(result.getFormData());
+                formData = result.getFormData();
+                getView().loadFormData(formData);
 			}
 		});
 	}
@@ -96,8 +104,19 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
                 new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        SaveDataAction action =new SaveDataAction();
-                        dispatcher.execute(action, new AsyncCallbackAdapter<SaveDataResult>());
+                        SaveDataAction action = new SaveDataAction();
+                        action.setFormData(formData);
+                        dispatcher.execute(action, new AsyncCallbackAdapter<SaveDataResult>(){
+                            @Override
+                            public void onSuccess(SaveDataResult result) {
+                                Window.alert("Всё сохранено!");
+                            }
+
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                                Window.alert("Fail!");
+                            }
+                        });
                     }
                 }
         ));
