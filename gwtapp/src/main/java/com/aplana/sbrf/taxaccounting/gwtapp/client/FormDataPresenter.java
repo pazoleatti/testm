@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataAction;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataResult;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,6 +39,7 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	 */
 	public interface MyView extends View {
 		Button getCancelButton();
+        Button getSaveButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData);
 	}
@@ -78,6 +81,7 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	@Override
 	protected void onBind() {
 		super.onBind();
+
 		registerHandler(getView().getCancelButton().addClickHandler(
 			new ClickHandler() {
 				@Override
@@ -86,6 +90,17 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 				}
 			}
 		));
+
+        // Save data button
+        registerHandler(getView().getSaveButton().addClickHandler(
+                new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        SaveDataAction action =new SaveDataAction();
+                        dispatcher.execute(action, new AsyncCallbackAdapter<SaveDataResult>());
+                    }
+                }
+        ));
 	}
 
 	@Override

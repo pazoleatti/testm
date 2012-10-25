@@ -27,6 +27,8 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	DataGrid<DataRow> formDataTable;
 	@UiField
 	Button cancelButton;
+    @UiField
+    Button saveButton;
 
 	private final Widget widget;
 
@@ -44,8 +46,13 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	public Button getCancelButton() {
 		return cancelButton;
 	}
-	
-	public void loadFormData(FormData formData) {
+
+    @Override
+    public Button getSaveButton() {
+        return saveButton;
+    }
+
+    public void loadFormData(FormData formData) {
 		Form form = formData.getForm();
 		System.out.println("Adding columns to formDataTable");
 		for (Column col: form.getColumns()) {

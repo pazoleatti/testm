@@ -12,6 +12,7 @@
 		</g:center>
 		<g:south size="50">
             <g:FlowPanel>
+                <g:Button ui:field="saveButton">Сохранить</g:Button>
 			    <g:Button ui:field="cancelButton">Отмена</g:Button>
             </g:FlowPanel>
 		</g:south>
