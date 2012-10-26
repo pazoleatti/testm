@@ -126,7 +126,17 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 
                             @Override
                             public void onFailure(Throwable throwable) {
-                                Window.alert("Fail!");
+                                Window.alert(throwable.getMessage());
+                                /*
+                                StringBuilder b = new StringBuilder();
+                                StackTraceElement[] stes = throwable.getStackTrace();
+                                for(int i=0; i<stes.length && i<5;i++){
+                                    StackTraceElement ste = stes[i];
+                                    b.append(ste.toString());
+                                    b.append("\n");
+                                }
+                                Window.alert(b.toString());
+                                */
                             }
                         });
                     }
