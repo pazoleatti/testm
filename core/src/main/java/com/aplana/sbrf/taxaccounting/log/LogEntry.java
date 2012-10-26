@@ -6,6 +6,8 @@ import java.io.Serializable;
  * Сообщение в журнале расчёта
  */
 public class LogEntry implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private LogLevel level;
 	private String message;
 	
