@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 <Configure class="org.mortbay.jetty.webapp.WebAppContext">
+    <Get name="securityHandler">
+        <Set name="userRealm">
+            <New class="org.mortbay.jetty.security.HashUserRealm">
+                <Set name="name">TaxAccounting Realm</Set>
+                <Set name="config"><SystemProperty name="jetty.home" default="."/>/src/test/config/jetty-realm.properties
+                </Set>
+            </New>
+        </Set>
+    </Get>
+    <!-- 
 	<New id="TaxAccDS" class="org.mortbay.jetty.plus.naming.Resource">
 		<Arg></Arg>
 		<Arg>jdbc/TaxAccDS</Arg>
@@ -13,4 +23,5 @@
 			</New>
 		</Arg>
 	</New>
+	 -->
 </Configure>
