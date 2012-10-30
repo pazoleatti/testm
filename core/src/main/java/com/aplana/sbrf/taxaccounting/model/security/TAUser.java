@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.security;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 public class TAUser implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -9,7 +9,7 @@ public class TAUser implements Serializable {
 	private int id;
 	private String login;
 	private String name;
-	private Set<TARole> roles;
+	private List<TARole> roles;
 	
 	public int getId() {
 		return id;
@@ -29,10 +29,10 @@ public class TAUser implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Set<TARole> getRoles() {
+	public List<TARole> getRoles() {
 		return roles;
 	}
-	public void setRoles(Set<TARole> roles) {
+	public void setRoles(List<TARole> roles) {
 		this.roles = roles;
 	}
 }
