@@ -5,23 +5,15 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.user.cellview.client.Column;
 
 /** @author Vitalii Samolovskikh */
-public abstract class AliasedColumn<T> extends Column<DataRow, T> {
+public abstract class DataRowColumn<T> extends Column<DataRow, T> {
     protected String alias;
 
-    public AliasedColumn(Cell<T> cell) {
+    protected DataRowColumn(Cell<T> cell, com.aplana.sbrf.taxaccounting.model.Column col) {
         super(cell);
-    }
-
-    protected AliasedColumn(Cell<T> cell, String alias) {
-        super(cell);
-        this.alias = alias;
+        this.alias = col.getAlias();
     }
 
     public String getAlias() {
         return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
     }
 }

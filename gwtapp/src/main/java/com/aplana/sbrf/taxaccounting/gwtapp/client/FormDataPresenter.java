@@ -26,8 +26,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
-public class FormDataPresenter extends
-Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
+public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 
     /**
      * Our data
@@ -50,6 +49,7 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
         Button getSaveButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData);
+		void reset();
 	}
 
 	public static final String NAME_TOKEN = "formData";
@@ -147,6 +147,7 @@ Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	@Override
 	protected void onReset() {
 		super.onReset();
+		getView().reset();
 	}
 
 	@Override

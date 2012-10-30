@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
 public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
-
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
@@ -51,22 +50,27 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
     public Button getSaveButton() {
         return saveButton;
     }
+    
+    public void reset() {
+		while (formDataTable.getColumnCount() > 0) {
+			formDataTable.removeColumn(0);
+		}
+    }
 
     public void loadFormData(FormData formData) {
+
 		Form form = formData.getForm();
-		System.out.println("Adding columns to formDataTable");
 		for (Column col: form.getColumns()) {
-			final String alias = col.getAlias();
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
-			System.out.println("adding column: " + col.getAlias());
 			if (col instanceof StringColumn) {
-				tableCol = new EditTextColumn(alias);
+				tableCol = new EditTextColumn((StringColumn)col);
 			} else if (col instanceof NumericColumn) {
-				tableCol = new EditNumericColumn(alias);
+				tableCol = new EditNumericColumn((NumericColumn)col);
 			} else if (col instanceof DateColumn) {
-				tableCol = new EditDateColumn(alias);
+				tableCol = new EditDateColumn((DateColumn)col);
 			}
 			formDataTable.addColumn(tableCol, col.getName());
+			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em;");
 		}
 		formDataTable.setRowCount(formData.getDataRows().size());
 		formDataTable.setRowData(0, formData.getDataRows());

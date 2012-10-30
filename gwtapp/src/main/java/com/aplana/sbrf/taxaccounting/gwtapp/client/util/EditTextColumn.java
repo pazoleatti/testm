@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client.util;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.google.gwt.cell.client.EditTextCell;
 
 /** @author Vitalii Samolovskikh */
-public class EditTextColumn extends AliasedColumn<String> {
+public class EditTextColumn extends DataRowColumn<String> {
 
-    public EditTextColumn() {
-        super(new EditTextCell());
-    }
-
-    public EditTextColumn(String alias) {
-        super(new EditTextCell(), alias);
+    public EditTextColumn(StringColumn col) {
+        super(new EditTextCell(), col);
     }
 
     @Override
