@@ -1,15 +1,17 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.shared;
 
-import com.aplana.sbrf.taxaccounting.log.LogEntry;
-import com.gwtplatform.dispatch.shared.Result;
-
 import java.util.List;
 
-/** @author Vitalii Samolovskikh */
-public class SaveDataResult implements Result {
-    private List<LogEntry> logEntries;
+import com.aplana.sbrf.taxaccounting.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.gwtplatform.dispatch.shared.Result;
 
-    public SaveDataResult() {
+/** @author Vitalii Samolovskikh */
+public class SaveFormDataResult implements Result {
+    private List<LogEntry> logEntries;
+    private FormData formData;
+    
+    public SaveFormDataResult() {
     }
 
     public List<LogEntry> getLogEntries() {
@@ -19,4 +21,13 @@ public class SaveDataResult implements Result {
     public void setLogEntries(List<LogEntry> logEntries) {
         this.logEntries = logEntries;
     }
+
+	public FormData getFormData() {
+		return formData;
+	}
+
+	public void setFormData(FormData formData) {
+		this.formData = formData;
+	}
+
 }

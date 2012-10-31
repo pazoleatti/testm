@@ -3,17 +3,23 @@ package com.aplana.sbrf.taxaccounting.gwtapp.client.util;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 
-/** @author Vitalii Samolovskikh */
 public class EditTextColumn extends DataRowColumn<String> {
 
     public EditTextColumn(StringColumn col) {
         super(new EditTextCell(), col);
+        this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
+			@Override
+			public void update(int index, DataRow dataRow, String value) {
+				dataRow.put(getAlias(), value);
+			}
+		});
     }
 
     @Override
     public String getValue(DataRow dataRow) {
-        return String.valueOf(dataRow.get(alias));
+    	String value = (String)dataRow.get(alias); 
+        return value == null ? "" : value;
     }
-
 }

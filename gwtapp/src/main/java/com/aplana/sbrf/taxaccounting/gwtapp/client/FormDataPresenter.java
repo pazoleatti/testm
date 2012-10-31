@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataAction;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataResult;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataResult;
 import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -27,13 +31,9 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
+	private Logger logger = Logger.getLogger(getClass().getName());
 
-    /**
-     * Our data
-     */
-    private FormData formData;
-
-    /**
+	/**
 	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataPresenter}'s proxy.
 	 */
 	@ProxyCodeSplit
@@ -46,9 +46,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	 */
 	public interface MyView extends View {
 		Button getCancelButton();
-        Button getSaveButton();
+		Button getSaveButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData);
+		FormData getFormData();
+		void setLogMessages(List<LogEntry> logEntries);
 		void reset();
 	}
 
@@ -81,8 +83,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 
 			@Override
 			public void onSuccess(GetFormDataResult result) {
-                formData = result.getFormData();
-                getView().loadFormData(formData);
+				getView().loadFormData(result.getFormData());
 			}
 		});
 	}
@@ -100,58 +101,40 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			}
 		));
 
-        // Save data button
-        registerHandler(getView().getSaveButton().addClickHandler(
-                new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        SaveDataAction action = new SaveDataAction();
-                        action.setFormData(formData);
-                        dispatcher.execute(action, new AsyncCallbackAdapter<SaveDataResult>(){
-                            @Override
-                            public void onSuccess(SaveDataResult result) {
-                                if(result.getLogEntries().isEmpty()){
-                                    Window.alert("Всё сохранено!");
-                                }else{
-                                    StringBuilder b = new StringBuilder();
-                                    for(LogEntry entry: result.getLogEntries()){
-                                        b.append(entry.getLevel().name());
-                                        b.append(": ");
-                                        b.append(entry.getMessage());
-                                        b.append("\n");
-                                    }
-                                    Window.alert(b.toString());
-                                }
-                            }
+		// Save data button
+		registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				SaveFormDataAction action = new SaveFormDataAction();
+				final MyView view = getView();
+				action.setFormData(view.getFormData());
+				dispatcher.execute(action, new AsyncCallbackAdapter<SaveFormDataResult>(){
+					@Override
+					public void onSuccess(SaveFormDataResult result) {
+						FormData savedFormData = result.getFormData();
+						view.reset();
+						view.loadFormData(savedFormData);
+						view.setLogMessages(result.getLogEntries());						
+					}
+						
+					@Override
+					public void onFailure(Throwable throwable) {
+						Window.alert(throwable.getMessage());
+						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
+					}							
+				});
+			}
+		}));
+}
 
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                Window.alert(throwable.getMessage());
-                                /*
-                                StringBuilder b = new StringBuilder();
-                                StackTraceElement[] stes = throwable.getStackTrace();
-                                for(int i=0; i<stes.length && i<5;i++){
-                                    StackTraceElement ste = stes[i];
-                                    b.append(ste.toString());
-                                    b.append("\n");
-                                }
-                                Window.alert(b.toString());
-                                */
-                            }
-                        });
-                    }
-                }
-        ));
-	}
+@Override
+protected void onReset() {
+	super.onReset();
+	getView().reset();
+}
 
-	@Override
-	protected void onReset() {
-		super.onReset();
-		getView().reset();
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealRootContentEvent.fire(this, this);
-	}
+@Override
+protected void revealInParent() {
+	RevealRootContentEvent.fire(this, this);
+}
 }

@@ -4,10 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /** @author Vitalii Samolovskikh */
-public class SaveDataAction extends UnsecuredActionImpl<SaveDataResult> {
+public class SaveFormDataAction extends UnsecuredActionImpl<SaveFormDataResult> {
     private FormData formData;
 
-    public SaveDataAction() {
+    public SaveFormDataAction() {
     }
 
     public FormData getFormData() {

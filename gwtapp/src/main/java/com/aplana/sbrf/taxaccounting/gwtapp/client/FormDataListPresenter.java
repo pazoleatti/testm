@@ -9,7 +9,6 @@ import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -66,7 +65,6 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 				@Override
 				public void execute(FormData formData) {
 					String formDataId = formData.getId().toString();
-					Window.alert("Открываем запись с id = " + formDataId);
 					placeManager.revealPlace(
 						new PlaceRequest(FormDataPresenter.NAME_TOKEN).
 						with(FormDataPresenter.FORM_DATA_ID, formDataId)

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.server;
 
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataAction;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -41,14 +41,14 @@ public class ServerModule extends HandlerModule {
 	}
 
     @Bean
-    public SaveDataHandler getSaveDataHandler(){
-        return new SaveDataHandler();
+    public SaveFormDataHandler getSaveDataHandler(){
+        return new SaveFormDataHandler();
     }
 
 	protected void configureHandlers() {
 		bindHandler(SendTextToServer.class, SendTextToServerHandler.class);
 		bindHandler(GetFormDataList.class, GetFormDataListHandler.class);
 		bindHandler(GetFormData.class, GetFormDataHandler.class);
-        bindHandler(SaveDataAction.class, SaveDataHandler.class);
+        bindHandler(SaveFormDataAction.class, SaveFormDataHandler.class);
 	}
 }
