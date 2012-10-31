@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.gwtapp.client.util.DataRowUtil;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -25,8 +24,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	public GetFormDataResult execute(GetFormData action, ExecutionContext context) throws ActionException {
 		GetFormDataResult result = new GetFormDataResult();
 		FormData formData = formDataDao.get(action.getFormDataId());
-		result.setForm(formData.getForm());
-		result.setRowsData(DataRowUtil.dataRowsToListOfMap(formData.getDataRows()));
+		result.setFormData(formData);
 		return result;
 	}
 
