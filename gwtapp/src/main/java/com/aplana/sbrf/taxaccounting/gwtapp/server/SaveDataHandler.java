@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.server;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataAction;
-import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveDataResult;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataResult;
 import com.aplana.sbrf.taxaccounting.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -17,17 +17,17 @@ import org.springframework.stereotype.Service;
 
 /** @author Vitalii Samolovskikh */
 @Service
-public class SaveDataHandler extends AbstractActionHandler<SaveDataAction, SaveDataResult> {
+public class SaveDataHandler extends AbstractActionHandler<SaveFormDataAction, SaveFormDataResult> {
     private FormDataScriptingService service;
     private FormDataDao formDataDao;
     private static final Log log = LogFactory.getLog(SaveDataHandler.class);
 
     public SaveDataHandler() {
-        super(SaveDataAction.class);
+        super(SaveFormDataAction.class);
     }
 
     @Override
-    public SaveDataResult execute(SaveDataAction action, ExecutionContext context) throws ActionException {
+    public SaveFormDataResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
         try {
             log.info("Enter to method.");
 
@@ -42,7 +42,7 @@ public class SaveDataHandler extends AbstractActionHandler<SaveDataAction, SaveD
                 logger.warn("Данные формы не сохранены, так как обнаружены ошибки");
             }
 
-            SaveDataResult result = new SaveDataResult();
+            SaveFormDataResult result = new SaveFormDataResult();
             result.setLogEntries(logger.getEntries());
 
             log.info("get out");
@@ -54,7 +54,7 @@ public class SaveDataHandler extends AbstractActionHandler<SaveDataAction, SaveD
     }
 
     @Override
-    public void undo(SaveDataAction action, SaveDataResult result, ExecutionContext context)
+    public void undo(SaveFormDataAction action, SaveFormDataResult result, ExecutionContext context)
             throws ActionException {
         // Nothing!
     }
