@@ -1,15 +1,10 @@
 package com.aplana.sbrf.taxaccounting.gwtapp.client;
 
-import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditDateColumn;
-import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditNumericColumn;
-import com.aplana.sbrf.taxaccounting.gwtapp.client.util.EditTextColumn;
+import com.aplana.sbrf.taxaccounting.gwtapp.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.DataGrid;
@@ -58,17 +53,11 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
     }
 
     public void loadFormData(FormData formData) {
-
 		Form form = formData.getForm();
+		DataRowColumnFactory factory = new DataRowColumnFactory();
+		
 		for (Column col: form.getColumns()) {
-			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
-			if (col instanceof StringColumn) {
-				tableCol = new EditTextColumn((StringColumn)col);
-			} else if (col instanceof NumericColumn) {
-				tableCol = new EditNumericColumn((NumericColumn)col);
-			} else if (col instanceof DateColumn) {
-				tableCol = new EditDateColumn((DateColumn)col);
-			}
+			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em;");
 		}
