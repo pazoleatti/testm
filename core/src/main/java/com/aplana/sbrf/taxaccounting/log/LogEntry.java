@@ -12,6 +12,13 @@ public class LogEntry implements Serializable {
 	private String message;
 	
 	/**
+	 * Конструктор по-умолчанию
+	 * Напрямую использоваться не должен, создан для совместимости с GWT
+	 */
+	public LogEntry() {
+	}
+	
+	/**
 	 * Конструктор для создания сообщения
 	 * @param level уровень важности сообщения
 	 * @param message текст сообщения
