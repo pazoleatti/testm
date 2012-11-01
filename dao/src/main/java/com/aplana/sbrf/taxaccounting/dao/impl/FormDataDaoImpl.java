@@ -69,7 +69,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
 		
 		jt.query(
-			"select * from data_row where form_data_id = ? order by order",
+			"select * from data_row where form_data_id = ? order by ord",
 			new Object[] { formDataId },
 			new int[] { Types.NUMERIC },
 			new RowCallbackHandler() {
@@ -78,7 +78,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					String alias = rs.getString("alias");
 					DataRow row = formData.appendDataRow(alias);
 					rowIdToAlias.put(rowId, row);
-					row.setOrder(rs.getInt("order"));
+					row.setOrder(rs.getInt("ord"));
 				}
 			}
 		);
@@ -168,7 +168,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			}
 		};
 		
-		jt.batchUpdate("insert into data_row (id, form_data_id, alias, order) values (nextval for seq_data_row, " + formDataId + ", ?, ?)", bpss);
+		jt.batchUpdate("insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, " + formDataId + ", ?, ?)", bpss);
 		final Map<String, Long> rowsAliasToId = new HashMap<String, Long>(dataRows.size());
 		jt.query(
 			"select id, alias from data_row where form_data_id = ?",

@@ -50,7 +50,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		form.getCalcScripts().clear();
 		
 		getJdbcTemplate().query(
-			"select * from form_script where form_id = ? order by order",
+			"select * from form_script where form_id = ? order by ord",
 			new Object[] { form.getId() },
 			new int[] { Types.NUMERIC },
 			new RowCallbackHandler() {
@@ -77,7 +77,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 					default:
 						throw new IllegalArgumentException("Unknown script type: " + type);
 					}
-					script.setOrder(rs.getInt("order"));
+					script.setOrder(rs.getInt("ord"));
 					script.setName(rs.getString("name"));
 					script.setId(rs.getInt("id"));
 					script.setBody(rs.getString("body"));						
@@ -133,8 +133,8 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		
 		if (!newScripts.isEmpty()) {
 			jt.batchUpdate(
-				"insert into form_script (id, form_id, type, name, order, body, condition) " +
-				"values (nextval for seq_form_script, " + formId + ", ?, ?, ?, ?, ?)",
+				"insert into form_script (id, form_id, type, name, ord, body, condition) " +
+				"values (seq_form_script.nextval, " + formId + ", ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public int getBatchSize() {
@@ -156,7 +156,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		
 		if (!oldScripts.isEmpty()) {
 			jt.batchUpdate(
-				"update form_script set (type, name, order, body, condition) = " +
+				"update form_script set (type, name, ord, body, condition) = " +
 				"(?, ?, ?, ?, ?) where id = ?",
 				new BatchPreparedStatementSetter() {
 					@Override

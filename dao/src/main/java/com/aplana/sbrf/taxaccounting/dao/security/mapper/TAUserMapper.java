@@ -11,10 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.security.TARole;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 public interface TAUserMapper {
-	@Select("select * from user where login = #{login}")
+	@Select("select * from sec_user where login = #{login}")
 	TAUser getUserByLogin(@Param("login") String login);
 	
-	@Select("select * from role r where exists (select 1 from user_role ur where ur.role_id = r.id and ur.user_id = #{userId})")
+	@Select("select * from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = #{userId})")
 	
 	@Results({
 		@Result(property="id"),

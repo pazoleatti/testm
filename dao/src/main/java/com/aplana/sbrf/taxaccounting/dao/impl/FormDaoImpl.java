@@ -53,7 +53,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 			if (deepFetch) {
 				form.getColumns().addAll(columnDao.getFormColumns(form.getId()));
 				scriptDao.fillFormScripts(form);				
-				String stRowsData = rs.getString("rows");
+				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
 					final ObjectMapper objectMapper = new ObjectMapper();
 					SimpleModule module = new SimpleModule("taxaccounting-dao-read", new Version(1, 0, 0, null));
@@ -106,7 +106,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 		final int formId = form.getId();
 		// TODO: создание новых версий формы потребует инсертов в form
 		getJdbcTemplate().update(
-			"update form set rows = ? where id = ?",
+			"update form set data_rows = ? where id = ?",
 			new Object[] { rowsJson, formId },
 			new int[] { Types.VARCHAR, Types.NUMERIC }
 		);

@@ -50,7 +50,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setWidth(rs.getInt("width"));
 			result.setEditable(rs.getBoolean("editable"));
 			result.setMandatory(rs.getBoolean("mandatory"));
-			result.setOrder(rs.getInt("order"));
+			result.setOrder(rs.getInt("ord"));
 			result.setGroupName(rs.getString("group_name"));
 			return result;
 		}
@@ -58,7 +58,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	
 	public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
-			"select * from form_column where form_id = ? order by order",
+			"select * from form_column where form_id = ? order by ord",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			new ColumnMapper()
@@ -114,8 +114,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 		
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, order, group_name) " +
-			"values (nextval for seq_form_column, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name) " +
+			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {					 
@@ -152,7 +152,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		
 		
 		jt.batchUpdate(
-			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, order = ?, group_name = ? " +
+			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ? " +
 			"where id = ?",
 			new BatchPreparedStatementSetter() {
 				@Override

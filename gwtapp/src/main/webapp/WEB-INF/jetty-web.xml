@@ -16,11 +16,10 @@
 		<Arg>java:comp/env/jdbc/TaxAccDS</Arg>
 		<Arg>
 			<New class="org.apache.commons.dbcp.BasicDataSource">
-				<Set name="driverClassName">com.ibm.db2.jcc.DB2Driver</Set>
-				<Set name="url">jdbc:db2://172.16.127.4:50000/TAX</Set>
-				<Set name="username">taxuser</Set>
-				<Set name="password">taxuser</Set>
-				<Set name="connectionProperties">currentSchema=TAX;currentFunctionPath=TAX;</Set>
+				<Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
+				<Set name="url">jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL</Set>
+				<Set name="username">TAX</Set>
+				<Set name="password">TAX</Set>
 			</New>
 		</Arg>
 	</New>

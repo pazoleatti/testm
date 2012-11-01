@@ -117,11 +117,11 @@
 		<!-- Зависимости необходимы только для отладки через gwt-maven-plugin. Добавить 
 			в зависимости только к плагину их не удалось. Нужно что нибудь придумать -->
 		<dependency>
-			<groupId>com.ibm</groupId>
-			<artifactId>db2jcc</artifactId>
-			<version>9.7</version>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc</artifactId>
+			<version>10.2.0.1</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/../../libs/db2jcc.jar</systemPath>
+			<systemPath>${pom.basedir}/../../libs/ojdbc6.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbcp</groupId>
