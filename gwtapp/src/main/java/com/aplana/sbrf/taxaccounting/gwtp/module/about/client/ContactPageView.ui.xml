@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<g:HTMLPanel>
+		<h1>Контакты</h1>
+
+		<p style="background-color: LemonChiffon;">
+			In this visit you have travelled to:
+			<g:Label ui:field="navigationHistory" />
+		</p>
+
+		<p>Компания "Аплана"
+			Москва, 117485, ул. Профсоюзная, 84/32, корп. 1
+			Тел.: +7 (495) 710 7580, 710 7581
+			Факс: +7 (495) 710 7579
+			info@aplana.com
+			www.aplana.ru
+		</p>
+
+	</g:HTMLPanel>
+</ui:UiBinder> 

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataResult;
+import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -28,6 +29,7 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
@@ -54,7 +56,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void reset();
 	}
 
-	public static final String NAME_TOKEN = "formData";
+	public static final String NAME_TOKEN = "!formData";
 
 	public static final String FORM_DATA_ID = "formDataId";
 
@@ -136,5 +138,6 @@ protected void onReset() {
 @Override
 protected void revealInParent() {
 	RevealRootContentEvent.fire(this, this);
+		//RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
 }
 }

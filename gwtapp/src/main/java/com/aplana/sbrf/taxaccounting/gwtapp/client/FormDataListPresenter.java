@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataListResult;
+import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
@@ -16,18 +17,20 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy> {
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataListPresenter}'s proxy.
 	 */
-	@ProxyStandard
+	@ProxyCodeSplit
 	@NameToken(nameToken)
 	public interface MyProxy extends Proxy<FormDataListPresenter>, Place {
 	}
@@ -40,7 +43,7 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 		public <C> Column<FormData, C> addTableColumn(Cell<C> cell, String headerText, final ValueGetter<C> getter, FieldUpdater<FormData, C> fieldUpdater);
 	}
 
-	public static final String nameToken = "formDataList";
+	public static final String nameToken = "!formDataList";
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatcher;
@@ -95,7 +98,8 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 
 	@Override
 	protected void revealInParent() {
-		RevealRootContentEvent.fire(this, this);
+		//RevealRootContentEvent.fire(this, this);
+		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
 	}
 
 	protected void loadFormDataList() {
