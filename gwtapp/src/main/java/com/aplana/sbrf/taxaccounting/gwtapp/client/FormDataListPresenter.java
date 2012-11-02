@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataListResult;
-import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
+import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
@@ -18,13 +18,11 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyStandard;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy> {
 	/**
@@ -98,7 +96,7 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 
 	@Override
 	protected void revealInParent() {
-		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
+		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
 
 	protected void loadFormDataList() {

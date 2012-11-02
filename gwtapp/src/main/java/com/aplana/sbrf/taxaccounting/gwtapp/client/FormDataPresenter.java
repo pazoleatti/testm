@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SaveFormDataResult;
-import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
+import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -30,7 +30,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	private Logger logger = Logger.getLogger(getClass().getName());
@@ -137,6 +136,6 @@ protected void onReset() {
 
 @Override
 protected void revealInParent() {
-	RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
+	RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 }
 }

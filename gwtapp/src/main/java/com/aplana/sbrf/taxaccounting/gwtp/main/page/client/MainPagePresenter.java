@@ -16,10 +16,10 @@
 
 package com.aplana.sbrf.taxaccounting.gwtp.main.page.client;
 
-import com.google.web.bindery.event.shared.EventBus;
+import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
-
+import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
@@ -60,7 +60,11 @@ public class MainPagePresenter extends
    * Use this in leaf presenters, inside their {@link #revealInParent} method.
    */
   @ContentSlot
-  public static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
+  static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
+  
+  static {
+	  RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
+  }
 
   @Inject
   public MainPagePresenter(final EventBus eventBus, final MyView view,

@@ -16,7 +16,7 @@
 
 package com.aplana.sbrf.taxaccounting.gwtp.module.about.client;
 
-import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
+import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.annotations.NameToken;
@@ -48,6 +48,6 @@ public class ContactPagePresenter
 
   @Override
   protected void revealInParent() {
-    RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
+    RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
   }
 }

@@ -16,6 +16,7 @@
 
 package com.aplana.sbrf.taxaccounting.gwtp.main.page.client;
 
+import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter.MyView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -59,7 +60,7 @@ public class MainPageView extends ViewImpl implements MyView {
 
   @Override
   public void setInSlot(Object slot, Widget content) {
-    if (slot == MainPagePresenter.TYPE_SetMainContent) {
+    if (slot == RevealContentTypeHolder.getMainContent()) {
       setMainContent(content);
     } else {
       super.setInSlot(slot, content);
