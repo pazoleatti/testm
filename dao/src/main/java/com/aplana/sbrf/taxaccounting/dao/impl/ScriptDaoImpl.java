@@ -156,8 +156,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		
 		if (!oldScripts.isEmpty()) {
 			jt.batchUpdate(
-				"update form_script set (type, name, ord, body, condition) = " +
-				"(?, ?, ?, ?, ?) where id = ?",
+				"update form_script set type = ?, name = ?, ord = ?, body = ?, condition = ? where id = ?",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public int getBatchSize() {
