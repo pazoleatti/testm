@@ -157,7 +157,6 @@
                     <copyWebapp>true</copyWebapp>
                     <runTarget>Main.html</runTarget>
                     <modules>
-                    	<module>com.aplana.sbrf.taxaccounting.gwtapp.TaxAccounting</module>  
                     	<module>com.aplana.sbrf.taxaccounting.gwtp.main.Main</module>
                     </modules>
                     <compileSourcesArtifacts>
