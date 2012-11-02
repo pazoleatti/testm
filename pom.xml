@@ -16,7 +16,8 @@
         <module>taxaccounting-ear</module>
 		<module>theme</module>
 		 -->
-  </modules>
+		<module>service</module>
+	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
