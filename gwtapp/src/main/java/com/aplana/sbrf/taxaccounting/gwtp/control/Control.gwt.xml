@@ -6,7 +6,7 @@
   <inherits name='com.google.gwt.uibinder.UiBinder' />
   <inherits name='com.google.gwt.inject.Inject' />
 
-  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.control.menu.MainMenu" />
-  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.control.singin.SingIn" />
+  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.control.menu.MainMenu" />
+  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.control.singin.SingIn" />
 
 </module>

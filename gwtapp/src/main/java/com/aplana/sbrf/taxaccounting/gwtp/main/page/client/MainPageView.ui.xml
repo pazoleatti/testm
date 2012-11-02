@@ -1,8 +1,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:menu="urn:import:com.aplana.sbrf.taxaccounting.gwtp.main.control.menu.client"
-	xmlns:singin="urn:import:com.aplana.sbrf.taxaccounting.gwtp.main.control.singin.client">
+	xmlns:menu="urn:import:com.aplana.sbrf.taxaccounting.gwtp.control.menu.client"
+	xmlns:singin="urn:import:com.aplana.sbrf.taxaccounting.gwtp.control.singin.client">
 
 	<g:HTMLPanel>
 	

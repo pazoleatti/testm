@@ -10,8 +10,10 @@
   <!-- Main -->
   <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.api.MainApi" />
   <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.entry.MainEntry" />
-  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.control.MainControl" />
   <inherits name="com.aplana.sbrf.taxaccounting.gwtp.main.page.MainPage"/>
+  
+  <!-- Control -->
+  <inherits name="com.aplana.sbrf.taxaccounting.gwtp.control.Control" />
   
   <!-- Module -->
   <inherits name="com.aplana.sbrf.taxaccounting.gwtp.module.Module" />

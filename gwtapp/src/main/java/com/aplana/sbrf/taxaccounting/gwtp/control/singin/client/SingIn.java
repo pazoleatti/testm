@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.gwtp.main.control.singin.client;
+package com.aplana.sbrf.taxaccounting.gwtp.control.singin.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
