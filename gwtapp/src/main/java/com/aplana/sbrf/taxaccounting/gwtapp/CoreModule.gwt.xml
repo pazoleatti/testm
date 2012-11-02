@@ -12,6 +12,7 @@
 	<inherits name="com.gwtplatform.dispatch.Dispatch" />
 	<inherits name="com.gwtplatform.mvp.Mvp" />
 
+	<source path="cell"/>
 	<source path="client" />
 	<source path="shared" />
 	<source path="com.aplana.sbrf.taxaccounting.model" />

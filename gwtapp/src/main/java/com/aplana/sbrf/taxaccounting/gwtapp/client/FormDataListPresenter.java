@@ -98,7 +98,6 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 
 	@Override
 	protected void revealInParent() {
-		//RevealRootContentEvent.fire(this, this);
 		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetMainContent, this);
 	}
 
