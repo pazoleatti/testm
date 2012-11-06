@@ -10,18 +10,18 @@ import com.google.inject.Inject;
 
 
 public class PlaceManager extends PlaceManagerImpl {
-  private final PlaceRequest defaultPlaceRequest;
+	private final PlaceRequest defaultPlaceRequest;
 
-  @Inject
-  public PlaceManager(final EventBus eventBus,
-      final TokenFormatter tokenFormatter, @DefaultPlace String defaultNameToken) {
-    super(eventBus, tokenFormatter);
+	@Inject
+	public PlaceManager(final EventBus eventBus,
+			final TokenFormatter tokenFormatter, @DefaultPlace String defaultNameToken) {
+		super(eventBus, tokenFormatter);
 
-    this.defaultPlaceRequest = new PlaceRequest(defaultNameToken);
-  }
+		this.defaultPlaceRequest = new PlaceRequest(defaultNameToken);
+	}
 
-  @Override
-  public void revealDefaultPlace() {
-    revealPlace(defaultPlaceRequest);
-  }
+	@Override
+	public void revealDefaultPlace() {
+		revealPlace(defaultPlaceRequest);
+	}
 }

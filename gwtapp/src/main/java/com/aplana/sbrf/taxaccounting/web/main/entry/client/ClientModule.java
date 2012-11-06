@@ -3,7 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPageView;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.CoreModule;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInModule;
@@ -28,7 +29,8 @@ public class ClientModule extends AbstractPresenterModule {
     
     install(new HomeModule());
     install(new AboutModule());
-    install(new CoreModule());
+    install(new FormDataListModule());
+    install(new FormDataModule());
     install(new SignInModule());
   }
 }

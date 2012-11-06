@@ -16,27 +16,23 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 @GinModules({ClientModule.class})
 public interface ClientGinjector extends Ginjector {
+	PlaceManager getPlaceManager();
 
-  PlaceManager getPlaceManager();
-  
-  EventBus getEventBus();
-  
-  Provider<MainPagePresenter> getMainPagePresenter();
-  
-  /* Презенторы модулей */
-  
-  AsyncProvider<AboutPagePresenter> getAboutUsPresenter();
+	EventBus getEventBus();
 
-  AsyncProvider<ContactPagePresenter> getContactPresenter();
-  
-  AsyncProvider<HomePagePresenter> getHomePresenter();
-  
-  
-  AsyncProvider<FormDataListPresenter> getFormDataListPresenter();
+	Provider<MainPagePresenter> getMainPagePresenter();
 
-  AsyncProvider<FormDataPresenter> getFormDataPresenter();
-  
-  
-  Provider<SignInPresenter> getSinInPresenter();
-  
+	/* Презенторы модулей */
+
+	AsyncProvider<AboutPagePresenter> getAboutUsPresenter();
+
+	AsyncProvider<ContactPagePresenter> getContactPresenter();
+
+	AsyncProvider<HomePagePresenter> getHomePresenter();
+
+	AsyncProvider<FormDataListPresenter> getFormDataListPresenter();
+
+	AsyncProvider<FormDataPresenter> getFormDataPresenter();
+
+	Provider<SignInPresenter> getSinInPresenter();
 }

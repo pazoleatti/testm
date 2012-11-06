@@ -8,11 +8,11 @@ import com.google.gwt.core.client.GWT;
 
 
 public class MainEntry implements EntryPoint {
-  public final ClientGinjector ginjector = GWT.create(ClientGinjector.class);
+	public final ClientGinjector ginjector = GWT.create(ClientGinjector.class);
 
-  @Override
-  public final void onModuleLoad() {
-    DelayedBindRegistry.bind(ginjector);
-    ginjector.getPlaceManager().revealCurrentPlace();
-  }
+	@Override
+	public final void onModuleLoad() {
+		DelayedBindRegistry.bind(ginjector);
+		ginjector.getPlaceManager().revealCurrentPlace();
+	}
 }
