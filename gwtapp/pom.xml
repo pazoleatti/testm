@@ -162,7 +162,7 @@
                     <copyWebapp>true</copyWebapp>
                     <runTarget>Main.html</runTarget>
                     <modules>
-                    	<module>com.aplana.sbrf.taxaccounting.gwtp.main.Main</module>
+                    	<module>com.aplana.sbrf.taxaccounting.web.main.Main</module>
                     </modules>
                     <compileSourcesArtifacts>
           				<compileSourcesArtifact>${project.groupId}:core</compileSourcesArtifact>
