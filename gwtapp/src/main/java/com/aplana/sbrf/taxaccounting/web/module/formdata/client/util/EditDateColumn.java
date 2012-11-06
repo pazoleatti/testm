@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.util;
+package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
 
 import java.util.Date;
 

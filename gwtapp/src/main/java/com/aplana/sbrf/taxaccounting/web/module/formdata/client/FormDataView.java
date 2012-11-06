@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.util.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -68,16 +68,13 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 
 	@Override
 	public void loadFormData(FormData formData) {
-		
 		this.formData = formData;
-		
 		DataRowColumnFactory factory = new DataRowColumnFactory();
 		for (Column col: formData.getForm().getColumns()) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 		}
-		
 		formDataTable.setRowCount(formData.getDataRows().size());
 		formDataTable.setRowData(formData.getDataRows());
 		formDataTable.redraw();
