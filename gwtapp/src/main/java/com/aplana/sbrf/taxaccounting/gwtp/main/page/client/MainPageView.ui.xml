@@ -6,7 +6,7 @@
 
 	<g:HTMLPanel>
 	
-		<singin:SingIn/>	
+		<singin:SingIn ui:field="singIn"/>	
 
 		<div ui:field="loadingMessage"
 			style="position:absolute; top:0; left:0; background-color:yellow;">Loading...</div>
@@ -18,6 +18,7 @@
 		<g:FlowPanel ui:field="mainContentPanel" />
 
 		<menu:MainMenu />
+		
 	</g:HTMLPanel>
 
 </ui:UiBinder> 

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.gwtp.main.entry.client;
 
 import com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataListPresenter;
 import com.aplana.sbrf.taxaccounting.gwtapp.client.FormDataPresenter;
+import com.aplana.sbrf.taxaccounting.gwtp.control.singin.client.SingInPresenter;
 import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.gwtp.module.about.client.AboutPagePresenter;
 import com.aplana.sbrf.taxaccounting.gwtp.module.about.client.ContactPagePresenter;
@@ -34,5 +35,8 @@ public interface ClientGinjector extends Ginjector {
   AsyncProvider<FormDataListPresenter> getFormDataListPresenter();
 
   AsyncProvider<FormDataPresenter> getFormDataPresenter();
+  
+  
+  Provider<SingInPresenter> getSinInPresenter();
   
 }

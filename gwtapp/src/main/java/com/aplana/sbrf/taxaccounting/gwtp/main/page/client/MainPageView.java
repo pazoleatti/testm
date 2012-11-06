@@ -16,15 +16,16 @@
 
 package com.aplana.sbrf.taxaccounting.gwtp.main.page.client;
 
+import com.aplana.sbrf.taxaccounting.gwtp.control.singin.client.SingIn;
 import com.aplana.sbrf.taxaccounting.gwtp.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.gwtp.main.page.client.MainPagePresenter.MyView;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
 
@@ -36,12 +37,13 @@ import com.gwtplatform.mvp.client.ViewImpl;
  * @author Christian Goudreau
  */
 public class MainPageView extends ViewImpl implements MyView {
-  interface MainPageViewUiBinder extends UiBinder<Widget, MainPageView> {
+  interface Binder extends UiBinder<Widget, MainPageView> {
   }
 
-  private static MainPageViewUiBinder uiBinder = GWT.create(MainPageViewUiBinder.class);
-
   public final Widget widget;
+  
+  @UiField(provided=true)
+  SingIn singIn;
 
   @UiField
   FlowPanel mainContentPanel;
@@ -49,8 +51,10 @@ public class MainPageView extends ViewImpl implements MyView {
   @UiField
   Element loadingMessage;
 
-  public MainPageView() {
-    widget = uiBinder.createAndBindUi(this);
+  @Inject
+  public MainPageView(Binder binder, SingIn singIn) {
+	this.singIn = singIn;
+    widget = binder.createAndBindUi(this);
   }
 
   @Override

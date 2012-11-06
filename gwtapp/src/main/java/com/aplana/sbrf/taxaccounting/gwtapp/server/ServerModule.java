@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Import;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.gwtapp.shared.SendTextToServer;
+import com.aplana.sbrf.taxaccounting.gwtp.control.singin.server.GetUserInfoActionHandler;
+import com.aplana.sbrf.taxaccounting.gwtp.control.singin.shared.GetUserInfoAction;
 import com.gwtplatform.dispatch.server.actionvalidator.ActionValidator;
 import com.gwtplatform.dispatch.server.spring.HandlerModule;
 import com.gwtplatform.dispatch.server.spring.actionvalidator.DefaultActionValidator;
@@ -50,5 +52,7 @@ public class ServerModule extends HandlerModule {
 		bindHandler(GetFormDataList.class, GetFormDataListHandler.class);
 		bindHandler(GetFormData.class, GetFormDataHandler.class);
         bindHandler(SaveFormDataAction.class, SaveFormDataHandler.class);
+        // TODO: Убрать отсюда
+        bindHandler(GetUserInfoAction.class, GetUserInfoActionHandler.class);
 	}
 }

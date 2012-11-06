@@ -15,6 +15,7 @@
 	<context:annotation-config />
 	<context:component-scan base-package="com.gwtplatform.dispatch.server.spring" />
 	<bean class="com.aplana.sbrf.taxaccounting.gwtapp.server.ServerModule" />
+	<bean class="com.aplana.sbrf.taxaccounting.gwtp.control.singin.server.SinginControlServerModule" />
 
 	<bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">
 		<constructor-arg>

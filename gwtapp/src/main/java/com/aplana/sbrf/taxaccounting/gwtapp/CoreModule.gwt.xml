@@ -7,16 +7,15 @@
 	<inherits name="com.google.gwt.uibinder.UiBinder" />
 	<inherits name="com.google.gwt.inject.Inject" />
 	<inherits name="com.google.gwt.logging.Logging" />
-	<inherits name="com.google.gwt.user.theme.standard.Standard" />
-	<inherits name="com.aplana.sbrf.taxaccounting.Model" />
 	<inherits name="com.gwtplatform.dispatch.Dispatch" />
 	<inherits name="com.gwtplatform.mvp.Mvp" />
+	
+	<inherits name="com.aplana.sbrf.taxaccounting.Model" />
 
 	<source path="widget"/>
 	<source path="cell"/>
-	<source path="client" />
-	<source path="shared" />
-	<source path="com.aplana.sbrf.taxaccounting.model" />
-	<source path="com.aplana.sbrf.taxaccounting.log" />
+	<source path="client"/>
+	<source path="shared"/>
 
+	
 </module>
