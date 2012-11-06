@@ -1,31 +1,42 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.aplana.sbrf.taxaccounting.web.module.formdata.server.GetFormDataHandler;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.server.SaveFormDataHandler;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.GetFormDataListHandler;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
-import com.aplana.sbrf.taxaccounting.web.widget.signin.server.GetUserInfoActionHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
+import com.gwtplatform.dispatch.server.actionhandler.ActionHandler;
 import com.gwtplatform.dispatch.server.spring.DispatchModule;
 import com.gwtplatform.dispatch.server.spring.HandlerModule;
 import com.gwtplatform.dispatch.server.spring.configuration.DefaultModule;
+import com.gwtplatform.dispatch.shared.Action;
+import com.gwtplatform.dispatch.shared.Result;
 
 @Configuration
 @Import(value = { DefaultModule.class })
 @ComponentScan(basePackageClasses = DispatchModule.class)
-public class MainHandlerModule extends HandlerModule {
+public class MainHandlerModule<A extends Action<R>, R extends Result> extends
+		HandlerModule {
 
+	@Autowired
+	private ListableBeanFactory listableBeanFactory;
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void configureHandlers() {
-		bindHandler(GetFormDataList.class, GetFormDataListHandler.class);
-		bindHandler(GetFormData.class, GetFormDataHandler.class);
-		bindHandler(SaveFormDataAction.class, SaveFormDataHandler.class);
-		// TODO: Убрать отсюда
-		bindHandler(GetUserInfoAction.class, GetUserInfoActionHandler.class);
+
+		for (Map.Entry<String, ActionHandler> entry : listableBeanFactory
+				.getBeansOfType(ActionHandler.class).entrySet()) {
+
+			Class<A> actionClass = entry.getValue().getActionType();
+
+			Class<? extends ActionHandler<A, R>> handlerClass = (Class<? extends ActionHandler<A, R>>) entry
+					.getValue().getClass();
+
+			bindHandler(actionClass, handlerClass);
+		}
+
 	}
 }
