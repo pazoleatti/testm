@@ -18,28 +18,32 @@ import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.security.TARole;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
-public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
+public class AuthenticationUserDetailsServiceImpl implements
+		AuthenticationUserDetailsService<Authentication> {
 	private final Log logger = LogFactory.getLog(getClass());
-	
+
 	@Autowired
 	private TAUserDao userDao;
 
 	@Override
-	public UserDetails loadUserDetails(Authentication token)	throws UsernameNotFoundException {
+	public UserDetails loadUserDetails(Authentication token)
+			throws UsernameNotFoundException {
 		String userName = token.getName();
 		TAUser user = userDao.getUser(userName);
 		if (user == null) {
-			String message = "User with login '" + userName + "' was not found in TaxAccounting database";
+			String message = "User with login '" + userName
+					+ "' was not found in TaxAccounting database";
 			logger.error(message);
 			throw new UsernameNotFoundException(message);
 		}
-		
-		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
-		
-		for (TARole role: user.getRoles()) {
+
+		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(
+				user.getRoles().size());
+
+		for (TARole role : user.getRoles()) {
 			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
 		}
-		
+
 		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
 		// возможно в будущем задействуем и их
 		return new User(userName, "notused", grantedAuthorities);
