@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
+package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,8 +10,8 @@ import com.aplana.sbrf.taxaccounting.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.SaveFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

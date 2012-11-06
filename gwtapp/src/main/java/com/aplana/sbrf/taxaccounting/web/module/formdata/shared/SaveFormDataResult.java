@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
+package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import java.util.List;
 

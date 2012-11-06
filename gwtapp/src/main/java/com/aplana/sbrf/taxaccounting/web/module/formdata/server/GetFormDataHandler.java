@@ -1,12 +1,12 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
+package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
