@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.service;
+package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
