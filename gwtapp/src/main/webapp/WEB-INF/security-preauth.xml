@@ -5,7 +5,7 @@
              http://www.springframework.org/schema/security
              http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
-	<beans:bean id="taxAccountingAuthenticationUserDetailsService" class="com.aplana.sbrf.taxaccounting.web.service.AuthenticationUserDetailsServiceImpl" />
+	<beans:bean id="taxAccountingAuthenticationUserDetailsService" class="com.aplana.sbrf.taxaccounting.service.impl.AuthenticationUserDetailsServiceImpl" />
 	<beans:bean id="preAuthenticatedProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
 	<beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
 		<beans:property name="preAuthenticatedUserDetailsService" ref="taxAccountingAuthenticationUserDetailsService" />

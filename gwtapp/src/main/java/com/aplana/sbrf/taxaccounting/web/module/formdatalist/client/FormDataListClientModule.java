@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
-public class FormDataListModule extends AbstractPresenterModule {
+public class FormDataListClientModule extends AbstractPresenterModule {
 
 	@Override
 	protected void configure() {
