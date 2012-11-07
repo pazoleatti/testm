@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
 import com.gwtplatform.dispatch.client.gin.DispatchAsyncModule;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
@@ -32,5 +33,6 @@ public class ClientModule extends AbstractPresenterModule {
     install(new FormDataListClientModule());
     install(new FormDataModule());
     install(new SignInClientModule());
+    install(new MainMenuClientModule());
   }
 }
