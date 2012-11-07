@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
