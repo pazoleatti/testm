@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.signin.server;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
@@ -10,7 +10,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
-@Service
+@Component
 public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoAction, GetUserInfoResult>{
 	
 

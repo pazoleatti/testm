@@ -17,6 +17,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -62,14 +63,20 @@ public class MainPagePresenter extends
   @ContentSlot
   static final Type<RevealContentHandler<?>> TYPE_SetMainContent = new Type<RevealContentHandler<?>>();
   
+  static final Object TYPE_SignInContent = new Object();
+  
+  
   static {
 	  RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
   }
+  
+  private final SignInPresenter signInPresenter;
 
   @Inject
   public MainPagePresenter(final EventBus eventBus, final MyView view,
-      final MyProxy proxy) {
+      final MyProxy proxy, SignInPresenter signInPresenter) {
     super(eventBus, view, proxy);
+    this.signInPresenter = signInPresenter;
   }
 
   @Override
@@ -86,4 +93,18 @@ public class MainPagePresenter extends
   public void onLockInteraction(LockInteractionEvent event) {
     getView().showLoading(event.shouldLock());
   }
+  
+  
+  @Override
+  protected void onReveal() {
+    super.onReveal();
+    setInSlot(TYPE_SignInContent, signInPresenter);
+  }
+
+  @Override
+  protected void onHide() {
+    super.onHide();
+    clearSlot(TYPE_SignInContent);
+  }
+  
 }

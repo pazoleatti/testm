@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -9,7 +10,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-public class SignInPresenter extends PresenterWidget<SignIn>{
+public class SignInPresenter extends PresenterWidget<SignInView>{
 	
 	public interface MyView extends View {
 		void setUserName(String userName);
@@ -18,26 +19,17 @@ public class SignInPresenter extends PresenterWidget<SignIn>{
 	private final DispatchAsync dispatchAsync;
 
 	@Inject
-	public SignInPresenter(EventBus eventBus, SignIn view, DispatchAsync dispatchAsync) {
-
+	public SignInPresenter(EventBus eventBus, SignInView view, DispatchAsync dispatchAsync) {
 		super(eventBus, view);
-		System.out.println("dfsdfsdfrer");
 		this.dispatchAsync = dispatchAsync;
 	}
 
 	@Override
 	protected void onReveal() {
-		System.out.println("dfsdfsdf");
 		
 		GetUserInfoAction action = new GetUserInfoAction();
 		
-		dispatchAsync.execute(action, new AsyncCallback<GetUserInfoResult>(){
-
-			@Override
-			public void onFailure(Throwable caught) {
-				caught.printStackTrace();
-				getView().setUserName("Error");
-			}
+		dispatchAsync.execute(action, new AbstractCallback<GetUserInfoResult>(){
 
 			@Override
 			public void onSuccess(GetUserInfoResult result) {
@@ -45,16 +37,9 @@ public class SignInPresenter extends PresenterWidget<SignIn>{
 			}
 			
 		});
+				
 		super.onReveal();
 		
-	}
-	
-	@Override
-	protected void onReset() {
-		
-		System.out.println("dfsdfsdf");
-		// TODO Auto-generated method stub
-		super.onReset();
 	}
 	
 }

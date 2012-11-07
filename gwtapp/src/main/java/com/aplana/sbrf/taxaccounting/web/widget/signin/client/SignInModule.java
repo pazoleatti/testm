@@ -8,7 +8,7 @@ public class SignInModule extends AbstractPresenterModule {
 	protected void configure() {
 		
 		bindPresenterWidget(SignInPresenter.class, SignInPresenter.MyView.class,
-				SignIn.class);
+				SignInView.class);
 
 	}
 

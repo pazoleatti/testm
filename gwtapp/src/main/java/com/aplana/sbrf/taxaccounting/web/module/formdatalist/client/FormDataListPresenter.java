@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
@@ -11,7 +12,6 @@ import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -101,12 +101,7 @@ public class FormDataListPresenter extends Presenter<FormDataListPresenter.MyVie
 	}
 
 	protected void loadFormDataList() {
-		dispatcher.execute(new GetFormDataList(), new AsyncCallback<GetFormDataListResult>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				caught.printStackTrace();
-			}
-
+		dispatcher.execute(new GetFormDataList(), new AbstractCallback<GetFormDataListResult>() {
 			@Override
 			public void onSuccess(GetFormDataListResult result) {
 				getView().setFormDataList(result.getRecords());	

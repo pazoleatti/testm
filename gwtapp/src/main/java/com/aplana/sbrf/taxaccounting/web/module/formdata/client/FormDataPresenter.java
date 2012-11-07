@@ -7,18 +7,16 @@ import java.util.logging.Logger;
 import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.AsyncCallbackAdapter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -78,12 +76,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		long formDataId = Long.parseLong(request.getParameter(FORM_DATA_ID, "none"));
 		GetFormData action = new GetFormData();
 		action.setFormDataId(formDataId);
-		dispatcher.execute(action, new AsyncCallback<GetFormDataResult>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				caught.printStackTrace();
-			}
-
+		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
 			@Override
 			public void onSuccess(GetFormDataResult result) {
 				getView().loadFormData(result.getFormData());
@@ -111,7 +104,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				SaveFormDataAction action = new SaveFormDataAction();
 				final MyView view = getView();
 				action.setFormData(view.getFormData());
-				dispatcher.execute(action, new AsyncCallbackAdapter<SaveFormDataResult>(){
+				dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 					@Override
 					public void onSuccess(SaveFormDataResult result) {
 						FormData savedFormData = result.getFormData();
@@ -122,8 +115,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						
 					@Override
 					public void onFailure(Throwable throwable) {
-						Window.alert(throwable.getMessage());
 						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
+						super.onFailure(throwable);
 					}							
 				});
 			}

@@ -18,7 +18,6 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter.MyView;
-import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignIn;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -28,60 +27,66 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
-
 /**
  * This is the top-level view of the application. Every time another presenter
  * wants to reveal itself, {@link MainPageView} will add its content of the
  * target inside the {@code mainContantPanel}.
- *
+ * 
  * @author Christian Goudreau
  */
 public class MainPageView extends ViewImpl implements MyView {
-  interface Binder extends UiBinder<Widget, MainPageView> {
-  }
+	interface Binder extends UiBinder<Widget, MainPageView> {
+	}
 
-  public final Widget widget;
-  
-  @UiField(provided=true)
-  SignIn singIn;
+	public final Widget widget;
 
-  @UiField
-  FlowPanel mainContentPanel;
+	@UiField
+	FlowPanel signInContentPanel;
 
-  @UiField
-  Element loadingMessage;
+	@UiField
+	FlowPanel mainContentPanel;
 
-  @Inject
-  public MainPageView(Binder binder, SignIn singIn) {
-	this.singIn = singIn;
-    widget = binder.createAndBindUi(this);
-  }
+	@UiField
+	Element loadingMessage;
 
-  @Override
-  public Widget asWidget() {
-    return widget;
-  }
+	@Inject
+	public MainPageView(Binder binder) {
+		widget = binder.createAndBindUi(this);
+	}
 
-  @Override
-  public void setInSlot(Object slot, Widget content) {
-    if (slot == RevealContentTypeHolder.getMainContent()) {
-      setMainContent(content);
-    } else {
-      super.setInSlot(slot, content);
-    }
-  }
+	@Override
+	public Widget asWidget() {
+		return widget;
+	}
 
-  private void setMainContent(Widget content) {
-    mainContentPanel.clear();
+	@Override
+	public void setInSlot(Object slot, Widget content) {
+		if (slot == RevealContentTypeHolder.getMainContent()) {
+			setMainContent(content);
+		} else if (slot == MainPagePresenter.TYPE_SignInContent) {
+			setSignInContent(content);
+		} else {
+			super.setInSlot(slot, content);
+		}
+	}
 
-    if (content != null) {
-      mainContentPanel.add(content);
-    }
-  }
+	private void setMainContent(Widget content) {
+		mainContentPanel.clear();
+		if (content != null) {
+			mainContentPanel.add(content);
+		}
+	}
 
-  @Override
-  public void showLoading(boolean visibile) {
-    loadingMessage.getStyle().setVisibility(
-        visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
-  }
+	private void setSignInContent(Widget content) {
+		signInContentPanel.clear();
+		if (content != null) {
+			signInContentPanel.add(content);
+		}
+	}
+
+	@Override
+	public void showLoading(boolean visibile) {
+		loadingMessage.getStyle().setVisibility(
+				visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
+	}
 }
