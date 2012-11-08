@@ -10,6 +10,8 @@
 		<g:FlowPanel height="20px">
 			<g:Button ui:field="saveButton">Сохранить</g:Button>
 			<g:Button ui:field="cancelButton">Отмена</g:Button>
+			<g:Button ui:field="addRowButton">Добавить строку</g:Button>
+			<g:Button ui:field="removeRowButton">Удалить строку</g:Button>
 		</g:FlowPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>

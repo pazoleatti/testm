@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -48,8 +49,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	public interface MyView extends View {
 		Button getCancelButton();
 		Button getSaveButton();
+		Button getAddRowButton();
+		Button getRemoveRowButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData);
+		void reloadRows();
 		FormData getFormData();
 		void setLogMessages(List<LogEntry> logEntries);
 		void reset();
@@ -97,8 +101,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			}
 		));
 
+		final MyView view = getView();
+		
 		// Save data button
-		registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
+		registerHandler(view.getSaveButton().addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				SaveFormDataAction action = new SaveFormDataAction();
@@ -112,7 +118,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						view.loadFormData(savedFormData);
 						view.setLogMessages(result.getLogEntries());						
 					}
-						
+
 					@Override
 					public void onFailure(Throwable throwable) {
 						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
@@ -121,7 +127,24 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				});
 			}
 		}));
-}
+		
+		registerHandler(view.getAddRowButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				FormData formData = view.getFormData();
+				formData.appendDataRow(null);
+				view.reloadRows();
+			}
+			
+		}));
+		
+		registerHandler(view.getRemoveRowButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				Window.alert("not implemented");
+			}
+		}));
+	}
 
 @Override
 protected void onReset() {

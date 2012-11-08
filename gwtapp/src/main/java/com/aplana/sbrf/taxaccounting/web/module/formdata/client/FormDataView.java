@@ -30,6 +30,11 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	Button cancelButton;
 	@UiField
 	Button saveButton;
+	@UiField
+	Button addRowButton;
+	@UiField
+	Button removeRowButton;
+	
 	@UiField(provided=true) CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
 
 	private final Widget widget;
@@ -75,6 +80,11 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 		}
+		reloadRows();
+	}
+
+	@Override
+	public void reloadRows() {
 		formDataTable.setRowCount(formData.getDataRows().size());
 		formDataTable.setRowData(formData.getDataRows());
 		formDataTable.redraw();
@@ -95,5 +105,15 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	@Override
 	public FormData getFormData() {
 		return formData;
+	}
+
+	@Override
+	public Button getAddRowButton() {
+		return addRowButton;
+	}
+
+	@Override
+	public Button getRemoveRowButton() {
+		return removeRowButton;
 	}
 }
