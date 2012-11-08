@@ -1,0 +1,13 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:cell="urn:import:com.google.gwt.user.cellview.client">
+	
+		<g:VerticalPanel width="100%">
+			<g:Label text="Информация о данных по налоговой форме"  height="20px"/>
+			<g:FlowPanel ui:field="filterContentPanel"/>
+			<g:Button ui:field="apply">Применить</g:Button>
+			<cell:CellTable ui:field="formDataTable" width="100%"/>
+		</g:VerticalPanel>
+		
+</ui:UiBinder> 

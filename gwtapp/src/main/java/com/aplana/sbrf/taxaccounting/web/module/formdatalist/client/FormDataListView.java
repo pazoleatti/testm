@@ -5,26 +5,36 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewImpl;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-public class FormDataListView extends ViewImpl implements FormDataListPresenter.MyView {
+public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers> implements
+		FormDataListPresenter.MyView {
 
-	private static final String html = "<h1>Список данных по налоговым формам</h1>\n"
-			+ "<div id=\"formDataListContainer\"></div>";
+	interface MyBinder extends UiBinder<Widget, FormDataListView> {
+	}
 
-	private final HTMLPanel panel = new HTMLPanel(html);
+	private final Widget widget;
 
-	private CellTable<FormData> formDataTable;
+	@UiField
+	FlowPanel filterContentPanel;
+
+	@UiField
+	CellTable<FormData> formDataTable;
 
 	@Inject
-	public FormDataListView() {
-		formDataTable = new CellTable<FormData>();
+	public FormDataListView(final MyBinder binder) {
+
+		widget = binder.createAndBindUi(this);
 
 		TextColumn<FormData> idColumn = new TextColumn<FormData>() {
 			@Override
@@ -40,13 +50,24 @@ public class FormDataListView extends ViewImpl implements FormDataListPresenter.
 		};
 		formDataTable.addColumn(idColumn, "id");
 		formDataTable.addColumn(formTypeColumn, "Тип формы");
-		
-		panel.add(formDataTable, "formDataListContainer");
+
 	}
 
 	@Override
 	public Widget asWidget() {
-		return panel;
+		return widget;
+	}
+
+	@Override
+	public void setInSlot(Object slot, Widget content) {
+		if (slot == FormDataListPresenter.TYPE_filterPresenter) {
+			filterContentPanel.clear();
+			if (content != null) {
+				filterContentPanel.add(content);
+			}
+		} else {
+			super.setInSlot(slot, content);
+		}
 	}
 
 	@Override
@@ -56,7 +77,9 @@ public class FormDataListView extends ViewImpl implements FormDataListPresenter.
 	}
 
 	@Override
-	public <C> Column<FormData, C> addTableColumn(Cell<C> cell, String headerText, final ValueGetter<C> getter, FieldUpdater<FormData, C> fieldUpdater) {
+	public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
+			String headerText, final ValueGetter<C> getter,
+			FieldUpdater<FormData, C> fieldUpdater) {
 		Column<FormData, C> column = new Column<FormData, C>(cell) {
 			public C getValue(FormData object) {
 				return getter.getValue(object);
@@ -66,4 +89,13 @@ public class FormDataListView extends ViewImpl implements FormDataListPresenter.
 		formDataTable.addColumn(column, headerText);
 		return column;
 	}
+
+
+	@UiHandler("apply")
+	void onApplyButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onApplyFilter();
+		}
+	}
+
 }

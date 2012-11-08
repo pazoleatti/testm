@@ -8,6 +8,7 @@
 
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.signin.SignIn" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.listeditor.ListEditor" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.DictionaryPicker" />
 	<source path="cell"/>
 </module>

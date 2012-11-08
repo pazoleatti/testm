@@ -4,6 +4,7 @@
 	<g:HTMLPanel>
 		<h1>СБРФ - Учет налогов</h1>
 		<p>Домашняя страница</p>
+		<g:FlowPanel ui:field="test"/>
 		
 	</g:HTMLPanel>
 </ui:UiBinder> 

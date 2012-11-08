@@ -2,24 +2,41 @@ package com.aplana.sbrf.taxaccounting.web.module.home.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomePagePresenter.MyView;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
-
 public class HomePageView extends ViewImpl implements MyView {
-  interface Binder extends UiBinder<Widget, HomePageView> {
-  }
+	interface Binder extends UiBinder<Widget, HomePageView> {
+	}
 
-  private final Widget widget;
+	@UiField
+	FlowPanel test;
 
-  @Inject
-  public HomePageView(final Binder binder) {
-    widget = binder.createAndBindUi(this);
-  }
+	private final Widget widget;
 
-  @Override
-  public Widget asWidget() {
-    return widget;
-  }
+	@Inject
+	public HomePageView(final Binder binder) {
+		widget = binder.createAndBindUi(this);
+	}
+
+	@Override
+	public Widget asWidget() {
+		return widget;
+	}
+
+	@Override
+	public void setInSlot(Object slot, Widget content) {
+		if (slot == HomePagePresenter.TYPE_testPresenter) {
+			test.clear();
+			if (content != null) {
+				test.add(content);
+			}
+		} else {
+			super.setInSlot(slot, content);
+		}
+	}
+
 }
