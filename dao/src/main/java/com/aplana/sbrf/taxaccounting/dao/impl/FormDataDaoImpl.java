@@ -23,8 +23,11 @@ import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
@@ -89,7 +92,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		return formData;
 	}
 	
+	
+	private boolean checkValueType(Object value, Class<? extends Column> columnType) {
+		// TODO: в будущем возможны спец-ячейки, тип которых отличается от типа столбца
+		if (value == null) {
+			return true;
+		} else {
+			return value instanceof BigDecimal && NumericColumn.class.equals(columnType)
+				|| value instanceof String && StringColumn.class.equals(columnType)
+				|| value instanceof Date && DateColumn.class.equals(columnType);
+		}
+	}
+	
+	
 	private void readValues(String tableName, final Map<Long, DataRow> rowMap, final FormData formData) {
+		final Form form = formData.getForm();
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 			new Object[] { formData.getId() },
@@ -101,13 +118,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					Object value = rs.getObject("value");
 					if (value != null) {
 						DataRow row = rowMap.get(rowId);
-						String columnAlias = formData.getForm().getColumn(columnId).getAlias();
-						
+						Column col = form.getColumn(columnId);
+						String columnAlias = col.getAlias();
 						// TODO: думаю, стоит зарефакторить
 						if (value instanceof java.sql.Date) {
 							value = new java.util.Date(((java.sql.Date)value).getTime());
 						}
 						
+						boolean typeOk = checkValueType(value, col.getClass());
+						if (!typeOk) {
+							logger.warn("Cannot assign value '" + value + "'(" + value.getClass().getName() + ") to column '" + columnAlias + "'(" + col.getClass().getName() + ")");
+							value = null;
+						}
 						row.put(columnAlias, value);
 					}
 				}
