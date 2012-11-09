@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutNameTokens;
@@ -31,6 +32,7 @@ public class GetMainMenuActionHandler extends
 		menuItems.add(new MenuItem("Домашняя", HomeNameTokens.homePage));
 		menuItems.add(new MenuItem("Список форм",
 				FormDataListNameTokens.formDataListPage));
+        menuItems.add(new MenuItem("Администрирование", AdminNameTokens.adminPage));
 		menuItems.add(new MenuItem("О системе", AboutNameTokens.aboutPage));
 		menuItems.add(new MenuItem("Контакты", AboutNameTokens.contactPage));
 
