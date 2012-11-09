@@ -3,6 +3,16 @@ package com.aplana.sbrf.taxaccounting.model.security;
 import java.io.Serializable;
 
 public class TARole implements Serializable {
+	/**
+	 * Алиас роли "Контролёр"
+	 */
+	public static final String ROLE_CONTROL = "ROLE_CONTROL";
+	/**
+	 * Алиас роли "Оператор"
+	 */
+	public static final String ROLE_OPERATOR = "ROLE_OPERATOR";
+	
+	
 	private static final long serialVersionUID = 1L;
 	
 	private int id;

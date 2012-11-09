@@ -24,11 +24,24 @@ public class TAUserDaoImpl implements TAUserDao {
 	@Override
 	public TAUser getUser(String login) {
 		TAUser user = userMapper.getUserByLogin(login);
+		initUser(user);
+		return user;		
+	}
+
+	@Override
+	public TAUser getUser(int userId) {
+		TAUser user = userMapper.getUserById(userId);
+		initUser(user);
+		return null;
+	}
+	
+	private void initUser(TAUser user) {
 		if (user != null) {
-			logger.info("User found, login = " + login + ", id = " + user.getId());
+			if (logger.isTraceEnabled()) {
+				logger.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
+			}
 			List<TARole> userRoles = userMapper.getRolesByUserId(user.getId()); 
 			user.setRoles(userRoles);
 		}
-		return user;
 	}
 }
