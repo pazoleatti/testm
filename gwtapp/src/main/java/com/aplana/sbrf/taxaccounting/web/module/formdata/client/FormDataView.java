@@ -3,10 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.Collections;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.google.gwt.uibinder.client.UiBinder;

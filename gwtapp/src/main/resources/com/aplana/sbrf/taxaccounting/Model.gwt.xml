@@ -3,6 +3,4 @@
 <module>
 	<inherits name="com.google.gwt.user.User"/>
 	<source path="model"></source>
-	<source path="util"></source>
-    <source path="log"></source>
 </module>

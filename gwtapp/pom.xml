@@ -3,16 +3,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- POM file generated with GWT webAppCreator -->
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.aplana.taxaccounting</groupId>
-	<artifactId>gwtapp</artifactId>
-	<packaging>war</packaging>
+
 	<parent>
-		<groupId>com.aplana</groupId>
+		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>taxaccounting</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	
-	<name>GWT-приложение АС "Учёт налогов"</name>
+
+	<artifactId>gwtapp</artifactId>
+	<description>АС "Учёт налогов" - GWT приложение</description>
+	<packaging>war</packaging>
 
 	<properties>
 		<!-- Convenience property to set the GWT version -->
@@ -24,20 +24,27 @@
 	</properties>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>com.aplana.taxaccounting</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
 			<version>${gwtVersion}</version>
 			<scope>provided</scope>
-		</dependency>	
-	
-        <!-- DI dependencies -->
-        <dependency>
-            <groupId>com.google.gwt.inject</groupId>
-            <artifactId>gin</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        	
+		</dependency>
+
+		<!-- DI dependencies -->
+		<dependency>
+			<groupId>com.google.gwt.inject</groupId>
+			<artifactId>gin</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
 		<!-- MVP component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -119,10 +126,10 @@
 			<artifactId>spring-security-web</artifactId>
 			<version>${springsecurity.version}</version>
 		</dependency>
-		
+
 		<!-- TODO: изменить обработку jdbc-драйверов -->
-		<!-- Зависимости необходимы только для отладки через gwt-maven-plugin. Добавить 
-			в зависимости только к плагину их не удалось. Нужно что нибудь придумать -->
+		<!-- Зависимости необходимы только для отладки через gwt-maven-plugin. 
+			Добавить в зависимости только к плагину их не удалось. Нужно что нибудь придумать -->
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc</artifactId>
@@ -150,98 +157,94 @@
 			<artifactId>btm</artifactId>
 			<version>2.1.3</version>
 		</dependency>
-		<dependency>
-			<groupId>com.aplana.taxaccounting</groupId>
-			<artifactId>core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+
 	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <configuration>
-                    <logLevel>INFO</logLevel>
-                    <style>${gwt.style}</style>
-                    <hostedWebapp>${webappDirectory}</hostedWebapp>
-                    <copyWebapp>true</copyWebapp>
-                    <runTarget>Main.html</runTarget>
-                    <modules>
-                    	<module>com.aplana.sbrf.taxaccounting.web.main.Main</module>
-                    </modules>
-                    <compileSourcesArtifacts>
-          				<compileSourcesArtifact>${project.groupId}:core</compileSourcesArtifact>
-        			</compileSourcesArtifacts>
-                    <extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
-                </configuration>
-            </plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<configuration>
+					<logLevel>INFO</logLevel>
+					<style>${gwt.style}</style>
+					<hostedWebapp>${webappDirectory}</hostedWebapp>
+					<copyWebapp>true</copyWebapp>
+					<runTarget>Main.html</runTarget>
+					<modules>
+						<module>com.aplana.sbrf.taxaccounting.web.main.Main</module>
+					</modules>
+					<compileSourcesArtifacts>
+						<compileSourcesArtifact>${project.groupId}:model</compileSourcesArtifact>
+					</compileSourcesArtifacts>
+					<extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <useProjectReferences>false</useProjectReferences>
-                    <additionalBuildcommands>
-                        <buildcommand>com.google.gwt.eclipse.core.gwtProjectValidator</buildcommand>
-                    </additionalBuildcommands>
-                    <additionalProjectnatures>
-                        <projectnature>com.google.gwt.eclipse.core.gwtNature</projectnature>
-                    </additionalProjectnatures>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.gwtplatform</groupId>
-                        <artifactId>gwtp-build-tools</artifactId>
-                        <version>0.7</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-    <dependencyManagement>
-    	<dependencies>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-core</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-context</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-beans</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-web</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-expression</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-asm</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-aop</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    		<dependency>
-    			<groupId>org.springframework</groupId>
-    			<artifactId>spring-tx</artifactId>
-    			<version>${org.springframework.version}</version>
-    		</dependency>
-    	</dependencies>
-    </dependencyManagement>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<useProjectReferences>false</useProjectReferences>
+					<additionalBuildcommands>
+						<buildcommand>com.google.gwt.eclipse.core.gwtProjectValidator</buildcommand>
+					</additionalBuildcommands>
+					<additionalProjectnatures>
+						<projectnature>com.google.gwt.eclipse.core.gwtNature</projectnature>
+					</additionalProjectnatures>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>com.gwtplatform</groupId>
+						<artifactId>gwtp-build-tools</artifactId>
+						<version>0.7</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-asm</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${org.springframework.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
