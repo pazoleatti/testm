@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -10,6 +11,8 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
@@ -45,15 +48,56 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 		this(SimpleSafeHtmlRenderer.getInstance());
 	}
 	
-	public DictionaryCell(SafeHtmlRenderer<String> renderer) {
+	public DictionaryCell(SafeHtmlRenderer<String> rendererp) {
 		super(CLICK, KEYDOWN);
-		if (renderer == null) {
+		if (rendererp == null) {
 			throw new IllegalArgumentException("renderer == null");
 		}
-
-		this.renderer = renderer;
+		
+		this.renderer = rendererp;
+		
+		
+		valueUpdater = new ValueUpdater<String>() {
+			@Override
+	        public void update(String value) {
+//	          fieldUpdater.update(index, rowValue, value);
+//				renderer.render("123456");
+//				Element cellParent = lastParent;
+//				String oldValue = lastValue;
+//				Object key = lastKey;
+//				int index = lastIndex;
+//				int column = lastColumn;
+//				setValue(new Context(index, column, key), cellParent, "12345");
+//				Window.alert("HELLO");
+				
+	        }
+		};
 
 		this.widget = new DictionaryPickerWidget();
+		widget.addValueChangeHandler(new ValueChangeHandler<SimpleDictionaryItem<Long>>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<SimpleDictionaryItem<Long>> event) {
+//				Window.alert("My value = " + event.getValue());
+				if (event.getValue() != null && event.getValue().getValue() != null) {
+					renderer.render(event.getValue().getName());
+				} else {
+					renderer.render("&nbsp;");
+				}
+				Element cellParent = lastParent;
+				String oldValue = lastValue;
+				Object key = lastKey;
+				int index = lastIndex;
+				int column = lastColumn;
+				if (event.getValue() != null && event.getValue().getValue() != null) {
+					setValue(new Context(index, column, key), cellParent, event.getValue().getName());
+				} else {
+					setValue(new Context(index, column, key), cellParent, null);
+				}
+				panel.hide();
+				
+			}
+		});
 		this.panel = new PopupPanel(true, true) {
 			@Override
 			protected void onPreviewNativeEvent(NativePreviewEvent event) {

@@ -1,16 +1,23 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+			 xmlns:c="urn:import:com.google.gwt.user.cellview.client"
+			 >
 	<g:VerticalPanel>
 		<g:LayoutPanel width="667px" height="48px">
-			<g:layer left="580px" width="79px" top="8px" height="24px">
-				<g:Button ui:field="button"/>
-			</g:layer>
 			<g:layer left="13px" width="561px" top="7px" height="28px">
-				<g:TextBox/>
+				<g:TextBox ui:field="txtFind" text="find"/>
 			</g:layer>
 		</g:LayoutPanel>
 		<g:ScrollPanel height="235px">
-			<c:CellTable width="100%" height="214px" ui:field="cellTable"/>
+			<c:CellTable width="95%" height="214px" ui:field="cellTable" />
+			
 		</g:ScrollPanel>
+		<c:SimplePager ui:field='pager' location='CENTER'/>
+		<g:LayoutPanel width="667px" height="48px">
+		<g:layer left="580px" width="79px" top="8px" height="24px">
+				<g:Button ui:field="btnClear" text="Clear"/>
+			</g:layer>
+		</g:LayoutPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>
