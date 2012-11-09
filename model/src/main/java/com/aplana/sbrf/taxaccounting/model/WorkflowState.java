@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 /**
- * Состояние жизненного цикла 
+ * РЎС‚Р°РґРёСЏ Р¶РёР·РЅРµРЅРЅРѕРіРѕ С†РёРєР»Р° 
  */
 public class WorkflowState implements Serializable {
 	private static final long serialVersionUID = 1L;

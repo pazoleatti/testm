@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 /**
- * Объект, представляющий жизненный цикл обработки налоговой формы (или другого объекта системы)
+ * Р–РёР·РЅРµРЅРЅС‹Р№ С†РёРєР» СЃРёСЃС‚РµРјС‹
  */
 public class Workflow implements Serializable {
 	private static final long serialVersionUID = 1L;
