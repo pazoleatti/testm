@@ -12,4 +12,8 @@ public interface WorkflowObject {
 	 * Текущая стадия жизненного цикла
 	 */
 	int getStateId();
+	/**
+	 * Установить стадию жизненного цикла
+	 */
+	void setStateId(int stateId);
 }

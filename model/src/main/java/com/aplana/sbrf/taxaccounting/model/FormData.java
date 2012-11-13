@@ -11,6 +11,7 @@ import java.util.List;
 public class FormData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long id;
+	private int stateId;	
 	private Form form;
 	private List<DataRow> dataRows;
 
@@ -27,6 +28,14 @@ public class FormData implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public int getStateId() {
+		return stateId;
+	}
+
+	public void setStateId(int stateId) {
+		this.stateId = stateId;
 	}
 
 	public Form getForm() {

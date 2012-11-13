@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Set;
 
 
 /**
@@ -9,13 +10,12 @@ import java.io.Serializable;
  */
 public class Department implements Serializable {
 	private static final long serialVersionUID = 1L;	
-	
 	private int id;
 	private String name;
 	private Integer parentId;
 	private DepartmentType type;
-	
-	
+	private Set<Integer> formTypes;
+
 	public int getId() {
 		return id;
 	}

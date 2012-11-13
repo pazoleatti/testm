@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 /**
  * Интерфейс, реализующий логику по проверке прав доступа
@@ -18,14 +16,6 @@ public interface FormDataAccessService {
 	boolean canRead(int userId, long formDataId);
 	
 	/**
-	 * Проверка прав на чтение данных
-	 * @param user объект, представляющий пользователя, для которого проверяются права
-	 * @param formData объект с данными по налоговой формы, для которого проверяются права 
-	 * @return true - если права на чтение есть, false - в противном случае
-	 */	
-	boolean canRead(TAUser user, FormData formData);
-	
-	/**
 	 * Проверка прав на редактирование данных
 	 * @param userId идентификатор пользователя, для которого проверяются права
 	 * @param formDataId идентификатор карточки данных по налоговой форме
@@ -34,10 +24,14 @@ public interface FormDataAccessService {
 	boolean canEdit(int userId, long formDataId);
 	
 	/**
-	 * Проверка прав на редактирование данных 
-	 * @param user объект, представляющий пользователя, для которого проверяются права
-	 * @param formData объект с данными по налоговой формы, для которого проверяются права 
-	 * @return true - если права на редактирование есть, false - в противном случае
+	 * Проверка того, что у пользователя есть права на создание карточек налоговых форм
+	 * Данный метод просто проверяет, что пользователь имеет подходящую роль 
+	 * и его подразделение может работать с данными налоговыми формами.
+	 * Проверки, связанные с бизнес-логикой (например то, что за один период в подразделении должна существовать
+	 * только одна форма заданного типа и т.п. должны проверяться отдельно).
+	 * @param userId идентификатор пользователя
+	 * @param formId идентификатор налоговой формы (шаблона)
+	 * @return true - если у пользователя есть права, false - в противном случае
 	 */
-	boolean canEdit(TAUser user, FormData formData);
+	boolean canCreate(int userId, int formId);
 }

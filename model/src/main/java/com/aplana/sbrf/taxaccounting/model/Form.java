@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Описание налоговой формы
+ * Описание налоговой формы (шаблон налоговой формы)
  * @author dsultanbekov
  */
 public class Form implements Serializable {
@@ -18,6 +18,7 @@ public class Form implements Serializable {
 	private Script createScript;
 	private List<Script> calcScripts = new ArrayList<Script>();
 	private List<DataRow> rows = new ArrayList<DataRow>();
+	private int workflowId;
 	
 	public Integer getId() {
 		return id;
@@ -95,4 +96,10 @@ public class Form implements Serializable {
 	public List<DataRow> getRows() {
 		return rows;
 	}
+	public int getWorkflowId() {
+		return workflowId;
+	}
+	public void setWorkflowId(int workflowId) {
+		this.workflowId = workflowId;
+	}	
 }
