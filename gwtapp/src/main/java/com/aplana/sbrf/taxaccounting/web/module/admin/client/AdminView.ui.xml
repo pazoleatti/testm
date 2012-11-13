@@ -3,7 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <g:HorizontalPanel width="100%" height="800px">
         <g:cell width="20%" height="100%">
-        <g:ListBox visibleItemCount="10" width="100%" height="100%"/>
+        <g:ListBox visibleItemCount="10" width="100%" height="100%" ui:field="formListBox"/>
         </g:cell>
         <g:cell width="80%" height="100%">
         <g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">

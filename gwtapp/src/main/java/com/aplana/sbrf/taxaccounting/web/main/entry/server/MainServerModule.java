@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
+import com.aplana.sbrf.taxaccounting.web.module.admin.server.AdminServerModule;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -11,7 +12,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServe
 
 @Configuration
 @Import(value = {MainHandlerModule.class,  FormDataListServerModule.class,
-		FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class })
+		FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
+        AdminServerModule.class
+})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 public class MainServerModule {
 

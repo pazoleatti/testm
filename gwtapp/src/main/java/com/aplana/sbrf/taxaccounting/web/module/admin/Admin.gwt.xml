@@ -6,5 +6,11 @@
     <inherits name="com.google.gwt.inject.Inject" />
     <inherits name="com.gwtplatform.mvp.Mvp"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
+    <inherits name="com.gwtplatform.dispatch.Dispatch" />
+    <inherits name="com.aplana.sbrf.taxaccounting.Model"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
+
     <source path='client'/>
+    <source path='shared'/>
 </module>
