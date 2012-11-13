@@ -1,7 +1,28 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
-    <g:VerticalPanel width="100%" height="100%">
-        <g:Label text="Админка"  height="20px"/>
-    </g:VerticalPanel>
+    <g:HorizontalPanel width="100%" height="800px">
+        <g:cell width="20%" height="100%">
+        <g:ListBox visibleItemCount="10" width="100%" height="100%"/>
+        </g:cell>
+        <g:cell width="80%" height="100%">
+        <g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
+            <g:tab>
+                <g:header size="50px">Скрипт создания</g:header>
+                <g:RichTextArea height="100%" width="100%" />
+            </g:tab>
+            <g:tab>
+                <g:header size="50px">Рассчетные скрипты</g:header>
+                <g:HorizontalPanel width="100%" height="100%">
+                    <g:cell width="25%" height="100%">
+                        <g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+                    </g:cell>
+                    <g:cell>
+                        <g:RichTextArea height="100%" width="100%"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+            </g:tab>
+        </g:TabLayoutPanel>
+        </g:cell>
+    </g:HorizontalPanel>
 </ui:UiBinder>
