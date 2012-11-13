@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.log;
+package com.aplana.sbrf.taxaccounting.log.impl;
 
 /**
  * Декоратор сообщений журнала, используемый при выполеннии проверок по строкам таблицы

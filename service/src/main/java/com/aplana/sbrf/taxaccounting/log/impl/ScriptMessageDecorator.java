@@ -1,4 +1,6 @@
-package com.aplana.sbrf.taxaccounting.log;
+package com.aplana.sbrf.taxaccounting.log.impl;
+
+import com.aplana.sbrf.taxaccounting.log.LogMessageDecorator;
 
 
 public class ScriptMessageDecorator implements LogMessageDecorator {
