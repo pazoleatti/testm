@@ -5,4 +5,5 @@
 	<inherits name="com.google.gwt.uibinder.UiBinder" />
 	<inherits name="com.google.gwt.inject.Inject" />
 	<source path='client' />
+	<source path="shared"/>
 </module>

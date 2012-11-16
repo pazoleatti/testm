@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  * виджет для выбора элемента 
  * TODO: сделать генериком, для того, чтобы можно было работать не только со строковыми кодами в справочниках, но и с числовыми
  */
-public class DictionaryCell extends AbstractEditableCell<String, String> {
+public class DictionaryCell extends AbstractEditableCell<String, String> implements ReadOnlyCell {
 
 	private static final int ESCAPE = 27;
 
@@ -43,12 +43,15 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 	private PopupPanel panel;
 	private final SafeHtmlRenderer<String> renderer;
 	private ValueUpdater<String> valueUpdater;
+	private String dictionaryCode;
+	private Boolean isReadOnly = false;
 
-	public DictionaryCell() {
-		this(SimpleSafeHtmlRenderer.getInstance());
+	public DictionaryCell(String dictionaryCode) {
+		this(SimpleSafeHtmlRenderer.getInstance(), dictionaryCode);
+		
 	}
 	
-	public DictionaryCell(SafeHtmlRenderer<String> rendererp) {
+	public DictionaryCell(SafeHtmlRenderer<String> rendererp, String dictionaryCode) {
 		super(CLICK, KEYDOWN);
 		if (rendererp == null) {
 			throw new IllegalArgumentException("renderer == null");
@@ -72,27 +75,29 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 				
 	        }
 		};
-
-		this.widget = new DictionaryPickerWidget();
-		widget.addValueChangeHandler(new ValueChangeHandler<SimpleDictionaryItem<Long>>() {
+		
+		this.widget = new DictionaryPickerWidget(dictionaryCode);
+		widget.addValueChangeHandler(new ValueChangeHandler<SimpleDictionaryItem<String>>() {
 			
 			@Override
-			public void onValueChange(ValueChangeEvent<SimpleDictionaryItem<Long>> event) {
+			public void onValueChange(ValueChangeEvent<SimpleDictionaryItem<String>> event) {
 //				Window.alert("My value = " + event.getValue());
-				if (event.getValue() != null && event.getValue().getValue() != null) {
-					renderer.render(event.getValue().getName());
-				} else {
-					renderer.render("&nbsp;");
-				}
+//				if (event.getValue() != null && event.getValue().getValue() != null) {
+//					renderer.render(event.getValue().getValue());
+//				} else {
+//					renderer.render("&nbsp;");
+//				}
 				Element cellParent = lastParent;
 				String oldValue = lastValue;
 				Object key = lastKey;
 				int index = lastIndex;
 				int column = lastColumn;
 				if (event.getValue() != null && event.getValue().getValue() != null) {
-					setValue(new Context(index, column, key), cellParent, event.getValue().getName());
+					setValue(new Context(index, column, key), cellParent, event.getValue().getValue());
+					valueUpdater.update(event.getValue().getValue());
 				} else {
 					setValue(new Context(index, column, key), cellParent, null);
+					valueUpdater.update(null);
 				}
 				panel.hide();
 				
@@ -190,23 +195,44 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, String value,
 			NativeEvent event, ValueUpdater<String> valueUpdater) {
-		this.lastKey = context.getKey();
-		this.lastParent = parent;
-		this.lastValue = value;
-		this.lastIndex = context.getIndex();
-		this.lastColumn = context.getColumn();
-		this.valueUpdater = valueUpdater;
-
-		// TODO: инициализация поискового виджета
-		//String viewData = getViewData(lastKey);
-		//String searchItem = (viewData == null) ? lastValue : viewData;
-		// widget.setSearchText(searchItem)
-		
-		panel.setPopupPositionAndShow(new PositionCallback() {
-			public void setPosition(int offsetWidth, int offsetHeight) {
-				panel.setPopupPosition(lastParent.getAbsoluteLeft() + offsetX,
-						lastParent.getAbsoluteTop() + offsetY);
-			}
-		});
+		if (!isReadOnly) {
+			this.lastKey = context.getKey();
+			this.lastParent = parent;
+			this.lastValue = value;
+			this.lastIndex = context.getIndex();
+			this.lastColumn = context.getColumn();
+			this.valueUpdater = valueUpdater;
+	
+			// TODO: инициализация поискового виджета
+			//String viewData = getViewData(lastKey);
+			//String searchItem = (viewData == null) ? lastValue : viewData;
+			// widget.setSearchText(searchItem)
+			
+			panel.setPopupPositionAndShow(new PositionCallback() {
+				public void setPosition(int offsetWidth, int offsetHeight) {
+					panel.setPopupPosition(lastParent.getAbsoluteLeft() + offsetX,
+							lastParent.getAbsoluteTop() + offsetY);
+				}
+			});
+		}
 	}
+
+	public String getDictionaryCode() {
+		return dictionaryCode;
+	}
+
+	public void setDictionaryCode(String dictionaryCode) {
+		this.dictionaryCode = dictionaryCode;
+	}
+
+	@Override
+	public void setReadOnly(Boolean readOnly) {
+		isReadOnly = readOnly;
+	}
+
+	@Override
+	public Boolean isReadOnly() {
+		return isReadOnly;
+	}
+	
 }

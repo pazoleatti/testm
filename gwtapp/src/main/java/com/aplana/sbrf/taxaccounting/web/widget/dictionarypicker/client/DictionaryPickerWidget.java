@@ -1,27 +1,30 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -32,85 +35,100 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * @author dsultanbekov
  *
  */
-public class DictionaryPickerWidget extends Composite implements HasValueChangeHandlers<SimpleDictionaryItem<Long>>{
+public class DictionaryPickerWidget extends Composite implements HasValueChangeHandlers<SimpleDictionaryItem<String>>{
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
 	}
 
 	private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-	@UiField(provided=true) CellTable<SimpleDictionaryItem<Long>> cellTable = new CellTable<SimpleDictionaryItem<Long>>();
-//	@UiField Button button;
+	@UiField(provided=true) CellTable<SimpleDictionaryItem<String>> cellTable = new CellTable<SimpleDictionaryItem<String>>();
+	@UiField Button btnFind;
 	@UiField TextBox txtFind;
 	@UiField SimplePager pager;
 	
+	private String dictionaryCode;
+	
 	private String value;
+	
+	private DictionaryDataProvider dataProvider;
 
-	public DictionaryPickerWidget() {
+	public DictionaryPickerWidget(String dictionaryCode) {
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		TextColumn<SimpleDictionaryItem<Long>> idColumn = new TextColumn<SimpleDictionaryItem<Long>>() {
+		
+		btnFind.setVisible(true);
+		
+		
+		TextColumn<SimpleDictionaryItem<String>> idColumn = new TextColumn<SimpleDictionaryItem<String>>() {
 			@Override
-			public String getValue(SimpleDictionaryItem<Long> object) {
+			public String getValue(SimpleDictionaryItem<String> object) {
 				return object.getName();
 			}
 		};
 		
-		TextColumn<SimpleDictionaryItem<Long>> formTypeColumn = new TextColumn<SimpleDictionaryItem<Long>>() {
+		TextColumn<SimpleDictionaryItem<String>> formTypeColumn = new TextColumn<SimpleDictionaryItem<String>>() {
 			@Override
-			public String getValue(SimpleDictionaryItem<Long> object) {
-				return object.getValue().toString();
+			public String getValue(SimpleDictionaryItem<String> object) {
+				return object.getValue();
 			}
 		};
-		cellTable.addColumn(idColumn, "Столбец1");
-		cellTable.addColumn(formTypeColumn, "Столбец2");
-//		List<String> values = new LinkedList<String>();
-//		for (int i=0; i<13; i++) {
-//			values.add("Value" + String.valueOf(i));
-//		}
-//		cellTable.setRowData(values);
-		cellTable.setPageSize(5);
-//		SimplePager.Resources pagerResources = GWT
-//                 .create(SimplePager.Resources.class);
-//		pager = new SimplePager(TextLocation.CENTER, pagerResources, true, 0,
-//                 true);
 		
+		cellTable.addColumn(idColumn, "Имя");
+		cellTable.addColumn(formTypeColumn, "Значеие");
+		cellTable.setPageSize(5);
 		 
 		pager.setDisplay(cellTable);
-//		ListDataProvider<String> dataProvider = new ListDataProvider<String>(values);
-		DictionaryDataProvider dataProvider = new DictionaryDataProvider();
+		dataProvider = new DictionaryDataProvider(txtFind.getValue(), dictionaryCode);
 		dataProvider.addDataDisplay(cellTable);
-		cellTable.addCellPreviewHandler(new Handler<SimpleDictionaryItem<Long>>() {
+		cellTable.addCellPreviewHandler(new Handler<SimpleDictionaryItem<String>>() {
 
 			@Override
-			public void onCellPreview(CellPreviewEvent<SimpleDictionaryItem<Long>> event) {
+			public void onCellPreview(CellPreviewEvent<SimpleDictionaryItem<String>> event) {
 				Boolean isClick = "click".equals(event.getNativeEvent().getType());
 				if (isClick) {
-//					value = event.getValue();
 					ValueChangeEvent.fire(DictionaryPickerWidget.this, event.getValue());
 				}
 			}
 		});
 		
-		
-		txtFind.addChangeHandler(new ChangeHandler() {
+		txtFind.addKeyPressHandler(new KeyPressHandler() {
 			
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onKeyPress(KeyPressEvent event) {
+				int keyCode = event.getNativeEvent().getKeyCode();
+				if (keyCode == KeyCodes.KEY_ENTER) {
+					findAction();
+				} else if (keyCode == KeyCodes.KEY_DOWN ) {
+					Window.alert("OK");
+					pager.nextPage();
+				} else if (keyCode == KeyCodes.KEY_PAGEDOWN) {
+					pager.previousPage();
+				}
+			}
+				
+			
+		});
+		
+		txtFind.addKeyUpHandler(new KeyUpHandler() {
+			
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				int keyCode = event.getNativeEvent().getKeyCode();
+				if (keyCode == KeyCodes.KEY_DOWN ) {
+					pager.nextPage();
+				} else if (keyCode == KeyCodes.KEY_UP) {
+					pager.previousPage();
+				}
+				
 			}
 		});
 		
-	}
-//	@UiHandler("button")
-//	void onButtonClick(ClickEvent event) {
-//		dispatcher.execute(new GetDictionaryDataList(), new AbstractCallback<GetDictionaryDataListResult>() {
-//			@Override
-//			public void onSuccess(GetDictionaryDataListResult result) {
-////				getView().setFormDataList(result.getRecords());	
-//			}
-//		});
 		
-//		value = txtFind.getValue();
-//		ValueChangeEvent.fire(this, value);
-//	}
+		
+	}
+	@UiHandler("btnFind")
+	void onFindButtonClick(ClickEvent event) {
+		
+	}
 	
 	@UiHandler("btnClear")
 	void onBtnClearClick(ClickEvent event) {
@@ -124,7 +142,33 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 		return value;
 	}
 	
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<SimpleDictionaryItem<Long>> handler) {
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<SimpleDictionaryItem<String>> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
-	 }
+	}
+	
+	private void findAction() {
+		dataProvider.setFilter("%"+txtFind.getValue()+"%");
+		pager.firstPage();
+		Range range = cellTable.getVisibleRange();
+		cellTable.setVisibleRangeAndClearData(range, true); 
+		
+	}
+	
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+	    findAction();
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {    
+			  @Override
+			  public void execute() {
+				  txtFind.setFocus(true);
+			  }
+		});
+		
+		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
+	          public void onRangeChange(RangeChangeEvent event) {
+	        	  txtFind.setFocus(true);
+	          }
+	    });	  
+	}	
 }

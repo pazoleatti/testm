@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryManager;
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.SimpleDictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
 
-public class StringDictionaryManager {
+public class StringDictionaryManager implements DictionaryManager<String>{
 	private Map<String, SimpleStringDictionaryDataProvider> dataProviders;
 
 	public void setDataProviders(Map<String, SimpleStringDictionaryDataProvider> dataProviders) {

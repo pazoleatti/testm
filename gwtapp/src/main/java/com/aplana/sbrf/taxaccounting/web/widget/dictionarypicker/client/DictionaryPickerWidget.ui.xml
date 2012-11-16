@@ -6,8 +6,11 @@
 	<g:VerticalPanel>
 		<g:LayoutPanel width="667px" height="48px">
 			<g:layer left="13px" width="561px" top="7px" height="28px">
-				<g:TextBox ui:field="txtFind" text="find"/>
+				<g:TextBox ui:field="txtFind" text=""/>
 			</g:layer>
+			<g:layer left="580px" width="79px" top="8px" height="24px">
+				<g:Button ui:field="btnFind" text="Find"/>
+		</g:layer>
 		</g:LayoutPanel>
 		<g:ScrollPanel height="235px">
 			<c:CellTable width="95%" height="214px" ui:field="cellTable" />
@@ -17,7 +20,7 @@
 		<g:LayoutPanel width="667px" height="48px">
 		<g:layer left="580px" width="79px" top="8px" height="24px">
 				<g:Button ui:field="btnClear" text="Clear"/>
-			</g:layer>
+		</g:layer>
 		</g:LayoutPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>
