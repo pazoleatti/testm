@@ -25,11 +25,15 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.aplana.taxaccounting</groupId>
-			<artifactId>core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>model</artifactId>
+			<version>${pom.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>core</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>

@@ -15,7 +15,8 @@
 		<module>core</module>
 		<module>dao</module>
 		<module>gwtapp</module>
-		<!-- <module>portlets</module> <module>taxaccounting-ear</module> <module>theme</module> -->
+		<!--module>portlets</module>
+		<module>taxaccounting-ear</module-->
 		<module>service</module>
 	</modules>
 	<properties>
@@ -55,7 +56,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>

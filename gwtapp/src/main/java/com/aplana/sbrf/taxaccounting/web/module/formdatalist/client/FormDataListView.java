@@ -45,7 +45,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		TextColumn<FormData> formTypeColumn = new TextColumn<FormData>() {
 			@Override
 			public String getValue(FormData object) {
-				return object.getForm().getType().getName();
+				return object.getFormType().getName();
 			}
 		};
 		formDataTable.addColumn(idColumn, "id");

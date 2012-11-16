@@ -75,7 +75,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	public void loadFormData(FormData formData) {
 		this.formData = formData;
 		DataRowColumnFactory factory = new DataRowColumnFactory();
-		for (Column col: formData.getForm().getColumns()) {
+		for (Column col: formData.getFormColumns()) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");

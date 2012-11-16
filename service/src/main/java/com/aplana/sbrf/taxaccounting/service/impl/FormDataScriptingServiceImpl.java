@@ -72,7 +72,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 */
 	@Override
 	public void processFormData(Logger logger, FormData formData) {
-		Form form = formData.getForm();
+		Form form = formDao.getForm(formData.getFormTemplateId());
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
 		engine.put("formData", formData);
@@ -100,7 +100,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 				}
 			}
 		}
-		checkMandatoryColumns(formData, logger);
+		checkMandatoryColumns(formData, form, logger);
 		logger.setMessageDecorator(null);
 	}
 
@@ -139,8 +139,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		logger.setMessageDecorator(null);
 	}
 	
-	private void checkMandatoryColumns(FormData formData, Logger logger) {
-		List<Column> columns = formData.getForm().getColumns();
+	private void checkMandatoryColumns(FormData formData, Form form, Logger logger) {
+		List<Column> columns = form.getColumns();
 		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
 		messageDecorator.setScriptName("Проверка обязательных полей");
 		logger.setMessageDecorator(messageDecorator);

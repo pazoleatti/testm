@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.WorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
@@ -20,21 +21,20 @@ import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	@Autowired
 	private WorkflowDao workflowDao;
-
 	@Autowired
 	private FormDataAccessService formDataAccessService;
-
 	@Autowired
 	private FormDataDao formDataDao;
-
 	@Autowired
 	private TAUserDao userDao;
+	@Autowired
+	private FormDao formDao;
 
 	@Override
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
 		FormData formData = formDataDao.get(formDataId);
 		int currentStateId = formData.getStateId();
-		Form form = formData.getForm();
+		Form form = formDao.getForm(formData.getFormTemplateId());
 		Workflow wf = workflowDao.getWorkflow(form.getWorkflowId());		
 		
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();

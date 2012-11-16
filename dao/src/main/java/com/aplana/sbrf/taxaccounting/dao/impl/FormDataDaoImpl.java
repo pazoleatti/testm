@@ -42,7 +42,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			int formId = rs.getInt("form_id");
 			Form form = formDao.getForm(formId);
 			FormData fd = new FormData();
-			fd.setForm(form);
+			fd.initFormTemplateParams(form);
 			fd.setId(formDataId);
 			return fd;
 		}
@@ -106,7 +106,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	
 	
 	private void readValues(String tableName, final Map<Long, DataRow> rowMap, final FormData formData) {
-		final Form form = formData.getForm();
+		final Form form = formDao.getForm(formData.getFormTemplateId());
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 			new Object[] { formData.getId() },
@@ -146,7 +146,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
 				"insert into form_data (id, form_id) values (?, ?)",
-				new Object[] { formDataId, formData.getForm().getId()}
+				new Object[] { formDataId, formData.getFormTemplateId()}
 			);
 			formData.setId(formDataId);
 		} else {
@@ -171,7 +171,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				ps.setString(1, rowAlias);
 				ps.setInt(2, dr.getOrder());
 				
-				for (Column col: formData.getForm().getColumns()) {
+				for (Column col: formData.getFormColumns()) {
 					Object val = dr.get(col.getAlias());
 					if (val == null) {
 						continue;
