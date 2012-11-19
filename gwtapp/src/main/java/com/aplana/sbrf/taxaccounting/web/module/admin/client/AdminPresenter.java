@@ -5,9 +5,15 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -22,6 +28,8 @@ import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
  */
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
     private final DispatchAsync dispatcher;
+
+    private Form formDescriptor;
 
     @Inject
     public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
@@ -43,6 +51,24 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
                 }
             }
         });
+
+        registerHandler(getView().getFormListBox().addChangeHandler(
+                new ChangeHandler() {
+                    @Override
+                    public void onChange(ChangeEvent changeEvent) {
+                        GetFormAction action = new GetFormAction();
+                        final ListBox listBox = getView().getFormListBox();
+                        action.setId(Integer.valueOf(listBox.getValue(listBox.getSelectedIndex())));
+                        dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+                            @Override
+                            public void onSuccess(GetFormResult result) {
+                                formDescriptor = result.getForm();
+                                getView().getCreateScriptBody().setValue(formDescriptor.getCreateScript().getBody());
+                            }
+                        });
+                    }
+                }
+        ));
     }
 
     @Override
@@ -63,5 +89,6 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
      */
     public interface MyView extends View {
         public ListBox getFormListBox();
+        public TextArea getCreateScriptBody();
     }
 }

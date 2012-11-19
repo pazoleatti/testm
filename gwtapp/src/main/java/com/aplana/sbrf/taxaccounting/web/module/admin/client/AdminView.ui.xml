@@ -9,7 +9,7 @@
         <g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
             <g:tab>
                 <g:header size="50px">Скрипт создания</g:header>
-                <g:RichTextArea height="100%" width="100%" />
+                <g:TextArea height="100%" width="100%" ui:field="createScriptBody"/>
             </g:tab>
             <g:tab>
                 <g:header size="50px">Рассчетные скрипты</g:header>
