@@ -11,12 +11,22 @@ import com.google.gwt.view.client.Range;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.DelayedBindRegistry;
 
+/**
+ * Асинхронный провайдер для таблицы, получающий даные с сервера 
+ * с использованием фильтра и кода справочника.
+ * @author Eugene Stetsenko
+ */
 public class DictionaryDataProvider extends AsyncDataProvider<SimpleDictionaryItem<String>>{
 	
 	private String filter = "%";
 	private final DispatchAsync dispatcher;
 	private String dictionaryCode;
 	
+	/**
+	 * 
+	 * @param newFilter Фильтр.
+	 * @param dictionaryCode Код справочника.
+	 */
 	public DictionaryDataProvider(String newFilter, String dictionaryCode) {
 		filter = newFilter;
 		dispatcher = ((ClientGinjector)DelayedBindRegistry.getGinjector()).getDispatchAsync();

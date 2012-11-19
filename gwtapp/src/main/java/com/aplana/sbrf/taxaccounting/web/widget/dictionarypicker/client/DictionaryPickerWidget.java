@@ -73,8 +73,8 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 		};
 		
 		cellTable.addColumn(idColumn, "Имя");
-		cellTable.addColumn(formTypeColumn, "Значеие");
-		cellTable.setPageSize(5);
+		cellTable.addColumn(formTypeColumn, "Значение");
+		cellTable.setPageSize(10);
 		 
 		pager.setDisplay(cellTable);
 		dataProvider = new DictionaryDataProvider(txtFind.getValue(), dictionaryCode);

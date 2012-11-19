@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared;
 
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
-
+/**
+ * Запрос для получения элементов справочника передающий фильтр, 
+ * границы выборки и код справочника.
+ * @author Eugene Stetsenko
+ *
+ */
 public class DictionaryPickerDataAction extends UnsecuredActionImpl<DictionaryPickerDataResult> {
 	private String filter;
 	private Integer start;

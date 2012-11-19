@@ -4,23 +4,28 @@
 			 xmlns:c="urn:import:com.google.gwt.user.cellview.client"
 			 >
 	<g:VerticalPanel>
-		<g:LayoutPanel width="667px" height="48px">
-			<g:layer left="13px" width="561px" top="7px" height="28px">
+		<g:HorizontalPanel width="auto" height="auto">
+
 				<g:TextBox ui:field="txtFind" text=""/>
-			</g:layer>
-			<g:layer left="580px" width="79px" top="8px" height="24px">
-				<g:Button ui:field="btnFind" text="Find"/>
-		</g:layer>
-		</g:LayoutPanel>
-		<g:ScrollPanel height="235px">
-			<c:CellTable width="95%" height="214px" ui:field="cellTable" />
-			
-		</g:ScrollPanel>
-		<c:SimplePager ui:field='pager' location='CENTER'/>
-		<g:LayoutPanel width="667px" height="48px">
-		<g:layer left="580px" width="79px" top="8px" height="24px">
-				<g:Button ui:field="btnClear" text="Clear"/>
-		</g:layer>
-		</g:LayoutPanel>
+
+
+				<g:Button ui:field="btnFind" text="Найти"/>
+
+		</g:HorizontalPanel>
+		<g:FlowPanel height="350px">
+			<g:HorizontalPanel height="300px" width="100%">
+				<c:CellTable width="100%" height="auto" ui:field="cellTable" />
+			</g:HorizontalPanel>
+			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
+				<c:SimplePager ui:field='pager' location='CENTER'/>
+				<g:cell horizontalAlignment='ALIGN_RIGHT' >
+					<g:Button ui:field="btnClear" text="Очистить"/>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:FlowPanel>
+		
+
+				
+
 	</g:VerticalPanel>
 </ui:UiBinder>

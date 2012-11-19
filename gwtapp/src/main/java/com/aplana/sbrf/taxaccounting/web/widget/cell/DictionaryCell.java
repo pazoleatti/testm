@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  * виджет для выбора элемента 
  * TODO: сделать генериком, для того, чтобы можно было работать не только со строковыми кодами в справочниках, но и с числовыми
  */
-public class DictionaryCell extends AbstractEditableCell<String, String> implements ReadOnlyCell {
+public class DictionaryCell extends AbstractEditableCell<String, String> {
 
 	private static final int ESCAPE = 27;
 
@@ -223,16 +223,6 @@ public class DictionaryCell extends AbstractEditableCell<String, String> impleme
 
 	public void setDictionaryCode(String dictionaryCode) {
 		this.dictionaryCode = dictionaryCode;
-	}
-
-	@Override
-	public void setReadOnly(Boolean readOnly) {
-		isReadOnly = readOnly;
-	}
-
-	@Override
-	public Boolean isReadOnly() {
-		return isReadOnly;
 	}
 	
 }

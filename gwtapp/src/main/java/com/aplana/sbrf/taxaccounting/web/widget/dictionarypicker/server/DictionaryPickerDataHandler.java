@@ -13,7 +13,12 @@ import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.Dictiona
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
+/**
+ * Сервис возвращающий список элементов справочника и общее количество записей 
+ * в справочнике.
+ * @author Eugene Stetsenko
+ *
+ */
 @Service
 public class DictionaryPickerDataHandler extends AbstractActionHandler<DictionaryPickerDataAction, DictionaryPickerDataResult>{
 //	@Autowired
