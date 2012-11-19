@@ -15,6 +15,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -79,6 +80,9 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+			final SingleSelectionModel<DataRow> selectionModel = new SingleSelectionModel<DataRow>();
+			formDataTable.setSelectionModel(selectionModel);
+
 		}
 		reloadRows();
 	}

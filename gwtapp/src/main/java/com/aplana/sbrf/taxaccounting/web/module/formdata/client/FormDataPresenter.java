@@ -17,8 +17,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -141,7 +141,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		registerHandler(view.getRemoveRowButton().addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				Window.alert("not implemented");
+				FormData formData = view.getFormData();
+				// TODO need rework
+				formData.getDataRows().remove(((SingleSelectionModel<DataRow>)view.getFormDataTable().getSelectionModel()).getSelectedObject());
+				view.reloadRows();
 			}
 		}));
 	}
