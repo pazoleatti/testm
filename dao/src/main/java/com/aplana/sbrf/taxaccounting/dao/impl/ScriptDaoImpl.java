@@ -28,31 +28,6 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	private static final int CALC = 2;
 	private static final int ROW = 3;
 
-    @Override
-    public int create(Script script) {
-        return 0;  // TODO
-    }
-
-    @Override
-    public Script select(int id) {
-        return null;  // TODO
-    }
-
-    @Override
-    public void update(Script script) {
-        // TODO
-    }
-
-    @Override
-    public void delete(Script script) {
-        delete(script.getId());
-    }
-
-    @Override
-    public void delete(int scriptId) {
-        // TODO
-    }
-
     private static class ScriptRecord {
 		int id;
 		int type;
