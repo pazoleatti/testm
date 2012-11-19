@@ -3,24 +3,27 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.WorkflowDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.Workflow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 
 public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
-	@Autowired
-	private WorkflowDao workflowDao;
+	private Log logger = LogFactory.getLog(getClass());
+	
 	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
@@ -29,30 +32,65 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	private TAUserDao userDao;
 	@Autowired
 	private FormDao formDao;
+	@Autowired
+	private DepartmentDao departmentDao;
+	@Autowired
+	private FormDataWorkflowDao formDataWorkflowDao;
 
 	@Override
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
-		FormData formData = formDataDao.get(formDataId);
-		int currentStateId = formData.getStateId();
-		Form form = formDao.getForm(formData.getFormTemplateId());
-		Workflow wf = workflowDao.getWorkflow(form.getWorkflowId());		
-		
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
-		TAUser user = userDao.getUser(userId);  
-
-		// TODO: проверки прав доступа на изменение статуса
-		// Сейчас делается черновая реализация: пользователь с ролью "Контролёр"
-		// может выполнять любые переходы по любой карточке данных, остальные - не могут этого делать
-		if (!user.hasRole(TARole.ROLE_CONTROL)) {
-			return new ArrayList<WorkflowMove>(0);
+		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
+		// на чтение соответствующей карточки данных
+		if (!formDataAccessService.canRead(userId, formDataId)) {
+			return result;
 		}
 		
-		for (WorkflowMove m: wf.getMoves()) {
-			if (m.getFromStateId() == currentStateId) {
-				result.add(m);
+		FormData formData = formDataDao.get(formDataId);
+		WorkflowState state = formData.getState();
+		TAUser user = userDao.getUser(userId);
+		
+		int formDataDepartmentId = formData.getDepartmentId();
+		int userDepartmentId = user.getDepartmentId();
+		Department formDataDepartment = departmentDao.getDepartment(formDataDepartmentId);
+		Department userDepartment = departmentDao.getDepartment(userDepartmentId);
+		
+		
+		boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
+		boolean isBankLevelUser = userDepartment.getType() == DepartmentType.ROOT_BANK;
+		
+		switch (state) {
+		case CREATED:
+			if (isBankLevelFormData) {
+				result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+			} else {
+				result.add(WorkflowMove.CREATED_TO_APPROVED);
 			}
+			break;
+		case PREPARED:
+			// Для ЖЦ прототипа не требуется
+			break;
+		case APPROVED:
+			if (isBankLevelFormData) {
+				logger.warn("Bank-level formData couldn't be in APPROVED state!");
+			} else {
+				result.add(WorkflowMove.APPROVED_TO_CREATED);
+				if (isBankLevelUser) {
+					result.add(WorkflowMove.APPOVED_TO_ACCEPTED);
+				}
+			}
+			break;
+		case ACCEPTED:
+			if (isBankLevelFormData) {
+				result.add(WorkflowMove.ACCEPTED_TO_CREATED);
+			} else {
+				if (isBankLevelUser) {
+					result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+				}
+			}
+			break;
 		}
-		return result;
+		return result; 
 	}
 
 	@Override

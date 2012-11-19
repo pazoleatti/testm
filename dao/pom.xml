@@ -3,26 +3,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.aplana.taxaccounting</groupId>
+	<artifactId>dao</artifactId>
+	<name>dao</name>
+	<description>АС "Учёт налогов" - Реализация DAO</description>
 
 	<parent>
-		<groupId>com.aplana.taxaccounting</groupId>
+		<groupId>com.aplana</groupId>
 		<artifactId>taxaccounting</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>dao</artifactId>
-	<description>АС "Учёт налогов" - Реализация DAO</description>
-
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>model</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>		
 		<dependency>
 			<groupId>org.springframework</groupId>
