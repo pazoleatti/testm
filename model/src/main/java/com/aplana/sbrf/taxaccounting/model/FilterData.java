@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter;
+package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,6 +15,8 @@ public class FilterData implements Serializable{
 	private List<Long> department;
 
 	private List<Long> formtype;
+
+    private List<Long> kind;
 
 	public List<Long> getPeriod() {
 		return period;
@@ -39,5 +41,13 @@ public class FilterData implements Serializable{
 	public void setFormtype(List<Long> formtype) {
 		this.formtype = formtype;
 	}
+
+    public List<Long> getKind() {
+        return kind;
+    }
+
+    public void setKind(List<Long> kind) {
+        this.kind = kind;
+    }
 
 }

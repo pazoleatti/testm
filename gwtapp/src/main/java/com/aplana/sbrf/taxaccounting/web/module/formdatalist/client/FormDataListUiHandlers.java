@@ -6,4 +6,6 @@ public interface FormDataListUiHandlers extends UiHandlers{
 	
 	void onApplyFilter();
 
+    void onCreateClicked();
+
 }

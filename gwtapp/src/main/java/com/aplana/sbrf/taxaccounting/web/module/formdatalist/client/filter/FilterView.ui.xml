@@ -7,21 +7,23 @@
 			font-weight: bold;
 		}
 	</ui:style>
-	<g:HorizontalPanel spacing="5" width="100%">
-		<g:VerticalPanel width="100%">
-			<g:Label text="Отчетный период" />
-			<lbe:ListBoxEditor ui:field="period"
-				multipleSelect="true" width="100%"/>
-		</g:VerticalPanel>
-		<g:VerticalPanel width="100%">
-			<g:Label text="Подразделение" />
-			<lbe:ListBoxEditor ui:field="department"
-				multipleSelect="true" width="100%"/>
-		</g:VerticalPanel>
-		<g:VerticalPanel width="100%">
-			<g:Label text="Налоговая форма (тип)" />
-			<lbe:ListBoxEditor ui:field="formtype"
-				multipleSelect="true" width="100%"/>
-		</g:VerticalPanel>
-	</g:HorizontalPanel>
+
+	<g:HorizontalPanel width="50%">
+        <g:VerticalPanel spacing="5" width="100%">
+            <g:Label text="Отчетный период" />
+		    <lbe:ListBoxEditor ui:field="period" visibleItemCount="1" />
+
+	        <g:Label text="Подразделение" />
+	        <lbe:ListBoxEditor ui:field="department" visibleItemCount="1"/>
+        </g:VerticalPanel>
+
+        <g:VerticalPanel spacing="5" width="100%">
+	        <g:Label text="Налоговая форма (тип)"/>
+            <lbe:ListBoxEditor ui:field="formtype" visibleItemCount="1"/>
+
+            <g:Label text="Вид"/>
+            <lbe:ListBoxEditor ui:field="kind" visibleItemCount="1" />
+        </g:VerticalPanel>
+    </g:HorizontalPanel>
+
 </ui:UiBinder> 

@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Repository("departmentDao")
 @Transactional(readOnly = true)
@@ -23,4 +24,9 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		}
 		return result;
 	}
+
+    @Override
+    public List<Department> listDepartments(){
+        return departmentMapper.getAll();
+    }
 }

@@ -4,10 +4,15 @@
 	xmlns:cell="urn:import:com.google.gwt.user.cellview.client">
 	
 		<g:VerticalPanel width="100%">
-			<g:Label text="Информация о данных по налоговой форме"  height="20px"/>
-			<g:FlowPanel ui:field="filterContentPanel"/>
-			<g:Button ui:field="apply">Применить</g:Button>
-			<cell:CellTable ui:field="formDataTable" width="100%"/>
-		</g:VerticalPanel>
+
+		    <g:Label text="Информация о данных по налоговой форме"  height="20px"/>
+            <g:HorizontalPanel width="100%" ui:field="filterContentPanel"/>
+            <g:HorizontalPanel>
+                <g:Button ui:field="create">Создать</g:Button>
+                <g:Button ui:field="apply">Применить</g:Button>
+            </g:HorizontalPanel>
+            <cell:CellTable ui:field="formDataTable" width="100%"/>
+
+        </g:VerticalPanel>
 		
 </ui:UiBinder> 

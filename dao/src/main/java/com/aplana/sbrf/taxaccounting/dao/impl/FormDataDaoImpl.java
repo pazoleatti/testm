@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,26 +12,21 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.Form;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
+
 
 @Repository
 @Transactional(readOnly=true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private FormDao formDao;
-	
-	private class FormDataRowMapper implements RowMapper<FormData> {
+
+    private class FormDataRowMapper implements RowMapper<FormData> {
 		public FormData mapRow(ResultSet rs, int index) throws SQLException {
 			long formDataId = rs.getLong("id");
 			int formId = rs.getInt("form_id");
@@ -259,7 +247,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		);		
 	}
 
-	@Override
+    @Override
+    public List<FormData> findByFilter(FilterData filterData){
+        String query = "select * from FORM_DATA inner join form ON FORM_DATA.FORM_ID = FORM.ID where " +
+                "FORM_DATA.DEPARTMENT_ID = " + filterData.getDepartment().iterator().next() + " and FORM.TYPE_ID = " +
+                filterData.getKind().iterator().next();
+        return getJdbcTemplate().query(query, new FormDataRowMapper());
+    }
+
+    @Override
 	public List<Long> listFormDataIdByType(int typeId) {
 		return getJdbcTemplate().queryForList(
 			"select id from form_data fd where exists (select 1 from form f where f.id = fd.form_id and f.type_id = ?)",
@@ -268,4 +264,5 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			Long.class
 		);
 	}
+
 }

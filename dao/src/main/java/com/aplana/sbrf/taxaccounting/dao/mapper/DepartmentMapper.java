@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.model.Department;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
+import java.util.List;
 
 public interface DepartmentMapper {
 	/**
@@ -23,4 +22,11 @@ public interface DepartmentMapper {
 	 */
 	@Select("select * from department where parent_id = #{parentDepartmentId}")
 	List<Department> getChildren(@Param("parentDepartmentId")int parentDepartmentId);
+
+    /**
+     * Получить список всех департаментов
+     * @return список департаментов
+     */
+    @Select("select * from department")
+    List<Department> getAll();
 }

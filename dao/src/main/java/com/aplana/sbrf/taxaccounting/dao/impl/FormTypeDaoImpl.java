@@ -1,16 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.FormType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly=true)
@@ -34,4 +34,8 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			new FormTypeMapper()
 		);
 	}
+
+    public List<FormType> listFormTypes(){
+        return getJdbcTemplate().query("select * from form_type", new FormTypeMapper());
+    }
 }

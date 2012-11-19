@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -12,10 +10,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
 
 public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
@@ -26,7 +26,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	private final Widget widget;
 
 	@UiField
-	FlowPanel filterContentPanel;
+    HorizontalPanel filterContentPanel;
 
 	@UiField
 	CellTable<FormData> formDataTable;
@@ -42,6 +42,8 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 				return String.valueOf(object.getId());
 			}
 		};
+
+
 		TextColumn<FormData> formTypeColumn = new TextColumn<FormData>() {
 			@Override
 			public String getValue(FormData object) {
@@ -98,4 +100,10 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		}
 	}
 
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
 }

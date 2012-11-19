@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.model.FilterData;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -9,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresente
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter.FilterData;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -22,11 +20,9 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.List;
 
 public class FormDataListPresenter extends
 		Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy> implements FormDataListUiHandlers{
@@ -101,7 +97,6 @@ public class FormDataListPresenter extends
 	@Override
 	protected void onReset() {
 		super.onReset();
-		loadFormDataList();
 	}
 
 	@Override
@@ -122,8 +117,11 @@ public class FormDataListPresenter extends
 				this);
 	}
 
-	protected void loadFormDataList() {
-		dispatcher.execute(new GetFormDataList(),
+	protected void loadFormDataList(FilterData filterData) {
+        GetFormDataList action = new GetFormDataList();
+        action.setFilterData(filterData);
+
+		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
 					@Override
 					public void onSuccess(GetFormDataListResult result) {
@@ -134,8 +132,12 @@ public class FormDataListPresenter extends
 
 	@Override
 	public void onApplyFilter() {
-		FilterData filterData = filterPresenter.getFilterData();
-		System.out.println(filterData.getDepartment());
-		
+        FilterData filterData = filterPresenter.getFilterData();
+        loadFormDataList(filterData);
 	}
+
+    @Override
+    public void onCreateClicked(){
+
+    }
 }

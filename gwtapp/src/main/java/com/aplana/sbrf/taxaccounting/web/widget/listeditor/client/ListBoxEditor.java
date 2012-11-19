@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.listeditor.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.ListBox;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ListBoxEditor extends ListBox implements LeafValueEditor<List<Long>> {
 
-	@Override
+    @Override
 	public void setValue(List<Long> value) {
 		if (value == null)
 			return;
