@@ -10,12 +10,9 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -29,115 +26,133 @@ import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
  * @author Vitalii Samolovskikh
  */
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
-    private final DispatchAsync dispatcher;
+	private final DispatchAsync dispatcher;
 
-    private Form formDescriptor;
+	private Form formDescriptor;
 
-    @Inject
-    public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
-        super(eventBus, view, proxy);
-        this.dispatcher = dispatcher;
-    }
+	@Inject
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+		super(eventBus, view, proxy);
+		this.dispatcher = dispatcher;
+	}
 
-    @Override
-    protected void onBind() {
-        super.onBind();
+	@Override
+	protected void onBind() {
+		super.onBind();
 
-        dispatcher.execute(new FormListAction(), new AbstractCallback<FormListResult>() {
-            @Override
-            public void onSuccess(FormListResult result) {
-                final ListBox listBox = getView().getFormListBox();
-                listBox.clear();
-                for (Form form : result.getForms()) {
-                    listBox.addItem(form.getType().getName(), form.getId().toString());
-                }
-            }
-        });
+		dispatcher.execute(new FormListAction(), new AbstractCallback<FormListResult>() {
+			@Override
+			public void onSuccess(FormListResult result) {
+				final ListBox listBox = getView().getFormListBox();
+				listBox.clear();
+				for (Form form : result.getForms()) {
+					listBox.addItem(form.getType().getName(), form.getId().toString());
+				}
+			}
+		});
 
-        registerHandler(getView().getFormListBox().addChangeHandler(
-                new ChangeHandler() {
-                    @Override
-                    public void onChange(ChangeEvent changeEvent) {
-                        loadForm();
-                    }
-                }
-        ));
+		registerHandler(getView().getFormListBox().addChangeHandler(
+				new ChangeHandler() {
+					@Override
+					public void onChange(ChangeEvent changeEvent) {
+						loadForm();
+					}
+				}
+		));
 
-        registerHandler(getView().getCancelButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                loadForm();
-            }
-        }));
+		registerHandler(getView().getCancelButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				loadForm();
+			}
+		}));
 
-        registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                if(formDescriptor.getCreateScript()==null){
-                    formDescriptor.setCreateScript(new Script());
-                }
+		registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				if (formDescriptor.getCreateScript() == null) {
+					formDescriptor.setCreateScript(new Script());
+				}
 
-                formDescriptor.getCreateScript().setBody(getView().getCreateScriptBody().getValue());
+				final Script script = formDescriptor.getCreateScript();
 
-                UpdateFormAction action = new UpdateFormAction();
-                action.setForm(formDescriptor);
-                dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
-                    @Override
-                    public void onSuccess(UpdateFormResult updateFormResult) {
-                        Window.alert("Форма сохранена.");
-                    }
-                });
-            }
-        }));
-    }
+				final MyView view = getView();
+				script.setName(view.getCreateScriptName().getValue());
+				script.setCondition(view.getCreateScriptCondition().getValue());
+				script.setRowScript(view.getCreateScriptPerRow().getValue());
+				script.setBody(view.getCreateScriptBody().getValue());
 
-    /**
-     * loadFormDescriptor and update fields
-     */
-    private void loadForm() {
-        GetFormAction action = new GetFormAction();
-        final ListBox listBox = getView().getFormListBox();
-        final int selectedIndex = listBox.getSelectedIndex();
-        if (selectedIndex >= 0) {
-            action.setId(Integer.valueOf(listBox.getValue(selectedIndex)));
-            dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-                @Override
-                public void onSuccess(GetFormResult result) {
-                    formDescriptor = result.getForm();
-                    final Script createScript = formDescriptor.getCreateScript();
-                    if (createScript != null) {
-                        getView().getCreateScriptBody().setValue(createScript.getBody());
-                    } else {
-                        getView().getCreateScriptBody().setValue("");
-                    }
-                }
-            });
-        }
-    }
+				UpdateFormAction action = new UpdateFormAction();
+				action.setForm(formDescriptor);
+				dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
+					@Override
+					public void onSuccess(UpdateFormResult updateFormResult) {
+						Window.alert("Форма сохранена.");
+					}
+				});
+			}
+		}));
+	}
 
-    @Override
-    protected void revealInParent() {
-        RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
-    }
+	/**
+	 * loadFormDescriptor and update fields
+	 */
+	private void loadForm() {
+		GetFormAction action = new GetFormAction();
+		final ListBox listBox = getView().getFormListBox();
+		final int selectedIndex = listBox.getSelectedIndex();
+		if (selectedIndex >= 0) {
+			action.setId(Integer.valueOf(listBox.getValue(selectedIndex)));
+			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+				@Override
+				public void onSuccess(GetFormResult result) {
+					formDescriptor = result.getForm();
+					final Script createScript = formDescriptor.getCreateScript();
+					if (createScript != null) {
+						getView().getCreateScriptName().setText(createScript.getName());
+						getView().getCreateScriptCondition().setText(createScript.getCondition());
+						getView().getCreateScriptPerRow().setValue(createScript.isRowScript());
+						getView().getCreateScriptBody().setValue(createScript.getBody());
+					} else {
+						getView().getCreateScriptName().setText("");
+						getView().getCreateScriptCondition().setText("");
+						getView().getCreateScriptPerRow().setValue(false);
+						getView().getCreateScriptBody().setValue("");
+					}
+				}
+			});
+		}
+	}
 
-    /**
-     * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s proxy.
-     */
-    @ProxyCodeSplit
-    @NameToken(AdminNameTokens.adminPage)
-    public interface MyProxy extends Proxy<AdminPresenter>, Place {
-    }
+	@Override
+	protected void revealInParent() {
+		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
+	}
 
-    /**
-     * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
-     */
-    public interface MyView extends View {
-        public ListBox getFormListBox();
+	/**
+	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s proxy.
+	 */
+	@ProxyCodeSplit
+	@NameToken(AdminNameTokens.adminPage)
+	public interface MyProxy extends Proxy<AdminPresenter>, Place {
+	}
 
-        public TextArea getCreateScriptBody();
+	/**
+	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
+	 */
+	public interface MyView extends View {
+		public ListBox getFormListBox();
 
-        public Button getSaveButton();
+		public TextArea getCreateScriptBody();
 
-        public Button getCancelButton();
-    }
+		public Button getSaveButton();
+
+		public Button getCancelButton();
+
+		public TextBox getCreateScriptName();
+
+		public TextBox getCreateScriptCondition();
+
+		public CheckBox getCreateScriptPerRow();
+	}
 }

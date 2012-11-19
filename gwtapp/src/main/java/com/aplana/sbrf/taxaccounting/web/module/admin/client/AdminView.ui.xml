@@ -10,8 +10,20 @@
             <g:tab>
                 <g:header size="50px">Скрипт создания</g:header>
                 <g:VerticalPanel width="100%" height="100%">
-                    <g:cell height="80%" width="100%"><g:TextArea width="100%" height="90%" ui:field="createScriptBody"/></g:cell>
-                    <g:cell height="20%">
+                    <g:cell><g:Label text="Название"/></g:cell>
+                    <g:cell width="100%"><g:TextBox width="100%" ui:field="createScriptName"/></g:cell>
+                    <g:cell><g:Label text="Условие"/></g:cell>
+                    <g:cell width="100%"><g:TextBox width="100%" ui:field="createScriptCondition"/></g:cell>
+
+                    <g:cell>
+                        <g:HorizontalPanel>
+                            <g:cell><g:CheckBox ui:field="createScriptPerRow"/></g:cell>
+                            <g:cell><g:Label text="применять для каждой строки"/></g:cell>
+                        </g:HorizontalPanel>
+                    </g:cell>
+
+                    <g:cell width="100%" height="600px"><g:TextArea width="100%" height="90%" ui:field="createScriptBody"/></g:cell>
+                    <g:cell>
                         <g:HorizontalPanel>
                             <g:cell><g:Button text="Сохранить" ui:field="saveButton"/></g:cell>
                             <g:cell><g:Button text="Отмена" ui:field="cancelButton"/></g:cell>

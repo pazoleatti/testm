@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Form;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -25,6 +22,15 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 
     @UiField
     TextArea createScriptBody;
+
+	@UiField
+	TextBox createScriptName;
+
+	@UiField
+	TextBox createScriptCondition;
+
+	@UiField
+	CheckBox createScriptPerRow;
 
     @UiField
     Button saveButton;
@@ -61,4 +67,19 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     public Button getCancelButton() {
         return cancelButton;
     }
+
+	@Override
+	public TextBox getCreateScriptName() {
+		return createScriptName;
+	}
+
+	@Override
+	public TextBox getCreateScriptCondition() {
+		return createScriptCondition;
+	}
+
+	@Override
+	public CheckBox getCreateScriptPerRow() {
+		return createScriptPerRow;
+	}
 }
