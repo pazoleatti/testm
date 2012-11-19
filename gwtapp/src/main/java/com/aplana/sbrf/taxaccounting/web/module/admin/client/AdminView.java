@@ -42,11 +42,23 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
         return widget;
     }
 
+    @Override
     public ListBox getFormListBox() {
         return formListBox;
     }
 
+    @Override
     public TextArea getCreateScriptBody() {
         return createScriptBody;
+    }
+
+    @Override
+    public Button getSaveButton() {
+        return saveButton;
+    }
+
+    @Override
+    public Button getCancelButton() {
+        return cancelButton;
     }
 }

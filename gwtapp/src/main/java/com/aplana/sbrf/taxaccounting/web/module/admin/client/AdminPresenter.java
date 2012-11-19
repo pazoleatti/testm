@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
 import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.*;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.inject.Inject;
@@ -46,7 +48,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
             public void onSuccess(FormListResult result) {
                 final ListBox listBox = getView().getFormListBox();
                 listBox.clear();
-                for(Form form:result.getForms()){
+                for (Form form : result.getForms()) {
                     listBox.addItem(form.getType().getName(), form.getId().toString());
                 }
             }
@@ -56,19 +58,61 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
                 new ChangeHandler() {
                     @Override
                     public void onChange(ChangeEvent changeEvent) {
-                        GetFormAction action = new GetFormAction();
-                        final ListBox listBox = getView().getFormListBox();
-                        action.setId(Integer.valueOf(listBox.getValue(listBox.getSelectedIndex())));
-                        dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-                            @Override
-                            public void onSuccess(GetFormResult result) {
-                                formDescriptor = result.getForm();
-                                getView().getCreateScriptBody().setValue(formDescriptor.getCreateScript().getBody());
-                            }
-                        });
+                        loadForm();
                     }
                 }
         ));
+
+        registerHandler(getView().getCancelButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                loadForm();
+            }
+        }));
+
+        registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if(formDescriptor.getCreateScript()==null){
+                    formDescriptor.setCreateScript(new Script());
+                }
+
+                formDescriptor.getCreateScript().setBody(getView().getCreateScriptBody().getValue());
+
+                UpdateFormAction action = new UpdateFormAction();
+                action.setForm(formDescriptor);
+                dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
+                    @Override
+                    public void onSuccess(UpdateFormResult updateFormResult) {
+                        Window.alert("Форма сохранена.");
+                    }
+                });
+            }
+        }));
+    }
+
+    /**
+     * loadFormDescriptor and update fields
+     */
+    private void loadForm() {
+        GetFormAction action = new GetFormAction();
+        final ListBox listBox = getView().getFormListBox();
+        final int selectedIndex = listBox.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            action.setId(Integer.valueOf(listBox.getValue(selectedIndex)));
+            dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+                @Override
+                public void onSuccess(GetFormResult result) {
+                    formDescriptor = result.getForm();
+                    final Script createScript = formDescriptor.getCreateScript();
+                    if (createScript != null) {
+                        getView().getCreateScriptBody().setValue(createScript.getBody());
+                    } else {
+                        getView().getCreateScriptBody().setValue("");
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -89,6 +133,11 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
      */
     public interface MyView extends View {
         public ListBox getFormListBox();
+
         public TextArea getCreateScriptBody();
+
+        public Button getSaveButton();
+
+        public Button getCancelButton();
     }
 }
