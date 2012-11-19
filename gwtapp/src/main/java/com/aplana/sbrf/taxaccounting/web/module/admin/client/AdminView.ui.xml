@@ -9,7 +9,15 @@
         <g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
             <g:tab>
                 <g:header size="50px">Скрипт создания</g:header>
-                <g:TextArea height="100%" width="100%" ui:field="createScriptBody"/>
+                <g:VerticalPanel width="100%" height="100%">
+                    <g:cell height="80%" width="100%"><g:TextArea width="100%" height="90%" ui:field="createScriptBody"/></g:cell>
+                    <g:cell height="20%">
+                        <g:HorizontalPanel>
+                            <g:cell><g:Button text="Сохранить"/></g:cell>
+                            <g:cell><g:Button text="Отмена"/></g:cell>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                </g:VerticalPanel>
             </g:tab>
             <g:tab>
                 <g:header size="50px">Рассчетные скрипты</g:header>
