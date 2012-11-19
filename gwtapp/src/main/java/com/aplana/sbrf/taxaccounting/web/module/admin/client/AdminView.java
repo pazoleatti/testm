@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Form;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
@@ -23,8 +24,13 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     ListBox formListBox;
 
     @UiField
-    @Editor.Path("formDescriptor.createScript.body")
     TextArea createScriptBody;
+
+    @UiField
+    Button saveButton;
+
+    @UiField
+    Button cancelButton;
 
     @Inject
     public AdminView(final Binder binder) {

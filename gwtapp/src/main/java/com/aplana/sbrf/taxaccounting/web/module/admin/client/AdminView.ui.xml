@@ -13,8 +13,8 @@
                     <g:cell height="80%" width="100%"><g:TextArea width="100%" height="90%" ui:field="createScriptBody"/></g:cell>
                     <g:cell height="20%">
                         <g:HorizontalPanel>
-                            <g:cell><g:Button text="Сохранить"/></g:cell>
-                            <g:cell><g:Button text="Отмена"/></g:cell>
+                            <g:cell><g:Button text="Сохранить" ui:field="saveButton"/></g:cell>
+                            <g:cell><g:Button text="Отмена" ui:field="cancelButton"/></g:cell>
                         </g:HorizontalPanel>
                     </g:cell>
                 </g:VerticalPanel>
