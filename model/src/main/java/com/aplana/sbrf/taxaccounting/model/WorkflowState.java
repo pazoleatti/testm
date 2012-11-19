@@ -1,26 +1,36 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 
 /**
- * Стадия жизненного цикла 
+ * Стадии жизненного цикла налоговой формы 
  */
-public class WorkflowState implements Serializable {
-	private static final long serialVersionUID = 1L;
+public enum WorkflowState {
+	CREATED(1, "Создана"),
+	PREPARED(2, "Подготовлена"),
+	APPROVED(3, "Утверждена"),
+	ACCEPTED(4, "Принята");
 
 	private int id;
 	private String name;
 	
+	private WorkflowState(int id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+	
 	public int getId() {
 		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
 	}
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
-		this.name = name;
+	
+	public static WorkflowState fromId(int id) {
+		for(WorkflowState state: values()) {
+			if (state.id == id) {
+				return state;
+			}
+		}
+		throw new IllegalArgumentException("Wrong WorkflowState id: " + id);
 	}
 }

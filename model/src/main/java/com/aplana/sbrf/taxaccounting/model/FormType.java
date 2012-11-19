@@ -2,6 +2,11 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
+/**
+ * Вид налоговой формы (название вида формы, без привязки к версии)
+ * Каждому виду формы (FormType) может соответствовать несколько версий формы (Form).
+ * @author dsultanbekov
+ */
 public class FormType implements Serializable {
 	private static final long serialVersionUID = 1L;
 

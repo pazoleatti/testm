@@ -26,8 +26,10 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
@@ -44,6 +46,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(form);
 			fd.setId(formDataId);
+			fd.setDepartmentId(rs.getInt("department_id"));
+			fd.setState(WorkflowState.fromId(rs.getInt("state")));
+			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			return fd;
 		}
 	}
@@ -145,8 +150,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-				"insert into form_data (id, form_id) values (?, ?)",
-				new Object[] { formDataId, formData.getFormTemplateId()}
+				"insert into form_data (id, form_id, department_id, kind, state) values (?, ?, ?, ?, ?)",
+				new Object[] { 
+					formDataId, 
+					formData.getFormTemplateId(),
+					formData.getDepartmentId(),
+					formData.getKind().getId(),
+					formData.getState().getId()
+				}
 			);
 			formData.setId(formDataId);
 		} else {

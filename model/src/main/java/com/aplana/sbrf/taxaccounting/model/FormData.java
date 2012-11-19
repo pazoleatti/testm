@@ -11,7 +11,10 @@ import java.util.List;
 public class FormData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long id;
-	private int stateId;
+	private WorkflowState state;
+	private FormDataKind kind;
+
+	private int departmentId;
 	
 	private int formTemplateId;
 
@@ -34,12 +37,39 @@ public class FormData implements Serializable {
 		this.id = id;
 	}
 
-	public int getStateId() {
-		return stateId;
+	public WorkflowState getState() {
+		return state;
 	}
 
-	public void setStateId(int stateId) {
-		this.stateId = stateId;
+	/**
+	 * Установить стадию жизненного цикла объекта FormData
+	 * Данный метод можно вызвать только один раз для каждого инстанса FormData, предполагается, что это будет
+	 * делаться в сервисном слое или в DAO.
+	 * Для того, чтобы изменить стадию у уже существующего объекта нужно использовать методы @{link FormDataWorkflowService} и затем
+	 * перечитать состояние объекта из БД при помощи DAO
+	 * @param state объект, задающий стадию жизненного цикла
+	 */
+	public void setState(WorkflowState state) {
+		if (this.state != null) {
+			throw new IllegalStateException("Value of state field is already initialized");
+		}
+		this.state = state;
+	}
+
+	public int getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(int departmentId) {
+		this.departmentId = departmentId;
+	}
+	
+	public FormDataKind getKind() {
+		return kind;
+	}
+
+	public void setKind(FormDataKind kind) {
+		this.kind = kind;
 	}
 
 	/**
@@ -87,11 +117,17 @@ public class FormData implements Serializable {
 	 * @return добавленная строка с установленным алиасом
 	 */
 	public DataRow appendDataRow(Object rowAlias) {
-		DataRow row = new DataRow(rowAlias == null ? null : rowAlias.toString(), formColumns);		
-		dataRows.add(row);
-		row.setOrder(dataRows.size() + 1);
+		DataRow row = new DataRow(rowAlias == null ? null : rowAlias.toString(), formColumns);
+		synchronized (dataRows) {
+			dataRows.add(row);
+			row.setOrder(dataRows.size() + 1);
+		}
 		return row;
 	}
+	
+	public DataRow appendDataRow() {
+		return appendDataRow(null);
+	}	
 	
 	public DataRow getDataRow(String rowAlias) {
 		if (rowAlias == null) {
