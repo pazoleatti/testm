@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.google.gwt.editor.client.Editor;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -31,6 +31,9 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 
 	@UiField
 	ScriptEditor calcScriptEditor;
+
+	@UiField
+	ListBox scriptListBox;
 
 	@Inject
     public AdminView(final Binder binder) {
@@ -65,5 +68,10 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	@Override
 	public ScriptEditor getCalcScriptEditor() {
 		return calcScriptEditor;
+	}
+
+	@Override
+	public ListBox getScriptListBox() {
+		return scriptListBox;
 	}
 }

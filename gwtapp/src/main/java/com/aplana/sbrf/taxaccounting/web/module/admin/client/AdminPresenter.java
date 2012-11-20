@@ -76,6 +76,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 
 				final MyView view = getView();
 				view.getCreateScriptEditor().flush();
+				view.getCalcScriptEditor().flush();
 
 				UpdateFormAction action = new UpdateFormAction();
 				action.setForm(formDescriptor);
@@ -85,6 +86,19 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 						Window.alert("Форма сохранена.");
 					}
 				});
+			}
+		}));
+
+		registerHandler(getView().getScriptListBox().addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent changeEvent) {
+				ListBox slb = getView().getScriptListBox();
+				int selInd = slb.getSelectedIndex();
+				if(selInd>=0){
+					int scrInd = Integer.valueOf(slb.getValue(selInd));
+					Script script = formDescriptor.getCalcScripts().get(scrInd);
+					getView().getCalcScriptEditor().setValue(script);
+				}
 			}
 		}));
 	}
@@ -104,6 +118,13 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 					formDescriptor = result.getForm();
 					final Script createScript = formDescriptor.getCreateScript();
 					getView().getCreateScriptEditor().setValue(createScript);
+
+					ListBox lb = getView().getScriptListBox();
+					lb.clear();
+					int i = 0;
+					for(Script script:formDescriptor.getCalcScripts()){
+						lb.addItem(script.getName(), String.valueOf(i++));
+					}
 				}
 			});
 		}
@@ -135,5 +156,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		public ScriptEditor getCreateScriptEditor();
 
 		public ScriptEditor getCalcScriptEditor();
+
+		ListBox getScriptListBox();
 	}
 }
