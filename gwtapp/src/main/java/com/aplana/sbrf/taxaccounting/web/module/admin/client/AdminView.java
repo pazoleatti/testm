@@ -21,24 +21,18 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     ListBox formListBox;
 
     @UiField
-    TextArea createScriptBody;
-
-	@UiField
-	TextBox createScriptName;
-
-	@UiField
-	TextBox createScriptCondition;
-
-	@UiField
-	CheckBox createScriptPerRow;
-
-    @UiField
     Button saveButton;
 
     @UiField
     Button cancelButton;
 
-    @Inject
+	@UiField
+	ScriptEditor createScriptEditor;
+
+	@UiField
+	ScriptEditor calcScriptEditor;
+
+	@Inject
     public AdminView(final Binder binder) {
         widget = binder.createAndBindUi(this);
     }
@@ -54,11 +48,6 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     }
 
     @Override
-    public TextArea getCreateScriptBody() {
-        return createScriptBody;
-    }
-
-    @Override
     public Button getSaveButton() {
         return saveButton;
     }
@@ -69,17 +58,12 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     }
 
 	@Override
-	public TextBox getCreateScriptName() {
-		return createScriptName;
+	public ScriptEditor getCreateScriptEditor() {
+		return createScriptEditor;
 	}
 
 	@Override
-	public TextBox getCreateScriptCondition() {
-		return createScriptCondition;
-	}
-
-	@Override
-	public CheckBox getCreateScriptPerRow() {
-		return createScriptPerRow;
+	public ScriptEditor getCalcScriptEditor() {
+		return calcScriptEditor;
 	}
 }

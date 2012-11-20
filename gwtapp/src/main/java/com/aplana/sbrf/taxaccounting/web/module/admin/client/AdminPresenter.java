@@ -74,13 +74,8 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 					formDescriptor.setCreateScript(new Script());
 				}
 
-				final Script script = formDescriptor.getCreateScript();
-
 				final MyView view = getView();
-				script.setName(view.getCreateScriptName().getValue());
-				script.setCondition(view.getCreateScriptCondition().getValue());
-				script.setRowScript(view.getCreateScriptPerRow().getValue());
-				script.setBody(view.getCreateScriptBody().getValue());
+				view.getCreateScriptEditor().flush();
 
 				UpdateFormAction action = new UpdateFormAction();
 				action.setForm(formDescriptor);
@@ -108,17 +103,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				public void onSuccess(GetFormResult result) {
 					formDescriptor = result.getForm();
 					final Script createScript = formDescriptor.getCreateScript();
-					if (createScript != null) {
-						getView().getCreateScriptName().setText(createScript.getName());
-						getView().getCreateScriptCondition().setText(createScript.getCondition());
-						getView().getCreateScriptPerRow().setValue(createScript.isRowScript());
-						getView().getCreateScriptBody().setValue(createScript.getBody());
-					} else {
-						getView().getCreateScriptName().setText("");
-						getView().getCreateScriptCondition().setText("");
-						getView().getCreateScriptPerRow().setValue(false);
-						getView().getCreateScriptBody().setValue("");
-					}
+					getView().getCreateScriptEditor().setValue(createScript);
 				}
 			});
 		}
@@ -143,16 +128,12 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	public interface MyView extends View {
 		public ListBox getFormListBox();
 
-		public TextArea getCreateScriptBody();
-
 		public Button getSaveButton();
 
 		public Button getCancelButton();
 
-		public TextBox getCreateScriptName();
+		public ScriptEditor getCreateScriptEditor();
 
-		public TextBox getCreateScriptCondition();
-
-		public CheckBox getCreateScriptPerRow();
+		public ScriptEditor getCalcScriptEditor();
 	}
 }

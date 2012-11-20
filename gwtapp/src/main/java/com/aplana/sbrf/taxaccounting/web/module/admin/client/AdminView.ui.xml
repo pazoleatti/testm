@@ -1,48 +1,44 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
-    <g:HorizontalPanel width="100%" height="800px">
-        <g:cell width="20%" height="100%">
-        <g:ListBox visibleItemCount="10" width="100%" height="100%" ui:field="formListBox"/>
-        </g:cell>
-        <g:cell width="80%" height="100%">
-        <g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
-            <g:tab>
-                <g:header size="50px">Скрипт создания</g:header>
-                <g:VerticalPanel width="100%" height="100%">
-                    <g:cell><g:Label text="Название"/></g:cell>
-                    <g:cell width="100%"><g:TextBox width="100%" ui:field="createScriptName"/></g:cell>
-                    <g:cell><g:Label text="Условие"/></g:cell>
-                    <g:cell width="100%"><g:TextBox width="100%" ui:field="createScriptCondition"/></g:cell>
-
-                    <g:cell>
-                        <g:HorizontalPanel>
-                            <g:cell><g:CheckBox ui:field="createScriptPerRow"/></g:cell>
-                            <g:cell><g:Label text="применять для каждой строки"/></g:cell>
-                        </g:HorizontalPanel>
-                    </g:cell>
-
-                    <g:cell width="100%" height="600px"><g:TextArea width="100%" height="90%" ui:field="createScriptBody"/></g:cell>
-                    <g:cell>
-                        <g:HorizontalPanel>
-                            <g:cell><g:Button text="Сохранить" ui:field="saveButton"/></g:cell>
-                            <g:cell><g:Button text="Отмена" ui:field="cancelButton"/></g:cell>
-                        </g:HorizontalPanel>
-                    </g:cell>
-                </g:VerticalPanel>
-            </g:tab>
-            <g:tab>
-                <g:header size="50px">Рассчетные скрипты</g:header>
-                <g:HorizontalPanel width="100%" height="100%">
-                    <g:cell width="25%" height="100%">
-                        <g:ListBox height="100%" width="100%" visibleItemCount="10"/>
-                    </g:cell>
-                    <g:cell>
-                        <g:RichTextArea height="100%" width="100%"/>
-                    </g:cell>
-                </g:HorizontalPanel>
-            </g:tab>
-        </g:TabLayoutPanel>
-        </g:cell>
-    </g:HorizontalPanel>
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client"
+			 >
+	<g:HorizontalPanel width="100%" height="800px">
+		<g:cell width="20%" height="100%">
+			<g:ListBox visibleItemCount="10" width="100%" height="100%" ui:field="formListBox"/>
+		</g:cell>
+		<g:cell width="80%" height="100%">
+			<g:VerticalPanel height="100%" width="100%">
+				<g:cell height="40px">
+					<g:HorizontalPanel>
+						<g:cell>
+							<g:Button text="Сохранить" ui:field="saveButton"/>
+						</g:cell>
+						<g:cell>
+							<g:Button text="Отмена" ui:field="cancelButton"/>
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:cell>
+				<g:cell height="100%">
+					<g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
+						<g:tab>
+							<g:header size="50px">Скрипт создания</g:header>
+							<u:ScriptEditor ui:field="createScriptEditor"/>
+						</g:tab>
+						<g:tab>
+							<g:header size="50px">Рассчетные скрипты</g:header>
+							<g:HorizontalPanel width="100%" height="100%">
+								<g:cell width="25%" height="100%">
+									<g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+								</g:cell>
+								<g:cell>
+									<u:ScriptEditor ui:field="calcScriptEditor"/>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:tab>
+					</g:TabLayoutPanel>
+				</g:cell>
+			</g:VerticalPanel>
+		</g:cell>
+	</g:HorizontalPanel>
 </ui:UiBinder>
