@@ -1,10 +1,18 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -12,13 +20,20 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.*;
-
+import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.FilterData;
+import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
 @Transactional(readOnly=true)
@@ -26,7 +41,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private FormDao formDao;
 
-    private class FormDataRowMapper implements RowMapper<FormData> {
+	private class FormDataRowMapper implements RowMapper<FormData> {
 		public FormData mapRow(ResultSet rs, int index) throws SQLException {
 			long formDataId = rs.getLong("id");
 			int formId = rs.getInt("form_id");
@@ -40,7 +55,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			return fd;
 		}
 	}
-	
+
 	private static class ValueRecord<T> {
 		private T value;
 		private String rowAlias;
@@ -55,12 +70,17 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	
 	public FormData get(final long formDataId) {
 		JdbcTemplate jt = getJdbcTemplate();
-		final FormData formData = jt.queryForObject(
-			"select * from form_data where id = ?",
-			new Object[] { formDataId },
-			new int[] { Types.NUMERIC },
-			new FormDataRowMapper()
-		);
+		final FormData formData;
+		try {
+			formData = jt.queryForObject(
+				"select * from form_data where id = ?",
+				new Object[] { formDataId },
+				new int[] { Types.NUMERIC },
+				new FormDataRowMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
+		}
 		
 		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
 		
@@ -133,6 +153,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Override
 	@Transactional(readOnly=false)
 	public long save(final FormData formData) {
+		if (formData.getState() == null) {
+			throw new DaoException("Не указана стадия жизненного цикла");
+		}
+		
+		if (formData.getKind() == null) {
+			throw new DaoException("Не указан тип налоговой формы");
+		}
+		
+		if (formData.getDepartmentId() == null) {
+			throw new DaoException("Не указано подразделение, к которому относится налоговая форма");
+		}
+		
 		Long formDataId;
 		JdbcTemplate jt = getJdbcTemplate();
 		if (formData.getId() == null) {
@@ -247,13 +279,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		);		
 	}
 
-    @Override
-    public List<FormData> findByFilter(FilterData filterData){
-        String query = "select * from FORM_DATA inner join form ON FORM_DATA.FORM_ID = FORM.ID where " +
-                "FORM_DATA.DEPARTMENT_ID = " + filterData.getDepartment().iterator().next() + " and FORM.TYPE_ID = " +
-                filterData.getKind().iterator().next();
-        return getJdbcTemplate().query(query, new FormDataRowMapper());
-    }
+	@Override
+	public List<FormData> findByFilter(FilterData filterData){
+		String query = "select * from FORM_DATA inner join form ON FORM_DATA.FORM_ID = FORM.ID where " +
+				"FORM_DATA.DEPARTMENT_ID = " + filterData.getDepartment().iterator().next() + " and FORM.TYPE_ID = " +
+				filterData.getKind().iterator().next();
+		return getJdbcTemplate().query(query, new FormDataRowMapper());
+	}
 
     @Override
 	public List<Long> listFormDataIdByType(int typeId) {
@@ -263,6 +295,42 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			new int[] { Types.NUMERIC },
 			Long.class
 		);
+	}
+
+
+	@Override
+	@Transactional(readOnly = false)
+	public void delete(long formDataId) {
+		JdbcTemplate jt = getJdbcTemplate();
+		
+		Object[] params = { formDataId };
+		int[] types = { Types.NUMERIC };
+		
+		jt.update(
+			"delete from numeric_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
+			params, 
+			types
+		);
+		jt.update(
+			"delete from string_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
+			params, 
+			types
+		);
+		jt.update(
+			"delete from date_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
+			params, 
+			types
+		);
+		jt.update(
+			"delete from data_row where form_data_id = ?",
+			params, 
+			types
+		);
+		jt.update(
+			"delete from form_data where id = ?",
+			params, 
+			types
+		);		
 	}
 
 }

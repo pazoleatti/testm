@@ -13,6 +13,7 @@ public interface FormDataDao {
 	 * Получить данные по налоговой формы
 	 * @param formDataId идентификатор заполненной налоговой формы
 	 * @return данные по налоговой форме
+	 * @throws DaoException, если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData get(long formDataId);
 	/**
@@ -44,5 +45,10 @@ public interface FormDataDao {
 	 * @return список идентификаторов данных по налоговым формам, удовлетворяющих запросу
 	 */
 	List<Long> listFormDataIdByType(int typeId);
-
+	
+	/**
+	 * Удалить запись о данных по налоговой форме
+	 * @param formDataId идентификатор записи
+	 */
+	void delete(long formDataId);
 }
