@@ -75,7 +75,6 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				}
 
 				final MyView view = getView();
-				view.getCreateScriptEditor().flush();
 				view.getCalcScriptEditor().flush();
 
 				UpdateFormAction action = new UpdateFormAction();
@@ -92,15 +91,24 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		registerHandler(getView().getScriptListBox().addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent changeEvent) {
-				ListBox slb = getView().getScriptListBox();
-				int selInd = slb.getSelectedIndex();
-				if(selInd>=0){
-					int scrInd = Integer.valueOf(slb.getValue(selInd));
-					Script script = formDescriptor.getCalcScripts().get(scrInd);
-					getView().getCalcScriptEditor().setValue(script);
-				}
+				loadScript();
 			}
 		}));
+	}
+
+	private void loadScript() {
+		ListBox slb = getView().getScriptListBox();
+		int selInd = slb.getSelectedIndex();
+		if(selInd>=0){
+			final String str = slb.getValue(selInd);
+
+			if(str.equals("create")){
+				getView().getCalcScriptEditor().setValue(formDescriptor.getCreateScript());
+			} else {
+				int scrInd = Integer.valueOf(str);
+				getView().getCalcScriptEditor().setValue(formDescriptor.getCalcScripts().get(scrInd));
+			}
+		}
 	}
 
 	/**
@@ -116,15 +124,19 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				@Override
 				public void onSuccess(GetFormResult result) {
 					formDescriptor = result.getForm();
-					final Script createScript = formDescriptor.getCreateScript();
-					getView().getCreateScriptEditor().setValue(createScript);
 
 					ListBox lb = getView().getScriptListBox();
 					lb.clear();
+
+					lb.addItem("Скрипт создания", "create");
+
 					int i = 0;
 					for(Script script:formDescriptor.getCalcScripts()){
 						lb.addItem(script.getName(), String.valueOf(i++));
 					}
+
+					lb.setSelectedIndex(0);
+					loadScript();
 				}
 			});
 		}
@@ -152,8 +164,6 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		public Button getSaveButton();
 
 		public Button getCancelButton();
-
-		public ScriptEditor getCreateScriptEditor();
 
 		public ScriptEditor getCalcScriptEditor();
 

@@ -22,11 +22,7 @@
 				<g:cell height="100%">
 					<g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
 						<g:tab>
-							<g:header size="50px">Скрипт создания</g:header>
-							<u:ScriptEditor ui:field="createScriptEditor"/>
-						</g:tab>
-						<g:tab>
-							<g:header size="50px">Рассчетные скрипты</g:header>
+							<g:header size="50px">Скрипты</g:header>
 							<g:HorizontalPanel width="100%" height="100%">
 								<g:cell width="25%" height="100%">
 									<g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="scriptListBox"/>
