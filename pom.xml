@@ -14,10 +14,9 @@
 		<module>model</module>
 		<module>core</module>
 		<module>dao</module>
+		<module>service</module>		
 		<module>gwtapp</module>
-		<!--module>portlets</module>
-		<module>taxaccounting-ear</module-->
-		<module>service</module>
+		<module>taxaccounting-ear</module>		
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -17,18 +17,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>portlets</artifactId>
+			<artifactId>gwtapp</artifactId>
 			<version>${pom.version}</version>
 			<type>war</type>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>com.aplana.taxaccounting</groupId>
-			<artifactId>theme</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
-		 -->
 	</dependencies>
 
 	<build>
@@ -43,19 +35,11 @@
 					<finalName>taxaccounting</finalName>
 					<modules>
 						<webModule>
-							<groupId>${pom.groupId}</groupId>
-							<artifactId>portlets</artifactId>
-							<bundleFileName>portlets.war</bundleFileName>
-							<contextRoot>/taxaccounting/portlets</contextRoot>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>gwtapp</artifactId>
+							<bundleFileName>gwtapp.war</bundleFileName>
+							<contextRoot>/taxaccounting/gwtapp</contextRoot>
 						</webModule>
-						<!-- 
-						<webModule>
-							<groupId>com.aplana.taxaccounting</groupId>
-							<artifactId>theme</artifactId>
-							<bundleFileName>theme.war</bundleFileName>
-							<contextRoot>/taxaccounting/theme</contextRoot>
-						</webModule>
-						 -->
 					</modules>
 				</configuration>
 			</plugin>
