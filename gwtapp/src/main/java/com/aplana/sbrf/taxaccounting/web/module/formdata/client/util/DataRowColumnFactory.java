@@ -8,20 +8,35 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 
 public class DataRowColumnFactory {
+	
+	Boolean isReadOnly = true;
+	
 	public Column<DataRow, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow> cellTable) {
 		com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
 			if (stringColumn.getDictionaryCode() != null) {
-				tableCol = new EditStringDictionaryColumn(stringColumn);
+				if (isReadOnly) {
+					tableCol = new TextColumn((StringColumn)col, true);//new EditStringDictionaryColumn(stringColumn);
+				} else {
+					tableCol = new EditStringDictionaryColumn(stringColumn);
+				}
 			} else {
-				tableCol = new EditTextColumn((StringColumn)col);	
+				tableCol = new TextColumn((StringColumn)col, isReadOnly);	
 			}
 		} else if (col instanceof NumericColumn) {
-			tableCol = new EditNumericColumn((NumericColumn)col, cellTable);
+			tableCol = new EditNumericColumn((NumericColumn)col, cellTable, isReadOnly);
 		} else if (col instanceof DateColumn) {
-			tableCol = new EditDateColumn((DateColumn)col);
+			tableCol = new SimpleDateColumn((DateColumn)col, isReadOnly);
 		}
 		return tableCol;
+	}
+	
+	public Boolean isReadOnly() {
+		return isReadOnly;
+	}
+	
+	public void setReadOnly(Boolean readOnly) {
+		this.isReadOnly = readOnly;
 	}
 }
