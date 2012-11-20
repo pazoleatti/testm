@@ -28,6 +28,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -47,7 +48,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	public FormData createForm(Logger logger, int formTemplateId, int departmentId, FormDataKind kind) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
-		
+
+		result.setState(WorkflowState.CREATED);
 		result.setDepartmentId(departmentId);
 		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
 		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
