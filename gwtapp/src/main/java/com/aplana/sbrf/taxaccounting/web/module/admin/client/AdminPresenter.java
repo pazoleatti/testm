@@ -28,7 +28,7 @@ import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
 	private final DispatchAsync dispatcher;
 
-	private FormTemplate formDescriptor;
+	private FormTemplate formTemplate;
 
 	@Inject
 	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
@@ -70,15 +70,15 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		registerHandler(getView().getSaveButton().addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent clickEvent) {
-				if (formDescriptor.getCreateScript() == null) {
-					formDescriptor.setCreateScript(new Script());
+				if (formTemplate.getCreateScript() == null) {
+					formTemplate.setCreateScript(new Script());
 				}
 
 				final MyView view = getView();
 				view.getScriptEditor().flush();
 
 				UpdateFormAction action = new UpdateFormAction();
-				action.setForm(formDescriptor);
+				action.setForm(formTemplate);
 				dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
 					@Override
 					public void onSuccess(UpdateFormResult updateFormResult) {
@@ -108,13 +108,13 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 			scriptEditor.flush();
 
 			if(str.equals("create")){
-				if(formDescriptor.getCreateScript()==null){
-					formDescriptor.setCreateScript(new Script());
+				if(formTemplate.getCreateScript()==null){
+					formTemplate.setCreateScript(new Script());
 				}
-				scriptEditor.setValue(formDescriptor.getCreateScript());
+				scriptEditor.setValue(formTemplate.getCreateScript());
 			} else {
 				int scrInd = Integer.valueOf(str);
-				scriptEditor.setValue(formDescriptor.getCalcScripts().get(scrInd));
+				scriptEditor.setValue(formTemplate.getCalcScripts().get(scrInd));
 			}
 		}
 	}
@@ -131,7 +131,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
 				@Override
 				public void onSuccess(GetFormResult result) {
-					formDescriptor = result.getForm();
+					formTemplate = result.getForm();
 
 					ListBox lb = getView().getScriptListBox();
 					lb.clear();
@@ -139,7 +139,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 					lb.addItem("Скрипт создания", "create");
 
 					int i = 0;
-					for(Script script:formDescriptor.getCalcScripts()){
+					for(Script script: formTemplate.getCalcScripts()){
 						lb.addItem(script.getName(), String.valueOf(i++));
 					}
 
