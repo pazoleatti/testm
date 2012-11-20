@@ -1,15 +1,21 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 /**
  * Реализация DAO для изменения стадии жизненного цикла у FormDao
  */
+@Repository
 public class FormDataWorkflowDaoImpl extends AbstractDao implements FormDataWorkflowDao {
 	@Override
-	public void changeFormDataState(int formDataId, int stateId) {
-		int rows = getJdbcTemplate().update("update form_data set state_id = ? where id = ?", stateId, formDataId);
+	@Transactional(readOnly=false)
+	public void changeFormDataState(long formDataId, WorkflowState workflowState) {
+		int rows = getJdbcTemplate().update("update form_data set state = ? where id = ?", workflowState.getId(), formDataId);
 		if (rows == 0) {
 			throw new DaoException("Не удалось изменить состояние у записи с id = " + formDataId + ", возможно идентификатор неверен");
 		}

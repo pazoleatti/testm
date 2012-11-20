@@ -20,8 +20,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
 public class FormDataDaoTest {
-	private int DEMO_FORM_TEMPLATE_ID = 1000;
-	
 	@Autowired
 	FormTemplateDao formTemplateDao;
 	
@@ -30,7 +28,7 @@ public class FormDataDaoTest {
 	
 	@Test
 	public void testDao() {
-		FormTemplate form = formTemplateDao.get(DEMO_FORM_TEMPLATE_ID);
+		FormTemplate form = formTemplateDao.get(Constants.DEMO_FORM_TEMPLATE_ID);
 		
 		FormData fd = new FormData(form);
 		
