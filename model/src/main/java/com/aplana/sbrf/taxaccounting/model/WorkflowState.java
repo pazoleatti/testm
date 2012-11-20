@@ -10,8 +10,8 @@ public enum WorkflowState {
 	APPROVED(3, "Утверждена"),
 	ACCEPTED(4, "Принята");
 
-	private int id;
-	private String name;
+	private final int id;
+	private final String name;
 	
 	private WorkflowState(int id, String name) {
 		this.id = id;
