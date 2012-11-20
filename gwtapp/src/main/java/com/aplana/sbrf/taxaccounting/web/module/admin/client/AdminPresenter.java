@@ -94,29 +94,54 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				bindScript();
 			}
 		}));
+
+		registerHandler(getView().getCreateScriptButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				Script script = new Script();
+				script.setName("Новый");
+				formTemplate.getCalcScripts().add(script);
+				script.setOrder(formTemplate.getCalcScripts().size());
+				bindFormTemplate();
+			}
+		}));
+
+		registerHandler(getView().getDeleteScriptButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				formTemplate.getCalcScripts().remove(getSelectedScript());
+				bindFormTemplate();
+			}
+		}));
 	}
 
 	/**
 	 * Bind script to form
 	 */
 	private void bindScript() {
+		ScriptEditor scriptEditor = getView().getScriptEditor();
+		scriptEditor.flush();
+		scriptEditor.setValue(getSelectedScript());
+	}
+
+	private Script getSelectedScript() {
+		Script script = null;
+
 		ListBox slb = getView().getScriptListBox();
 		int selInd = slb.getSelectedIndex();
-		if(selInd>=0){
+		if (selInd >= 0) {
 			String str = slb.getValue(selInd);
-			ScriptEditor scriptEditor = getView().getScriptEditor();
-			scriptEditor.flush();
-
-			if(str.equals("create")){
-				if(formTemplate.getCreateScript()==null){
+			if (str.equals("create")) {
+				if (formTemplate.getCreateScript() == null) {
 					formTemplate.setCreateScript(new Script());
 				}
-				scriptEditor.setValue(formTemplate.getCreateScript());
+				script = formTemplate.getCreateScript();
 			} else {
 				int scrInd = Integer.valueOf(str);
-				scriptEditor.setValue(formTemplate.getCalcScripts().get(scrInd));
+				script = formTemplate.getCalcScripts().get(scrInd);
 			}
 		}
+		return script;
 	}
 
 	/**
@@ -133,21 +158,25 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				public void onSuccess(GetFormResult result) {
 					formTemplate = result.getForm();
 
-					ListBox lb = getView().getScriptListBox();
-					lb.clear();
-
-					lb.addItem("Скрипт создания", "create");
-
-					int i = 0;
-					for(Script script: formTemplate.getCalcScripts()){
-						lb.addItem(script.getName(), String.valueOf(i++));
-					}
-
-					lb.setSelectedIndex(0);
-					bindScript();
+					bindFormTemplate();
 				}
 			});
 		}
+	}
+
+	private void bindFormTemplate() {
+		ListBox lb = getView().getScriptListBox();
+		lb.clear();
+
+		lb.addItem("Скрипт создания", "create");
+
+		int i = 0;
+		for (Script script : formTemplate.getCalcScripts()) {
+			lb.addItem(script.getName(), String.valueOf(i++));
+		}
+
+		lb.setSelectedIndex(0);
+		bindScript();
 	}
 
 	@Override
@@ -176,5 +205,9 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		public ScriptEditor getScriptEditor();
 
 		ListBox getScriptListBox();
+
+		Button getCreateScriptButton();
+
+		Button getDeleteScriptButton();
 	}
 }

@@ -32,6 +32,12 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	@UiField
 	ListBox scriptListBox;
 
+	@UiField
+	Button createScriptButton;
+
+	@UiField
+	Button deleteScriptButton;
+
 	@Inject
     public AdminView(final Binder binder) {
         widget = binder.createAndBindUi(this);
@@ -65,5 +71,15 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	@Override
 	public ListBox getScriptListBox() {
 		return scriptListBox;
+	}
+
+	@Override
+	public Button getCreateScriptButton() {
+		return createScriptButton;
+	}
+
+	@Override
+	public Button getDeleteScriptButton() {
+		return deleteScriptButton;
 	}
 }
