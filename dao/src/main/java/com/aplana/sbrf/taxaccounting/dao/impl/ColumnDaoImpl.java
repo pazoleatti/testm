@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
@@ -66,7 +66,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	}
 
 	@Override
-	public void saveFormColumns(final Form form) {
+	public void saveFormColumns(final FormTemplate form) {
 		int formId = form.getId();
 		
 		JdbcTemplate jt = getJdbcTemplate();

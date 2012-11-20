@@ -20,14 +20,14 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.FilterData;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
@@ -39,13 +39,13 @@ import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 @Transactional(readOnly=true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
-	private FormDao formDao;
+	private FormTemplateDao formTemplateDao;
 
 	private class FormDataRowMapper implements RowMapper<FormData> {
 		public FormData mapRow(ResultSet rs, int index) throws SQLException {
 			long formDataId = rs.getLong("id");
 			int formId = rs.getInt("form_id");
-			Form form = formDao.getForm(formId);
+			FormTemplate form = formTemplateDao.get(formId);
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(form);
 			fd.setId(formDataId);
@@ -119,7 +119,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	
 	
 	private void readValues(String tableName, final Map<Long, DataRow> rowMap, final FormData formData) {
-		final Form form = formDao.getForm(formData.getFormTemplateId());
+		final FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 			new Object[] { formData.getId() },

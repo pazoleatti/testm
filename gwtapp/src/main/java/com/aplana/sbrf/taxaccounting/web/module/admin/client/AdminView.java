@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

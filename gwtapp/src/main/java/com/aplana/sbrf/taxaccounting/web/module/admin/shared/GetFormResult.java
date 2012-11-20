@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.gwtplatform.dispatch.shared.Result;
 
 /**
  * @author Vitalii Samolovskikh
  */
 public class GetFormResult implements Result {
-    private Form form;
+    private FormTemplate form;
 
-    public Form getForm() {
+    public FormTemplate getForm() {
         return form;
     }
 
-    public void setForm(Form form) {
+    public void setForm(FormTemplate form) {
         this.form = form;
     }
 }

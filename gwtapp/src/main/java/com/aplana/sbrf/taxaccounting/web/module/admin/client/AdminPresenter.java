@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -28,7 +28,7 @@ import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
 	private final DispatchAsync dispatcher;
 
-	private Form formDescriptor;
+	private FormTemplate formDescriptor;
 
 	@Inject
 	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
@@ -45,7 +45,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 			public void onSuccess(FormListResult result) {
 				final ListBox listBox = getView().getFormListBox();
 				listBox.clear();
-				for (Form form : result.getForms()) {
+				for (FormTemplate form : result.getForms()) {
 					listBox.addItem(form.getType().getName(), form.getId().toString());
 				}
 			}

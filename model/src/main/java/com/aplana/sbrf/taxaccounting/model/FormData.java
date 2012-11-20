@@ -23,7 +23,7 @@ public class FormData implements Serializable {
 	public FormData() {
 	}
 	
-	public FormData(Form form) {
+	public FormData(FormTemplate form) {
 		initFormTemplateParams(form);
 	}
 	
@@ -83,7 +83,7 @@ public class FormData implements Serializable {
 	 * @param formTemplate описание шаблона налоговой формы
 	 * @throws IllegalStateException если значение поля form уже было проинициализировано 
 	 */
-	public void initFormTemplateParams(Form formTemplate) {
+	public void initFormTemplateParams(FormTemplate formTemplate) {
 		if (this.formColumns != null) {
 			throw new IllegalStateException("FormTemplate-related properties was already initialized in this FormData instance");
 		}

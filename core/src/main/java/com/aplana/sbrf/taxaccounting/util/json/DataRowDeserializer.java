@@ -17,7 +17,7 @@ import org.codehaus.jackson.map.JsonDeserializer;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 
@@ -27,11 +27,11 @@ import com.aplana.sbrf.taxaccounting.model.StringColumn;
 public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 	private Log logger = LogFactory.getLog(getClass());
 	
-	private Form form;
+	private FormTemplate form;
 	private boolean failOnWrongFields;
 	private DateFormat dateFormat;
 	
-	public DataRowDeserializer(Form form, DateFormat dateFormat, boolean failOnWrongFields) {
+	public DataRowDeserializer(FormTemplate form, DateFormat dateFormat, boolean failOnWrongFields) {
 		this.form = form;
 		this.failOnWrongFields = failOnWrongFields;
 		this.dateFormat = dateFormat;

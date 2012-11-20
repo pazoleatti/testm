@@ -19,12 +19,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 import com.aplana.sbrf.taxaccounting.util.json.DataRowDeserializer;
@@ -32,7 +32,7 @@ import com.aplana.sbrf.taxaccounting.util.json.DataRowSerializer;
 
 @Repository
 @Transactional(readOnly=true)
-public class FormDaoImpl extends AbstractDao implements FormDao {
+public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
 	@Autowired
 	private FormTypeDao formTypeDao;
 	@Autowired
@@ -40,13 +40,13 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	@Autowired
 	private ScriptDao scriptDao;
 	
-	private class FormMapper implements RowMapper<Form> {
+	private class FormMapper implements RowMapper<FormTemplate> {
 		private boolean deepFetch;
 		public FormMapper(boolean deepFetch) {
 			this.deepFetch = deepFetch; 
 		}
-		public Form mapRow(ResultSet rs, int index) throws SQLException {
-			Form form = new Form();
+		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
+			FormTemplate form = new FormTemplate();
 			form.setId(rs.getInt("id"));
 			form.setType(formTypeDao.getType(rs.getInt("type_id")));
 			
@@ -74,10 +74,10 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 	}
 
 	@Cacheable("Form")
-	public Form getForm(int formId) {
-		logger.info("Fetching Form with id = " + formId);
+	public FormTemplate get(int formId) {
+		logger.info("Fetching FormTemplate with id = " + formId);
 		JdbcTemplate jt = getJdbcTemplate();
-		final Form form = jt.queryForObject(
+		final FormTemplate form = jt.queryForObject(
 			"select * from form where id = ?",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
@@ -88,7 +88,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 
 	@Transactional(readOnly=false)
 	@CacheEvict(value="Form", key="#form.id")
-	public int saveForm(final Form form) {
+	public int save(final FormTemplate form) {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("taxaccounting-dao-write", new Version(1, 0, 0, null));
 		module.addSerializer(DataRow.class, new DataRowSerializer(FormatUtils.getShortDateFormat()));
@@ -116,7 +116,7 @@ public class FormDaoImpl extends AbstractDao implements FormDao {
 		return form.getId().intValue();
 	}
 
-	public List<Form> listForms() {
+	public List<FormTemplate> listAll() {
 		return getJdbcTemplate().query("select * from form", new FormMapper(false));
 	}
 }

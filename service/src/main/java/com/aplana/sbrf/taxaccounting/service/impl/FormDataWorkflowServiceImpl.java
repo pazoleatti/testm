@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
@@ -31,7 +31,7 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	@Autowired
 	private TAUserDao userDao;
 	@Autowired
-	private FormDao formDao;
+	private FormTemplateDao formDao;
 	@Autowired
 	private DepartmentDao departmentDao;
 	@Autowired
@@ -94,7 +94,7 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	}
 
 	@Override
-	public void doMove(long formDataId, int userId, int moveId) {
+	public void doMove(long formDataId, int userId, WorkflowMove workflowMove) {
 
 	}
 }

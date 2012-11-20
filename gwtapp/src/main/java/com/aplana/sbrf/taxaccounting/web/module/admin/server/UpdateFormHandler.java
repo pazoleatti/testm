@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.server;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, UpdateFormResult> {
-    private FormDao formDao;
+    private FormTemplateDao formTemplateDao;
 
     public UpdateFormHandler() {
         super(UpdateFormAction.class);
@@ -22,7 +22,7 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
     @Override
     public UpdateFormResult execute(UpdateFormAction action, ExecutionContext context) throws ActionException {
-        formDao.saveForm(action.getForm());
+        formTemplateDao.save(action.getForm());
         return new UpdateFormResult();
     }
 
@@ -32,7 +32,7 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
     }
 
     @Autowired
-    public void setFormDao(FormDao formDao) {
-        this.formDao = formDao;
+    public void setFormDao(FormTemplateDao formDao) {
+        this.formTemplateDao = formDao;
     }
 }

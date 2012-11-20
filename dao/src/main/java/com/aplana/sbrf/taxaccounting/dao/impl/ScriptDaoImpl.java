@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
@@ -45,7 +45,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public void fillFormScripts(final Form form) {
+	public void fillFormScripts(final FormTemplate form) {
 		form.setCreateScript(null);
 		form.getCalcScripts().clear();
 		
@@ -88,7 +88,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	
 	@Override
 	@Transactional(readOnly = false)
-	public void saveFormScripts(Form form) {
+	public void saveFormScripts(FormTemplate form) {
 		int formId = form.getId();
 		JdbcTemplate jt = getJdbcTemplate();
 		

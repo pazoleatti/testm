@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.Form;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
@@ -20,17 +20,17 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
 public class FormDataDaoTest {
-	private int DEMO_FORM_ID = 1000;
+	private int DEMO_FORM_TEMPLATE_ID = 1000;
 	
 	@Autowired
-	FormDao formDao;
+	FormTemplateDao formTemplateDao;
 	
 	@Autowired
 	FormDataDao formDataDao;
 	
 	@Test
 	public void testDao() {
-		Form form = formDao.getForm(DEMO_FORM_ID);
+		FormTemplate form = formTemplateDao.get(DEMO_FORM_TEMPLATE_ID);
 		
 		FormData fd = new FormData(form);
 		

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.server;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FormListHandler extends AbstractActionHandler<FormListAction, FormListResult> {
-    private FormDao formDao;
+    private FormTemplateDao formTemplateDao;
 
     public FormListHandler() {
         super(FormListAction.class);
@@ -25,7 +25,7 @@ public class FormListHandler extends AbstractActionHandler<FormListAction, FormL
     @Override
     public FormListResult execute(FormListAction formListAction, ExecutionContext executionContext) throws ActionException {
         FormListResult result = new FormListResult();
-        result.setForms(formDao.listForms());
+        result.setForms(formTemplateDao.listAll());
         return result;
     }
 
@@ -35,7 +35,7 @@ public class FormListHandler extends AbstractActionHandler<FormListAction, FormL
     }
 
     @Autowired
-    public void setFormDao(FormDao formDao) {
-        this.formDao = formDao;
+    public void setFormDao(FormTemplateDao formDao) {
+        this.formTemplateDao = formDao;
     }
 }

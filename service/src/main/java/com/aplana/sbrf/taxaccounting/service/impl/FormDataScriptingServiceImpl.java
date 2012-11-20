@@ -17,16 +17,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -34,7 +34,7 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 @Service
 public class FormDataScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
 	@Autowired
-	private FormDao formDao;
+	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormDataDao formDataDao;
 	
@@ -44,8 +44,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
 	 */
 	@Override
-	public FormData createForm(Logger logger, int formId, int departmentId, FormDataKind kind) {
-		Form form = formDao.getForm(formId);
+	public FormData createForm(Logger logger, int formTemplateId, int departmentId, FormDataKind kind) {
+		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
 		
 		result.setDepartmentId(departmentId);
@@ -79,7 +79,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 */
 	@Override
 	public void processFormData(Logger logger, FormData formData) {
-		Form form = formDao.getForm(formData.getFormTemplateId());
+		FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
 		engine.put("formData", formData);
@@ -146,8 +146,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		logger.setMessageDecorator(null);
 	}
 	
-	private void checkMandatoryColumns(FormData formData, Form form, Logger logger) {
-		List<Column> columns = form.getColumns();
+	private void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
+		List<Column> columns = formTemplate.getColumns();
 		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
 		messageDecorator.setScriptName("Проверка обязательных полей");
 		logger.setMessageDecorator(messageDecorator);

@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 /**
  * Сервис для выполнения работ, связанных с жизненным циклом над данными {@link FormData налоговых форм} 
  * @author dsultanbekov
- *
  */
 public interface FormDataWorkflowService {
 	/**
@@ -22,8 +21,8 @@ public interface FormDataWorkflowService {
 	 * Выполнить изменение статуса карточки
 	 * @param formDataId идентификатор объекта {@link FormData}
 	 * @param userId идентификатор пользователя, от имени которого выплняется действие 
-	 * @param moveId идентификатор @{link WorkflowMove перехода жизненного цикла}
-	 * @throws
+	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
+	 * @throws ServiceException
 	 */
-	void doMove(long formDataId, int userId, int moveId);
+	void doMove(long formDataId, int userId, WorkflowMove move);
 }

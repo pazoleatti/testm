@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.server;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetFormResult> {
-    private FormDao formDao;
+    private FormTemplateDao formTemplateDao;
 
     public GetFormHandler() {
         super(GetFormAction.class);
@@ -23,7 +23,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
     @Override
     public GetFormResult execute(GetFormAction action, ExecutionContext context) throws ActionException {
         GetFormResult result = new GetFormResult();
-        result.setForm(formDao.getForm(action.getId()));
+        result.setForm(formTemplateDao.get(action.getId()));
         return result;
     }
 
@@ -33,7 +33,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
     }
 
     @Autowired
-    public void setFormDao(FormDao formDao) {
-        this.formDao = formDao;
+    public void setFormDao(FormTemplateDao formDao) {
+        this.formTemplateDao = formDao;
     }
 }

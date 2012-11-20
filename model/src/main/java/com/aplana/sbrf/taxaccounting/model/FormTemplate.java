@@ -8,7 +8,7 @@ import java.util.List;
  * Описание налоговой формы (шаблон налоговой формы)
  * @author dsultanbekov
  */
-public class Form implements Serializable {
+public class FormTemplate implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
