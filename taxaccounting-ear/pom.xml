@@ -4,11 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>taxaccounting</artifactId>
-		<groupId>com.aplana</groupId>
+		<groupId>com.aplana.taxaccounting</groupId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.aplana.taxaccounting</groupId>
 	<artifactId>taxaccounting-ear</artifactId>
 	<packaging>ear</packaging>
 
