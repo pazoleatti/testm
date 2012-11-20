@@ -24,6 +24,6 @@ public abstract class AbstractDao {
 	}
 	
 	protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
-		return getJdbcTemplate().queryForObject("values (" + sequenceName + ".nextval)", resultType);
+		return getJdbcTemplate().queryForObject("select " + sequenceName + ".nextval from dual", resultType);
 	}
 }
