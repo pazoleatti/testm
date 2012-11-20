@@ -26,6 +26,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Form;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -43,9 +44,15 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
 	 */
 	@Override
-	public FormData createForm(Logger logger, int formId) {
+	public FormData createForm(Logger logger, int formId, int departmentId, FormDataKind kind) {
 		Form form = formDao.getForm(formId);
 		FormData result = new FormData(form);
+		
+		result.setDepartmentId(departmentId);
+		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
+		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
+		result.setKind(kind);
+		
 		for (DataRow predefinedRow: form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
 			for (Map.Entry<String, Object> entry: predefinedRow.entrySet()) {

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.Set;
 
 
 /**
@@ -9,12 +8,17 @@ import java.util.Set;
  * @author dsultanbekov
  */
 public class Department implements Serializable {
-	private static final long serialVersionUID = 1L;	
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Идентификатор подразделения "Банк", представляющего весь СБРФ
+	 */
+	public static final int ROOT_BANK_ID = 1;
+	
 	private int id;
 	private String name;
 	private Integer parentId;
 	private DepartmentType type;
-	private Set<Integer> formTypes;
 
 	public int getId() {
 		return id;

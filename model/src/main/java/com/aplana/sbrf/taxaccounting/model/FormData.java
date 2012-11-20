@@ -13,11 +13,9 @@ public class FormData implements Serializable {
 	private Long id;
 	private WorkflowState state;
 	private FormDataKind kind;
+	private Integer departmentId;
 
-	private int departmentId;
-	
 	private int formTemplateId;
-
 	private List<Column> formColumns;
 	private List<DataRow> dataRows;
 	private FormType formType;
@@ -56,11 +54,15 @@ public class FormData implements Serializable {
 		this.state = state;
 	}
 
-	public int getDepartmentId() {
+	public Integer getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(int departmentId) {
+	/**
+	 * Задать идентификатор {@link Department подразделения} к которому относится налоговая форма
+	 * @param departmentId идентификатор подразделения
+	 */
+	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
 	}
 	

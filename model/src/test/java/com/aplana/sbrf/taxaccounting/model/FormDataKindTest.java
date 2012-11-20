@@ -7,40 +7,35 @@ import java.util.Set;
 
 import org.junit.Test;
 
-public class WorkflowStateTest {
+public class FormDataKindTest {
 	@Test
 	public void testIds() {
 		// Проверяем, что идентификаторы всех состояний уникальны
 		Set<Integer> ids = new HashSet<Integer>();
-		for (WorkflowState state: WorkflowState.values()) {
-			int id = state.getId();
+		for (FormDataKind kind: FormDataKind.values()) {
+			int id = kind.getId();
 			if (ids.contains(id)) {
 				fail("Multiple occurences of id " + id);		
 			}
-		}
+		}		
 	}
 	
 	@Test
 	public void testFromId() {
-		WorkflowState state = WorkflowState.fromId(1);
-		assert(state == WorkflowState.CREATED);
+		FormDataKind kind = FormDataKind.fromId(1);
+		assert(kind == FormDataKind.PRIMARY);
 		
-		state = WorkflowState.fromId(2);
-		assert(state == WorkflowState.PREPARED);
+		kind = FormDataKind.fromId(2);
+		assert(kind == FormDataKind.CONSOLIDATED);
 		
-		state = WorkflowState.fromId(3);
-		assert(state == WorkflowState.APPROVED);
-
-		state = WorkflowState.fromId(4);
-		assert(state == WorkflowState.ACCEPTED);
-
-		// Проверка на несуществующий id
+		kind = FormDataKind.fromId(3);
+		assert(kind == FormDataKind.SUMMARY);
+		
 		try {
-			state = WorkflowState.fromId(9);
+			kind = FormDataKind.fromId(100);
 			fail("Checking of wrong id retrieval failed");
 		} catch (IllegalArgumentException e) {
-			assert true;
+			
 		}
 	}
-
 }
