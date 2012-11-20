@@ -47,6 +47,8 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	@UiField
 	TextArea body;
 
+	private boolean initialized = false;
+
 	/**
 	 * Constructs new editor.
 	 */
@@ -64,6 +66,7 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	@Override
 	public void setValue(Script script) {
 		driver.edit(script);
+		initialized = true;
 	}
 
 	/**
@@ -82,6 +85,10 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	 * @return merged script
 	 */
 	public Script flush() {
-		return driver.flush();
+		if (initialized) {
+			return driver.flush();
+		} else {
+			return null;
+		}
 	}
 }

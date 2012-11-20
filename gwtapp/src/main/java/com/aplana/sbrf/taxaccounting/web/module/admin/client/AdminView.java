@@ -27,7 +27,7 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     Button cancelButton;
 
 	@UiField
-	ScriptEditor calcScriptEditor;
+	ScriptEditor scriptEditor;
 
 	@UiField
 	ListBox scriptListBox;
@@ -58,8 +58,8 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     }
 
 	@Override
-	public ScriptEditor getCalcScriptEditor() {
-		return calcScriptEditor;
+	public ScriptEditor getScriptEditor() {
+		return scriptEditor;
 	}
 
 	@Override

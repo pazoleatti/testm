@@ -75,7 +75,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 				}
 
 				final MyView view = getView();
-				view.getCalcScriptEditor().flush();
+				view.getScriptEditor().flush();
 
 				UpdateFormAction action = new UpdateFormAction();
 				action.setForm(formDescriptor);
@@ -91,22 +91,30 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		registerHandler(getView().getScriptListBox().addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent changeEvent) {
-				loadScript();
+				bindScript();
 			}
 		}));
 	}
 
-	private void loadScript() {
+	/**
+	 * Bind script to form
+	 */
+	private void bindScript() {
 		ListBox slb = getView().getScriptListBox();
 		int selInd = slb.getSelectedIndex();
 		if(selInd>=0){
-			final String str = slb.getValue(selInd);
+			String str = slb.getValue(selInd);
+			ScriptEditor scriptEditor = getView().getScriptEditor();
+			scriptEditor.flush();
 
 			if(str.equals("create")){
-				getView().getCalcScriptEditor().setValue(formDescriptor.getCreateScript());
+				if(formDescriptor.getCreateScript()==null){
+					formDescriptor.setCreateScript(new Script());
+				}
+				scriptEditor.setValue(formDescriptor.getCreateScript());
 			} else {
 				int scrInd = Integer.valueOf(str);
-				getView().getCalcScriptEditor().setValue(formDescriptor.getCalcScripts().get(scrInd));
+				scriptEditor.setValue(formDescriptor.getCalcScripts().get(scrInd));
 			}
 		}
 	}
@@ -136,7 +144,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 					}
 
 					lb.setSelectedIndex(0);
-					loadScript();
+					bindScript();
 				}
 			});
 		}
@@ -165,7 +173,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 
 		public Button getCancelButton();
 
-		public ScriptEditor getCalcScriptEditor();
+		public ScriptEditor getScriptEditor();
 
 		ListBox getScriptListBox();
 	}

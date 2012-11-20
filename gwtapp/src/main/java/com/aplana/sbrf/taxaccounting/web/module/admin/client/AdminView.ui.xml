@@ -28,7 +28,7 @@
 									<g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="scriptListBox"/>
 								</g:cell>
 								<g:cell>
-									<u:ScriptEditor ui:field="calcScriptEditor"/>
+									<u:ScriptEditor ui:field="scriptEditor"/>
 								</g:cell>
 							</g:HorizontalPanel>
 						</g:tab>
