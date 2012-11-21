@@ -27,7 +27,7 @@
 		</g:cell>
 
 		<g:cell width="100%" height="600px">
-			<g:TextArea width="100%" height="90%" ui:field="body"/>
+			<g:TextArea width="100%" height="100%" ui:field="body"/>
 		</g:cell>
 	</g:VerticalPanel>
 </ui:UiBinder>
