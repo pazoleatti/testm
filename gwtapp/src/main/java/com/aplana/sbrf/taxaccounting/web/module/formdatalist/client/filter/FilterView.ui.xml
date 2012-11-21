@@ -11,18 +11,18 @@
 	<g:HorizontalPanel width="50%">
         <g:VerticalPanel spacing="5" width="100%">
             <g:Label text="Отчетный период" />
-		    <lbe:ListBoxEditor ui:field="period" visibleItemCount="1" />
+		    <lbe:LongListBoxEditor ui:field="period" visibleItemCount="1" />
 
 	        <g:Label text="Подразделение" />
-	        <lbe:ListBoxEditor ui:field="department" visibleItemCount="1"/>
+	        <lbe:LongListBoxEditor ui:field="department" visibleItemCount="1"/>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">
 	        <g:Label text="Налоговая форма (тип)"/>
-            <lbe:ListBoxEditor ui:field="formtype" visibleItemCount="1"/>
+            <lbe:LongListBoxEditor ui:field="formtype" visibleItemCount="1"/>
 
             <g:Label text="Вид"/>
-            <lbe:ListBoxEditor ui:field="kind" visibleItemCount="1" />
+            <lbe:LongListBoxEditor ui:field="kind" visibleItemCount="1" />
         </g:VerticalPanel>
     </g:HorizontalPanel>
 

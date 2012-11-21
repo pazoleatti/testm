@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.FilterData;
+import com.aplana.sbrf.taxaccounting.model.DataFilter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter.SelectItem;
-import com.aplana.sbrf.taxaccounting.web.widget.listeditor.client.ListBoxEditor;
+import com.aplana.sbrf.taxaccounting.web.widget.listeditor.client.LongListBoxEditor;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,12 +13,12 @@ import com.gwtplatform.mvp.client.ViewImpl;
 
 import java.util.List;
 
-public class FilterView extends ViewImpl implements FilterPresenter.MyView, Editor<FilterData>{
+public class FilterView extends ViewImpl implements FilterPresenter.MyView, Editor<DataFilter>{
 
     interface MyBinder extends UiBinder<Widget, FilterView> {
     }
 
-    interface MyDriver extends SimpleBeanEditorDriver<FilterData, FilterView>{
+    interface MyDriver extends SimpleBeanEditorDriver<DataFilter, FilterView>{
     }
 
     private final Widget widget;
@@ -26,16 +26,16 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
     private final MyDriver driver;
 
     @UiField
-    ListBoxEditor period;
+	LongListBoxEditor period;
 
     @UiField
-    ListBoxEditor department;
+	LongListBoxEditor department;
 
     @UiField
-    ListBoxEditor formtype;
+	LongListBoxEditor formtype;
 
     @UiField
-    ListBoxEditor kind;
+	LongListBoxEditor kind;
 
     @Inject
     public FilterView(final MyBinder binder, final MyDriver driver) {
@@ -52,13 +52,13 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 
 
     @Override
-    public void setFilterData(FilterData filterData) {
-        driver.edit(filterData);
+    public void setDataFilter(DataFilter dataFilter) {
+        driver.edit(dataFilter);
     }
 
 
     @Override
-    public FilterData getFilterData() {
+    public DataFilter getDataFilter() {
         return driver.flush();
     }
 

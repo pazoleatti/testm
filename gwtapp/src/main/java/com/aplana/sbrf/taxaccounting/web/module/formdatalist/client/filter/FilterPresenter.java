@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
+import com.aplana.sbrf.taxaccounting.model.DataFilter;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FilterData;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
@@ -20,9 +20,9 @@ import java.util.List;
 public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	public interface MyView extends View {
-		void setFilterData(FilterData filterData);
+		void setDataFilter(DataFilter dataFilter);
 
-		FilterData getFilterData();
+		DataFilter getDataFilter();
 
 		void setPeriodList(List<SelectItem> list);
 
@@ -45,8 +45,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		this.dispatchAsync = dispatchAsync;
 	}
 
-	public FilterData getFilterData() {
-		return getView().getFilterData();
+	public DataFilter getFilterData() {
+		return getView().getDataFilter();
 	}
 
 	public void initFilter() {
@@ -84,8 +84,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						getView().setDepartmentList(departmentItems);
 						getView().setKindList(formTypeItems);
 
-						FilterData filterData = new FilterData();
-						getView().setFilterData(filterData);
+						DataFilter dataFilter = new DataFilter();
+						getView().setDataFilter(dataFilter);
 
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}

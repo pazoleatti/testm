@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FilterData;
+import com.aplana.sbrf.taxaccounting.model.DataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -137,9 +137,9 @@ public class FormDataListPresenter extends
 	 * 
 	 * @param filterData
 	 */
-	private void loadFormDataList(FilterData filterData) {
+	private void loadFormDataList(DataFilter filterData) {
 		GetFormDataList action = new GetFormDataList();
-		action.setFilterData(filterData);
+		action.setDataFilter(filterData);
 
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
@@ -156,7 +156,7 @@ public class FormDataListPresenter extends
 
 	@Override
 	public void onApplyFilter() {
-		FilterData filterData = filterPresenter.getFilterData();
+		DataFilter filterData = filterPresenter.getFilterData();
 		loadFormDataList(filterData);
 	}
 
@@ -167,7 +167,7 @@ public class FormDataListPresenter extends
 	@Override
 	public void onFilterReady(FilterReadyEvent event) {
 		if (event.getSource() == filterPresenter) {
-			FilterData filterData = filterPresenter.getFilterData();
+			DataFilter filterData = filterPresenter.getFilterData();
 			loadFormDataList(filterData);
 		}
 	}
