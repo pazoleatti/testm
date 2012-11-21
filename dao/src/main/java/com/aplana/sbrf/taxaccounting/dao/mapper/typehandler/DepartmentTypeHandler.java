@@ -10,12 +10,11 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
 import org.apache.ibatis.type.TypeHandler;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
 /**
- * Мапирует {@link Department.Type типы подразделений} на числовые столбцы в базе
- * В качестве числового представления типа используется значения поля {@link Department.Type#getCode()}
+ * Мапирует {@link DepartmentType типы подразделений} на числовые столбцы в базе
+ * В качестве числового представления типа используется значения поля {@link DepartmentType#getCode()}
  * @author dsultanbekov
  */
 @MappedTypes(DepartmentType.class)
