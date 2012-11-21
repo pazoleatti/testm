@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.DataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter.SelectItem;
 import com.aplana.sbrf.taxaccounting.web.widget.listeditor.client.LongListBoxEditor;
 import com.google.gwt.editor.client.Editor;
@@ -13,12 +13,12 @@ import com.gwtplatform.mvp.client.ViewImpl;
 
 import java.util.List;
 
-public class FilterView extends ViewImpl implements FilterPresenter.MyView, Editor<DataFilter>{
+public class FilterView extends ViewImpl implements FilterPresenter.MyView, Editor<FormDataFilter>{
 
     interface MyBinder extends UiBinder<Widget, FilterView> {
     }
 
-    interface MyDriver extends SimpleBeanEditorDriver<DataFilter, FilterView>{
+    interface MyDriver extends SimpleBeanEditorDriver<FormDataFilter, FilterView>{
     }
 
     private final Widget widget;
@@ -52,13 +52,13 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 
 
     @Override
-    public void setDataFilter(DataFilter dataFilter) {
-        driver.edit(dataFilter);
+    public void setDataFilter(FormDataFilter formDataFilter) {
+        driver.edit(formDataFilter);
     }
 
 
     @Override
-    public DataFilter getDataFilter() {
+    public FormDataFilter getDataFilter() {
         return driver.flush();
     }
 

@@ -26,7 +26,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 		/*TODO: тут нужно получать пользовательский ID и передавать в dataHandlerService в качестве параметра,
 		* в рамках прототипа это не делается*/
 
-		List<FormData> formDataList = dataHandlerService.findDataByUserIdAndFilter(0L, action.getDataFilter());
+		List<FormData> formDataList = dataHandlerService.findDataByUserIdAndFilter(0L, action.getFormDataFilter());
         GetFormDataListResult res = new GetFormDataListResult();
 		res.setRecords(formDataList);
 		return res;

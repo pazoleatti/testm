@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DataSearchDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.model.Filter;
+import com.aplana.sbrf.taxaccounting.dao.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -16,11 +16,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.util.FormatUtils.transformToSqlInStatement;
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 @Repository
 @Transactional(readOnly = true)
-public class DataSearchDaoImpl extends AbstractDao implements DataSearchDao {
+public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
 	@Autowired
 	private FormTemplateDao formTemplateDao;
@@ -40,7 +40,7 @@ public class DataSearchDaoImpl extends AbstractDao implements DataSearchDao {
 		}
 	}
 	@Override
-	public List<FormData> findByFilter(Filter dataFilter){
+	public List<FormData> findByFilter(FormDataDaoFilter dataFilter){
 		String query = "select * from FORM_DATA inner join form ON FORM_DATA.FORM_ID = FORM.ID where " +
 				"FORM_DATA.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartment())+
 				" and FORM.TYPE_ID in " + transformToSqlInStatement(dataFilter.getKind());

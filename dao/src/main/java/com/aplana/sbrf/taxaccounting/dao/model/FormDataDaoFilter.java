@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.dao.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class Filter implements Serializable {
+public class FormDataDaoFilter implements Serializable {
 
 	private static final long serialVersionUID = -961619115678926848L;
 

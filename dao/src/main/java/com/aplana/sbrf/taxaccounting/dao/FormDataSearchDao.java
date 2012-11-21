@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-
-import com.aplana.sbrf.taxaccounting.dao.model.Filter;
+import com.aplana.sbrf.taxaccounting.dao.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  * @author srybakov
  *
  */
-public interface DataSearchDao {
+public interface FormDataSearchDao {
 
 	/**
 	 * Возвращает список идентификаторов данных по налоговым формам, имеющих указанный тип
@@ -19,6 +18,6 @@ public interface DataSearchDao {
 	 * @return возвращает информацию по всем имеющимся в наличии заполенным формам, удовлетворяющие
 	 * запросу
 	 */
-	List<FormData> findByFilter(Filter filter);
+	List<FormData> findByFilter(FormDataDaoFilter filter);
 
 }

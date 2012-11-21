@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.util;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.TimeZone;
 
 public class FormatUtils {
@@ -35,14 +34,5 @@ public class FormatUtils {
 			shortDateFormat.set(result);
 		}
 		return result;
-	}
-
-	/**
-	 * Функция преобразует список (например, содержащий элементы 1,2,3,4) в строку вида "(1,2,3,4)", которая бдует
-	 * использоваться в SQL запросах вида "...where param in (1,2,3,4)";
-	 */
-	public static String transformToSqlInStatement(List list){
-		StringBuffer stringBuffer = new StringBuffer(list.toString());
-		return "(" + (stringBuffer.substring(1, stringBuffer.length() - 1)) + ")";
 	}
 }

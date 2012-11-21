@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ import java.util.List;
  */
 public interface DataHandlerService {
 
-	List<FormData> findDataByUserIdAndFilter(Long userId, DataFilter dataFilter);
+	List<FormData> findDataByUserIdAndFilter(Long userId, FormDataFilter formDataFilter);
 }

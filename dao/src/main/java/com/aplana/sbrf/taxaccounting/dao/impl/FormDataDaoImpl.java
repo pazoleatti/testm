@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataRowMapper;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,21 +26,6 @@ import java.util.*;
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
-
-	private class FormDataRowMapper implements RowMapper<FormData> {
-		public FormData mapRow(ResultSet rs, int index) throws SQLException {
-			long formDataId = rs.getLong("id");
-			int formId = rs.getInt("form_id");
-			FormTemplate form = formTemplateDao.get(formId);
-			FormData fd = new FormData();
-			fd.initFormTemplateParams(form);
-			fd.setId(formDataId);
-			fd.setDepartmentId(rs.getInt("department_id"));
-			fd.setState(WorkflowState.fromId(rs.getInt("state")));
-			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
-			return fd;
-		}
-	}
 
 	private static class ValueRecord<T> {
 		private T value;
@@ -62,14 +47,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				"select * from form_data where id = ?",
 				new Object[] { formDataId },
 				new int[] { Types.NUMERIC },
-				new FormDataRowMapper()
+				new FormDataRowMapper(formTemplateDao)
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
 		}
 		
 		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
-		
+
 		jt.query(
 			"select * from data_row where form_data_id = ? order by ord",
 			new Object[] { formDataId },
@@ -84,7 +69,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				}
 			}
 		);
-		
+
 		readValues("numeric_value", rowIdToAlias, formData);
 		readValues("string_value", rowIdToAlias, formData);
 		readValues("date_value", rowIdToAlias, formData);
@@ -261,7 +246,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	public List<FormData> getAll() {
 		return getJdbcTemplate().query(
 			"select * from form_data",
-			new FormDataRowMapper()
+			new FormDataRowMapper(formTemplateDao)
 		);		
 	}
 

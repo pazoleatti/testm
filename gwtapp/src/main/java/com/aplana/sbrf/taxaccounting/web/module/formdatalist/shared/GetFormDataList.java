@@ -1,21 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetFormDataList extends UnsecuredActionImpl<GetFormDataListResult>{
 
-    private DataFilter dataFilter;
+    private FormDataFilter formDataFilter;
 
     public GetFormDataList() {
 
     }
 
-    public DataFilter getDataFilter(){
-        return dataFilter;
+    public FormDataFilter getFormDataFilter(){
+        return formDataFilter;
     }
 
-    public void setDataFilter(DataFilter dataFilter){
-        this.dataFilter = dataFilter;
+    public void setFormDataFilter(FormDataFilter formDataFilter){
+        this.formDataFilter = formDataFilter;
     }
 }

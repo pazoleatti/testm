@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author sgoryachkin
  *
  */
-public class DataFilter implements Serializable{
+public class FormDataFilter implements Serializable{
 	private static final long serialVersionUID = -4400641241082281834L;
 
 	private Long period;
