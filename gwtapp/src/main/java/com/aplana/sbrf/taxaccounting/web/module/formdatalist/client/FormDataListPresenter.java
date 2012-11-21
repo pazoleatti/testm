@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
 import com.google.gwt.cell.client.ActionCell;
@@ -20,19 +21,21 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.List;
 
 public class FormDataListPresenter extends
-		Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy> implements FormDataListUiHandlers{
+		Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy>
+		implements FormDataListUiHandlers, FilterReadyEvent.MyHandler {
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
 	 */
 	@ProxyCodeSplit
 	@NameToken(nameToken)
-	public interface MyProxy extends Proxy<FormDataListPresenter>, Place {
+	public interface MyProxy extends ProxyPlace<FormDataListPresenter>, Place {
 	}
 
 	/**
@@ -94,9 +97,21 @@ public class FormDataListPresenter extends
 				}, null);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.gwtplatform.mvp.client.Presenter#useManualReveal()
+	 */
 	@Override
-	protected void onReset() {
-		super.onReset();
+	public boolean useManualReveal() {
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform.mvp.client.proxy.PlaceRequest)
+	 */
+	@Override
+	public void prepareFromRequest(PlaceRequest request) {
+		super.prepareFromRequest(request);
+		filterPresenter.initFilter();
 	}
 
 	@Override
@@ -117,27 +132,49 @@ public class FormDataListPresenter extends
 				this);
 	}
 
-	protected void loadFormDataList(FilterData filterData) {
-        GetFormDataList action = new GetFormDataList();
-        action.setFilterData(filterData);
+	/**
+	 * Применение фильтра, обновление списка форм
+	 * 
+	 * @param filterData
+	 */
+	private void loadFormDataList(FilterData filterData) {
+		GetFormDataList action = new GetFormDataList();
+		action.setFilterData(filterData);
 
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
 					@Override
 					public void onSuccess(GetFormDataListResult result) {
 						getView().setFormDataList(result.getRecords());
+						if (!isVisible()) {
+							// Вручную вызывается onReveal
+							getProxy().manualReveal(FormDataListPresenter.this);
+						}
 					}
 				});
 	}
 
 	@Override
 	public void onApplyFilter() {
-        FilterData filterData = filterPresenter.getFilterData();
-        loadFormDataList(filterData);
+		FilterData filterData = filterPresenter.getFilterData();
+		loadFormDataList(filterData);
 	}
 
-    @Override
-    public void onCreateClicked(){
+	/* (non-Javadoc)
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent.MyHandler#onFilterReady(com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent)
+	 */
+	@ProxyEvent
+	@Override
+	public void onFilterReady(FilterReadyEvent event) {
+		if (event.getSource() == filterPresenter) {
+			FilterData filterData = filterPresenter.getFilterData();
+			loadFormDataList(filterData);
+		}
+	}
 
-    }
+	@Override
+	public void onCreateClicked() {
+
+	}
+
 }
