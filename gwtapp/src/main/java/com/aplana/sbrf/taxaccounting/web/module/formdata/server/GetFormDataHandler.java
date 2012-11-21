@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -15,6 +17,9 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
 	@Autowired
 	private FormDataDao formDataDao;
+	
+	@Autowired
+	private FormDataAccessService accessService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -25,6 +30,12 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		GetFormDataResult result = new GetFormDataResult();
 		FormData formData = formDataDao.get(action.getFormDataId());
 		result.setFormData(formData);
+		AccessFlags accessFlags = new AccessFlags();
+		accessFlags.setCanCreate(false);
+		accessFlags.setCanDelete(false);
+		accessFlags.setCanEdit(true);
+		accessFlags.setCanRead(false);
+		result.setAccessFlags(accessFlags);
 		return result;
 	}
 

@@ -9,7 +9,7 @@ import com.google.gwt.user.cellview.client.Column;
 
 public class DataRowColumnFactory {
 	
-	Boolean isReadOnly = true;
+	Boolean isReadOnly = false;
 	
 	public Column<DataRow, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow> cellTable) {
 		com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;

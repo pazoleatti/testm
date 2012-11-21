@@ -12,6 +12,10 @@
 			<g:Button ui:field="cancelButton">Отмена</g:Button>
 			<g:Button ui:field="addRowButton">Добавить строку</g:Button>
 			<g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+			<g:Button ui:field="manualInputButton">Ручной ввод</g:Button>
+			<g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
+			<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
+			<g:Button ui:field="printButton">Печать</g:Button>
 		</g:FlowPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>

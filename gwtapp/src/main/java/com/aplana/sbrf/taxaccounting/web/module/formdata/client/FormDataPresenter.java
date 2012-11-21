@@ -7,8 +7,10 @@ import java.util.logging.Logger;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
@@ -17,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -51,12 +54,22 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		Button getSaveButton();
 		Button getAddRowButton();
 		Button getRemoveRowButton();
+		Button getManualInputButton();
+		Button getPrintButton();
+		Button getOriginalVersionButton();
 		DataGrid<DataRow> getFormDataTable();
-		void loadFormData(FormData formData);
+		void loadFormData(FormData formData, AccessFlags flags);
+		void reloadFormData(FormData formData, AccessFlags flags);
 		void reloadRows();
 		FormData getFormData();
 		void setLogMessages(List<LogEntry> logEntries);
 		void reset();
+		Boolean isReadOnly();
+//		void setReadOnly(Boolean readOnly);
+		void activateEditMode();
+		void activateReadOnlyMode();
+		
+//		void loadFormData(FormData formData, AccessFlags flags);
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -83,7 +96,9 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
 			@Override
 			public void onSuccess(GetFormDataResult result) {
-				getView().loadFormData(result.getFormData());
+//				AccessFlags flags = result.getAccessFlags();
+//				Window.alert(flags.getCanCreate() +" " + flags.getCanRead() + " " + flags.getCanEdit());
+				getView().loadFormData(result.getFormData(), result.getAccessFlags());
 			}
 		});
 	}
@@ -115,7 +130,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					public void onSuccess(SaveFormDataResult result) {
 						FormData savedFormData = result.getFormData();
 						view.reset();
-						view.loadFormData(savedFormData);
+						view.loadFormData(savedFormData, null);
 						view.setLogMessages(result.getLogEntries());						
 					}
 
@@ -146,6 +161,32 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				formData.getDataRows().remove(((SingleSelectionModel<DataRow>)view.getFormDataTable().getSelectionModel()).getSelectedObject());
 				view.reloadRows();
 			}
+		}));
+		
+		registerHandler(view.getManualInputButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				view.activateEditMode();
+			}
+			
+		}));
+		
+		registerHandler(view.getPrintButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				Window.alert("В разработке");
+//				view.activateReadOnlyMode();
+			}
+			
+		}));
+		
+		registerHandler(view.getOriginalVersionButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+//				Window.alert("В разработке");
+				view.activateReadOnlyMode();
+			}
+			
 		}));
 	}
 
