@@ -77,7 +77,7 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 			} else {
 				result.add(WorkflowMove.APPROVED_TO_CREATED);
 				if (isBankLevelUser) {
-					result.add(WorkflowMove.APPOVED_TO_ACCEPTED);
+					result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
 				}
 			}
 			break;
