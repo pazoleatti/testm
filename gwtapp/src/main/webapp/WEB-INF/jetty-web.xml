@@ -5,7 +5,7 @@
 	<Get name="securityHandler">
 		<Set name="userRealm">
 			<New class="org.mortbay.jetty.security.HashUserRealm">
-				<Set name="name">TaxAccounting Realm</Set>
+				<Set name="name">defaultWIMFileBasedRealm</Set><!-- TODO: Указать такое же имя realm, как будет в WebSphere -->
 				<Set name="config">
 				<SystemProperty name="jetty.home" default="."/>/src/test/config/jetty-realm.properties</Set>
 			</New>
