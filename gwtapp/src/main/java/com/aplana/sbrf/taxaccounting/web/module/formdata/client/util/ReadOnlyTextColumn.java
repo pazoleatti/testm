@@ -2,24 +2,18 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.ReadOnlyStringCell;
+
 /**
  * 
  * @author Eugene Stetsenko
  * Текстовая колонка С возможностью редактирования
  *
  */
-public class EditTextColumn extends DataRowColumn<String> {
+public class ReadOnlyTextColumn extends DataRowColumn<String> {
 
-    public EditTextColumn(StringColumn col) {
-        super(new EditTextCell(), col);
-        this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
-			@Override
-			public void update(int index, DataRow dataRow, String value) {
-				dataRow.put(getAlias(), value);
-			}
-		});
+    public ReadOnlyTextColumn(StringColumn col) {
+        super(new ReadOnlyStringCell(), col);
     }
 
     @Override

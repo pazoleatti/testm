@@ -17,17 +17,29 @@ public class DataRowColumnFactory {
 			StringColumn stringColumn = (StringColumn)col;
 			if (stringColumn.getDictionaryCode() != null) {
 				if (isReadOnly) {
-					tableCol = new TextColumn((StringColumn)col, true);//new EditStringDictionaryColumn(stringColumn);
+					tableCol = new ReadOnlyTextColumn((StringColumn)col);//new EditStringDictionaryColumn(stringColumn);
 				} else {
 					tableCol = new EditStringDictionaryColumn(stringColumn);
 				}
 			} else {
-				tableCol = new TextColumn((StringColumn)col, isReadOnly);	
+			    if (isReadOnly) {
+				tableCol = new ReadOnlyTextColumn((StringColumn)col);
+			    } else {
+				tableCol = new EditTextColumn((StringColumn)col);
+			    }
 			}
 		} else if (col instanceof NumericColumn) {
-			tableCol = new EditNumericColumn((NumericColumn)col, cellTable, isReadOnly);
+		    if (isReadOnly) {
+			tableCol = new ReadOnlyNumericColumn((NumericColumn)col, cellTable);
+		    } else {
+			tableCol = new EditNumericColumn((NumericColumn)col, cellTable);
+		    }
 		} else if (col instanceof DateColumn) {
-			tableCol = new SimpleDateColumn((DateColumn)col, isReadOnly);
+		    if (isReadOnly) {
+			tableCol = new ReadOnlyDateColumn((DateColumn)col);
+		    } else {
+			tableCol = new EditDateColumn((DateColumn)col);
+		    }
 		}
 		return tableCol;
 	}

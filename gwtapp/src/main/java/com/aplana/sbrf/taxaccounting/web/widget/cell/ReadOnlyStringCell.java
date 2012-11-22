@@ -11,8 +11,8 @@ public class ReadOnlyStringCell extends AbstractCell<String> {
 	public void render(com.google.gwt.cell.client.Cell.Context context,
 			String value, SafeHtmlBuilder sb) {
 		if (value == null) {
-	        return;
-	    }
+			return;
+		}
 		SafeHtml safeValue = SafeHtmlUtils.fromString(value);
 		sb.append(safeValue);
 	}

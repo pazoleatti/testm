@@ -17,9 +17,8 @@ public class ReadOnlyNumericCell extends AbstractCell<BigDecimal> {
 	public void render(com.google.gwt.cell.client.Cell.Context context,
 			BigDecimal value, SafeHtmlBuilder sb) {
 		if (value == null) {
-	        return;
-	    }
+			return;
+		}
 		sb.appendEscaped(format.format(value));
 	}
-
 }

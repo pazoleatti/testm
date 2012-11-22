@@ -31,10 +31,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		FormData formData = formDataDao.get(action.getFormDataId());
 		result.setFormData(formData);
 		AccessFlags accessFlags = new AccessFlags();
-		accessFlags.setCanCreate(false);
-		accessFlags.setCanDelete(false);
+		accessFlags.setCanCreate(true);
+		accessFlags.setCanDelete(true);
 		accessFlags.setCanEdit(true);
-		accessFlags.setCanRead(false);
+		accessFlags.setCanRead(true);
 		result.setAccessFlags(accessFlags);
 		return result;
 	}

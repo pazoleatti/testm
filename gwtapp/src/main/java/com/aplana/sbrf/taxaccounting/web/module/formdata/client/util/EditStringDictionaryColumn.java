@@ -4,7 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.DictionaryCell;
 import com.google.gwt.cell.client.FieldUpdater;
-
+/**
+ * 
+ * @author Eugene Stetsenko
+ * Колонка с выбором из справочника
+ *
+ */
 public class EditStringDictionaryColumn extends DataRowColumn<String> {
     public EditStringDictionaryColumn(StringColumn stringColumn) {
     	super(new DictionaryCell(stringColumn.getDictionaryCode()), stringColumn);

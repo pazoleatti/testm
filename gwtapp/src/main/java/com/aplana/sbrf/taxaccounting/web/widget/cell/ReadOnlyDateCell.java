@@ -8,7 +8,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class ReadOnlyDateCell extends AbstractCell<Date> {
 
-	DateTimeFormat format;
+	private DateTimeFormat format;
 	
 	public ReadOnlyDateCell(DateTimeFormat format) {
 		this.format = format;
@@ -17,11 +17,9 @@ public class ReadOnlyDateCell extends AbstractCell<Date> {
 	public void render(com.google.gwt.cell.client.Cell.Context context,
 			Date value, SafeHtmlBuilder sb) {
 		if (value == null) {
-	        return;
+			return;
 	    }
 		String convertedDate = format.format(value);
 		sb.appendEscaped(convertedDate);
-		
 	}
-
 }
