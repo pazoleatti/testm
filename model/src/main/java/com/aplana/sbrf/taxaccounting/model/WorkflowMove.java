@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
 public enum WorkflowMove {
 	CREATED_TO_APPROVED(1, "Утвердить", WorkflowState.CREATED, WorkflowState.APPROVED),
 	APPROVED_TO_CREATED(2, "Вернуть в \"Создана\"", WorkflowState.APPROVED, WorkflowState.CREATED),
-	APPOVED_TO_ACCEPTED(3, "Принять", WorkflowState.APPROVED, WorkflowState.ACCEPTED),
+	APPROVED_TO_ACCEPTED(3, "Принять", WorkflowState.APPROVED, WorkflowState.ACCEPTED),
 	ACCEPTED_TO_APPROVED(4, "Вернуть в \"Принята\"", WorkflowState.ACCEPTED, WorkflowState.APPROVED),
 	CREATED_TO_ACCEPTED(5, "Принять", WorkflowState.CREATED, WorkflowState.ACCEPTED),
 	ACCEPTED_TO_CREATED(6, "Вернуть в \"Создана\"", WorkflowState.ACCEPTED, WorkflowState.CREATED);
