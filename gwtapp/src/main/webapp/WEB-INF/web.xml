@@ -37,7 +37,7 @@
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
-		<welcome-file>TaxAccounting.html</welcome-file>
+		<welcome-file>Main.html</welcome-file>
 	</welcome-file-list>
 
 	<resource-ref> <description>TaxAccounting DataSource Reference</description> 
