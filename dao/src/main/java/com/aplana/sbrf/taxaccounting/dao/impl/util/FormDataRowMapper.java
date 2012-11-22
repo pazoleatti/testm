@@ -29,6 +29,7 @@ public class FormDataRowMapper implements RowMapper<FormData> {
 			fd.setDepartmentId(rs.getInt("department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
+			fd.setReportPeriodId(rs.getInt("report_period_id"));
 			return fd;
 		}
 

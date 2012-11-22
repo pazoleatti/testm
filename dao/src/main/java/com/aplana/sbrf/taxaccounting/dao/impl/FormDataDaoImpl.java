@@ -136,19 +136,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			throw new DaoException("Не указано подразделение, к которому относится налоговая форма");
 		}
 		
+		if (formData.getReportPeriodId() == null) {
+			throw new DaoException("Не указан идентификатор отчётного периода");
+		}
+		
 		Long formDataId;
 		JdbcTemplate jt = getJdbcTemplate();
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-				"insert into form_data (id, form_id, department_id, kind, state) values (?, ?, ?, ?, ?)",
-				new Object[] { 
-					formDataId, 
-					formData.getFormTemplateId(),
-					formData.getDepartmentId(),
-					formData.getKind().getId(),
-					formData.getState().getId()
-				}
+				"insert into form_data (id, form_id, department_id, kind, state, report_period_id) values (?, ?, ?, ?, ?, ?)",
+				formDataId, 
+				formData.getFormTemplateId(),
+				formData.getDepartmentId(),
+				formData.getKind().getId(),
+				formData.getState().getId(),
+				formData.getReportPeriodId()
 			);
 			formData.setId(formDataId);
 		} else {

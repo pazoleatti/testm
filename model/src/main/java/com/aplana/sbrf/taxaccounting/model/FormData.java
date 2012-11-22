@@ -14,6 +14,7 @@ public class FormData implements Serializable {
 	private WorkflowState state;
 	private FormDataKind kind;
 	private Integer departmentId;
+	private Integer reportPeriodId;
 
 	private int formTemplateId;
 	private List<Column> formColumns;
@@ -66,6 +67,22 @@ public class FormData implements Serializable {
 		this.departmentId = departmentId;
 	}
 	
+	/**
+	 * Возвращает идентификатор отчётного периода, к которому относится налоговая форма
+	 * @return идентификатор отчётного периода
+	 */
+	public Integer getReportPeriodId() {
+		return reportPeriodId;
+	}
+
+	/**
+	 * Задать идентификатор отчётного периода, к которому относится налоговая форма
+	 * @param reportPeriodId значение идентификатора отчётного периода
+	 */
+	public void setReportPeriodId(int reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
+	}
+
 	public FormDataKind getKind() {
 		return kind;
 	}

@@ -40,6 +40,7 @@ public class FormDataWorkflowDaoTest {
 		formData.setDepartmentId(Department.ROOT_BANK_ID);
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setState(WorkflowState.CREATED);
+		formData.setReportPeriodId(Constants.REPORT_PERIOD_ID);
 		formDataId = formDataDao.save(formData);
 	}
 	
