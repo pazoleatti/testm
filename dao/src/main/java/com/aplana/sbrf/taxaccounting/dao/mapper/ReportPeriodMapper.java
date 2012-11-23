@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.mapper;
 
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -20,18 +19,18 @@ public interface ReportPeriodMapper {
 
 	/**
 	 * Получить объект текущего отчётного периода по виду налога
-	 * @param taxType вид налога
+	 * @param taxTypeCode код вида налога
 	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
 	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
 	 */
-	@Select("select * from report_period where tax_type = #{taxType} and is_active = 1 ")
-	ReportPeriod getCurrentPeriod(@Param("taxType")TaxType taxType);
+	@Select("select * from report_period where tax_type = #{taxTypeCode} and is_active = 1 ")
+	ReportPeriod getCurrentPeriod(@Param("taxTypeCode")char taxType);
 
 	/**
 	 * Получить полный список отчётных периодов по виду налога
-	 * @param taxType вид налога
+	 * @param taxTypeCode код вида налога
 	 * @return список всех отчётных периодов
 	 */
-	@Select("select * from report_period where tax_type = #{taxType} ")
-	List<ReportPeriod> listAllPeriodsByTaxType(TaxType taxType);
+	@Select("select * from report_period where tax_type = #{taxTypeCode} ")
+	List<ReportPeriod> listAllPeriodsByTaxType(@Param("taxTypeCode")char taxTypeCode);
 }
