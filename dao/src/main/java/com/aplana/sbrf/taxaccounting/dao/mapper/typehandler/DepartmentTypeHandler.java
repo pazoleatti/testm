@@ -4,11 +4,10 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
+import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
-import org.apache.ibatis.type.TypeHandler;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
@@ -18,38 +17,37 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType;
  * @author dsultanbekov
  */
 @MappedTypes(DepartmentType.class)
-public class DepartmentTypeHandler implements TypeHandler<DepartmentType> {
+public class DepartmentTypeHandler extends BaseTypeHandler<DepartmentType> {
+
 	@Override
-	public DepartmentType getResult(ResultSet rs, String colName) throws SQLException {
-		Object value = rs.getObject(colName);
-		if (value == null) {
-			return null;
+	public DepartmentType getNullableResult(ResultSet rs, String columnName) throws SQLException {
+		if (rs.getObject(columnName) != null) {
+			return DepartmentType.fromCode(rs.getInt(columnName));
 		} else {
-			return DepartmentType.fromCode(rs.getInt(colName));
+			return null;
 		}
 	}
 
 	@Override
-	public DepartmentType getResult(ResultSet rs, int index) throws SQLException {
-		Object value = rs.getObject(index);
-		if (value == null) {
-			return null;
+	public DepartmentType getNullableResult(ResultSet rs, int colIndex) throws SQLException {
+		if (rs.getObject(colIndex) != null) {
+			return DepartmentType.fromCode(rs.getInt(colIndex));
 		} else {
-			return DepartmentType.fromCode(rs.getInt(index));
+			return null;
 		}
 	}
 
 	@Override
-	public DepartmentType getResult(CallableStatement stmt, int index) throws SQLException {
+	public DepartmentType getNullableResult(CallableStatement stmt, int index) throws SQLException {
+		if (stmt.getObject(index) != null) {
+			return DepartmentType.fromCode(stmt.getInt(index));
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public void setNonNullParameter(PreparedStatement stmt, int index, DepartmentType value, JdbcType jdbcType) throws SQLException {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setParameter(PreparedStatement stmt, int index, DepartmentType value, JdbcType type) throws SQLException {
-		if (value == null) {
-			stmt.setNull(index, Types.NUMERIC);	
-		} else {
-			stmt.setInt(index, value.getCode());
-		}
 	}
 }
