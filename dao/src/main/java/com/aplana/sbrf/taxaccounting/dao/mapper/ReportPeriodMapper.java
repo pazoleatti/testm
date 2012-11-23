@@ -24,7 +24,7 @@ public interface ReportPeriodMapper {
 	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
 	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
 	 */
-	@Select("select * from report_period where tax_type = #{taxType} ")
+	@Select("select * from report_period where tax_type = #{taxType} and is_active = 1 ")
 	ReportPeriod getCurrentPeriod(@Param("taxType")TaxType taxType);
 
 	/**

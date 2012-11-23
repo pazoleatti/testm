@@ -33,11 +33,14 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 
 	@Override
 	public ReportPeriod getCurrentPeriod(TaxType taxType) {
-		List<ReportPeriod> reportPeriod = reportPeriodMapper.listAllPeriodsByTaxType(taxType);
-		if (reportPeriod.size() > 1){
-			throw  new DaoException("Существует несколько открытых периодов по виду налога " + taxType);
+		try{
+			ReportPeriod reportPeriod = reportPeriodMapper.getCurrentPeriod(taxType);
+			return reportPeriod;
+		} catch (Exception e) {
+			/*TODO посмотреть какой эксепшен кидает MyBatis, если по запросу найдено несколько результатов и ловить
+			* не Exception, а тот, который нам нужен!*/
+			throw new DaoException("Существует несколько открытых периодов по виду налога " + taxType);
 		}
-		return reportPeriod.iterator().next();
 	}
 
 	@Override
