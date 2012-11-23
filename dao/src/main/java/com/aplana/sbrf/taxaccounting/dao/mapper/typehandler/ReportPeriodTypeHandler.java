@@ -22,7 +22,7 @@ public class ReportPeriodTypeHandler implements TypeHandler<ReportPeriod> {
 
 	@Override
 	public void setParameter(PreparedStatement preparedStatement, int i, ReportPeriod reportPeriod, JdbcType jdbcType) throws SQLException {
-		/* TODO: поконсалтить с Дамиром! */
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
