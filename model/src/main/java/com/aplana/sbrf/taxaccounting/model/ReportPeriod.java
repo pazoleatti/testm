@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 /**
  * Отчётный период.
  * В нормальной ситуации может быть только один активный отчётный период по каждому виду налога
@@ -7,7 +9,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * TODO: это класс-заглушка, необходимая для реализации прототипа, в будущем будет расширен и дополнен
  * @author dsultanbekov
  */
-public class ReportPeriod {
+public class ReportPeriod implements Serializable {
 	// Первичный ключ
 	private int id;
 	// Название периода

@@ -43,7 +43,7 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 			if(e.getCause() instanceof TooManyResultsException){
 				throw new DaoException("Существует несколько открытых периодов по виду налога " + taxType);
 			} else {
-				throw new DaoException("Ошибка при попытке получения отчетного периода. Причина " + e.getCause());
+				throw e;
 			}
 		}
 	}

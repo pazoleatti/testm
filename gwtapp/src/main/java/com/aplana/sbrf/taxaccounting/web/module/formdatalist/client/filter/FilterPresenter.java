@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
@@ -56,22 +57,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						getView().clearData();
-						List<Department> departments = result.getDepartments();
-						List<SelectItem> departmentItems = new ArrayList<SelectItem>();
-						// TODO: переписать код с применением google Function()
-						for (Department department : departments) {
-							departmentItems.add(new SelectItem(Long
-									.valueOf(department.getId()), department
-									.getName()));
-						}
 
-						List<FormType> formTypes = result.getKinds();
-						List<SelectItem> formTypeItems = new ArrayList<SelectItem>();
-						for (FormType formType : formTypes) {
-							formTypeItems.add(new SelectItem(Long
-									.valueOf(formType.getId()), formType
-									.getName()));
-						}
+						List<SelectItem> reportPeriodItems = fillPeriodList(result);
+						List<SelectItem> departmentItems = fillDepartmentList(result);
+						List<SelectItem> formTypeItems = fillFormTypeList(result);
 
 						List<SelectItem> type = new ArrayList<SelectItem>();
 						List<SelectItem> period = new ArrayList<SelectItem>();
@@ -80,7 +69,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						period.add(new SelectItem(1L, date.toString()));
 
 						getView().setFormtypeList(type);
-						getView().setPeriodList(period);
+						getView().setPeriodList(reportPeriodItems);
 						getView().setDepartmentList(departmentItems);
 						getView().setKindList(formTypeItems);
 
@@ -91,6 +80,40 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 					}
 				});
 
+	}
+
+	private List<SelectItem> fillPeriodList(GetFilterDataResult result){
+		List<ReportPeriod> reportPeriods = result.getPeriods();
+		List<SelectItem> reportPeriodItems = new ArrayList<SelectItem>();
+		for (ReportPeriod reportPeriod : reportPeriods){
+			reportPeriodItems.add(new SelectItem(Long
+					.valueOf(reportPeriod.getId()),
+					reportPeriod.getName()));
+		}
+		return reportPeriodItems;
+	}
+
+	private List<SelectItem> fillFormTypeList(GetFilterDataResult result){
+		List<FormType> formTypes = result.getKinds();
+		List<SelectItem> formTypeItems = new ArrayList<SelectItem>();
+		for (FormType formType : formTypes) {
+			formTypeItems.add(new SelectItem(Long
+					.valueOf(formType.getId()), formType
+					.getName()));
+		}
+		return formTypeItems;
+	}
+
+	private List<SelectItem> fillDepartmentList(GetFilterDataResult result){
+		List<Department> departments = result.getDepartments();
+		List<SelectItem> departmentItems = new ArrayList<SelectItem>();
+		// TODO: переписать код с применением google Function()
+		for (Department department : departments) {
+			departmentItems.add(new SelectItem(Long
+					.valueOf(department.getId()), department
+					.getName()));
+		}
+		return departmentItems;
 	}
 
 }

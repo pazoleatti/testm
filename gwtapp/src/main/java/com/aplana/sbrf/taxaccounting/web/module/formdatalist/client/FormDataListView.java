@@ -52,6 +52,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		};
 		formDataTable.addColumn(idColumn, "id");
 		formDataTable.addColumn(formTypeColumn, "Тип формы");
+		//TODO: добавить department и period для отображения в таблице
 
 	}
 
