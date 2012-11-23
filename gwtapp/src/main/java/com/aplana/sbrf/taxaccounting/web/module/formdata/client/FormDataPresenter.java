@@ -6,21 +6,27 @@ import java.util.logging.Logger;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -50,6 +56,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
 	 */
 	public interface MyView extends View {
+		FlowPanel getButtonPanel();
 		Button getCancelButton();
 		Button getSaveButton();
 		Button getAddRowButton();
@@ -57,6 +64,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		Button getManualInputButton();
 		Button getPrintButton();
 		Button getOriginalVersionButton();
+		Button getRecalculateButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData, AccessFlags flags);
 		void reloadFormData(FormData formData, AccessFlags flags);
@@ -160,10 +168,47 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				view.reloadRows();
 			}
 		}));
-		
+		//TODO need rework
 		registerHandler(view.getManualInputButton().addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				final FlowPanel buttonPanel = view.getButtonPanel();
+				final MyView view = getView();
+				GetAvailableMovesAction action = new GetAvailableMovesAction();
+				action.setFormDataId(view.getFormData().getId());
+				dispatcher.execute(action, new AbstractCallback<GetAvailableMovesResult>(){
+					@Override
+					public void onSuccess(GetAvailableMovesResult result) {
+						for (final WorkflowMove move : result.getAvailableMoves()) {
+							Button newButton = new Button();
+							newButton.setText(move.getName());
+							newButton.addClickHandler(new ClickHandler() {
+								
+								@Override
+								public void onClick(ClickEvent event) {
+									GoMoveAction action = new GoMoveAction();
+									action.setFormDataId(view.getFormData().getId());
+									action.setMove(move);
+									dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
+										@Override
+										public void onSuccess(GoMoveResult result) {
+											
+										}
+										
+									});
+								}
+							});
+							buttonPanel.add(newButton);
+						}
+					}
+
+					@Override
+					public void onFailure(Throwable throwable) {
+						logger.log(Level.SEVERE, "Failed to get AvailableMoves object", throwable);
+						super.onFailure(throwable);
+					}							
+				});
+				
 				view.activateEditMode();
 			}
 			
@@ -183,6 +228,32 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			public void onClick(ClickEvent event) {
 //				Window.alert("В разработке");
 				view.activateReadOnlyMode();
+			}
+			
+		}));
+		//TODO Same as save button?
+		registerHandler(view.getRecalculateButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				SaveFormDataAction action = new SaveFormDataAction();
+				final MyView view = getView();
+				action.setFormData(view.getFormData());
+				dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
+					@Override
+					public void onSuccess(SaveFormDataResult result) {
+						FormData savedFormData = result.getFormData();
+						view.reset();
+						view.loadForm(savedFormData, null);
+						view.setLogMessages(result.getLogEntries());						
+					}
+
+					@Override
+					public void onFailure(Throwable throwable) {
+						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
+						super.onFailure(throwable);
+					}							
+				});
+				
 			}
 			
 		}));

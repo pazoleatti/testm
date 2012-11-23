@@ -14,6 +14,9 @@
 			<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
 			<g:Button ui:field="printButton">Печать</g:Button>
 		</g:FlowPanel>
+		<!--  Необходимо для добавления кнопок Workflow -->
+		<g:FlowPanel height="20px" ui:field="buttonPanel">
+		</g:FlowPanel>
 		<g:HorizontalPanel ui:field="gridPanel" width="100%" height="610px">
 			<c:DataGrid ui:field="formDataTable" focus="true" height="600px" width="100%"/>
 		</g:HorizontalPanel>

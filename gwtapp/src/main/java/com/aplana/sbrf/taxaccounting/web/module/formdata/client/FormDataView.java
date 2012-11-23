@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -34,6 +35,8 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	
 	private AccessFlags flags = null;
 
+	@UiField
+	FlowPanel buttonPanel;
 	@UiField
 	DataGrid<DataRow> formDataTable;
 	@UiField
@@ -98,7 +101,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	}
 	
 	public void loadForm(FormData formData, AccessFlags flags) {
-		
+		buttonPanel.clear();
 		factory.setReadOnly(readOnly);
 		this.formData = formData;
 		for (Column col: formData.getFormColumns()) {
@@ -195,6 +198,8 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			originalVersionButton.setVisible(false);
 		}
 		
+		
+		
 		saveButton.setVisible(true);
 		recalculateButton.setVisible(true);
 		addRowButton.setVisible(true);
@@ -225,6 +230,16 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 		originalVersionButton.setVisible(false);
 		
 		printButton.setVisible(true);
+	}
+
+	@Override
+	public FlowPanel getButtonPanel() {
+		return buttonPanel;
+	}
+
+	@Override
+	public Button getRecalculateButton() {
+		return recalculateButton;
 	}
 
 	

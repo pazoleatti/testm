@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -22,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 
+@Service
 public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	private Log logger = LogFactory.getLog(getClass());
 	
