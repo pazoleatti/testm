@@ -10,7 +10,7 @@ import java.util.List;
  * @author srybakov
  *
  */
-public interface DataHandlerService {
+public interface FormDataSearchService {
 
 	List<FormData> findDataByUserIdAndFilter(Long userId, FormDataFilter formDataFilter);
 }

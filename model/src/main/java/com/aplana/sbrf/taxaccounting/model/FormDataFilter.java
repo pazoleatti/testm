@@ -13,8 +13,10 @@ public class FormDataFilter implements Serializable{
 
 	private Long department;
 
+	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
 	private Long formtype;
 
+	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
     private Long kind;
 
 	public Long getPeriod() {

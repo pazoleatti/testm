@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.service.DataHandlerService;
+import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class DataHandlerServiceImpl implements DataHandlerService {
+public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 	@Autowired
 	private FormDataSearchDao formDataSearchDao;

@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.dao.model;
 import java.io.Serializable;
 import java.util.List;
 
-/*
+/**
 	Данный класс используется сервисом DataHandlerServiceImpl.
 	DataHandlerServiceImpl получает FormDataFilter с пользовательской стороны и преобразует его в FormDataDaoFilter,
 	который дальше идет на DAO слой.
