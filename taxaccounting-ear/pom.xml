@@ -15,9 +15,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>gwtapp</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
 	</dependencies>
