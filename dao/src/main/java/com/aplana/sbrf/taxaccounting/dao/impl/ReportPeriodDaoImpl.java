@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.mapper.ReportPeriodMapper;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 	public ReportPeriod get(int periodId) {
 		ReportPeriod result = reportPeriodMapper.get(periodId);
 		if (result == null) {
-			throw new DaoException("Не удалось найти активного отчетного периода с id = " + periodId);
+			throw new DaoException("Не удалось найти отчетного периода с id = " + periodId);
 		}
 		return result;
 	}
@@ -39,7 +40,11 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 			return reportPeriod;
 		} catch (MyBatisSystemException e) {
 			/* Nested exception is TooManyResultsException */
-			throw new DaoException("Существует несколько открытых периодов по виду налога " + taxType);
+			if(e.getCause() instanceof TooManyResultsException){
+				throw new DaoException("Существует несколько открытых периодов по виду налога " + taxType);
+			} else {
+				throw new DaoException("Ошибка при попытке получения отчетного периода. Причина " + e.getCause());
+			}
 		}
 	}
 
