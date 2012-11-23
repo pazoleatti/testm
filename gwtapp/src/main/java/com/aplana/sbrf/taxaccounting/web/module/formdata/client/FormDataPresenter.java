@@ -68,7 +68,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 //		void setReadOnly(Boolean readOnly);
 		void activateEditMode();
 		void activateReadOnlyMode();
-		
+		void loadForm(FormData formData, AccessFlags flags);
 //		void loadFormData(FormData formData, AccessFlags flags);
 	}
 
@@ -96,8 +96,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
 			@Override
 			public void onSuccess(GetFormDataResult result) {
-//				AccessFlags flags = result.getAccessFlags();
-//				Window.alert(flags.getCanCreate() +" " + flags.getCanRead() + " " + flags.getCanEdit());
 				getView().loadFormData(result.getFormData(), result.getAccessFlags());
 			}
 		});
@@ -130,7 +128,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					public void onSuccess(SaveFormDataResult result) {
 						FormData savedFormData = result.getFormData();
 						view.reset();
-						view.loadFormData(savedFormData, null);
+						view.loadForm(savedFormData, null);
 						view.setLogMessages(result.getLogEntries());						
 					}
 

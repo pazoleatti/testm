@@ -6,6 +6,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
@@ -91,13 +92,15 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 
 	@Override
 	public void loadFormData(FormData formData, AccessFlags flags) {
-		if (this.flags == null) {
-			this.flags = flags;
-			activateReadOnlyModeWithoutUpdate(flags);
-		}
-		this.formData = formData;
+		activateReadOnlyModeWithoutUpdate(flags);
+		this.flags = flags;
+		loadForm(formData, flags);
+	}
+	
+	public void loadForm(FormData formData, AccessFlags flags) {
 		
 		factory.setReadOnly(readOnly);
+		this.formData = formData;
 		for (Column col: formData.getFormColumns()) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
@@ -113,7 +116,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	public void reloadFormData(FormData formData, AccessFlags flags) {
 //		Window.alert(String.valueOf(formData.getFormColumns().size()));
 		reset();
-		loadFormData(formData, flags);
+		loadForm(formData, flags);
 	}
 	
 
@@ -184,12 +187,23 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	
 	private void activateEditModeWithoutUpdate() {
 		this.readOnly = false;
-		originalVersionButton.setVisible(true);
+		
+		// сводная форма уровня Банка.
+		if ((formData.getDepartmentId() == 1) && (formData.getKind() == FormDataKind.SUMMARY)) {
+			originalVersionButton.setVisible(true);
+		} else {
+			originalVersionButton.setVisible(false);
+		}
+		
 		saveButton.setVisible(true);
 		recalculateButton.setVisible(true);
+		addRowButton.setVisible(true);
+		removeRowButton.setVisible(true);
+		printButton.setVisible(true);
+		
 		manualInputButton.setVisible(false);
-		removeRowButton.setVisible(false);
 		printButton.setVisible(false);
+		
 	}
 
 	@Override
@@ -201,13 +215,15 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	
 	private void activateReadOnlyModeWithoutUpdate(AccessFlags flags) {
 		this.readOnly = true;
+
 		manualInputButton.setVisible(flags.getCanEdit());
-		removeRowButton.setVisible(flags.getCanDelete());
-		saveButton.setVisible(flags.getCanEdit());
 		
-		originalVersionButton.setVisible(false);
+		saveButton.setVisible(false);
+		removeRowButton.setVisible(false);
 		recalculateButton.setVisible(false);
 		addRowButton.setVisible(false);
+		originalVersionButton.setVisible(false);
+		
 		printButton.setVisible(true);
 	}
 
