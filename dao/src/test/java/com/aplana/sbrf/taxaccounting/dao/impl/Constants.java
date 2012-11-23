@@ -6,4 +6,8 @@ public class Constants {
 	public static final int DEMO_FORM_TEMPLATE_ID = 1000;
 
 	public static final int REPORT_PERIOD_ID = 1;
+
+	public static final int BANK_CONTROL_USER_ID = 3;
+	
+	public static final String BANK_CONTROL_USER_LOGIN = "controlBank";
 }

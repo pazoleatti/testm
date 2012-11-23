@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import com.aplana.sbrf.taxaccounting.model.security.TARole;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
+// TODO: Убрать дублирование Results - аннотаций 
 public interface TAUserMapper {
 	@Select("select * from sec_user where login = #{login}")
 	@Results({
@@ -20,6 +21,11 @@ public interface TAUserMapper {
 	TAUser getUserByLogin(@Param("login") String login);
 	
 	@Select("select * from sec_user where id = #{userId}")
+	@Results({
+		@Result(property="id"),
+		@Result(property="name"),
+		@Result(property="departmentId", column="department_id")
+	})
 	TAUser getUserById(@Param("userId") int userId);
 	
 	@Select("select * from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = #{userId})")

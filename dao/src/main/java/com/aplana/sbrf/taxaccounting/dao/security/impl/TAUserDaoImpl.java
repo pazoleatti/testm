@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.security.mapper.TAUserMapper;
 import com.aplana.sbrf.taxaccounting.model.security.TARole;
@@ -24,6 +25,9 @@ public class TAUserDaoImpl implements TAUserDao {
 	@Override
 	public TAUser getUser(String login) {
 		TAUser user = userMapper.getUserByLogin(login);
+		if (user == null) {
+			throw new DaoException("Пользователь с логином \"" + login + "\" не найден в БД");
+		}
 		initUser(user);
 		return user;		
 	}
@@ -31,8 +35,11 @@ public class TAUserDaoImpl implements TAUserDao {
 	@Override
 	public TAUser getUser(int userId) {
 		TAUser user = userMapper.getUserById(userId);
-		initUser(user);
-		return null;
+		if (user == null) {
+			throw new DaoException("Пользователь с id = " + userId + " не найден в БД");
+		}
+		initUser(user);		
+		return user;
 	}
 	
 	private void initUser(TAUser user) {
