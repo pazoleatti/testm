@@ -55,6 +55,9 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	Button recalculateButton;
 	@UiField
 	Button printButton;
+	@UiField
+	Button deleteFormButton;
+	
 	
 	
 	@UiField(provided=true) CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
@@ -198,8 +201,6 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 			originalVersionButton.setVisible(false);
 		}
 		
-		
-		
 		saveButton.setVisible(true);
 		recalculateButton.setVisible(true);
 		addRowButton.setVisible(true);
@@ -222,6 +223,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 		this.readOnly = true;
 
 		manualInputButton.setVisible(flags.getCanEdit());
+		deleteFormButton.setVisible(flags.getCanDelete());
 		
 		saveButton.setVisible(false);
 		removeRowButton.setVisible(false);
@@ -240,6 +242,11 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	@Override
 	public Button getRecalculateButton() {
 		return recalculateButton;
+	}
+
+	@Override
+	public Button getDeleteFormButton() {
+		return deleteFormButton;
 	}
 
 	

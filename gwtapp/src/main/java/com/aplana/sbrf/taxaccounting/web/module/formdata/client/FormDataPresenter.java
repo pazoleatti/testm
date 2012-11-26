@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -65,6 +67,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		Button getPrintButton();
 		Button getOriginalVersionButton();
 		Button getRecalculateButton();
+		Button getDeleteFormButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData, AccessFlags flags);
 		void reloadFormData(FormData formData, AccessFlags flags);
@@ -228,6 +231,29 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			public void onClick(ClickEvent event) {
 //				Window.alert("В разработке");
 				view.activateReadOnlyMode();
+			}
+			
+		}));
+		registerHandler(view.getDeleteFormButton().addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				boolean isOK = Window.confirm("Удалить?");
+				if (isOK) {
+					DeleteFormAction action = new DeleteFormAction();
+					action.setFormDataId(view.getFormData().getId());
+					dispatcher.execute(action, new AbstractCallback<DeleteFormResult>(){
+						@Override
+						public void onSuccess(DeleteFormResult result) {
+							placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
+						}
+	
+						@Override
+						public void onFailure(Throwable throwable) {
+							logger.log(Level.SEVERE, "Failed to delete formData object", throwable);
+							super.onFailure(throwable);
+						}							
+					});
+				}
 			}
 			
 		}));

@@ -13,6 +13,7 @@
 			<g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
 			<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
 			<g:Button ui:field="printButton">Печать</g:Button>
+			<g:Button ui:field="deleteFormButton">Удалить</g:Button>
 		</g:FlowPanel>
 		<!--  Необходимо для добавления кнопок Workflow -->
 		<g:FlowPanel height="20px" ui:field="buttonPanel">
