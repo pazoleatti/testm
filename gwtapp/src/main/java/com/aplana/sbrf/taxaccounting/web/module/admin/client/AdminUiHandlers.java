@@ -6,13 +6,16 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * Короче это интерфейс обработчика событий формы. обработчиком событий формы в модели MVP является Presenter.
  * В нашем случае <code>AdminPresenter</code>.
  *
+ * @author Vitalii Samolovskikh
  * @see AdminPresenter
  * @see AdminView
- * @author Vitalii Samolovskikh
  */
 public interface AdminUiHandlers extends UiHandlers {
 	/**
 	 * Обработчик события выбора шаблона формы.
+	 *
+	 * @param id идентификатор шаблона выбранной формы. Это, конечно, нарушает чистоту модели MVP, но с другой стороны...
+	 *           Ну а что делать?
 	 */
-	public void select();
+	public void select(Integer id);
 }

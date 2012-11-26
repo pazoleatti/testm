@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -15,8 +15,6 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
-
-import java.util.List;
 
 /**
  * Presenter для страницы администрирования. Выполняет следующие действия:
@@ -51,31 +49,25 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		dispatcher.execute(new FormListAction(), new AbstractCallback<FormListResult>() {
 			@Override
 			public void onSuccess(FormListResult result) {
-			    ListBox lb = getView().getListBox();
-				lb.clear();
-				for(FormTemplate ft: result.getForms()){
-					lb.addItem(ft.getType().getName(), ft.getId().toString());
-				}
+			    CellTable<FormTemplate> table = getView().getFormTemplateTable();
+				table.setRowData(result.getForms());
 			}
 		});
 	}
 
 	/**
 	 * Когда пользователь выбирает какой-нибудь шаблон формы, он переходит на страницу редактирования шаблона формы.
-	 * Это происходит в этом методе. Получаем из списка шаблонов формы тот, который выбрал пользователь и
-	 * переходим на страницу редактирования нужного шаблона.
+	 * Это происходит в этом методе.
+	 *
+	 * @param id идентификатор шаблона формы
 	 */
 	@Override
-	public void select() {
-		ListBox lb = getView().getListBox();
-		int selectedIndex = lb.getSelectedIndex();
-		if (selectedIndex >= 0) {
+	public void select(Integer id) {
 			placeManager.revealPlace(
 					new PlaceRequest(AdminNameTokens.formTemplatePage).with(
-							FormTemplatePresenter.PARAM_FORM_TEMPLATE_ID, lb.getValue(selectedIndex)
+							FormTemplatePresenter.PARAM_FORM_TEMPLATE_ID, String.valueOf(id)
 					)
 			);
-		}
 	}
 
 	/**
@@ -98,6 +90,6 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его Presenter.
 	 */
 	public interface MyView extends View, HasUiHandlers<AdminUiHandlers> {
-		public ListBox getListBox();
+		CellTable<FormTemplate> getFormTemplateTable();
 	}
 }
