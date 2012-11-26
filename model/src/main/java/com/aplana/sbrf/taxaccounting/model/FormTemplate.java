@@ -26,7 +26,7 @@ public class FormTemplate implements Serializable {
 	/**
 	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется <code>java.util.List</code>.
 	 */
-	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
+	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
 
 	private int workflowId;
 
