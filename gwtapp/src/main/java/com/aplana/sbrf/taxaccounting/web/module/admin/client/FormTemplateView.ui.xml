@@ -66,10 +66,10 @@
 								<g:cell>
 									<g:HorizontalPanel>
 										<g:cell>
-											<g:Button text="Вверх"/>
+											<g:Button text="Вверх" ui:field="upEventScript"/>
 										</g:cell>
 										<g:cell>
-											<g:Button text="Вниз"/>
+											<g:Button text="Вниз" ui:field="downEventScript"/>
 										</g:cell>
 										<g:cell>
 											<g:Button text="Удалить" ui:field="removeScriptFromEvent"/>
