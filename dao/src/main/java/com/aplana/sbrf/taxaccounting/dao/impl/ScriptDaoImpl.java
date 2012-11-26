@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -28,9 +26,6 @@ import java.util.*;
  */
 @Repository
 public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
-	@SuppressWarnings("UnusedDeclaration")
-	private static final Log log = LogFactory.getLog(ScriptDaoImpl.class);
-
 	/**
 	 * Получает скрипты шаблона формы из БД и привязывает их к объектной модели.
 	 * @param formTemplate шаблон формы

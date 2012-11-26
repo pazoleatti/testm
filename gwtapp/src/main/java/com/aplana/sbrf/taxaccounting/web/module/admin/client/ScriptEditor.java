@@ -10,15 +10,15 @@ import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.*;
 
 /**
- * The editor for all scripts. You can use it in UiBinder. Just add schema
+ * Элемент редактирования срипта. Его можно использовать в XML, только нужно добавить схему:
  * <p/>
  * <pre>xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client"</pre>
  * <p/>
  * <pre>&lt;u:ScriptEditor ui:field="scriptEditor"/&gt;</pre>
  * <p/>
- * You also can use it as widget.
- * <p/>
- * You can set and get value, but when you call <code>getValue</code> it merges changes to bean.
+ * Это обычный виджет со значением. Можно устанавливать и получать значения. Только нужно понимать,
+ * что при получении значения, мы получим не новое значение, а то же самое, с внесенными изменениями.
+ * Т.е. если мы используем скрипт где-то еще, там он тоже изменится.
  *
  * @author Vitalii Samolovskikh
  */
@@ -47,10 +47,14 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	@UiField
 	TextArea body;
 
+	/**
+	 * Флаг того, что элемент проинициализирован.
+	 * Это нужно для того чтобы проверять, было ли установлено значение элемента или нет.
+	 */
 	private boolean initialized = false;
 
 	/**
-	 * Constructs new editor.
+	 * Создает новый элемент для редактирования скриптов.
 	 */
 	public ScriptEditor() {
 		super();
@@ -59,9 +63,9 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	}
 
 	/**
-	 * Sets script bean value.
+	 * Устанавливает скрипт для редактирования.
 	 *
-	 * @param script script for edit
+	 * @param script скрипт
 	 */
 	@Override
 	public void setValue(Script script) {
@@ -70,7 +74,7 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	}
 
 	/**
-	 * It'a alias for <code>flush</code> method.
+	 * It's an alias of the <code>flush</code> method.
 	 *
 	 * @return merged script
 	 */
@@ -80,7 +84,8 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	}
 
 	/**
-	 * Merges changes to bean and returns bean.
+	 * Мержит старые значения скрипта вместе со значениями из элементов формы.
+	 * И возвращает скрипт.
 	 *
 	 * @return merged script
 	 */

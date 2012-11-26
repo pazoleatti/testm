@@ -10,6 +10,8 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 /**
+ * Представление для страницы администрирования.
+ *
  * @author Vitalii Samolovskikh
  */
 public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements AdminPresenter.MyView {
@@ -18,6 +20,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 
 	private final Widget widget;
 
+	/**
+	 * Список шаблонов форм. А больше здесь нифига нет.
+	 */
 	@UiField
 	ListBox formListBox;
 
@@ -26,6 +31,12 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 		widget = binder.createAndBindUi(this);
 	}
 
+	/**
+	 * Вызываем обработчик на выбор пользователем формы.
+	 *
+	 * @param event событие выбора. Мы его, конечно, не используем. Но, насколько я понимаю,
+	 *              оно тут должно быть, чтобы было ясно какое именно событие мы будем обрабатывать.
+	 */
 	@UiHandler("formListBox")
 	public void onFormListBoxChange(ChangeEvent event) {
 		if (getUiHandlers() != null) {
@@ -38,6 +49,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 		return widget;
 	}
 
+	/**
+	 * @see AdminPresenter.MyView
+	 */
 	@Override
 	public ListBox getListBox() {
 		return formListBox;

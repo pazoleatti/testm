@@ -11,6 +11,8 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 /**
+ * Представление для формы редактирования шаблона формы.
+ *
  * @author Vitalii Samolovskikh
  */
 public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers> implements FormTemplatePresenter.MyView {

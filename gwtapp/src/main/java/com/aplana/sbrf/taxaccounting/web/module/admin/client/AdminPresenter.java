@@ -19,12 +19,16 @@ import com.gwtplatform.mvp.client.proxy.*;
 import java.util.List;
 
 /**
+ * Presenter для страницы администрирования. Выполняет следующие действия:
+ * <ol>
+ *     <li>Загружает список шаблонов форм</li>
+ *     <li>Переходит к редактированию выбранного шаблона формы</li>
+ * </ol>
  * @author Vitalii Samolovskikh
  */
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> implements AdminUiHandlers {
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
-
 
 	@Inject
 	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher) {
@@ -34,6 +38,13 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		getView().setUiHandlers(this);
 	}
 
+	/**
+	 * Здесь происходит подготовка формы администрирования.
+	 *
+	 * Загружается список шаблонов форм и складывается в список для выбора.
+	 *
+	 * @param request запрос
+	 */
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
@@ -49,6 +60,11 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		});
 	}
 
+	/**
+	 * Когда пользователь выбирает какой-нибудь шаблон формы, он переходит на страницу редактирования шаблона формы.
+	 * Это происходит в этом методе. Получаем из списка шаблонов формы тот, который выбрал пользователь и
+	 * переходим на страницу редактирования нужного шаблона.
+	 */
 	@Override
 	public void select() {
 		ListBox lb = getView().getListBox();
@@ -62,16 +78,25 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		}
 	}
 
+	/**
+	 * TODO: понять
+	 */
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
 
+	/**
+	 * TODO: Про этот интерфейс тоже надо почитать.
+	 */
 	@ProxyCodeSplit
 	@NameToken(AdminNameTokens.adminPage)
 	public interface MyProxy extends Proxy<AdminPresenter>, Place {
 	}
 
+	/**
+	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его Presenter.
+	 */
 	public interface MyView extends View, HasUiHandlers<AdminUiHandlers> {
 		public ListBox getListBox();
 	}
