@@ -18,8 +18,8 @@
 			<New class="org.apache.commons.dbcp.BasicDataSource">
 				<Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
 				<Set name="url">jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL</Set>
-				<Set name="username">TAX_VIT</Set>
-				<Set name="password">TAX_VIT</Set>
+				<Set name="username">TAX</Set>
+				<Set name="password">TAX</Set>
 			</New>
 		</Arg>
 	</New>
