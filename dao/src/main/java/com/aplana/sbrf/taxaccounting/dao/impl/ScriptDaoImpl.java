@@ -18,21 +18,33 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+/**
+ * DAO для работы со скриптами.
+ *
+ * Как таковой работы со скриптами не происходит. Все происходит прозрачно через сохранение и получение шаблона формы.
+ * Именно DAO шаблона формы использует этот класс
+ *
+ * @see FormTemplateDaoImpl
+ */
 @Repository
 public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	@SuppressWarnings("UnusedDeclaration")
 	private static final Log log = LogFactory.getLog(ScriptDaoImpl.class);
 
+	/**
+	 * Получает скрипты шаблона формы из БД и привязывает их к объектной модели.
+	 * @param formTemplate шаблон формы
+	 */
 	@Override
 	@Transactional(readOnly = true)
-	public void fillFormScripts(final FormTemplate form) {
+	public void fillFormScripts(final FormTemplate formTemplate) {
 		final Map<Integer, Script> scriptMap = new HashMap<Integer, Script>();
 
-		form.clearScripts();
+		formTemplate.clearScripts();
 
 		getJdbcTemplate().query(
 				"select * from form_script where form_id = ? order by ord",
-				new Object[]{form.getId()},
+				new Object[]{formTemplate.getId()},
 				new int[]{Types.NUMERIC},
 				new RowCallbackHandler() {
 					@Override
@@ -44,35 +56,39 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 						script.setBody(rs.getString("body"));
 						script.setRowScript(rs.getInt("per_row") != 0);
 						scriptMap.put(script.getId(), script);
-						form.addScript(script);
+						formTemplate.addScript(script);
 					}
 				}
 		);
 
 		getJdbcTemplate().query(
 				"select es.event_code, es.script_id from event_script es join form_script fs on es.script_id=fs.id where fs.form_id = ? order by es.event_code, es.ord",
-				new Object[]{form.getId()}, new int[]{Types.NUMERIC},
+				new Object[]{formTemplate.getId()}, new int[]{Types.NUMERIC},
 				new RowCallbackHandler() {
 					@Override
 					public void processRow(ResultSet rs) throws SQLException {
-						form.addEventScript(FormDataEvent.getByCode(rs.getInt("event_code")), scriptMap.get(rs.getInt("script_id")));
+						formTemplate.addEventScript(FormDataEvent.getByCode(rs.getInt("event_code")), scriptMap.get(rs.getInt("script_id")));
 					}
 				}
 		);
 	}
 
+	/**
+	 * Берет скрипты из объектной модели и сохраняет/обновляет их в БД. Удаляет ненужные.
+	 * @param formTemplate шаблон формы
+	 */
 	@Override
 	@Transactional(readOnly = false)
-	public void saveFormScripts(FormTemplate form) {
-		Set<Integer> removedScriptIds = selectFormScriptIds(form.getId());
+	public void saveFormScripts(FormTemplate formTemplate) {
+		Set<Integer> removedScriptIds = selectFormScriptIds(formTemplate.getId());
 
 		// Clear joins between scripts and events.
-		deleteEventJoins(form);
+		deleteEventJoins(formTemplate);
 
 		List<Script> oldScripts = new ArrayList<Script>();
 		List<Script> newScripts = new ArrayList<Script>();
 
-		for (Script script : form.getScripts()) {
+		for (Script script : formTemplate.getScripts()) {
 			if (script.getId() <= 0) {
 				newScripts.add(script);
 			} else {
@@ -82,25 +98,25 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		}
 
 		// Insert new scripts
-		insertScripts(form, newScripts);
+		insertScripts(formTemplate, newScripts);
 
 		// Update old scripts
-		updateScripts(form, oldScripts);
+		updateScripts(formTemplate, oldScripts);
 
 		// Delete deleted scripts
 		deleteScripts(removedScriptIds);
 
 		// Add joins between scripts and events
-		insertEventJoins(form);
+		insertEventJoins(formTemplate);
 	}
 
 	/**
-	 * Create joins between events and scripts of form.
+	 * Сохраняет назначения скриптов на соцыбтия формы.
 	 *
-	 * @param form form template
+	 * @param formTemplate шаблон формы
 	 */
-	private void insertEventJoins(FormTemplate form) {
-		Map<FormDataEvent, List<Script>> eventScripts = form.getEventScripts();
+	private void insertEventJoins(FormTemplate formTemplate) {
+		Map<FormDataEvent, List<Script>> eventScripts = formTemplate.getEventScripts();
 		if (eventScripts != null) {
 			final List<Object[]> args = new ArrayList<Object[]>();
 			for (Map.Entry<FormDataEvent, List<Script>> entry : eventScripts.entrySet()) {
@@ -133,23 +149,23 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	}
 
 	/**
-	 * Delete all joins between events and scripts by script's ids.
-	 * Clear EVENT_SCRIPT table.
+	 * Удаляет все связи событий формы и скриптов для определенной формы.
+	 * Очищает таблицу EVENT_SCRIPT.
 	 *
-	 * @param form форма, в которой нужно удалить связи скриптов с событиями
+	 * @param formTemplate форма, в которой нужно удалить связи скриптов с событиями
 	 */
-	private void deleteEventJoins(FormTemplate form) {
+	private void deleteEventJoins(FormTemplate formTemplate) {
 		getJdbcTemplate().update(
 				"delete from event_script where script_id in (select id from form_script where form_id=?)",
-				form.getId()
+				formTemplate.getId()
 		);
 	}
 
 	/**
-	 * Select all script's ids from DB by form id.
+	 * Получает все скрипты по идентификатору шаблона формы.
 	 *
-	 * @param formId the form identifier
-	 * @return the set of the identifiers of all scripts of the form.
+	 * @param formId идентификатор шаблона формы
+	 * @return множество скриптов формы
 	 */
 	private Set<Integer> selectFormScriptIds(int formId) {
 		JdbcTemplate jt = getJdbcTemplate();
@@ -201,10 +217,10 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	}
 
 	/**
-	 * Updates existed scripts.
+	 * обновляет существующие скрипты
 	 *
-	 * @param form    form of scripts
-	 * @param scripts list of scripts for updating.
+	 * @param form    шаблон формы
+	 * @param scripts списко скриптов для обновления
 	 */
 	private void updateScripts(final FormTemplate form, final List<Script> scripts) {
 		if (!scripts.isEmpty()) {
@@ -232,9 +248,9 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	}
 
 	/**
-	 * Deletes all scripts by ids in set.
+	 * удаляет скрипты по идентификаторам
 	 *
-	 * @param ids identifiers of scripts which must be deleted.
+	 * @param ids множество идентификаторов удаляемых скриптов
 	 */
 	private void deleteScripts(final Set<Integer> ids) {
 		if (!ids.isEmpty()) {
