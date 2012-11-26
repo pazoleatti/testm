@@ -9,11 +9,15 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.logging.Logger;
+
 /**
  * @author Vitalii Samolovskikh
  */
 @Service
 public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, UpdateFormResult> {
+	@SuppressWarnings("UnusedDeclaration")
+	private static final Logger log = Logger.getLogger(UpdateFormHandler.class.getName());
     private FormTemplateDao formTemplateDao;
 
     public UpdateFormHandler() {
@@ -22,7 +26,7 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
     @Override
     public UpdateFormResult execute(UpdateFormAction action, ExecutionContext context) throws ActionException {
-        formTemplateDao.save(action.getForm());
+		formTemplateDao.save(action.getForm());
         return new UpdateFormResult();
     }
 

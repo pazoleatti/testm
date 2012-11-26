@@ -9,8 +9,8 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -22,13 +22,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -38,9 +31,9 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormDataDao formDataDao;
-	
+
 	private Map<String, Object> scriptExposedBeans;
-	
+
 	/* (non-Javadoc)
 	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
 	 */
@@ -54,25 +47,17 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
 		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
 		result.setKind(kind);
-		
-		for (DataRow predefinedRow: form.getRows()) {
+
+		for (DataRow predefinedRow : form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
-			for (Map.Entry<String, Object> entry: predefinedRow.entrySet()) {
+			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
 				dataRow.put(entry.getKey(), entry.getValue());
 			}
 		}
-		
-		Script createScript = form.getCreateScript();
-		if (createScript != null && createScript.getBody() != null) {
-			ScriptEngine engine = getScriptEngine();
-			engine.put("logger", logger);
-			engine.put("formData", result);
-			try {
-				engine.eval(createScript.getBody());
-			} catch (ScriptException e) {
-				logger.error(e);
-			}
-		}
+
+		// Execute scripts for the form event CREATE
+		List<Script> scripts = form.getScriptsByEvent(FormDataEvent.CREATE);
+		executeScripts(scripts, result, logger);
 		return result;
 	}
 
@@ -82,12 +67,26 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	@Override
 	public void processFormData(Logger logger, FormData formData) {
 		FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
+		List<Script> calcScripts = form.getScriptsByEvent(FormDataEvent.CALCULATE);
+
+		executeScripts(calcScripts, formData, logger);
+		checkMandatoryColumns(formData, form, logger);
+		logger.setMessageDecorator(null);
+	}
+
+	/**
+	 * Execute scripts
+	 *
+	 * @param scripts  list of scripts. Scripts executes in order of list.
+	 * @param formData data of the form
+	 * @param logger   script logger
+	 */
+	private void executeScripts(List<Script> scripts, FormData formData, Logger logger) {
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
 		engine.put("formData", formData);
-		List<Script> calcScripts = form.getCalcScripts();
 		ScriptMessageDecorator d = new ScriptMessageDecorator();
-		for (Script calcScript: calcScripts) {
+		for (Script calcScript : scripts) {
 			if (calcScript.isRowScript()) {
 				performRowScript(calcScript, formData, engine, logger);
 			} else {
@@ -95,7 +94,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 					logger.setMessageDecorator(d);
 					if (calcScript.getCondition() != null) {
 						d.setScriptName(calcScript.getName() + " - Условие исполнения");
-						boolean check = (Boolean)engine.eval(calcScript.getCondition());
+						boolean check = (Boolean) engine.eval(calcScript.getCondition());
 						if (!check) {
 							continue;
 						}
@@ -109,15 +108,13 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 				}
 			}
 		}
-		checkMandatoryColumns(formData, form, logger);
-		logger.setMessageDecorator(null);
 	}
 
 	private void performRowScript(Script rowScript, FormData formData, ScriptEngine engine, Logger logger) {
 		RowScriptMessageDecorator d = new RowScriptMessageDecorator();
 		logger.setMessageDecorator(d);
 		int rowIndex = 0;
-		for (DataRow row: formData.getDataRows()) {
+		for (DataRow row : formData.getDataRows()) {
 			++rowIndex;
 			d.setRowIndex(rowIndex);
 			engine.put("row", row);
@@ -126,7 +123,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			try {
 				if (rowScript.getCondition() != null) {
 					d.setScriptName(rowScript.getName() + " - Условие исполнения");
-					boolean check = (Boolean)engine.eval(rowScript.getCondition());
+					boolean check = (Boolean) engine.eval(rowScript.getCondition());
 					if (!check) {
 						continue;
 					}
@@ -147,18 +144,18 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		}
 		logger.setMessageDecorator(null);
 	}
-	
+
 	private void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
 		List<Column> columns = formTemplate.getColumns();
 		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
 		messageDecorator.setScriptName("Проверка обязательных полей");
 		logger.setMessageDecorator(messageDecorator);
 		int rowIndex = 0;
-		for (DataRow row: formData.getDataRows()) {
+		for (DataRow row : formData.getDataRows()) {
 			++rowIndex;
 			messageDecorator.setRowIndex(rowIndex);
 			List<String> columnNames = new ArrayList<String>();
-			for (Column col: columns) {
+			for (Column col : columns) {
 				if (col.isMandatory() && row.get(col.getAlias()) == null) {
 					columnNames.add(col.getName());
 				}
@@ -169,7 +166,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		}
 		logger.setMessageDecorator(null);
 	}
-	
+
 	private ScriptEngine getScriptEngine() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");

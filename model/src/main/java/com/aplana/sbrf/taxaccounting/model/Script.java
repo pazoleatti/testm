@@ -6,17 +6,12 @@ import java.io.Serializable;
 /**
  * Скрипт 
  */
-public class Script implements Ordered, Serializable {
+public class Script implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int id;
 	private String body;
-	
-	/**
-	 * Порядок исполнения
-	 */
-	private int order;	
-	
+
 	/**
 	 * Имя скрипта
 	 */
@@ -63,14 +58,7 @@ public class Script implements Ordered, Serializable {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
-	public int getOrder() {
-		return order;
-	}
-	public void setOrder(int order) {
-		this.order = order;
-	}
-	
+
 	public String getName() {
 		return name;
 	}

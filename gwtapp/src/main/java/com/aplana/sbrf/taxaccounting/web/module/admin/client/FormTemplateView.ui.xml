@@ -1,0 +1,95 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client"
+		>
+	<g:VerticalPanel height="100%" width="100%">
+		<g:cell height="40px">
+			<g:HorizontalPanel>
+				<g:cell>
+					<g:Button text="Сохранить" ui:field="saveButton"/>
+				</g:cell>
+				<g:cell>
+					<g:Button text="Отмена" ui:field="cancelButton"/>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:cell>
+		<g:cell height="100%">
+			<g:TabLayoutPanel barUnit="PX" barHeight="30" width="100%" height="100%">
+				<g:tab>
+					<g:header size="50px">Скрипты</g:header>
+					<g:HorizontalPanel width="100%" height="100%">
+						<g:cell width="25%" height="100%">
+							<g:VerticalPanel width="100%" height="100%">
+								<g:cell height="100%">
+									<g:ListBox height="100%" width="100%" visibleItemCount="10"
+											   ui:field="scriptListBox"/>
+								</g:cell>
+								<g:cell>
+									<g:HorizontalPanel>
+										<g:cell>
+											<g:Button text="Создать" ui:field="createScriptButton"/>
+										</g:cell>
+										<g:cell>
+											<g:Button text="Удалить" ui:field="deleteScriptButton"/>
+										</g:cell>
+									</g:HorizontalPanel>
+								</g:cell>
+							</g:VerticalPanel>
+						</g:cell>
+						<g:cell>
+							<u:ScriptEditor ui:field="scriptEditor"/>
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:tab>
+				<g:tab>
+					<g:header>События</g:header>
+					<g:HorizontalPanel width="100%" height="100%">
+						<g:cell width="20%">
+							<g:VerticalPanel width="100%" height="100%">
+								<g:cell>
+									<g:Label text="События"/>
+								</g:cell>
+								<g:cell height="100%">
+									<g:ListBox width="100%" height="100%" visibleItemCount="10" ui:field="eventListBox"/>
+								</g:cell>
+							</g:VerticalPanel>
+						</g:cell>
+						<g:cell width="80%">
+							<g:VerticalPanel height="100%" width="100%">
+								<g:cell>
+									<g:Label text="Скрипты события"/>
+								</g:cell>
+								<g:cell height="50%">
+									<g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+								</g:cell>
+								<g:cell>
+									<g:HorizontalPanel>
+										<g:cell>
+											<g:Button text="Вверх"/>
+										</g:cell>
+										<g:cell>
+											<g:Button text="Вниз"/>
+										</g:cell>
+										<g:cell>
+											<g:Button text="Удалить"/>
+										</g:cell>
+									</g:HorizontalPanel>
+								</g:cell>
+								<g:cell>
+									<g:Label text="Остальные скрипты"/>
+								</g:cell>
+								<g:cell height="50%">
+									<g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+								</g:cell>
+								<g:cell>
+									<g:Button text="Добавить"/>
+								</g:cell>
+							</g:VerticalPanel>
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:tab>
+			</g:TabLayoutPanel>
+		</g:cell>
+	</g:VerticalPanel>
+</ui:UiBinder>

@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Описание налоговой формы (шаблон налоговой формы)
@@ -12,12 +11,15 @@ public class FormTemplate implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
-	private List<Column> columns = new ArrayList<Column>();
 	private FormType type;
-	private String version;	
-	private Script createScript;
-	private List<Script> calcScripts = new ArrayList<Script>();
+	private String version;
+
 	private List<DataRow> rows = new ArrayList<DataRow>();
+	private List<Column> columns = new ArrayList<Column>();
+
+	private List<Script> scripts = new ArrayList<Script>();
+	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
+
 	private int workflowId;
 	
 	public Integer getId() {
@@ -84,14 +86,12 @@ public class FormTemplate implements Serializable {
 	public void setVersion(String version) {
 		this.version = version;
 	}
-	public Script getCreateScript() {
-		return createScript;
-	}
-	public void setCreateScript(Script createScript) {
-		this.createScript = createScript;
-	}
-	public List<Script> getCalcScripts() {
-		return calcScripts;
+
+	/**
+	 * Don't use for data manipulation.
+	 */
+	public List<Script> getScripts() {
+		return scripts;
 	}
 	public List<DataRow> getRows() {
 		return rows;
@@ -101,5 +101,85 @@ public class FormTemplate implements Serializable {
 	}
 	public void setWorkflowId(int workflowId) {
 		this.workflowId = workflowId;
-	}	
+	}
+
+	public Map<FormDataEvent, List<Script>> getEventScripts() {
+		return eventScripts;
+	}
+
+	/**
+	 * Remove all scripts from form.
+	 */
+	public void clearScripts() {
+		scripts.clear();
+		if(eventScripts!=null){
+			eventScripts.clear();
+		}
+	}
+
+	/**
+	 * Add script to event in order.
+	 *
+	 * @param event form event
+	 * @param script form script
+	 */
+	public void addEventScript(FormDataEvent event, Script script) {
+		if(!scripts.contains(script)){
+			throw new IllegalArgumentException("Form doesn't contain script.");
+		}
+
+		List<Script> scriptList = eventScripts.get(event);
+		if(scriptList==null){
+			scriptList = new ArrayList<Script>();
+			eventScripts.put(event, scriptList);
+		}
+
+		if(!scriptList.contains(script)){
+			scriptList.add(script);
+		}
+	}
+
+	/**
+	 * Adds script to from, but doesn't create join with event.
+	 *
+	 * @param script script
+	 */
+	public void addScript(Script script){
+		scripts.add(script);
+	}
+
+	/**
+	 * Remove script from form.
+	 *
+	 * @param script script
+	 */
+	public void removeScript(Script script){
+		// TODO: бросать исключение если скрипта нет
+		scripts.remove(script);
+		for(Map.Entry<FormDataEvent, List<Script>> entry: eventScripts.entrySet()){
+			entry.getValue().remove(script);
+		}
+	}
+
+	/**
+	 *
+	 * @param script script
+	 * @return index of script in main form script list.
+	 * TODO: может перетащить в DAO?
+	 */
+	public int indexOfScript(Script script){
+		return scripts.indexOf(script);
+	}
+
+	/**
+	 * @param event form event
+	 * @return list of scripts joined with the event
+	 */
+	public List<Script> getScriptsByEvent(FormDataEvent event){
+		if(eventScripts.containsKey(event)){
+			return eventScripts.get(event);
+		}else{
+			return new ArrayList<Script>(0);
+		}
+	}
 }
