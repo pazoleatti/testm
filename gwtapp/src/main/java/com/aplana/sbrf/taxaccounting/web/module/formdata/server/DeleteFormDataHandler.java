@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -16,23 +16,23 @@ import com.gwtplatform.dispatch.shared.ActionException;
  *
  */
 @Service
-public class DeleteFormHandler extends AbstractActionHandler<DeleteFormAction, DeleteFormResult> {
+public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataAction, DeleteFormDataResult> {
 	
 	@Autowired
 	private FormDataDao formDataDao;
 	
-	public DeleteFormHandler() {
-		super(DeleteFormAction.class);
+	public DeleteFormDataHandler() {
+		super(DeleteFormDataAction.class);
 	}
 	
 	@Override
-	public DeleteFormResult execute(DeleteFormAction action, ExecutionContext context) throws ActionException {
+	public DeleteFormDataResult execute(DeleteFormDataAction action, ExecutionContext context) throws ActionException {
 		formDataDao.delete(action.getFormDataId());
-		return new DeleteFormResult();
+		return new DeleteFormDataResult();
 	}
 
 	@Override
-	public void undo(DeleteFormAction action, DeleteFormResult result, ExecutionContext context) throws ActionException {
+	public void undo(DeleteFormDataAction action, DeleteFormDataResult result, ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
 }

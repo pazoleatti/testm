@@ -12,8 +12,8 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -239,11 +239,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			public void onClick(ClickEvent event) {
 				boolean isOK = Window.confirm("Удалить?");
 				if (isOK) {
-					DeleteFormAction action = new DeleteFormAction();
+					DeleteFormDataAction action = new DeleteFormDataAction();
 					action.setFormDataId(view.getFormData().getId());
-					dispatcher.execute(action, new AbstractCallback<DeleteFormResult>(){
+					dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
 						@Override
-						public void onSuccess(DeleteFormResult result) {
+						public void onSuccess(DeleteFormDataResult result) {
 							placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
 						}
 	

@@ -7,6 +7,6 @@ import com.gwtplatform.dispatch.shared.Result;
  * Результат запроса для удаления формы.
  *
  */
-public class DeleteFormResult implements Result {
+public class DeleteFormDataResult implements Result {
 	
 }

@@ -7,7 +7,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  * Запрос для удаления формы
  *
  */
-public class DeleteFormAction extends UnsecuredActionImpl<DeleteFormResult> {
+public class DeleteFormDataAction extends UnsecuredActionImpl<DeleteFormDataResult> {
 	private long formDataId;
 	
 	public long getFormDataId() {
