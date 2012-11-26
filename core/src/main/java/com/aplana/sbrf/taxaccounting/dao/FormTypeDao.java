@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.List;
 
@@ -19,4 +20,12 @@ public interface FormTypeDao {
 	
 	
     List<FormType> listFormTypes();
+
+
+	/**
+	 * Получить список видов налоговых форм с определенным типом налога
+	 * @param taxType тип налога
+	 * @return Список видов налоговых форм с определенным типом налога
+	 */
+	List<FormType> listAllByTaxType(TaxType taxType);
 }
