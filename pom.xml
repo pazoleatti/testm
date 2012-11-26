@@ -49,8 +49,13 @@
 			<version>3.2</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.6.2</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
-
 
 	<build>
 		<pluginManagement>

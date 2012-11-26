@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.module.SimpleModule;
-import org.codehaus.jackson.type.TypeReference;
+import org.codehaus.jackson.map.ser.CustomSerializerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,12 +19,9 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
-import com.aplana.sbrf.taxaccounting.util.json.DataRowDeserializer;
 import com.aplana.sbrf.taxaccounting.util.json.DataRowSerializer;
 
 @Repository
@@ -54,19 +48,25 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				form.getColumns().addAll(columnDao.getFormColumns(form.getId()));
 				scriptDao.fillFormScripts(form);				
 				String stRowsData = rs.getString("data_rows");
-				if (stRowsData != null) {
+				if (stRowsData != null) { 
+					// TODO: Механизм сериализации/десериализации предопределённых строк требует доработки,
+					// так как оригинальная реализация не работала на WAS из-за другой версии Jackson.
+					// Пока просто отключаем эту функцию
+					/*
 					final ObjectMapper objectMapper = new ObjectMapper();
-					SimpleModule module = new SimpleModule("taxaccounting-dao-read", new Version(1, 0, 0, null));
-					module.addDeserializer(DataRow.class, new DataRowDeserializer(form, FormatUtils.getShortDateFormat(), true));
-					objectMapper.registerModule(module);
+					CustomDeserializerFactory sf = new CustomDeserializerFactory();
+					objectMapper.setDeserializerProvider(new StdDeserializerProvider(sf));
+					sf.addSpecificMapping(DataRow.class, new DataRowDeserializer(form, FormatUtils.getShortDateFormat(), true));
 					List<DataRow> rows;
 					try {
-						rows = objectMapper.readValue(stRowsData, new TypeReference<List<DataRow>>() {});
+						rows = objectMapper.readValue(stRowsData, TypeFactory.collectionType(List.class, DataRow.class));
 					} catch (IOException e) {
 						logger.error("Failed to read json", e);
 						throw new DaoException("Не удалось прочитать данные в формате json: " + e.getMessage());
 					}
-					form.getRows().addAll(rows);
+					form.getRows().addAll(rows); */
+					
+					logger.warn("Disabled due incompartibility with WAS");
 				}
 			}
 			return form;
@@ -90,10 +90,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	@CacheEvict(value="Form", key="#form.id")
 	public int save(final FormTemplate form) {
 		final ObjectMapper objectMapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule("taxaccounting-dao-write", new Version(1, 0, 0, null));
-		module.addSerializer(DataRow.class, new DataRowSerializer(FormatUtils.getShortDateFormat()));
-		objectMapper.registerModule(module);
-		
+		CustomSerializerFactory sf = new CustomSerializerFactory();
+		sf.addSpecificMapping(DataRow.class, new DataRowSerializer(FormatUtils.getShortDateFormat()));
+		objectMapper.setSerializerFactory(sf);
+
+		final int formTemplateId = form.getId().intValue();
+		// TODO: Механизм сериализации/десериализации предопределённых строк требует доработки,
+		// так как оригинальная реализация не работала на WAS из-за другой версии Jackson.
+		// Пока просто отключаем эту функцию
+		/*
 		String rowsJson;
 		OrderUtils.reorder(form.getRows());
 		try {
@@ -103,17 +108,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			throw new DaoException("Не удалось сериализовать значение строки данных в JSON: " + e.getMessage());
 		}
 		
-		final int formId = form.getId();
+		
 		// TODO: создание новых версий формы потребует инсертов в form
 		getJdbcTemplate().update(
 			"update form set data_rows = ? where id = ?",
 			new Object[] { rowsJson, formId },
 			new int[] { Types.VARCHAR, Types.NUMERIC }
 		);
+		
+		*/
 
 		columnDao.saveFormColumns(form);
 		scriptDao.saveFormScripts(form);
-		return form.getId().intValue();
+		return formTemplateId;
 	}
 
 	public List<FormTemplate> listAll() {

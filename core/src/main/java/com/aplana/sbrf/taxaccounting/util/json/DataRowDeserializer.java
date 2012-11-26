@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonParser.Feature;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.DeserializationContext;
@@ -46,7 +45,6 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 	@Override
 	public DataRow deserialize(JsonParser jp, DeserializationContext ctx) throws IOException, JsonProcessingException {
 		DataRow result = new DataRow(form.getColumns());
-		jp.enable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
 		JsonToken token = jp.nextToken();
 		while (token != JsonToken.END_OBJECT && token != null) {
 			validateToken(token, JsonToken.FIELD_NAME, jp);
@@ -115,7 +113,6 @@ public class DataRowDeserializer extends JsonDeserializer<DataRow>{
 			}
 			token = jp.nextToken();
 		}
-		jp.disable(Feature.ALLOW_NON_NUMERIC_NUMBERS);
 		if (result.getAlias() == null) {
 			throw new IllegalArgumentException("Alias is not specified in json string representing data row");
 		}
