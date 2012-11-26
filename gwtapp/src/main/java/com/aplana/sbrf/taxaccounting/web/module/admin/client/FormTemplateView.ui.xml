@@ -72,7 +72,7 @@
 											<g:Button text="Вниз"/>
 										</g:cell>
 										<g:cell>
-											<g:Button text="Удалить"/>
+											<g:Button text="Удалить" ui:field="removeScriptFromEvent"/>
 										</g:cell>
 									</g:HorizontalPanel>
 								</g:cell>
@@ -83,7 +83,7 @@
 									<g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="freeScriptListBox"/>
 								</g:cell>
 								<g:cell>
-									<g:Button text="Добавить"/>
+									<g:Button text="Добавить" ui:field="addScriptToEvent"/>
 								</g:cell>
 							</g:VerticalPanel>
 						</g:cell>

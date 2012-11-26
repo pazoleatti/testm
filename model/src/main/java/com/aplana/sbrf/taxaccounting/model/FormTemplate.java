@@ -5,11 +5,12 @@ import java.util.*;
 
 /**
  * Описание налоговой формы (шаблон налоговой формы)
+ *
  * @author dsultanbekov
  */
 public class FormTemplate implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private Integer id;
 	private FormType type;
 	private String version;
@@ -21,49 +22,56 @@ public class FormTemplate implements Serializable {
 	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
 
 	private int workflowId;
-	
+
 	public Integer getId() {
 		return id;
 	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	public List<Column> getColumns() {
 		return columns;
 	}
+
 	public void setType(FormType type) {
 		this.type = type;
 	}
+
 	public FormType getType() {
 		return type;
 	}
+
 	/**
 	 * Получить определение столбца по числовому идентификатору
+	 *
 	 * @param columnId идентификатор столбца
 	 * @return определение столбца
 	 * @throws IllegalArgumentException если в определении формы отсутствует столбец с указанным <code>id</code>
 	 */
 	public Column getColumn(int columnId) {
-		for (Column col: columns) {
+		for (Column col : columns) {
 			if (col.getId() == columnId) {
 				return col;
 			}
 		}
 		throw new IllegalArgumentException("Wrong columnId: " + columnId);
 	}
-	
+
 	/**
 	 * Получить определение столбца налоговой формы по алиасу
+	 *
 	 * @param columnAlias
 	 * @return определение столбца
-	 * @throws NullPointerException если <code>alias == null</code>
+	 * @throws NullPointerException     если <code>alias == null</code>
 	 * @throws IllegalArgumentException если указан алиас, отсутствующий в определении формы
 	 */
 	public Column getColumn(String columnAlias) {
 		if (columnAlias == null) {
 			throw new NullPointerException("Column alias cannot be null");
 		}
-		for (Column col: columns) {
+		for (Column col : columns) {
 			if (columnAlias.equals(col.getAlias())) {
 				return col;
 			}
@@ -73,14 +81,16 @@ public class FormTemplate implements Serializable {
 
 	/**
 	 * Получить версию формы: для каждого типа формы может существовать несколько версий
+	 *
 	 * @return версия формы
 	 */
 	public String getVersion() {
 		return version;
 	}
-	
+
 	/**
 	 * Установить версию для формы
+	 *
 	 * @param version номер версии
 	 */
 	public void setVersion(String version) {
@@ -93,12 +103,15 @@ public class FormTemplate implements Serializable {
 	public List<Script> getScripts() {
 		return scripts;
 	}
+
 	public List<DataRow> getRows() {
 		return rows;
 	}
+
 	public int getWorkflowId() {
 		return workflowId;
 	}
+
 	public void setWorkflowId(int workflowId) {
 		this.workflowId = workflowId;
 	}
@@ -112,7 +125,7 @@ public class FormTemplate implements Serializable {
 	 */
 	public void clearScripts() {
 		scripts.clear();
-		if(eventScripts!=null){
+		if (eventScripts != null) {
 			eventScripts.clear();
 		}
 	}
@@ -120,23 +133,36 @@ public class FormTemplate implements Serializable {
 	/**
 	 * Add script to event in order.
 	 *
-	 * @param event form event
+	 * @param event  form event
 	 * @param script form script
 	 */
 	public void addEventScript(FormDataEvent event, Script script) {
-		if(!scripts.contains(script)){
+		if (!scripts.contains(script)) {
 			throw new IllegalArgumentException("Form doesn't contain script.");
 		}
 
 		List<Script> scriptList = eventScripts.get(event);
-		if(scriptList==null){
+		if (scriptList == null) {
 			scriptList = new ArrayList<Script>();
 			eventScripts.put(event, scriptList);
 		}
 
-		if(!scriptList.contains(script)){
+		if (!scriptList.contains(script)) {
 			scriptList.add(script);
 		}
+	}
+
+	public void removeEventScript(FormDataEvent event, Script script) {
+		if (!scripts.contains(script)) {
+			throw new IllegalArgumentException("Form doesn't contain script.");
+		}
+
+		List<Script> scriptList = eventScripts.get(event);
+		if (scriptList == null || !scriptList.contains(script)) {
+			throw new IllegalArgumentException("Form event doesn't contain script.");
+		}
+
+		scriptList.remove(script);
 	}
 
 	/**
@@ -144,7 +170,7 @@ public class FormTemplate implements Serializable {
 	 *
 	 * @param script script
 	 */
-	public void addScript(Script script){
+	public void addScript(Script script) {
 		scripts.add(script);
 	}
 
@@ -153,21 +179,20 @@ public class FormTemplate implements Serializable {
 	 *
 	 * @param script script
 	 */
-	public void removeScript(Script script){
+	public void removeScript(Script script) {
 		// TODO: бросать исключение если скрипта нет
 		scripts.remove(script);
-		for(Map.Entry<FormDataEvent, List<Script>> entry: eventScripts.entrySet()){
+		for (Map.Entry<FormDataEvent, List<Script>> entry : eventScripts.entrySet()) {
 			entry.getValue().remove(script);
 		}
 	}
 
 	/**
-	 *
 	 * @param script script
 	 * @return index of script in main form script list.
-	 * TODO: может перетащить в DAO?
+	 *         TODO: может перетащить в DAO?
 	 */
-	public int indexOfScript(Script script){
+	public int indexOfScript(Script script) {
 		return scripts.indexOf(script);
 	}
 
@@ -175,10 +200,10 @@ public class FormTemplate implements Serializable {
 	 * @param event form event
 	 * @return list of scripts joined with the event
 	 */
-	public List<Script> getScriptsByEvent(FormDataEvent event){
-		if(eventScripts.containsKey(event)){
+	public List<Script> getScriptsByEvent(FormDataEvent event) {
+		if (eventScripts.containsKey(event)) {
 			return eventScripts.get(event);
-		}else{
+		} else {
 			return new ArrayList<Script>(0);
 		}
 	}

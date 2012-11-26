@@ -52,6 +52,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		super.prepareFromRequest(request);
 
 		ListBox elb = getView().getEventListBox();
+		elb.clear();
 		for(FormDataEvent event:FormDataEvent.values()){
 			elb.addItem(event.getTitle(), String.valueOf(event.getCode()));
 		}
@@ -62,19 +63,15 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 
 	@Override
 	public void selectEvent() {
-		ListBox elb = getView().getEventListBox();
-
 		ListBox slb = getView().getEventScriptListBox();
 		slb.clear();
 
 		ListBox flb = getView().getFreeScriptListBox();
 		flb.clear();
 
-		int selectedIndex = elb.getSelectedIndex();
-		if(selectedIndex>=0){
-			int code = Integer.valueOf(elb.getValue(selectedIndex));
-			FormDataEvent event = FormDataEvent.getByCode(code);
+		FormDataEvent event = getSelectedEvent();
 
+		if(event!=null){
 			List<Script> scripts = formTemplate.getScriptsByEvent(event);
 			if(scripts!=null){
 				for(Script script:scripts){
@@ -99,6 +96,56 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 					flb.addItem(script.getName(), String.valueOf(script.getId()));
 				}
 			}
+		}
+	}
+
+	private FormDataEvent getSelectedEvent() {
+		FormDataEvent event = null;
+		ListBox elb = getView().getEventListBox();
+		int selectedIndex = elb.getSelectedIndex();
+		if(selectedIndex>=0){
+			int code = Integer.valueOf(elb.getValue(selectedIndex));
+			event = FormDataEvent.getByCode(code);
+		}
+		return event;
+	}
+
+	@Override
+	public void addScriptToEvent() {
+		ListBox flb = getView().getFreeScriptListBox();
+
+		Script script = getSelectedScriptById(flb);
+
+		if(script!=null){
+			formTemplate.addEventScript(getSelectedEvent(), script);
+			selectEvent();
+		}
+	}
+
+	private Script getSelectedScriptById(ListBox lb) {
+		Script script = null;
+		int ind = lb.getSelectedIndex();
+		if(ind>=0){
+			int id = Integer.valueOf(lb.getValue(ind));
+			for(Script sc: formTemplate.getScripts()){
+				if(sc.getId()==id){
+					script = sc;
+					break;
+				}
+			}
+		}
+		return script;
+	}
+
+	@Override
+	public void removeScriptFromEvent() {
+		ListBox elb = getView().getEventScriptListBox();
+
+		Script script = getSelectedScriptById(elb);
+
+		if(script!=null){
+			formTemplate.removeEventScript(getSelectedEvent(), script);
+			selectEvent();
 		}
 	}
 
@@ -170,9 +217,8 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	}
 
 	private Script getSelectedScript() {
-		Script script = null;
-
 		ListBox slb = getView().getScriptListBox();
+		Script script = null;
 		int selInd = slb.getSelectedIndex();
 		if (selInd >= 0) {
 			String str = slb.getValue(selInd);
@@ -185,11 +231,10 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	public interface MyView extends View, HasUiHandlers<FormTemplateUiHandlers> {
 		public ScriptEditor getScriptEditor();
 		public ListBox getScriptListBox();
+
 		public ListBox getEventListBox();
-
-		ListBox getEventScriptListBox();
-
-		ListBox getFreeScriptListBox();
+		public ListBox getEventScriptListBox();
+		public ListBox getFreeScriptListBox();
 	}
 
 	@ProxyCodeSplit

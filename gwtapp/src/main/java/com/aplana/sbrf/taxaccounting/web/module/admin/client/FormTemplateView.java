@@ -41,6 +41,16 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 		widget = binder.createAndBindUi(this);
 	}
 
+	@UiHandler("addScriptToEvent")
+	public void onAddScriptToEvent(ClickEvent event){
+		getUiHandlers().addScriptToEvent();
+	}
+
+	@UiHandler("removeScriptFromEvent")
+	public void onRemoveScriptFromEvent(ClickEvent event){
+		getUiHandlers().removeScriptFromEvent();
+	}
+
 	@UiHandler("eventListBox")
 	public void onSelectEvent(ChangeEvent event){
 		getUiHandlers().selectEvent();

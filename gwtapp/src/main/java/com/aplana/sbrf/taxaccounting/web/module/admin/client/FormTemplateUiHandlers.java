@@ -8,8 +8,12 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface FormTemplateUiHandlers extends UiHandlers {
 	public void load();
 	public void save();
+
 	public void selectScript();
 	public void createScript();
 	public void deleteScript();
+
 	public void selectEvent();
+	public void addScriptToEvent();
+	public void removeScriptFromEvent();
 }
