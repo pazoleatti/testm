@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Мапирует {@link TaxType типы подразделений} на числовые столбцы в базе
- * В качестве числового представления типа используется значения поля {@link TaxType#getCode()}
+ * Мапирует {@link TaxType вид налога} на столбцы в базе
+ * В качестве символьного представления типа используется значения поля {@link TaxType#getCode()}
  * @author srybakov
  */
 @MappedTypes(TaxType.class)
