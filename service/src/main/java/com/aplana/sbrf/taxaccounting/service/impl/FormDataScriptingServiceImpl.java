@@ -75,11 +75,11 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	}
 
 	/**
-	 * Execute scripts
+	 * Выполняет последовательность сриптов для определенной формы
 	 *
-	 * @param scripts  list of scripts. Scripts executes in order of list.
-	 * @param formData data of the form
-	 * @param logger   script logger
+	 * @param scripts  Список скриптов. Порядок формы задает порядок выполнения.
+	 * @param formData Данные формы
+	 * @param logger   Логгер для сохранения ошщибок скрипта.
 	 */
 	private void executeScripts(List<Script> scripts, FormData formData, Logger logger) {
 		ScriptEngine engine = getScriptEngine();
