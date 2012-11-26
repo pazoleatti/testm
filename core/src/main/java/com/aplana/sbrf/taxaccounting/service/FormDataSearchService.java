@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface FormDataSearchService {
 
-	List<FormData> findDataByUserIdAndFilter(Long userId, FormDataFilter formDataFilter);
+	List<FormData> findDataByUserIdAndFilter(int userId, FormDataFilter formDataFilter);
 
 	List<Department> listDepartments();
 

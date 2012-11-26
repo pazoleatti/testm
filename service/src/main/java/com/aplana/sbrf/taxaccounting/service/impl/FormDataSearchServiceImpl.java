@@ -31,7 +31,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 
 	@Override
-	public List<FormData> findDataByUserIdAndFilter(Long userId, FormDataFilter formDataFilter) {
+	public List<FormData> findDataByUserIdAndFilter(int userId, FormDataFilter formDataFilter) {
 		/*TODO: сервис должен быть переписан после добавления параметра --ВСЕ--, так же на данный момент не используется
 		параметр userId.  ==> это только прототип сервиса!
 		*/
