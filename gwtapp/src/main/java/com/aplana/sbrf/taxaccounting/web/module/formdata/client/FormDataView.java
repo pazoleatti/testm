@@ -209,6 +209,7 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 		
 		manualInputButton.setVisible(false);
 		printButton.setVisible(false);
+		deleteFormButton.setVisible(false);
 		
 	}
 
