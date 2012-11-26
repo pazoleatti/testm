@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
@@ -23,6 +24,10 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * @author Vitalii Samolovskikh
  */
@@ -45,8 +50,56 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+
+		ListBox elb = getView().getEventListBox();
+		for(FormDataEvent event:FormDataEvent.values()){
+			elb.addItem(event.getTitle(), String.valueOf(event.getCode()));
+		}
+
 		formId = Integer.valueOf(request.getParameter(PARAM_FORM_TEMPLATE_ID, "0"));
 		load();
+	}
+
+	@Override
+	public void selectEvent() {
+		ListBox elb = getView().getEventListBox();
+
+		ListBox slb = getView().getEventScriptListBox();
+		slb.clear();
+
+		ListBox flb = getView().getFreeScriptListBox();
+		flb.clear();
+
+		int selectedIndex = elb.getSelectedIndex();
+		if(selectedIndex>=0){
+			int code = Integer.valueOf(elb.getValue(selectedIndex));
+			FormDataEvent event = FormDataEvent.getByCode(code);
+
+			List<Script> scripts = formTemplate.getScriptsByEvent(event);
+			if(scripts!=null){
+				for(Script script:scripts){
+					slb.addItem(script.getName(), String.valueOf(script.getId()));
+				}
+			}
+
+			List<Script> freeScripts = formTemplate.getScripts();
+			if(freeScripts!=null){
+				freeScripts = new ArrayList<Script>(freeScripts);
+
+				if(scripts!=null){
+					for(Iterator<Script> i=freeScripts.iterator();i.hasNext();){
+						Script script = i.next();
+						if(scripts.contains(script)){
+							i.remove();
+						}
+					}
+				}
+
+				for(Script script:freeScripts){
+					flb.addItem(script.getName(), String.valueOf(script.getId()));
+				}
+			}
+		}
 	}
 
 	@Override
@@ -104,7 +157,6 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		for (Script script : formTemplate.getScripts()) {
 			lb.addItem(script.getName(), String.valueOf(i++));
 		}
-
 		lb.setSelectedIndex(0);
 		bindScript();
 	}
@@ -133,6 +185,11 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	public interface MyView extends View, HasUiHandlers<FormTemplateUiHandlers> {
 		public ScriptEditor getScriptEditor();
 		public ListBox getScriptListBox();
+		public ListBox getEventListBox();
+
+		ListBox getEventScriptListBox();
+
+		ListBox getFreeScriptListBox();
 	}
 
 	@ProxyCodeSplit

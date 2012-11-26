@@ -61,7 +61,7 @@
 									<g:Label text="Скрипты события"/>
 								</g:cell>
 								<g:cell height="50%">
-									<g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+									<g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="eventScriptListBox"/>
 								</g:cell>
 								<g:cell>
 									<g:HorizontalPanel>
@@ -80,7 +80,7 @@
 									<g:Label text="Остальные скрипты"/>
 								</g:cell>
 								<g:cell height="50%">
-									<g:ListBox height="100%" width="100%" visibleItemCount="10"/>
+									<g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="freeScriptListBox"/>
 								</g:cell>
 								<g:cell>
 									<g:Button text="Добавить"/>

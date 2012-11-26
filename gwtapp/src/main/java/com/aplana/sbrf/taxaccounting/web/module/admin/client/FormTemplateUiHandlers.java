@@ -11,4 +11,5 @@ public interface FormTemplateUiHandlers extends UiHandlers {
 	public void selectScript();
 	public void createScript();
 	public void deleteScript();
+	public void selectEvent();
 }

@@ -28,11 +28,22 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 	@UiField
 	ListBox eventListBox;
 
+	@UiField
+	ListBox eventScriptListBox;
+
+	@UiField
+	ListBox freeScriptListBox;
+
 	private final Widget widget;
 
 	@Inject
 	public FormTemplateView(Binder binder) {
 		widget = binder.createAndBindUi(this);
+	}
+
+	@UiHandler("eventListBox")
+	public void onSelectEvent(ChangeEvent event){
+		getUiHandlers().selectEvent();
 	}
 
 	@UiHandler("saveButton")
@@ -77,5 +88,20 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 	@Override
 	public ListBox getScriptListBox() {
 		return scriptListBox;
+	}
+
+	@Override
+	public ListBox getEventListBox() {
+		return eventListBox;
+	}
+
+	@Override
+	public ListBox getEventScriptListBox() {
+		return eventScriptListBox;
+	}
+
+	@Override
+	public ListBox getFreeScriptListBox() {
+		return freeScriptListBox;
 	}
 }
