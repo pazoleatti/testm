@@ -6,10 +6,10 @@ import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.logging.Logger;
 
 /**
  * @author Vitalii Samolovskikh
@@ -17,7 +17,8 @@ import java.util.logging.Logger;
 @Service
 public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, UpdateFormResult> {
 	@SuppressWarnings("UnusedDeclaration")
-	private static final Logger log = Logger.getLogger(UpdateFormHandler.class.getName());
+	private static final Log log = LogFactory.getLog(UpdateFormHandler.class);
+
     private FormTemplateDao formTemplateDao;
 
     public UpdateFormHandler() {

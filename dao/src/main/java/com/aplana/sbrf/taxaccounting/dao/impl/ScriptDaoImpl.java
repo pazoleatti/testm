@@ -4,21 +4,24 @@ import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
-import java.util.logging.Logger;
 
 @Repository
 public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	@SuppressWarnings("UnusedDeclaration")
-	private static final Logger log = Logger.getLogger(ScriptDaoImpl.class.getName());
+	private static final Log log = LogFactory.getLog(ScriptDaoImpl.class);
 
 	@Override
 	@Transactional(readOnly = true)
@@ -162,46 +165,39 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	}
 
 	/**
-	 * Adds new scripts to DB.
+	 * Сохраняет новые скрипты в БД.
 	 *
-	 * @param form    we add scripts to this form
-	 * @param scripts list of scripts to adding
+	 * @param form    форма, в которую добавляются скрипты
+	 * @param scripts список скриптов
 	 */
-	private void insertScripts(FormTemplate form, List<Script> scripts) {
+	private void insertScripts(final FormTemplate form, final List<Script> scripts) {
 		if (!scripts.isEmpty()) {
 			for (Script script : scripts) {
-				insert(form, script);
+				script.setId(generateId("seq_form_script", Integer.class));
 			}
-		}
-	}
 
-	/**
-	 * Insert script to DB.
-	 *
-	 * @param form   form template with this script
-	 * @param script script
-	 */
-	private void insert(final FormTemplate form, final Script script) {
-		script.setId(generateId("seq_form_script", Integer.class));
+			getJdbcTemplate().batchUpdate(
+					"insert into form_script (id, form_id, name, ord, body, condition, per_row) values (?, ?, ?, ?, ?, ?, ?)",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
+							Script script = scripts.get(i);
+							ps.setInt(1, script.getId());
+							ps.setInt(2, form.getId());
+							ps.setString(3, script.getName());
+							ps.setInt(4, form.indexOfScript(script));
+							ps.setString(5, script.getBody());
+							ps.setString(6, script.getCondition());
+							ps.setBoolean(7, script.isRowScript());
+						}
 
-		getJdbcTemplate().update(
-				new PreparedStatementCreator() {
-					@Override
-					public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-						PreparedStatement ps = connection.prepareStatement(
-								"insert into form_script (id, form_id, name, ord, body, condition, per_row) values (?, ?, ?, ?, ?, ?, ?)"
-						);
-						ps.setInt(1, script.getId());
-						ps.setInt(2, form.getId());
-						ps.setString(3, script.getName());
-						ps.setInt(4, form.indexOfScript(script));
-						ps.setString(5, script.getBody());
-						ps.setString(6, script.getCondition());
-						ps.setBoolean(7, script.isRowScript());
-						return ps;
+						@Override
+						public int getBatchSize() {
+							return scripts.size();
+						}
 					}
-				}
-		);
+			);
+		}
 	}
 
 	/**
