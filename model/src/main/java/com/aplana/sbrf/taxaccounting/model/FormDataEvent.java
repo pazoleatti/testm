@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 /**
- * Form events.
+ * События формы. К ним привязываются скрипты.
  *
  * @author Vitalii Samolovskikh
  */
@@ -28,10 +28,16 @@ public enum FormDataEvent implements Serializable {
 		this.title = title;
 	}
 
+	/**
+	 * @return название события на русском человекопонятном языке
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * @return код события. Используется для маппинга в БД.
+	 */
 	public int getCode() {
 		return code;
 	}

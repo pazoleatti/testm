@@ -74,10 +74,18 @@ public class Script implements Serializable {
 		this.condition = condition;
 	}
 
+	/**
+	 * @return если возвращает true, то скрипт выполняется для каждой строки формы,
+	 * иначе для все формы в целом 1 раз
+	 */
 	public boolean isRowScript() {
 		return rowScript;
 	}
 
+	/**
+	 * @param rowScript признак того что скрипт выполняется для каждой строки или для всей формы в целов.
+	 *                  если true, то для каждой строки, если false то для всей формы в целом.
+	 */
 	public void setRowScript(boolean rowScript) {
 		this.rowScript = rowScript;
 	}

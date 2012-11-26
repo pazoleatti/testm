@@ -18,7 +18,14 @@ public class FormTemplate implements Serializable {
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();
 
+	/**
+	 * Все скрипты формы.
+	 */
 	private List<Script> scripts = new ArrayList<Script>();
+
+	/**
+	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется <code>java.util.List</code>.
+	 */
 	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
 
 	private int workflowId;
@@ -98,7 +105,9 @@ public class FormTemplate implements Serializable {
 	}
 
 	/**
-	 * Don't use for data manipulation.
+	 * Не использовать для манипуляций сриптами!!!
+	 *
+	 * @return список скриптов формы.
 	 */
 	public List<Script> getScripts() {
 		return scripts;
@@ -116,12 +125,18 @@ public class FormTemplate implements Serializable {
 		this.workflowId = workflowId;
 	}
 
+	/**
+	 * Возвращает маппинг скриптов на события формы. в виде отображения события на списки скриптов.
+	 * Порядок в списке скриптов соответствует порядку выполнения скриптов для каждого конкретного события.
+	 *
+	 * @return маппинг скриптов на события формы.
+	 */
 	public Map<FormDataEvent, List<Script>> getEventScripts() {
 		return eventScripts;
 	}
 
 	/**
-	 * Remove all scripts from form.
+	 * Удаляет все скрипты в шаблоне формы. Так же очищает маппинг скриптов.
 	 */
 	public void clearScripts() {
 		scripts.clear();
@@ -131,10 +146,11 @@ public class FormTemplate implements Serializable {
 	}
 
 	/**
-	 * Add script to event in order.
+	 * Добавляет скрипт для события формы. Добавляемый скрипт ранее должен быть привязан к шаблону формы.
 	 *
-	 * @param event  form event
-	 * @param script form script
+	 * @see #addScript(Script)
+	 * @param event  событие формы
+	 * @param script скрипт
 	 */
 	public void addEventScript(FormDataEvent event, Script script) {
 		if (!scripts.contains(script)) {
@@ -152,6 +168,12 @@ public class FormTemplate implements Serializable {
 		}
 	}
 
+	/**
+	 * Удаляет привязку скрипта к событию формы. Отвязка скрипта от шаблона формы не происходит.
+	 *
+	 * @param event событие формы
+	 * @param script скрипт
+	 */
 	public void removeEventScript(FormDataEvent event, Script script) {
 		if (!scripts.contains(script)) {
 			throw new IllegalArgumentException("Form doesn't contain script.");
@@ -166,21 +188,24 @@ public class FormTemplate implements Serializable {
 	}
 
 	/**
-	 * Adds script to from, but doesn't create join with event.
+	 * Добавляет скрипт к шаблону формы. При это не происходит привязки скрипта на событие.
 	 *
-	 * @param script script
+	 * @param script скрипт
 	 */
 	public void addScript(Script script) {
 		scripts.add(script);
 	}
 
 	/**
-	 * Remove script from form.
+	 * Удаляет скрипт из шаблона формы. Удаляются так же все привязки скрипта к событиям формы.
 	 *
-	 * @param script script
+	 * @param script скрипт
 	 */
 	public void removeScript(Script script) {
-		// TODO: бросать исключение если скрипта нет
+		if(!scripts.contains(script)){
+			throw new IllegalArgumentException("Form template doesn't contain the script.");
+		}
+
 		scripts.remove(script);
 		for (Map.Entry<FormDataEvent, List<Script>> entry : eventScripts.entrySet()) {
 			entry.getValue().remove(script);
@@ -189,7 +214,7 @@ public class FormTemplate implements Serializable {
 
 	/**
 	 * @param script script
-	 * @return index of script in main form script list.
+	 * @return индекс скрипта в списке скриптов
 	 *         TODO: может перетащить в DAO?
 	 */
 	public int indexOfScript(Script script) {
@@ -197,8 +222,8 @@ public class FormTemplate implements Serializable {
 	}
 
 	/**
-	 * @param event form event
-	 * @return list of scripts joined with the event
+	 * @param event событие формы
+	 * @return список скриптов для определенного события формы.
 	 */
 	public List<Script> getScriptsByEvent(FormDataEvent event) {
 		if (eventScripts.containsKey(event)) {
