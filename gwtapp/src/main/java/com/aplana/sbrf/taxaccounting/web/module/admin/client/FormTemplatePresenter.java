@@ -102,6 +102,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 				scripts.set(ind - 1, script);
 				scripts.set(ind, exchange);
 				selectEvent();
+				getView().getEventScriptListBox().setSelectedIndex(ind - 1);
 			}
 		}
 	}
@@ -123,6 +124,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 				scripts.set(ind + 1, script);
 				scripts.set(ind, exchange);
 				selectEvent();
+				getView().getEventScriptListBox().setSelectedIndex(ind + 1);
 			}
 		}
 	}
