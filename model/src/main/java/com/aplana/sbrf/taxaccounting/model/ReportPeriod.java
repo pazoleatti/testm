@@ -10,6 +10,8 @@ import java.io.Serializable;
  * @author dsultanbekov
  */
 public class ReportPeriod implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	// Первичный ключ
 	private int id;
 	// Название периода
