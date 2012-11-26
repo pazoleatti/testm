@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
 
+import com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.TaxTypeHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -15,6 +18,12 @@ public interface ReportPeriodMapper {
 	 * @throws DAOException если периода с заданным идентификатором не существует
 	 */
 	@Select("select * from report_period where id = #{periodId}")
+	@Results({
+			@Result(property="id"),
+			@Result(property="name"),
+			@Result(property="taxType", column = "tax_type", typeHandler=TaxTypeHandler.class),
+			@Result(property="active", column="is_active")
+	})
 	ReportPeriod get(@Param("periodId")int periodId);
 
 	/**
@@ -24,6 +33,12 @@ public interface ReportPeriodMapper {
 	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
 	 */
 	@Select("select * from report_period where tax_type = #{taxTypeCode} and is_active = 1 ")
+	@Results({
+			@Result(property="id"),
+			@Result(property="name"),
+			@Result(property="taxType", column = "tax_type", typeHandler=TaxTypeHandler.class),
+			@Result(property="active", column="is_active")
+	})
 	ReportPeriod getCurrentPeriod(@Param("taxTypeCode")char taxType);
 
 	/**
@@ -32,5 +47,11 @@ public interface ReportPeriodMapper {
 	 * @return список всех отчётных периодов
 	 */
 	@Select("select * from report_period where tax_type = #{taxTypeCode} ")
+	@Results({
+			@Result(property="id"),
+			@Result(property="name"),
+			@Result(property="taxType", column = "tax_type", typeHandler=TaxTypeHandler.class),
+			@Result(property="active", column="is_active")
+	})
 	List<ReportPeriod> listAllPeriodsByTaxType(@Param("taxTypeCode")char taxTypeCode);
 }

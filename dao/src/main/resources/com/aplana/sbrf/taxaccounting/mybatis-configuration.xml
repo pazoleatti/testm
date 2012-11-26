@@ -3,6 +3,7 @@
 <configuration>
 	<typeHandlers>
 		<typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.DepartmentTypeHandler"/>
+        <typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.TaxTypeHandler"/>
 		<package name="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler"/>
 	</typeHandlers>
 </configuration>
