@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
@@ -51,8 +48,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	}
 
 	public void initFilter() {
-
-		dispatchAsync.execute(new GetFilterData(),
+		GetFilterData action = new GetFilterData();
+		//TODO: action нужно брать из закладки! Убрать хард-код!
+		action.setTaxType(TaxType.TRANSPORT);
+		dispatchAsync.execute(action,
 				new AbstractCallback<GetFilterDataResult>() {
 					@Override
 					public void onSuccess(GetFilterDataResult result) {

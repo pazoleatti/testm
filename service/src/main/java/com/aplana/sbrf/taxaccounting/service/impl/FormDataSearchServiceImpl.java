@@ -60,6 +60,11 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	@Override
+	public List<FormType> listFormTypesByTaxType(TaxType taxType){
+		return formTypeDao.listAllByTaxType(taxType);
+	}
+
+	@Override
 	public List<ReportPeriod> listReportPeriodsByTaxType(TaxType taxType) {
 		return reportPeriodDao.listAllPeriodsByTaxType(taxType);
 	}

@@ -17,5 +17,7 @@ public interface FormDataSearchService {
 
 	List<FormType> listFormTypes();
 
+	List<FormType> listFormTypesByTaxType(TaxType taxType);
+
 	List<ReportPeriod> listReportPeriodsByTaxType(TaxType taxType);
 }

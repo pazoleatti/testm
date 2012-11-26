@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
@@ -25,9 +24,8 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
         GetFilterDataResult res = new GetFilterDataResult();
         res.setDepartments(formDataSearchService.listDepartments());
-        res.setKinds(formDataSearchService.listFormTypes());
-		/*TODO: убрать хардкод по TaxType и получать значение из закладки!*/
-		res.setPeriods(formDataSearchService.listReportPeriodsByTaxType(TaxType.TRANSPORT));
+        res.setKinds(formDataSearchService.listFormTypesByTaxType(action.getTaxType()));
+		res.setPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
         return res;
     }
 
