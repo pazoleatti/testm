@@ -73,7 +73,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	@Cacheable("Form")
+	//@Cacheable("Form")
+	// TODO: пока не будет версии кеша, нормально работающей на кластере
 	public FormTemplate get(int formId) {
 		logger.info("Fetching FormTemplate with id = " + formId);
 		JdbcTemplate jt = getJdbcTemplate();
