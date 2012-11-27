@@ -1,27 +1,12 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class FormatUtils {
-	private static ThreadLocal<DateFormat> isoDateFormat = new ThreadLocal<DateFormat>();
 	private static ThreadLocal<DateFormat> shortDateFormat = new ThreadLocal<DateFormat>();
-	
-	/**
-	 * Форматирует строку в формат ISO
-	 * Используется при генерации строк при передаче в браузер (рекомендуемый способ для передачи дат в dojo)
-	 */
-	public static DateFormat getIsoDateFormat() {
-		DateFormat result = isoDateFormat.get(); 
-		if (result == null) {
-			TimeZone tz = TimeZone.getTimeZone("UTC");
-			result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			result.setTimeZone(tz);
-			isoDateFormat.set(result);
-		}
-		return result;
-	}
+	private static ThreadLocal<NumberFormat> simpleNumberFormat = new ThreadLocal<NumberFormat>();
 
 	/**
 	 * Форматирует строку в строку, содержащую информацию только о дате, без времени и тайм-зоны
@@ -34,5 +19,20 @@ public class FormatUtils {
 			shortDateFormat.set(result);
 		}
 		return result;
+	}
+
+	/**
+	 * Создает и возвращает числовой формат для простого десятичного формата чисел. Целая часть форматируется без
+	 * разделителей.
+	 *
+	 * @return формат
+	 */
+	public static NumberFormat getSimpleNumberFormat(){
+		NumberFormat format = simpleNumberFormat.get();
+		if(format==null){
+			format = new DecimalFormat("0.########", new DecimalFormatSymbols(Locale.US));
+			simpleNumberFormat.set(format);
+		}
+		return format;
 	}
 }

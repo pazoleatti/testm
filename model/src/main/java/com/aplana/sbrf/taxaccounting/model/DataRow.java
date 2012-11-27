@@ -16,20 +16,20 @@ import java.util.Set;
  * конструкции вида <code>row.property = anotherRow.property</code>
  * Можно считать что строка данных - это Map, в котором ключи - {@link Column#getAlias алиасы столбцов}, а значение -
  * значения содержащиеся в соответствующих столбцах.
- * 
+ * <p/>
  * Обращаю внимание, что часть методов интерфейса не реализована, при их вызове будет возникать UnsupportedOperationException.
- *
+ * <p/>
  * Фактически класс является обёрткой над обычным HashMap, но при этом содержит ряд дополнительных атрибутов,
  * содержащих информацию о строке в отчётной форме, а также операции по работе с Map реализованы таким образом,
  * чтобы предотвратить заполнение строки данными неверного типа. При использовании метода put проводится проверка данных
- * на соответствие типу соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не позволяет 
+ * на соответствие типу соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не позволяет
  * добавлять в строку данные по столбцам, которые отсутствуют в определении формы
  * Для некоторых числовых типов реализовано автоматическое приведение к BigDecimal.
- *
+ * <p/>
  * Для облегчения идентификации нужной строки среди строк данных по форме, можно использовать строковые алиасы. Их стоит использовать
  * для строк, несущих особую смысловую нагрузку (например "Итого" и т.п.).
- * 
- * Данный объект обязательно должен обладать сведениями о столбцах формы, к которой принадлежит строка.Этого можно достичь либо 
+ * <p/>
+ * Данный объект обязательно должен обладать сведениями о столбцах формы, к которой принадлежит строка.Этого можно достичь либо
  * создав объект вызовом конструктора, принимающего список {@link Column столбцов}, либо использовать конструктор по-умолчанию и после этого
  * вызвать метод {@linkplain #setFormColumns}.
  */
@@ -40,17 +40,17 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private int order;
 
 	public DataRow() {
-		
+
 	}
-	
+
 	static class MapEntry implements Map.Entry<String, Object> {
 
 		private Map.Entry<String, CellValue> sourceEntry;
-		
+
 		private MapEntry(Map.Entry<String, CellValue> sourceEntry) {
 			this.sourceEntry = sourceEntry;
 		}
-		
+
 		@Override
 		public String getKey() {
 			return sourceEntry.getKey();
@@ -58,7 +58,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 		@Override
 		public Object getValue() {
-			CellValue value = sourceEntry.getValue(); 
+			CellValue value = sourceEntry.getValue();
 			return value == null ? null : value.getValue();
 		}
 
@@ -66,14 +66,14 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		public Object setValue(Object value) {
 			throw new UnsupportedOperationException("not implemented yet");
 		}
-		
+
 	}
-	
+
 	public DataRow(String alias, List<Column> formColumns) {
 		this(formColumns);
 		this.alias = alias;
 	}
-	
+
 	public DataRow(List<Column> formColumns) {
 		setFormColumns(formColumns);
 	}
@@ -81,17 +81,18 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	/**
 	 * Задать информацию о столбцах, допустимых в строке
 	 * Внимание: использование данного метода сбрасывает значение всех столбцов в строке в null
+	 *
 	 * @param formColumns список столбцов
 	 */
 	public void setFormColumns(List<Column> formColumns) {
 		data = new HashMap<String, CellValue>(formColumns.size());
-		for (Column col: formColumns) {
+		for (Column col : formColumns) {
 			CellValue cellValue = new CellValue();
 			cellValue.setColumn(col);
 			data.put(col.getAlias(), cellValue);
 		}
 	}
-	
+
 	public String getAlias() {
 		return alias;
 	}
@@ -99,7 +100,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public void setAlias(String code) {
 		this.alias = code;
 	}
-	
+
 	/**
 	 * Методы, реализующие интефрейс Map<String, Object>
 	 */
@@ -120,8 +121,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
-		for(Map.Entry<String, CellValue> entry: data.entrySet()) {
-			entries.add(new MapEntry(entry));
+		if (data != null) {
+			for (Map.Entry<String, CellValue> entry : data.entrySet()) {
+				entries.add(new MapEntry(entry));
+			}
 		}
 		return entries;
 	}
@@ -133,10 +136,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		}
 		return cellValue;
 	}
-	
+
 	@Override
 	public Object get(Object key) {
-		CellValue cellValue = getCellValue((String)key);
+		CellValue cellValue = getCellValue((String) key);
 		return cellValue.getValue();
 	}
 
@@ -152,7 +155,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Object put(String key, Object value) {
-		CellValue cellValue = getCellValue((String)key);
+		CellValue cellValue = getCellValue((String) key);
 		return cellValue.setValue(value);
 	}
 
@@ -174,7 +177,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public Collection<Object> values() {
 		List<Object> values = new ArrayList<Object>(data.size());
-		for (Map.Entry<String, CellValue> entry: data.entrySet()) {
+		for (Map.Entry<String, CellValue> entry : data.entrySet()) {
 			values.add(entry.getValue().getValue());
 		}
 		return values;
@@ -188,5 +191,35 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		DataRow dataRow = (DataRow) o;
+
+		if (order != dataRow.order) return false;
+		if (alias != null ? !alias.equals(dataRow.alias) : dataRow.alias != null) return false;
+		if (data != null ? !data.equals(dataRow.data) : dataRow.data != null) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = alias != null ? alias.hashCode() : 0;
+		result = 31 * result + order;
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "DataRow{" +
+				"data=" + data +
+				", alias='" + alias + '\'' +
+				", order=" + order +
+				'}';
 	}
 }
