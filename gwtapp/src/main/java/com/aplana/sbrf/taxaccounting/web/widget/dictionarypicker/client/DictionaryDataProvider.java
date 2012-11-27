@@ -53,6 +53,7 @@ public class DictionaryDataProvider extends AsyncDataProvider<SimpleDictionaryIt
   			public void onSuccess(DictionaryPickerDataResult result) {
   				updateRowData(start, result.getDictionaryItems());
   				display.setRowCount(result.getSize());
+  				super.onSuccess(result);
   			}
   		});
 	}

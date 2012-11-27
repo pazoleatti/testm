@@ -33,6 +33,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 			@Override
 			public void onSuccess(GetUserInfoResult result) {
 				getView().setUserName(result.getUserName());
+				super.onSuccess(result);
 			}
 			
 		});

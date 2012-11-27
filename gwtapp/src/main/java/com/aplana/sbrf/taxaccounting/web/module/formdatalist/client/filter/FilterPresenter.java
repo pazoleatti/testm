@@ -76,6 +76,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						getView().setDataFilter(formDataFilter);
 
 						FilterReadyEvent.fire(FilterPresenter.this);
+						super.onSuccess(result);
 					}
 				});
 

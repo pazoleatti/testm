@@ -51,6 +51,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 			public void onSuccess(FormListResult result) {
 			    CellTable<FormTemplate> table = getView().getFormTemplateTable();
 				table.setRowData(result.getForms());
+				super.onSuccess(result);
 			}
 		});
 	}

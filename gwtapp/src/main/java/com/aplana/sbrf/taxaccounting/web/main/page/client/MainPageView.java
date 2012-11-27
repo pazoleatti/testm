@@ -16,6 +16,8 @@ public class MainPageView extends ViewImpl implements MyView {
 	}
 
 	public final Widget widget;
+	
+	private int lockCount;
 
 	@UiField
 	FlowPanel mainMenuContentPanel;
@@ -74,8 +76,13 @@ public class MainPageView extends ViewImpl implements MyView {
 	}
 
 	@Override
-	public void showLoading(boolean visibile) {
+	public void lockAndShowLoading(boolean locked) {
+		if (locked){
+			lockCount++;
+		} else {
+			lockCount--;
+		}
 		loadingMessage.getStyle().setVisibility(
-				visibile ? Visibility.VISIBLE : Visibility.HIDDEN);
+				lockCount == 0 ? Visibility.HIDDEN : Visibility.VISIBLE);
 	}
 }

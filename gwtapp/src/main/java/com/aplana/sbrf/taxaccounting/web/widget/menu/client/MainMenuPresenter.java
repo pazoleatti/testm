@@ -36,6 +36,7 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 			@Override
 			public void onSuccess(GetMainMenuResult result) {
 				getView().setMenuItems(result.getMenuItems());
+				super.onSuccess(result);
 			}
 			
 		});

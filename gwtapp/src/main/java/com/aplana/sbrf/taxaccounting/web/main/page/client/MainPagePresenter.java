@@ -29,7 +29,7 @@ public class MainPagePresenter extends
 	 * {@link MainPagePresenter}'s view.
 	 */
 	public interface MyView extends View {
-		void showLoading(boolean visibile);
+		void lockAndShowLoading(boolean visibile);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class MainPagePresenter extends
 	 */
 	@ProxyEvent
 	public void onLockInteraction(LockInteractionEvent event) {
-		getView().showLoading(event.shouldLock());
+		getView().lockAndShowLoading(event.shouldLock());
 	}
 
 	@Override

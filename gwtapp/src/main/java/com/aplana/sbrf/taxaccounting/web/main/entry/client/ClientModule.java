@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
+import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.client.gin.DispatchAsyncModule;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 import com.gwtplatform.mvp.client.gin.DefaultModule;
@@ -23,6 +24,8 @@ public class ClientModule extends AbstractPresenterModule {
     install(new DefaultModule(PlaceManager.class));
     
 	install(new DispatchAsyncModule());
+	
+	requestStaticInjection(EventBus.class);
 
 	bindConstant().annotatedWith(DefaultPlace.class).to(HomeNameTokens.homePage);
 	

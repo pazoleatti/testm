@@ -169,6 +169,7 @@ public class FormDataListPresenter extends
 							// Вручную вызывается onReveal
 							getProxy().manualReveal(FormDataListPresenter.this);
 						}
+						super.onSuccess(result);
 					}
 				});
 	}

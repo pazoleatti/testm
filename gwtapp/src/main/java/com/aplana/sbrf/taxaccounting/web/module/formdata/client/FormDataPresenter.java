@@ -108,6 +108,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			@Override
 			public void onSuccess(GetFormDataResult result) {
 				getView().loadFormData(result.getFormData(), result.getAccessFlags());
+				super.onSuccess(result);
 			}
 		});
 	}
@@ -140,7 +141,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						FormData savedFormData = result.getFormData();
 						view.reset();
 						view.loadForm(savedFormData, null);
-						view.setLogMessages(result.getLogEntries());						
+						view.setLogMessages(result.getLogEntries());	
+						super.onSuccess(result);
 					}
 
 					@Override
@@ -195,13 +197,14 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 									dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
 										@Override
 										public void onSuccess(GoMoveResult result) {
-											
+											super.onSuccess(result);
 										}
 										
 									});
 								}
 							});
 							buttonPanel.add(newButton);
+							super.onSuccess(result);
 						}
 					}
 
@@ -245,6 +248,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						@Override
 						public void onSuccess(DeleteFormDataResult result) {
 							placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
+							super.onSuccess(result);
 						}
 	
 						@Override
@@ -270,7 +274,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						FormData savedFormData = result.getFormData();
 						view.reset();
 						view.loadForm(savedFormData, null);
-						view.setLogMessages(result.getLogEntries());						
+						view.setLogMessages(result.getLogEntries());
+						super.onSuccess(result);
 					}
 
 					@Override
