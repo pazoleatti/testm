@@ -132,7 +132,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 				engine.eval(rowScript.getBody());
 			} catch (Exception e) {
 				logger.error(e);
-				// TODO: возможно не стоит делать брек, а ограничится выводом сообщения?
+				// TODO: возможно не стоит делать брек, а ограничиться выводом сообщения?
 				// или даже сделать опцию в скрипте, определяющую данное поведение
 				break;
 			} finally {
