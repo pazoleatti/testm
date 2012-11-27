@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
 
+import java.math.BigDecimal;
+
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ReadOnlyStringCell;
+import com.google.gwt.user.client.Window;
 
 /**
  * 
@@ -18,7 +21,12 @@ public class ReadOnlyTextColumn extends DataRowColumn<String> {
 
     @Override
     public String getValue(DataRow dataRow) {
-    	String value = (String)dataRow.get(alias); 
+    	String value = null;
+    	if (dataRow.get(alias) instanceof BigDecimal) {
+    		value = ((BigDecimal) dataRow.get(alias)).toPlainString();
+    	} else if (dataRow.get(alias) instanceof String){
+    		value = (String) dataRow.get(alias);
+    	}
         return value == null ? "" : value;
     }
 }

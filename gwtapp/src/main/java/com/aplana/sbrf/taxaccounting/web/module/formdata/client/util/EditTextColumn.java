@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
 
+import java.math.BigDecimal;
+
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.user.client.Window;
 /**
  * 
  * @author Eugene Stetsenko
@@ -24,7 +27,12 @@ public class EditTextColumn extends DataRowColumn<String> {
 
     @Override
     public String getValue(DataRow dataRow) {
-    	String value = (String)dataRow.get(alias); 
-        return value == null ? "" : value;
+    	String value = null;
+    	if (dataRow.get(alias) instanceof BigDecimal) {
+    		value = ((BigDecimal) dataRow.get(alias)).toPlainString();
+    	} else if (dataRow.get(alias) instanceof String){
+    		value = (String) dataRow.get(alias);
+    	}
+    	return value == null ? "" : value;
     }
 }

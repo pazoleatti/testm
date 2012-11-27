@@ -220,6 +220,12 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 		
 	}
 	
+	@Override
+	public void activateReadOnlyMode(FormData data) {
+		activateReadOnlyModeWithoutUpdate(flags);
+		reloadFormData(data, flags);
+	}
+	
 	private void activateReadOnlyModeWithoutUpdate(AccessFlags flags) {
 		this.readOnly = true;
 

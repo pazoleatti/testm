@@ -81,6 +81,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void activateReadOnlyMode();
 		void loadForm(FormData formData, AccessFlags flags);
 //		void loadFormData(FormData formData, AccessFlags flags);
+		void activateReadOnlyMode(FormData data);
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -138,9 +139,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 					@Override
 					public void onSuccess(SaveFormDataResult result) {
-						FormData savedFormData = result.getFormData();
-						view.reset();
-						view.loadForm(savedFormData, null);
+//						FormData savedFormData = result.getFormData();
+//						view.reset();
+//						view.loadForm(savedFormData, null);
+						view.activateReadOnlyMode(result.getFormData());
 						view.setLogMessages(result.getLogEntries());	
 						super.onSuccess(result);
 					}

@@ -16,29 +16,29 @@ public class DataRowColumnFactory {
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
 			if (stringColumn.getDictionaryCode() != null) {
-				if (isReadOnly) {
+				if (isReadOnly || !col.isEditable()) {
 					tableCol = new ReadOnlyTextColumn((StringColumn)col);//new EditStringDictionaryColumn(stringColumn);
 				} else {
 					tableCol = new EditStringDictionaryColumn(stringColumn);
 				}
 			} else {
-			    if (isReadOnly) {
-				tableCol = new ReadOnlyTextColumn((StringColumn)col);
+				if (isReadOnly || !col.isEditable()) {
+					tableCol = new ReadOnlyTextColumn((StringColumn)col);
 			    } else {
-				tableCol = new EditTextColumn((StringColumn)col);
+			    	tableCol = new EditTextColumn((StringColumn)col);
 			    }
 			}
 		} else if (col instanceof NumericColumn) {
-		    if (isReadOnly) {
-			tableCol = new ReadOnlyNumericColumn((NumericColumn)col, cellTable);
+		    if (isReadOnly || !col.isEditable()) {
+		    	tableCol = new ReadOnlyNumericColumn((NumericColumn)col, cellTable);
 		    } else {
-			tableCol = new EditNumericColumn((NumericColumn)col, cellTable);
+		    	tableCol = new EditNumericColumn((NumericColumn)col, cellTable);
 		    }
 		} else if (col instanceof DateColumn) {
-		    if (isReadOnly) {
-			tableCol = new ReadOnlyDateColumn((DateColumn)col);
+		    if (isReadOnly || !col.isEditable()) {
+		    	tableCol = new ReadOnlyDateColumn((DateColumn)col);
 		    } else {
-			tableCol = new EditDateColumn((DateColumn)col);
+		    	tableCol = new EditDateColumn((DateColumn)col);
 		    }
 		}
 		return tableCol;
