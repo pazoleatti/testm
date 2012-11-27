@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
@@ -9,8 +8,6 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataList, GetFormDataListResult> {
@@ -26,9 +23,10 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 		/*TODO: тут нужно получать пользовательский ID и передавать в formDataSearchService в качестве параметра,
 		* в рамках прототипа это не делается*/
 
-		List<FormData> formDataList = formDataSearchService.findDataByUserIdAndFilter(0, action.getFormDataFilter());
         GetFormDataListResult res = new GetFormDataListResult();
-		res.setRecords(formDataList);
+		res.setRecords(formDataSearchService.findDataByUserIdAndFilter(0, action.getFormDataFilter()));
+		res.setDepartments(formDataSearchService.listDepartments());
+		res.setReportPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
 		return res;
 	}
 

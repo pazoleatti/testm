@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
@@ -24,7 +23,9 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FormDataListPresenter extends
 		Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy>
@@ -44,6 +45,8 @@ public class FormDataListPresenter extends
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 		void setFormDataList(List<FormData> records);
+		void setDepartmentMap(Map<Integer, String> departmentMap);
+		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
 
 		public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
 				String headerText, final ValueGetter<C> getter,
@@ -111,6 +114,7 @@ public class FormDataListPresenter extends
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+		//System.out.println("NAME TOKEN:" + request.getNameToken());
 		filterPresenter.initFilter();
 	}
 
@@ -140,12 +144,27 @@ public class FormDataListPresenter extends
 	private void loadFormDataList(FormDataFilter filterFormData) {
 		GetFormDataList action = new GetFormDataList();
 		action.setFormDataFilter(filterFormData);
+		//TODO: убрать хардкод!
+		action.setTaxType(TaxType.TRANSPORT);
 
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
 					@Override
 					public void onSuccess(GetFormDataListResult result) {
+						Map<Integer, String> departmentMap = new HashMap<Integer, String>();
+						for(Department department : result.getDepartments()){
+							departmentMap.put(department.getId(), department.getName());
+						}
+
+						Map<Integer, String> reportPeriodMap = new HashMap<Integer, String>();
+						for(ReportPeriod period : result.getReportPeriods()){
+							reportPeriodMap.put(period.getId(), period.getName());
+						}
+
 						getView().setFormDataList(result.getRecords());
+						getView().setDepartmentMap(departmentMap);
+						getView().setReportPeriodMap(reportPeriodMap);
+
 						if (!isVisible()) {
 							// Вручную вызывается onReveal
 							getProxy().manualReveal(FormDataListPresenter.this);

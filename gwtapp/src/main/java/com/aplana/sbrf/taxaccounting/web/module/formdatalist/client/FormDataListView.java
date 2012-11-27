@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
+import java.util.Map;
 
 public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
@@ -31,18 +32,20 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	@UiField
 	CellTable<FormData> formDataTable;
 
+	private Map<Integer, String> departmentsMap;
+	private Map<Integer, String> reportPeriodsMap;
+
 	@Inject
 	public FormDataListView(final MyBinder binder) {
 
 		widget = binder.createAndBindUi(this);
 
-		TextColumn<FormData> idColumn = new TextColumn<FormData>() {
+		TextColumn<FormData> formKindColumn = new TextColumn<FormData>() {
 			@Override
 			public String getValue(FormData object) {
-				return String.valueOf(object.getId());
+				return object.getKind().getName();
 			}
 		};
-
 
 		TextColumn<FormData> formTypeColumn = new TextColumn<FormData>() {
 			@Override
@@ -50,9 +53,25 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 				return object.getFormType().getName();
 			}
 		};
-		formDataTable.addColumn(idColumn, "id");
-		formDataTable.addColumn(formTypeColumn, "Тип формы");
-		//TODO: добавить department и period для отображения в таблице
+
+		TextColumn<FormData> departmentColumn = new TextColumn<FormData>() {
+			@Override
+			public String getValue(FormData object) {
+				return departmentsMap.get(object.getDepartmentId());
+			}
+		};
+
+		TextColumn<FormData> reportPeriodColumn = new TextColumn<FormData>() {
+			@Override
+			public String getValue(FormData object) {
+				return reportPeriodsMap.get(object.getReportPeriodId());
+			}
+		};
+
+		formDataTable.addColumn(formKindColumn, "Тип");
+		formDataTable.addColumn(formTypeColumn, "Вид");
+		formDataTable.addColumn(departmentColumn, "Подразделение");
+		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
 
 	}
 
@@ -77,6 +96,16 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	public void setFormDataList(List<FormData> records) {
 		formDataTable.setRowCount(records.size());
 		formDataTable.setRowData(0, records);
+	}
+
+	@Override
+	public void setDepartmentMap(Map<Integer, String> departmentMap) {
+		this.departmentsMap = departmentMap;
+	}
+
+	@Override
+	public void setReportPeriodMap(Map<Integer, String> reportPeriodMap) {
+		this.reportPeriodsMap = reportPeriodMap;
 	}
 
 	@Override
