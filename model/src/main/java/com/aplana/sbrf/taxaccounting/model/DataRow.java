@@ -195,14 +195,24 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
 		DataRow dataRow = (DataRow) o;
 
-		if (order != dataRow.order) return false;
-		if (alias != null ? !alias.equals(dataRow.alias) : dataRow.alias != null) return false;
-		if (data != null ? !data.equals(dataRow.data) : dataRow.data != null) return false;
+		if (order != dataRow.order) {
+			return false;
+		}
+		if (alias != null ? !alias.equals(dataRow.alias) : dataRow.alias != null) {
+			return false;
+		}
+		if (data != null ? !data.equals(dataRow.data) : dataRow.data != null) {
+			return false;
+		}
 
 		return true;
 	}
