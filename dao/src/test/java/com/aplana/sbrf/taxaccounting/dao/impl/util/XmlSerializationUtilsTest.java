@@ -12,11 +12,12 @@ import static org.junit.Assert.*;
  * Тестируем "сериализацию" строк данных.
  * @author Vitalii Samolovskikh
  */
-public class SerializationUtilsTest {
+public class XmlSerializationUtilsTest {
 
 	private List<Column> columns;
+	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
-	public SerializationUtilsTest() {
+	public XmlSerializationUtilsTest() {
 		// Columns
 		columns = new ArrayList<Column>();
 
@@ -47,14 +48,14 @@ public class SerializationUtilsTest {
 		assertFalse("The initial data is empty.", data.isEmpty());
 
 		// Serialize
-		String string = SerializationUtils.serialize(data);
+		String string = xmlSerializationUtils.serialize(data);
 		assertNotNull("The result of serialization is null.", string);
 		assertFalse("The result of serialization is empty.", string.isEmpty());
 
 		System.out.println(string);
 
 		// Deserialize
-		List<DataRow> deserializedData = SerializationUtils.deserialize(string, columns);
+		List<DataRow> deserializedData = xmlSerializationUtils.deserialize(string, columns);
 		assertNotNull("The result of deserialization is null.", deserializedData);
 		assertFalse("The result of deserialization is empty.", deserializedData.isEmpty());
 
@@ -76,7 +77,7 @@ public class SerializationUtilsTest {
 
 
 		row = new DataRow("withColumns", columns);
-		row.put("stringColumn", "test");
+		row.put("stringColumn", "test тест");
 		row.put("numericColumn", new BigDecimal(1234.56));
 		row.put("dateColumn", new Date());
 		rows.add(row);

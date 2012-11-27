@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import java.text.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class FormatUtils {
 	private static ThreadLocal<DateFormat> shortDateFormat = new ThreadLocal<DateFormat>();

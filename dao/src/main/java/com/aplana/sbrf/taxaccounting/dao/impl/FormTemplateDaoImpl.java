@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SerializationUtils;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,7 +27,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private ColumnDao columnDao;
 	@Autowired
 	private ScriptDao scriptDao;
-	
+	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
+
 	private class FormMapper implements RowMapper<FormTemplate> {
 		private boolean deepFetch;
 		public FormMapper(boolean deepFetch) {
@@ -42,8 +43,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				form.getColumns().addAll(columnDao.getFormColumns(form.getId()));
 				scriptDao.fillFormScripts(form);				
 				String stRowsData = rs.getString("data_rows");
-				if (stRowsData != null) { 
-					form.getRows().addAll(SerializationUtils.deserialize(stRowsData, form.getColumns()));
+				if (stRowsData != null) {
+					form.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, form.getColumns()));
 					logger.warn("Disabled due incompartibility with WAS");
 				}
 			}
@@ -70,7 +71,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	public int save(final FormTemplate form) {
 		final int formTemplateId = form.getId().intValue();
 
-		String xml = SerializationUtils.serialize(form.getRows());
+		String xml = xmlSerializationUtils.serialize(form.getRows());
 		// TODO: создание новых версий формы потребует инсертов в form
 		getJdbcTemplate().update(
 			"update form set data_rows = ? where id = ?",
