@@ -30,7 +30,8 @@ public class FormatUtils {
 	public static NumberFormat getSimpleNumberFormat(){
 		NumberFormat format = simpleNumberFormat.get();
 		if(format==null){
-			format = new DecimalFormat("0.########", new DecimalFormatSymbols(Locale.US));
+			format = new DecimalFormat("0.#", new DecimalFormatSymbols(Locale.US));
+			format.setMaximumFractionDigits(38);
 			simpleNumberFormat.set(format);
 		}
 		return format;
