@@ -4,6 +4,9 @@
 	<typeHandlers>
 		<typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.DepartmentTypeHandler"/>
         <typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.TaxTypeHandler"/>
-		<package name="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler"/>
 	</typeHandlers>
+	<mappers>
+		<mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/DepartmentMapper.xml"/>
+		<mapper resource="com/aplana/sbrf/taxaccounting/dao/security/mapper/TAUserMapper.xml"/>
+	</mappers>	
 </configuration>
