@@ -36,7 +36,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		* Еще один момент: пока что параметр ВСЕ передается не как null, а как Long.MAX_VALUE,
 		* будет исправлено, когда решится проблема с LongListBoxEditor*/
 
-		List<FormData> formDataList = new ArrayList<FormData>();
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		if(formDataFilter.getDepartment() == Long.MAX_VALUE){
@@ -98,9 +97,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
 		}
 
-		formDataList = formDataSearchDao.findByFilter(formDataDaoFilter);
-
-		return formDataList;
+		List<FormData> formDataList  = formDataSearchDao.findByFilter(formDataDaoFilter);
+    	return formDataList;
 	}
 
 	@Override
