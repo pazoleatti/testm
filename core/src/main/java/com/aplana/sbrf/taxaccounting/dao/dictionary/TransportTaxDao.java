@@ -19,4 +19,10 @@ public interface TransportTaxDao extends ScriptExposed {
 	 * @return значение ставки налога в рублях
 	 */
 	int getTaxRate(String code, BigDecimal age, BigDecimal power);
+	
+	/**
+	 * Возвращает название вида транспортного средства
+	 * @return название вида транспортного средства или null, если передан несуществующий код
+	 */
+	String getTsTypeName(String tsTypeCode);
 }

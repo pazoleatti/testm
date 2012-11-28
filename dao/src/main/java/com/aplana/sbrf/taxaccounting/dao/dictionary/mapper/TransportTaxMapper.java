@@ -14,4 +14,7 @@ public interface TransportTaxMapper {
 		"and (min_power is null or min_power <= #{power}) and (max_power is null or max_power >= #{power})"
 	})
 	Integer getTransportTaxRate(@Param("transportCode")String transportCode, @Param("age")int age, @Param("power")int power);
+	
+	@Select("select name from transport_type_code where code = #{tsTypeCode}")
+	String getTsTypeName(@Param("tsTypeCode")String tsTypeCode);
 }

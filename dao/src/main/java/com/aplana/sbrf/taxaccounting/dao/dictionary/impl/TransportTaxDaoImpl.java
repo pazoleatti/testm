@@ -34,4 +34,9 @@ public class TransportTaxDaoImpl implements TransportTaxDao {
 		}
 		return result.intValue();
 	}
+
+	@Override
+	public String getTsTypeName(String tsTypeCode) {
+		return transportTaxMapper.getTsTypeName(tsTypeCode);
+	}
 }
