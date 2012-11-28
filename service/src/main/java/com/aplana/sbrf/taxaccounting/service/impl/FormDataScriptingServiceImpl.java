@@ -10,7 +10,9 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +33,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormDataDao formDataDao;
+	@Autowired
+	private DepartmentDao departmentDao;
 
 	private Map<String, Object> scriptExposedBeans;
 
@@ -38,7 +42,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
 	 */
 	@Override
-	public FormData createForm(Logger logger, int formTemplateId, int departmentId, FormDataKind kind) {
+	public FormData createForm(Logger logger, int formTemplateId, int departmentId, FormDataKind kind, TAUser currentUser) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
 
@@ -57,7 +61,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 
 		// Execute scripts for the form event CREATE
 		List<Script> scripts = form.getScriptsByEvent(FormDataEvent.CREATE);
-		executeScripts(scripts, result, logger);
+		executeScripts(scripts, result, currentUser, logger);
 		return result;
 	}
 
@@ -65,11 +69,11 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#processFormData(com.aplana.sbrf.taxaccounting.log.Logger, com.aplana.sbrf.taxaccounting.model.FormData)
 	 */
 	@Override
-	public void processFormData(Logger logger, FormData formData) {
+	public void processFormData(Logger logger, FormData formData, TAUser currentUser) {
 		FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
 		List<Script> calcScripts = form.getScriptsByEvent(FormDataEvent.CALCULATE);
 
-		executeScripts(calcScripts, formData, logger);
+		executeScripts(calcScripts, formData, currentUser, logger);
 		checkMandatoryColumns(formData, form, logger);
 		logger.setMessageDecorator(null);
 	}
@@ -81,10 +85,13 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @param formData Данные формы
 	 * @param logger   Логгер для сохранения ошщибок скрипта.
 	 */
-	private void executeScripts(List<Script> scripts, FormData formData, Logger logger) {
+	private void executeScripts(List<Script> scripts, FormData formData, TAUser currentUser, Logger logger) {
 		ScriptEngine engine = getScriptEngine();
 		engine.put("logger", logger);
 		engine.put("formData", formData);
+		engine.put("user", currentUser);
+		engine.put("userDepartment", departmentDao.getDepartment(currentUser.getDepartmentId()));
+		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
 		ScriptMessageDecorator d = new ScriptMessageDecorator();
 		for (Script calcScript : scripts) {
 			if (calcScript.isRowScript()) {

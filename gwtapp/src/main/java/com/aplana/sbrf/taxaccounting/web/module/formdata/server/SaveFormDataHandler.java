@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
 	private FormDataScriptingService service;
     @Autowired
     private FormDataDao formDataDao;
+	@Autowired
+	private SecurityService securityService;
 
     public SaveFormDataHandler() {
         super(SaveFormDataAction.class);
@@ -35,7 +38,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
         try {
             Logger logger = new Logger();
             final FormData formData = action.getFormData();
-            service.processFormData(logger, formData);
+            service.processFormData(logger, formData, securityService.currentUser());
 
             SaveFormDataResult result = new SaveFormDataResult();            
             
