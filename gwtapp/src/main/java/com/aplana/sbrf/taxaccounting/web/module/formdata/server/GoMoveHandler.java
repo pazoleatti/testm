@@ -1,19 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
-import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * 
@@ -28,7 +25,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 	private SecurityService securityService;
 	
 	@Autowired
-	private FormDataWorkflowService workflowService;
+	private FormDataService formDataService;
 	
 	public GoMoveHandler() {
 		super(GoMoveAction.class);
@@ -38,7 +35,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 	public GoMoveResult execute(GoMoveAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		workflowService.doMove(action.getFormDataId(), userId, action.getMove());
+		formDataService.doMove(action.getFormDataId(), userId, action.getMove(), new Logger());
 		return new GoMoveResult();
 	}
 

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
@@ -11,12 +12,15 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +39,17 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
+	private TAUserDao userDao;
+	@Autowired
+	private FormTemplateDao formTemplateDao;
+	@Autowired
+	private FormDataWorkflowDao formDataWorkflowDao;
+	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
 	@Autowired
-	private TAUserDao userDao;
-	@Autowired
-	private FormTemplateDao formTemplateDao;
+	private FormDataWorkflowService formDataWorkflowService;
 
 	/**
 	 * Создать налоговую форму заданного типа
@@ -125,9 +133,9 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public long saveFormData(int userId, FormData formData) {
-		if(formDataAccessService.canEdit(userId, formData.getId())){
+		if (formDataAccessService.canEdit(userId, formData.getId())) {
 			return formDataDao.save(formData);
-		}else{
+		} else {
 			throw new AccessDeniedException(
 					"Can't save form: userId=%d, formDataId=%d",
 					userId, formData.getId()
@@ -146,9 +154,9 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public FormData getFormData(int userId, long formDataId) {
-		if(formDataAccessService.canRead(userId, formDataId)){
+		if (formDataAccessService.canRead(userId, formDataId)) {
 			return formDataDao.get(formDataId);
-		}else{
+		} else {
 			throw new AccessDeniedException(
 					"Can't read form: userId=%d, formDataId=%d",
 					userId, formDataId
@@ -166,9 +174,9 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void deleteFormData(int userId, long formDataId) {
-		if(formDataAccessService.canDelete(userId, formDataId)){
+		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);
-		}else{
+		} else {
 			throw new AccessDeniedException(
 					"Can't delete form: userId=%d, formDataId=%d",
 					userId, formDataId
@@ -196,5 +204,28 @@ public class FormDataServiceImpl implements FormDataService {
 			}
 		}
 		logger.setMessageDecorator(null);
+	}
+
+	/**
+	 * Перемещает форму из одного состояния в другое.
+	 *
+	 * @param formDataId   идентификатор налоговой формы
+	 * @param userId       идентификатор текщуего пользователя
+	 * @param workflowMove переход
+	 */
+	@Override
+	public boolean doMove(long formDataId, int userId, WorkflowMove workflowMove, Logger logger) {
+		List<WorkflowMove> availableMoves = formDataWorkflowService.getAvailableMoves(userId, formDataId);
+		if (!availableMoves.contains(workflowMove)) {
+			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления");
+		}
+
+		formDataScriptingService.executeScripts(userDao.getUser(userId), formDataDao.get(formDataId), workflowMove.getEvent(), logger);
+		if (!logger.containsLevel(LogLevel.ERROR)) {
+			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

@@ -1,17 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
@@ -21,7 +11,13 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
-import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
@@ -34,11 +30,7 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 	@Autowired
 	private TAUserDao userDao;
 	@Autowired
-	private FormTemplateDao formDao;
-	@Autowired
 	private DepartmentDao departmentDao;
-	@Autowired
-	private FormDataWorkflowDao formDataWorkflowDao;
 
 	@Override
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
@@ -96,12 +88,4 @@ public class FormDataWorkflowServiceImpl implements FormDataWorkflowService {
 		return result; 
 	}
 
-	@Override
-	public void doMove(long formDataId, int userId, WorkflowMove workflowMove) {
-		List<WorkflowMove> availableMoves = getAvailableMoves(userId, formDataId);
-		if (!availableMoves.contains(workflowMove)) {
-			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления" );
-		}
-		formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
-	}
 }

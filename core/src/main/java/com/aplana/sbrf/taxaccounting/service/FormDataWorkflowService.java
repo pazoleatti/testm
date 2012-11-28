@@ -17,12 +17,4 @@ public interface FormDataWorkflowService {
 	 * @return список переходов жизненного цикла, которые может выполнить текущий пользователь над данным объектом {@link FormData}
 	 */
 	List<WorkflowMove> getAvailableMoves(int userId, long formDataId);
-	/**
-	 * Выполнить изменение статуса карточки
-	 * @param formDataId идентификатор объекта {@link FormData}
-	 * @param userId идентификатор пользователя, от имени которого выплняется действие 
-	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
-	 * @throws ServiceException
-	 */
-	void doMove(long formDataId, int userId, WorkflowMove move);
 }

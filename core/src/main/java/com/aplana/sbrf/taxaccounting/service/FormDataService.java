@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
@@ -27,6 +28,7 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
+	@SuppressWarnings("UnusedDeclaration")
 	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind);
 	
 	/**
@@ -62,5 +64,13 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException если у пользователя недостаточно прав для удаления записи
 	 */
 	void deleteFormData(int userId, long formDataId);
-	
+
+	/**
+	 * Выполнить изменение статуса карточки
+	 * @param formDataId идентификатор объекта {@link FormData}
+	 * @param userId идентификатор пользователя, от имени которого выплняется действие
+	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException
+	 */
+	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 }
