@@ -25,5 +25,5 @@
 	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
 
 	<!-- Browser -->
-	<set-property name="user.agent" value="gecko1_8,safari,ie8"/>
+	<set-property name="user.agent" value="gecko1_8,safari,ie8,ie9"/>
 </module>
