@@ -44,6 +44,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setDepartment(Arrays.asList(formDataFilter.getDepartment()));
 			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
 			formDataDaoFilter.setPeriod(Arrays.asList(formDataFilter.getPeriod()));
+			formDataDaoFilter.setKind(Arrays.asList(formDataFilter.getKind()));
 			formDataList = formDataSearchDao.findByFilter(formDataDaoFilter);
 		}
 		return formDataList;

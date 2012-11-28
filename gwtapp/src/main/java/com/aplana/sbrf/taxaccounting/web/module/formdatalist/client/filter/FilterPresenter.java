@@ -34,6 +34,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	}
 
 	private final DispatchAsync dispatchAsync;
+	//TODO: этот MAGIC_NUMBER уйдет когда разберемся с LongListBoxEditor, пока используем данную метку для обработки параметра ВСЕ
+	private static final long MAGIC_NUMBER = Long.MAX_VALUE;
 
 	@Inject
 	public FilterPresenter(EventBus eventBus, MyView view,
@@ -57,16 +59,12 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						List<SelectItem> reportPeriodItems = fillPeriodList(result);
 						List<SelectItem> departmentItems = fillDepartmentList(result);
 						List<SelectItem> formTypeItems = fillFormTypeList(result);
-
-						List<SelectItem> kind = new ArrayList<SelectItem>();
-						kind.add(new SelectItem(3L, "Сводная"));
-						kind.add(new SelectItem(2L, "Консолидированная"));
-						kind.add(new SelectItem(1L, "Первичная"));
+						List<SelectItem> formKindList = fillFormKindList();
 
 						getView().setFormtypeList(formTypeItems);
 						getView().setPeriodList(reportPeriodItems);
 						getView().setDepartmentList(departmentItems);
-						getView().setKindList(kind);
+						getView().setKindList(formKindList);
 
 						FormDataFilter formDataFilter = new FormDataFilter();
 						getView().setDataFilter(formDataFilter);
@@ -81,6 +79,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	private List<SelectItem> fillPeriodList(GetFilterDataResult result){
 		List<ReportPeriod> reportPeriods = result.getPeriods();
 		List<SelectItem> reportPeriodItems = new ArrayList<SelectItem>();
+		reportPeriodItems.add(new SelectItem(MAGIC_NUMBER, ""));
 		for (ReportPeriod reportPeriod : reportPeriods){
 			reportPeriodItems.add(new SelectItem((long) reportPeriod.getId(),
 					reportPeriod.getName()));
@@ -91,6 +90,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	private List<SelectItem> fillFormTypeList(GetFilterDataResult result){
 		List<FormType> formTypes = result.getFormTypes();
 		List<SelectItem> formTypeItems = new ArrayList<SelectItem>();
+		formTypeItems.add(new SelectItem(MAGIC_NUMBER, ""));
 		for (FormType formType : formTypes) {
 			formTypeItems.add(new SelectItem((long) formType.getId(), formType
 					.getName()));
@@ -101,12 +101,22 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	private List<SelectItem> fillDepartmentList(GetFilterDataResult result){
 		List<Department> departments = result.getDepartments();
 		List<SelectItem> departmentItems = new ArrayList<SelectItem>();
-		// TODO: переписать код с применением google Function()
+
+		departmentItems.add(new SelectItem(MAGIC_NUMBER, ""));
 		for (Department department : departments) {
 			departmentItems.add(new SelectItem((long) department.getId(), department
 					.getName()));
 		}
 		return departmentItems;
+	}
+
+	private List<SelectItem> fillFormKindList(){
+		List<SelectItem> kind = new ArrayList<SelectItem>();
+		kind.add(new SelectItem(MAGIC_NUMBER, ""));
+		kind.add(new SelectItem(3L, "Сводная"));
+		kind.add(new SelectItem(2L, "Консолидированная"));
+		kind.add(new SelectItem(1L, "Первичная"));
+		return kind;
 	}
 
 }
