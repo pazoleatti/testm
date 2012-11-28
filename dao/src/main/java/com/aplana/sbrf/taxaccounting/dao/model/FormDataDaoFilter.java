@@ -13,43 +13,45 @@ public class FormDataDaoFilter implements Serializable {
 
 	private static final long serialVersionUID = -961619115678926848L;
 
-	private List<Long> period;
+	private List<Long> reportPeriodId;
 
-	private List<Long> department;
+	private List<Long> departmentId;
 
-	private List<Long> formtype;
+	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
+	private List<Long> formTypeId;
 
-	private List<Long> kind;
+	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
+	private List<Long> formDataKind;
 
 	public List<Long> getPeriod() {
-		return period;
+		return reportPeriodId;
 	}
 
 	public void setPeriod(List<Long> period) {
-		this.period = period;
+		this.reportPeriodId = period;
 	}
 
 	public List<Long> getDepartment() {
-		return department;
+		return departmentId;
 	}
 
 	public void setDepartment(List<Long> department) {
-		this.department = department;
+		this.departmentId = department;
 	}
 
 	public List<Long> getFormtype() {
-		return formtype;
+		return formTypeId;
 	}
 
 	public void setFormtype(List<Long> formtype) {
-		this.formtype = formtype;
+		this.formTypeId = formtype;
 	}
 
 	public List<Long> getKind() {
-		return kind;
+		return formDataKind;
 	}
 
 	public void setKind(List<Long> kind) {
-		this.kind = kind;
+		this.formDataKind = kind;
 	}
 }

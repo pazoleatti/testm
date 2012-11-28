@@ -14,7 +14,7 @@ public class GetFilterDataResult implements Result {
     }
 
     private List<Department> departments;
-    private List<FormType> kinds;
+    private List<FormType> types;
 	private List<ReportPeriod> periods;
 
     public List<Department> getDepartments() {
@@ -25,12 +25,12 @@ public class GetFilterDataResult implements Result {
         this.departments = departments;
     }
 
-    public List<FormType> getKinds() {
-        return kinds;
+    public List<FormType> getFormTypes() {
+        return types;
     }
 
-    public void setKinds(List<FormType> kinds) {
-        this.kinds = kinds;
+    public void setFormTypes(List<FormType> kinds) {
+        this.types = kinds;
     }
 
 	public List<ReportPeriod> getPeriods() {

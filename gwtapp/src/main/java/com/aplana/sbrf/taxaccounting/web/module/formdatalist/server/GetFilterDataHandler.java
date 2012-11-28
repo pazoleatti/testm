@@ -24,7 +24,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
         GetFilterDataResult res = new GetFilterDataResult();
         res.setDepartments(formDataSearchService.listDepartments());
-        res.setKinds(formDataSearchService.listFormTypesByTaxType(action.getTaxType()));
+        res.setFormTypes(formDataSearchService.listFormTypesByTaxType(action.getTaxType()));
 		res.setPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
         return res;
     }

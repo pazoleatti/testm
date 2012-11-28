@@ -58,13 +58,15 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						List<SelectItem> departmentItems = fillDepartmentList(result);
 						List<SelectItem> formTypeItems = fillFormTypeList(result);
 
-						List<SelectItem> type = new ArrayList<SelectItem>();
-						type.add(new SelectItem(1L, "Сводная"));
+						List<SelectItem> kind = new ArrayList<SelectItem>();
+						kind.add(new SelectItem(3L, "Сводная"));
+						kind.add(new SelectItem(2L, "Консолидированная"));
+						kind.add(new SelectItem(1L, "Первичная"));
 
-						getView().setFormtypeList(type);
+						getView().setFormtypeList(formTypeItems);
 						getView().setPeriodList(reportPeriodItems);
 						getView().setDepartmentList(departmentItems);
-						getView().setKindList(formTypeItems);
+						getView().setKindList(kind);
 
 						FormDataFilter formDataFilter = new FormDataFilter();
 						getView().setDataFilter(formDataFilter);
@@ -80,19 +82,17 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		List<ReportPeriod> reportPeriods = result.getPeriods();
 		List<SelectItem> reportPeriodItems = new ArrayList<SelectItem>();
 		for (ReportPeriod reportPeriod : reportPeriods){
-			reportPeriodItems.add(new SelectItem(Long
-					.valueOf(reportPeriod.getId()),
+			reportPeriodItems.add(new SelectItem((long) reportPeriod.getId(),
 					reportPeriod.getName()));
 		}
 		return reportPeriodItems;
 	}
 
 	private List<SelectItem> fillFormTypeList(GetFilterDataResult result){
-		List<FormType> formTypes = result.getKinds();
+		List<FormType> formTypes = result.getFormTypes();
 		List<SelectItem> formTypeItems = new ArrayList<SelectItem>();
 		for (FormType formType : formTypes) {
-			formTypeItems.add(new SelectItem(Long
-					.valueOf(formType.getId()), formType
+			formTypeItems.add(new SelectItem((long) formType.getId(), formType
 					.getName()));
 		}
 		return formTypeItems;
@@ -103,8 +103,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		List<SelectItem> departmentItems = new ArrayList<SelectItem>();
 		// TODO: переписать код с применением google Function()
 		for (Department department : departments) {
-			departmentItems.add(new SelectItem(Long
-					.valueOf(department.getId()), department
+			departmentItems.add(new SelectItem((long) department.getId(), department
 					.getName()));
 		}
 		return departmentItems;

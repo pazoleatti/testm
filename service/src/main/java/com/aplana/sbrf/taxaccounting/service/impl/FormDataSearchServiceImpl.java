@@ -42,7 +42,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			/*В этой ветке будем обрабатывать параметр -ВСЕ-*/
 		} else {
 			formDataDaoFilter.setDepartment(Arrays.asList(formDataFilter.getDepartment()));
-			formDataDaoFilter.setKind(Arrays.asList(formDataFilter.getKind()));
+			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
 			formDataDaoFilter.setPeriod(Arrays.asList(formDataFilter.getPeriod()));
 			formDataList = formDataSearchDao.findByFilter(formDataDaoFilter);
 		}

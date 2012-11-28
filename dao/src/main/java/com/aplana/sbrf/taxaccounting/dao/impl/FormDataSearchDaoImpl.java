@@ -24,7 +24,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	public List<FormData> findByFilter(FormDataDaoFilter dataFilter){
 		String query = "select * from form_data fd where fd.department_id in " + transformToSqlInStatement(dataFilter.
 				getDepartment()) + " and exists (select 1 from form f where fd.form_id = f.id and f.type_id in " +
-				transformToSqlInStatement(dataFilter.getKind()) + ") and exists (select 1 from report_period rp where" +
+				transformToSqlInStatement(dataFilter.getFormtype()) + ") and exists (select 1 from report_period rp where" +
 				" fd.report_period_id = rp.id and rp.id in " + transformToSqlInStatement(dataFilter.getPeriod()) + ")";
 
 		return getJdbcTemplate().query(query, new FormDataRowMapper(formTemplateDao));
