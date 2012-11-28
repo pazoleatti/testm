@@ -10,19 +10,19 @@
 
 	<g:HorizontalPanel width="50%">
         <g:VerticalPanel spacing="5" width="100%">
-            <g:Label text="Отчетный период" />
-		    <lbe:LongListBoxEditor ui:field="period" visibleItemCount="1" />
+            <g:Label width="200px" text="Отчетный период" />
+		    <lbe:LongListBoxEditor width="200px" ui:field="period" visibleItemCount="1" />
 
-	        <g:Label text="Подразделение" />
-	        <lbe:LongListBoxEditor ui:field="department" visibleItemCount="1"/>
+	        <g:Label width="200px" text="Подразделение" />
+	        <lbe:LongListBoxEditor width="200px" ui:field="department" visibleItemCount="1"/>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">
-	        <g:Label text="Тип налоговой формы"/>
-            <lbe:LongListBoxEditor ui:field="kind" visibleItemCount="1"/>
+	        <g:Label width="200px" text="Тип налоговой формы"/>
+            <lbe:LongListBoxEditor width="200px" ui:field="kind" visibleItemCount="1"/>
 
-            <g:Label text="Вид налоговой формы"/>
-            <lbe:LongListBoxEditor ui:field="formtype" visibleItemCount="1" />
+            <g:Label width="200px" text="Вид налоговой формы"/>
+            <lbe:LongListBoxEditor width="200px" ui:field="formtype" visibleItemCount="1" />
         </g:VerticalPanel>
     </g:HorizontalPanel>
 
