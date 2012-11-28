@@ -26,7 +26,8 @@ public class NullableDatePickerCell extends DatePickerCell {
 			// Если значение в ячейке равно null, то стандартная реализация не рендерит ничего
 			// Из-за этого обрамляющий div получается нулевой длины и нажать на него невозможно.
 			// Для того, чтобы исправить ситуацию, в div выводим nonbreaking-пробел
-			sb.appendHtmlConstant("&nbsp;");
+			// nbsp win(alt+255)
+			sb.appendHtmlConstant(" ");
 		}
 	}
 

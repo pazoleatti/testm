@@ -187,7 +187,8 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 		if (s != null) {
 			sb.append(renderer.render(s));
 		} else {
-			sb.append(renderer.render("&nbsp;"));
+			// nbsp win(alt+255)
+			sb.append(renderer.render(" "));
 		}
 		
 	}
