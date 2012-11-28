@@ -40,7 +40,6 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			link.setTargetHistoryToken(menuItem.getLink());
 			link.setText(menuItem.getName());
 			panel.add(link);
-			panel.add(new Label("|"));
 		}
 	}
 

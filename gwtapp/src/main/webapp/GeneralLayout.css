@@ -1,0 +1,91 @@
+@CHARSET "UTF-8";
+
+.mainContent {
+	/* text-align: center;
+	margin: 0 auto;
+	width: 1000px;*/
+}
+
+.loadingStatusLabel {
+    background-color: #FFF1A8;
+    border-color: #FFF1A8 #FFF1A8;
+    border-radius: 0 0 4px 4px;
+    border-right: 2px solid #FFF1A8;
+    border-style: none solid solid;
+    border-width: 0 2px 2px;
+    color: #000000;
+    font-family: arial,sans-serif;
+    font-weight: bold;
+    left: 50%;
+    margin-left: 66px;
+    padding: 3px;
+    position: absolute;
+    z-index: 1100;
+}
+
+.topNavigation {
+	background: url("img/top_grad.gif") repeat-x scroll center bottom #F1F1F1;
+    border-top: 1px solid #E6E6E6;
+    height: 38px;
+    margin-top: 8px;
+}
+
+.mainMenuNavigation {
+	padding: 10px 0 0 32px;
+}
+
+.mainMenuNavigation div a {
+	color: #222222;
+	font-weight: bold;
+	font-size: 14px;
+	margin-right: 14px;
+	padding: 0;
+	text-decoration: none;
+	font-family: Helvetica,Arial;
+}
+
+.mainMenuNavigation div a:hover {
+	border-bottom: 1px dotted #6A8EA4;
+	color: #3964C2;
+}
+
+.topHeader {
+	vertical-align: top;
+	padding: 0px;
+	margin: 2px 2px 0px 2px;
+	height: 40px;
+}
+
+.topLogo {
+	float: left;
+	margin: 4px 0 0 32px;
+	background: none;
+	border: none;
+}
+
+.topLogo img {
+	margin: 0px;
+	padding: 0px;
+	background: none;
+	border: none;
+}
+
+.topLogoMsg {
+	color: #777777;
+	font-size: 22px;
+    font-weight: bold;
+    left: 50%;
+    margin: 10px 0 0;
+    position: absolute;
+}
+
+.signIn div div {
+	font-weight: bold;
+	/**color: #5B5B5B;*/
+	color: #8C8F91;
+	float: right;
+	font-size: 10px;
+	height: 23px;
+	margin: 4px 6px 0;
+	padding: 0px;
+}
