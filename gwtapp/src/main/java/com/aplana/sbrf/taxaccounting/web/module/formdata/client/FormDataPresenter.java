@@ -28,6 +28,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
@@ -36,13 +37,15 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
+public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> 
+									implements FormDataUiHandlers{
 	private Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
@@ -50,23 +53,14 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	 */
 	@ProxyCodeSplit
 	@NameToken(NAME_TOKEN)
-	public interface MyProxy extends Proxy<FormDataPresenter>, Place {
+	public interface MyProxy extends ProxyPlace<FormDataPresenter>, Place {
 	}
 
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
 	 */
-	public interface MyView extends View {
+	public interface MyView extends View, HasUiHandlers<FormDataUiHandlers> {
 		FlowPanel getButtonPanel();
-		Button getCancelButton();
-		Button getSaveButton();
-		Button getAddRowButton();
-		Button getRemoveRowButton();
-		Button getManualInputButton();
-		Button getPrintButton();
-		Button getOriginalVersionButton();
-		Button getRecalculateButton();
-		Button getDeleteFormButton();
 		DataGrid<DataRow> getFormDataTable();
 		void loadFormData(FormData formData, AccessFlags flags);
 		void reloadFormData(FormData formData, AccessFlags flags);
@@ -75,11 +69,9 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void setLogMessages(List<LogEntry> logEntries);
 		void reset();
 		Boolean isReadOnly();
-//		void setReadOnly(Boolean readOnly);
 		void activateEditMode();
 		void activateReadOnlyMode();
 		void loadForm(FormData formData, AccessFlags flags);
-//		void loadFormData(FormData formData, AccessFlags flags);
 		void activateReadOnlyMode(FormData data);
 	}
 
@@ -96,6 +88,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
+		getView().setUiHandlers(this);
 	}
 
 	@Override
@@ -114,192 +107,136 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	}
 
 	@Override
-	protected void onBind() {
-		super.onBind();
-
-		registerHandler(getView().getCancelButton().addClickHandler(
-			new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
-				}
-			}
-		));
-
-		final MyView view = getView();
-		
-		// Save data button
-		registerHandler(view.getSaveButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				SaveFormDataAction action = new SaveFormDataAction();
-				final MyView view = getView();
-				action.setFormData(view.getFormData());
-				dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
-					@Override
-					public void onSuccess(SaveFormDataResult result) {
-//						FormData savedFormData = result.getFormData();
-//						view.reset();
-//						view.loadForm(savedFormData, null);
-						view.activateReadOnlyMode(result.getFormData());
-						view.setLogMessages(result.getLogEntries());	
-						super.onSuccess(result);
-					}
-
-					@Override
-					public void onFailure(Throwable throwable) {
-						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
-						super.onFailure(throwable);
-					}							
-				});
-			}
-		}));
-		
-		registerHandler(view.getAddRowButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				FormData formData = view.getFormData();
-				formData.appendDataRow(null);
-				view.reloadRows();
-			}
-			
-		}));
-		
-		registerHandler(view.getRemoveRowButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				FormData formData = view.getFormData();
-				// TODO need rework
-				formData.getDataRows().remove(((SingleSelectionModel<DataRow>)view.getFormDataTable().getSelectionModel()).getSelectedObject());
-				view.reloadRows();
-			}
-		}));
-		//TODO need rework
-		registerHandler(view.getManualInputButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				final FlowPanel buttonPanel = view.getButtonPanel();
-				final MyView view = getView();
-				GetAvailableMovesAction action = new GetAvailableMovesAction();
-				action.setFormDataId(view.getFormData().getId());
-				dispatcher.execute(action, new AbstractCallback<GetAvailableMovesResult>(){
-					@Override
-					public void onSuccess(GetAvailableMovesResult result) {
-						for (final WorkflowMove move : result.getAvailableMoves()) {
-							Button newButton = new Button();
-							newButton.setText(move.getName());
-							newButton.addClickHandler(new ClickHandler() {
-								
-								@Override
-								public void onClick(ClickEvent event) {
-									GoMoveAction action = new GoMoveAction();
-									action.setFormDataId(view.getFormData().getId());
-									action.setMove(move);
-									dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
-										@Override
-										public void onSuccess(GoMoveResult result) {
-											view.setLogMessages(result.getLogEntries());
-											super.onSuccess(result);
-										}
-										
-									});
-								}
-							});
-							buttonPanel.add(newButton);
-							super.onSuccess(result);
-						}
-					}
-
-					@Override
-					public void onFailure(Throwable throwable) {
-						logger.log(Level.SEVERE, "Failed to get AvailableMoves object", throwable);
-						super.onFailure(throwable);
-					}							
-				});
-				
-				view.activateEditMode();
-			}
-			
-		}));
-		
-		registerHandler(view.getPrintButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				Window.alert("В разработке");
-//				view.activateReadOnlyMode();
-			}
-			
-		}));
-		
-		registerHandler(view.getOriginalVersionButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-//				Window.alert("В разработке");
-				view.activateReadOnlyMode();
-			}
-			
-		}));
-		registerHandler(view.getDeleteFormButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				boolean isOK = Window.confirm("Удалить?");
-				if (isOK) {
-					DeleteFormDataAction action = new DeleteFormDataAction();
-					action.setFormDataId(view.getFormData().getId());
-					dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
-						@Override
-						public void onSuccess(DeleteFormDataResult result) {
-							placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
-							super.onSuccess(result);
-						}
-	
-						@Override
-						public void onFailure(Throwable throwable) {
-							logger.log(Level.SEVERE, "Failed to delete formData object", throwable);
-							super.onFailure(throwable);
-						}							
-					});
-				}
-			}
-			
-		}));
-		//TODO Same as save button?
-		registerHandler(view.getRecalculateButton().addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				SaveFormDataAction action = new SaveFormDataAction();
-				final MyView view = getView();
-				action.setFormData(view.getFormData());
-				dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
-					@Override
-					public void onSuccess(SaveFormDataResult result) {
-						FormData savedFormData = result.getFormData();
-						view.reset();
-						view.loadForm(savedFormData, null);
-						view.setLogMessages(result.getLogEntries());
-						super.onSuccess(result);
-					}
-
-					@Override
-					public void onFailure(Throwable throwable) {
-						logger.log(Level.SEVERE, "Failed to save formData object", throwable);
-						super.onFailure(throwable);
-					}							
-				});
-				
-			}
-			
-		}));
+	protected void onReset() {
+		super.onReset();
+		getView().reset();
 	}
+	
+	@Override
+	protected void revealInParent() {
+		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
+	}
+	
+	@Override
+	public void onCancelClicked() {
+		placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
+	}
+	
+	@Override
+	public void onSaveClicked() {
+		SaveFormDataAction action = new SaveFormDataAction();
+		final MyView view = getView();
+		action.setFormData(view.getFormData());
+		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
+			@Override
+			public void onSuccess(SaveFormDataResult result) {
+				view.activateReadOnlyMode(result.getFormData());
+				view.setLogMessages(result.getLogEntries());	
+				super.onSuccess(result);
+			}
 
-@Override
-protected void onReset() {
-	super.onReset();
-	getView().reset();
-}
+			@Override
+			public void onFailure(Throwable throwable) {
+				logger.log(Level.SEVERE, "Failed to save formData object", throwable);
+				super.onFailure(throwable);
+			}							
+		});
+		
+	}
+	
+	@Override
+	public void onAddRowClicked() {
+		FormData formData = getView().getFormData();
+		formData.appendDataRow(null);
+		getView().reloadRows();
+	}
+	
+	@Override
+	public void onRemoveRowClicked() {
+		FormData formData = getView().getFormData();
+		// TODO need rework
+		formData.getDataRows().remove(((SingleSelectionModel<DataRow>)getView().getFormDataTable().getSelectionModel()).getSelectedObject());
+		getView().reloadRows();
+	}
+	
+	//TODO need rework
+	@Override
+	public void onManualInputClicked() {
+		final FlowPanel buttonPanel = getView().getButtonPanel();
+		final MyView view = getView();
+		GetAvailableMovesAction action = new GetAvailableMovesAction();
+		action.setFormDataId(view.getFormData().getId());
+		dispatcher.execute(action, new AbstractCallback<GetAvailableMovesResult>(){
+			@Override
+			public void onSuccess(GetAvailableMovesResult result) {
+				for (final WorkflowMove move : result.getAvailableMoves()) {
+					Button newButton = new Button();
+					newButton.setText(move.getName());
+					newButton.addClickHandler(new ClickHandler() {
+						
+						@Override
+						public void onClick(ClickEvent event) {
+							GoMoveAction action = new GoMoveAction();
+							action.setFormDataId(view.getFormData().getId());
+							action.setMove(move);
+							dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
+								@Override
+								public void onSuccess(GoMoveResult result) {
+									super.onSuccess(result);
+								}
+								
+							});
+						}
+					});
+					buttonPanel.add(newButton);
+					
+					super.onSuccess(result);
+				}
+			}
 
-@Override
-protected void revealInParent() {
-	RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
-}
+			@Override
+			public void onFailure(Throwable throwable) {
+				logger.log(Level.SEVERE, "Failed to get AvailableMoves object", throwable);
+				super.onFailure(throwable);
+			}							
+		});
+		
+		view.activateEditMode();
+	}
+	
+	@Override
+	public void onOriginalVersionClicked() {
+		getView().activateReadOnlyMode();
+	}
+	
+	@Override
+	public void onRecalculateClicked() {
+	}
+	
+	@Override
+	public void onPrintClicked() {
+		Window.alert("В разработке");
+	}
+	
+	@Override
+	public void onDeleteFormClicked() {
+		boolean isOK = Window.confirm("Удалить?");
+		if (isOK) {
+			DeleteFormDataAction action = new DeleteFormDataAction();
+			action.setFormDataId(getView().getFormData().getId());
+			dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
+				@Override
+				public void onSuccess(DeleteFormDataResult result) {
+					placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
+					super.onSuccess(result);
+				}
+
+				@Override
+				public void onFailure(Throwable throwable) {
+					logger.log(Level.SEVERE, "Failed to delete formData object", throwable);
+					super.onFailure(throwable);
+				}							
+			});
+		}
+	}
 }

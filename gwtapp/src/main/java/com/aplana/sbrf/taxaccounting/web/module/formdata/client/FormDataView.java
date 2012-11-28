@@ -11,8 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
@@ -20,9 +22,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewImpl;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
+public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> implements FormDataPresenter.MyView {
+	
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
@@ -39,8 +42,6 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	FlowPanel buttonPanel;
 	@UiField
 	DataGrid<DataRow> formDataTable;
-	@UiField
-	Button cancelButton;
 	@UiField
 	Button saveButton;
 	@UiField
@@ -72,16 +73,6 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	@Override
 	public Widget asWidget() {
 		return widget;
-	}
-
-	@Override
-	public Button getCancelButton() {
-		return cancelButton;
-	}
-
-	@Override
-	public Button getSaveButton() {
-		return saveButton;
 	}
 
 	@Override
@@ -151,36 +142,6 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 	}
 
 	@Override
-	public Button getAddRowButton() {
-		return addRowButton;
-	}
-
-	@Override
-	public Button getRemoveRowButton() {
-		return removeRowButton;
-	}
-	
-	@Override
-	public Button getManualInputButton() {
-		return manualInputButton;
-	}
-	
-	@Override
-	public Button getPrintButton() {
-		return printButton;
-	}
-	
-	@Override
-	public Button getOriginalVersionButton() {
-		return originalVersionButton;
-	}
-	
-//	@OverridegetOriginalVersionButton
-//	public void setReadOnly(Boolean readOnly) {
-//		this.readOnly = readOnly;
-//	}
-	
-	@Override
 	public Boolean isReadOnly() {
 		return readOnly;
 	}
@@ -246,16 +207,66 @@ public class FormDataView extends ViewImpl implements FormDataPresenter.MyView {
 		return buttonPanel;
 	}
 
-	@Override
-	public Button getRecalculateButton() {
-		return recalculateButton;
-	}
-
-	@Override
-	public Button getDeleteFormButton() {
-		return deleteFormButton;
-	}
-
+	@UiHandler("cancelButton")
+	void onCancelButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCancelClicked();
+        }
+    }
 	
+	@UiHandler("saveButton")
+	void onSaveButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCancelClicked();
+        }
+    }
 	
+	@UiHandler("addRowButton")
+	void onAddRowButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onAddRowClicked();
+        }
+    }
+	
+	@UiHandler("removeRowButton")
+	void onRemoveRowButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRemoveRowClicked();
+        }
+    }
+	
+	@UiHandler("manualInputButton")
+	void onManualInputButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onManualInputClicked();
+        }
+    }
+	
+	@UiHandler("originalVersionButton")
+	void onOriginalVersionButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onOriginalVersionClicked();
+        }
+    }
+	
+	@UiHandler("recalculateButton")
+	void onRecalculateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRecalculateClicked();
+        }
+    }
+	
+	@UiHandler("printButton")
+	void onPrintButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onPrintClicked();
+        }
+    }
+	
+	@UiHandler("deleteFormButton")
+	void onDeleteFormButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDeleteFormClicked();
+        }
+    }
 }
