@@ -54,4 +54,13 @@ public interface FormDataService {
 	 * @throws AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	FormData getFormData(int userId, long formDataId);
+	
+	/**
+	 * Удалить данные по налоговой форме
+	 * @param userId идентификатор пользователя, выполняющего операцию
+	 * @param formDataId идентификатор записи, котрую нужно удалить
+	 * @throws AccessDeniedException если у пользователя недостаточно прав для удаления записи
+	 */
+	void deleteFormData(int userId, long formDataId);
+	
 }
