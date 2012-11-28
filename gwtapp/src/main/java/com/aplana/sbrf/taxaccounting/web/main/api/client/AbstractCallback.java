@@ -12,6 +12,8 @@ import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 public abstract class AbstractCallback<T> implements AsyncCallback<T>,
 		HasHandlers {
 	
+	// TODO: Почему то не получается использовать @Inject для статических полей. Надо разобраться.
+	// Пока ворк эраунд - получение инжектора руками и установка значения.
 	private static EventBus eventBus = ((ClientGinjector)DelayedBindRegistry.getGinjector()).getEventBus();
 	
 	public AbstractCallback(){
@@ -32,7 +34,6 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>,
 
 	@Override
 	public void fireEvent(GwtEvent<?> event) {
-		System.out.println("EB:" + eventBus);
 		eventBus.fireEventFromSource(event, this);
 	}
 }
