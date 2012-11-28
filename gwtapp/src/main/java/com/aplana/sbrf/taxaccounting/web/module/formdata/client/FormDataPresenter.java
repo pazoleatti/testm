@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -122,7 +123,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
+					placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
 				}
 			}
 		));
@@ -249,7 +250,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
 						@Override
 						public void onSuccess(DeleteFormDataResult result) {
-							placeManager.revealPlace(new PlaceRequest(FormDataListPresenter.nameToken));
+							placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
 							super.onSuccess(result);
 						}
 	

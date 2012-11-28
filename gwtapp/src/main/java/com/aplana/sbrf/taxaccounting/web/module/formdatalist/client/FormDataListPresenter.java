@@ -1,74 +1,49 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
 import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.proxy.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class FormDataListPresenter extends
-		Presenter<FormDataListPresenter.MyView, FormDataListPresenter.MyProxy>
+		FormDataListPresenterBase<FormDataListPresenter.MyProxy>
 		implements FormDataListUiHandlers, FilterReadyEvent.MyHandler {
+	
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
 	 */
 	@ProxyCodeSplit
-	@NameToken(nameToken)
+	@NameToken(FormDataListNameTokens.FORM_DATA_LIST)
 	public interface MyProxy extends ProxyPlace<FormDataListPresenter>, Place {
 	}
-
-	/**
-	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
-	 * 's view.
-	 */
-	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
-		void setFormDataList(List<FormData> records);
-		void setDepartmentMap(Map<Integer, String> departmentMap);
-		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
-
-		public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
-				String headerText, final ValueGetter<C> getter,
-				FieldUpdater<FormData, C> fieldUpdater);
-	}
-
-	public static final String nameToken = "!formDataList";
-
-	private final PlaceManager placeManager;
-	private final DispatchAsync dispatcher;
-
-	private final FilterPresenter filterPresenter;
-	static final Object TYPE_filterPresenter = new Object();
 
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
 			FilterPresenter filterPresenter) {
-		super(eventBus, view, proxy);
-		this.placeManager = placeManager;
-		this.dispatcher = dispatcher;
-		this.filterPresenter = filterPresenter;
+		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter);
 		getView().setUiHandlers(this);
 	}
 
@@ -100,13 +75,7 @@ public class FormDataListPresenter extends
 				}, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.gwtplatform.mvp.client.Presenter#useManualReveal()
-	 */
-	@Override
-	public boolean useManualReveal() {
-		return true;
-	}
+
 
 	/* (non-Javadoc)
 	 * @see com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform.mvp.client.proxy.PlaceRequest)
@@ -115,24 +84,6 @@ public class FormDataListPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 		filterPresenter.initFilter(TaxType.valueOf(request.getParameter("nType", "")));
-	}
-
-	@Override
-	protected void onReveal() {
-		super.onReveal();
-		setInSlot(TYPE_filterPresenter, filterPresenter);
-	}
-
-	@Override
-	protected void onHide() {
-		super.onHide();
-		clearSlot(TYPE_filterPresenter);
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 	/**
