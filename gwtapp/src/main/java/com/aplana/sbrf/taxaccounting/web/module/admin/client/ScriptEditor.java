@@ -70,7 +70,7 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	@Override
 	public void setValue(Script script) {
 		driver.edit(script);
-		initialized = true;
+		initialized = script != null;
 	}
 
 	/**
