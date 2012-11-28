@@ -18,10 +18,10 @@
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">
-	        <g:Label text="Налоговая форма (тип)"/>
+	        <g:Label text="Тип налоговой формы"/>
             <lbe:LongListBoxEditor ui:field="formtype" visibleItemCount="1"/>
 
-            <g:Label text="Вид"/>
+            <g:Label text="Вид налоговой формы"/>
             <lbe:LongListBoxEditor ui:field="kind" visibleItemCount="1" />
         </g:VerticalPanel>
     </g:HorizontalPanel>

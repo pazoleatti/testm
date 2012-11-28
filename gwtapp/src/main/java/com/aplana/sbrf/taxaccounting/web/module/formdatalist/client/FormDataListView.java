@@ -68,8 +68,8 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 			}
 		};
 
-		formDataTable.addColumn(formKindColumn, "Тип");
-		formDataTable.addColumn(formTypeColumn, "Вид");
+		formDataTable.addColumn(formKindColumn, "Тип налоговой формы");
+		formDataTable.addColumn(formTypeColumn, "Вид налоговой формы");
 		formDataTable.addColumn(departmentColumn, "Подразделение");
 		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
 
