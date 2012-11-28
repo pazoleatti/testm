@@ -1,33 +1,30 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
-	@Autowired
-	private FormDataDao formDataDao;
-	
+
 	@Autowired
 	private FormDataAccessService accessService;
 
 	@Autowired
 	private SecurityService securityService;
+
+	@Autowired
+	private FormDataService formDataService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -38,7 +35,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		GetFormDataResult result = new GetFormDataResult();
-		FormData formData = formDataDao.get(action.getFormDataId());
+
+		FormData formData = formDataService.getFormData(userId, action.getFormDataId());
 		result.setFormData(formData);
 
 		Long formDataId = formData.getId();

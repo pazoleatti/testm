@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 /**
  * 
  * @author Eugene Stetsenko
@@ -17,9 +17,12 @@ import com.gwtplatform.dispatch.shared.ActionException;
  */
 @Service
 public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataAction, DeleteFormDataResult> {
-	
+
 	@Autowired
-	private FormDataDao formDataDao;
+	private FormDataService formDataService;
+
+	@Autowired
+	private SecurityService securityService;
 	
 	public DeleteFormDataHandler() {
 		super(DeleteFormDataAction.class);
@@ -27,7 +30,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	
 	@Override
 	public DeleteFormDataResult execute(DeleteFormDataAction action, ExecutionContext context) throws ActionException {
-		formDataDao.delete(action.getFormDataId());
+		formDataService.deleteFormData(securityService.currentUser().getId(), action.getFormDataId());
 		return new DeleteFormDataResult();
 	}
 

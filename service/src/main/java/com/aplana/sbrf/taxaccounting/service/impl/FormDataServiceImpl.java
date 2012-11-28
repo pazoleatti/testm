@@ -1,0 +1,145 @@
+package com.aplana.sbrf.taxaccounting.service.impl;
+
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * Сервис для работы с {@link FormData данными по налоговым формам}.
+ *
+ * @author Vitalii Samolovskikh
+ */
+@Service
+public class FormDataServiceImpl implements FormDataService {
+
+	@Autowired
+	private FormDataDao formDataDao;
+	@Autowired
+	private FormDataAccessService formDataAccessService;
+	@Autowired
+	private FormDataScriptingService formDataScriptingService;
+	@Autowired
+	private TAUserDao userDao;
+
+	/**
+	 * Создать налоговую форму заданного типа
+	 * При создании формы выполняются следующие действия:
+	 * 1) создаётся пустой объект
+	 * 2) если в объявлении формы заданы строки по-умолчанию (начальные данные), то эти строки копируются в созданную форму
+	 * 3) если в объявлении формы задан скрипт создания, то этот скрипт выполняется над создаваемой формой
+	 *
+	 * @param logger         логгер-объект для фиксации диагностических сообщений
+	 * @param userId         идентификатор пользователя, запросившего операцию
+	 * @param formTemplateId идентификатор шаблона формы, по которой создавать объект
+	 * @param departmentId   идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}, к которому относится форма
+	 * @param kind           {@link com.aplana.sbrf.taxaccounting.model.FormDataKind тип налоговой формы} (первичная, сводная, и т.д.), это поле необходимо, так как некоторые виды
+	 *                       налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
+	 *                       - в виде первичной и консолидированной)
+	 * @return созданный и проинициализированный объект данных.
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 *          если у пользователя нет прав создавать налоговую форму с такими параметрами
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException
+	 *          если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
+	 *          обязательных параметров
+	 */
+	@Override
+	public FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind) {
+		if (formDataAccessService.canCreate(userId, formTemplateId, kind, departmentId)) {
+			return formDataScriptingService.createForm(logger, formTemplateId, departmentId, kind, userDao.getUser(userId));
+		} else {
+			throw new AccessDeniedException(
+					"Can't create form: userId=%d, formTemplateId=%d, departmentId=%d, kind=%s",
+					userId, formTemplateId, departmentId, kind.name()
+			);
+		}
+	}
+
+	/**
+	 * Выполнить расчёты по налоговой форме
+	 *
+	 * @param logger   логгер-объект для фиксации диагностических сообщений
+	 * @param userId   идентификатор пользователя, запросившего операцию
+	 * @param formData объект с данными по налоговой форме
+	 */
+	@Override
+	public void doCalc(Logger logger, int userId, FormData formData) {
+		if (formDataAccessService.canEdit(userId, formData.getId())) {
+			formDataScriptingService.processFormData(logger, formData, userDao.getUser(userId));
+		} else {
+			throw new AccessDeniedException(
+					"Can't calculate form: userId=%d, formDataId=%d",
+					userId, formData.getId()
+			);
+		}
+	}
+
+	/**
+	 * Сохранить данные по налоговой форме
+	 *
+	 * @param userId   идентификатор пользователя, выполняющего операцию
+	 * @param formData объект с данными налоговой формы
+	 * @return идентификатор сохранённой записи
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 *          если у пользователя нет прав редактировать налоговую форму с такими параметрами
+	 */
+	@Override
+	public long saveFormData(int userId, FormData formData) {
+		if(formDataAccessService.canEdit(userId, formData.getId())){
+			return formDataDao.save(formData);
+		}else{
+			throw new AccessDeniedException(
+					"Can't save form: userId=%d, formDataId=%d",
+					userId, formData.getId()
+			);
+		}
+	}
+
+	/**
+	 * Получить данные по налоговой форме
+	 *
+	 * @param userId     идентификатор пользователя, выполняющего операцию
+	 * @param formDataId идентификатор записи, которую необходимо считать
+	 * @return объект с данными по налоговой форме
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 *          если у пользователя нет прав просматривать налоговую форму с такими параметрами
+	 */
+	@Override
+	public FormData getFormData(int userId, long formDataId) {
+		if(formDataAccessService.canRead(userId, formDataId)){
+			return formDataDao.get(formDataId);
+		}else{
+			throw new AccessDeniedException(
+					"Can't read form: userId=%d, formDataId=%d",
+					userId, formDataId
+			);
+		}
+	}
+
+	/**
+	 * Удалить данные по налоговой форме
+	 *
+	 * @param userId     идентификатор пользователя, выполняющего операцию
+	 * @param formDataId идентификатор записи, котрую нужно удалить
+	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 *          если у пользователя недостаточно прав для удаления записи
+	 */
+	@Override
+	public void deleteFormData(int userId, long formDataId) {
+		if(formDataAccessService.canDelete(userId, formDataId)){
+			formDataDao.delete(formDataId);
+		}else{
+			throw new AccessDeniedException(
+					"Can't delete form: userId=%d, formDataId=%d",
+					userId, formDataId
+			);
+		}
+	}
+}

@@ -12,7 +12,7 @@ public interface FormDataDao {
 	 * Получить данные по налоговой формы
 	 * @param formDataId идентификатор заполненной налоговой формы
 	 * @return данные по налоговой форме
-	 * @throws DaoException, если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
+	 * @throws com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException, если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData get(long formDataId);
 	/**
@@ -26,7 +26,7 @@ public interface FormDataDao {
 
 	/**
 	 * Возвращает информацию по всем, имеющимся в наличии заполенным формам
-	 * @return
+	 * @return список всех форм
 	 */
 	List<FormData> getAll();
 
