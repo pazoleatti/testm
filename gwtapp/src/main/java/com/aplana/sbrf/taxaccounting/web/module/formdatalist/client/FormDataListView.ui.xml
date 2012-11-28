@@ -6,6 +6,9 @@
 		<g:VerticalPanel width="100%">
 
 		    <g:Label text="Информация о данных по налоговой форме"  height="20px"/>
+            <g:cell horizontalAlignment="ALIGN_CENTER" width="100%">
+                <g:Label ui:field="taxTypeLabel"/>
+            </g:cell>
             <g:HorizontalPanel width="100%" ui:field="filterContentPanel"/>
             <g:HorizontalPanel>
                 <g:Button ui:field="create">Создать</g:Button>

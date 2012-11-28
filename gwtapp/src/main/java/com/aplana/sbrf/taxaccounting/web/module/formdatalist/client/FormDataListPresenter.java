@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
@@ -25,6 +18,9 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy>
@@ -93,7 +89,10 @@ public class FormDataListPresenter extends
 	 */
 	private void loadFormDataList(FormDataFilter filterFormData) {
 		GetFormDataList action = new GetFormDataList();
-		filterFormData.setTaxType(TaxType.valueOf(placeManager.getCurrentPlaceRequest().getParameter("nType", "")));
+		String taxTypeParam = placeManager.getCurrentPlaceRequest().getParameter("nType", "");
+
+		getView().setTaxTypeLabel("Тип налога: " + TaxType.valueOf(taxTypeParam).getName());
+		filterFormData.setTaxType(TaxType.valueOf(taxTypeParam));
 		action.setFormDataFilter(filterFormData);
 
 		dispatcher.execute(action,

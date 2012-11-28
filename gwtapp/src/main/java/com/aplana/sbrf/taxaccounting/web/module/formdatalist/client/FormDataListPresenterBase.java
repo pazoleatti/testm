@@ -16,9 +16,6 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.ContactPagePresenter;
@@ -34,6 +31,9 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -57,6 +57,8 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 
 		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
+
+		void setTaxTypeLabel(String taxTypeLabel);
 
 		public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
 				String headerText, final ValueGetter<C> getter,
