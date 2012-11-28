@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-	<g:HTMLPanel styleName="mainContent">
+	<g:HTMLPanel styleName="mainContent" height="100%">
 			
 		<div ui:field="loadingMessage" class="loadingStatusLabel">
 			<div>Загрузка...</div>
