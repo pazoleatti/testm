@@ -12,7 +12,6 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
@@ -47,25 +46,20 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		return getView().getDataFilter();
 	}
 
-	public void initFilter() {
+	public void initFilter(TaxType taxType) {
 		GetFilterData action = new GetFilterData();
-		//TODO: action нужно брать из закладки! Убрать хард-код!
-		action.setTaxType(TaxType.TRANSPORT);
+		action.setTaxType(taxType);
 		dispatchAsync.execute(action,
 				new AbstractCallback<GetFilterDataResult>() {
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						getView().clearData();
-
 						List<SelectItem> reportPeriodItems = fillPeriodList(result);
 						List<SelectItem> departmentItems = fillDepartmentList(result);
 						List<SelectItem> formTypeItems = fillFormTypeList(result);
 
 						List<SelectItem> type = new ArrayList<SelectItem>();
-						List<SelectItem> period = new ArrayList<SelectItem>();
-						Date date = new Date();
 						type.add(new SelectItem(1L, "Сводная"));
-						period.add(new SelectItem(1L, date.toString()));
 
 						getView().setFormtypeList(type);
 						getView().setPeriodList(reportPeriodItems);

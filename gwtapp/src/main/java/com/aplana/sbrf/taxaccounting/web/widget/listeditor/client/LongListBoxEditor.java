@@ -6,8 +6,9 @@ import com.google.gwt.user.client.ui.ListBox;
 public class LongListBoxEditor extends ListBox implements LeafValueEditor<Long> {
 	@Override
 	public void setValue(Long value) {
-		if (value == null)
+		if (value == null){
 			return;
+		}
 
 		for (int i = 0; i < getItemCount(); i++) {
 			String optValue = getValue(i);
@@ -21,6 +22,9 @@ public class LongListBoxEditor extends ListBox implements LeafValueEditor<Long> 
 
 	@Override
 	public Long getValue() {
+		if(getSelectedIndex() < 0){
+			return null;
+		}
 		return Long.valueOf(getValue(getSelectedIndex()));
 	}
 }

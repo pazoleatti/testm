@@ -61,6 +61,8 @@ public class FormDataListPresenter extends
 	private final FilterPresenter filterPresenter;
 	static final Object TYPE_filterPresenter = new Object();
 
+	private static String CURRENT_TAB = "";
+
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
@@ -114,8 +116,7 @@ public class FormDataListPresenter extends
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		//System.out.println("NAME TOKEN:" + request.getNameToken());
-		filterPresenter.initFilter();
+		filterPresenter.initFilter(TaxType.valueOf(request.getParameter("nType", "")));
 	}
 
 	@Override
@@ -143,9 +144,8 @@ public class FormDataListPresenter extends
 	 */
 	private void loadFormDataList(FormDataFilter filterFormData) {
 		GetFormDataList action = new GetFormDataList();
+		filterFormData.setTaxType(TaxType.valueOf(placeManager.getCurrentPlaceRequest().getParameter("nType", "")));
 		action.setFormDataFilter(filterFormData);
-		//TODO: убрать хардкод!
-		action.setTaxType(TaxType.TRANSPORT);
 
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
@@ -165,8 +165,10 @@ public class FormDataListPresenter extends
 						getView().setDepartmentMap(departmentMap);
 						getView().setReportPeriodMap(reportPeriodMap);
 
-						if (!isVisible()) {
+						if ((!isVisible()) || (!CURRENT_TAB.equals(placeManager.getCurrentPlaceRequest()
+								.getParameter("nType", "")))) {
 							// Вручную вызывается onReveal
+							CURRENT_TAB = placeManager.getCurrentPlaceRequest().getParameter("nType", "");
 							getProxy().manualReveal(FormDataListPresenter.this);
 						}
 						super.onSuccess(result);

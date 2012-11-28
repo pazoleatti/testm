@@ -26,7 +26,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
         GetFormDataListResult res = new GetFormDataListResult();
 		res.setRecords(formDataSearchService.findDataByUserIdAndFilter(0, action.getFormDataFilter()));
 		res.setDepartments(formDataSearchService.listDepartments());
-		res.setReportPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
+		res.setReportPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getFormDataFilter().getTaxType()));
 		return res;
 	}
 

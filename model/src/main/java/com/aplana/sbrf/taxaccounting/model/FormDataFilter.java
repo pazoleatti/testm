@@ -19,6 +19,8 @@ public class FormDataFilter implements Serializable{
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
     private Long kind;
 
+	private TaxType taxType;
+
 	public Long getPeriod() {
 		return period;
 	}
@@ -50,5 +52,13 @@ public class FormDataFilter implements Serializable{
     public void setKind(Long kind) {
         this.kind = kind;
     }
+
+	public TaxType getTaxType() {
+		return taxType;
+	}
+
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
+	}
 
 }

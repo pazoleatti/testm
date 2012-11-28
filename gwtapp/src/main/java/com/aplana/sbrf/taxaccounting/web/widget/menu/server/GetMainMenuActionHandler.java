@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -29,12 +30,10 @@ public class GetMainMenuActionHandler extends
 
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 		menuItems.add(new MenuItem("Домашняя", HomeNameTokens.homePage));
-		menuItems.add(new MenuItem("Транспортный налог",
-				FormDataListNameTokens.formDataListPage));
-		//TODO: добавить зависимость от параметра.
-		menuItems.add(new MenuItem("Налог на прибыль", FormDataListNameTokens.formDataListPage));
-		menuItems.add(new MenuItem("Налог на имущество", FormDataListNameTokens.formDataListPage));
-		menuItems.add(new MenuItem("НДС", FormDataListNameTokens.formDataListPage));
+		menuItems.add(new MenuItem("Транспортный налог",FormDataListNameTokens.formDataListPage + TaxType.TRANSPORT));
+		menuItems.add(new MenuItem("Налог на прибыль", FormDataListNameTokens.formDataListPage + TaxType.INCOME));
+		menuItems.add(new MenuItem("Налог на имущество", FormDataListNameTokens.formDataListPage + TaxType.PROPERTY));
+		menuItems.add(new MenuItem("НДС", FormDataListNameTokens.formDataListPage + TaxType.VAT));
         menuItems.add(new MenuItem("Администрирование", AdminNameTokens.adminPage));
 		menuItems.add(new MenuItem("О системе", AboutNameTokens.aboutPage));
 		menuItems.add(new MenuItem("Контакты", AboutNameTokens.contactPage));
