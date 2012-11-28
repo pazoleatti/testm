@@ -1,29 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
@@ -43,6 +37,10 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> {
 	private Logger logger = Logger.getLogger(getClass().getName());
@@ -200,6 +198,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 									dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
 										@Override
 										public void onSuccess(GoMoveResult result) {
+											view.setLogMessages(result.getLogEntries());
 											super.onSuccess(result);
 										}
 										

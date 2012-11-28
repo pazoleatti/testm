@@ -35,8 +35,11 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 	public GoMoveResult execute(GoMoveAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		formDataService.doMove(action.getFormDataId(), userId, action.getMove(), new Logger());
-		return new GoMoveResult();
+		Logger logger = new Logger();
+		formDataService.doMove(action.getFormDataId(), userId, action.getMove(), logger);
+		GoMoveResult result = new GoMoveResult();
+		result.setLogEntries(logger.getEntries());
+		return result;
 	}
 
 	@Override
