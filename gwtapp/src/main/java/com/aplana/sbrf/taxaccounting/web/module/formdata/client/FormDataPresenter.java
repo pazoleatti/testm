@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
@@ -36,13 +41,8 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> 
 									implements FormDataUiHandlers{
@@ -119,7 +119,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	
 	@Override
 	public void onCancelClicked() {
-		placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
+		placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST).with("nType", String.valueOf(TaxType.TRANSPORT)));
 	}
 	
 	@Override
