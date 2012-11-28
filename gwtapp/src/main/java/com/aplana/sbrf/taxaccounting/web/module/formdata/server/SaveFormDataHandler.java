@@ -33,20 +33,23 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
     public SaveFormDataResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
         try {
             Logger logger = new Logger();
-            final FormData formData = action.getFormData();
+            FormData formData = action.getFormData();
 			TAUser currentUser = securityService.currentUser();
-			formDataService.saveFormData(currentUser.getId(), formData);
 
-            SaveFormDataResult result = new SaveFormDataResult();            
-            
+			// Перед сохранением формы всегда делаем её пересчет.
+			formDataService.doCalc(logger, currentUser.getId(), formData);
+
+			// И если нет ошибок
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                long formDataId = formDataService.saveFormData(currentUser.getId(), formData);
-                logger.info("Данные успешно записаны, идентификтор: %d", formDataId);
-                formData.setId(formDataId);
+				// Сохраняем форму.
+				long formDataId = formDataService.saveFormData(currentUser.getId(), formData);
+				logger.info("Данные успешно записаны, идентификтор: %d", formDataId);
             } else {
                 logger.warn("Данные формы не сохранены, так как обнаружены ошибки");
             }
-            result.setFormData(formData);            
+
+			SaveFormDataResult result = new SaveFormDataResult();
+			result.setFormData(formData);
             result.setLogEntries(logger.getEntries());
             return result;
         } catch (Throwable t) {
