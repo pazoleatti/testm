@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,9 +23,9 @@ import com.gwtplatform.dispatch.shared.ActionException;
  */
 @Service
 public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveResult> {
-	
+
 	@Autowired
-	private TAUserDao userDao;
+	private SecurityService securityService;
 	
 	@Autowired
 	private FormDataWorkflowService workflowService;
@@ -35,13 +36,10 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 	
 	@Override
 	public GoMoveResult execute(GoMoveAction action, ExecutionContext context) throws ActionException {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String login = auth.getName();
-		TAUser user = userDao.getUser(login);
+		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		workflowService.doMove(action.getFormDataId(), userId, action.getMove());
-		GoMoveResult result = new GoMoveResult();
-		return result;
+		return new GoMoveResult();
 	}
 
 	@Override

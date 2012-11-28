@@ -13,6 +13,7 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
 	<context:annotation-config />
+	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
 	<bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule" />
 
 	<bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">

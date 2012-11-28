@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,13 +21,13 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
 	@Autowired
-	private TAUserDao userDao;
-	
-	@Autowired
 	private FormDataDao formDataDao;
 	
 	@Autowired
 	private FormDataAccessService accessService;
+
+	@Autowired
+	private SecurityService securityService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -34,9 +35,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	
 	@Override
 	public GetFormDataResult execute(GetFormData action, ExecutionContext context) throws ActionException {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String login = auth.getName();
-		TAUser user = userDao.getUser(login);
+		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		GetFormDataResult result = new GetFormDataResult();
 		FormData formData = formDataDao.get(action.getFormDataId());
