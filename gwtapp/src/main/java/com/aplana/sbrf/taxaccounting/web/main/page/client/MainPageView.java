@@ -82,7 +82,12 @@ public class MainPageView extends ViewImpl implements MyView {
 		} else {
 			lockCount--;
 		}
-		loadingMessage.getStyle().setVisibility(
-				lockCount == 0 ? Visibility.HIDDEN : Visibility.VISIBLE);
+		if (lockCount <= 0 ){
+			loadingMessage.getStyle().setVisibility(Visibility.HIDDEN);
+			lockCount = 0;
+		} else {
+			loadingMessage.getStyle().setVisibility(Visibility.VISIBLE);
+		}
+		
 	}
 }

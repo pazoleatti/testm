@@ -61,8 +61,6 @@ public class FormDataListPresenter extends
 	private final FilterPresenter filterPresenter;
 	static final Object TYPE_filterPresenter = new Object();
 
-	private static String CURRENT_TAB = "";
-
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
@@ -165,12 +163,12 @@ public class FormDataListPresenter extends
 						getView().setDepartmentMap(departmentMap);
 						getView().setReportPeriodMap(reportPeriodMap);
 
-						if ((!isVisible()) || (!CURRENT_TAB.equals(placeManager.getCurrentPlaceRequest()
-								.getParameter("nType", "")))) {
-							// Вручную вызывается onReveal
-							CURRENT_TAB = placeManager.getCurrentPlaceRequest().getParameter("nType", "");
-							getProxy().manualReveal(FormDataListPresenter.this);
-						}
+
+						// Вручную вызывается onReveal. Вызываем его всегда, даже когда
+						// презентер в состоянии visible, т.к. нам необходима его разблокировка.
+						// Почему GWTP вызывает блокировку даже если страница уже видна - непонятно.
+						getProxy().manualReveal(FormDataListPresenter.this);
+
 						super.onSuccess(result);
 					}
 				});
