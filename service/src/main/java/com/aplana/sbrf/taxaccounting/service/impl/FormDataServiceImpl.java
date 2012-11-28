@@ -1,16 +1,27 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -28,6 +39,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataScriptingService formDataScriptingService;
 	@Autowired
 	private TAUserDao userDao;
+	@Autowired
+	private FormTemplateDao formTemplateDao;
 
 	/**
 	 * Создать налоговую форму заданного типа
@@ -53,7 +66,25 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind) {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind, departmentId)) {
-			return formDataScriptingService.createForm(logger, formTemplateId, departmentId, kind, userDao.getUser(userId));
+			FormTemplate form = formTemplateDao.get(formTemplateId);
+			FormData result = new FormData(form);
+
+			result.setState(WorkflowState.CREATED);
+			result.setDepartmentId(departmentId);
+			// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
+			// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
+			result.setKind(kind);
+
+			for (DataRow predefinedRow : form.getRows()) {
+				DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
+				for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
+					dataRow.put(entry.getKey(), entry.getValue());
+				}
+			}
+
+			// Execute scripts for the form event CREATE
+			formDataScriptingService.executeScripts(userDao.getUser(userId), result, FormDataEvent.CREATE, logger);
+			return result;
 		} else {
 			throw new AccessDeniedException(
 					"Can't create form: userId=%d, formTemplateId=%d, departmentId=%d, kind=%s",
@@ -72,7 +103,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, int userId, FormData formData) {
 		if (formDataAccessService.canEdit(userId, formData.getId())) {
-			formDataScriptingService.processFormData(logger, formData, userDao.getUser(userId));
+			formDataScriptingService.executeScripts(userDao.getUser(userId), formData, FormDataEvent.CALCULATE, logger);
+			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		} else {
 			throw new AccessDeniedException(
 					"Can't calculate form: userId=%d, formDataId=%d",
@@ -141,5 +173,27 @@ public class FormDataServiceImpl implements FormDataService {
 					userId, formDataId
 			);
 		}
+	}
+
+	private void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
+		List<Column> columns = formTemplate.getColumns();
+		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
+		messageDecorator.setScriptName("Проверка обязательных полей");
+		logger.setMessageDecorator(messageDecorator);
+		int rowIndex = 0;
+		for (DataRow row : formData.getDataRows()) {
+			++rowIndex;
+			messageDecorator.setRowIndex(rowIndex);
+			List<String> columnNames = new ArrayList<String>();
+			for (Column col : columns) {
+				if (col.isMandatory() && row.get(col.getAlias()) == null) {
+					columnNames.add(col.getName());
+				}
+			}
+			if (!columnNames.isEmpty()) {
+				logger.error("Не заполнены столбцы %s", columnNames.toString());
+			}
+		}
+		logger.setMessageDecorator(null);
 	}
 }

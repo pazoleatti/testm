@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +27,9 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+/**
+ * Реализация сервиса для выполнения скриптов над формой.
+ */
 @Service
 public class FormDataScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
 	@Autowired
@@ -38,142 +41,128 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 
 	private Map<String, Object> scriptExposedBeans;
 
-	/* (non-Javadoc)
-	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#createForm(com.aplana.sbrf.taxaccounting.log.Logger, int)
+	/**
+	 * Выполняет скрипты формы по определенному событию.
+	 *
+	 * @param user     текущий пользователь. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
+	 *                 не должно зависеть от пользователя.
+	 * @param formData данные налоговой формы
+	 * @param event    событие формы
+	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
 	 */
 	@Override
-	public FormData createForm(Logger logger, int formTemplateId, int departmentId, FormDataKind kind, TAUser currentUser) {
-		FormTemplate form = formTemplateDao.get(formTemplateId);
-		FormData result = new FormData(form);
+	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger) {
+		ScriptEngine engine = getScriptEngine();
 
-		result.setState(WorkflowState.CREATED);
-		result.setDepartmentId(departmentId);
-		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
-		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
-		result.setKind(kind);
+		// predefined script variables
+		engine.put("logger", logger);
+		engine.put("formData", formData);
+		engine.put("user", user);
+		engine.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
+		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
 
-		for (DataRow predefinedRow : form.getRows()) {
-			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
-			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
-				dataRow.put(entry.getKey(), entry.getValue());
+		// execute scripts
+		List<Script> scripts = formTemplateDao.get(formData.getFormTemplateId()).getScriptsByEvent(event);
+		for (Script script : scripts) {
+			if (script.isRowScript()) {
+				executeRowScript(engine, script, formData, logger);
+			} else {
+				executeFormScript(engine, script, logger);
 			}
 		}
-
-		// Execute scripts for the form event CREATE
-		List<Script> scripts = form.getScriptsByEvent(FormDataEvent.CREATE);
-		executeScripts(scripts, result, currentUser, logger);
-		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aplana.sbrf.taxaccounting.service.impl.FormDataScriptingService#processFormData(com.aplana.sbrf.taxaccounting.log.Logger, com.aplana.sbrf.taxaccounting.model.FormData)
+	/**
+	 * Выполняет скрипт для всей формы в целом.
+	 *
+	 * @param engine задает среду выполнения скрипта
+	 * @param script скрипт формы
+	 * @param logger логгер
 	 */
-	@Override
-	public void processFormData(Logger logger, FormData formData, TAUser currentUser) {
-		FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
-		List<Script> calcScripts = form.getScriptsByEvent(FormDataEvent.CALCULATE);
+	private void executeFormScript(ScriptEngine engine, Script script, Logger logger) {
+		ScriptMessageDecorator d = new ScriptMessageDecorator();
+		logger.setMessageDecorator(d);
 
-		executeScripts(calcScripts, formData, currentUser, logger);
-		checkMandatoryColumns(formData, form, logger);
+		executeScript(engine, script, logger, d);
+
 		logger.setMessageDecorator(null);
 	}
 
 	/**
-	 * Выполняет последовательность сриптов для определенной формы
+	 * Выполняет скрипт для каждой строки формы.
 	 *
-	 * @param scripts  Список скриптов. Порядок формы задает порядок выполнения.
-	 * @param formData Данные формы
-	 * @param logger   Логгер для сохранения ошщибок скрипта.
+	 * @param engine   задает среду выполнения скрипта
+	 * @param script   скрипт строки
+	 * @param formData данные формы
+	 * @param logger   логгер
 	 */
-	private void executeScripts(List<Script> scripts, FormData formData, TAUser currentUser, Logger logger) {
-		ScriptEngine engine = getScriptEngine();
-		engine.put("logger", logger);
-		engine.put("formData", formData);
-		engine.put("user", currentUser);
-		engine.put("userDepartment", departmentDao.getDepartment(currentUser.getDepartmentId()));
-		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
-		ScriptMessageDecorator d = new ScriptMessageDecorator();
-		for (Script calcScript : scripts) {
-			if (calcScript.isRowScript()) {
-				performRowScript(calcScript, formData, engine, logger);
-			} else {
-				try {
-					logger.setMessageDecorator(d);
-					if (calcScript.getCondition() != null) {
-						d.setScriptName(calcScript.getName() + " - Условие исполнения");
-						boolean check = (Boolean) engine.eval(calcScript.getCondition());
-						if (!check) {
-							continue;
-						}
-					}
-					d.setScriptName(calcScript.getName());
-					engine.eval(calcScript.getBody());
-				} catch (Exception e) {
-					logger.error(e);
-				} finally {
-					logger.setMessageDecorator(null);
-				}
-			}
-		}
-	}
+	private void executeRowScript(ScriptEngine engine, Script script, FormData formData, Logger logger) {
+		RowScriptMessageDecorator decorator = new RowScriptMessageDecorator();
+		logger.setMessageDecorator(decorator);
 
-	private void performRowScript(Script rowScript, FormData formData, ScriptEngine engine, Logger logger) {
-		RowScriptMessageDecorator d = new RowScriptMessageDecorator();
-		logger.setMessageDecorator(d);
-		int rowIndex = 0;
-		for (DataRow row : formData.getDataRows()) {
-			++rowIndex;
-			d.setRowIndex(rowIndex);
+		// Если происходит ошибка, то выполнение данного скрипта для оставшихся строк останавливается.
+		// Если мы продолжим выполнение скрипта, то рискуем получить количество ошибок по количеству строк в форме,
+		// т.е. очень много. С другой стороны, если мы останавливаем выполнение, то не получим все ошибки и
+		// лишим пользователя возможности исправить все ошибки сразу.
+		//
+		// TODO: Надо подумать над поведением.
+		boolean error = false;
+		for (ListIterator<DataRow> i = formData.getDataRows().listIterator(); i.hasNext() && !error; ) {
+			int rowIndex = i.nextIndex();
+			DataRow row = i.next();
+
+			decorator.setRowIndex(rowIndex);
 			engine.put("row", row);
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
-			try {
-				if (rowScript.getCondition() != null) {
-					d.setScriptName(rowScript.getName() + " - Условие исполнения");
-					boolean check = (Boolean) engine.eval(rowScript.getCondition());
-					if (!check) {
-						continue;
-					}
-				}
-				d.setScriptName(rowScript.getName());
-				engine.eval(rowScript.getBody());
-			} catch (Exception e) {
-				logger.error(e);
-				// TODO: возможно не стоит делать брек, а ограничиться выводом сообщения?
-				// или даже сделать опцию в скрипте, определяющую данное поведение
-				break;
-			} finally {
-				Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-				bindings.remove("row");
-				bindings.remove("rowIndex");
-				bindings.remove("rowAlias");
-			}
+
+			error = !executeScript(engine, script, logger, decorator);
+
+			Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+			bindings.remove("row");
+			bindings.remove("rowIndex");
+			bindings.remove("rowAlias");
 		}
+
 		logger.setMessageDecorator(null);
 	}
 
-	private void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
-		List<Column> columns = formTemplate.getColumns();
-		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
-		messageDecorator.setScriptName("Проверка обязательных полей");
-		logger.setMessageDecorator(messageDecorator);
-		int rowIndex = 0;
-		for (DataRow row : formData.getDataRows()) {
-			++rowIndex;
-			messageDecorator.setRowIndex(rowIndex);
-			List<String> columnNames = new ArrayList<String>();
-			for (Column col : columns) {
-				if (col.isMandatory() && row.get(col.getAlias()) == null) {
-					columnNames.add(col.getName());
-				}
+	/**
+	 * Выполняет любой скрипт, ловит ошибки, записывает их в логгер.
+	 *
+	 * @param engine    задает средуу выполнения скрипта
+	 * @param script    скрипт
+	 * @param logger    логгер
+	 * @param decorator декоратор для ошибок
+	 */
+	private boolean executeScript(ScriptEngine engine, Script script, Logger logger, ScriptMessageDecorator decorator) {
+		try {
+			boolean executeCondition = true;
+
+			// Condition
+			if (script.getCondition() != null) {
+				decorator.setScriptName(script.getName() + " - Условие исполнения");
+				executeCondition = (Boolean) engine.eval(script.getCondition());
 			}
-			if (!columnNames.isEmpty()) {
-				logger.error("Не заполнены столбцы %s", columnNames.toString());
+
+			// If condition is absent or is true then execute script
+			if (executeCondition) {
+				decorator.setScriptName(script.getName());
+				engine.eval(script.getBody());
 			}
+
+			return true;
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
 		}
-		logger.setMessageDecorator(null);
 	}
 
+	/**
+	 * Создает и возвращает среду выполнения для скрипта
+	 *
+	 * @return engine
+	 */
 	private ScriptEngine getScriptEngine() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");
