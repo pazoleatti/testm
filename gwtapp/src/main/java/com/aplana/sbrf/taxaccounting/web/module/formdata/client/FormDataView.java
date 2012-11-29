@@ -19,6 +19,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -58,6 +59,19 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	Button printButton;
 	@UiField
 	Button deleteFormButton;
+	
+	@UiField
+	Label formTypeLabel;
+	@UiField
+	Label taxTypeLabel;
+	@UiField
+	Label formKindLabel;
+	@UiField
+	Label departmentIdLabel;
+	@UiField
+	Label reportPeriodLabel;
+	@UiField
+	Label stateLabel;
 	
 	
 	
@@ -269,4 +283,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
             getUiHandlers().onDeleteFormClicked();
         }
     }
+
+	@Override
+	public void setAdditionalFormInfo(String formType, String taxType, String formKind,
+										String departmentId, String reportPeriod, String state) {
+		taxTypeLabel.setText("Тип налога: " + taxType);
+		formTypeLabel.setText(" Вид налоговой формы: " + formType);
+		formKindLabel.setText("Тип налоговой формы: " + formKind);
+		departmentIdLabel.setText("Подразделение: " + departmentId);
+		reportPeriodLabel.setText("Отчётный период: " + reportPeriod);
+		stateLabel.setText("Состояние: " + state);
+	}
 }

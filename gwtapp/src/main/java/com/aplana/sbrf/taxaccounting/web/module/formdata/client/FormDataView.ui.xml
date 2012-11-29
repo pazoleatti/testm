@@ -3,6 +3,18 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
 	<g:VerticalPanel width="100%" height="100%">
 		<g:Label text="Информация о данных по налоговой форме"  height="20px"/>
+		<g:HorizontalPanel >
+			<g:VerticalPanel spacing="5">
+				<g:Label ui:field="taxTypeLabel"/>
+				<g:Label ui:field="formTypeLabel"/>
+				<g:Label ui:field="formKindLabel"/>
+			</g:VerticalPanel>
+			<g:VerticalPanel spacing="5">
+				<g:Label ui:field="departmentIdLabel"/>
+				<g:Label ui:field="reportPeriodLabel"/>
+				<g:Label ui:field="stateLabel"/>
+			</g:VerticalPanel>
+		</g:HorizontalPanel>
 		<c:CellList ui:field="loggerList" width="100%"/>
 		<g:FlowPanel height="20px">
 			<g:Button ui:field="saveButton">Сохранить</g:Button>

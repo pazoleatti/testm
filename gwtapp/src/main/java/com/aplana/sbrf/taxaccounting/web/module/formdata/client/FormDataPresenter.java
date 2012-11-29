@@ -18,6 +18,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMove
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
@@ -73,6 +75,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void activateReadOnlyMode();
 		void loadForm(FormData formData, AccessFlags flags);
 		void activateReadOnlyMode(FormData data);
+		void setAdditionalFormInfo(String formType, String taxType, String formKind,
+									String departmentId, String reportPeriod, String state);
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -101,9 +105,38 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			@Override
 			public void onSuccess(GetFormDataResult result) {
 				getView().loadFormData(result.getFormData(), result.getAccessFlags());
+				setAdditionalFormInfo();
 				super.onSuccess(result);
 			}
 		});
+	}
+	
+//	@Override
+//	protected void onBind() {
+//		super.onBind();
+//		
+//	}
+	
+	private void setAdditionalFormInfo() {
+		
+		GetNamesForIdAction action = new GetNamesForIdAction();
+		action.setDepartmentId(getView().getFormData().getDepartmentId());
+		action.setReportPeriodId(getView().getFormData().getReportPeriodId());
+		dispatcher.execute(action, new AbstractCallback<GetNamesForIdResult>() {
+			@Override
+			public void onSuccess(GetNamesForIdResult result) {
+				getView().setAdditionalFormInfo(
+						getView().getFormData().getFormType().getName(),
+						getView().getFormData().getFormType().getTaxType().getName(),
+						getView().getFormData().getKind().getName(),
+						result.getDepartmenName(),
+						result.getReportPeriod(),
+						getView().getFormData().getState().getName()
+					);
+				super.onSuccess(result);
+			}
+		});
+		
 	}
 
 	@Override
