@@ -19,6 +19,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -109,7 +110,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 	
 	public void loadForm(FormData formData, AccessFlags flags) {
-		buttonPanel.clear();
+//		buttonPanel.clear();
 		factory.setReadOnly(readOnly);
 		this.formData = formData;
 		for (Column col: formData.getFormColumns()) {
@@ -293,5 +294,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 		departmentIdLabel.setText("Подразделение: " + departmentId);
 		reportPeriodLabel.setText("Отчётный период: " + reportPeriod);
 		stateLabel.setText("Состояние: " + state);
+	}
+
+	@Override
+	public AccessFlags getFlags() {
+		return flags;
 	}
 }

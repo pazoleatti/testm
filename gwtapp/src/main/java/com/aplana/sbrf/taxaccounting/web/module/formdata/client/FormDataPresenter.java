@@ -69,6 +69,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void loadFormData(FormData formData, AccessFlags flags);
 		void reloadFormData(FormData formData, AccessFlags flags);
 		void reloadRows();
+		AccessFlags getFlags();
 		FormData getFormData();
 		void setLogMessages(List<LogEntry> logEntries);
 		void reset();
@@ -166,6 +167,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			@Override
 			public void onSuccess(SaveFormDataResult result) {
 //				view.activateReadOnlyMode(result.getFormData());
+				view.reloadFormData(result.getFormData(), view.getFlags());
 				view.setLogMessages(result.getLogEntries());	
 				super.onSuccess(result);
 			}
@@ -251,6 +253,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
 			@Override
 			public void onSuccess(RecalculateFormDataResult result) {
+				getView().reloadFormData(result.getFormData(), getView().getFlags());
 				getView().setLogMessages(result.getLogEntries());
 				super.onSuccess(result);
 			}
