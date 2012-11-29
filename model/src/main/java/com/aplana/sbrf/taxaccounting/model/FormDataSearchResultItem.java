@@ -12,6 +12,8 @@ public class FormDataSearchResultItem {
 	private FormDataKind formDataKind;
 	// Стадия жизненного цикла
 	private WorkflowState state;
+	// Идентификатор описания налоговой формы
+	private Integer formTemplateId;
 	// Идентификатор вида налоговой формы
 	private Integer formTypeId;
 	// Название вида налоговой формы
@@ -46,6 +48,12 @@ public class FormDataSearchResultItem {
 	}
 	public void setState(WorkflowState state) {
 		this.state = state;
+	}
+	public Integer getFormTemplateId() {
+		return formTemplateId;
+	}
+	public void setFormTemplateId(Integer formTemplateId) {
+		this.formTemplateId = formTemplateId;
 	}
 	public Integer getFormTypeId() {
 		return formTypeId;
