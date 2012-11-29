@@ -69,12 +69,6 @@
 		<description>Все аутентифицированные пользователи</description>	
 		<role-name>taxaccountingUsers</role-name>
 	</security-role>
-<!--
-	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>defaultWIMFileBasedRealm</realm-name>
-	</login-config>
--->
 
 	<login-config>
 			<auth-method>FORM</auth-method>
@@ -89,6 +83,7 @@
 		<web-resource-collection>
 			<web-resource-name>Protected Pages</web-resource-name>
 			<url-pattern>/Main.html</url-pattern>
+			<url-pattern>/dispatch/*</url-pattern>
 			<http-method>DELETE</http-method>
 			<http-method>GET</http-method>
 			<http-method>POST</http-method>

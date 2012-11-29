@@ -8,6 +8,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
+ * Сервлет для выхода из системы. Очищает сессию и редиректит на страницу авторизации.
+ *
  * @author Vitalii Samolovskikh
  */
 public class LogoutServlet extends HttpServlet {
