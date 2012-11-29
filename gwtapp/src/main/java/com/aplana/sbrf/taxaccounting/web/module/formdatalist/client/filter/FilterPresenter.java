@@ -36,6 +36,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	private final DispatchAsync dispatchAsync;
 	//TODO: этот MAGIC_NUMBER уйдет когда разберемся с LongListBoxEditor, пока используем данную метку для обработки параметра ВСЕ
 	private static final long MAGIC_NUMBER = Long.MAX_VALUE;
+	private static final int DEFAULT_DEPARTMENT_SELECTED_ITEM = 1;
 
 	@Inject
 	public FilterPresenter(EventBus eventBus, MyView view,
@@ -67,6 +68,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						getView().setKindList(formKindList);
 
 						FormDataFilter formDataFilter = new FormDataFilter();
+						formDataFilter.setDepartment(departmentItems.get(DEFAULT_DEPARTMENT_SELECTED_ITEM).getId());
 						getView().setDataFilter(formDataFilter);
 
 						FilterReadyEvent.fire(FilterPresenter.this);
