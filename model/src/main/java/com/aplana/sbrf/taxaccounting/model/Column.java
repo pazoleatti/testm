@@ -10,7 +10,7 @@ import java.io.Serializable;
 public abstract class Column implements Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private int id;
+	private Integer id = null;
 	private String name;
 	private String alias;
 	private int width;
@@ -24,7 +24,7 @@ public abstract class Column implements Ordered, Serializable {
 	 * Если значение < 0, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
 	 * @return идентификатор столбца
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	
@@ -32,7 +32,7 @@ public abstract class Column implements Ordered, Serializable {
 	 * Задать значение идентификатора столбца
 	 * @param id значение идентификатора, для новых столбцов нужно задавать отрицательные значения
 	 */
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getName() {

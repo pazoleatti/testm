@@ -87,12 +87,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		int order = 0;
 		for (Column col: columns) {
 			col.setOrder(++order);
-			if (col.getId() < 0) {
+			if (col.getId() == null) {
 				newColumns.add(col);
 			} else {
 				oldColumns.add(col);
+				removedColumns.remove(col.getId());
 			}
-			removedColumns.remove(col.getId());
 		}
 		
 		jt.batchUpdate(

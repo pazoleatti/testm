@@ -57,12 +57,17 @@ public class FormTemplate implements Serializable {
 	 * @return определение столбца
 	 * @throws IllegalArgumentException если в определении формы отсутствует столбец с указанным <code>id</code>
 	 */
-	public Column getColumn(int columnId) {
+	public Column getColumn(Integer columnId) {
+		if(columnId == null){
+			throw new IllegalArgumentException("Argument columnId can't be null.");
+		}
+
 		for (Column col : columns) {
-			if (col.getId() == columnId) {
+			if (columnId.equals(col.getId())) {
 				return col;
 			}
 		}
+
 		throw new IllegalArgumentException("Wrong columnId: " + columnId);
 	}
 
