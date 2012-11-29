@@ -84,7 +84,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		List<Script> newScripts = new ArrayList<Script>();
 
 		for (Script script : formTemplate.getScripts()) {
-			if (script.getId() <= 0) {
+			if (script.getId() == null) {
 				newScripts.add(script);
 			} else {
 				removedScriptIds.remove(script.getId());

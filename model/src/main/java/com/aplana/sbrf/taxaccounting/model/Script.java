@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class Script implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private int id;
+	private Integer id = null;
 	private String body;
 
 	/**
@@ -47,7 +47,7 @@ public class Script implements Serializable {
 	 * Получить идентификатор скрипта
 	 * @return идентификатор скрипта
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -55,7 +55,7 @@ public class Script implements Serializable {
 	 * Задать идентификатор скрипта
 	 * @param id идентификатор скрипта
 	 */
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

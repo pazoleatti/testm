@@ -92,7 +92,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 */
 	@Override
 	public void upEventScript() {
-		Script script = getSelectedScriptById(getView().getEventScriptListBox());
+		Script script = getSelectedScript(getView().getEventScriptListBox());
 		FormDataEvent event = getSelectedEvent();
 		if (script != null && event != null) {
 			List<Script> scripts = formTemplate.getScriptsByEvent(event);
@@ -114,7 +114,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 */
 	@Override
 	public void downEventScript() {
-		Script script = getSelectedScriptById(getView().getEventScriptListBox());
+		Script script = getSelectedScript(getView().getEventScriptListBox());
 		FormDataEvent event = getSelectedEvent();
 		if (script != null && event != null) {
 			List<Script> scripts = formTemplate.getScriptsByEvent(event);
@@ -144,30 +144,28 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 
 		FormDataEvent event = getSelectedEvent();
 
-		if (event != null) {
-			List<Script> scripts = formTemplate.getScriptsByEvent(event);
-			if (scripts != null) {
-				for (Script script : scripts) {
-					slb.addItem(script.getName(), String.valueOf(script.getId()));
+		List<Script> scripts = formTemplate.getScripts();
+
+		if (event != null && scripts != null) {
+			List<Script> eventScripts = formTemplate.getScriptsByEvent(event);
+			if (eventScripts != null) {
+				for (Script script : eventScripts) {
+					slb.addItem(script.getName(), String.valueOf(formTemplate.indexOfScript(script)));
 				}
 			}
 
-			List<Script> freeScripts = formTemplate.getScripts();
-			if (freeScripts != null) {
-				freeScripts = new ArrayList<Script>(freeScripts);
-
-				if (scripts != null) {
-					for (Iterator<Script> i = freeScripts.iterator(); i.hasNext(); ) {
-						Script script = i.next();
-						if (scripts.contains(script)) {
-							i.remove();
-						}
+			List<Script> freeScripts = new ArrayList<Script>(scripts);
+			if (eventScripts != null) {
+				for (Iterator<Script> i = freeScripts.iterator(); i.hasNext(); ) {
+					Script script = i.next();
+					if (eventScripts.contains(script)) {
+						i.remove();
 					}
 				}
+			}
 
-				for (Script script : freeScripts) {
-					flb.addItem(script.getName(), String.valueOf(script.getId()));
-				}
+			for (Script script : freeScripts) {
+				flb.addItem(script.getName(), String.valueOf(formTemplate.indexOfScript(script)));
 			}
 		}
 	}
@@ -193,7 +191,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 */
 	@Override
 	public void addScriptToEvent() {
-		Script script = getSelectedScriptById(getView().getFreeScriptListBox());
+		Script script = getSelectedScript(getView().getFreeScriptListBox());
 		if (script != null) {
 			formTemplate.addEventScript(getSelectedEvent(), script);
 			selectEvent();
@@ -205,17 +203,11 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 *
 	 * @param lb ListBox
 	 */
-	private Script getSelectedScriptById(ListBox lb) {
+	private Script getSelectedScript(ListBox lb) {
 		Script script = null;
 		int ind = lb.getSelectedIndex();
 		if (ind >= 0) {
-			int id = Integer.valueOf(lb.getValue(ind));
-			for (Script sc : formTemplate.getScripts()) {
-				if (sc.getId() == id) {
-					script = sc;
-					break;
-				}
-			}
+			script = formTemplate.getScripts().get(Integer.valueOf(lb.getValue(ind)));
 		}
 		return script;
 	}
@@ -227,7 +219,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 */
 	@Override
 	public void removeScriptFromEvent() {
-		Script script = getSelectedScriptById(getView().getEventScriptListBox());
+		Script script = getSelectedScript(getView().getEventScriptListBox());
 		if (script != null) {
 			formTemplate.removeEventScript(getSelectedEvent(), script);
 			selectEvent();
