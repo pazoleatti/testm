@@ -72,7 +72,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		AccessFlags getFlags();
 		FormData getFormData();
 		void setLogMessages(List<LogEntry> logEntries);
-		void reset();
+		void cleanTable();
 		Boolean isReadOnly();
 		void activateEditMode();
 		void activateReadOnlyMode();
@@ -114,11 +114,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		});
 	}
 	
-//	@Override
-//	protected void onBind() {
-//		super.onBind();
-//		
-//	}
 	
 	private void setAdditionalFormInfo() {
 		
@@ -142,10 +137,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		
 	}
 
+	
 	@Override
 	protected void onReset() {
 		super.onReset();
-		getView().reset();
+		getView().cleanTable();
 	}
 	
 	@Override
