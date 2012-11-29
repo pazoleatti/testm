@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -15,6 +16,9 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	@Autowired
 	private FormDataSearchService formDataSearchService;
 
+	@Autowired
+	private SecurityService securityService;
+
 
     public GetFilterDataHandler() {
         super(GetFilterData.class);
@@ -23,7 +27,8 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
         GetFilterDataResult res = new GetFilterDataResult();
-        res.setDepartments(formDataSearchService.listDepartments());
+        res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
+				.getDepartmentId()));
         res.setFormTypes(formDataSearchService.listFormTypesByTaxType(action.getTaxType()));
 		res.setPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
         return res;

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,6 +15,9 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 	@Autowired
 	private FormDataSearchService formDataSearchService;
 
+	@Autowired
+	private SecurityService securityService;
+
 	public GetFormDataListHandler() {
 		super(GetFormDataList.class);
 	}
@@ -24,8 +28,10 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 		* в рамках прототипа это не делается*/
 
         GetFormDataListResult res = new GetFormDataListResult();
-		res.setRecords(formDataSearchService.findDataByUserIdAndFilter(0, action.getFormDataFilter()));
-		res.setDepartments(formDataSearchService.listDepartments());
+		res.setRecords(formDataSearchService.findDataByUserIdAndFilter(securityService.currentUser(),
+				action.getFormDataFilter()));
+		res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
+				.getDepartmentId()));
 		res.setReportPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getFormDataFilter().getTaxType()));
 		return res;
 	}

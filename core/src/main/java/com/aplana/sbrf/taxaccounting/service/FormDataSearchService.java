@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 import java.util.List;
 
@@ -12,20 +13,21 @@ import java.util.List;
 public interface FormDataSearchService {
 
 	/**
-	 * Данный метод, основываясь на userId и formDataFilter, формирует параметры фильтра {@link FormDataDaoFilter}, а
-	 * затем сформированный FormDataDaoFilter передает в функцию {@link FormDataSearchDao.findByFilter()} для выполнения
-	 * запроса к базе по заданным параметрам фильтра.
-	 * @param userId идентификатор пользователя
+	 * Данный метод, основываясь на текущем пользователе и formDataFilter, формирует параметры фильтра
+	 * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию
+	 * {@link FormDataSearchDao.findByFilter()} для выполнения запроса к базе по заданным параметрам фильтра.
+	 * @param currentUser текущий пользователь
 	 * @param formDataFilter фильтр, по параметрам которого происходит поиск данных по отчетной форме
 	 * @return список идентификаторов данных по отчётным формам, соответствующие критериям поиска.
 	 */
-	List<FormData> findDataByUserIdAndFilter(int userId, FormDataFilter formDataFilter);
+	List<FormData> findDataByUserIdAndFilter(TAUser currentUser, FormDataFilter formDataFilter);
 
 	/**
-	 * Получить список всех отчетных периодов
-	 * @return список всех отчетных периодов
+	 * Получить список, включающий в себя департамент и его дочернии департаменты
+	 * @param parentDepartmentId - идентификатор департамента, по которому выбираются дочернии департаменты
+	 * @return список, включающий в себя департамент и его дочернии департаменты
 	 */
-	List<Department> listDepartments();
+	List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId);
 
 	/**
 	 * Получить список всех видов налоговых форм

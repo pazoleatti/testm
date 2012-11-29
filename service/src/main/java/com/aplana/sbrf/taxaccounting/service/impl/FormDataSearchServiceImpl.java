@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,15 +32,11 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 
 	@Override
-	public List<FormData> findDataByUserIdAndFilter(int userId, FormDataFilter formDataFilter) {
-		/*TODO: на данный момент параметр ВСЕ обрабатывается, но пока-что не учитывается userId
-		* Еще один момент: пока что параметр ВСЕ передается не как null, а как Long.MAX_VALUE,
-		* будет исправлено, когда решится проблема с LongListBoxEditor*/
-
+	public List<FormData> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		if(formDataFilter.getDepartment() == Long.MAX_VALUE){
-			List<Department> departmentList = departmentDao.listDepartments();
+			List<Department> departmentList = listAllDepartmentsByParentDepartmentId(user.getDepartmentId());
 			List<Long> departmentLongList = new ArrayList<Long>();
 			for(Department department : departmentList){
 				departmentLongList.add((long)department.getId());
@@ -87,8 +84,11 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	@Override
-	public List<Department> listDepartments() {
-		return departmentDao.listDepartments();
+	public List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId) {
+		List<Department> departmentList = new ArrayList<Department>();
+		departmentList.add(departmentDao.getDepartment(parentDepartmentId));
+		departmentList.addAll(departmentDao.getChildren(parentDepartmentId));
+		return departmentList;
 	}
 
 	@Override

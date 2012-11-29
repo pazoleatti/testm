@@ -25,6 +25,10 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		return result;
 	}
 
+	public List<Department> getChildren(int parentDepartmentId){
+		return departmentMapper.getChildren(parentDepartmentId);
+	}
+
     @Override
     public List<Department> listDepartments(){
         return departmentMapper.getAll();
