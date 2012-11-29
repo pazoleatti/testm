@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * 
@@ -9,12 +10,12 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  *
  */
 public class RecalculateFormDataAction extends UnsecuredActionImpl<RecalculateFormDataResult> {
-	private Long formDataId;
+	private FormData formData;
 	
-	public Long getFormDataId() {
-		return formDataId;
+	public FormData getFormData() {
+		return formData;
 	}
-	public void setFormDataId(Long formDataId) {
-		this.formDataId = formDataId;
+	public void setFormData(FormData formData) {
+		this.formData = formData;
 	}
 }

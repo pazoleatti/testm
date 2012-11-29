@@ -38,14 +38,12 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 	public RecalculateFormDataResult execute(RecalculateFormDataAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		
-		FormData formData = formDataService.getFormData(userId, action.getFormDataId());
 		Logger logger = new Logger();
 		
 		formDataService.doCalc(
 				logger, 
 				userId, 
-				formData
+				action.getFormData()
 				);
 		RecalculateFormDataResult result = new RecalculateFormDataResult();
 		result.setLogEntries(logger.getEntries());

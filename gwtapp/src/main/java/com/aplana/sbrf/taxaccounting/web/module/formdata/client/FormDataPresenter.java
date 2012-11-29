@@ -247,12 +247,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void onRecalculateClicked() {
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
-		action.setFormDataId(getView().getFormData().getId());
+		action.setFormData(getView().getFormData());
 		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
 			@Override
 			public void onSuccess(RecalculateFormDataResult result) {
 				getView().setLogMessages(result.getLogEntries());
-				Window.alert(""+result.getLogEntries().size());
 				super.onSuccess(result);
 			}
 		});
