@@ -255,6 +255,10 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		script.setName("Новый");
 		formTemplate.addScript(script);
 		bindFormTemplate();
+
+		ListBox listBox = getView().getScriptListBox();
+		listBox.setSelectedIndex(listBox.getItemCount() - 1);
+		bindScript();
 	}
 
 	/**

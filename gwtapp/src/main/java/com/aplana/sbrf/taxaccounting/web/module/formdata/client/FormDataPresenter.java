@@ -182,9 +182,9 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 							dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
 								@Override
 								public void onSuccess(GoMoveResult result) {
+									view.setLogMessages(result.getLogEntries());
 									super.onSuccess(result);
 								}
-								
 							});
 						}
 					});
