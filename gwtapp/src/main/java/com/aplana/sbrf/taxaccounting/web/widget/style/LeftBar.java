@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.tools;
+package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import java.util.Iterator;
 
@@ -10,49 +10,38 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Bar extends Composite implements HasWidgets {
+public class LeftBar extends Composite implements HasWidgets{
 
-	private static BarUiBinder uiBinder = GWT.create(BarUiBinder.class);
+	private static Binder uiBinder = GWT.create(Binder.class);
 
-	interface BarUiBinder extends UiBinder<Widget, Bar> {
+	interface Binder extends UiBinder<Widget, LeftBar> {
 	}
-
-	public Bar() {
-		initWidget(uiBinder.createAndBindUi(this));
-	}
-
-	@UiField
-	Panel leftPlaceHolder;
 	
-	Panel rightPlaceHolder;
+	@UiField
+	Panel placeHolder;
 
-	public Bar(String firstName) {
+	public LeftBar() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
 	public void add(Widget w) {
-		// TODO Auto-generated method stub
-		
+		placeHolder.add(w);
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		placeHolder.clear();
 	}
 
 	@Override
 	public Iterator<Widget> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		return placeHolder.iterator();
 	}
 
 	@Override
 	public boolean remove(Widget w) {
-		
-		// TODO Auto-generated method stub
-		return false;
+		return placeHolder.remove(w);
 	}
 
 }

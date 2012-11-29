@@ -1,21 +1,28 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:cell="urn:import:com.google.gwt.user.cellview.client">
-	
-		<g:VerticalPanel width="100%">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:cell="urn:import:com.google.gwt.user.cellview.client"
+	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
-		    <g:Label text="Информация о данных по налоговой форме"  height="20px"/>
-            <g:cell horizontalAlignment="ALIGN_CENTER" width="100%">
-                <g:Label ui:field="taxTypeLabel"/>
-            </g:cell>
-            <g:HorizontalPanel width="100%" ui:field="filterContentPanel"/>
-            <g:HorizontalPanel>
-                <g:Button ui:field="create">Создать</g:Button>
-                <g:Button ui:field="apply">Применить</g:Button>
-            </g:HorizontalPanel>
-            <cell:CellTable ui:field="formDataTable" width="100%"/>
+	<g:VerticalPanel width="100%">
 
-        </g:VerticalPanel>
-		
+		<g:Label text="Информация о данных по налоговой форме" height="20px" />
+		<g:cell horizontalAlignment="ALIGN_CENTER" width="100%">
+			<g:Label ui:field="taxTypeLabel" />
+		</g:cell>
+		<g:HorizontalPanel width="100%" ui:field="filterContentPanel" />
+
+		<style:Bar>
+			<style:LeftBar>
+				<g:Button ui:field="create">Создать</g:Button>
+				<g:Button ui:field="apply">Применить</g:Button>
+			</style:LeftBar>
+		</style:Bar>
+
+		<g:HorizontalPanel>
+
+		</g:HorizontalPanel>
+		<cell:CellTable ui:field="formDataTable" width="100%" />
+
+	</g:VerticalPanel>
+
 </ui:UiBinder> 
