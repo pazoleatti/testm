@@ -231,7 +231,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@UiHandler("saveButton")
 	void onSaveButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onCancelClicked();
+            getUiHandlers().onSaveClicked();
         }
     }
 	
@@ -283,7 +283,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
             getUiHandlers().onDeleteFormClicked();
         }
     }
-
+	
 	@Override
 	public void setAdditionalFormInfo(String formType, String taxType, String formKind,
 										String departmentId, String reportPeriod, String state) {

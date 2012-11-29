@@ -22,6 +22,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdAct
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -163,7 +165,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 			@Override
 			public void onSuccess(SaveFormDataResult result) {
-				view.activateReadOnlyMode(result.getFormData());
+//				view.activateReadOnlyMode(result.getFormData());
 				view.setLogMessages(result.getLogEntries());	
 				super.onSuccess(result);
 			}
@@ -244,6 +246,16 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	
 	@Override
 	public void onRecalculateClicked() {
+		RecalculateFormDataAction action = new RecalculateFormDataAction();
+		action.setFormDataId(getView().getFormData().getId());
+		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
+			@Override
+			public void onSuccess(RecalculateFormDataResult result) {
+				getView().setLogMessages(result.getLogEntries());
+				Window.alert(""+result.getLogEntries().size());
+				super.onSuccess(result);
+			}
+		});
 	}
 	
 	@Override
