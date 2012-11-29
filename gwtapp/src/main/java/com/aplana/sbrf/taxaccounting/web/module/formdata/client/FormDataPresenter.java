@@ -106,10 +106,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		action.setFormDataId(formDataId);
 		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
 			@Override
-			public void onSuccess(GetFormDataResult result) {
+			public void onReqSuccess(GetFormDataResult result) {
 				getView().loadFormData(result.getFormData(), result.getAccessFlags());
 				setAdditionalFormInfo();
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 	}
@@ -127,7 +127,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		action.setReportPeriodId(getView().getFormData().getReportPeriodId());
 		dispatcher.execute(action, new AbstractCallback<GetNamesForIdResult>() {
 			@Override
-			public void onSuccess(GetNamesForIdResult result) {
+			public void onReqSuccess(GetNamesForIdResult result) {
 				getView().setAdditionalFormInfo(
 						getView().getFormData().getFormType().getName(),
 						getView().getFormData().getFormType().getTaxType().getName(),
@@ -136,7 +136,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						result.getReportPeriod(),
 						getView().getFormData().getState().getName()
 					);
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 		
@@ -165,17 +165,16 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		action.setFormData(view.getFormData());
 		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 			@Override
-			public void onSuccess(SaveFormDataResult result) {
+			public void onReqSuccess(SaveFormDataResult result) {
 //				view.activateReadOnlyMode(result.getFormData());
 				view.reloadFormData(result.getFormData(), view.getFlags());
 				view.setLogMessages(result.getLogEntries());	
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 
 			@Override
-			public void onFailure(Throwable throwable) {
+			public void onReqFailure(Throwable throwable) {
 				logger.log(Level.SEVERE, "Failed to save formData object", throwable);
-				super.onFailure(throwable);
 			}							
 		});
 		
@@ -205,7 +204,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		action.setFormDataId(view.getFormData().getId());
 		dispatcher.execute(action, new AbstractCallback<GetAvailableMovesResult>(){
 			@Override
-			public void onSuccess(GetAvailableMovesResult result) {
+			public void onReqSuccess(GetAvailableMovesResult result) {
 				for (final WorkflowMove move : result.getAvailableMoves()) {
 					Button newButton = new Button();
 					newButton.setText(move.getName());
@@ -218,23 +217,21 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 							action.setMove(move);
 							dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
 								@Override
-								public void onSuccess(GoMoveResult result) {
+								public void onReqSuccess(GoMoveResult result) {
 									view.setLogMessages(result.getLogEntries());
-									super.onSuccess(result);
+									super.onReqSuccess(result);
 								}
 							});
 						}
 					});
 					buttonPanel.add(newButton);
-					
-					super.onSuccess(result);
+
 				}
 			}
 
 			@Override
-			public void onFailure(Throwable throwable) {
+			public void onReqFailure(Throwable throwable) {
 				logger.log(Level.SEVERE, "Failed to get AvailableMoves object", throwable);
-				super.onFailure(throwable);
 			}							
 		});
 		
@@ -252,10 +249,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		action.setFormData(getView().getFormData());
 		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
 			@Override
-			public void onSuccess(RecalculateFormDataResult result) {
+			public void onReqSuccess(RecalculateFormDataResult result) {
 				getView().reloadFormData(result.getFormData(), getView().getFlags());
 				getView().setLogMessages(result.getLogEntries());
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 	}
@@ -273,15 +270,14 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			action.setFormDataId(getView().getFormData().getId());
 			dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
 				@Override
-				public void onSuccess(DeleteFormDataResult result) {
+				public void onReqSuccess(DeleteFormDataResult result) {
 					placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST));
-					super.onSuccess(result);
 				}
 
 				@Override
-				public void onFailure(Throwable throwable) {
+				public void onReqFailure(Throwable throwable) {
 					logger.log(Level.SEVERE, "Failed to delete formData object", throwable);
-					super.onFailure(throwable);
+					super.onReqFailure(throwable);
 				}							
 			});
 		}

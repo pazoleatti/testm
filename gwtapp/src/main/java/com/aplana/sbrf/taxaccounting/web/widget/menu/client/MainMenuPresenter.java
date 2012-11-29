@@ -34,9 +34,9 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 		dispatchAsync.execute(action, new AbstractCallback<GetMainMenuResult>(){
 
 			@Override
-			public void onSuccess(GetMainMenuResult result) {
+			public void onReqSuccess(GetMainMenuResult result) {
 				getView().setMenuItems(result.getMenuItems());
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 			
 		});

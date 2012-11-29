@@ -50,10 +50,9 @@ public class DictionaryDataProvider extends AsyncDataProvider<SimpleDictionaryIt
           action.setDictionaryCode(dictionaryCode);
           dispatcher.execute(action, new AbstractCallback<DictionaryPickerDataResult>() {
   			@Override
-  			public void onSuccess(DictionaryPickerDataResult result) {
+  			public void onReqSuccess(DictionaryPickerDataResult result) {
   				updateRowData(start, result.getDictionaryItems());
   				display.setRowCount(result.getSize());
-  				super.onSuccess(result);
   			}
   		});
 	}

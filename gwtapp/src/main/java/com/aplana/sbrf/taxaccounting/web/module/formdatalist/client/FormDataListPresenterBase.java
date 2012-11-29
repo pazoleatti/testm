@@ -52,11 +52,17 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 * View.
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
+		public interface FormDataLinkRender{
+			String renderUrl(FormData formData);
+		}
+		
 		void setFormDataList(List<FormData> records);
 
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 
 		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
+		
+		void setFormDataLinkRender(FormDataLinkRender render);
 
 		void setTaxTypeLabel(String taxTypeLabel);
 

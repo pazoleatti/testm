@@ -98,7 +98,7 @@ public class FormDataListPresenter extends
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
 					@Override
-					public void onSuccess(GetFormDataListResult result) {
+					public void onReqSuccess(GetFormDataListResult result) {
 						Map<Integer, String> departmentMap = new HashMap<Integer, String>();
 						for(Department department : result.getDepartments()){
 							departmentMap.put(department.getId(), department.getName());
@@ -119,7 +119,6 @@ public class FormDataListPresenter extends
 						// Почему GWTP вызывает блокировку даже если страница уже видна - непонятно.
 						getProxy().manualReveal(FormDataListPresenter.this);
 
-						super.onSuccess(result);
 					}
 				});
 	}

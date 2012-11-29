@@ -54,7 +54,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		dispatchAsync.execute(action,
 				new AbstractCallback<GetFilterDataResult>() {
 					@Override
-					public void onSuccess(GetFilterDataResult result) {
+					public void onReqSuccess(GetFilterDataResult result) {
 						getView().clearData();
 						List<SelectItem> reportPeriodItems = fillPeriodList(result);
 						List<SelectItem> departmentItems = fillDepartmentList(result);
@@ -70,7 +70,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						getView().setDataFilter(formDataFilter);
 
 						FilterReadyEvent.fire(FilterPresenter.this);
-						super.onSuccess(result);
 					}
 				});
 

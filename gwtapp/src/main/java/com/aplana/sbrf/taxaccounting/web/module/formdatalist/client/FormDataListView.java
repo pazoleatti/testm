@@ -145,4 +145,10 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
             getUiHandlers().onCreateClicked();
         }
     }
+
+	@Override
+	public void setFormDataLinkRender(FormDataLinkRender render) {
+		// TODO Auto-generated method stub
+		
+	}
 }

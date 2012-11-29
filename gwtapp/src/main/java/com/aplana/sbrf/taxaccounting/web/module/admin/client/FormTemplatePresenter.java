@@ -275,10 +275,10 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		action.setId(formId);
 		dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
 			@Override
-			public void onSuccess(GetFormResult result) {
+			public void onReqSuccess(GetFormResult result) {
 				formTemplate = result.getForm();
 				bindFormTemplate();
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 	}
@@ -295,9 +295,9 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		action.setForm(formTemplate);
 		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
 			@Override
-			public void onSuccess(UpdateFormResult result) {
+			public void onReqSuccess(UpdateFormResult result) {
 				Window.alert("Форма сохранена.");
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 	}

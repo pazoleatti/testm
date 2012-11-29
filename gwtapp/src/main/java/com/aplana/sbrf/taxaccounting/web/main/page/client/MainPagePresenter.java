@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -44,6 +45,9 @@ public class MainPagePresenter extends
 	static {
 		RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
 	}
+	
+	
+	private int lockCount;
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
@@ -70,7 +74,19 @@ public class MainPagePresenter extends
 	 */
 	@ProxyEvent
 	public void onLockInteraction(LockInteractionEvent event) {
-		getView().lockAndShowLoading(event.shouldLock());
+		if (event.shouldLock()){
+			lockCount++;
+		} else {
+			lockCount--;
+		}
+		System.out.println(event.getSource() + " : " + event.shouldLock()  + " : " + lockCount);
+		if (lockCount <= 0 ){
+			getView().lockAndShowLoading(false);
+			lockCount = 0;
+		} else {
+			getView().lockAndShowLoading(true);
+		}
+		
 	}
 
 	@Override

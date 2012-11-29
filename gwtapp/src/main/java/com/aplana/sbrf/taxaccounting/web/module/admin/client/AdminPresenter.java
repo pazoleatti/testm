@@ -48,10 +48,10 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		super.prepareFromRequest(request);
 		dispatcher.execute(new FormListAction(), new AbstractCallback<FormListResult>() {
 			@Override
-			public void onSuccess(FormListResult result) {
+			public void onReqSuccess(FormListResult result) {
 			    CellTable<FormTemplate> table = getView().getFormTemplateTable();
 				table.setRowData(result.getForms());
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 		});
 	}

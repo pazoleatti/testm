@@ -31,9 +31,9 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 		dispatchAsync.execute(action, new AbstractCallback<GetUserInfoResult>(){
 
 			@Override
-			public void onSuccess(GetUserInfoResult result) {
+			public void onReqSuccess(GetUserInfoResult result) {
 				getView().setUserName(result.getUserName());
-				super.onSuccess(result);
+				super.onReqSuccess(result);
 			}
 			
 		});

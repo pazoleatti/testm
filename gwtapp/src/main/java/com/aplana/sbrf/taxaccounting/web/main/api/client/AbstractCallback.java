@@ -33,11 +33,13 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandle
 	private static EventBus eventBus = ((ClientGinjector)DelayedBindRegistry.getGinjector()).getEventBus();
 
 	/**
-	 * Воздает новый обработчик возврата запросак к серверу. При этом блокируется экран пользователя
+	 * Создает новый обработчик возврата запросак к серверу. При этом блокируется экран пользователя
 	 * и он ничего не может сделать.
 	 */
 	public AbstractCallback(){
-		LockInteractionEvent.fire(this, true);
+		if (needLock()){
+			LockInteractionEvent.fire(this, true);
+		}
 	}
 
 	/**
@@ -46,9 +48,13 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandle
 	 * @param result результат работы сервера
 	 */
 	@Override
-	public void onSuccess(T result) {
-		LockInteractionEvent.fire(this, false);
+	public final void onSuccess(T result) {
+		this.onReqSuccess(result);
+		if (needLock()){
+			LockInteractionEvent.fire(this, false);
+		}
 	}
+	
 
 	/**
 	 * Вызывается в случае неудачной обработки запроса сервером. Выводит соответствующее сообщение.
@@ -57,10 +63,25 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandle
 	 * @param throwable ошибка, произошедшая на сервере
 	 */
 	@Override
-	public void onFailure(Throwable throwable) {
+	public final void onFailure(Throwable throwable) {
+		this.onReqFailure(throwable);
 		throwable.printStackTrace();
 		Window.alert(throwable.getMessage());
-		LockInteractionEvent.fire(this, false);
+		if (needLock()){
+			LockInteractionEvent.fire(this, false);
+		}
+	}
+	
+	protected void onReqSuccess(T result){
+		
+	}
+	
+	protected void onReqFailure(Throwable throwable){
+		
+	}
+	
+	protected boolean needLock(){
+		return true;
 	}
 
 	@Override
