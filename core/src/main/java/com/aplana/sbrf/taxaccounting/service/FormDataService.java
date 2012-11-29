@@ -28,7 +28,6 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
-	@SuppressWarnings("UnusedDeclaration")
 	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind);
 	
 	/**
