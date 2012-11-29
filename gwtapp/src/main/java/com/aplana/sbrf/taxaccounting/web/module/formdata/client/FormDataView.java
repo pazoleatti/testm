@@ -19,7 +19,6 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -92,7 +91,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void reset() {
+	public void cleanTable() {
+		System.out.println("cleanTable");
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
 		}
@@ -127,7 +127,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@Override
 	public void reloadFormData(FormData formData, AccessFlags flags) {
 //		Window.alert(String.valueOf(formData.getFormColumns().size()));
-		reset();
+		cleanTable();
 		loadForm(formData, flags);
 	}
 	
