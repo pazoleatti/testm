@@ -50,19 +50,10 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		}
 
 		if(formDataFilter.getPeriod() == Long.MAX_VALUE){
-			List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(formDataFilter
-					.getTaxType());
+			List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(formDataFilter.getTaxType());
 			List<Long> reportPeriodLongList = new ArrayList<Long>();
-			/*TODO: По поводу обработки ситуации, когда у нас нету Отчетного периода или Типа формы с определенным TaxType,
-			* нужно поговорить. Может все-таки имеет смысл обрабатывать это подобным образом на сервисном слое, чем многократно
-			* усложнять логику DAO слоя дополнительными SQL скриптами?!?*/
-			System.out.println("Check on empty reportPeriodList. isEmpty() = " + reportPeriodList.isEmpty());
- 			if(!reportPeriodList.isEmpty()){
-				for (ReportPeriod reportPeriod : reportPeriodList){
-					reportPeriodLongList.add((long)reportPeriod.getId());
-				}
-			} else {
-				reportPeriodLongList.add(-1L);
+			for (ReportPeriod reportPeriod : reportPeriodList){
+				reportPeriodLongList.add((long)reportPeriod.getId());
 			}
 			formDataDaoFilter.setPeriod(reportPeriodLongList);
 		} else {
@@ -83,22 +74,16 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		if(formDataFilter.getFormtype() == Long.MAX_VALUE){
 			List<FormType> formTypeList = formTypeDao.listAllByTaxType(formDataFilter.getTaxType());
 			List<Long> formTypeLongList = new ArrayList<Long>();
-			//TODO: см коммент выше.
-			System.out.println("Check on empty formTypeList. isEmpty() = " + formTypeList.isEmpty());
-			if(!formTypeList.isEmpty()){
-				for(FormType formType : formTypeList){
-					formTypeLongList.add((long)formType.getId());
-				}
-			} else {
-				formTypeLongList.add(-1L);
+
+			for(FormType formType : formTypeList){
+				formTypeLongList.add((long)formType.getId());
 			}
 			formDataDaoFilter.setFormtype(formTypeLongList);
 		} else {
 			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
 		}
 
-		List<FormData> formDataList  = formDataSearchDao.findByFilter(formDataDaoFilter);
-    	return formDataList;
+		return formDataSearchDao.findByFilter(formDataDaoFilter);
 	}
 
 	@Override

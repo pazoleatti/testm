@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -22,7 +23,16 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
 	@Override
 	public List<FormData> findByFilter(FormDataDaoFilter dataFilter){
-		String query = "select * from form_data fd where fd.department_id in " + transformToSqlInStatement(dataFilter.
+		/*Перед тем как выполнять SQL запрос, нам нужно убедиться что:
+		 1)dataFilter.getFormtype() не пустой список
+		 2)dataFilter.getPeriod() не пустой список
+		 если один из списков пустой, то поиск не выполняем, а возвращаем пустой результат.
+		 */
+		if(dataFilter.getFormtype().isEmpty() || dataFilter.getPeriod().isEmpty()){
+			return (new ArrayList<FormData>());
+		}
+
+ 		String query = "select * from form_data fd where fd.department_id in " + transformToSqlInStatement(dataFilter.
 				getDepartment()) + " and fd.kind in " + transformToSqlInStatement(dataFilter.getKind()) +
 				" and exists (select 1 from form f where fd.form_id = f.id and f.type_id in " +
 				transformToSqlInStatement(dataFilter.getFormtype()) + ") and exists (select 1 from report_period rp" +
