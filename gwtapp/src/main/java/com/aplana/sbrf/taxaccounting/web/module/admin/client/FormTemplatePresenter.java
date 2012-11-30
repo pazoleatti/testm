@@ -21,6 +21,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
@@ -46,6 +47,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	public static final String PARAM_FORM_TEMPLATE_ID = "formTemplateId";
 
 	private final DispatchAsync dispatcher;
+	private final PlaceManager placeManager;
 
 	/**
 	 * Идентификатор шаблона формы. Его мы храним для перезагрузки формы.
@@ -61,9 +63,10 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 * Конструктор каким-то таинственным образом получает диспатчер, view и все остальные нужные нам ништяки.
 	 */
 	@Inject
-	public FormTemplatePresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+	public FormTemplatePresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
+		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
 	}
 
@@ -340,6 +343,14 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 			script = formTemplate.getScripts().get(scrInd);
 		}
 		return script;
+	}
+
+	/**
+	 * Закрыть форму редактирования и вернуться на форму администрирования со списком шаблонов форм.
+	 */
+	@Override
+	public void close() {
+		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
 	}
 
 	/**

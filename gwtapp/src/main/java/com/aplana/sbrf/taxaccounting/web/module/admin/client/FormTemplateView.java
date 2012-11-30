@@ -79,6 +79,18 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 		}
 	}
 
+	@UiHandler("resetButton")
+	public void onReset(ClickEvent event){
+		if(getUiHandlers()!=null){
+			getUiHandlers().load();
+		}
+	}
+
+	@UiHandler("cancelButton")
+	public void onCancel(ClickEvent event){
+		getUiHandlers().close();
+	}
+
 	@UiHandler("scriptListBox")
 	public void onChange(ChangeEvent event){
 		getUiHandlers().selectScript();
@@ -92,13 +104,6 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 	@UiHandler("deleteScriptButton")
 	public void onDelete(ClickEvent event){
 		getUiHandlers().deleteScript();
-	}
-
-	@UiHandler("cancelButton")
-	public void onCancel(ClickEvent event){
-		if(getUiHandlers()!=null){
-			getUiHandlers().load();
-		}
 	}
 
 	@Override

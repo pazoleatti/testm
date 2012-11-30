@@ -12,6 +12,7 @@
 			<t:Bar>
 				<t:LeftBar>
 					<g:Button text="Сохранить" ui:field="saveButton"/>
+					<g:Button text="Сбросить" ui:field="resetButton"/>
 					<g:Button text="Отмена" ui:field="cancelButton"/>
 				</t:LeftBar>
 			</t:Bar>

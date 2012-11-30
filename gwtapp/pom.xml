@@ -188,6 +188,7 @@
 						<compileSourcesArtifact>${project.groupId}:model</compileSourcesArtifact>
 					</compileSourcesArtifacts>
 					<extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
+					<draftCompile>true</draftCompile>
 				</configuration>
 				<executions>
 					<execution>

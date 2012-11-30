@@ -60,4 +60,9 @@ public interface FormTemplateUiHandlers extends UiHandlers {
 	 * Опустить скрипт на одну позицию в очереди на выполнение
 	 */
 	public void downEventScript();
+
+	/**
+	 * Закрыть форму редактирования и вернуться на форму администрирования со списком шаблонов форм.
+	 */
+	public void close();
 }
