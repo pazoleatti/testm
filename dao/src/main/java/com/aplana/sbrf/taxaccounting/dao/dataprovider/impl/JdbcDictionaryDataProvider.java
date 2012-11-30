@@ -8,22 +8,22 @@ import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.aplana.sbrf.taxaccounting.dao.dataprovider.SimpleDictionaryDataProvider;
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
  * Простая JDBC-реализация источника данных для справочников
  * @param <ValueType> тип значения, может быть BigDecimal или String
  * Сам этот класс является абстрактным
- * Использоваться должны отнаследованные от него классы: {@link SimpleStringDictionaryDataProvider} и 
- * {@link SimpleNumericDictionaryDataProvider}
+ * Использоваться должны отнаследованные от него классы: {@link StringDictionaryDataProvider} и 
+ * {@link NumericDictionaryDataProvider}
  */
-public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao implements SimpleDictionaryDataProvider<ValueType> {
-	private class ItemRowMapper implements RowMapper<SimpleDictionaryItem<ValueType>> {
+public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao implements DictionaryDataProvider<ValueType> {
+	private class ItemRowMapper implements RowMapper<DictionaryItem<ValueType>> {
 		@Override
-		public SimpleDictionaryItem<ValueType> mapRow(ResultSet rs, int rowNum) throws SQLException {
-			SimpleDictionaryItem<ValueType> item = new SimpleDictionaryItem<ValueType>();
+		public DictionaryItem<ValueType> mapRow(ResultSet rs, int rowNum) throws SQLException {
+			DictionaryItem<ValueType> item = new DictionaryItem<ValueType>();
 			item.setName(rs.getString("name"));
 			item.setValue(getValue(rs));
 			return item;
@@ -34,7 +34,7 @@ public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao 
 	private String dictionaryName;
 	private String sqlQuery;
 	@Override
-	public List<SimpleDictionaryItem<ValueType>> getValues(String valuePattern) {
+	public List<DictionaryItem<ValueType>> getValues(String valuePattern) {
 		return getJdbcTemplate().query(
 			"select * from (" + sqlQuery + ") where value like ?",
 			new Object[] { valuePattern },
@@ -43,7 +43,7 @@ public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao 
 		);
 	}
 	
-	public SimpleDictionaryItem<ValueType> getItem(ValueType value) {
+	public DictionaryItem<ValueType> getItem(ValueType value) {
 		try {
 			return getJdbcTemplate().queryForObject(
 				"select * from (" + sqlQuery + ") where value = ?",

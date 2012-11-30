@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.dataprovider;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 public interface DictionaryManager<T> {
-	public List<SimpleDictionaryItem<T>> getAvailableDictionaries();
+	public List<DictionaryItem<T>> getAvailableDictionaries();
 	
-	public SimpleDictionaryDataProvider<T> getDataProvider(String dictionaryCode);
+	public DictionaryDataProvider<T> getDataProvider(String dictionaryCode);
 }

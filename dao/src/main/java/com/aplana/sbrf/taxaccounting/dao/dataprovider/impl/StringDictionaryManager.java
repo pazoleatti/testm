@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryManager;
-import com.aplana.sbrf.taxaccounting.dao.dataprovider.SimpleDictionaryDataProvider;
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 public class StringDictionaryManager implements DictionaryManager<String>{
-	private Map<String, SimpleStringDictionaryDataProvider> dataProviders;
+	private Map<String, StringDictionaryDataProvider> dataProviders;
 
-	public void setDataProviders(Map<String, SimpleStringDictionaryDataProvider> dataProviders) {
+	public void setDataProviders(Map<String, StringDictionaryDataProvider> dataProviders) {
 		this.dataProviders = dataProviders;
 	}
 	
-	public SimpleDictionaryDataProvider<String> getDataProvider(String dictionaryCode) {
-		SimpleStringDictionaryDataProvider dp = dataProviders.get(dictionaryCode);
+	public DictionaryDataProvider<String> getDataProvider(String dictionaryCode) {
+		StringDictionaryDataProvider dp = dataProviders.get(dictionaryCode);
 		if (dp == null) {
 			throw new DaoException("Неизвестный код справочника: " + dictionaryCode);
 		}
@@ -25,13 +25,13 @@ public class StringDictionaryManager implements DictionaryManager<String>{
 	}
 	
 	/**
-	 * Метод возвращает список определённых в системе справочников в виде списка {@link SimpleDictionaryItem},
+	 * Метод возвращает список определённых в системе справочников в виде списка {@link DictionaryItem},
 	 * в элементах которого поле name задаёт название справочника, а value - его уникальный код 
 	 */
-	public List<SimpleDictionaryItem<String>> getAvailableDictionaries() {
-		List<SimpleDictionaryItem<String>> items = new ArrayList<SimpleDictionaryItem<String>>(dataProviders.size());
-		for(Map.Entry<String, SimpleStringDictionaryDataProvider> entry: dataProviders.entrySet()) {
-			SimpleDictionaryItem<String> item = new SimpleDictionaryItem<String>();
+	public List<DictionaryItem<String>> getAvailableDictionaries() {
+		List<DictionaryItem<String>> items = new ArrayList<DictionaryItem<String>>(dataProviders.size());
+		for(Map.Entry<String, StringDictionaryDataProvider> entry: dataProviders.entrySet()) {
+			DictionaryItem<String> item = new DictionaryItem<String>();
 			item.setValue(entry.getKey());
 			item.setName(entry.getValue().getDictionaryName());
 			items.add(item);

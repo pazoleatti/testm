@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -77,10 +77,10 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 		};
 		
 		this.widget = new DictionaryPickerWidget(dictionaryCode);
-		widget.addValueChangeHandler(new ValueChangeHandler<SimpleDictionaryItem<String>>() {
+		widget.addValueChangeHandler(new ValueChangeHandler<DictionaryItem<String>>() {
 			
 			@Override
-			public void onValueChange(ValueChangeEvent<SimpleDictionaryItem<String>> event) {
+			public void onValueChange(ValueChangeEvent<DictionaryItem<String>> event) {
 //				Window.alert("My value = " + event.getValue());
 //				if (event.getValue() != null && event.getValue().getValue() != null) {
 //					renderer.render(event.getValue().getValue());

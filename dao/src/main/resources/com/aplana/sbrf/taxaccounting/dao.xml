@@ -45,17 +45,31 @@
 		<property name="dataProviders">
 			<map>
 				<entry key="transportTypeCode">
-					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
-						p:dictionaryName="Коды видов ТС"
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
+						p:dictionaryName="ТН - Коды видов ТС"
 						p:sqlQuery="select code as value, name from transport_type_code order by code"
 					/>
 				</entry>
 				<entry key="transportOkato">				
-					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
-						p:dictionaryName="Коды ОКАТО"
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
+						p:dictionaryName="ТН - Коды ОКАТО"
 						p:sqlQuery="select okato as value, name from transport_okato order by okato"
 					/>
 				</entry>
+				<entry key="transportTaxBenefitCode">				
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
+						p:dictionaryName="ТН - Коды налоговых льгот"
+						p:sqlQuery="select code as Value, name from transport_tax_benefit_code order by code"
+					/>
+				</entry>
+				<!-- 
+				<entry key="transportTaxBaseUnitCode">				
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.SimpleStringDictionaryDataProvider"
+						p:dictionaryName="ТН - Коды единиц измерения налоговой базы по ОКЕИ"
+						p:sqlQuery="select code as value, name from transport_unit_code"
+					/>
+				</entry>
+				 -->
 			</map>
 		</property>
 	</bean>

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.gwtplatform.dispatch.shared.Result;
 /**
  * Результат запроса для получения элементов справочника.
@@ -12,14 +12,14 @@ import com.gwtplatform.dispatch.shared.Result;
  *
  */
 public class DictionaryPickerDataResult implements Result {
-	private List<SimpleDictionaryItem<String>> dictionaryItems;
+	private List<DictionaryItem<String>> dictionaryItems;
 	private Integer size;
 	
-	public List<SimpleDictionaryItem<String>> getDictionaryItems() {
+	public List<DictionaryItem<String>> getDictionaryItems() {
 		return dictionaryItems;
 	}
 	
-	public void setDictionaryItems(List<SimpleDictionaryItem<String>> dictionaryItems) {
+	public void setDictionaryItems(List<DictionaryItem<String>> dictionaryItems) {
 		this.dictionaryItems = dictionaryItems;
 	}
 

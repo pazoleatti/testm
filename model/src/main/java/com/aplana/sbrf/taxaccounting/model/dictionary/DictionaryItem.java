@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Каждый элемент представляет собой пару: значение-метка. 
  * @param <ValueType> - тип значения, система поддерживает BigDecimal и String 
  */
-public class SimpleDictionaryItem<ValueType> implements Serializable{
+public class DictionaryItem<ValueType> implements Serializable{
 	/**
 	 * 
 	 */

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -35,12 +35,12 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * @author dsultanbekov
  *
  */
-public class DictionaryPickerWidget extends Composite implements HasValueChangeHandlers<SimpleDictionaryItem<String>>{
+public class DictionaryPickerWidget extends Composite implements HasValueChangeHandlers<DictionaryItem<String>>{
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
 	}
 
 	private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-	@UiField(provided=true) CellTable<SimpleDictionaryItem<String>> cellTable = new CellTable<SimpleDictionaryItem<String>>();
+	@UiField(provided=true) CellTable<DictionaryItem<String>> cellTable = new CellTable<DictionaryItem<String>>();
 	@UiField Button btnFind;
 	@UiField TextBox txtFind;
 	@UiField SimplePager pager;
@@ -58,16 +58,16 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 		btnFind.setVisible(true);
 		
 		
-		TextColumn<SimpleDictionaryItem<String>> idColumn = new TextColumn<SimpleDictionaryItem<String>>() {
+		TextColumn<DictionaryItem<String>> idColumn = new TextColumn<DictionaryItem<String>>() {
 			@Override
-			public String getValue(SimpleDictionaryItem<String> object) {
+			public String getValue(DictionaryItem<String> object) {
 				return object.getName();
 			}
 		};
 		
-		TextColumn<SimpleDictionaryItem<String>> formTypeColumn = new TextColumn<SimpleDictionaryItem<String>>() {
+		TextColumn<DictionaryItem<String>> formTypeColumn = new TextColumn<DictionaryItem<String>>() {
 			@Override
-			public String getValue(SimpleDictionaryItem<String> object) {
+			public String getValue(DictionaryItem<String> object) {
 				return object.getValue();
 			}
 		};
@@ -79,10 +79,10 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 		pager.setDisplay(cellTable);
 		dataProvider = new DictionaryDataProvider(txtFind.getValue(), dictionaryCode);
 		dataProvider.addDataDisplay(cellTable);
-		cellTable.addCellPreviewHandler(new Handler<SimpleDictionaryItem<String>>() {
+		cellTable.addCellPreviewHandler(new Handler<DictionaryItem<String>>() {
 
 			@Override
-			public void onCellPreview(CellPreviewEvent<SimpleDictionaryItem<String>> event) {
+			public void onCellPreview(CellPreviewEvent<DictionaryItem<String>> event) {
 				Boolean isClick = "click".equals(event.getNativeEvent().getType());
 				if (isClick) {
 					ValueChangeEvent.fire(DictionaryPickerWidget.this, event.getValue());
@@ -142,7 +142,7 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 		return value;
 	}
 	
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<SimpleDictionaryItem<String>> handler) {
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<DictionaryItem<String>> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
 	

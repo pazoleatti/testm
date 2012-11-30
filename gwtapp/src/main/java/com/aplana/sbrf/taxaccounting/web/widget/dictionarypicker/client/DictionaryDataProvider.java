@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryPickerDataAction;
@@ -16,7 +16,7 @@ import com.gwtplatform.mvp.client.DelayedBindRegistry;
  * с использованием фильтра и кода справочника.
  * @author Eugene Stetsenko
  */
-public class DictionaryDataProvider extends AsyncDataProvider<SimpleDictionaryItem<String>>{
+public class DictionaryDataProvider extends AsyncDataProvider<DictionaryItem<String>>{
 	
 	private String filter = "%";
 	private final DispatchAsync dispatcher;
@@ -34,7 +34,7 @@ public class DictionaryDataProvider extends AsyncDataProvider<SimpleDictionaryIt
 	}
 
 	@Override
-	protected void onRangeChanged(final HasData<SimpleDictionaryItem<String>> display) {
+	protected void onRangeChanged(final HasData<DictionaryItem<String>> display) {
 	      final Range range = display.getVisibleRange();
           final int start = range.getStart();
           final int length = range.getLength();

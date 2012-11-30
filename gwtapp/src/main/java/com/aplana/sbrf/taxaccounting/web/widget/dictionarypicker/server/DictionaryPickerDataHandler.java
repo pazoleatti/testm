@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryManager;
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryPickerDataAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryPickerDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -34,11 +34,11 @@ public class DictionaryPickerDataHandler extends AbstractActionHandler<Dictionar
 	@Override
 	public DictionaryPickerDataResult execute(DictionaryPickerDataAction action, ExecutionContext context) throws ActionException {
 		DictionaryPickerDataResult result = new DictionaryPickerDataResult();
-		List<SimpleDictionaryItem<String>> items = dictionaryManager.getDataProvider(action.getDictionaryCode()).getValues(action.getFilter());
+		List<DictionaryItem<String>> items = dictionaryManager.getDataProvider(action.getDictionaryCode()).getValues(action.getFilter());
 		if ( (action.getStart() + action.getOffset()) <= items.size() ) {
-			List<SimpleDictionaryItem<String>> newItems = items.subList(action.getStart(), action.getStart() + action.getOffset());
+			List<DictionaryItem<String>> newItems = items.subList(action.getStart(), action.getStart() + action.getOffset());
 			
-			result.setDictionaryItems(new LinkedList<SimpleDictionaryItem<String>>(newItems));
+			result.setDictionaryItems(new LinkedList<DictionaryItem<String>>(newItems));
 			result.setSize(items.size());
 		} else {
 			result.setDictionaryItems(items);
