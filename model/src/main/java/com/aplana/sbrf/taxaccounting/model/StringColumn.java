@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.SimpleDictionaryItem;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
  * Реализация {@link Column}, предназначенная для представления столбцов со строковыми данными
@@ -22,8 +22,8 @@ public class StringColumn extends Column  implements Serializable {
 	 * то использование справочника не гарантирует того, что в столбце могут оказаться только значения, перечисленные в справочнике,
 	 * автоматических проверок такой целосостности не производится.
 	 * 
-	 * В качестве значения, записываемого в столбец используется {@link SimpleDictionaryItem#getValue() значение} элемента справочника, 
-	 * а не его {@link SimpleDictionaryItem#getName() описание}. 
+	 * В качестве значения, записываемого в столбец используется {@link DictionaryItem#getValue() значение} элемента справочника, 
+	 * а не его {@link DictionaryItem#getName() описание}. 
 	 * 
 	 * @see {@link DictionaryManager}
 	 * 
