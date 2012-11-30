@@ -40,6 +40,12 @@
 			<version>${gwtVersion}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwtVersion}</version>
+			<scope>runtime</scope>
+		</dependency>		
 
 		<!-- DI dependencies -->
 		<dependency>
@@ -75,6 +81,12 @@
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-crawler</artifactId>
 			<version>${gwtpVersion}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Annotation component -->
@@ -140,33 +152,6 @@
 			<scope>system</scope>
 			<systemPath>${pom.basedir}/../../libs/ojdbc6.jar</systemPath>
 		</dependency>
-		<dependency>
-			<groupId>commons-dbcp</groupId>
-			<artifactId>commons-dbcp</artifactId>
-			<version>1.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-plus</artifactId>
-			<version>6.1H.22</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-naming</artifactId>
-			<version>6.1H.22</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.btm</groupId>
-			<artifactId>btm</artifactId>
-			<version>2.1.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwtVersion}</version>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -188,16 +173,7 @@
 						<compileSourcesArtifact>${project.groupId}:model</compileSourcesArtifact>
 					</compileSourcesArtifacts>
 					<extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m</extraJvmArgs>
-					<draftCompile>true</draftCompile>
 				</configuration>
-				<executions>
-					<execution>
-         				<goals>
-              				<goal>compile</goal>
-              				<goal>test</goal>
-            			</goals>					
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
@@ -267,4 +243,69 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<profiles>
+		<profile>
+			<id>development</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>${gwtVersion}</version>
+						<configuration>
+							<draftCompile>true</draftCompile>
+							<validateOnly>true</validateOnly>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>commons-dbcp</groupId>
+					<artifactId>commons-dbcp</artifactId>
+					<version>1.4</version>
+				</dependency>
+				<dependency>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-plus</artifactId>
+					<version>6.1H.22</version>
+				</dependency>
+				<dependency>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-naming</artifactId>
+					<version>6.1H.22</version>
+				</dependency>
+				<dependency>
+					<groupId>org.codehaus.btm</groupId>
+					<artifactId>btm</artifactId>
+					<version>2.1.3</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>production</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>${gwtVersion}</version>
+						<configuration>
+							<optimizationLevel>9</optimizationLevel>
+						</configuration>
+						<executions>
+							<execution>
+		         				<goals>
+		              				<goal>compile</goal>
+		              				<goal>test</goal>
+		            			</goals>					
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>			
+		</profile>
+	</profiles>
 </project>
