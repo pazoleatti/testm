@@ -12,7 +12,7 @@
 			<g:Label text="Условие"/>
 		</g:cell>
 		<g:cell width="100%">
-			<g:TextBox width="100%" ui:field="condition"/>
+			<g:TextArea height="100px" width="100%" ui:field="condition"/>
 		</g:cell>
 
 		<g:cell>

@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -306,6 +307,8 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	 * Биндит шаблон формы на представление.
 	 */
 	private void bindFormTemplate() {
+		getView().getTitleLabel().setText(formTemplate.getType().getName());
+
 		ListBox lb = getView().getScriptListBox();
 		lb.clear();
 		int i = 0;
@@ -367,6 +370,8 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		 * списко скриптов не назначенных на выбранное событие
 		 */
 		public ListBox getFreeScriptListBox();
+
+		Label getTitleLabel();
 	}
 
 	@ProxyCodeSplit

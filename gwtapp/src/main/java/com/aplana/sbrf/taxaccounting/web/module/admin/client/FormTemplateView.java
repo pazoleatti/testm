@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -35,6 +36,9 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 
 	@UiField
 	ListBox freeScriptListBox;
+
+	@UiField
+	Label titleLabel;
 
 	private final Widget widget;
 
@@ -125,5 +129,10 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 	@Override
 	public ListBox getFreeScriptListBox() {
 		return freeScriptListBox;
+	}
+
+	@Override
+	public Label getTitleLabel() {
+		return titleLabel;
 	}
 }
