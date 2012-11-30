@@ -99,4 +99,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	public List<FormTemplate> listAll() {
 		return getJdbcTemplate().query("select * from form", new FormMapper(false));
 	}
+
+	@Override
+	public int getActiveFormTemplateId(int formTypeId) {
+		throw new UnsupportedOperationException("not implemented");
+	}
 }
