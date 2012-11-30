@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 
 /**
  * Get a cell value from a record.
@@ -8,5 +8,5 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
  * @param <C> the cell type
  */
 public interface ValueGetter<C> {
-	C getValue(FormData contact);
+	C getValue(FormDataSearchResultItem contact);
 }

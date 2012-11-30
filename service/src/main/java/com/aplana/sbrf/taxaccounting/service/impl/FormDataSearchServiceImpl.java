@@ -32,7 +32,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 
 	@Override
-	public List<FormData> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
+	public List<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		if(formDataFilter.getDepartment() == Long.MAX_VALUE){

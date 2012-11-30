@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,7 +34,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
     HorizontalPanel filterContentPanel;
 
 	@UiField
-	CellTable<FormData> formDataTable;
+	CellTable<FormDataSearchResultItem> formDataTable;
 
 	private Map<Integer, String> departmentsMap;
 	private Map<Integer, String> reportPeriodsMap;
@@ -44,30 +44,30 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
 		widget = binder.createAndBindUi(this);
 
-		TextColumn<FormData> formKindColumn = new TextColumn<FormData>() {
+		TextColumn<FormDataSearchResultItem> formKindColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
-			public String getValue(FormData object) {
-				return object.getKind().getName();
+			public String getValue(FormDataSearchResultItem object) {
+				return object.getFormDataKind().getName();
 			}
 		};
 
-		TextColumn<FormData> formTypeColumn = new TextColumn<FormData>() {
+		TextColumn<FormDataSearchResultItem> formTypeColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
-			public String getValue(FormData object) {
-				return object.getFormType().getName();
+			public String getValue(FormDataSearchResultItem object) {
+				return object.getFormTypeName();
 			}
 		};
 
-		TextColumn<FormData> departmentColumn = new TextColumn<FormData>() {
+		TextColumn<FormDataSearchResultItem> departmentColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
-			public String getValue(FormData object) {
+			public String getValue(FormDataSearchResultItem object) {
 				return departmentsMap.get(object.getDepartmentId());
 			}
 		};
 
-		TextColumn<FormData> reportPeriodColumn = new TextColumn<FormData>() {
+		TextColumn<FormDataSearchResultItem> reportPeriodColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
-			public String getValue(FormData object) {
+			public String getValue(FormDataSearchResultItem object) {
 				return reportPeriodsMap.get(object.getReportPeriodId());
 			}
 		};
@@ -97,7 +97,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	}
 
 	@Override
-	public void setFormDataList(List<FormData> records) {
+	public void setFormDataList(List<FormDataSearchResultItem> records) {
 		formDataTable.setRowCount(records.size());
 		formDataTable.setRowData(0, records);
 	}
@@ -118,11 +118,11 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	}
 
 	@Override
-	public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
+	public <C> Column<FormDataSearchResultItem, C> addTableColumn(Cell<C> cell,
 			String headerText, final ValueGetter<C> getter,
-			FieldUpdater<FormData, C> fieldUpdater) {
-		Column<FormData, C> column = new Column<FormData, C>(cell) {
-			public C getValue(FormData object) {
+			FieldUpdater<FormDataSearchResultItem, C> fieldUpdater) {
+		Column<FormDataSearchResultItem, C> column = new Column<FormDataSearchResultItem, C>(cell) {
+			public C getValue(FormDataSearchResultItem object) {
 				return getter.getValue(object);
 			}
 		};

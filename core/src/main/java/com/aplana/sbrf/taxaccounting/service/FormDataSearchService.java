@@ -20,7 +20,7 @@ public interface FormDataSearchService {
 	 * @param formDataFilter фильтр, по параметрам которого происходит поиск данных по отчетной форме
 	 * @return список идентификаторов данных по отчётным формам, соответствующие критериям поиска.
 	 */
-	List<FormData> findDataByUserIdAndFilter(TAUser currentUser, FormDataFilter formDataFilter);
+	List<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser currentUser, FormDataFilter formDataFilter);
 
 	/**
 	 * Получить список, включающий в себя департамент и его дочернии департаменты

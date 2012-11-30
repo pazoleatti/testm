@@ -50,11 +50,11 @@ public class FormDataListPresenter extends
 		// переопределения делегатов
 		// нужно как-то передалать.
 		// Также, нужно разобраться, нужно ли здесь делать registerHandler???
-		ActionCell<FormData> openFormDataCell = new ActionCell<FormData>(
-				"Открыть", new ActionCell.Delegate<FormData>() {
+		ActionCell<FormDataSearchResultItem> openFormDataCell = new ActionCell<FormDataSearchResultItem>(
+				"Открыть", new ActionCell.Delegate<FormDataSearchResultItem>() {
 					@Override
-					public void execute(FormData formData) {
-						String formDataId = formData.getId().toString();
+					public void execute(FormDataSearchResultItem formData) {
+						String formDataId = formData.getFormDataId().toString();
 						placeManager.revealPlace(new PlaceRequest(
 								FormDataPresenter.NAME_TOKEN).with(
 								FormDataPresenter.FORM_DATA_ID, formDataId));
@@ -63,9 +63,9 @@ public class FormDataListPresenter extends
 				});
 
 		getView().addTableColumn(openFormDataCell, "Action",
-				new ValueGetter<FormData>() {
+				new ValueGetter<FormDataSearchResultItem>() {
 					@Override
-					public FormData getValue(FormData contact) {
+					public FormDataSearchResultItem getValue(FormDataSearchResultItem contact) {
 						return contact;
 					}
 				}, null);

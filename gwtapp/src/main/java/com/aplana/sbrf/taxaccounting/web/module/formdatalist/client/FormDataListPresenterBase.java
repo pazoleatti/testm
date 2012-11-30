@@ -17,6 +17,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.ContactPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
@@ -56,7 +57,7 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 			String renderUrl(FormData formData);
 		}
 		
-		void setFormDataList(List<FormData> records);
+		void setFormDataList(List<FormDataSearchResultItem> records);
 
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 
@@ -66,9 +67,9 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 
 		void setTaxTypeLabel(String taxTypeLabel);
 
-		public <C> Column<FormData, C> addTableColumn(Cell<C> cell,
+		public <C> Column<FormDataSearchResultItem, C> addTableColumn(Cell<C> cell,
 				String headerText, final ValueGetter<C> getter,
-				FieldUpdater<FormData, C> fieldUpdater);
+				FieldUpdater<FormDataSearchResultItem, C> fieldUpdater);
 	}
 	
 	protected final PlaceManager placeManager;

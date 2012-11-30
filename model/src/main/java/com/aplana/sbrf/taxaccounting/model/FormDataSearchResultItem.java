@@ -1,11 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 /**
  * DTO-Класс, содержащий информацию о параметрах налоговых форм и связанных с ним объектов в "плоском" виде
  * Используется для того, чтобы отображать результаты поисковых запросов по налоговым формам в таблицах, без необходимости
  * запрашивать из БД сведения по связанным объектам (название подразделения, вид налога и т.п.)
  */
-public class FormDataSearchResultItem {
+public class FormDataSearchResultItem implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	public FormDataSearchResultItem() {
+	}
+
 	// Идентификатор записи с данными налоговой формы
 	private Long formDataId;
 	// Тип налоговой формы

@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -11,21 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetAvailableMovesResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetNamesForIdResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,11 +24,11 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> 
 									implements FormDataUiHandlers{
@@ -83,7 +65,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	}
 
 	public static final String NAME_TOKEN = "!formData";
-
 	public static final String FORM_DATA_ID = "formDataId";
 
 	private final DispatchAsync dispatcher;
