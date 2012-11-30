@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormDataUiHandlers extends UiHandlers{
@@ -21,4 +22,6 @@ public interface FormDataUiHandlers extends UiHandlers{
 	public void onPrintClicked();
 	
 	public void onDeleteFormClicked();
+	
+	public void onWorkflowMove( WorkflowMove wfMove );
 }

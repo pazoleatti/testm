@@ -1,9 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
@@ -26,6 +32,15 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	@Autowired
 	private FormDataService formDataService;
 
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
+	
+	@Autowired
+	private DepartmentDao departmentDao;
+	
+	@Autowired
+	private FormDataWorkflowService workflowService;
+
 	public GetFormDataHandler() {
 		super(GetFormData.class);
 	}
@@ -38,7 +53,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 
 		FormData formData = formDataService.getFormData(userId, action.getFormDataId());
 		result.setFormData(formData);
-
+		result.setDepartmenName(departmentDao.getDepartment(user.getDepartmentId()).getName());
+		result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 		Long formDataId = formData.getId();
 		AccessFlags accessFlags = new AccessFlags();
 		accessFlags.setCanCreate(false);
@@ -46,6 +62,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		accessFlags.setCanEdit(accessService.canEdit(userId, formDataId));
 		accessFlags.setCanRead(accessService.canRead(userId, formDataId));
 		result.setAccessFlags(accessFlags);
+		List<WorkflowMove> availableMoves =	workflowService.getAvailableMoves(userId, action.getFormDataId());
+		result.setAvailableMoves(availableMoves);
 		return result;
 	}
 

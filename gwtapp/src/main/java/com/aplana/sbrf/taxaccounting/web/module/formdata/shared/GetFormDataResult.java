@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.gwtplatform.dispatch.shared.Result;
 /**
  * 
@@ -13,6 +16,13 @@ public class GetFormDataResult implements Result {
 	private FormData formData;
 	
 	private AccessFlags accessFlags;
+	
+	private String departmenName;
+	
+	private String reportPeriod;
+
+	private List<WorkflowMove> availableMoves;
+
 	
 	public FormData getFormData() {
 		return formData;
@@ -28,5 +38,29 @@ public class GetFormDataResult implements Result {
 
 	public void setAccessFlags(AccessFlags accessFlags) {
 		this.accessFlags = accessFlags;
+	}
+	
+	public String getDepartmenName() {
+		return departmenName;
+	}
+
+	public void setDepartmenName(String departmenName) {
+		this.departmenName = departmenName;
+	}
+
+	public String getReportPeriod() {
+		return reportPeriod;
+	}
+
+	public void setReportPeriod(String reportPeriod) {
+		this.reportPeriod = reportPeriod;
+	}
+
+	public List<WorkflowMove> getAvailableMoves() {
+		return availableMoves;
+	}
+
+	public void setAvailableMoves(List<WorkflowMove> availableMoves) {
+		this.availableMoves = availableMoves;
 	}
 }

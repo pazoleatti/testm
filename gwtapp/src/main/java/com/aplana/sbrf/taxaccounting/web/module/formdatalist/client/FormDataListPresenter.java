@@ -56,7 +56,7 @@ public class FormDataListPresenter extends
 					public void execute(FormDataSearchResultItem formData) {
 						String formDataId = formData.getFormDataId().toString();
 						placeManager.revealPlace(new PlaceRequest(
-								FormDataPresenter.NAME_TOKEN).with(
+								FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "true").with(
 								FormDataPresenter.FORM_DATA_ID, formDataId));
 
 					}

@@ -1,24 +1,26 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -34,13 +36,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 	
-	//Form status
-	private Boolean readOnly = true;
+	private Map<Button, WorkflowMove> buttonsAssociation = new HashMap<Button, WorkflowMove>();
 	
-	private AccessFlags flags = null;
-
-	@UiField
-	FlowPanel buttonPanel;
 	@UiField
 	DataGrid<DataRow> formDataTable;
 	@UiField
@@ -59,6 +56,22 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	Button printButton;
 	@UiField
 	Button deleteFormButton;
+	
+	@UiField
+	LeftBar workflowButtons;
+	// Workflow buttons
+//	@UiField
+//	Button createdToApprovedButton;
+//	@UiField
+//	Button approvedToCreatedButton;
+//	@UiField
+//	Button approvedToAcceptedButton;
+//	@UiField
+//	Button acceptedToApprovedButton;
+//	@UiField
+//	Button createdToAcceptedButton;
+//	@UiField
+//	Button acceptedToCreatedButton;
 	
 	@UiField
 	Label formTypeLabel;
@@ -103,14 +116,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 
 	@Override
-	public void loadFormData(FormData formData, AccessFlags flags) {
-		activateReadOnlyModeWithoutUpdate(flags);
-		this.flags = flags;
-		loadForm(formData, flags);
-	}
-	
-	public void loadForm(FormData formData, AccessFlags flags) {
-//		buttonPanel.clear();
+	public void loadFormData(FormData formData, boolean readOnly) {
+		cleanTable();
+		
 		factory.setReadOnly(readOnly);
 		this.formData = formData;
 		for (Column col: formData.getFormColumns()) {
@@ -125,23 +133,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 	
 	@Override
-	public void reloadFormData(FormData formData, AccessFlags flags) {
-//		Window.alert(String.valueOf(formData.getFormColumns().size()));
-		cleanTable();
-		loadForm(formData, flags);
+	public void removeSelectedTableRow() {
+		formData.getDataRows().remove(((SingleSelectionModel<DataRow>)formDataTable.getSelectionModel()).getSelectedObject());
 	}
 	
-
 	@Override
 	public void reloadRows() {
 		formDataTable.setRowCount(formData.getDataRows().size());
 		formDataTable.setRowData(formData.getDataRows());
 		formDataTable.redraw();
-	}
-
-	@Override
-	public DataGrid<DataRow> getFormDataTable() {
-		return formDataTable;
 	}
 
 	@Override
@@ -154,72 +154,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@Override
 	public FormData getFormData() {
 		return formData;
-	}
-
-	@Override
-	public Boolean isReadOnly() {
-		return readOnly;
-	}
-
-	@Override
-	public void activateEditMode() {
-		activateEditModeWithoutUpdate();
-		reloadFormData(formData, flags);
-	}
-	
-	private void activateEditModeWithoutUpdate() {
-		this.readOnly = false;
-		
-		// сводная форма уровня Банка.
-		if ((formData.getDepartmentId() == 1) && (formData.getKind() == FormDataKind.SUMMARY)) {
-			originalVersionButton.setVisible(true);
-		} else {
-			originalVersionButton.setVisible(false);
-		}
-		
-		saveButton.setVisible(true);
-		recalculateButton.setVisible(true);
-		addRowButton.setVisible(true);
-		removeRowButton.setVisible(true);
-		printButton.setVisible(true);
-		
-		manualInputButton.setVisible(false);
-		printButton.setVisible(false);
-		deleteFormButton.setVisible(false);
-		
-	}
-
-	@Override
-	public void activateReadOnlyMode() {
-		activateReadOnlyModeWithoutUpdate(flags);
-		reloadFormData(formData, flags);
-		
-	}
-	
-	@Override
-	public void activateReadOnlyMode(FormData data) {
-		activateReadOnlyModeWithoutUpdate(flags);
-		reloadFormData(data, flags);
-	}
-	
-	private void activateReadOnlyModeWithoutUpdate(AccessFlags flags) {
-		this.readOnly = true;
-
-		manualInputButton.setVisible(flags.getCanEdit());
-		deleteFormButton.setVisible(flags.getCanDelete());
-		
-		saveButton.setVisible(false);
-		removeRowButton.setVisible(false);
-		recalculateButton.setVisible(false);
-		addRowButton.setVisible(false);
-		originalVersionButton.setVisible(false);
-		
-		printButton.setVisible(true);
-	}
-
-	@Override
-	public FlowPanel getButtonPanel() {
-		return buttonPanel;
 	}
 
 	@UiHandler("cancelButton")
@@ -296,8 +230,65 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 		stateLabel.setText("Состояние: " + state);
 	}
 
+	/**
+	 * Показывает кнопки для доступных переходов, 
+	 * если null, то скрываем все кнопки.
+	 */
 	@Override
-	public AccessFlags getFlags() {
-		return flags;
+	public void setWorkflowButtons(List<WorkflowMove> moves) {
+		workflowButtons.clear();
+		if (moves != null) {
+			for (final WorkflowMove workflowMove : moves) {
+				Button button = new Button(workflowMove.getName(), new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent event) {
+						getUiHandlers().onWorkflowMove(workflowMove);
+					}
+				});
+				workflowButtons.add(button);
+			}
+		}
 	}
+
+	@Override
+	public void showOriginalVersionButton(boolean show) {
+		originalVersionButton.setVisible(show);
+	}
+
+	@Override
+	public void showSaveButton(boolean show) {
+		saveButton.setVisible(show);
+	}
+
+	@Override
+	public void showRecalculateButton(boolean show) {
+		recalculateButton.setVisible(show);
+	}
+
+	@Override
+	public void showAddRowButton(boolean show) {
+		addRowButton.setVisible(show);
+	}
+
+	@Override
+	public void showRemoveRowButton(boolean show) {
+		removeRowButton.setVisible(show);
+	}
+
+	@Override
+	public void showPrintButton(boolean show) {
+		printButton.setVisible(show);
+	}
+
+	@Override
+	public void showManualInputButton(boolean show) {
+		manualInputButton.setVisible(show);
+	}
+
+	@Override
+	public void showDeleteFormButton(boolean show) {
+		deleteFormButton.setVisible(show);
+	}
+
 }
