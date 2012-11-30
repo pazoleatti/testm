@@ -20,11 +20,9 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
-    <filter-mapping>
+	<filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/Main.html</url-pattern>
-		<url-pattern>/dispatch/*</url-pattern>
-		<url-pattern>/</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
 
@@ -83,9 +81,7 @@
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Protected Pages</web-resource-name>
-			<url-pattern>/Main.html</url-pattern>
-			<url-pattern>/dispatch/*</url-pattern>
-			<url-pattern>/</url-pattern>
+			<url-pattern>/*</url-pattern>
 			<http-method>DELETE</http-method>
 			<http-method>GET</http-method>
 			<http-method>POST</http-method>
@@ -101,5 +97,14 @@
 			<description>SSL or MSSL not required</description>
 			<transport-guarantee>NONE</transport-guarantee>
 		</user-data-constraint>
+	</security-constraint>
+
+	<!-- Exclude some URL's from authentication. See also security.xml. -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Unsecured</web-resource-name>
+			<url-pattern>/login</url-pattern>
+			<url-pattern>/favicon.ico</url-pattern>
+		</web-resource-collection>
 	</security-constraint>
 </web-app>
