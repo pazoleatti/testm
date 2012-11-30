@@ -1,13 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
-import com.google.gwt.cell.client.ActionCell;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -18,9 +22,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy>
@@ -43,36 +44,7 @@ public class FormDataListPresenter extends
 		getView().setUiHandlers(this);
 	}
 
-	@Override
-	protected void onBind() {
-		super.onBind();
-		// TODO: довольно коряво, проблема в том, у ActionCell нет методов для
-		// переопределения делегатов
-		// нужно как-то передалать.
-		// Также, нужно разобраться, нужно ли здесь делать registerHandler???
-		ActionCell<FormDataSearchResultItem> openFormDataCell = new ActionCell<FormDataSearchResultItem>(
-				"Открыть", new ActionCell.Delegate<FormDataSearchResultItem>() {
-					@Override
-					public void execute(FormDataSearchResultItem formData) {
-						String formDataId = formData.getFormDataId().toString();
-						placeManager.revealPlace(new PlaceRequest(
-								FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "true").with(
-								FormDataPresenter.FORM_DATA_ID, formDataId));
-
-					}
-				});
-
-		getView().addTableColumn(openFormDataCell, "Action",
-				new ValueGetter<FormDataSearchResultItem>() {
-					@Override
-					public FormDataSearchResultItem getValue(FormDataSearchResultItem contact) {
-						return contact;
-					}
-				}, null);
-	}
-
-
-
+	
 	/* (non-Javadoc)
 	 * @see com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform.mvp.client.proxy.PlaceRequest)
 	 */

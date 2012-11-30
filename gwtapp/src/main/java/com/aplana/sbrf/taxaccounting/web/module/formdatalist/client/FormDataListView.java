@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import java.util.List;
+import java.util.Map;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.FieldUpdater;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -16,10 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.List;
-import java.util.Map;
-
-public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers> implements
+public class FormDataListView extends
+		ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
 
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
@@ -31,7 +33,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	Label taxTypeLabel;
 
 	@UiField
-    HorizontalPanel filterContentPanel;
+	HorizontalPanel filterContentPanel;
 
 	@UiField
 	CellTable<FormDataSearchResultItem> formDataTable;
@@ -51,13 +53,6 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 			}
 		};
 
-		TextColumn<FormDataSearchResultItem> formTypeColumn = new TextColumn<FormDataSearchResultItem>() {
-			@Override
-			public String getValue(FormDataSearchResultItem object) {
-				return object.getFormTypeName();
-			}
-		};
-
 		TextColumn<FormDataSearchResultItem> departmentColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
@@ -72,8 +67,31 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 			}
 		};
 
+		Column<FormDataSearchResultItem, FormDataSearchResultItem> linkColumn = new Column<FormDataSearchResultItem, FormDataSearchResultItem>(
+				new AbstractCell<FormDataSearchResultItem>() {
+
+					@Override
+					public void render(Context context,
+							FormDataSearchResultItem formData,
+							SafeHtmlBuilder sb) {
+						if (formData == null) {
+							return;
+						}
+						sb.appendHtmlConstant("<a href=\"#"
+								+ FormDataPresenter.NAME_TOKEN + ";"
+								+ FormDataPresenter.FORM_DATA_ID + "="
+								+ formData.getFormDataId() + "\">"
+								+ formData.getFormTypeName() + "</a>");
+					}
+				}) {
+			public FormDataSearchResultItem getValue(
+					FormDataSearchResultItem object) {
+				return object;
+			}
+		};
+
 		formDataTable.addColumn(formKindColumn, "Тип налоговой формы");
-		formDataTable.addColumn(formTypeColumn, "Вид налоговой формы");
+		formDataTable.addColumn(linkColumn, "Вид налоговой формы");
 		formDataTable.addColumn(departmentColumn, "Подразделение");
 		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
 
@@ -113,24 +131,9 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 	}
 
 	@Override
-	public void setTaxTypeLabel(String taxTypeLabel){
+	public void setTaxTypeLabel(String taxTypeLabel) {
 		this.taxTypeLabel.setText(taxTypeLabel);
 	}
-
-	@Override
-	public <C> Column<FormDataSearchResultItem, C> addTableColumn(Cell<C> cell,
-			String headerText, final ValueGetter<C> getter,
-			FieldUpdater<FormDataSearchResultItem, C> fieldUpdater) {
-		Column<FormDataSearchResultItem, C> column = new Column<FormDataSearchResultItem, C>(cell) {
-			public C getValue(FormDataSearchResultItem object) {
-				return getter.getValue(object);
-			}
-		};
-		column.setFieldUpdater(fieldUpdater);
-		formDataTable.addColumn(column, headerText);
-		return column;
-	}
-
 
 	@UiHandler("apply")
 	void onApplyButtonClicked(ClickEvent event) {
@@ -139,16 +142,11 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		}
 	}
 
-    @UiHandler("create")
-    void onCreateButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCreateClicked();
-        }
-    }
-
-	@Override
-	public void setFormDataLinkRender(FormDataLinkRender render) {
-		// TODO Auto-generated method stub
-		
+	@UiHandler("create")
+	void onCreateButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCreateClicked();
+		}
 	}
+
 }

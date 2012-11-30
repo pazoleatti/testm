@@ -16,14 +16,13 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
+import java.util.List;
+import java.util.Map;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.ContactPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -32,9 +31,6 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -53,23 +49,14 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 * View.
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
-		public interface FormDataLinkRender{
-			String renderUrl(FormData formData);
-		}
 		
 		void setFormDataList(List<FormDataSearchResultItem> records);
 
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 
 		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
-		
-		void setFormDataLinkRender(FormDataLinkRender render);
 
 		void setTaxTypeLabel(String taxTypeLabel);
-
-		public <C> Column<FormDataSearchResultItem, C> addTableColumn(Cell<C> cell,
-				String headerText, final ValueGetter<C> getter,
-				FieldUpdater<FormDataSearchResultItem, C> fieldUpdater);
 	}
 	
 	protected final PlaceManager placeManager;
