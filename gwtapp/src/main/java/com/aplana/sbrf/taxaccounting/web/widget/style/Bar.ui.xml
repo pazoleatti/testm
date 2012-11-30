@@ -4,7 +4,7 @@
 	<ui:style>
 
 	</ui:style>
-	<g:HorizontalPanel width="100%" borderWidth="1">
+	<g:HorizontalPanel width="100%">
 		<g:cell horizontalAlignment="ALIGN_LEFT">
 				<g:FlowPanel ui:field="leftPlaceHolder" />
 		</g:cell>
