@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Сервлет для выхода из системы. Очищает сессию и редиректит на страницу авторизации.
@@ -14,10 +15,15 @@ import java.io.IOException;
  */
 public class LogoutServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		if (session != null) {
-			session.invalidate();
+		String contextPath = request.getContextPath();
+		if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
+			response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");
+		} else {
+			HttpSession session = request.getSession();
+			if (session != null) {
+				session.invalidate();
+			}
+			response.sendRedirect(contextPath + "/login");
 		}
-		response.sendRedirect(request.getContextPath() + "/login");
 	}
 }
