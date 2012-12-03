@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
@@ -9,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -82,6 +85,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			result.setAccessFlags(accessFlags);
 		}
 		else{
+			result.setLogEntries(new ArrayList<LogEntry>());
+			
 			formData = formDataService.getFormData(userId, action.getFormDataId());
 			result.setDepartmenName(departmentDao.getDepartment(user.getDepartmentId()).getName());
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());

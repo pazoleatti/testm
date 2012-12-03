@@ -23,8 +23,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> implements FormDataPresenter.MyView {
-	
+public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
+		implements FormDataPresenterBase.MyView {
+
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
@@ -48,7 +49,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	Button printButton;
 	@UiField
 	Button deleteFormButton;
-	
+
 	@UiField
 	LeftBar workflowButtons;
 
@@ -64,9 +65,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	Label reportPeriodLabel;
 	@UiField
 	Label stateLabel;
-	
-		
-	@UiField(provided=true) 
+
+	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
 
 	private final Widget widget;
@@ -74,7 +74,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@Inject
 	public FormDataView(final Binder binder) {
 		widget = binder.createAndBindUi(this);
-	}	
+	}
 
 	@Override
 	public Widget asWidget() {
@@ -82,15 +82,18 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 
 	@Override
-	public void setColumnsData(List<Column> columnsData) {
-		
+	public void setColumnsData(List<Column> columnsData, boolean readOnly) {
+
 		// Clean columns
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
-		}	
+		}
 
-		for (Column col: columnsData) {
-			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
+		factory.setReadOnly(readOnly);
+
+		for (Column col : columnsData) {
+			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
+					.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 			final SingleSelectionModel<DataRow> selectionModel = new SingleSelectionModel<DataRow>();
@@ -98,10 +101,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 		}
 
 	}
-	
+
 	@Override
-	public void setRowsData(List<DataRow> rowsData, boolean readOnly) {
-		factory.setReadOnly(readOnly);
+	public void setRowsData(List<DataRow> rowsData) {
 		formDataTable.setRowCount(rowsData.size());
 		formDataTable.setRowData(rowsData);
 		formDataTable.redraw();
@@ -114,74 +116,76 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 		loggerList.redraw();
 	}
 
-
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCancelClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCancelClicked();
+		}
+	}
+
 	@UiHandler("saveButton")
 	void onSaveButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onSaveClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onSaveClicked();
+		}
+	}
+
 	@UiHandler("addRowButton")
 	void onAddRowButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onAddRowClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onAddRowClicked();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@UiHandler("removeRowButton")
 	void onRemoveRowButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onRemoveRowClicked(((SingleSelectionModel<DataRow>)formDataTable.getSelectionModel()).getSelectedObject());
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onRemoveRowClicked(
+					((SingleSelectionModel<DataRow>) formDataTable
+							.getSelectionModel()).getSelectedObject());
+		}
+	}
+
 	@UiHandler("manualInputButton")
 	void onManualInputButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onManualInputClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onManualInputClicked();
+		}
+	}
+
 	@UiHandler("originalVersionButton")
 	void onOriginalVersionButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onOriginalVersionClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onOriginalVersionClicked();
+		}
+	}
+
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onRecalculateClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onRecalculateClicked();
+		}
+	}
+
 	@UiHandler("printButton")
 	void onPrintButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onPrintClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onPrintClicked();
+		}
+	}
+
 	@UiHandler("deleteFormButton")
 	void onDeleteFormButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onDeleteFormClicked();
-        }
-    }
-	
+		if (getUiHandlers() != null) {
+			getUiHandlers().onDeleteFormClicked();
+		}
+	}
+
 	@Override
-	public void setAdditionalFormInfo(String formType, String taxType, String formKind,
-										String departmentId, String reportPeriod, String state) {
+	public void setAdditionalFormInfo(String formType, String taxType,
+			String formKind, String departmentId, String reportPeriod,
+			String state) {
 		taxTypeLabel.setText("Тип налога: " + taxType);
 		formTypeLabel.setText(" Вид налоговой формы: " + formType);
 		formKindLabel.setText("Тип налоговой формы: " + formKind);
@@ -191,21 +195,21 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 
 	/**
-	 * Показывает кнопки для доступных переходов, 
-	 * если null, то скрываем все кнопки.
+	 * Показывает кнопки для доступных переходов, если null, то скрываем все
+	 * кнопки.
 	 */
 	@Override
 	public void setWorkflowButtons(List<WorkflowMove> moves) {
 		workflowButtons.clear();
 		if (moves != null) {
 			for (final WorkflowMove workflowMove : moves) {
-				Button button = new Button(workflowMove.getName(), new ClickHandler() {
-					
-					@Override
-					public void onClick(ClickEvent event) {
-						getUiHandlers().onWorkflowMove(workflowMove);
-					}
-				});
+				Button button = new Button(workflowMove.getName(),
+						new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								getUiHandlers().onWorkflowMove(workflowMove);
+							}
+						});
 				workflowButtons.add(button);
 			}
 		}
