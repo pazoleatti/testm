@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 			 xmlns:c="urn:import:com.google.gwt.user.cellview.client"
+			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 			 >
 	<g:VerticalPanel>
 		<g:HorizontalPanel width="auto" height="auto">
@@ -14,7 +15,7 @@
 		</g:HorizontalPanel>
 		<g:FlowPanel height="350px">
 			<g:HorizontalPanel height="300px" width="100%">
-				<c:CellTable width="100%" height="auto" ui:field="cellTable" />
+				<style:GenericCellTable width="100%" height="auto" ui:field="cellTable" />
 			</g:HorizontalPanel>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
 				<c:SimplePager ui:field='pager' location='CENTER'/>

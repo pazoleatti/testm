@@ -1,0 +1,139 @@
+@CHARSET "UTF-8";
+
+/**
+ * Override default cell css from file com/google/gwt/user/cellview/client/CellTable.css 
+ */
+.cellTableWidget {
+	background-color: #a9a5a2;
+	border: none !important;
+	border-top: 1px solid #a9a5a2 !important;
+	border-left: 1px solid #a9a5a2 !important;
+}
+
+.cellTableFirstColumn {
+	
+}
+
+.cellTableLastColumn {
+	
+}
+
+.cellTableFooter {
+	border-bottom: 1px solid #9CC2EF;
+	font-size: 12px;
+	font-weight: normal;
+	height: 4em;
+	padding: 0 2px;
+	text-shadow: none;
+}
+
+.cellTableHeader {
+	font-size: 12px;
+	font-weight: normal;
+	height: 4em;
+	padding: 0 2px;
+	text-shadow: none;
+	border: none !important;
+	border-bottom: 1px solid #a9a5a2 !important;
+	border-right: 1px solid #a9a5a2 !important;
+	color: #222222;
+	background-color: #91d466;
+	text-align: left;
+}
+
+.cellTableCell {
+	overflow: hidden;
+	font-size: 11px;
+	height: 10px;
+	padding: 2px;
+	color: #222222;
+	border: none !important;
+	border-bottom: 1px solid #a9a5a2 !important;
+    border-right: 1px solid #a9a5a2 !important;
+}
+
+.cellTableFirstColumnFooter {
+	
+}
+
+.cellTableFirstColumnHeader {
+	
+}
+
+.cellTableLastColumnFooter {
+	
+}
+
+.cellTableLastColumnHeader {
+	
+}
+
+.cellTableSortableHeader {
+	cursor: pointer;
+	cursor: hand;
+}
+
+.cellTableSortableHeader:hover {
+	
+}
+
+.cellTableSortedHeaderAscending {
+	
+}
+
+.cellTableSortedHeaderDescending {
+	
+}
+
+.cellTableEvenRow {
+	background-color: #FFFFFF;
+}
+
+.cellTableEvenRowCell {
+	background-color: #FFFFFF;
+}
+
+.cellTableOddRow {
+	background-color: #F4F3F3;
+}
+
+.cellTableOddRowCell {
+	background-color: #F4F3F3;
+}
+
+.cellTableHoveredRow {
+	
+}
+
+.cellTableHoveredRowCell {
+	
+}
+
+.cellTableKeyboardSelectedRow {
+	background-color: #FFFFCC;
+}
+
+.cellTableKeyboardSelectedRowCell {
+	background-color: #FFFFCC;
+}
+
+.cellTableSelectedRow {
+	background-color: #FFFFCC;
+	border: none;
+}
+
+.cellTableSelectedRowCell {
+	background-color: #FFFFCC;
+}
+
+/**
+ * The keyboard selected cell is visible over selection.
+ */
+.cellTableKeyboardSelectedCell {
+	background-color: #9A9CFF;
+	border-color: #373AD7;
+}
+
+.cellTableLoading {
+	margin: 30px;
+}

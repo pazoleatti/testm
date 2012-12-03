@@ -1,0 +1,136 @@
+@CHARSET "UTF-8";
+
+/**
+ * Override default cell css from file com/google/gwt/user/cellview/client/DataGrid.css 
+ */
+.dataGridWidget {
+	background-color: #a9a5a2;
+	border: none !important;
+	border-top: 1px solid #a9a5a2 !important;
+	border-left: 1px solid #a9a5a2 !important;
+}
+
+.dataGridFirstColumn {
+	
+}
+
+.dataGridLastColumn {
+	
+}
+
+.dataGridFooter {
+	border-top: 2px solid #6f7277;
+	padding: 3px 15px;
+	text-align: left;
+	color: #4b4a4a;
+	text-shadow: #ddf 1px 1px 0;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.dataGridHeader {
+	font-size: 12px;
+	font-weight: normal;
+	height: 4em;
+	padding: 0 2px;
+	text-shadow: none;
+	border: none !important;
+	border-bottom: 1px solid #a9a5a2 !important;
+    border-right: 1px solid #a9a5a2 !important;
+	color: #222222;
+	background-color: #91d466;
+	text-align: left;
+}
+
+.dataGridCell {
+	overflow: hidden;
+	font-size: 11px;
+	height: 10px;
+	padding: 2px;
+	color: #222222;
+	border: none !important;
+	border-bottom: 1px solid #a9a5a2 !important;
+    border-right: 1px solid #a9a5a2 !important;
+}
+
+.dataGridFirstColumnFooter {
+	
+}
+
+.dataGridFirstColumnHeader {
+	
+}
+
+.dataGridLastColumnFooter {
+	
+}
+
+.dataGridLastColumnHeader {
+	
+}
+
+.dataGridSortableHeader {
+	cursor: pointer;
+	cursor: hand;
+}
+
+.dataGridSortableHeader:hover {
+	
+}
+
+.dataGridSortedHeaderAscending {
+	
+}
+
+.dataGridSortedHeaderDescending {
+	
+}
+
+.dataGridEvenRow {
+	background-color: #FFFFFF;
+}
+
+.dataGridEvenRowCell {
+	background-color: #FFFFFF;
+}
+
+.dataGridOddRow {
+	background-color: #F4F3F3;
+}
+
+.dataGridOddRowCell {
+	background-color: #F4F3F3;
+}
+
+.dataGridHoveredRow {
+	
+}
+
+.dataGridHoveredRowCell {
+	
+}
+
+.dataGridKeyboardSelectedRow {
+	background-color: #FFFFCC;
+}
+
+.dataGridKeyboardSelectedRowCell {
+	background-color: #FFFFCC;
+}
+
+.dataGridSelectedRow {
+	background-color: #FFFFCC;
+	border: none;
+}
+
+.dataGridSelectedRowCell {
+	background-color: #FFFFCC;
+}
+
+/**
+ * The keyboard selected cell is visible over selection.
+ */
+.dataGridKeyboardSelectedCell {
+	background-color: #9A9CFF;
+	border-color: #373AD7;
+}

@@ -1,0 +1,15 @@
+@CHARSET "UTF-8";
+
+.genericTable {
+}
+
+.genericTable th {
+}
+
+.genericTable tbody tr td {
+}
+
+.genericTable tbody tr div button {
+	padding: 0;
+	font-size: 10px;
+}

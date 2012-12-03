@@ -39,7 +39,7 @@
 		</style:Bar>
 		<g:cell width="100%">
 			<g:ScrollPanel width="100%">
-				<c:DataGrid ui:field="formDataTable" focus="true" height="600px"/>
+				<style:GenericDataGrid ui:field="formDataTable" focus="true" height="600px"/>
 			</g:ScrollPanel>
 		</g:cell>
 	</g:VerticalPanel>

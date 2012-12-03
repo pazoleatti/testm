@@ -89,3 +89,15 @@
 	margin: 4px 6px 0;
 	padding: 0px;
 }
+
+.footer {
+	border-top: 1px solid #CCCCCC;
+	color: #B3B2B1;
+    clear: both;
+    font-size: 0.8em;
+    margin-top: 1em;
+    padding: 1em;
+    text-align: center;
+}
+
+

@@ -21,7 +21,8 @@
 		<g:HorizontalPanel>
 
 		</g:HorizontalPanel>
-		<cell:CellTable ui:field="formDataTable" width="100%" />
+	
+		<style:GenericCellTable ui:field="formDataTable" width="100%" />
 
 	</g:VerticalPanel>
 
