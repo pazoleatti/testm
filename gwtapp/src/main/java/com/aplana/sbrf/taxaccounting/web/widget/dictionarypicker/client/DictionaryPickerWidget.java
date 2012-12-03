@@ -40,7 +40,7 @@ public class DictionaryPickerWidget extends Composite implements HasValueChangeH
 	}
 
 	private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-	@UiField(provided=true) CellTable<DictionaryItem<String>> cellTable = new CellTable<DictionaryItem<String>>();
+	@UiField CellTable<DictionaryItem<String>> cellTable;
 	@UiField Button btnFind;
 	@UiField TextBox txtFind;
 	@UiField SimplePager pager;
