@@ -24,9 +24,6 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 	
 	@Override
 	public GetFormDataListResult execute(GetFormDataList action,	ExecutionContext context) throws ActionException {
-		/*TODO: тут нужно получать пользовательский ID и передавать в formDataSearchService в качестве параметра,
-		* в рамках прототипа это не делается*/
-
         GetFormDataListResult res = new GetFormDataListResult();
 		res.setRecords(formDataSearchService.findDataByUserIdAndFilter(securityService.currentUser(),
 				action.getFormDataFilter()));

@@ -24,6 +24,11 @@
             <g:Label width="200px" text="Вид налоговой формы"/>
             <lbe:LongListBoxEditor width="200px" ui:field="formtype" visibleItemCount="1" />
         </g:VerticalPanel>
+
+        <g:VerticalPanel spacing="5" width="100%">
+            <g:Label width="200px" text="Статус формы"/>
+            <lbe:LongListBoxEditor width="200px" ui:field="formState" visibleItemCount="1"/>
+        </g:VerticalPanel>
     </g:HorizontalPanel>
 
 </ui:UiBinder> 

@@ -29,6 +29,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 		public void setKindList(List<SelectItem> list);
 
+		public void setFormStateList(List<SelectItem> list);
+
 		public void clearData();
 
 	}
@@ -61,16 +63,17 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						List<SelectItem> departmentItems = fillDepartmentList(result);
 						List<SelectItem> formTypeItems = fillFormTypeList(result);
 						List<SelectItem> formKindList = fillFormKindList();
+						List<SelectItem> formStateList = fillFormStateList();
 
 						getView().setFormtypeList(formTypeItems);
 						getView().setPeriodList(reportPeriodItems);
 						getView().setDepartmentList(departmentItems);
 						getView().setKindList(formKindList);
+						getView().setFormStateList(formStateList);
 
 						FormDataFilter formDataFilter = new FormDataFilter();
 						formDataFilter.setDepartment(departmentItems.get(DEFAULT_DEPARTMENT_SELECTED_ITEM).getId());
 						getView().setDataFilter(formDataFilter);
-
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}
 				});
@@ -118,6 +121,16 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		kind.add(new SelectItem(2L, "Консолидированная"));
 		kind.add(new SelectItem(1L, "Первичная"));
 		return kind;
+	}
+
+	private List<SelectItem> fillFormStateList(){
+		List<SelectItem> formState = new ArrayList<SelectItem>();
+		formState.add(new SelectItem(MAGIC_NUMBER, ""));
+		formState.add(new SelectItem(1L, "Создана"));
+		formState.add(new SelectItem(2L, "Подготовлена"));
+		formState.add(new SelectItem(3L, "Утверждена"));
+		formState.add(new SelectItem(4L, "Принята"));
+		return formState;
 	}
 
 }

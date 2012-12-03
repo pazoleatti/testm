@@ -23,6 +23,8 @@ public class FormDataDaoFilter implements Serializable {
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
 	private List<Long> formDataKind;
 
+	private List<Long> formStates;
+
 	public List<Long> getPeriod() {
 		return reportPeriodId;
 	}
@@ -53,5 +55,13 @@ public class FormDataDaoFilter implements Serializable {
 
 	public void setKind(List<Long> kind) {
 		this.formDataKind = kind;
+	}
+
+	public List<Long> getFormStates() {
+		return formStates;
+	}
+
+	public void setFormStates(List<Long> formStates) {
+		this.formStates = formStates;
 	}
 }

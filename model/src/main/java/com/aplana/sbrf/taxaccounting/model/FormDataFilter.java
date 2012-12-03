@@ -21,6 +21,8 @@ public class FormDataFilter implements Serializable{
 
 	private TaxType taxType;
 
+	private Long formState;
+
 	public Long getPeriod() {
 		return reportPeriodId;
 	}
@@ -59,6 +61,14 @@ public class FormDataFilter implements Serializable{
 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
+	}
+
+	public Long getFormState() {
+		return formState;
+	}
+
+	public void setFormState(Long formState) {
+		this.formState = formState;
 	}
 
 }

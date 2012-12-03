@@ -80,6 +80,17 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
 		}
 
+		if(formDataFilter.getFormState() == Long.MAX_VALUE){
+			WorkflowState[] formStates = WorkflowState.values();
+			List<Long> formStatesLongList = new ArrayList<Long>();
+			for(int i = 0; i < formStates.length; i++){
+				formStatesLongList.add((long)formStates[i].getId());
+			}
+			formDataDaoFilter.setFormStates(formStatesLongList);
+		} else {
+			formDataDaoFilter.setFormStates(Arrays.asList(formDataFilter.getFormState()));
+		}
+
 		return formDataSearchDao.findByFilter(formDataDaoFilter);
 	}
 

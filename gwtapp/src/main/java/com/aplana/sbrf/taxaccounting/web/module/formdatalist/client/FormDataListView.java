@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.AbstractCell;
@@ -19,6 +16,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
+import java.util.Map;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -67,6 +67,13 @@ public class FormDataListView extends
 			}
 		};
 
+		TextColumn<FormDataSearchResultItem> stateColumn = new TextColumn<FormDataSearchResultItem>() {
+			@Override
+			public String getValue(FormDataSearchResultItem object) {
+				return object.getState().getName();
+			}
+		};
+
 		Column<FormDataSearchResultItem, FormDataSearchResultItem> linkColumn = new Column<FormDataSearchResultItem, FormDataSearchResultItem>(
 				new AbstractCell<FormDataSearchResultItem>() {
 
@@ -94,6 +101,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(linkColumn, "Вид налоговой формы");
 		formDataTable.addColumn(departmentColumn, "Подразделение");
 		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
+		formDataTable.addColumn(stateColumn, "Статус формы");
 
 	}
 

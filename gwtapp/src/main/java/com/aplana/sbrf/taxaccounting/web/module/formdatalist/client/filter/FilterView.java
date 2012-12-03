@@ -37,6 +37,9 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
     @UiField
 	LongListBoxEditor kind;
 
+	@UiField
+	LongListBoxEditor formState;
+
     @Inject
     public FilterView(final MyBinder binder, final MyDriver driver) {
         widget = binder.createAndBindUi(this);
@@ -92,12 +95,20 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
         }
     }
 
+	@Override
+	public void setFormStateList(List<SelectItem> list){
+		for(SelectItem selectItem : list){
+			formState.addItem(selectItem.getName(), String.valueOf(selectItem.getId()));
+		}
+	}
+
     @Override
     public void clearData(){
         period.clear();
         department.clear();
         formtype.clear();
         kind.clear();
+		formState.clear();
     }
 
 }

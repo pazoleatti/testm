@@ -49,7 +49,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				"  AND ft.id in " + transformToSqlInStatement(dataFilter.getFormtype()) +
 				"  AND rp.id in " + transformToSqlInStatement(dataFilter.getPeriod()) +
 				"  AND fd.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartment()) +
-				"  AND fd.kind in " + transformToSqlInStatement(dataFilter.getKind()) ;
+				"  AND fd.kind in " + transformToSqlInStatement(dataFilter.getKind()) +
+				"  AND fd.state in " + transformToSqlInStatement(dataFilter.getFormStates());
 
 		return getJdbcTemplate().query(query, new FormDataSearchResultItemMapper());
 	}
