@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -35,9 +33,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	private FormData formData;
 	
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
-	
-	private Map<Button, WorkflowMove> buttonsAssociation = new HashMap<Button, WorkflowMove>();
-	
+
 	@UiField
 	DataGrid<DataRow> formDataTable;
 	@UiField
@@ -59,20 +55,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	
 	@UiField
 	LeftBar workflowButtons;
-	// Workflow buttons
-//	@UiField
-//	Button createdToApprovedButton;
-//	@UiField
-//	Button approvedToCreatedButton;
-//	@UiField
-//	Button approvedToAcceptedButton;
-//	@UiField
-//	Button acceptedToApprovedButton;
-//	@UiField
-//	Button createdToAcceptedButton;
-//	@UiField
-//	Button acceptedToCreatedButton;
-	
+
 	@UiField
 	Label formTypeLabel;
 	@UiField

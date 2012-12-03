@@ -55,8 +55,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		FormData getFormData();
 		void setLogMessages(List<LogEntry> logEntries);
 		void cleanTable();
-//		void activateReadOnlyModeWithoutUpdate(AccessFlags flags);
-//		void activateEditModeWithoutUpdate();
 		void setAdditionalFormInfo(String formType, String taxType, String formKind,
 									String departmentId, String reportPeriod, String state);
 		void loadFormData(FormData formData, boolean readOnly);
@@ -123,7 +121,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					showEditModeButtons();
 					getView().setWorkflowButtons(null);
 				} else {
-//					getView().activateReadOnlyModeWithoutUpdate(result.getAccessFlags());
 					showReadOnlyModeButtons();
 					getView().setWorkflowButtons(result.getAvailableMoves());
 					
@@ -138,7 +135,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					);
 				
 				getView().loadFormData(result.getFormData(), readOnly);
-//				getProxy().manualReveal(FormDataPresenter.this);
+				//getProxy().manualReveal(FormDataPresenter.this);
 				
 				super.onReqSuccess(result);
 			}
