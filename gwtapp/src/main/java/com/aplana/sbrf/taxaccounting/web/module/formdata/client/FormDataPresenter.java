@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -23,17 +28,16 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
-
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> 
 									implements FormDataUiHandlers{
@@ -51,13 +55,15 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataUiHandlers> {
-		void reloadRows();
-		FormData getFormData();
+		
+		void loadTable(FormData formData, boolean readOnly);
+		void reloadRows(FormData formData);
+		
 		void setLogMessages(List<LogEntry> logEntries);
 		void cleanTable();
 		void setAdditionalFormInfo(String formType, String taxType, String formKind,
 									String departmentId, String reportPeriod, String state);
-		void loadFormData(FormData formData, boolean readOnly);
+
 		void setWorkflowButtons(List<WorkflowMove> moves);
 		
 		void showOriginalVersionButton(boolean show);
@@ -68,8 +74,6 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		void showPrintButton(boolean show);
 		void showManualInputButton(boolean show);
 		void showDeleteFormButton(boolean show);
-		
-		void removeSelectedTableRow();
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -88,8 +92,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
-	private FormData formData;
-	private AccessFlags flags;
+	protected FormData formData;
+	protected AccessFlags flags;
 
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -134,7 +138,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						result.getFormData().getState().getName()
 					);
 				
-				getView().loadFormData(result.getFormData(), readOnly);
+				getView().loadTable(result.getFormData(), readOnly);
 				//getProxy().manualReveal(FormDataPresenter.this);
 				
 				super.onReqSuccess(result);
@@ -176,11 +180,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
 		final MyView view = getView();
-		action.setFormData(view.getFormData());
+		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 			@Override
 			public void onReqSuccess(SaveFormDataResult result) {
-				getView().loadFormData(result.getFormData(), false);
+				getView().loadTable(result.getFormData(), false);
 				view.setLogMessages(result.getLogEntries());	
 				super.onReqSuccess(result);
 			}
@@ -195,15 +199,14 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	
 	@Override
 	public void onAddRowClicked() {
-		FormData formData = getView().getFormData();
 		formData.appendDataRow(null);
-		getView().reloadRows();
+		getView().reloadRows(formData);
 	}
 	
 	@Override
-	public void onRemoveRowClicked() {
-		getView().removeSelectedTableRow();
-		getView().reloadRows();
+	public void onRemoveRowClicked(DataRow dataRow) {
+		formData.getDataRows().remove(dataRow);
+		getView().reloadRows(formData);
 	}
 	
 	@Override
@@ -219,11 +222,11 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void onRecalculateClicked() {
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
-		action.setFormData(getView().getFormData());
+		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
 			@Override
 			public void onReqSuccess(RecalculateFormDataResult result) {
-				getView().loadFormData(result.getFormData(), false);
+				getView().loadTable(result.getFormData(), false);
 				getView().setLogMessages(result.getLogEntries());
 				super.onReqSuccess(result);
 			}
@@ -240,7 +243,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		boolean isOK = Window.confirm("Удалить?");
 		if (isOK) {
 			DeleteFormDataAction action = new DeleteFormDataAction();
-			action.setFormDataId(getView().getFormData().getId());
+			action.setFormDataId(formData.getId());
 			dispatcher.execute(action, new AbstractCallback<DeleteFormDataResult>(){
 				@Override
 				public void onReqSuccess(DeleteFormDataResult result) {
@@ -293,13 +296,13 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	public void refreshForm(Boolean readOnly) {
 		placeManager.revealPlace(new PlaceRequest(
 				FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, readOnly.toString()).with(
-				FormDataPresenter.FORM_DATA_ID, getView().getFormData().getId().toString()));
+				FormDataPresenter.FORM_DATA_ID, formData.getId().toString()));
 	}
 
 	@Override
 	public void onWorkflowMove(WorkflowMove wfMove) {
 		GoMoveAction action = new GoMoveAction();
-		action.setFormDataId(getView().getFormData().getId());
+		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
 		dispatcher.execute(action, new AbstractCallback<GoMoveResult>(){
 			@Override

@@ -30,8 +30,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
-	private FormData formData;
-	
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
 	@UiField
@@ -69,9 +67,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@UiField
 	Label stateLabel;
 	
-	
-	
-	@UiField(provided=true) CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
+		
+	@UiField(provided=true) 
+	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
 
 	private final Widget widget;
 
@@ -99,11 +97,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 
 	@Override
-	public void loadFormData(FormData formData, boolean readOnly) {
+	public void loadTable(FormData formData, boolean readOnly) {
 		cleanTable();
 		
 		factory.setReadOnly(readOnly);
-		this.formData = formData;
 		for (Column col: formData.getFormColumns()) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
@@ -112,16 +109,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 			formDataTable.setSelectionModel(selectionModel);
 		}
 		
-		reloadRows();
+		reloadRows(formData);
 	}
 	
 	@Override
-	public void removeSelectedTableRow() {
-		formData.getDataRows().remove(((SingleSelectionModel<DataRow>)formDataTable.getSelectionModel()).getSelectedObject());
-	}
-	
-	@Override
-	public void reloadRows() {
+	public void reloadRows(FormData formData) {
 		formDataTable.setRowCount(formData.getDataRows().size());
 		formDataTable.setRowData(formData.getDataRows());
 		formDataTable.redraw();
@@ -134,10 +126,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 		loggerList.redraw();
 	}
 
-	@Override
-	public FormData getFormData() {
-		return formData;
-	}
 
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
@@ -163,7 +151,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	@UiHandler("removeRowButton")
 	void onRemoveRowButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onRemoveRowClicked();
+            getUiHandlers().onRemoveRowClicked(((SingleSelectionModel<DataRow>)formDataTable.getSelectionModel()).getSelectedObject());
         }
     }
 	
