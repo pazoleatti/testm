@@ -4,7 +4,8 @@ import com.google.gwt.user.cellview.client.DataGrid;
 
 public interface GenericDataGridResources extends DataGrid.Resources {
 
-	@Source(value = { DataGrid.Style.DEFAULT_CSS, "GenericDataGridStyle.css" })
+	//@Source(value = { DataGrid.Style.DEFAULT_CSS, "GenericDataGridStyle.css" })
+	@Source(value = {"GenericDataGridStyle.css" })
 	DataGrid.Style dataGridStyle();
 
 }
