@@ -23,6 +23,7 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormDataPresenter.MyProxy> 
 									implements FormDataUiHandlers{
 	private Logger logger = Logger.getLogger(getClass().getName());
-	
+
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s proxy.
 	 */
@@ -74,12 +75,21 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	}
 
 	public static final String NAME_TOKEN = "!formData";
+
 	public static final String FORM_DATA_ID = "formDataId";
 	public static final String READ_ONLY = "readOnly";
+	
+	public static final String DEPARTMENT_ID = "departmentId";
+	
+	public static final String FORM_DATA_KIND_ID = "formDataKindId";
+	
+	public static final String FORM_DATA_TYPE_ID = "formDataTypeId";
+	
+	public static final String FORM_DATA_RPERIOD_ID = "formDataTypeId";
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
-	
+
 	private FormData formData;
 	private AccessFlags flags;
 
@@ -95,11 +105,15 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		long formDataId = Long.parseLong(request.getParameter(FORM_DATA_ID, "none"));
 		final boolean readOnly = Boolean.parseBoolean(request.getParameter(READ_ONLY, "true"));
 		
 		GetFormData action = new GetFormData();
-		action.setFormDataId(formDataId);
+		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
+		action.setDepartmentId(Long.parseLong(request.getParameter(DEPARTMENT_ID, String.valueOf(Long.MAX_VALUE))));
+		action.setFormDataKind(Long.parseLong((request.getParameter(FORM_DATA_KIND_ID, String.valueOf(Long.MAX_VALUE)))));
+		action.setFormDataTypeId((Long.parseLong((request.getParameter(FORM_DATA_TYPE_ID, String.valueOf(Long.MAX_VALUE))))));
+		action.setReportPeriodId(Long.parseLong(request.getParameter(FORM_DATA_RPERIOD_ID, String.valueOf(Long.MAX_VALUE))));
+		
 		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
 			@Override
 			public void onReqSuccess(GetFormDataResult result) {
@@ -113,7 +127,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 					showReadOnlyModeButtons();
 					getView().setWorkflowButtons(result.getAvailableMoves());
 					
-				}
+			}
 				getView().setAdditionalFormInfo(
 						result.getFormData().getFormType().getName(),
 						result.getFormData().getFormType().getTaxType().getName(),
@@ -128,13 +142,22 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				
 				super.onReqSuccess(result);
 			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				logger.log(Level.INFO, "Can't open form", throwable);
+				placeManager.revealPlace(new PlaceRequest(FormDataListNameTokens.FORM_DATA_LIST).with("nType", String.valueOf(TaxType.TRANSPORT)));
+				super.onReqFailure(throwable);
+			}
+			
 		});
 	}
-	
+		
 	@Override
 	public boolean useManualReveal() {
 		return false;
 	}
+
 	
 	@Override
 	protected void onReset() {
@@ -170,6 +193,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 				logger.log(Level.SEVERE, "Failed to save formData object", throwable);
 			}							
 		});
+		
 	}
 	
 	@Override
@@ -188,8 +212,8 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void onManualInputClicked() {
 		refreshForm(false);
-	}
-	
+			}							
+		
 	@Override
 	public void onOriginalVersionClicked() {
 		Window.alert("В разработке");

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 /**
  * 
@@ -14,6 +15,8 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class GetFormDataResult implements Result {
 	private FormData formData;
+	
+	private List<LogEntry> logEntries;
 	
 	private AccessFlags accessFlags;
 	
@@ -63,4 +66,13 @@ public class GetFormDataResult implements Result {
 	public void setAvailableMoves(List<WorkflowMove> availableMoves) {
 		this.availableMoves = availableMoves;
 	}
+
+	public List<LogEntry> getLogEntries() {
+		return logEntries;
+	}
+
+	public void setLogEntries(List<LogEntry> logEntries) {
+		this.logEntries = logEntries;
+	}
+	
 }

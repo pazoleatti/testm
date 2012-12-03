@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
@@ -115,7 +116,13 @@ public class FormDataListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-
+		FormDataFilter filterFormData = filterPresenter.getFilterData();
+		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").
+				with(FormDataPresenter.FORM_DATA_ID, String.valueOf(Long.MAX_VALUE)).
+				with(FormDataPresenter.FORM_DATA_KIND_ID,String.valueOf(filterFormData.getKind())).
+				with(FormDataPresenter.DEPARTMENT_ID, String.valueOf(filterFormData.getDepartment())).
+				with(FormDataPresenter.FORM_DATA_TYPE_ID, String.valueOf(filterFormData.getFormtype())).
+				with(FormDataPresenter.FORM_DATA_RPERIOD_ID, String.valueOf(filterFormData.getPeriod())));
 	}
 
 }
