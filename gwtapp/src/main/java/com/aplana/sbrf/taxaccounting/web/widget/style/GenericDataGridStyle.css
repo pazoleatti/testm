@@ -53,6 +53,10 @@
     border-right: 1px solid #a9a5a2 !important;
 }
 
+.dataGridCell input {
+	width: 99%;
+}
+
 .dataGridFirstColumnFooter {
 	
 }
