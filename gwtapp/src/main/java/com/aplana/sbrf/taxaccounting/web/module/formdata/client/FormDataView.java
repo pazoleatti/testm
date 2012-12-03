@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.Collections;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
@@ -84,38 +82,28 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void cleanTable() {
-		System.out.println("cleanTable");
+	public void setColumnsData(List<Column> columnsData) {
+		
+		// Clean columns
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
-		}
-		loggerList.setRowCount(0);
-		loggerList.setRowData(Collections.EMPTY_LIST);
-		formDataTable.setRowCount(0);
-		formDataTable.setRowData(Collections.EMPTY_LIST);
-	}
+		}	
 
-	@Override
-	public void loadTable(FormData formData, boolean readOnly) {
-		cleanTable();
-		
-		factory.setReadOnly(readOnly);
-		for (Column col: formData.getFormColumns()) {
+		for (Column col: columnsData) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 			final SingleSelectionModel<DataRow> selectionModel = new SingleSelectionModel<DataRow>();
 			formDataTable.setSelectionModel(selectionModel);
 		}
-		
-		reloadRows(formData);
+
 	}
 	
 	@Override
-	public void reloadRows(FormData formData) {
-		formDataTable.setRowCount(formData.getDataRows().size());
-		formDataTable.setRowData(formData.getDataRows());
+	public void setRowsData(List<DataRow> rowsData, boolean readOnly) {
+		factory.setReadOnly(readOnly);
+		formDataTable.setRowCount(rowsData.size());
+		formDataTable.setRowData(rowsData);
 		formDataTable.redraw();
 	}
 
@@ -148,6 +136,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers> impleme
         }
     }
 	
+	@SuppressWarnings("unchecked")
 	@UiHandler("removeRowButton")
 	void onRemoveRowButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {

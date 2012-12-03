@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -55,12 +56,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter}'s view.
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataUiHandlers> {
-		
-		void loadTable(FormData formData, boolean readOnly);
-		void reloadRows(FormData formData);
-		
+
+		void setColumnsData(List<Column> columnsData);
+		void setRowsData(List<DataRow> rowsData, boolean readOnly);
 		void setLogMessages(List<LogEntry> logEntries);
-		void cleanTable();
 		void setAdditionalFormInfo(String formType, String taxType, String formKind,
 									String departmentId, String reportPeriod, String state);
 
@@ -94,6 +93,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 
 	protected FormData formData;
 	protected AccessFlags flags;
+	protected boolean readOnlyMode;
 
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -107,7 +107,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		final boolean readOnly = Boolean.parseBoolean(request.getParameter(READ_ONLY, "true"));
+		readOnlyMode = Boolean.parseBoolean(request.getParameter(READ_ONLY, "true"));
 		
 		GetFormData action = new GetFormData();
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
@@ -121,7 +121,7 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 			public void onReqSuccess(GetFormDataResult result) {
 				formData = result.getFormData();
 				flags= result.getAccessFlags();
-				if (!readOnly && result.getAccessFlags().getCanEdit()) {
+				if (!readOnlyMode && result.getAccessFlags().getCanEdit()) {
 					showEditModeButtons();
 					getView().setWorkflowButtons(null);
 				} else {
@@ -138,8 +138,9 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 						result.getFormData().getState().getName()
 					);
 				
-				getView().loadTable(result.getFormData(), readOnly);
-				//getProxy().manualReveal(FormDataPresenter.this);
+				getView().setColumnsData(formData.getFormColumns());
+				getView().setRowsData(formData.getDataRows(), readOnlyMode);
+				getProxy().manualReveal(FormDataPresenter.this);
 				
 				super.onReqSuccess(result);
 			}
@@ -156,16 +157,10 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		
 	@Override
 	public boolean useManualReveal() {
-		return false;
+		return true;
 	}
 
-	
-	@Override
-	protected void onReset() {
-		super.onReset();
-		getView().cleanTable();
-	}
-	
+		
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
@@ -179,13 +174,13 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
-		final MyView view = getView();
 		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>(){
 			@Override
 			public void onReqSuccess(SaveFormDataResult result) {
-				getView().loadTable(result.getFormData(), false);
-				view.setLogMessages(result.getLogEntries());	
+				FormDataPresenter.this.formData = result.getFormData();
+				getView().setLogMessages(result.getLogEntries());
+				getView().setRowsData(FormDataPresenter.this.formData.getDataRows(), readOnlyMode);
 				super.onReqSuccess(result);
 			}
 
@@ -200,13 +195,13 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 	@Override
 	public void onAddRowClicked() {
 		formData.appendDataRow(null);
-		getView().reloadRows(formData);
+		getView().setRowsData(formData.getDataRows(), readOnlyMode);
 	}
 	
 	@Override
 	public void onRemoveRowClicked(DataRow dataRow) {
 		formData.getDataRows().remove(dataRow);
-		getView().reloadRows(formData);
+		getView().setRowsData(formData.getDataRows(), readOnlyMode);
 	}
 	
 	@Override
@@ -226,8 +221,9 @@ public class FormDataPresenter extends Presenter<FormDataPresenter.MyView, FormD
 		dispatcher.execute(action, new AbstractCallback<RecalculateFormDataResult>(){
 			@Override
 			public void onReqSuccess(RecalculateFormDataResult result) {
-				getView().loadTable(result.getFormData(), false);
+				formData = result.getFormData();
 				getView().setLogMessages(result.getLogEntries());
+				getView().setRowsData(formData.getDataRows(), readOnlyMode);
 				super.onReqSuccess(result);
 			}
 		});
