@@ -7,13 +7,19 @@ import com.google.gwt.user.cellview.client.Column;
 /** @author Vitalii Samolovskikh */
 public abstract class DataRowColumn<T> extends Column<DataRow, T> {
     protected String alias;
-
+    protected String rowGroup; 
+    
     protected DataRowColumn(Cell<T> cell, com.aplana.sbrf.taxaccounting.model.Column col) {
         super(cell);
         this.alias = col.getAlias();
+        this.rowGroup = col.getGroupName();
     }
 
     public String getAlias() {
         return alias;
+    }
+    
+    public String getRowGroup() {
+    	return rowGroup;
     }
 }
