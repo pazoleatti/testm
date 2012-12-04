@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 
 
 /**
@@ -45,5 +49,13 @@ public interface FormDataAccessService {
 	 * @param formDataId идентификатор карточки с данными формы
 	 * @return true - если у пользователя есть права на удаление, false - в противном случае
 	 */
-	boolean canDelete(int userId, long formDataId);	
+	boolean canDelete(int userId, long formDataId);
+	
+	/**
+	 * Получить список переходов, которые данный пользователь может выполнить над данным объектом {@link FormData}
+	 * @param userId идентификатор пользователя
+	 * @param formDataId идентификатор записи данных формы
+	 * @return список переходов жизненного цикла, которые может выполнить текущий пользователь над данным объектом {@link FormData}
+	 */
+	List<WorkflowMove> getAvailableMoves(int userId, long formDataId);
 }

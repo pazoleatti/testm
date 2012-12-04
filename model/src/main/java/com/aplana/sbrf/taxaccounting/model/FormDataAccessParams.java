@@ -1,0 +1,39 @@
+package com.aplana.sbrf.taxaccounting.model;
+
+import java.util.List;
+
+/**
+ * Параметры доступа к объекту данных по {@link FormData налоговой форме}
+ * @author DSultanbekov
+ */
+public class FormDataAccessParams {
+	private boolean canRead;
+	private boolean canEdit;
+	private boolean canDelete;
+	private List<WorkflowMove> workflowMoves;
+	
+	public boolean isCanRead() {
+		return canRead;
+	}
+	public void setCanRead(boolean canRead) {
+		this.canRead = canRead;
+	}
+	public boolean isCanEdit() {
+		return canEdit;
+	}
+	public void setCanEdit(boolean canEdit) {
+		this.canEdit = canEdit;
+	}
+	public boolean isCanDelete() {
+		return canDelete;
+	}
+	public void setCanDelete(boolean canDelete) {
+		this.canDelete = canDelete;
+	}
+	public List<WorkflowMove> getWorkflowMoves() {
+		return workflowMoves;
+	}
+	public void setWorkflowMoves(List<WorkflowMove> workflowMoves) {
+		this.workflowMoves = workflowMoves;
+	}
+}

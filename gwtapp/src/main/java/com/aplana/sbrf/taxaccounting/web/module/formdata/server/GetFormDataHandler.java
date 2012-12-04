@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
@@ -16,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
@@ -24,8 +25,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResul
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
@@ -44,9 +43,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	
 	@Autowired
 	private DepartmentDao departmentDao;
-	
-	@Autowired
-	private FormDataWorkflowService workflowService;
 	
 	@Autowired
 	FormTemplateDao formTemplateDao;
@@ -99,7 +95,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			accessFlags.setCanRead(accessService.canRead(userId, formDataId));
 			result.setAccessFlags(accessFlags);
 			
-			List<WorkflowMove> availableMoves =	workflowService.getAvailableMoves(userId, action.getFormDataId());
+			List<WorkflowMove> availableMoves =	accessService.getAvailableMoves(userId, action.getFormDataId());
 			result.setAvailableMoves(availableMoves);
 		}
 		

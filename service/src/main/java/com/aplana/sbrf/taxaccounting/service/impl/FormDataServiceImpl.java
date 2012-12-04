@@ -1,5 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -18,15 +25,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormDataWorkflowService;
 import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -48,8 +48,6 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataAccessService formDataAccessService;
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
-	@Autowired
-	private FormDataWorkflowService formDataWorkflowService;
 
 	/**
 	 * Создать налоговую форму заданного типа
@@ -215,7 +213,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public boolean doMove(long formDataId, int userId, WorkflowMove workflowMove, Logger logger) {
-		List<WorkflowMove> availableMoves = formDataWorkflowService.getAvailableMoves(userId, formDataId);
+		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userId, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления");
 		}

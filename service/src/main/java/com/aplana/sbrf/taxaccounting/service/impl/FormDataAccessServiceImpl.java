@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.security.TARole;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
@@ -18,6 +24,8 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 @Service
 // TODO: добавить учёт ролей пользователя, но для прототипа достаточно только привязки к депаратаментам
 public class FormDataAccessServiceImpl implements FormDataAccessService {
+	private Log logger = LogFactory.getLog(getClass());	
+	
 	@Autowired
 	private TAUserDao userDao;
 	@Autowired
@@ -81,5 +89,62 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return false;
 		}
 		return canEdit(user, formData);
+	}
+	
+	@Override
+	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
+		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
+		
+		FormData formData = formDataDao.get(formDataId);
+		TAUser user = userDao.getUser(userId);		
+		
+		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
+		// на чтение соответствующей карточки данных
+		if (!canRead(user, formData)) {
+			return result;
+		}
+		WorkflowState state = formData.getState();
+		
+		int formDataDepartmentId = formData.getDepartmentId();
+		int userDepartmentId = user.getDepartmentId();
+		Department formDataDepartment = departmentDao.getDepartment(formDataDepartmentId);
+		Department userDepartment = departmentDao.getDepartment(userDepartmentId);
+		
+		
+		boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
+		boolean isBankLevelUser = userDepartment.getType() == DepartmentType.ROOT_BANK;
+		
+		switch (state) {
+		case CREATED:
+			if (isBankLevelFormData) {
+				result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+			} else {
+				result.add(WorkflowMove.CREATED_TO_APPROVED);
+			}
+			break;
+		case PREPARED:
+			// Для ЖЦ прототипа не требуется
+			break;
+		case APPROVED:
+			if (isBankLevelFormData) {
+				logger.warn("Bank-level formData couldn't be in APPROVED state!");
+			} else {
+				result.add(WorkflowMove.APPROVED_TO_CREATED);
+				if (isBankLevelUser) {
+					result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
+				}
+			}
+			break;
+		case ACCEPTED:
+			if (isBankLevelFormData) {
+				result.add(WorkflowMove.ACCEPTED_TO_CREATED);
+			} else {
+				if (isBankLevelUser) {
+					result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+				}
+			}
+			break;
+		}
+		return result; 
 	}
 }
