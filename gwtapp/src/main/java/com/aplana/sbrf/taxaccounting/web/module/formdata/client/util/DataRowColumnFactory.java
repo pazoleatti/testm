@@ -15,25 +15,27 @@ public class DataRowColumnFactory {
 		com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
-			if (stringColumn.getDictionaryCode() != null) {
-				if (isReadOnly || !col.isEditable()) {
-					tableCol = new ReadOnlyTextColumn((StringColumn)col);//new EditStringDictionaryColumn(stringColumn);
-				} else {
-					tableCol = new EditStringDictionaryColumn(stringColumn);
-				}
+			if (isReadOnly || !col.isEditable()) {
+				tableCol = new ReadOnlyTextColumn((StringColumn)col);
 			} else {
-				if (isReadOnly || !col.isEditable()) {
-					tableCol = new ReadOnlyTextColumn((StringColumn)col);
-			    } else {
-			    	tableCol = new EditTextColumn((StringColumn)col);
-			    }
+				if (stringColumn.getDictionaryCode() != null) {
+					tableCol = new EditStringDictionaryColumn(stringColumn);
+				} else {
+					tableCol = new EditTextColumn((StringColumn)col);
+				}
 			}
 		} else if (col instanceof NumericColumn) {
-		    if (isReadOnly || !col.isEditable()) {
-		    	tableCol = new ReadOnlyNumericColumn((NumericColumn)col, cellTable);
+			NumericColumn numericColumn = (NumericColumn) col;
+			if (isReadOnly || !col.isEditable()) {
+		    	tableCol = new ReadOnlyNumericColumn(numericColumn, cellTable);
 		    } else {
-		    	tableCol = new EditNumericColumn((NumericColumn)col, cellTable);
-		    }
+				String dictionaryCode = numericColumn.getDictionaryCode();
+				if(dictionaryCode !=null && !dictionaryCode.trim().isEmpty()) {
+					tableCol = new EditNumericDictionaryColumn(numericColumn);
+				}else{
+					tableCol = new EditNumericColumn(numericColumn, cellTable);
+				}
+			}
 		} else if (col instanceof DateColumn) {
 		    if (isReadOnly || !col.isEditable()) {
 		    	tableCol = new ReadOnlyDateColumn((DateColumn)col);

@@ -11,12 +11,15 @@ import com.google.gwt.view.client.Range;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.DelayedBindRegistry;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * Асинхронный провайдер для таблицы, получающий даные с сервера 
  * с использованием фильтра и кода справочника.
  * @author Eugene Stetsenko
  */
-public class DictionaryDataProvider extends AsyncDataProvider<DictionaryItem<String>>{
+public class DictionaryDataProvider<ValueType extends Serializable> extends AsyncDataProvider<DictionaryItem<ValueType>>{
 	
 	private String filter = "%";
 	private final DispatchAsync dispatcher;
@@ -34,7 +37,7 @@ public class DictionaryDataProvider extends AsyncDataProvider<DictionaryItem<Str
 	}
 
 	@Override
-	protected void onRangeChanged(final HasData<DictionaryItem<String>> display) {
+	protected void onRangeChanged(final HasData<DictionaryItem<ValueType>> display) {
 	      final Range range = display.getVisibleRange();
           final int start = range.getStart();
           final int length = range.getLength();
@@ -51,7 +54,7 @@ public class DictionaryDataProvider extends AsyncDataProvider<DictionaryItem<Str
           dispatcher.execute(action, new AbstractCallback<DictionaryPickerDataResult>() {
   			@Override
   			public void onReqSuccess(DictionaryPickerDataResult result) {
-  				updateRowData(start, result.getDictionaryItems());
+  				updateRowData(start, (List) result.getDictionaryItems());
   				display.setRowCount(result.getSize());
   			}
   		});

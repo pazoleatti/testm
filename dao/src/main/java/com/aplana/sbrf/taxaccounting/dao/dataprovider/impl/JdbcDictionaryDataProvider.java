@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.dataprovider.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
-
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Простая JDBC-реализация источника данных для справочников
@@ -19,8 +18,8 @@ import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
  * Использоваться должны отнаследованные от него классы: {@link StringDictionaryDataProvider} и 
  * {@link NumericDictionaryDataProvider}
  */
-public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao implements DictionaryDataProvider<ValueType> {
-	private class ItemRowMapper implements RowMapper<DictionaryItem<ValueType>> {
+public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable> extends AbstractDao implements DictionaryDataProvider<ValueType> {
+	protected class ItemRowMapper implements RowMapper<DictionaryItem<ValueType>> {
 		@Override
 		public DictionaryItem<ValueType> mapRow(ResultSet rs, int rowNum) throws SQLException {
 			DictionaryItem<ValueType> item = new DictionaryItem<ValueType>();
@@ -33,16 +32,12 @@ public abstract class JdbcDictionaryDataProvider<ValueType> extends AbstractDao 
 	
 	private String dictionaryName;
 	private String sqlQuery;
+
 	@Override
-	public List<DictionaryItem<ValueType>> getValues(String valuePattern) {
-		return getJdbcTemplate().query(
-			"select * from (" + sqlQuery + ") where value like ?",
-			new Object[] { valuePattern },
-			new int[] { Types.VARCHAR },
-			new ItemRowMapper()
-		);
+	public List<DictionaryItem<ValueType>> getValues() {
+		return getJdbcTemplate().query(getSqlQuery(), new ItemRowMapper());
 	}
-	
+
 	public DictionaryItem<ValueType> getItem(ValueType value) {
 		try {
 			return getJdbcTemplate().queryForObject(

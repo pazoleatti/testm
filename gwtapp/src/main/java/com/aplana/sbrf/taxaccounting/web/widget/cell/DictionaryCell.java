@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import static com.google.gwt.dom.client.BrowserEvents.CLICK;
-import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
-
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.TextDictionaryWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -21,6 +19,11 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
+import java.io.Serializable;
+
+import static com.google.gwt.dom.client.BrowserEvents.CLICK;
+import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
+
 
 /**
  * Заготовка для редактора ячеек, отображающих значения из справочника
@@ -28,27 +31,21 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  * виджет для выбора элемента 
  * TODO: сделать генериком, для того, чтобы можно было работать не только со строковыми кодами в справочниках, но и с числовыми
  */
-public class DictionaryCell extends AbstractEditableCell<String, String> {
+public abstract class DictionaryCell<ValueType extends Serializable> extends AbstractEditableCell<ValueType, String> {
 
 	private static final int ESCAPE = 27;
 
-	private final DictionaryPickerWidget widget;
 	private int offsetX = 10;
 	private int offsetY = 10;
 	private Object lastKey;
 	private Element lastParent;
 	private int lastIndex;
 	private int lastColumn;
-	private String lastValue;
 	private PopupPanel panel;
-	private final SafeHtmlRenderer<String> renderer;
-	private ValueUpdater<String> valueUpdater;
-	private String dictionaryCode;
-	private Boolean isReadOnly = false;
+	protected final SafeHtmlRenderer<String> renderer;
 
 	public DictionaryCell(String dictionaryCode) {
 		this(SimpleSafeHtmlRenderer.getInstance(), dictionaryCode);
-		
 	}
 	
 	public DictionaryCell(SafeHtmlRenderer<String> rendererp, String dictionaryCode) {
@@ -58,49 +55,23 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 		}
 		
 		this.renderer = rendererp;
-		
-		
-		valueUpdater = new ValueUpdater<String>() {
+
+		DictionaryPickerWidget<ValueType> widget = createWidget(dictionaryCode);
+		widget.addValueChangeHandler(new ValueChangeHandler<DictionaryItem<ValueType>>() {
+
 			@Override
-	        public void update(String value) {
-//	          fieldUpdater.update(index, rowValue, value);
-//				renderer.render("123456");
-//				Element cellParent = lastParent;
-//				String oldValue = lastValue;
-//				Object key = lastKey;
-//				int index = lastIndex;
-//				int column = lastColumn;
-//				setValue(new Context(index, column, key), cellParent, "12345");
-//				Window.alert("HELLO");
-				
-	        }
-		};
-		
-		this.widget = new DictionaryPickerWidget(dictionaryCode);
-		widget.addValueChangeHandler(new ValueChangeHandler<DictionaryItem<String>>() {
-			
-			@Override
-			public void onValueChange(ValueChangeEvent<DictionaryItem<String>> event) {
-//				Window.alert("My value = " + event.getValue());
-//				if (event.getValue() != null && event.getValue().getValue() != null) {
-//					renderer.render(event.getValue().getValue());
-//				} else {
-//					renderer.render("&nbsp;");
-//				}
+			public void onValueChange(ValueChangeEvent<DictionaryItem<ValueType>> event) {
 				Element cellParent = lastParent;
-				String oldValue = lastValue;
 				Object key = lastKey;
 				int index = lastIndex;
 				int column = lastColumn;
 				if (event.getValue() != null && event.getValue().getValue() != null) {
 					setValue(new Context(index, column, key), cellParent, event.getValue().getValue());
-					valueUpdater.update(event.getValue().getValue());
 				} else {
 					setValue(new Context(index, column, key), cellParent, null);
-					valueUpdater.update(null);
 				}
 				panel.hide();
-				
+
 			}
 		});
 		this.panel = new PopupPanel(true, true) {
@@ -117,7 +88,6 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {
 				lastKey = null;
-				lastValue = null;
 				lastIndex = -1;
 				lastColumn = -1;
 				if (lastParent != null && !event.isAutoClosed()) {
@@ -129,39 +99,18 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 			}
 		});
 		panel.add(widget);
-
-		// Hide the panel and call valueUpdater.update when a date is selected
-		/**
-		widget.addValueChangeHandler(new ValueChangeHandler<Date>() {
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				// Remember the values before hiding the popup.
-				Element cellParent = lastParent;
-				String oldValue = lastValue;
-				Object key = lastKey;
-				int index = lastIndex;
-				int column = lastColumn;
-				panel.hide();
-
-				// Update the cell and value updater.
-				Date date = event.getValue();
-				setViewData(key, date.toString());
-				setValue(new Context(index, column, key), cellParent, oldValue);
-				if (valueUpdater != null) {
-					valueUpdater.update(date.toString());
-				}
-			}
-		});
-		*/
 	}
 
+	protected abstract DictionaryPickerWidget<ValueType> createWidget(String dictionaryCode);
+
 	@Override
-	public boolean isEditing(Context context, Element parent, String value) {
+	public boolean isEditing(Context context, Element parent, ValueType value) {
 		return lastKey != null && lastKey.equals(context.getKey());
 	}
 
 	@Override
-	public void onBrowserEvent(Context context, Element parent, String value,
-			NativeEvent event, ValueUpdater<String> valueUpdater) {
+	public void onBrowserEvent(Context context, Element parent, ValueType value,
+			NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
 		super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		if (CLICK.equals(event.getType())) {
 			onEnterKeyDown(context, parent, value, event, valueUpdater);
@@ -169,61 +118,21 @@ public class DictionaryCell extends AbstractEditableCell<String, String> {
 	}
 
 	@Override
-	public void render(Context context, String value, SafeHtmlBuilder sb) {
-		// Get the view data.
-		Object key = context.getKey();
-		String viewData = getViewData(key);
-		if (viewData != null && viewData.equals(value)) {
-			clearViewData(key);
-			viewData = null;
-		}
-
-		String s = null;
-		if (viewData != null) {
-			s = viewData;
-		} else if (value != null) {
-			s = value;
-		}
-		if (s != null) {
-			sb.append(renderer.render(s));
-		} else {
-			// nbsp win(alt+255)
-			sb.append(renderer.render(" "));
-		}
-		
-	}
+	public abstract void render(Context context, ValueType value, SafeHtmlBuilder sb);
 
 	@Override
-	protected void onEnterKeyDown(Context context, Element parent, String value,
-			NativeEvent event, ValueUpdater<String> valueUpdater) {
-		if (!isReadOnly) {
-			this.lastKey = context.getKey();
-			this.lastParent = parent;
-			this.lastValue = value;
-			this.lastIndex = context.getIndex();
-			this.lastColumn = context.getColumn();
-			this.valueUpdater = valueUpdater;
-	
-			// TODO: инициализация поискового виджета
-			//String viewData = getViewData(lastKey);
-			//String searchItem = (viewData == null) ? lastValue : viewData;
-			// widget.setSearchText(searchItem)
-			
-			panel.setPopupPositionAndShow(new PositionCallback() {
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					panel.setPopupPosition(lastParent.getAbsoluteLeft() + offsetX,
-							lastParent.getAbsoluteTop() + offsetY);
-				}
-			});
-		}
-	}
+	protected void onEnterKeyDown(Context context, Element parent, ValueType value,
+			NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
+		this.lastKey = context.getKey();
+		this.lastParent = parent;
+		this.lastIndex = context.getIndex();
+		this.lastColumn = context.getColumn();
 
-	public String getDictionaryCode() {
-		return dictionaryCode;
+		panel.setPopupPositionAndShow(new PositionCallback() {
+			public void setPosition(int offsetWidth, int offsetHeight) {
+				panel.setPopupPosition(lastParent.getAbsoluteLeft() + offsetX,
+						lastParent.getAbsoluteTop() + offsetY);
+			}
+		});
 	}
-
-	public void setDictionaryCode(String dictionaryCode) {
-		this.dictionaryCode = dictionaryCode;
-	}
-	
 }

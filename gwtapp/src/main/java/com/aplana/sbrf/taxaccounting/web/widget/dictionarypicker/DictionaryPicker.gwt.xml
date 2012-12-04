@@ -4,6 +4,10 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.uibinder.UiBinder" />
 	<inherits name="com.google.gwt.inject.Inject" />
+	<inherits name="com.aplana.sbrf.taxaccounting.Model"/>
+	<inherits name="com.gwtplatform.dispatch.DispatchShared"/>
+	<inherits name="com.aplana.sbrf.taxaccounting.web.main.entry.MainEntry"/>
+	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
 	<source path='client' />
 	<source path="shared"/>
 </module>

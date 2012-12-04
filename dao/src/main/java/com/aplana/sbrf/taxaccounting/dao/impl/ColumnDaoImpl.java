@@ -36,6 +36,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			if ("N".equals(type)) {
 				result = new NumericColumn();
 				((NumericColumn)result).setPrecision(rs.getInt("precision"));
+				((NumericColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
 			} else if ("D".equals(type)) {
 				result = new DateColumn();
 			} else if ("S".equals(type)) {
@@ -132,13 +133,15 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
-					
+
 					if (col instanceof StringColumn) {
-						ps.setString(8, ((StringColumn)col).getDictionaryCode());
+						ps.setString(8, ((StringColumn) col).getDictionaryCode());
+					} else if (col instanceof NumericColumn) {
+						ps.setString(8, ((NumericColumn) col).getDictionaryCode());
 					} else {
 						ps.setNull(8, Types.VARCHAR);
 					}
-					
+
 					ps.setInt(9, col.getOrder());
 					ps.setString(10, col.getGroupName());
 				}
@@ -164,16 +167,21 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					ps.setInt(4, col.isEditable() ? 1 : 0);
 					ps.setInt(5, col.isMandatory() ? 1 : 0);
 					ps.setInt(6, col.getWidth());
+
 					if (col instanceof NumericColumn) {
 						ps.setInt(7, ((NumericColumn)col).getPrecision());
 					} else {
 						ps.setNull(7, Types.NUMERIC);
 					}
+
 					if (col instanceof StringColumn) {
 						ps.setString(8, ((StringColumn)col).getDictionaryCode());
+					} else if(col instanceof NumericColumn){
+						ps.setString(8, ((NumericColumn)col).getDictionaryCode());
 					} else {
 						ps.setNull(8, Types.VARCHAR);
 					}
+
 					ps.setInt(9, col.getOrder());
 					ps.setString(10, col.getGroupName());
 					ps.setInt(11, col.getId());

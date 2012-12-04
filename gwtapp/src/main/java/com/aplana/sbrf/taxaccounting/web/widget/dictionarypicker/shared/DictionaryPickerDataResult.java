@@ -12,14 +12,14 @@ import com.gwtplatform.dispatch.shared.Result;
  *
  */
 public class DictionaryPickerDataResult implements Result {
-	private List<DictionaryItem<String>> dictionaryItems;
+	private List<DictionaryItem> dictionaryItems;
 	private Integer size;
 	
-	public List<DictionaryItem<String>> getDictionaryItems() {
+	public List<DictionaryItem> getDictionaryItems() {
 		return dictionaryItems;
 	}
 	
-	public void setDictionaryItems(List<DictionaryItem<String>> dictionaryItems) {
+	public void setDictionaryItems(List<DictionaryItem> dictionaryItems) {
 		this.dictionaryItems = dictionaryItems;
 	}
 
