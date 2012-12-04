@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Vitalii Samolovskikh
  */
-public abstract class DictionaryResult<ValueType extends Serializable> implements Result {
+public class DictionaryResult<ValueType extends Serializable> implements Result {
 	private List<DictionaryItem<ValueType>> dictionaryItems;
 	private Integer size;
 

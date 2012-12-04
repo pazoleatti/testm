@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-import com.google.gwt.i18n.client.NumberFormat;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.FormatUtils;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.AsyncDataProvider;
 
@@ -15,16 +15,16 @@ public class NumericDictionaryWidget extends DictionaryPickerWidget<BigDecimal> 
 		super(dictionaryCode);
 	}
 
-	protected TextColumn<DictionaryItem<BigDecimal>> createValueColumn() {
-		return new TextColumn<DictionaryItem<BigDecimal>>() {
-				@Override
-				public String getValue(DictionaryItem<BigDecimal> object) {
-					return NumberFormat.getFormat("0.#").format(object.getValue());
-				}
-			};
+	protected DictionaryDataProvider<?, BigDecimal> createDataProvider(String dictionaryCode) {
+		return new NumericDictionaryDataProvider(dictionaryCode);
 	}
 
-	protected AsyncDataProvider<DictionaryItem<BigDecimal>> createDataProvider(String dictionaryCode) {
-		return new NumericDictionaryProvider(dictionaryCode);
+	@Override
+	protected String valueToString(BigDecimal value) {
+		if (value != null) {
+			return FormatUtils.getSimpleNumberFormat().format(value);
+		} else {
+			return "";
+		}
 	}
 }

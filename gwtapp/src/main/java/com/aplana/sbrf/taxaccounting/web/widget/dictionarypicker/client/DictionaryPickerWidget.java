@@ -2,13 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -18,134 +14,147 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.CellPreviewEvent.Handler;
-import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.io.Serializable;
 
 /**
  * Заготовка для виджета для выбора значения из справочника
- * @author dsultanbekov
  *
+ * @author dsultanbekov
  */
-public abstract class DictionaryPickerWidget<ValueType extends Serializable> extends Composite implements HasValueChangeHandlers<DictionaryItem<ValueType>>{
+public abstract class DictionaryPickerWidget<ValueType extends Serializable> extends Composite
+		implements HasValue<ValueType> {
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
 	}
 
 	private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-	@UiField CellTable<DictionaryItem<ValueType>> cellTable;
-	@UiField Button btnFind;
-	@UiField TextBox txtFind;
-	@UiField SimplePager pager;
+	@UiField
+	CellTable<DictionaryItem<ValueType>> cellTable;
+	@UiField
+	TextBox txtFind;
+	@UiField
+	SimplePager pager;
 
-	private AsyncDataProvider<DictionaryItem<ValueType>> dataProvider;
+	private DictionaryDataProvider<?, ValueType> dataProvider;
+
+	private ValueType value;
 
 	public DictionaryPickerWidget(String dictionaryCode) {
 		initWidget(uiBinder.createAndBindUi(this));
 
-		btnFind.setVisible(true);
-
 		// Table
-		TextColumn<DictionaryItem<ValueType>> idColumn = new TextColumn<DictionaryItem<ValueType>>() {
-			@Override
-			public String getValue(DictionaryItem<ValueType> object) {
-				return object.getName();
-			}
-		};
-
-		TextColumn<DictionaryItem<ValueType>> valueColumn = createValueColumn();
-
-		cellTable.addColumn(idColumn, "Имя");
-		cellTable.addColumn(valueColumn, "Значение");
-		cellTable.setPageSize(10);
-		 
-		pager.setDisplay(cellTable);
-		dataProvider = createDataProvider(dictionaryCode);
-		dataProvider.addDataDisplay(cellTable);
-		cellTable.addCellPreviewHandler(new Handler<DictionaryItem<ValueType>>() {
-			@Override
-			public void onCellPreview(CellPreviewEvent<DictionaryItem<ValueType>> event) {
-				Boolean isClick = "click".equals(event.getNativeEvent().getType());
-				if (isClick) {
-					ValueChangeEvent.fire(DictionaryPickerWidget.this, event.getValue());
+		cellTable.addColumn(new NameColumn(), "Имя");
+		cellTable.addColumn(createValueColumn(), "Значение");
+		final SingleSelectionModel<DictionaryItem<ValueType>> sm = new SingleSelectionModel<DictionaryItem<ValueType>>();
+		cellTable.setSelectionModel(sm);
+		sm.addSelectionChangeHandler(
+				new SelectionChangeEvent.Handler() {
+					@Override
+					public void onSelectionChange(SelectionChangeEvent event) {
+						DictionaryItem<ValueType> selected = sm.getSelectedObject();
+						if(selected!=null){
+							setValue(selected.getValue(), true);
+						}else{
+							setValue(null, true);
+						}
+					}
 				}
+		);
+
+		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
+			public void onRangeChange(RangeChangeEvent event) {
+				txtFind.setFocus(true);
 			}
 		});
+
+		pager.setDisplay(cellTable);
+		pager.setPageSize(10);
+
+		dataProvider = createDataProvider(dictionaryCode);
+		dataProvider.addDataDisplay(cellTable);
 	}
 
-	protected abstract AsyncDataProvider<DictionaryItem<ValueType>> createDataProvider(String dictionaryCode);
-
-	protected abstract TextColumn<DictionaryItem<ValueType>> createValueColumn();
- /*
-	@UiHandler("txtFind")
-	public void onTxtFindKeyPress(KeyPressEvent event){
-		int keyCode = event.getNativeEvent().getKeyCode();
-		if (keyCode == KeyCodes.KEY_ENTER) {
-			findAction();
-		} else if (keyCode == KeyCodes.KEY_DOWN ) {
-			Window.alert("OK");
-			pager.nextPage();
-		} else if (keyCode == KeyCodes.KEY_PAGEDOWN) {
-			pager.previousPage();
+	private class NameColumn extends TextColumn<DictionaryItem<ValueType>> {
+		@Override
+		public String getValue(DictionaryItem<ValueType> object) {
+			return object.getName();
 		}
 	}
 
+	protected abstract DictionaryDataProvider<?, ValueType> createDataProvider(String dictionaryCode);
+
+	protected TextColumn<DictionaryItem<ValueType>> createValueColumn() {
+		return new TextColumn<DictionaryItem<ValueType>>() {
+			@Override
+			public String getValue(DictionaryItem<ValueType> item) {
+				return valueToString(item.getValue());
+			}
+		};
+	}
+
 	@UiHandler("txtFind")
-	public void onTxtFindKeyUp(KeyUpEvent event){
+	public void onTxtFindKeyUp(KeyUpEvent event) {
 		int keyCode = event.getNativeEvent().getKeyCode();
-		if (keyCode == KeyCodes.KEY_DOWN ) {
+		if (keyCode == KeyCodes.KEY_PAGEDOWN) {
 			pager.nextPage();
-		} else if (keyCode == KeyCodes.KEY_UP) {
+		} else if (keyCode == KeyCodes.KEY_PAGEUP) {
 			pager.previousPage();
+		} else {
+			find();
 		}
 	}
-	@UiHandler("btnFind")
-	void onFindButtonClick(ClickEvent event) {
-		
+
+	private void find() {
+		dataProvider.setSearchPattern(txtFind.getValue());
+		if (cellTable.getVisibleRange().getStart() == 0) {
+			dataProvider.load(cellTable.getVisibleRange());
+		} else {
+			pager.firstPage();
+		}
 	}
-   */
 
 	@UiHandler("btnClear")
 	void onBtnClearClick(ClickEvent event) {
-		ValueChangeEvent.fire(DictionaryPickerWidget.this, null);
+		setValue(null, true);
 	}
 
 	@Override
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<DictionaryItem<ValueType>> handler) {
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<ValueType> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
-	/*
-	private void findAction() {
-		dataProvider.setFilter("%"+txtFind.getValue()+"%");
-		pager.firstPage();
-		Range range = cellTable.getVisibleRange();
-		cellTable.setVisibleRangeAndClearData(range, true); 
+
+	@Override
+	public ValueType getValue() {
+		return value;
 	}
 
 	@Override
-	protected void onLoad() {
-		super.onLoad();
-	    findAction();
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {    
-			  @Override
-			  public void execute() {
-				  txtFind.setFocus(true);
-			  }
-		});
+	public void setValue(ValueType value) {
+		setValue(value, false);
+	}
 
-		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
-	          public void onRangeChange(RangeChangeEvent event) {
-	        	  txtFind.setFocus(true);
-	          }
-	    });	  
-	}	
-	*/
+	abstract protected String valueToString(ValueType value);
+
+	@Override
+	public void setValue(ValueType value, boolean b) {
+		this.value = value;
+		txtFind.setValue(valueToString(value));
+		find();
+		if (b) {
+			ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
+		}
+	}
+
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		txtFind.setFocus(true);
+	}
 }

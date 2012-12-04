@@ -6,15 +6,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared;
  * @author Eugene Stetsenko
  *
  */
-public class StringDictionaryAction extends DictionaryAction<StringDictionaryResult, String> {
-	private String filter;
-
-	public String getFilter() {
-		return filter;
-	}
-
-	public void setFilter(String filter) {
-		this.filter = filter;
-	}
+public class StringDictionaryAction extends DictionaryAction<String> {
 
 }

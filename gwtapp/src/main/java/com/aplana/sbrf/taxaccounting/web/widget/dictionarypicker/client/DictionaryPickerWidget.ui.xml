@@ -5,20 +5,21 @@
 			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 		>
 	<g:VerticalPanel>
-		<g:HorizontalPanel width="auto" height="auto">
-			<g:TextBox ui:field="txtFind" text=""/>
-			<g:Button ui:field="btnFind" text="Найти"/>
-		</g:HorizontalPanel>
-		<g:FlowPanel height="350px">
-			<g:HorizontalPanel height="300px" width="100%">
+		<g:cell width="100%">
+			<g:TextBox ui:field="txtFind" text="" width="100%"/>
+		</g:cell>
+		<g:cell height="300px" width="100%">
 				<style:GenericCellTable width="100%" height="auto" ui:field="cellTable"/>
-			</g:HorizontalPanel>
+		</g:cell>
+		<g:cell>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
-				<c:SimplePager ui:field='pager' location='CENTER'/>
+				<g:cell>
+					<c:SimplePager ui:field='pager' location='CENTER'/>
+				</g:cell>
 				<g:cell horizontalAlignment='ALIGN_RIGHT'>
 					<g:Button ui:field="btnClear" text="Очистить"/>
 				</g:cell>
 			</g:HorizontalPanel>
-		</g:FlowPanel>
+		</g:cell>
 	</g:VerticalPanel>
 </ui:UiBinder>

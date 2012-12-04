@@ -7,24 +7,25 @@ import java.io.Serializable;
 /**
  * @author Vitalii Samolovskikh
  */
-public abstract class DictionaryAction<R extends DictionaryResult<VT>, VT extends Serializable> extends UnsecuredActionImpl<R> {
-	private Integer offset;
-	private Integer max;
+public abstract class DictionaryAction<VT extends Serializable> extends UnsecuredActionImpl<DictionaryResult<VT>> {
+	private int offset;
+	private int max;
 	private String dictionaryCode;
+	private String searchPattern = null;
 
-	public Integer getOffset() {
+	public int getOffset() {
 		return offset;
 	}
 
-	public void setOffset(Integer offset) {
+	public void setOffset(int offset) {
 		this.offset = offset;
 	}
 
-	public Integer getMax() {
+	public int getMax() {
 		return max;
 	}
 
-	public void setMax(Integer max) {
+	public void setMax(int max) {
 		this.max = max;
 	}
 
@@ -34,5 +35,13 @@ public abstract class DictionaryAction<R extends DictionaryResult<VT>, VT extend
 
 	public void setDictionaryCode(String dictionaryCode) {
 		this.dictionaryCode = dictionaryCode;
+	}
+
+	public String getSearchPattern() {
+		return searchPattern;
+	}
+
+	public void setSearchPattern(String searchPattern) {
+		this.searchPattern = searchPattern;
 	}
 }

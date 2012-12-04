@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult;
-import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.StringDictionaryAction;
-import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.StringDictionaryResult;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
@@ -21,11 +19,12 @@ import java.io.Serializable;
  *
  * @author Eugene Stetsenko
  */
-public abstract class DictionaryDataProvider<A extends DictionaryAction<R, T>, R extends DictionaryResult<T>, T extends Serializable>
+public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T extends Serializable>
 		extends AsyncDataProvider<DictionaryItem<T>> {
-
 	private final DispatchAsync dispatcher;
 	private final String dictionaryCode;
+
+	protected String searchPattern = null;
 
 	/**
 	 * @param dictionaryCode Код справочника.
@@ -37,17 +36,23 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<R, T>, R
 
 	@Override
 	protected void onRangeChanged(final HasData<DictionaryItem<T>> display) {
-		final Range range = display.getVisibleRange();
+		load(display.getVisibleRange());
+	}
+
+	public void load(Range range) {
 		final int offset = range.getStart();
-		final int max = range.getLength();
+		int max = range.getLength();
 
 		A action = createAction();
+		if (searchPattern != null && !searchPattern.isEmpty()) {
+			action.setSearchPattern(getSearchPattern());
+		}
 		action.setOffset(offset);
 		action.setMax(max);
 		action.setDictionaryCode(dictionaryCode);
-		dispatcher.execute(action, new AbstractCallback<R>() {
+		dispatcher.execute(action, new AbstractCallback<DictionaryResult<T>>() {
 			@Override
-			public void onReqSuccess(R result) {
+			public void onReqSuccess(DictionaryResult<T> result) {
 				updateRowData(offset, result.getDictionaryItems());
 				updateRowCount(result.getSize(), true);
 			}
@@ -55,4 +60,12 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<R, T>, R
 	}
 
 	protected abstract A createAction();
+
+	public String getSearchPattern() {
+		return searchPattern;
+	}
+
+	public void setSearchPattern(String searchPattern) {
+		this.searchPattern = searchPattern;
+	}
 }

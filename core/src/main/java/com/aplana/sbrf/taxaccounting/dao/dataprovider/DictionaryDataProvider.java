@@ -6,6 +6,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 public interface DictionaryDataProvider<ValueType extends Serializable> {
-	List<DictionaryItem<ValueType>> getValues();
-	DictionaryItem<ValueType> getItem(ValueType value);
+	public List<DictionaryItem<ValueType>> getValues();
+	public List<DictionaryItem<ValueType>> getValues(String pattern);
+	public DictionaryItem<ValueType> getItem(ValueType value);
 }

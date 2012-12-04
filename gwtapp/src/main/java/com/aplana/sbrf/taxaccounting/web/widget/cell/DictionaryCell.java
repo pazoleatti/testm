@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.TextDictionaryWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -57,16 +55,16 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 		this.renderer = rendererp;
 
 		DictionaryPickerWidget<ValueType> widget = createWidget(dictionaryCode);
-		widget.addValueChangeHandler(new ValueChangeHandler<DictionaryItem<ValueType>>() {
+		widget.addValueChangeHandler(new ValueChangeHandler<ValueType>() {
 
 			@Override
-			public void onValueChange(ValueChangeEvent<DictionaryItem<ValueType>> event) {
+			public void onValueChange(ValueChangeEvent<ValueType> event) {
 				Element cellParent = lastParent;
 				Object key = lastKey;
 				int index = lastIndex;
 				int column = lastColumn;
-				if (event.getValue() != null && event.getValue().getValue() != null) {
-					setValue(new Context(index, column, key), cellParent, event.getValue().getValue());
+				if (event.getValue() != null) {
+					setValue(new Context(index, column, key), cellParent, event.getValue());
 				} else {
 					setValue(new Context(index, column, key), cellParent, null);
 				}
