@@ -4,8 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPageView;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminModule;
-import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorPagePresenter;
-import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorPageView;
+import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
@@ -43,8 +42,6 @@ public class ClientModule extends AbstractPresenterModule {
 	
     bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
             MainPageView.class, MainPagePresenter.MyProxy.class);
-    bindPresenter(ErrorPagePresenter.class, ErrorPagePresenter.MyView.class,
-            ErrorPageView.class, ErrorPagePresenter.MyProxy.class);
     
     install(new HomeModule());
     install(new AboutModule());
@@ -52,6 +49,8 @@ public class ClientModule extends AbstractPresenterModule {
     install(new FormDataModule());
     install(new SignInClientModule());
     install(new MainMenuClientModule());
-      install(new AdminModule());
+    install(new AdminModule());
+    install(new ErrorModule());
+    
   }
 }
