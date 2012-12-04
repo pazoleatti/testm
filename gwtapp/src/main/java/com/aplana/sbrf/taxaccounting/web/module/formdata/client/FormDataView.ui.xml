@@ -2,45 +2,56 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
-	<g:VerticalPanel width="100%">
-		<g:Label text="Информация о данных по налоговой форме" height="20px"/>
-		<g:HorizontalPanel>
-			<g:VerticalPanel spacing="5">
-				<g:Label ui:field="taxTypeLabel"/>
-				<g:Label ui:field="formTypeLabel"/>
-				<g:Label ui:field="formKindLabel"/>
+	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
+
+		<g:north size="140">
+			<g:VerticalPanel width="100%">
+
+				<g:HorizontalPanel>
+					<g:VerticalPanel spacing="5">
+						<g:Label ui:field="taxTypeLabel" />
+						<g:Label ui:field="formTypeLabel" />
+						<g:Label ui:field="formKindLabel" />
+					</g:VerticalPanel>
+					<g:VerticalPanel spacing="5">
+						<g:Label ui:field="departmentIdLabel" />
+						<g:Label ui:field="reportPeriodLabel" />
+						<g:Label ui:field="stateLabel" />
+					</g:VerticalPanel>
+				</g:HorizontalPanel>
+
+
+				<c:CellList ui:field="loggerList" width="100%" />
+
+				<style:Bar>
+					<style:LeftBar>
+						<g:Button ui:field="addRowButton">Добавить строку</g:Button>
+						<g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+						<g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
+						<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
+						<g:Button ui:field="printButton">Печать</g:Button>
+					</style:LeftBar>
+					<style:RightBar>
+						<g:Button ui:field="manualInputButton">Ручной ввод</g:Button>
+						<g:Button ui:field="deleteFormButton">Удалить</g:Button>
+						<g:Button ui:field="saveButton">Сохранить</g:Button>
+						<g:Button ui:field="cancelButton">Отмена</g:Button>
+					</style:RightBar>
+				</style:Bar>
+
+
+				<style:Bar>
+					<style:LeftBar ui:field="workflowButtons" />
+				</style:Bar>
+
 			</g:VerticalPanel>
-			<g:VerticalPanel spacing="5">
-				<g:Label ui:field="departmentIdLabel"/>
-				<g:Label ui:field="reportPeriodLabel"/>
-				<g:Label ui:field="stateLabel"/>
-			</g:VerticalPanel>
-		</g:HorizontalPanel>
-		
-		<c:CellList ui:field="loggerList" width="100%"/>
-		
-		<style:Bar>
-			<style:LeftBar>
-			   	<g:Button ui:field="addRowButton">Добавить строку</g:Button>
-				<g:Button ui:field="removeRowButton">Удалить строку</g:Button>
-				<g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
-				<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
-				<g:Button ui:field="printButton">Печать</g:Button>
-			</style:LeftBar>
-			<style:RightBar> 
-			    <g:Button ui:field="manualInputButton" >Ручной ввод</g:Button>
-   				<g:Button ui:field="deleteFormButton">Удалить</g:Button>
-   				<g:Button ui:field="saveButton" >Сохранить</g:Button>
-   				<g:Button ui:field="cancelButton" >Отмена</g:Button>
-			</style:RightBar>
-		</style:Bar>
-		<style:Bar>
-			<style:LeftBar ui:field="workflowButtons"/>
-		</style:Bar>
-		<g:cell width="100%">
-			<g:ScrollPanel width="100%">
-				<style:GenericDataGrid ui:field="formDataTable" focus="true" height="600px"/>
-			</g:ScrollPanel>
-		</g:cell>
-	</g:VerticalPanel>
+		</g:north>
+
+		<g:center>
+
+			<style:GenericDataGrid ui:field="formDataTable" />
+
+		</g:center>
+
+	</g:DockLayoutPanel>
 </ui:UiBinder>

@@ -1,5 +1,7 @@
 @CHARSET "UTF-8";
 
+html,body {height:100%}
+
 .mainContent {
 	/* text-align: center;
 	margin: 0 auto;
@@ -48,6 +50,8 @@
 	border-bottom: 1px dotted #6A8EA4;
 	color: #3964C2;
 }
+
+
 
 .topHeader {
 	vertical-align: top;
