@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<String> implements StringFilterDictionaryDataProvider<String> {
+public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<String> implements StringFilterDictionaryDataProvider {
 	@Override
 	public String getValue(ResultSet rs) throws SQLException {
 		return rs.getString("value");

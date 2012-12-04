@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.Range;
@@ -45,7 +46,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	@UiField TextBox txtFind;
 	@UiField SimplePager pager;
 
-	private DictionaryDataProvider<ValueType> dataProvider;
+	private AsyncDataProvider<DictionaryItem<ValueType>> dataProvider;
 
 	public DictionaryPickerWidget(String dictionaryCode) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -67,7 +68,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		cellTable.setPageSize(10);
 		 
 		pager.setDisplay(cellTable);
-		dataProvider = new DictionaryDataProvider<ValueType>(txtFind.getValue(), dictionaryCode);
+		dataProvider = createDataProvider(dictionaryCode);
 		dataProvider.addDataDisplay(cellTable);
 		cellTable.addCellPreviewHandler(new Handler<DictionaryItem<ValueType>>() {
 			@Override
@@ -80,8 +81,10 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		});
 	}
 
-	protected abstract TextColumn<DictionaryItem<ValueType>> createValueColumn();
+	protected abstract AsyncDataProvider<DictionaryItem<ValueType>> createDataProvider(String dictionaryCode);
 
+	protected abstract TextColumn<DictionaryItem<ValueType>> createValueColumn();
+ /*
 	@UiHandler("txtFind")
 	public void onTxtFindKeyPress(KeyPressEvent event){
 		int keyCode = event.getNativeEvent().getKeyCode();
@@ -104,12 +107,12 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 			pager.previousPage();
 		}
 	}
-
 	@UiHandler("btnFind")
 	void onFindButtonClick(ClickEvent event) {
 		
 	}
-	
+   */
+
 	@UiHandler("btnClear")
 	void onBtnClearClick(ClickEvent event) {
 		ValueChangeEvent.fire(DictionaryPickerWidget.this, null);
@@ -119,14 +122,14 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<DictionaryItem<ValueType>> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}
-	
+	/*
 	private void findAction() {
 		dataProvider.setFilter("%"+txtFind.getValue()+"%");
 		pager.firstPage();
 		Range range = cellTable.getVisibleRange();
 		cellTable.setVisibleRangeAndClearData(range, true); 
 	}
-	
+
 	@Override
 	protected void onLoad() {
 		super.onLoad();
@@ -144,4 +147,5 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	          }
 	    });	  
 	}	
+	*/
 }

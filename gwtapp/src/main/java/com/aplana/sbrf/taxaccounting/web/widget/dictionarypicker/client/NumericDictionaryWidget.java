@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.view.client.AsyncDataProvider;
 
 import java.math.BigDecimal;
 
@@ -21,5 +22,9 @@ public class NumericDictionaryWidget extends DictionaryPickerWidget<BigDecimal> 
 					return NumberFormat.getFormat("0.#").format(object.getValue());
 				}
 			};
+	}
+
+	protected AsyncDataProvider<DictionaryItem<BigDecimal>> createDataProvider(String dictionaryCode) {
+		return new NumericDictionaryProvider(dictionaryCode);
 	}
 }

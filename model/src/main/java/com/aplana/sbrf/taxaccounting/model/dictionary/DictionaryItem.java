@@ -8,9 +8,6 @@ import java.io.Serializable;
  * @param <ValueType> - тип значения, система поддерживает BigDecimal и String 
  */
 public class DictionaryItem<ValueType extends Serializable> implements Serializable{
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5498342769014233422L;
 	private ValueType value;
 	private String name;

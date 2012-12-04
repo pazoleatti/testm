@@ -7,14 +7,14 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import java.io.Serializable;
 import java.util.Map;
 
-public class DictionaryManagerImpl implements DictionaryManager{
-	private Map<String, DictionaryDataProvider> dataProviders;
+public class DictionaryManagerImpl<ValueType extends Serializable> implements DictionaryManager<ValueType>{
+	private Map<String, DictionaryDataProvider<ValueType>> dataProviders;
 
-	public void setDataProviders(Map<String, DictionaryDataProvider> dataProviders) {
+	public void setDataProviders(Map<String, DictionaryDataProvider<ValueType>> dataProviders) {
 		this.dataProviders = dataProviders;
 	}
 	
-	public <ValueType extends Serializable> DictionaryDataProvider<ValueType> getDataProvider(String dictionaryCode) {
+	public DictionaryDataProvider<ValueType> getDataProvider(String dictionaryCode) {
 		DictionaryDataProvider<ValueType> dp = dataProviders.get(dictionaryCode);
 		if (dp == null) {
 			throw new DaoException("Неизвестный код справочника: " + dictionaryCode);

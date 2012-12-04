@@ -11,23 +11,6 @@ import com.gwtplatform.dispatch.shared.Result;
  * @author Eugene Stetsenko
  *
  */
-public class DictionaryPickerDataResult implements Result {
-	private List<DictionaryItem> dictionaryItems;
-	private Integer size;
-	
-	public List<DictionaryItem> getDictionaryItems() {
-		return dictionaryItems;
-	}
-	
-	public void setDictionaryItems(List<DictionaryItem> dictionaryItems) {
-		this.dictionaryItems = dictionaryItems;
-	}
+public class StringDictionaryResult extends DictionaryResult<String> {
 
-	public Integer getSize() {
-		return size;
-	}
-
-	public void setSize(Integer size) {
-		this.size = size;
-	}
 }

@@ -8,6 +8,6 @@ import java.util.List;
 /**
  * @author Vitalii Samolovskikh
  */
-public interface StringFilterDictionaryDataProvider<ValueType extends Serializable> {
-	public List<DictionaryItem<ValueType>> getValues(String valuePattern);
+public interface StringFilterDictionaryDataProvider {
+	public List<DictionaryItem<String>> getValues(String valuePattern);
 }
