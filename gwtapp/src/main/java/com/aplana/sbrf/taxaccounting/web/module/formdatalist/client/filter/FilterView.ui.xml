@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:lbe="urn:import:com.aplana.sbrf.taxaccounting.web.widget.listeditor.client">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
 	<ui:style>
 		.important {
 			font-weight: bold;
@@ -11,23 +11,23 @@
 	<g:HorizontalPanel width="50%">
         <g:VerticalPanel spacing="5" width="100%">
             <g:Label width="200px" text="Отчетный период" />
-		    <lbe:LongListBoxEditor width="200px" ui:field="period" visibleItemCount="1" />
+		    <g:ValueListBox width="200px" ui:field="reportPeriodId" />
 
 	        <g:Label width="200px" text="Подразделение" />
-	        <lbe:LongListBoxEditor width="200px" ui:field="department" visibleItemCount="1"/>
+	        <g:ValueListBox width="200px" ui:field="departmentId" />
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">
 	        <g:Label width="200px" text="Тип налоговой формы"/>
-            <lbe:LongListBoxEditor width="200px" ui:field="kind" visibleItemCount="1"/>
+            <g:ValueListBox width="200px" ui:field="formDataKind" />
 
             <g:Label width="200px" text="Вид налоговой формы"/>
-            <lbe:LongListBoxEditor width="200px" ui:field="formtype" visibleItemCount="1" />
+            <g:ValueListBox width="200px" ui:field="formTypeId" />
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">
             <g:Label width="200px" text="Статус формы"/>
-            <lbe:LongListBoxEditor width="200px" ui:field="formState" visibleItemCount="1"/>
+            <g:ValueListBox width="200px" ui:field="formState"/>
         </g:VerticalPanel>
     </g:HorizontalPanel>
 

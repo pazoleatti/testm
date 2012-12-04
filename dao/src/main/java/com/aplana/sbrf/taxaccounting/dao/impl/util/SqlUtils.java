@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+
 import java.util.List;
 
 /**
@@ -14,5 +17,21 @@ public class SqlUtils {
 	public static String transformToSqlInStatement(List list){
 		StringBuffer stringBuffer = new StringBuffer(list.toString());
 		return "(" + (stringBuffer.substring(1, stringBuffer.length() - 1)) + ")";
+	}
+
+	public static String transformFormStatesToSqlInStatement(List<WorkflowState> source){
+		StringBuffer result = new StringBuffer("");
+		for(WorkflowState workflowState : source){
+			result.append(workflowState.getId() + ",");
+		}
+		return "(" + result.substring(0, result.length() - 1) + ")";
+	}
+
+	public static String transformFormKindsToSqlInStatement(List<FormDataKind> source){
+		StringBuffer result = new StringBuffer("");
+		for(FormDataKind formDataKind : source){
+			result.append(formDataKind.getId() + ",");
+		}
+		return "(" + result.substring(0, result.length() - 1) + ")";
 	}
 }

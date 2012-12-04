@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -28,7 +28,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		 2)dataFilter.getPeriod() не пустой список
 		 если один из списков пустой, то поиск не выполняем, а возвращаем пустой результат.
 		 */
-		if(dataFilter.getFormtype().isEmpty() || dataFilter.getPeriod().isEmpty()){
+		if(dataFilter.getFormTypeId().isEmpty() || dataFilter.getReportPeriodId().isEmpty()){
 			return (new ArrayList<FormDataSearchResultItem>());
 		}
 
@@ -46,13 +46,12 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				"  EXISTS (SELECT 1 FROM FORM f WHERE f.id = fd.form_id AND f.type_id = ft.id) " +
 				"  AND dp.id = fd.department_id " +
 				"  AND rp.id = fd.report_period_id" +
-				"  AND ft.id in " + transformToSqlInStatement(dataFilter.getFormtype()) +
-				"  AND rp.id in " + transformToSqlInStatement(dataFilter.getPeriod()) +
-				"  AND fd.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartment()) +
-				"  AND fd.kind in " + transformToSqlInStatement(dataFilter.getKind()) +
-				"  AND fd.state in " + transformToSqlInStatement(dataFilter.getFormStates());
+				"  AND ft.id in " + transformToSqlInStatement(dataFilter.getFormTypeId()) +
+				"  AND rp.id in " + transformToSqlInStatement(dataFilter.getReportPeriodId()) +
+				"  AND fd.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartmentId()) +
+				"  AND fd.kind in " + transformFormKindsToSqlInStatement(dataFilter.getFormDataKind()) +
+				"  AND fd.state in " + transformFormStatesToSqlInStatement(dataFilter.getFormStates());
 
 		return getJdbcTemplate().query(query, new FormDataSearchResultItemMapper());
 	}
-
 }

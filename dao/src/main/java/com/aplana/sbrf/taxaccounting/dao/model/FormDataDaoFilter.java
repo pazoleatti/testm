@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.model;
 
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,55 +16,56 @@ public class FormDataDaoFilter implements Serializable {
 
 	private static final long serialVersionUID = -961619115678926848L;
 
-	private List<Long> reportPeriodId;
+	private List<Integer> reportPeriodId;
 
-	private List<Long> departmentId;
+	private List<Integer> departmentId;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
-	private List<Long> formTypeId;
+	private List<Integer> formTypeId;
 
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
-	private List<Long> formDataKind;
+	private List<FormDataKind> formDataKind;
 
-	private List<Long> formStates;
+	private List<WorkflowState> formStates;
 
-	public List<Long> getPeriod() {
+
+	public List<Integer> getReportPeriodId() {
 		return reportPeriodId;
 	}
 
-	public void setPeriod(List<Long> period) {
-		this.reportPeriodId = period;
+	public void setReportPeriodId(List<Integer> reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
 	}
 
-	public List<Long> getDepartment() {
+	public List<Integer> getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartment(List<Long> department) {
-		this.departmentId = department;
+	public void setDepartmentId(List<Integer> departmentId) {
+		this.departmentId = departmentId;
 	}
 
-	public List<Long> getFormtype() {
+	public List<Integer> getFormTypeId() {
 		return formTypeId;
 	}
 
-	public void setFormtype(List<Long> formtype) {
-		this.formTypeId = formtype;
+	public void setFormTypeId(List<Integer> formTypeId) {
+		this.formTypeId = formTypeId;
 	}
 
-	public List<Long> getKind() {
+	public List<FormDataKind> getFormDataKind() {
 		return formDataKind;
 	}
 
-	public void setKind(List<Long> kind) {
-		this.formDataKind = kind;
+	public void setFormDataKind(List<FormDataKind> formDataKind) {
+		this.formDataKind = formDataKind;
 	}
 
-	public List<Long> getFormStates() {
+	public List<WorkflowState> getFormStates() {
 		return formStates;
 	}
 
-	public void setFormStates(List<Long> formStates) {
+	public void setFormStates(List<WorkflowState> formStates) {
 		this.formStates = formStates;
 	}
 }

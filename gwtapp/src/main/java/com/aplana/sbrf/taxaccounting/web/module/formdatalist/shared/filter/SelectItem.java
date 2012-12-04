@@ -2,26 +2,26 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter;
 
 import java.io.Serializable;
 
-public class SelectItem implements Serializable {
+public class SelectItem<T> implements Serializable {
 	private static final long serialVersionUID = -2957561387604546546L;
 
-	private Long id;
+	private T id;
 	private String name;
 
 	public SelectItem() {
 	};
 
-	public SelectItem(Long id, String name) {
+	public SelectItem(T id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
 	}
 
-	public Long getId() {
+	public T getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(T id) {
 		this.id = id;
 	}
 

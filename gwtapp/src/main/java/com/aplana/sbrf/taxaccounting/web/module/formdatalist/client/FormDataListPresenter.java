@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -24,6 +21,9 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
@@ -142,13 +142,13 @@ public class FormDataListPresenter extends
 				.with(FormDataPresenter.FORM_DATA_ID,
 						String.valueOf(Long.MAX_VALUE))
 				.with(FormDataPresenter.FORM_DATA_KIND_ID,
-						String.valueOf(filterFormData.getKind()))
+						String.valueOf(filterFormData.getFormDataKind()))
 				.with(FormDataPresenter.DEPARTMENT_ID,
-						String.valueOf(filterFormData.getDepartment()))
+						String.valueOf(filterFormData.getDepartmentId()))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
-						String.valueOf(filterFormData.getFormtype()))
+						String.valueOf(filterFormData.getFormTypeId()))
 				.with(FormDataPresenter.FORM_DATA_RPERIOD_ID,
-						String.valueOf(filterFormData.getPeriod())));
+						String.valueOf(filterFormData.getReportPeriodId())));
 	}
 
 }

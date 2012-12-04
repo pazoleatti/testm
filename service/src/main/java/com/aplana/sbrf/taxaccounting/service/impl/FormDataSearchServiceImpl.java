@@ -35,58 +35,50 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	public List<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
-		if(formDataFilter.getDepartment() == Long.MAX_VALUE){
+		if(formDataFilter.getDepartmentId() == null){
 			List<Department> departmentList = listAllDepartmentsByParentDepartmentId(user.getDepartmentId());
-			List<Long> departmentLongList = new ArrayList<Long>();
+			List<Integer> departmentIntegerList = new ArrayList<Integer>();
 			for(Department department : departmentList){
-				departmentLongList.add((long)department.getId());
+				departmentIntegerList.add(department.getId());
 			}
-			formDataDaoFilter.setDepartment(departmentLongList);
+			formDataDaoFilter.setDepartmentId(departmentIntegerList);
 		} else {
-			formDataDaoFilter.setDepartment(Arrays.asList(formDataFilter.getDepartment()));
+			formDataDaoFilter.setDepartmentId(Arrays.asList(formDataFilter.getDepartmentId()));
 		}
 
-		if(formDataFilter.getPeriod() == Long.MAX_VALUE){
+		if(formDataFilter.getReportPeriodId() == null){
 			List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(formDataFilter.getTaxType());
-			List<Long> reportPeriodLongList = new ArrayList<Long>();
+			List<Integer> reportPeriodIntegerList = new ArrayList<Integer>();
 			for (ReportPeriod reportPeriod : reportPeriodList){
-				reportPeriodLongList.add((long)reportPeriod.getId());
+				reportPeriodIntegerList.add(reportPeriod.getId());
 			}
-			formDataDaoFilter.setPeriod(reportPeriodLongList);
+			formDataDaoFilter.setReportPeriodId(reportPeriodIntegerList);
 		} else {
-			formDataDaoFilter.setPeriod(Arrays.asList(formDataFilter.getPeriod()));
+			formDataDaoFilter.setReportPeriodId(Arrays.asList(formDataFilter.getReportPeriodId()));
 		}
 
-		if(formDataFilter.getKind() == Long.MAX_VALUE){
+		if(formDataFilter.getFormDataKind() == null){
 			FormDataKind[] formDataKinds = FormDataKind.values();
-			List<Long> formDataKindLongList = new ArrayList<Long>();
-			for(int i = 0; i < formDataKinds.length; i++){
-				formDataKindLongList.add((long)formDataKinds[i].getId());
-			}
-			formDataDaoFilter.setKind(formDataKindLongList);
+			formDataDaoFilter.setFormDataKind(Arrays.asList(formDataKinds));
 		} else {
-			formDataDaoFilter.setKind(Arrays.asList(formDataFilter.getKind()));
+			formDataDaoFilter.setFormDataKind(Arrays.asList(formDataFilter.getFormDataKind()));
 		}
 
-		if(formDataFilter.getFormtype() == Long.MAX_VALUE){
+		if(formDataFilter.getFormTypeId() == null){
 			List<FormType> formTypeList = formTypeDao.listAllByTaxType(formDataFilter.getTaxType());
-			List<Long> formTypeLongList = new ArrayList<Long>();
+			List<Integer> formTypeIntegerList = new ArrayList<Integer>();
 
 			for(FormType formType : formTypeList){
-				formTypeLongList.add((long)formType.getId());
+				formTypeIntegerList.add(formType.getId());
 			}
-			formDataDaoFilter.setFormtype(formTypeLongList);
+			formDataDaoFilter.setFormTypeId(formTypeIntegerList);
 		} else {
-			formDataDaoFilter.setFormtype(Arrays.asList(formDataFilter.getFormtype()));
+			formDataDaoFilter.setFormTypeId(Arrays.asList(formDataFilter.getFormTypeId()));
 		}
 
-		if(formDataFilter.getFormState() == Long.MAX_VALUE){
+		if(formDataFilter.getFormState() == null){
 			WorkflowState[] formStates = WorkflowState.values();
-			List<Long> formStatesLongList = new ArrayList<Long>();
-			for(int i = 0; i < formStates.length; i++){
-				formStatesLongList.add((long)formStates[i].getId());
-			}
-			formDataDaoFilter.setFormStates(formStatesLongList);
+			formDataDaoFilter.setFormStates(Arrays.asList(formStates));
 		} else {
 			formDataDaoFilter.setFormStates(Arrays.asList(formDataFilter.getFormState()));
 		}

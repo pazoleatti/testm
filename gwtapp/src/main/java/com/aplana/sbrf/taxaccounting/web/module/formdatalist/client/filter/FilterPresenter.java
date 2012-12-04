@@ -12,7 +12,9 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
@@ -21,23 +23,25 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 		FormDataFilter getDataFilter();
 
-		void setPeriodList(List<SelectItem> list);
+		void setPeriodList(List<SelectItem<Integer>> list);
 
-		void setDepartmentList(List<SelectItem> list);
+		void setDepartmentList(List<SelectItem<Integer>> list);
 
-		void setFormtypeList(List<SelectItem> list);
+		void setFormtypeList(List<SelectItem<Integer>> list);
 
-		public void setKindList(List<SelectItem> list);
+		public void setKindList(List<SelectItem<FormDataKind>> list);
 
-		public void setFormStateList(List<SelectItem> list);
+		public void setFormStateList(List<SelectItem<WorkflowState>> list);
 
-		public void clearData();
+		void setFormTypesMap(Map<Integer, String> formTypesMap);
+
+		void setDepartmentMaps(Map<Integer, String> departmentMaps);
+
+		void setReportPeriodMaps(Map<Integer, String> reportPeriodMaps);
 
 	}
 
 	private final DispatchAsync dispatchAsync;
-	//TODO: этот MAGIC_NUMBER уйдет когда разберемся с LongListBoxEditor, пока используем данную метку для обработки параметра ВСЕ
-	private static final long MAGIC_NUMBER = Long.MAX_VALUE;
 	private static final int DEFAULT_DEPARTMENT_SELECTED_ITEM = 1;
 
 	@Inject
@@ -58,12 +62,29 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 				new AbstractCallback<GetFilterDataResult>() {
 					@Override
 					public void onReqSuccess(GetFilterDataResult result) {
-						getView().clearData();
-						List<SelectItem> reportPeriodItems = fillPeriodList(result);
-						List<SelectItem> departmentItems = fillDepartmentList(result);
-						List<SelectItem> formTypeItems = fillFormTypeList(result);
-						List<SelectItem> formKindList = fillFormKindList();
-						List<SelectItem> formStateList = fillFormStateList();
+
+						List<SelectItem<Integer>> reportPeriodItems = fillPeriodList(result);
+						List<SelectItem<Integer>> departmentItems = fillDepartmentList(result);
+						List<SelectItem<Integer>> formTypeItems = fillFormTypeList(result);
+						List<SelectItem<FormDataKind>> formKindList = fillFormKindList();
+						List<SelectItem<WorkflowState>> formStateList = fillFormStateList();
+
+						Map<Integer, String> formTypesMap = new HashMap<Integer, String>();
+						Map<Integer, String> reportDepiodMaps = new HashMap<Integer, String>();
+						Map<Integer, String> departmentMaps = new HashMap<Integer, String>();
+
+						for (FormType formType : result.getFormTypes()){
+							formTypesMap.put(formType.getId(), formType.getName());
+						}
+						for(Department department : result.getDepartments()){
+							departmentMaps.put(department.getId(), department.getName());
+						}
+						for(ReportPeriod reportPeriod : result.getPeriods()){
+							reportDepiodMaps.put(reportPeriod.getId(), reportPeriod.getName());
+						}
+						getView().setFormTypesMap(formTypesMap);
+						getView().setDepartmentMaps(departmentMaps);
+						getView().setReportPeriodMaps(reportDepiodMaps);
 
 						getView().setFormtypeList(formTypeItems);
 						getView().setPeriodList(reportPeriodItems);
@@ -72,7 +93,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 						getView().setFormStateList(formStateList);
 
 						FormDataFilter formDataFilter = new FormDataFilter();
-						formDataFilter.setDepartment(departmentItems.get(DEFAULT_DEPARTMENT_SELECTED_ITEM).getId());
+						formDataFilter.setDepartmentId(departmentItems.get(DEFAULT_DEPARTMENT_SELECTED_ITEM).getId());
 						getView().setDataFilter(formDataFilter);
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}
@@ -80,56 +101,60 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	}
 
-	private List<SelectItem> fillPeriodList(GetFilterDataResult result){
+	private List<SelectItem<Integer>> fillPeriodList(GetFilterDataResult result){
 		List<ReportPeriod> reportPeriods = result.getPeriods();
-		List<SelectItem> reportPeriodItems = new ArrayList<SelectItem>();
-		reportPeriodItems.add(new SelectItem(MAGIC_NUMBER, ""));
+		List<SelectItem<Integer>> reportPeriodItems = new ArrayList<SelectItem<Integer>>();
+		reportPeriodItems.add(new SelectItem<Integer>(null, ""));
 		for (ReportPeriod reportPeriod : reportPeriods){
-			reportPeriodItems.add(new SelectItem((long) reportPeriod.getId(),
+			reportPeriodItems.add(new SelectItem<Integer>( reportPeriod.getId(),
 					reportPeriod.getName()));
 		}
 		return reportPeriodItems;
 	}
 
-	private List<SelectItem> fillFormTypeList(GetFilterDataResult result){
+	private List<SelectItem<Integer>> fillFormTypeList(GetFilterDataResult result){
 		List<FormType> formTypes = result.getFormTypes();
-		List<SelectItem> formTypeItems = new ArrayList<SelectItem>();
-		formTypeItems.add(new SelectItem(MAGIC_NUMBER, ""));
+		List<SelectItem<Integer>> formTypeItems = new ArrayList<SelectItem<Integer>>();
+		formTypeItems.add(new SelectItem<Integer>(null, ""));
 		for (FormType formType : formTypes) {
-			formTypeItems.add(new SelectItem((long) formType.getId(), formType
+			formTypeItems.add(new SelectItem<Integer>( formType.getId(), formType
 					.getName()));
 		}
 		return formTypeItems;
 	}
 
-	private List<SelectItem> fillDepartmentList(GetFilterDataResult result){
+	private List<SelectItem<Integer>> fillDepartmentList(GetFilterDataResult result){
 		List<Department> departments = result.getDepartments();
-		List<SelectItem> departmentItems = new ArrayList<SelectItem>();
+		List<SelectItem<Integer>> departmentItems = new ArrayList<SelectItem<Integer>>();
 
-		departmentItems.add(new SelectItem(MAGIC_NUMBER, ""));
+		departmentItems.add(new SelectItem<Integer>(null, ""));
 		for (Department department : departments) {
-			departmentItems.add(new SelectItem((long) department.getId(), department
+			departmentItems.add(new SelectItem<Integer>( department.getId(), department
 					.getName()));
 		}
 		return departmentItems;
 	}
 
-	private List<SelectItem> fillFormKindList(){
-		List<SelectItem> kind = new ArrayList<SelectItem>();
-		kind.add(new SelectItem(MAGIC_NUMBER, ""));
-		kind.add(new SelectItem(3L, "Сводная"));
-		kind.add(new SelectItem(2L, "Консолидированная"));
-		kind.add(new SelectItem(1L, "Первичная"));
+	private List<SelectItem<FormDataKind>> fillFormKindList(){
+		List<SelectItem<FormDataKind>> kind = new ArrayList<SelectItem<FormDataKind>>();
+		FormDataKind[] formDataKinds = FormDataKind.values();
+
+		kind.add(new SelectItem<FormDataKind>(null, ""));
+		for (int i = 0; i < formDataKinds.length; i++){
+			kind.add(new SelectItem<FormDataKind>(formDataKinds[i], formDataKinds[i].getName()));
+		}
 		return kind;
 	}
 
-	private List<SelectItem> fillFormStateList(){
-		List<SelectItem> formState = new ArrayList<SelectItem>();
-		formState.add(new SelectItem(MAGIC_NUMBER, ""));
-		formState.add(new SelectItem(1L, "Создана"));
-		formState.add(new SelectItem(2L, "Подготовлена"));
-		formState.add(new SelectItem(3L, "Утверждена"));
-		formState.add(new SelectItem(4L, "Принята"));
+	private List<SelectItem<WorkflowState>> fillFormStateList(){
+		List<SelectItem<WorkflowState>> formState = new ArrayList<SelectItem<WorkflowState>>();
+		WorkflowState[] workflowStates = WorkflowState.values();
+
+		formState.add(new SelectItem<WorkflowState>(null, ""));
+		for(int i = 0; i < workflowStates.length; i++){
+			formState.add(new SelectItem<WorkflowState>(workflowStates[i], workflowStates[i].getName()));
+		}
+
 		return formState;
 	}
 

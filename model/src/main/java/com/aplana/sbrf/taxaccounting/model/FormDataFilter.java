@@ -9,51 +9,51 @@ import java.io.Serializable;
 public class FormDataFilter implements Serializable{
 	private static final long serialVersionUID = -4400641241082281834L;
 
-	private Long reportPeriodId;
+	private Integer reportPeriodId;
 
-	private Long departmentId;
+	private Integer departmentId;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
-	private Long formTypeId;
+	private Integer formTypeId;
 
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
-    private Long formDataKind;
+    private FormDataKind formDataKind;
 
 	private TaxType taxType;
 
-	private Long formState;
+	private WorkflowState formState;
 
-	public Long getPeriod() {
+	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
 
-	public void setPeriod(Long period) {
-		this.reportPeriodId = period;
+	public void setReportPeriodId(Integer reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
 	}
 
-	public Long getDepartment() {
+	public Integer getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartment(Long department) {
-		this.departmentId = department;
+	public void setDepartmentId(Integer departmentId) {
+		this.departmentId = departmentId;
 	}
 
-	public Long getFormtype() {
+	public Integer getFormTypeId() {
 		return formTypeId;
 	}
 
-	public void setFormtype(Long formtype) {
-		this.formTypeId = formtype;
+	public void setFormTypeId(Integer formTypeId) {
+		this.formTypeId = formTypeId;
 	}
 
-    public Long getKind() {
-        return formDataKind;
-    }
+	public FormDataKind getFormDataKind() {
+		return formDataKind;
+	}
 
-    public void setKind(Long kind) {
-        this.formDataKind = kind;
-    }
+	public void setFormDataKind(FormDataKind formDataKind) {
+		this.formDataKind = formDataKind;
+	}
 
 	public TaxType getTaxType() {
 		return taxType;
@@ -63,11 +63,11 @@ public class FormDataFilter implements Serializable{
 		this.taxType = taxType;
 	}
 
-	public Long getFormState() {
+	public WorkflowState getFormState() {
 		return formState;
 	}
 
-	public void setFormState(Long formState) {
+	public void setFormState(WorkflowState formState) {
 		this.formState = formState;
 	}
 
