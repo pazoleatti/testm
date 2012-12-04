@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.DelayedBindRegistry;
@@ -27,6 +29,9 @@ import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
  * а то приложение может никогда не очнуться.
  */
 public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandlers {
+	
+	
+	protected Logger logger = Logger.getLogger(getClass().getName());
 	
 	// TODO: Почему то не получается использовать @Inject для статических полей. Надо разобраться.
 	// Пока ворк эраунд - получение инжектора руками и установка значения.
@@ -65,8 +70,10 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandle
 	@Override
 	public final void onFailure(Throwable throwable) {
 		this.onReqFailure(throwable);
-		throwable.printStackTrace();
-		Window.alert(throwable.getMessage());
+		logger.log(Level.INFO, errorOnFailureMsg(), throwable);
+		if (needErrorOnFailure()){
+			ErrorEvent.fire(this, errorOnFailureMsg(), throwable);
+		}
 		if (needLock()){
 			LockInteractionEvent.fire(this, false);
 		}
@@ -82,6 +89,14 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>, HasHandle
 	
 	protected boolean needLock(){
 		return true;
+	}
+	
+	protected boolean needErrorOnFailure(){
+		return true;
+	}
+	
+	protected String errorOnFailureMsg(){
+		return "Ошибка при асинхронном вызове";
 	}
 
 	@Override

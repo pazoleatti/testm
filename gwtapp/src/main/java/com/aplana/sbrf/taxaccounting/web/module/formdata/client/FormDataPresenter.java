@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.logging.Level;
-
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
@@ -50,62 +49,62 @@ public class FormDataPresenter extends
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-		readOnlyMode = Boolean.parseBoolean(request.getParameter(READ_ONLY,
-				"true"));
+		try {
+			super.prepareFromRequest(request);
+			readOnlyMode = Boolean.parseBoolean(request.getParameter(READ_ONLY,
+					"true"));
 
-		GetFormData action = new GetFormData();
-		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID,
-				String.valueOf(Long.MAX_VALUE))));
-		action.setDepartmentId(Long.parseLong(request.getParameter(
-				DEPARTMENT_ID, String.valueOf(Long.MAX_VALUE))));
-		action.setFormDataKind(Long.parseLong((request.getParameter(
-				FORM_DATA_KIND_ID, String.valueOf(Long.MAX_VALUE)))));
-		action.setFormDataTypeId((Long.parseLong((request.getParameter(
-				FORM_DATA_TYPE_ID, String.valueOf(Long.MAX_VALUE))))));
-		action.setReportPeriodId(Long.parseLong(request.getParameter(
-				FORM_DATA_RPERIOD_ID, String.valueOf(Long.MAX_VALUE))));
+			GetFormData action = new GetFormData();
+			action.setFormDataId(Long.parseLong(request.getParameter(
+					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
+			action.setDepartmentId(Long.parseLong(request.getParameter(
+					DEPARTMENT_ID, String.valueOf(Long.MAX_VALUE))));
+			action.setFormDataKind(Long.parseLong((request.getParameter(
+					FORM_DATA_KIND_ID, String.valueOf(Long.MAX_VALUE)))));
+			action.setFormDataTypeId((Long.parseLong((request.getParameter(
+					FORM_DATA_TYPE_ID, String.valueOf(Long.MAX_VALUE))))));
+			action.setReportPeriodId(Long.parseLong(request.getParameter(
+					FORM_DATA_RPERIOD_ID, String.valueOf(Long.MAX_VALUE))));
 
-		dispatcher.execute(action, new AbstractCallback<GetFormDataResult>() {
-			@Override
-			public void onReqSuccess(GetFormDataResult result) {
-				formData = result.getFormData();
-				flags = result.getAccessFlags();
-				if (!readOnlyMode && result.getAccessFlags().getCanEdit()) {
-					showEditModeButtons();
-					getView().setWorkflowButtons(null);
-				} else {
-					showReadOnlyModeButtons();
-					getView().setWorkflowButtons(result.getAvailableMoves());
+			dispatcher.execute(action,
+					new AbstractCallback<GetFormDataResult>() {
+						@Override
+						public void onReqSuccess(GetFormDataResult result) {
+							formData = result.getFormData();
+							flags = result.getAccessFlags();
+							if (!readOnlyMode
+									&& result.getAccessFlags().getCanEdit()) {
+								showEditModeButtons();
+								getView().setWorkflowButtons(null);
+							} else {
+								showReadOnlyModeButtons();
+								getView().setWorkflowButtons(
+										result.getAvailableMoves());
 
-				}
-				getView().setLogMessages(result.getLogEntries());
-				getView().setAdditionalFormInfo(
-						result.getFormData().getFormType().getName(),
-						result.getFormData().getFormType().getTaxType()
-								.getName(),
-						result.getFormData().getKind().getName(),
-						result.getDepartmenName(), result.getReportPeriod(),
-						result.getFormData().getState().getName());
+							}
+							getView().setLogMessages(result.getLogEntries());
+							getView().setAdditionalFormInfo(
+									result.getFormData().getFormType()
+											.getName(),
+									result.getFormData().getFormType()
+											.getTaxType().getName(),
+									result.getFormData().getKind().getName(),
+									result.getDepartmenName(),
+									result.getReportPeriod(),
+									result.getFormData().getState().getName());
 
-				getView().setColumnsData(formData.getFormColumns(),
-						readOnlyMode);
-				getView().setRowsData(formData.getDataRows());
-				getProxy().manualReveal(FormDataPresenter.this);
+							getView().setColumnsData(formData.getFormColumns(),
+									readOnlyMode);
+							getView().setRowsData(formData.getDataRows());
+							getProxy().manualReveal(FormDataPresenter.this);
 
-				super.onReqSuccess(result);
-			}
+							super.onReqSuccess(result);
+						}
 
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				logger.log(Level.INFO, "Can't open form", throwable);
-				placeManager.revealPlace(new PlaceRequest(
-						FormDataListNameTokens.FORM_DATA_LIST).with("nType",
-						String.valueOf(TaxType.TRANSPORT)));
-				super.onReqFailure(throwable);
-			}
-
-		});
+					});
+		} catch (Error e) {
+			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
+		}
 	}
 
 	@Override
@@ -142,12 +141,6 @@ public class FormDataPresenter extends
 				getView().setRowsData(
 						FormDataPresenter.this.formData.getDataRows());
 				super.onReqSuccess(result);
-			}
-
-			@Override
-			public void onReqFailure(Throwable throwable) {
-				logger.log(Level.SEVERE, "Failed to save formData object",
-						throwable);
 			}
 		});
 
@@ -192,14 +185,6 @@ public class FormDataPresenter extends
 						public void onReqSuccess(DeleteFormDataResult result) {
 							placeManager.revealPlace(new PlaceRequest(
 									FormDataListNameTokens.FORM_DATA_LIST));
-						}
-
-						@Override
-						public void onReqFailure(Throwable throwable) {
-							logger.log(Level.SEVERE,
-									"Failed to delete formData object",
-									throwable);
-							super.onReqFailure(throwable);
 						}
 					});
 		}

@@ -27,7 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used in {@link PlaceManager} and is bind
+ * This annotation is used in {@link TaPlaceManager} and is bind
  * in {@link ClientModule}. It's purpose is to bind the default place to a
  * default presenter.
  *

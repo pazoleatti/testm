@@ -74,7 +74,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	}
 
 	@Override
-	public void lockAndShowLoading(boolean locked) {
+	public void showLoading(boolean locked) {
 		loadingMessage.getStyle().setVisibility(
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
 	}

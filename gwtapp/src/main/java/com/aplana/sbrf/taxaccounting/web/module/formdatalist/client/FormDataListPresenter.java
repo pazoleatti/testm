@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
@@ -25,9 +26,9 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class FormDataListPresenter extends
-		FormDataListPresenterBase<FormDataListPresenter.MyProxy>
-		implements FormDataListUiHandlers, FilterReadyEvent.MyHandler {
-	
+		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
+		FormDataListUiHandlers, FilterReadyEvent.MyHandler {
+
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
@@ -45,14 +46,22 @@ public class FormDataListPresenter extends
 		getView().setUiHandlers(this);
 	}
 
-	
-	/* (non-Javadoc)
-	 * @see com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform.mvp.client.proxy.PlaceRequest)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.gwtplatform.mvp.client.Presenter#prepareFromRequest(com.gwtplatform
+	 * .mvp.client.proxy.PlaceRequest)
 	 */
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-		filterPresenter.initFilter(TaxType.valueOf(request.getParameter("nType", "")));
+		try {
+			super.prepareFromRequest(request);
+			filterPresenter.initFilter(TaxType.valueOf(request.getParameter(
+					"nType", "")));
+		} catch (Exception e) {
+			ErrorEvent.fire(this, "Неудалось открыть список форм", e);
+		}
 	}
 
 	/**
@@ -62,9 +71,11 @@ public class FormDataListPresenter extends
 	 */
 	private void loadFormDataList(FormDataFilter filterFormData) {
 		GetFormDataList action = new GetFormDataList();
-		String taxTypeParam = placeManager.getCurrentPlaceRequest().getParameter("nType", "");
+		String taxTypeParam = placeManager.getCurrentPlaceRequest()
+				.getParameter("nType", "");
 
-		getView().setTaxTypeLabel("Тип налога: " + TaxType.valueOf(taxTypeParam).getName());
+		getView().setTaxTypeLabel(
+				"Тип налога: " + TaxType.valueOf(taxTypeParam).getName());
 		filterFormData.setTaxType(TaxType.valueOf(taxTypeParam));
 		action.setFormDataFilter(filterFormData);
 
@@ -73,23 +84,27 @@ public class FormDataListPresenter extends
 					@Override
 					public void onReqSuccess(GetFormDataListResult result) {
 						Map<Integer, String> departmentMap = new HashMap<Integer, String>();
-						for(Department department : result.getDepartments()){
-							departmentMap.put(department.getId(), department.getName());
+						for (Department department : result.getDepartments()) {
+							departmentMap.put(department.getId(),
+									department.getName());
 						}
 
 						Map<Integer, String> reportPeriodMap = new HashMap<Integer, String>();
-						for(ReportPeriod period : result.getReportPeriods()){
-							reportPeriodMap.put(period.getId(), period.getName());
+						for (ReportPeriod period : result.getReportPeriods()) {
+							reportPeriodMap.put(period.getId(),
+									period.getName());
 						}
 
 						getView().setFormDataList(result.getRecords());
 						getView().setDepartmentMap(departmentMap);
 						getView().setReportPeriodMap(reportPeriodMap);
 
-
-						// Вручную вызывается onReveal. Вызываем его всегда, даже когда
-						// презентер в состоянии visible, т.к. нам необходима его разблокировка.
-						// Почему GWTP вызывает блокировку даже если страница уже видна - непонятно.
+						// Вручную вызывается onReveal. Вызываем его всегда,
+						// даже когда
+						// презентер в состоянии visible, т.к. нам необходима
+						// его разблокировка.
+						// Почему GWTP вызывает блокировку даже если страница
+						// уже видна - непонятно.
 						getProxy().manualReveal(FormDataListPresenter.this);
 
 					}
@@ -102,8 +117,13 @@ public class FormDataListPresenter extends
 		loadFormDataList(filterFormData);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent.MyHandler#onFilterReady(com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.
+	 * FilterReadyEvent
+	 * .MyHandler#onFilterReady(com.aplana.sbrf.taxaccounting.web
+	 * .module.formdatalist.client.filter.FilterReadyEvent)
 	 */
 	@ProxyEvent
 	@Override
@@ -117,12 +137,18 @@ public class FormDataListPresenter extends
 	@Override
 	public void onCreateClicked() {
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
-		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").
-				with(FormDataPresenter.FORM_DATA_ID, String.valueOf(Long.MAX_VALUE)).
-				with(FormDataPresenter.FORM_DATA_KIND_ID,String.valueOf(filterFormData.getKind())).
-				with(FormDataPresenter.DEPARTMENT_ID, String.valueOf(filterFormData.getDepartment())).
-				with(FormDataPresenter.FORM_DATA_TYPE_ID, String.valueOf(filterFormData.getFormtype())).
-				with(FormDataPresenter.FORM_DATA_RPERIOD_ID, String.valueOf(filterFormData.getPeriod())));
+		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
+				.with(FormDataPresenter.READ_ONLY, "false")
+				.with(FormDataPresenter.FORM_DATA_ID,
+						String.valueOf(Long.MAX_VALUE))
+				.with(FormDataPresenter.FORM_DATA_KIND_ID,
+						String.valueOf(filterFormData.getKind()))
+				.with(FormDataPresenter.DEPARTMENT_ID,
+						String.valueOf(filterFormData.getDepartment()))
+				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
+						String.valueOf(filterFormData.getFormtype()))
+				.with(FormDataPresenter.FORM_DATA_RPERIOD_ID,
+						String.valueOf(filterFormData.getPeriod())));
 	}
 
 }
