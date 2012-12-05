@@ -13,6 +13,11 @@ import javax.script.ScriptEngineManager;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import groovy.lang.GroovyClassLoader;
+import groovy.util.GroovyScriptEngine;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +37,15 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  */
 @Service
 public class FormDataScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
+	/**
+	 * Предопределенные пакеты для импорта в скрипты. Здесь только пакеты.
+	 */
+	private static final String[] PREDEFINED_IMPORTS = new String[]{
+			"com.aplana.sbrf.taxaccounting.model",
+			"com.aplana.sbrf.taxaccounting.model.dictionary",
+			"com.aplana.sbrf.taxaccounting.model.log",
+			"com.aplana.sbrf.taxaccounting.model.security"
+	};
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -166,6 +180,18 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	private ScriptEngine getScriptEngine() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");
+
+		// Predefined imports
+		CompilerConfiguration config = new CompilerConfiguration();
+		ImportCustomizer ic = new ImportCustomizer();
+		ic.addStarImports(PREDEFINED_IMPORTS);
+		config.addCompilationCustomizers(ic);
+
+		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) engine;
+		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
+		classLoader = new GroovyClassLoader(classLoader, config, false);
+		groovyScriptEngine.setClassLoader(classLoader);
+
 		Bindings b = engine.createBindings();
 		b.putAll(scriptExposedBeans);
 		engine.put("formDataDao", formDataDao);
