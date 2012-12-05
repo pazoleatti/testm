@@ -25,13 +25,12 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import java.io.Serializable;
 
 /**
- * Заготовка для виджета для выбора значения из справочника
+ * Базовый класс виджета для выбора значения из справочника.
  *
- * @author dsultanbekov
+ * @param <ValueType> тип значения справочника
  */
 public abstract class DictionaryPickerWidget<ValueType extends Serializable> extends Composite
 		implements HasValue<ValueType> {
-
 	private final SingleSelectionModel<DictionaryItem<ValueType>> selectionModel;
 
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
@@ -145,11 +144,15 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 
 	@Override
 	public void setValue(ValueType value, boolean b) {
-		this.value = value;
-		txtFind.setValue(valueToString(value));
-		selectionModel.clear();
-		if (b) {
-			ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
+		if (this.value != null ? !this.value.equals(value) : value != null) {
+			this.value = value;
+
+			txtFind.setValue(valueToString(value));
+			selectionModel.clear();
+
+			if (b) {
+				ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
+			}
 		}
 	}
 

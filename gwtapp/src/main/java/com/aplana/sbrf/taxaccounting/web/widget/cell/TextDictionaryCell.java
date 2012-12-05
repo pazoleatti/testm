@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.TextDict
 
 /**
  * @author Vitalii Samolovskikh
+ * @see DictionaryCell
  */
 public class TextDictionaryCell extends DictionaryCell<String> {
 	public TextDictionaryCell(String dictionaryCode) {

@@ -25,10 +25,13 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
 
 /**
- * Заготовка для редактора ячеек, отображающих значения из справочника
- * Код и идея работы основаны на коде DatePickerCell: при клике на ячейке отображается popup-окно, в котором отображается
- * виджет для выбора элемента
- * TODO: сделать генериком, для того, чтобы можно было работать не только со строковыми кодами в справочниках, но и с числовыми
+ * Ячейка для редактирования значений из справочника.
+ * Код и идея работы основаны на коде DatePickerCell: при клике на ячейке отображается popup-окно, в котором,
+ * отображается виджет для выбора элемента.
+ *
+ * Не просто постичь высокую философию {@link AbstractEditableCell}.
+ *
+ * @param <ValueType> тип значения справочника
  */
 public abstract class DictionaryCell<ValueType extends Serializable> extends AbstractEditableCell<ValueType, String> {
 

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 
 /**
  * @author Vitalii Samolovskikh
+ * @see DictionaryCell
  */
 public class NumericDictionaryCell extends DictionaryCell<BigDecimal> {
 	public NumericDictionaryCell(String dictionaryCode) {

@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 /**
  * @author Vitalii Samolovskikh
+ * @see DictionaryDataProvider
  */
 public class NumericDictionaryDataProvider extends DictionaryDataProvider<NumericDictionaryAction, BigDecimal> {
 	public NumericDictionaryDataProvider(String dictionaryCode) {

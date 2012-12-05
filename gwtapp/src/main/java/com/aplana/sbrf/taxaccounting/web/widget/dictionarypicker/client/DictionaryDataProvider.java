@@ -17,6 +17,8 @@ import java.io.Serializable;
  * Асинхронный провайдер для таблицы, получающий даные с сервера
  * с использованием фильтра и кода справочника.
  *
+ * @param <A> действие
+ * @param <T> тип значения справочника
  * @author Eugene Stetsenko
  */
 public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T extends Serializable>
@@ -39,6 +41,11 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 		load(display.getVisibleRange());
 	}
 
+	/**
+	 * Загружает значения справочника в определенном диапазоне.
+	 *
+	 * @param range диапазон данных
+	 */
 	public void load(Range range) {
 		final int offset = range.getStart();
 		int max = range.getLength();
@@ -59,6 +66,10 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 		});
 	}
 
+	/**
+	 * Создает действие по получению данных. Так как это класс абстрактный для всех типов справочников,
+	 * то создание действия перенесено в дочерние классы.
+	 */
 	protected abstract A createAction();
 
 	public String getSearchPattern() {
