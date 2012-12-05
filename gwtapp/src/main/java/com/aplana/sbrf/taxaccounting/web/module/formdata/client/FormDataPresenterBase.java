@@ -6,11 +6,11 @@ import java.util.logging.Logger;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -78,7 +78,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final PlaceManager placeManager;
 
 	protected FormData formData;
-	protected AccessFlags flags;
+	protected FormDataAccessParams accessParams;
 	protected boolean readOnlyMode;
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
@@ -111,8 +111,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showPrintButton(true);
 
-		view.showManualInputButton(flags.getCanEdit());
-		view.showDeleteFormButton(flags.getCanDelete());
+		view.showManualInputButton(accessParams.isCanEdit());
+		view.showDeleteFormButton(accessParams.isCanDelete());
 	}
 
 	protected void showEditModeButtons() {

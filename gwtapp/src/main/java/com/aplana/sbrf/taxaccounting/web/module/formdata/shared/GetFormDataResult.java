@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 /**
@@ -18,13 +18,11 @@ public class GetFormDataResult implements Result {
 	
 	private List<LogEntry> logEntries;
 	
-	private AccessFlags accessFlags;
-	
 	private String departmenName;
 	
 	private String reportPeriod;
-
-	private List<WorkflowMove> availableMoves;
+	
+	private FormDataAccessParams formDataAccessParams;
 
 	
 	public FormData getFormData() {
@@ -33,14 +31,6 @@ public class GetFormDataResult implements Result {
 	
 	public void setFormData(FormData formData) {
 		this.formData = formData;
-	}
-
-	public AccessFlags getAccessFlags() {
-		return accessFlags;
-	}
-
-	public void setAccessFlags(AccessFlags accessFlags) {
-		this.accessFlags = accessFlags;
 	}
 	
 	public String getDepartmenName() {
@@ -59,12 +49,12 @@ public class GetFormDataResult implements Result {
 		this.reportPeriod = reportPeriod;
 	}
 
-	public List<WorkflowMove> getAvailableMoves() {
-		return availableMoves;
+	public FormDataAccessParams getFormDataAccessParams() {
+		return formDataAccessParams;
 	}
 
-	public void setAvailableMoves(List<WorkflowMove> availableMoves) {
-		this.availableMoves = availableMoves;
+	public void setFormDataAccessParams(FormDataAccessParams formDataAccessParams) {
+		this.formDataAccessParams = formDataAccessParams;
 	}
 
 	public List<LogEntry> getLogEntries() {

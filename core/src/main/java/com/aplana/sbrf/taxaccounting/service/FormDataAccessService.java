@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 
@@ -36,12 +37,12 @@ public interface FormDataAccessService {
 	 * Проверки, связанные с бизнес-логикой (например то, что за один период в подразделении должна существовать
 	 * только одна форма заданного типа и т.п. должны проверяться отдельно).
 	 * @param userId идентификатор пользователя
-	 * @param formId идентификатор налоговой формы (шаблона)
+	 * @param formTemplateId идентификатор налоговой формы (шаблона)
 	 * @param kind тип налоговой формы, который создаётся
 	 * @param departmentId идентификатор подразделения, в котором создаётся форма
 	 * @return true - если у пользователя есть права, false - в противном случае
 	 */
-	boolean canCreate(int userId, int formId, FormDataKind kind, int departmentId);
+	boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId);
 	
 	/**
 	 * Проверка того, что у пользователя есть права на удаление карточки с данными налоговой формы
@@ -58,4 +59,15 @@ public interface FormDataAccessService {
 	 * @return список переходов жизненного цикла, которые может выполнить текущий пользователь над данным объектом {@link FormData}
 	 */
 	List<WorkflowMove> getAvailableMoves(int userId, long formDataId);
+	
+	/**
+	 * Получить объект, содержащий {@link FormDataAccessParams параметры доступа} пользователя к объекту {@link FormData}
+	 * Если для одного и того же объекта FormData нужно получить значения нескольких флагов доступа, то
+	 * использование этого метода более предпочтительно, так как его реализация более эффективно запрашивает данные
+	 * из БД
+	 * @param userId идентификатор пользователя
+	 * @param formDataId идентификатор записи данных формы
+	 * @return объект, содержащий информацию о правах доступа пользователя к данной налоговой форме
+	 */
+	FormDataAccessParams getFormDataAccessParams(int userId, long formDataId);
 }

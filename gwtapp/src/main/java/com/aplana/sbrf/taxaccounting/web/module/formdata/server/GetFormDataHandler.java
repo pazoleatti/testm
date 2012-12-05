@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -19,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AccessFlags;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -73,12 +72,12 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			
 			result.setLogEntries(logger.getEntries());
 			
-			AccessFlags accessFlags = new AccessFlags();
-			accessFlags.setCanCreate(false);
-			accessFlags.setCanDelete(false);
-			accessFlags.setCanEdit(true);
-			accessFlags.setCanRead(true);
-			result.setAccessFlags(accessFlags);
+			FormDataAccessParams accessParams = new FormDataAccessParams();
+			accessParams.setCanDelete(false);
+			accessParams.setCanEdit(true);
+			accessParams.setCanRead(true);
+			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
+			result.setFormDataAccessParams(accessParams);
 		}
 		else{
 			result.setLogEntries(new ArrayList<LogEntry>());
@@ -88,15 +87,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 			
 			Long formDataId = formData.getId();
-			AccessFlags accessFlags = new AccessFlags();
-			accessFlags.setCanCreate(false);
-			accessFlags.setCanDelete(accessService.canDelete(userId, formDataId));
-			accessFlags.setCanEdit(accessService.canEdit(userId, formDataId));
-			accessFlags.setCanRead(accessService.canRead(userId, formDataId));
-			result.setAccessFlags(accessFlags);
-			
-			List<WorkflowMove> availableMoves =	accessService.getAvailableMoves(userId, action.getFormDataId());
-			result.setAvailableMoves(availableMoves);
+			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
+			result.setFormDataAccessParams(accessParams);
 		}
 		
 		result.setFormData(formData);

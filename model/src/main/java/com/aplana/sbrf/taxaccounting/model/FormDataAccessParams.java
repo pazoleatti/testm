@@ -1,16 +1,19 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Параметры доступа к объекту данных по {@link FormData налоговой форме}
  * @author DSultanbekov
  */
-public class FormDataAccessParams {
+public class FormDataAccessParams implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private boolean canRead;
 	private boolean canEdit;
 	private boolean canDelete;
-	private List<WorkflowMove> workflowMoves;
+	private List<WorkflowMove> availableWorkflowMoves;
 	
 	public boolean isCanRead() {
 		return canRead;
@@ -30,10 +33,10 @@ public class FormDataAccessParams {
 	public void setCanDelete(boolean canDelete) {
 		this.canDelete = canDelete;
 	}
-	public List<WorkflowMove> getWorkflowMoves() {
-		return workflowMoves;
+	public List<WorkflowMove> getAvailableWorkflowMoves() {
+		return availableWorkflowMoves;
 	}
-	public void setWorkflowMoves(List<WorkflowMove> workflowMoves) {
-		this.workflowMoves = workflowMoves;
+	public void setAvailableWorkflowMoves(List<WorkflowMove> workflowMoves) {
+		this.availableWorkflowMoves = workflowMoves;
 	}
 }

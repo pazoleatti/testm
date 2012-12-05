@@ -71,15 +71,13 @@ public class FormDataPresenter extends
 						@Override
 						public void onReqSuccess(GetFormDataResult result) {
 							formData = result.getFormData();
-							flags = result.getAccessFlags();
-							if (!readOnlyMode
-									&& result.getAccessFlags().getCanEdit()) {
+							accessParams = result.getFormDataAccessParams();
+							if (!readOnlyMode && accessParams.isCanEdit()) {
 								showEditModeButtons();
 								getView().setWorkflowButtons(null);
 							} else {
 								showReadOnlyModeButtons();
-								getView().setWorkflowButtons(
-										result.getAvailableMoves());
+								getView().setWorkflowButtons(accessParams.getAvailableWorkflowMoves());
 
 							}
 							getView().setLogMessages(result.getLogEntries());
