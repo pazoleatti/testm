@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
+import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,12 +18,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.CustomHeaderBuilder;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
@@ -30,7 +31,16 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
-	private DataRowColumnFactory factory = new DataRowColumnFactory();
+	private DataRowColumnFactory factory = new DataRowColumnFactory();	
+
+	@UiField
+	DockLayoutPanel dockPanel;
+	
+	@UiField
+	Widget logPanel;
+	
+	@UiField
+	Bar workflowBar;
 
 	@UiField
 	DataGrid<DataRow> formDataTable;
@@ -114,6 +124,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLogMessages(List<LogEntry> logEntries) {
+		dockPanel.setWidgetHidden(logPanel, (logEntries==null || logEntries.isEmpty()) ? true : false);
+		
 		loggerList.setRowCount(logEntries.size());
 		loggerList.setRowData(logEntries);
 		loggerList.redraw();
@@ -204,6 +216,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setWorkflowButtons(List<WorkflowMove> moves) {
 		workflowButtons.clear();
+		
+		dockPanel.setWidgetHidden(workflowBar, (moves==null || moves.isEmpty()) ? true : false);
+		
 		if (moves != null) {
 			for (final WorkflowMove workflowMove : moves) {
 				Button button = new Button(workflowMove.getName(),
