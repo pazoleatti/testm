@@ -4,17 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.filter.SelectItem;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
@@ -23,15 +19,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 		FormDataFilter getDataFilter();
 
-		void setPeriodList(List<SelectItem<Integer>> list);
+		void setKindList(List<FormDataKind> list);
 
-		void setDepartmentList(List<SelectItem<Integer>> list);
-
-		void setFormtypeList(List<SelectItem<Integer>> list);
-
-		public void setKindList(List<SelectItem<FormDataKind>> list);
-
-		public void setFormStateList(List<SelectItem<WorkflowState>> list);
+		void setFormStateList(List<WorkflowState> list);
 
 		void setFormTypesMap(Map<Integer, String> formTypesMap);
 
@@ -42,7 +32,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	}
 
 	private final DispatchAsync dispatchAsync;
-	private static final int DEFAULT_DEPARTMENT_SELECTED_ITEM = 1;
+	private static final int DEFAULT_DEPARTMENT_ITEM = 0;
 
 	@Inject
 	public FilterPresenter(EventBus eventBus, MyView view,
@@ -63,37 +53,14 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 					@Override
 					public void onReqSuccess(GetFilterDataResult result) {
 
-						List<SelectItem<Integer>> reportPeriodItems = fillPeriodList(result);
-						List<SelectItem<Integer>> departmentItems = fillDepartmentList(result);
-						List<SelectItem<Integer>> formTypeItems = fillFormTypeList(result);
-						List<SelectItem<FormDataKind>> formKindList = fillFormKindList();
-						List<SelectItem<WorkflowState>> formStateList = fillFormStateList();
-
-						Map<Integer, String> formTypesMap = new HashMap<Integer, String>();
-						Map<Integer, String> reportDepiodMaps = new HashMap<Integer, String>();
-						Map<Integer, String> departmentMaps = new HashMap<Integer, String>();
-
-						for (FormType formType : result.getFormTypes()){
-							formTypesMap.put(formType.getId(), formType.getName());
-						}
-						for(Department department : result.getDepartments()){
-							departmentMaps.put(department.getId(), department.getName());
-						}
-						for(ReportPeriod reportPeriod : result.getPeriods()){
-							reportDepiodMaps.put(reportPeriod.getId(), reportPeriod.getName());
-						}
-						getView().setFormTypesMap(formTypesMap);
-						getView().setDepartmentMaps(departmentMaps);
-						getView().setReportPeriodMaps(reportDepiodMaps);
-
-						getView().setFormtypeList(formTypeItems);
-						getView().setPeriodList(reportPeriodItems);
-						getView().setDepartmentList(departmentItems);
-						getView().setKindList(formKindList);
-						getView().setFormStateList(formStateList);
+						getView().setFormTypesMap(fillFormTypesMap(result));
+						getView().setReportPeriodMaps(fillReportPeriodsMap(result));
+						getView().setDepartmentMaps(fillDepartmentsMap(result));
+						getView().setKindList(fillFormKindList());
+						getView().setFormStateList(fillFormStateList());
 
 						FormDataFilter formDataFilter = new FormDataFilter();
-						formDataFilter.setDepartmentId(departmentItems.get(DEFAULT_DEPARTMENT_SELECTED_ITEM).getId());
+						formDataFilter.setDepartmentId(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId());
 						getView().setDataFilter(formDataFilter);
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}
@@ -101,60 +68,41 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	}
 
-	private List<SelectItem<Integer>> fillPeriodList(GetFilterDataResult result){
-		List<ReportPeriod> reportPeriods = result.getPeriods();
-		List<SelectItem<Integer>> reportPeriodItems = new ArrayList<SelectItem<Integer>>();
-		reportPeriodItems.add(new SelectItem<Integer>(null, ""));
-		for (ReportPeriod reportPeriod : reportPeriods){
-			reportPeriodItems.add(new SelectItem<Integer>( reportPeriod.getId(),
-					reportPeriod.getName()));
+	private Map<Integer, String> fillDepartmentsMap(GetFilterDataResult source){
+		Map<Integer, String> departmentsMap = new HashMap<Integer, String>();
+		for(Department department : source.getDepartments()){
+			departmentsMap.put(department.getId(), department.getName());
 		}
-		return reportPeriodItems;
+		return departmentsMap;
 	}
 
-	private List<SelectItem<Integer>> fillFormTypeList(GetFilterDataResult result){
-		List<FormType> formTypes = result.getFormTypes();
-		List<SelectItem<Integer>> formTypeItems = new ArrayList<SelectItem<Integer>>();
-		formTypeItems.add(new SelectItem<Integer>(null, ""));
-		for (FormType formType : formTypes) {
-			formTypeItems.add(new SelectItem<Integer>( formType.getId(), formType
-					.getName()));
+	private Map<Integer, String> fillReportPeriodsMap(GetFilterDataResult source){
+		Map<Integer, String> reportPeriodsMap = new HashMap<Integer, String>();
+		for(ReportPeriod reportPeriod : source.getPeriods()){
+			reportPeriodsMap.put(reportPeriod.getId(), reportPeriod.getName());
 		}
-		return formTypeItems;
+		return reportPeriodsMap;
 	}
 
-	private List<SelectItem<Integer>> fillDepartmentList(GetFilterDataResult result){
-		List<Department> departments = result.getDepartments();
-		List<SelectItem<Integer>> departmentItems = new ArrayList<SelectItem<Integer>>();
-
-		departmentItems.add(new SelectItem<Integer>(null, ""));
-		for (Department department : departments) {
-			departmentItems.add(new SelectItem<Integer>( department.getId(), department
-					.getName()));
+	private Map<Integer, String> fillFormTypesMap(GetFilterDataResult source){
+		Map<Integer, String> formTypesMap = new HashMap<Integer, String>();
+		for(FormType formType : source.getFormTypes()){
+			formTypesMap.put(formType.getId(), formType.getName());
 		}
-		return departmentItems;
+		return formTypesMap;
 	}
 
-	private List<SelectItem<FormDataKind>> fillFormKindList(){
-		List<SelectItem<FormDataKind>> kind = new ArrayList<SelectItem<FormDataKind>>();
-		FormDataKind[] formDataKinds = FormDataKind.values();
-
-		kind.add(new SelectItem<FormDataKind>(null, ""));
-		for (int i = 0; i < formDataKinds.length; i++){
-			kind.add(new SelectItem<FormDataKind>(formDataKinds[i], formDataKinds[i].getName()));
-		}
+	private List<FormDataKind> fillFormKindList(){
+		List<FormDataKind> kind = new ArrayList<FormDataKind>();
+		kind.add(null);
+		kind.addAll(Arrays.asList(FormDataKind.values()));
 		return kind;
 	}
 
-	private List<SelectItem<WorkflowState>> fillFormStateList(){
-		List<SelectItem<WorkflowState>> formState = new ArrayList<SelectItem<WorkflowState>>();
-		WorkflowState[] workflowStates = WorkflowState.values();
-
-		formState.add(new SelectItem<WorkflowState>(null, ""));
-		for(int i = 0; i < workflowStates.length; i++){
-			formState.add(new SelectItem<WorkflowState>(workflowStates[i], workflowStates[i].getName()));
-		}
-
+	private List<WorkflowState> fillFormStateList(){
+		List<WorkflowState> formState = new ArrayList<WorkflowState>();
+		formState.add(null);
+		formState.addAll(Arrays.asList(WorkflowState.values()));
 		return formState;
 	}
 
