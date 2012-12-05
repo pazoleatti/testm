@@ -37,11 +37,24 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 	private String dictionaryName;
 	private String sqlQuery;
 
+	/**
+	 * Возвращает все значения из справочника.
+	 *
+	 * @return список значений справочника
+	 */
 	@Override
 	public List<DictionaryItem<ValueType>> getValues() {
 		return getJdbcTemplate().query(getSqlQuery(), new ItemRowMapper());
 	}
 
+	/**
+	 * Возвращает запись св справочнике по значению. Запись может содержать так же и название значения.
+	 * Т.е. кроме кода ОКАТО, например, ещё и его название.
+	 *
+	 * @param value значение из справочника
+	 * @return запись в справочнике
+	 */
+	@Override
 	public DictionaryItem<ValueType> getItem(ValueType value) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -70,8 +83,21 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 		this.sqlQuery = sqlQuery;
 	}
 
-	public abstract ValueType getValue(ResultSet rs) throws SQLException;
+	/**
+	 * Получает значение справочника из {@link ResultSet}
+	 *
+	 * @param rs result set
+	 * @return значение справочника
+	 * @throws SQLException например, если в ответе не окажется нужного поля
+	 */
+	protected abstract ValueType getValue(ResultSet rs) throws SQLException;
 
+	/**
+	 * Подготавливает паттерн поиска. Обрезает со всех сторон. Эскейпит всякие символы. Обрамляет в %.
+	 *
+	 * @param pattern исходный паттерн поиска
+	 * @return паттерн поиска, готовый к использованию в БД
+	 */
 	protected String preparePattern(String pattern) {
 		if (pattern == null) {
 			return EMPTY_PATTERN;

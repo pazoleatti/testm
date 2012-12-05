@@ -8,13 +8,29 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+/**
+ * Источник данных для числовых справочников. Значениями в которых, являются числа
+ */
 public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<BigDecimal> {
-
+	/**
+	 * Получает значение справочника из {@link ResultSet}
+	 *
+	 * @param rs result set
+	 * @return значение справочника
+	 * @throws SQLException например, если в ответе не окажется нужного поля
+	 */
 	@Override
 	public BigDecimal getValue(ResultSet rs) throws SQLException {
 		return rs.getBigDecimal("value");
 	}
 
+	/**
+	 * Возвращает отфйильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
+	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
+	 *
+	 * @param pattern паттерн поиска
+	 * @return отфильтрованный список значений справочника
+	 */
 	@Override
 	public List<DictionaryItem<BigDecimal>> getValues(String pattern) {
 		String preparedPattern = preparePattern(pattern);
