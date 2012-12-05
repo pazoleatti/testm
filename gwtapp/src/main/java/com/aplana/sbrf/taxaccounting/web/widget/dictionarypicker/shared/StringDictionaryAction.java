@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared;
 
 /**
- * Запрос для получения элементов справочника передающий фильтр, 
- * границы выборки и код справочника.
- * @author Eugene Stetsenko
+ * Действие получения значений справочника для строковых справочников.
  *
+ * @author Vitalii Samolovskikh
+ * @see DictionaryAction
  */
 public class StringDictionaryAction extends DictionaryAction<String> {
-
 }

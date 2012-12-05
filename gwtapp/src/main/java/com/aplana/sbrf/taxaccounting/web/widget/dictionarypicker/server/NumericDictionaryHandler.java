@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 /**
+ * Хандлер для получения значений числовго справочника.
+ * @see DictionaryHandler
  * @author Vitalii Samolovskikh
  */
 @Service
@@ -27,6 +29,7 @@ public class NumericDictionaryHandler extends DictionaryHandler<NumericDictionar
 		super(NumericDictionaryAction.class);
 	}
 
+	@Override
 	protected DictionaryDataProvider<BigDecimal> getDictionaryDataProvider(String dictionaryCode) {
 		return dictionaryManager.getDataProvider(dictionaryCode);
 	}

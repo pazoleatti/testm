@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Сервис возвращающий список элементов справочника и общее количество записей
- * в справочнике.
+ * Хандлер для получения значений строкового справочника.
  *
- * @author Eugene Stetsenko
+ * @see DictionaryHandler
+ * @author Vitalii Samolovskikh
  */
 @Service
 public class StringDictionaryHandler extends DictionaryHandler<StringDictionaryAction, String> {
@@ -28,6 +28,7 @@ public class StringDictionaryHandler extends DictionaryHandler<StringDictionaryA
 		super(StringDictionaryAction.class);
 	}
 
+	@Override
 	protected DictionaryDataProvider<String> getDictionaryDataProvider(String dictionaryCode) {
 		return dictionaryManager.getDataProvider(dictionaryCode);
 	}

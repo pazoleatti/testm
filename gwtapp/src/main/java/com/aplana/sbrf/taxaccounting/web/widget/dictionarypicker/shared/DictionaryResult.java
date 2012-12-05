@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
+ * Результат выполнения действия по получению значений справочника. Для всех событий справочников.
+ * Содержит список значений справочника и количество значений справочника, удовлетворяющих условиям фильтрации.
+ *
  * @author Vitalii Samolovskikh
  */
 public class DictionaryResult<ValueType extends Serializable> implements Result {

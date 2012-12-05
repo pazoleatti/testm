@@ -15,10 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Базовый класс хандлера для получения значений справочника.
+ *
+ * @param <A> действие
+ * @param <T> тип значения справочника
  * @author Vitalii Samolovskikh
  */
 public abstract class DictionaryHandler<A extends DictionaryAction<T>, T extends Serializable>
 		extends AbstractActionHandler<A, DictionaryResult<T>> {
+	@SuppressWarnings("UnusedDeclaration")
 	private final Log log = LogFactory.getLog(DictionaryHandler.class);
 
 	public DictionaryHandler(Class<A> actionType) {
@@ -27,36 +32,38 @@ public abstract class DictionaryHandler<A extends DictionaryAction<T>, T extends
 
 	@Override
 	public DictionaryResult<T> execute(A action, ExecutionContext context) throws ActionException {
-		try {
-			DictionaryDataProvider<T> dictionaryDataProvider = getDictionaryDataProvider(action.getDictionaryCode());
+		DictionaryDataProvider<T> dictionaryDataProvider = getDictionaryDataProvider(action.getDictionaryCode());
 
-			List<DictionaryItem<T>> items;
-			if (action.getSearchPattern() != null && !action.getSearchPattern().isEmpty()) {
-				items = dictionaryDataProvider.getValues(action.getSearchPattern());
-			} else {
-				items = dictionaryDataProvider.getValues();
-			}
-
-			DictionaryResult<T> result = new DictionaryResult<T>();
-			int begin = action.getOffset();
-			int end = action.getOffset() + action.getMax();
-			int size = items.size();
-			if (begin<size && (begin>0 || end < size)) {
-				end = Math.min(end, size);
-				result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(items.subList(begin, end)));
-			} else if(begin>size){
-				result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(0));
-			} else {
-				result.setDictionaryItems(items);
-			}
-			result.setSize(size);
-			return result;
-		} catch (Throwable e) {
-			log.error("Error!", e);
-			throw new ActionException(e);
+		List<DictionaryItem<T>> items;
+		if (action.getSearchPattern() != null && !action.getSearchPattern().isEmpty()) {
+			items = dictionaryDataProvider.getValues(action.getSearchPattern());
+		} else {
+			items = dictionaryDataProvider.getValues();
 		}
+
+		DictionaryResult<T> result = new DictionaryResult<T>();
+		int begin = action.getOffset();
+		int end = action.getOffset() + action.getMax();
+		int size = items.size();
+		if (begin < size && (begin > 0 || end < size)) {
+			end = Math.min(end, size);
+			result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(items.subList(begin, end)));
+		} else if (begin > size) {
+			result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(0));
+		} else {
+			result.setDictionaryItems(items);
+		}
+		result.setSize(size);
+		return result;
 	}
 
+	/**
+	 * Источники данных для справочников различных типов разные. Поэтому, получение источника данных для справчоника
+	 * осуществляется в дочерних классах.
+	 *
+	 * @param dictionaryCode код справочника
+	 * @return источник данных справочника
+	 */
 	protected abstract DictionaryDataProvider<T> getDictionaryDataProvider(String dictionaryCode);
 
 	@Override
