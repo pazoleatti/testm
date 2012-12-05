@@ -4,11 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -102,6 +104,17 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public int getActiveFormTemplateId(int formTypeId) {
-		throw new UnsupportedOperationException("not implemented");
+		JdbcTemplate jt = getJdbcTemplate();
+		try {
+			FormTemplate form =jt.queryForObject(
+					"select * from form where type_id = ?",
+					new Object[]{formTypeId},
+					new int[]{Types.NUMERIC}, 
+					new FormMapper(false)
+					);
+			return form.getId();
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException("Для данного типа найдено не единственный шаблон налоговой формы.");
+		}
 	}
 }
