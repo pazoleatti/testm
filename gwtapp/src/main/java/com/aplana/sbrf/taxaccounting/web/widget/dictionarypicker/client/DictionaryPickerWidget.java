@@ -147,13 +147,13 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	public void setValue(ValueType value, boolean b) {
 		this.value = value;
 		txtFind.setValue(valueToString(value));
+		selectionModel.clear();
 		if (b) {
 			ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
 		}
 	}
 
 	public void init() {
-		selectionModel.clear();
 		txtFind.setFocus(true);
 	}
 }
