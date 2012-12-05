@@ -100,7 +100,7 @@ public class FormDataPresenter extends
 						}
 
 					});
-		} catch (Error e) {
+		} catch (Exception e) {
 			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
 		}
 	}
