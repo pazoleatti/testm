@@ -245,14 +245,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		);		
 	}
 
-	@Override
-	public List<FormData> getAll() {
-		return getJdbcTemplate().query(
-			"select * from form_data",
-			new FormDataRowMapper(formTemplateDao)
-		);		
-	}
-
     @Override
 	public List<Long> listFormDataIdByType(int typeId) {
 		return getJdbcTemplate().queryForList(
