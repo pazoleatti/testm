@@ -38,16 +38,8 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
 
 			// Перед сохранением формы всегда делаем её пересчет.
 			formDataService.doCalc(logger, currentUser.getId(), formData);
-
-			// И если нет ошибок
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-				// Сохраняем форму.
-				long formDataId = formDataService.saveFormData(currentUser.getId(), formData);
-				logger.info("Данные успешно записаны, идентификтор: %d", formDataId);
-            } else {
-                logger.warn("Данные формы не сохранены, так как обнаружены ошибки");
-            }
-
+			formDataService.saveFormData(currentUser.getId(), formData);
+			logger.info("Данные успешно записаны");
 			SaveFormDataResult result = new SaveFormDataResult();
 			result.setFormData(formData);
             result.setLogEntries(logger.getEntries());

@@ -169,6 +169,7 @@ public class FormDataPresenter extends
 					public void onReqSuccess(RecalculateFormDataResult result) {
 						formData = result.getFormData();
 						getView().setRowsData(formData.getDataRows());
+						getView().setLogMessages(result.getLogEntries());
 						super.onReqSuccess(result);
 					}
 				});
