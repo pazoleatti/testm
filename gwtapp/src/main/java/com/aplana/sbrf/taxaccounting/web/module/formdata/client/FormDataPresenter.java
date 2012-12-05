@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
@@ -98,7 +97,6 @@ public class FormDataPresenter extends
 
 							super.onReqSuccess(result);
 						}
-
 					});
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
@@ -122,9 +120,14 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCancelClicked() {
-		placeManager.revealPlace(new PlaceRequest(
-				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
-				String.valueOf(TaxType.TRANSPORT)));
+		if (readOnlyMode || (formData.getId() == null)) {
+			goToFormDataList();
+		} else {
+			boolean isOK = Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+			if (isOK) {
+				revealForm(true);
+			}
+		}
 	}
 
 	@Override
@@ -181,8 +184,7 @@ public class FormDataPresenter extends
 					new AbstractCallback<DeleteFormDataResult>() {
 						@Override
 						public void onReqSuccess(DeleteFormDataResult result) {
-							placeManager.revealPlace(new PlaceRequest(
-									FormDataListNameTokens.FORM_DATA_LIST));
+							goToFormDataList();
 						}
 					});
 		}
@@ -201,6 +203,12 @@ public class FormDataPresenter extends
 				super.onReqSuccess(result);
 			}
 		});
+	}
+	
+	private void goToFormDataList() {
+		placeManager.revealPlace(new PlaceRequest(
+				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
+						String.valueOf(formData.getFormType().getTaxType())));
 	}
 
 }

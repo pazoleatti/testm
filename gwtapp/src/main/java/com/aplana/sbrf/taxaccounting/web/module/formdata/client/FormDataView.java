@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.CustomHeaderBuilder;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.CustomHeaderBuilder;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
