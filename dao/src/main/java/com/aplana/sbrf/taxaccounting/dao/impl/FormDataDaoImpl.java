@@ -1,25 +1,38 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataRowMapper;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 @Repository
 @Transactional(readOnly=true)
@@ -39,16 +52,47 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 	}
 	
+	private static class RowMapperResult {
+		FormData formData;
+		FormTemplate formTemplate;
+	}
+	
+	private class FormDataRowMapper implements RowMapper<RowMapperResult> {
+		public RowMapperResult mapRow(ResultSet rs, int index) throws SQLException {
+			RowMapperResult result = new RowMapperResult();
+
+			int formTemplateId = rs.getInt("form_id");
+			FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+			
+			FormData fd = new FormData();
+			fd.initFormTemplateParams(formTemplate);
+			fd.setId(rs.getLong("id"));
+			fd.setDepartmentId(rs.getInt("department_id"));
+			fd.setState(WorkflowState.fromId(rs.getInt("state")));
+			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
+			fd.setReportPeriodId(rs.getInt("report_period_id"));
+			
+			result.formData = fd;
+			result.formTemplate = formTemplate;			
+			return result;
+		}
+
+	}
+	
+	
 	public FormData get(final long formDataId) {
 		JdbcTemplate jt = getJdbcTemplate();
 		final FormData formData;
+		final FormTemplate formTemplate;
 		try {
-			formData = jt.queryForObject(
+			RowMapperResult res = jt.queryForObject(
 				"select * from form_data where id = ?",
 				new Object[] { formDataId },
 				new int[] { Types.NUMERIC },
-				new FormDataRowMapper(formTemplateDao)
+				new FormDataRowMapper()
 			);
+			formData = res.formData;
+			formTemplate = res.formTemplate;
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
 		}
@@ -68,11 +112,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					row.setOrder(rs.getInt("ord"));
 				}
 			}
-		);
-
-		readValues("numeric_value", rowIdToAlias, formData);
-		readValues("string_value", rowIdToAlias, formData);
-		readValues("date_value", rowIdToAlias, formData);
+		);				
+		readValues("numeric_value", formTemplate, rowIdToAlias, formData);
+		readValues("string_value", formTemplate, rowIdToAlias, formData);
+		readValues("date_value", formTemplate, rowIdToAlias, formData);
 		return formData;
 	}
 	
@@ -89,8 +132,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 	
 	
-	private void readValues(String tableName, final Map<Long, DataRow> rowMap, final FormData formData) {
-		final FormTemplate form = formTemplateDao.get(formData.getFormTemplateId());
+	private void readValues(String tableName, final FormTemplate formTemplate, final Map<Long, DataRow> rowMap, final FormData formData) {
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 			new Object[] { formData.getId() },
@@ -102,7 +144,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					Object value = rs.getObject("value");
 					if (value != null) {
 						DataRow row = rowMap.get(rowId);
-						Column col = form.getColumn(columnId);
+						Column col = formTemplate.getColumn(columnId);
 						String columnAlias = col.getAlias();
 						// TODO: думаю, стоит зарефакторить
 						if (value instanceof java.sql.Date) {
