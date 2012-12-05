@@ -31,6 +31,9 @@ import java.io.Serializable;
  */
 public abstract class DictionaryPickerWidget<ValueType extends Serializable> extends Composite
 		implements HasValue<ValueType> {
+
+	private final SingleSelectionModel<DictionaryItem<ValueType>> selectionModel;
+
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
 	}
 
@@ -52,17 +55,15 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		// Table
 		cellTable.addColumn(new NameColumn(), "Имя");
 		cellTable.addColumn(createValueColumn(), "Значение");
-		final SingleSelectionModel<DictionaryItem<ValueType>> sm = new SingleSelectionModel<DictionaryItem<ValueType>>();
-		cellTable.setSelectionModel(sm);
-		sm.addSelectionChangeHandler(
+		selectionModel = new SingleSelectionModel<DictionaryItem<ValueType>>();
+		cellTable.setSelectionModel(selectionModel);
+		selectionModel.addSelectionChangeHandler(
 				new SelectionChangeEvent.Handler() {
 					@Override
 					public void onSelectionChange(SelectionChangeEvent event) {
-						DictionaryItem<ValueType> selected = sm.getSelectedObject();
-						if(selected!=null){
+						DictionaryItem<ValueType> selected = selectionModel.getSelectedObject();
+						if (selected != null) {
 							setValue(selected.getValue(), true);
-						}else{
-							setValue(null, true);
 						}
 					}
 				}
@@ -146,15 +147,13 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	public void setValue(ValueType value, boolean b) {
 		this.value = value;
 		txtFind.setValue(valueToString(value));
-		find();
 		if (b) {
 			ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
 		}
 	}
 
-	@Override
-	protected void onAttach() {
-		super.onAttach();
+	public void init() {
+		selectionModel.clear();
 		txtFind.setFocus(true);
 	}
 }

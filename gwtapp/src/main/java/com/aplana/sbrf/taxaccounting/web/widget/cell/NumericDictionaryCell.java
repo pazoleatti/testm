@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.FormatUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.NumericDictionaryWidget;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 import java.math.BigDecimal;
 
@@ -19,28 +18,11 @@ public class NumericDictionaryCell extends DictionaryCell<BigDecimal> {
 		return new NumericDictionaryWidget(dictionaryCode);
 	}
 
-	@Override
-	public void render(Context context, BigDecimal value, SafeHtmlBuilder sb) {
-		// Get the view data.
-		Object key = context.getKey();
-		String viewData = getViewData(key);
-		if (viewData != null && viewData.equals(value)) {
-			clearViewData(key);
-			viewData = null;
-		}
-
-		String s = null;
-		if (viewData != null) {
-			s = viewData;
-		} else if (value != null) {
-			s = NumberFormat.getDecimalFormat().format(value);
-		}
-		if (s != null) {
-			sb.append(renderer.render(s));
+	protected String valueToString(BigDecimal value) {
+		if(value!=null){
+			return FormatUtils.getSimpleNumberFormat().format(value);
 		} else {
-			// nbsp win(alt+255)
-			sb.append(renderer.render(" "));
+			return "\u00A0";
 		}
-
 	}
 }
