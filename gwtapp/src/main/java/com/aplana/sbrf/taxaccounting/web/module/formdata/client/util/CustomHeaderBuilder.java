@@ -19,7 +19,7 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		boolean tableHasGroupHeader = false;
     	
 		for (int i=0; i<getTable().getColumnCount(); i++) {
-			if (((DataRowColumn)getTable().getColumn(i)).getRowGroup() != null) {
+			if (((DataRowColumn<?>)getTable().getColumn(i)).getRowGroup() != null) {
 				tableHasGroupHeader = true;
 				break;
 			}
@@ -28,18 +28,18 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		// Таблица имеет дополнительный заголовок
 		if (tableHasGroupHeader) {
 			for(int i=0; i<getTable().getColumnCount(); i++) {
-				if (((DataRowColumn)getTable().getColumn(i)).getRowGroup() == null) {
+				if (((DataRowColumn<?>)getTable().getColumn(i)).getRowGroup() == null) {
 					oneCell(tr, getTable().getHeader(i).getKey().toString());
 				} else {
 					int j=i+1;
 					for (; j<getTable().getColumnCount(); j++) {
-						if (!((DataRowColumn)getTable().getColumn(i)).getRowGroup().equals(
-								((DataRowColumn)getTable().getColumn(j)).getRowGroup())) {
+						if (!((DataRowColumn<?>)getTable().getColumn(i)).getRowGroup().equals(
+								((DataRowColumn<?>)getTable().getColumn(j)).getRowGroup())) {
 							break;
 						}
 					}
-					groupColumns(tr, j-i, ((DataRowColumn)getTable().getColumn(i)).getRowGroup());
-					i+=(j-i)-1;
+					groupColumns(tr, j-i, ((DataRowColumn<?>)getTable().getColumn(i)).getRowGroup());
+					i=j-1;
 				}
 			}
 			tr = startRow();
@@ -53,7 +53,7 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
     }
 
 	private void buildHeader(TableRowBuilder out, Header<?> header, Column<DataRow, ?> column, boolean haveParentHeader) {
-		if (((DataRowColumn)column).getRowGroup() != null || !haveParentHeader) {
+		if (((DataRowColumn<?>)column).getRowGroup() != null || !haveParentHeader) {
 			Style style = getTable().getResources().style();
 			StringBuilder classesBuilder = new StringBuilder(style.header());
 	
