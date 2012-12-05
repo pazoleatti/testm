@@ -142,7 +142,7 @@ public class FormDataListPresenter extends
 				.with(FormDataPresenter.FORM_DATA_ID,
 						String.valueOf(Long.MAX_VALUE))
 				.with(FormDataPresenter.FORM_DATA_KIND_ID,
-						String.valueOf(filterFormData.getFormDataKind()))
+						String.valueOf(filterFormData.getFormDataKind().getId()))
 				.with(FormDataPresenter.DEPARTMENT_ID,
 						String.valueOf(filterFormData.getDepartmentId()))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
