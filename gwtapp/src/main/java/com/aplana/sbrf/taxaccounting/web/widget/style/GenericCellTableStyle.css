@@ -42,7 +42,7 @@
 }
 
 .cellTableCell {
-    font-weight: bold;
+    font-weight: normal;
 	overflow: hidden;
 	font-size: 11px;
 	height: 10px;
