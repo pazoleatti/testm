@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormD
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -115,7 +116,9 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onPrintClicked() {
-		Window.alert("В разработке");
+		Window.open(GWT.getHostPageBaseURL()
+                + "download/downloadController/" + formData.getId(), "", "");
+		//Window.alert("В разработке");
 	}
 
 	@Override
