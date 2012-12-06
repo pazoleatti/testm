@@ -1,5 +1,18 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
@@ -8,19 +21,6 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
@@ -58,7 +58,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	//@Cacheable("Form")
+	//@Cacheable("FormTemplate")
 	// TODO: пока не будет версии кеша, нормально работающей на кластере
 	public FormTemplate get(int formId) {
 		logger.info("Fetching FormTemplate with id = " + formId);
@@ -73,7 +73,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
 	@Transactional(readOnly = false)
-	@CacheEvict(value = "Form", key = "#form.id")
+	//@CacheEvict(value = "FormTemplate", key = "#form.id")
+	// TODO: пока не будет версии кеша, нормально работающей на кластере	
 	public int save(final FormTemplate form) {
 		final int formTemplateId = form.getId().intValue();
 
