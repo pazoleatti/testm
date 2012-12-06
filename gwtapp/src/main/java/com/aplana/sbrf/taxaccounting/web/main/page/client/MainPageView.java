@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -28,6 +29,12 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	Element loadingMessage;
+	
+	@UiField
+	HasText title;
+	
+	@UiField
+	HasText desc;
 
 	@Inject
 	public MainPageView(Binder binder) {
@@ -77,5 +84,15 @@ public class MainPageView extends ViewImpl implements MyView {
 	public void showLoading(boolean locked) {
 		loadingMessage.getStyle().setVisibility(
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
+	}
+
+	@Override
+	public void setTitle(String text) {
+		title.setText(text);
+	}
+
+	@Override
+	public void setDesc(String text) {
+		desc.setText(text);
 	}
 }

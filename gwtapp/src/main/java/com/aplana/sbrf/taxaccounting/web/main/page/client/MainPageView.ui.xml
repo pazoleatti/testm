@@ -5,7 +5,6 @@
 	<ui:style>
 		.panel {
 			padding: 10px;
-
 		}
 		
 		.panelContent {
@@ -42,10 +41,11 @@
 		<g:north size="90">
 			<g:HTMLPanel styleName="{style.panel}">
 				<h2>
-					<g:Label text="Название презентора" />
+					<g:Label text="Название презентора" ui:field="title" />
 				</h2>
 				<h3>
-					<g:Label text="Длинный комментарий для этого презентора" />
+					<g:Label text="Длинный комментарий для этого презентора"
+						ui:field="desc" />
 				</h3>
 			</g:HTMLPanel>
 		</g:north>
@@ -55,10 +55,9 @@
 				<g:FlowPanel ui:field="mainContentPanel" height="100%" />
 			</g:HTMLPanel>
 		</g:center>
-
-		<g:south size='20'>
-			<g:HTML>FOOTER</g:HTML>
-		</g:south>
+		
+		<!-- <g:south size='20'> <g:HTML>FOOTER</g:HTML> </g:south> -->
+		
 	</g:DockLayoutPanel>
 
 

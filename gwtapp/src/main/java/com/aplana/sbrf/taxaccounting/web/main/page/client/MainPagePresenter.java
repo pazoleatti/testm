@@ -12,6 +12,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
@@ -31,6 +32,8 @@ public class MainPagePresenter extends
 	 */
 	public interface MyView extends View {
 		void showLoading(boolean visibile);
+		void setTitle(String text);
+		void setDesc(String text);
 	}
 
 	/**
@@ -48,14 +51,18 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
-
+	
+	@SuppressWarnings("unused")
+	private final PlaceManager placeManager;
+	
 	@Inject
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
-			MainMenuPresenter mainMenuPresenter) {
+			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
+		this.placeManager = placeManager;
 	}
 
 	@Override
