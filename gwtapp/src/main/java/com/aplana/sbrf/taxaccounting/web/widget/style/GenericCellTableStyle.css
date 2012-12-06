@@ -5,13 +5,12 @@
  */
 .cellTableWidget {
 	background-color: #a9a5a2;
-	border: none !important;
-	border-top: 1px solid #a9a5a2 !important;
-	border-left: 1px solid #a9a5a2 !important;
+	border: none;
 }
 
 .cellTableFirstColumn {
-    border-left: 1px solid #a9a5a2 !important;
+    border-left: 1px solid #cfcfcf !important;
+    border-bottom: 1px solid #cfcfcf;
 }
 
 .cellTableLastColumn {
@@ -30,12 +29,13 @@
 .cellTableHeader {
 	font-size: 12px;
 	font-weight: bold;
-	height: 4em;
+	height: 3em;
 	padding: 0 2px;
 	text-shadow: none;
-	border: none !important;
-	border-bottom: 1px solid #808080 !important;
-	border-right: 1px solid #808080 !important;
+	border: none;
+	border-bottom: 1px solid #828282;
+	border-right: 1px solid #828282;
+    border-top: 1px solid #828282;
 	color: white;
 	background-color: #949494;
 	text-align: left;
@@ -48,9 +48,10 @@
 	height: 10px;
 	padding: 2px;
 	color: #222222;
-	border: none !important;
-	border-bottom: 1px solid #cfcfcf !important;
-    border-right: 1px solid #cfcfcf !important;
+	border-top: none ;
+    border-left: none;
+	border-bottom: 1px solid #cfcfcf;
+    border-right: 1px solid #cfcfcf;
 }
 
 .cellTableFirstColumnFooter {
@@ -58,7 +59,7 @@
 }
 
 .cellTableFirstColumnHeader {
-	
+    border-left: 1px solid #828282 !important;
 }
 
 .cellTableLastColumnFooter {

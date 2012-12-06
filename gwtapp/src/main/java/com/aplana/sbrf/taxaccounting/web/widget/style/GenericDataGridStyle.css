@@ -4,14 +4,13 @@
  * Override default cell css from file com/google/gwt/user/cellview/client/DataGrid.css 
  */
 .dataGridWidget {
-	background-color: #a9a5a2;
-	border: none !important;
-	border-top: 1px solid #a9a5a2 !important;
-	border-left: 1px solid #a9a5a2 !important;
+    background-color: #a9a5a2;
+    border: none;
 }
 
 .dataGridFirstColumn {
-    border-left: 1px solid #a9a5a2 !important;
+    border-left: 1px solid #cfcfcf !important;
+    border-bottom: 1px solid #cfcfcf;
 }
 
 .dataGridLastColumn {
@@ -34,11 +33,12 @@
 	height: 4em;
 	padding: 0 2px;
 	text-shadow: none;
-	border: none !important;
-	border-bottom: 1px solid #808080 !important;
-    border-right: 1px solid #808080 !important;
 	color: white;
 	background-color: #949494;
+    border: none;
+    border-bottom: 1px solid #828282;
+    border-right: 1px solid #828282;
+    /*border-top: 1px solid #828282;*/
 	text-align: left;
     word-wrap: break-word;
 }
@@ -50,9 +50,10 @@
 	height: 10px;
 	padding: 2px;
 	color: #222222;
-	border: none !important;
-	border-bottom: 1px solid #cfcfcf !important;
-    border-right: 1px solid #cfcfcf !important;
+    border-top: none ;
+    border-left: none;
+    border-bottom: 1px solid #cfcfcf;
+    border-right: 1px solid #cfcfcf;
 }
 
 .dataGridCell input {
@@ -64,7 +65,7 @@
 }
 
 .dataGridFirstColumnHeader {
-	
+    border-left: 1px solid #828282 !important;
 }
 
 .dataGridLastColumnFooter {
