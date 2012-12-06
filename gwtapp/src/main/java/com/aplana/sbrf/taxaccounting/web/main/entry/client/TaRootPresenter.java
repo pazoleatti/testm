@@ -23,7 +23,6 @@ public class TaRootPresenter extends RootPresenter {
 			lockCount--;
 		}
 		
-		System.out.println(lockInteractionEvent.getSource() + " : " + lockInteractionEvent.shouldLock()  + " : " + lockCount);
 		if (lockCount <= 0 ){
 			lockCount = 0;
 			ScreenLockEvent.fire(this, false);
