@@ -7,7 +7,6 @@
 	<inherits name='com.google.gwt.inject.Inject' />
 
 	<!-- TaxAccounting Modules -->
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.about.AboutModule" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.admin.Admin" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule" />
 	<inherits

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPageView;
-import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
@@ -44,7 +43,6 @@ public class ClientModule extends AbstractPresenterModule {
             MainPageView.class, MainPagePresenter.MyProxy.class);
     
     install(new HomeModule());
-    install(new AboutModule());
     install(new FormDataListClientModule());
     install(new FormDataModule());
     install(new SignInClientModule());

@@ -29,14 +29,7 @@ public class HomePageView extends ViewImpl implements MyView {
 
 	@Override
 	public void setInSlot(Object slot, Widget content) {
-		if (slot == HomePagePresenter.TYPE_testPresenter) {
-			test.clear();
-			if (content != null) {
-				test.add(content);
-			}
-		} else {
-			super.setInSlot(slot, content);
-		}
+		super.setInSlot(slot, content);
 	}
 
 }
