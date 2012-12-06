@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -105,16 +106,19 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	@Override
 	public int getActiveFormTemplateId(int formTypeId) {
 		JdbcTemplate jt = getJdbcTemplate();
+		FormTemplate form;
 		try {
-			FormTemplate form =jt.queryForObject(
-					"select * from form where type_id = ?",
-					new Object[]{formTypeId},
-					new int[]{Types.NUMERIC}, 
+			form =jt.queryForObject(
+					"select * from form where type_id = ? and is_active = ?",
+					new Object[]{formTypeId,1},
+					new int[]{Types.NUMERIC,Types.NUMERIC}, 
 					new FormMapper(false)
 					);
 			return form.getId();
-		} catch (IncorrectResultSizeDataAccessException e) {
-			throw new DaoException("Для данного типа найдено не единственный шаблон налоговой формы.");
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Для данного вида налоговой формы %d не найдено активного шаблона налоговой формы.",formTypeId);
+		}catch(IncorrectResultSizeDataAccessException e){
+			throw new DaoException("Для даного вида налоговой формы %d найдено несколько активных шаблонов налоговой формы.",formTypeId);
 		}
 	}
 }
