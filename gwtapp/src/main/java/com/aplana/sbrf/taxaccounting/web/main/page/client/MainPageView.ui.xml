@@ -38,7 +38,7 @@
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="90">
+		<g:north size="0">
 			<g:HTMLPanel styleName="{style.panel}">
 				<h2>
 					<g:Label text="Название презентора" ui:field="title" />
