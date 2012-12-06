@@ -11,7 +11,7 @@
 }
 
 .cellTableFirstColumn {
-	
+    border-left: 1px solid #a9a5a2 !important;
 }
 
 .cellTableLastColumn {
@@ -29,27 +29,28 @@
 
 .cellTableHeader {
 	font-size: 12px;
-	font-weight: normal;
+	font-weight: bold;
 	height: 4em;
 	padding: 0 2px;
 	text-shadow: none;
 	border: none !important;
-	border-bottom: 1px solid #a9a5a2 !important;
-	border-right: 1px solid #a9a5a2 !important;
-	color: #222222;
-	background-color: #91d466;
+	border-bottom: 1px solid #808080 !important;
+	border-right: 1px solid #808080 !important;
+	color: white;
+	background-color: #949494;
 	text-align: left;
 }
 
 .cellTableCell {
+    font-weight: bold;
 	overflow: hidden;
 	font-size: 11px;
 	height: 10px;
 	padding: 2px;
 	color: #222222;
 	border: none !important;
-	border-bottom: 1px solid #a9a5a2 !important;
-    border-right: 1px solid #a9a5a2 !important;
+	border-bottom: 1px solid #cfcfcf !important;
+    border-right: 1px solid #cfcfcf !important;
 }
 
 .cellTableFirstColumnFooter {
