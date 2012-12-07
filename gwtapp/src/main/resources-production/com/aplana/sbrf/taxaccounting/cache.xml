@@ -14,10 +14,10 @@
  	<bean id="cacheManager" class="com.aplana.taxaccounting.support.dynacache.DynacacheCacheManager">
 		<property name="caches">
 			<map>
-				<entry key="FormType" value="services/cache/aplana/taxaccounting/FormType"/>
-				<entry key="FormTemplate" value="services/cache/aplana/taxaccounting/FormTemplate"/>
-				<entry key="Department" value="services/cache/aplana/taxaccounting/Department"/>
-				<entry key="User" value="services/cache/aplana/taxaccounting/User"/>
+				<entry key="FormType" value="java:comp/env/services/cache/aplana/taxaccounting/FormType"/>
+				<entry key="FormTemplate" value="java:comp/env/services/cache/aplana/taxaccounting/FormTemplate"/>
+				<entry key="Department" value="java:comp/env/services/cache/aplana/taxaccounting/Department"/>
+				<entry key="User" value="java:comp/env/services/cache/aplana/taxaccounting/User"/>
 			</map>
 		</property>
 	</bean>

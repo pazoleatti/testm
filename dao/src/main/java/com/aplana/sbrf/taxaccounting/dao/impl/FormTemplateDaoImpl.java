@@ -6,6 +6,8 @@ import java.sql.Types;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,8 +60,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	//@Cacheable("FormTemplate")
-	// TODO: пока не будет версии кеша, нормально работающей на кластере
+	@Cacheable("FormTemplate")
 	public FormTemplate get(int formId) {
 		logger.info("Fetching FormTemplate with id = " + formId);
 		JdbcTemplate jt = getJdbcTemplate();
@@ -73,8 +74,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
 	@Transactional(readOnly = false)
-	//@CacheEvict(value = "FormTemplate", key = "#form.id")
-	// TODO: пока не будет версии кеша, нормально работающей на кластере	
+	@CacheEvict(value = "FormTemplate", key = "#form.id")
 	public int save(final FormTemplate form) {
 		final int formTemplateId = form.getId().intValue();
 

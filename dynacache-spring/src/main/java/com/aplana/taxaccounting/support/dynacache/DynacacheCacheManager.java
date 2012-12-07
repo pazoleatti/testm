@@ -36,6 +36,9 @@ public class DynacacheCacheManager extends AbstractCacheManager {
 			InitialContext ic = new InitialContext();
 			for (Map.Entry<String, String> entry: caches.entrySet()) {
 				DistributedObjectCache cache = (DistributedObjectCache)ic.lookup(entry.getValue());
+				// При создании менеджера (оно происходит при старте приложения),
+				// очищаем кэши, так как в них могли остаться данные от предыдущей версии приложения
+				cache.clear();
 				result.add(new DynacacheCache(entry.getKey(), cache));
 			}
 		} catch (NamingException e) {

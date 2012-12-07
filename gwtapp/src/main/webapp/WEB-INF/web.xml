@@ -68,11 +68,44 @@
 		<welcome-file>Main.html</welcome-file>
 	</welcome-file-list>
 
-	<resource-ref> <description>TaxAccounting DataSource Reference</description> 
+	<resource-ref>
+		<description>TaxAccounting DataSource Reference</description> 
 		<res-ref-name>jdbc/TaxAccDS</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type> 
 		<res-auth>Container</res-auth>
 	</resource-ref> 
+	
+	<resource-ref>
+		<description>TaxAccounting FormType Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/FormType</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+	
+	<resource-ref>
+		<description>TaxAccounting FormTemplate Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/FormTemplate</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+	
+	<resource-ref>
+		<description>TaxAccounting Department Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/Department</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>	
+
+	<resource-ref>
+		<description>TaxAccounting User Dynacache Reference</description>
+		<res-ref-name>services/cache/aplana/taxaccounting/User</res-ref-name>
+		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>	
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
