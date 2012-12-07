@@ -9,7 +9,7 @@
 			<g:TextBox ui:field="txtFind" text="" width="100%"/>
 		</g:cell>
 		<g:cell height="300px" width="100%">
-				<style:GenericCellTable width="100%" height="100%" ui:field="cellTable"/>
+				<style:GenericCellTable width="100%" height="auto" ui:field="cellTable"/>
 		</g:cell>
 		<g:cell>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
