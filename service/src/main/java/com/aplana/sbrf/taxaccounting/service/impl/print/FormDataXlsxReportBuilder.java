@@ -118,8 +118,9 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	private void createDataForTable(){
-		Row row = sheet.createRow(rowNumber++);
+		
 		for (DataRow dataRow : data.getDataRows()) {
+			Row row = sheet.createRow(rowNumber++);
 			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
