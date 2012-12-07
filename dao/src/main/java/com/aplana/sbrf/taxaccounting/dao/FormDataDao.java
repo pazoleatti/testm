@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 
 import java.util.List;
 
@@ -36,4 +37,14 @@ public interface FormDataDao {
 	 * @param formDataId идентификатор записи
 	 */
 	void delete(long formDataId);
+
+	/**
+	 * Ищет налоговую форму по заданным параметрам.
+	 *
+	 * @param formTypeId идентификатор {@link com.aplana.sbrf.taxaccounting.model.FormType вида формы}.
+	 * @param kind тип формы
+	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
+	 * @param periodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 */
+	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int periodId);
 }

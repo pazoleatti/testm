@@ -71,8 +71,10 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		// predefined script variables
 		engine.put("logger", logger);
 		engine.put("formData", formData);
-		engine.put("user", user);
-		engine.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
+		if(user!=null){
+			engine.put("user", user);
+			engine.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
+		}
 		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
 
 		// execute scripts

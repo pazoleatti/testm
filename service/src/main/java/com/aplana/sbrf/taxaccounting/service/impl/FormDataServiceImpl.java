@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,31 +74,36 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind) {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind, departmentId)) {
-			FormTemplate form = formTemplateDao.get(formTemplateId);
-			FormData result = new FormData(form);
-
-			result.setState(WorkflowState.CREATED);
-			result.setDepartmentId(departmentId);
-			// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
-			// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
-			result.setKind(kind);
-
-			for (DataRow predefinedRow : form.getRows()) {
-				DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
-				for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
-					dataRow.put(entry.getKey(), entry.getValue());
-				}
-			}
-
-			// Execute scripts for the form event CREATE
-			formDataScriptingService.executeScripts(userDao.getUser(userId), result, FormDataEvent.CREATE, logger);
-			return result;
+			return createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind);
 		} else {
 			throw new AccessDeniedException(
 					"Can't create form: userId=%d, formTemplateId=%d, departmentId=%d, kind=%s",
 					userId, formTemplateId, departmentId, kind.name()
 			);
 		}
+	}
+
+	@Override
+	public FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind) {
+		FormTemplate form = formTemplateDao.get(formTemplateId);
+		FormData result = new FormData(form);
+
+		result.setState(WorkflowState.CREATED);
+		result.setDepartmentId(departmentId);
+		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
+		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
+		result.setKind(kind);
+
+		for (DataRow predefinedRow : form.getRows()) {
+			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
+			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
+				dataRow.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		// Execute scripts for the form event CREATE
+		formDataScriptingService.executeScripts(user, result, FormDataEvent.CREATE, logger);
+		return result;
 	}
 
 	/**

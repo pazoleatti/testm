@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
@@ -72,4 +73,6 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException
 	 */
 	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
+
+	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind);
 }

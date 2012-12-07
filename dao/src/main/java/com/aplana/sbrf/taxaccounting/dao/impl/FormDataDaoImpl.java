@@ -44,26 +44,26 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		private T value;
 		private String rowAlias;
 		private int columnId;
-		
+
 		public ValueRecord(T value, String rowAlias, int columnId) {
 			this.value = value;
 			this.rowAlias = rowAlias;
 			this.columnId = columnId;
 		}
 	}
-	
+
 	private static class RowMapperResult {
 		FormData formData;
 		FormTemplate formTemplate;
 	}
-	
+
 	private class FormDataRowMapper implements RowMapper<RowMapperResult> {
 		public RowMapperResult mapRow(ResultSet rs, int index) throws SQLException {
 			RowMapperResult result = new RowMapperResult();
 
 			int formTemplateId = rs.getInt("form_id");
 			FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-			
+
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
@@ -71,15 +71,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
-			
+
 			result.formData = fd;
-			result.formTemplate = formTemplate;			
+			result.formTemplate = formTemplate;
 			return result;
 		}
 
 	}
-	
-	
+
+
 	public FormData get(final long formDataId) {
 		JdbcTemplate jt = getJdbcTemplate();
 		final FormData formData;
@@ -96,7 +96,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
 		}
-		
+
 		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
 
 		jt.query(
@@ -112,14 +112,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					row.setOrder(rs.getInt("ord"));
 				}
 			}
-		);				
+		);
 		readValues("numeric_value", formTemplate, rowIdToAlias, formData);
 		readValues("string_value", formTemplate, rowIdToAlias, formData);
 		readValues("date_value", formTemplate, rowIdToAlias, formData);
 		return formData;
 	}
-	
-	
+
+
 	private boolean checkValueType(Object value, Class<? extends Column> columnType) {
 		// TODO: в будущем возможны спец-ячейки, тип которых отличается от типа столбца
 		if (value == null) {
@@ -130,8 +130,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				|| value instanceof Date && DateColumn.class.equals(columnType);
 		}
 	}
-	
-	
+
+
 	private void readValues(String tableName, final FormTemplate formTemplate, final Map<Long, DataRow> rowMap, final FormData formData) {
 		getJdbcTemplate().query(
 			"select * from " + tableName + " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
@@ -150,7 +150,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						if (value instanceof java.sql.Date) {
 							value = new java.util.Date(((java.sql.Date)value).getTime());
 						}
-						
+
 						boolean typeOk = checkValueType(value, col.getClass());
 						if (!typeOk) {
 							logger.warn("Cannot assign value '" + value + "'(" + value.getClass().getName() + ") to column '" + columnAlias + "'(" + col.getClass().getName() + ")");
@@ -169,26 +169,26 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getState() == null) {
 			throw new DaoException("Не указана стадия жизненного цикла");
 		}
-		
+
 		if (formData.getKind() == null) {
 			throw new DaoException("Не указан тип налоговой формы");
 		}
-		
+
 		if (formData.getDepartmentId() == null) {
 			throw new DaoException("Не указано подразделение, к которому относится налоговая форма");
 		}
-		
+
 		if (formData.getReportPeriodId() == null) {
 			throw new DaoException("Не указан идентификатор отчётного периода");
 		}
-		
+
 		Long formDataId;
 		JdbcTemplate jt = getJdbcTemplate();
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
 				"insert into form_data (id, form_id, department_id, kind, state, report_period_id) values (?, ?, ?, ?, ?, ?)",
-				formDataId, 
+				formDataId,
 				formData.getFormTemplateId(),
 				formData.getDepartmentId(),
 				formData.getKind().getId(),
@@ -209,7 +209,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		final List<ValueRecord<BigDecimal>> numericValues = new ArrayList<ValueRecord<BigDecimal>>();
 		final List<ValueRecord<String>> stringValues = new ArrayList<ValueRecord<String>>();
 		final List<ValueRecord<Date>> dateValues = new ArrayList<ValueRecord<Date>>();
-		
+
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -217,7 +217,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				String rowAlias = dr.getAlias();
 				ps.setString(1, rowAlias);
 				ps.setInt(2, dr.getOrder());
-				
+
 				for (Column col: formData.getFormColumns()) {
 					Object val = dr.get(col.getAlias());
 					if (val == null) {
@@ -236,7 +236,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				return dataRows.size();
 			}
 		};
-		
+
 		jt.batchUpdate("insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, " + formDataId + ", ?, ?)", bpss);
 		final Map<String, Long> rowsAliasToId = new HashMap<String, Long>(dataRows.size());
 		jt.query(
@@ -252,10 +252,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		insertValues("numeric_value", numericValues, rowsAliasToId);
 		insertValues("string_value", stringValues, rowsAliasToId);
 		insertValues("date_value", dateValues, rowsAliasToId);
-		
+
 		return formDataId;
 	}
-	
+
 	private <T> void insertValues(String tableName, final List<ValueRecord<T>> values, final Map<String, Long> rowsAliasToId) {
 		if (values.isEmpty()) {
 			return;
@@ -267,7 +267,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				ps.setInt(2, rec.columnId);
 				if (rec.value instanceof Date) {
 					java.sql.Date sqlDate = new java.sql.Date(((Date)rec.value).getTime());
-					ps.setDate(3, sqlDate);	
+					ps.setDate(3, sqlDate);
 				} else if (rec.value instanceof BigDecimal) {
 					// TODO: Добавить округление данных в соответствии с точностью, указанной в объекте Column
 					ps.setBigDecimal(3, (BigDecimal)rec.value);
@@ -284,7 +284,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		getJdbcTemplate().batchUpdate(
 			"insert into " + tableName + " (row_id, column_id, value) values (?, ?, ?)",
 			bpss
-		);		
+		);
 	}
 
     @Override
@@ -302,35 +302,58 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Transactional(readOnly = false)
 	public void delete(long formDataId) {
 		JdbcTemplate jt = getJdbcTemplate();
-		
+
 		Object[] params = { formDataId };
 		int[] types = { Types.NUMERIC };
-		
+
 		jt.update(
-			"delete from numeric_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
-			params, 
+			"delete from numeric_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
+			params,
 			types
 		);
 		jt.update(
-			"delete from string_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
-			params, 
+			"delete from string_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
+			params,
 			types
 		);
 		jt.update(
-			"delete from date_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)", 
-			params, 
+			"delete from date_value v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
+			params,
 			types
 		);
 		jt.update(
 			"delete from data_row where form_data_id = ?",
-			params, 
+			params,
 			types
 		);
 		jt.update(
 			"delete from form_data where id = ?",
-			params, 
+			params,
 			types
-		);		
+		);
 	}
 
+	/**
+	 * Ищет налоговую форму по заданным параметрам.
+	 *
+	 * @param formTypeId   идентификатор {@link com.aplana.sbrf.taxaccounting.model.FormType вида формы}.
+	 * @param kind         тип формы
+	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
+	 * @param periodId     идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 */
+	@Override
+	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int periodId) {
+		int formDataId = getJdbcTemplate().queryForInt(
+				"select fd.id from form_data fd join form f on fd.form_id=f.id " +
+						"where f.type_id=? and fd.kind=? and fd.department_id=? and fd.report_period_id=?",
+				new Object[]{formTypeId, kind.getId(), departmentId, periodId},
+				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
+		);
+
+		if (formDataId > 0) {
+			return get(formDataId);
+		} else {
+			return null;
+		}
+	}
 }
