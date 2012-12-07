@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
@@ -24,6 +22,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
@@ -124,9 +124,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLogMessages(List<LogEntry> logEntries) {
-		dockPanel.setWidgetHidden(logPanel, (logEntries==null || logEntries.isEmpty()) ? true : false);
-		
-		loggerList.setRowCount(logEntries.size());
+		dockPanel.setWidgetHidden(logPanel, (logEntries == null || logEntries.isEmpty()));
+		if (logEntries != null) {
+			loggerList.setRowCount(logEntries.size());
+		}
 		loggerList.setRowData(logEntries);
 		loggerList.redraw();
 	}
@@ -217,7 +218,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setWorkflowButtons(List<WorkflowMove> moves) {
 		workflowButtons.clear();
 		
-		dockPanel.setWidgetHidden(workflowBar, (moves==null || moves.isEmpty()) ? true : false);
+		dockPanel.setWidgetHidden(workflowBar, (moves == null || moves.isEmpty()));
 		
 		if (moves != null) {
 			for (final WorkflowMove workflowMove : moves) {

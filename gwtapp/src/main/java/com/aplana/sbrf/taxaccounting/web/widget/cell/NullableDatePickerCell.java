@@ -32,8 +32,8 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
  */
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
-	private static final String BUTTON_WIDTH = "133px";
-	private static final String BUTTON_HEIGHT = "25px";
+	private static final String BUTTON_WIDTH = "133px";  //8.313em
+	private static final String BUTTON_HEIGHT = "25px";  //1.563em
 	private static final String BUTTON_CAPTION = "Очистить";
 
 	private static final int ESCAPE = 27;
