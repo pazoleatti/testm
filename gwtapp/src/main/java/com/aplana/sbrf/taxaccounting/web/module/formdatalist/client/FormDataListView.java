@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.AbstractCell;
@@ -18,6 +15,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
+import java.util.Map;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -120,6 +120,7 @@ public class FormDataListView extends
 
 	@Override
 	public void setFormDataList(List<FormDataSearchResultItem> records) {
+		formDataTable.setPageSize(records.size());
 		formDataTable.setRowCount(records.size());
 		formDataTable.setRowData(0, records);
 	}
