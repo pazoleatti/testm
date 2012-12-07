@@ -73,7 +73,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			}
 			
 			result.setLogEntries(logger.getEntries());
-			
+			result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
 			FormDataAccessParams accessParams = new FormDataAccessParams();
 			accessParams.setCanDelete(false);
 			accessParams.setCanEdit(true);
@@ -83,15 +83,15 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		}
 		else{
 			result.setLogEntries(new ArrayList<LogEntry>());
-			
+
 			formData = formDataService.getFormData(userId, action.getFormDataId());
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
-			
+			result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
 			Long formDataId = formData.getId();
 			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
 			result.setFormDataAccessParams(accessParams);
 		}
-		result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
+
 		result.setFormData(formData);
 		
 		return result;
