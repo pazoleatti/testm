@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -12,14 +14,18 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.proxy.NavigationEvent;
+import com.gwtplatform.mvp.client.proxy.NavigationHandler;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
+import com.gwtplatform.mvp.client.proxy.SetPlaceTitleHandler;
 
 public class MainPagePresenter extends
 		Presenter<MainPagePresenter.MyView, MainPagePresenter.MyProxy>
-		implements ScreenLockEvent.MyHandler {
+		implements ScreenLockEvent.MyHandler, TitleUpdateEvent.MyHandler,
+		NavigationHandler {
 	/**
 	 * {@link MainPagePresenter}'s proxy.
 	 */
@@ -32,7 +38,9 @@ public class MainPagePresenter extends
 	 */
 	public interface MyView extends View {
 		void showLoading(boolean visibile);
+
 		void setTitle(String text);
+
 		void setDesc(String text);
 	}
 
@@ -51,10 +59,11 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
-	
-	@SuppressWarnings("unused")
+
+	private boolean titleUpdated = false;
+
 	private final PlaceManager placeManager;
-	
+
 	@Inject
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
@@ -91,6 +100,52 @@ public class MainPagePresenter extends
 			getView().showLoading(true);
 		} else {
 			getView().showLoading(false);
+		}
+	}
+
+	@Override
+	protected void onReset() {
+		if (!titleUpdated) {
+			placeManager.getCurrentTitle(new SetPlaceTitleHandler() {
+				@Override
+				public void onSetPlaceTitle(String title) {
+					updateTitle(title, null);
+				}
+			});
+		}
+		super.onReset();
+	}
+
+	@Override
+	@ProxyEvent
+	public void onNavigation(NavigationEvent navigationEvent) {
+		titleUpdated = false;
+	}
+
+	@Override
+	@ProxyEvent
+	public void onTitleUpdate(final TitleUpdateEvent event) {
+		titleUpdated = true;
+		updateTitle(event.getTitle(), event.getDesc());
+	}
+
+	/**
+	 * 
+	 * Обновляет/Добавляет/Сбрасывает заголовки страницы.
+	 * 
+	 * @param title
+	 * @param desc
+	 */
+	private void updateTitle(String title, String desc) {
+		getView().setTitle(title);
+		getView().setDesc(desc);
+
+		StringBuilder pageTitleBuilder = new StringBuilder(
+				"АС \"Учет налогов\"");
+		if (Document.get() != null) {
+			pageTitleBuilder.append(title != null ? " - " + title : "");
+			pageTitleBuilder.append(desc != null ? " : " + desc : "");
+			Document.get().setTitle(pageTitleBuilder.toString());
 		}
 	}
 

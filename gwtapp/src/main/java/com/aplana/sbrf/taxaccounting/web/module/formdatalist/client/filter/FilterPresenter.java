@@ -33,6 +33,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	private final DispatchAsync dispatchAsync;
 	private static final int DEFAULT_DEPARTMENT_ITEM = 0;
+	
+	private TaxType taxType;
 
 	@Inject
 	public FilterPresenter(EventBus eventBus, MyView view,
@@ -42,10 +44,13 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	}
 
 	public FormDataFilter getFilterData() {
-		return getView().getDataFilter();
+		FormDataFilter formDataFilter = getView().getDataFilter();
+		formDataFilter.setTaxType(this.taxType);
+		return formDataFilter;
 	}
 
 	public void initFilter(TaxType taxType) {
+		this.taxType = taxType;
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
 		dispatchAsync.execute(action,

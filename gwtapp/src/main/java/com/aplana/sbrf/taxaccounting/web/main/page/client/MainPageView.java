@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -19,6 +20,9 @@ public class MainPageView extends ViewImpl implements MyView {
 	public final Widget widget;
 
 	@UiField
+	DockLayoutPanel dockPanel;
+
+	@UiField
 	Panel mainMenuContentPanel;
 
 	@UiField
@@ -29,10 +33,16 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	Element loadingMessage;
-	
+
+	@UiField
+	Widget titlePanel;
+
 	@UiField
 	HasText title;
-	
+
+	@UiField
+	Widget descPanel;
+
 	@UiField
 	HasText desc;
 
@@ -88,11 +98,13 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@Override
 	public void setTitle(String text) {
+		dockPanel.setWidgetHidden(titlePanel, text == null);
 		title.setText(text);
 	}
 
 	@Override
 	public void setDesc(String text) {
+		dockPanel.setWidgetHidden(descPanel, text == null);
 		desc.setText(text);
 	}
 }

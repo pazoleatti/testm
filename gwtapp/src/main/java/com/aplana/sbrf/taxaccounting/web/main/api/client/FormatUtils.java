@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 
 import com.google.gwt.i18n.client.NumberFormat;
 
-import java.math.BigDecimal;
-
 /**
  * @author Vitalii Samolovskikh
  */

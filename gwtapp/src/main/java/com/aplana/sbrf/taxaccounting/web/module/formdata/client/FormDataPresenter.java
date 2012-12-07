@@ -3,7 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
@@ -77,7 +78,9 @@ public class FormDataPresenter extends
 								getView().setWorkflowButtons(null);
 							} else {
 								showReadOnlyModeButtons();
-								getView().setWorkflowButtons(accessParams.getAvailableWorkflowMoves());
+								getView().setWorkflowButtons(
+										accessParams
+												.getAvailableWorkflowMoves());
 
 							}
 							getView().setLogMessages(result.getLogEntries());
@@ -94,13 +97,20 @@ public class FormDataPresenter extends
 							getView().setColumnsData(formData.getFormColumns(),
 									readOnlyMode);
 							getView().setRowsData(formData.getDataRows());
+
+							TitleUpdateEvent.fire(this,
+									readOnlyMode ? "Налоговая форма"
+											: "Редактирование налоговой формы",
+									formData.getFormType().getName());
+
 							getProxy().manualReveal(FormDataPresenter.this);
 
 							super.onReqSuccess(result);
 						}
 					});
 		} catch (Exception e) {
-			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
+			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму",
+					e);
 		}
 	}
 
@@ -116,9 +126,9 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onPrintClicked() {
-		Window.open(GWT.getHostPageBaseURL()
-                + "download/downloadController/" + formData.getId(), "", "");
-		//Window.alert("В разработке");
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadController/"
+				+ formData.getId(), "", "");
+		// Window.alert("В разработке");
 	}
 
 	@Override
@@ -126,7 +136,8 @@ public class FormDataPresenter extends
 		if (readOnlyMode || (formData.getId() == null)) {
 			goToFormDataList();
 		} else {
-			boolean isOK = Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+			boolean isOK = Window
+					.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 			if (isOK) {
 				revealForm(true);
 			}
@@ -208,11 +219,11 @@ public class FormDataPresenter extends
 			}
 		});
 	}
-	
+
 	private void goToFormDataList() {
 		placeManager.revealPlace(new PlaceRequest(
 				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
-						String.valueOf(formData.getFormType().getTaxType())));
+				String.valueOf(formData.getFormType().getTaxType())));
 	}
 
 }

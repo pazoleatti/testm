@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;

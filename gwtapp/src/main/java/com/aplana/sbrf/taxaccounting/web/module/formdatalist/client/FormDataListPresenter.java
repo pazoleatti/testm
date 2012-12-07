@@ -5,7 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
@@ -69,16 +70,10 @@ public class FormDataListPresenter extends
 	 * 
 	 * @param filterFormData
 	 */
-	private void loadFormDataList(FormDataFilter filterFormData) {
+	private void loadFormDataList(final FormDataFilter filterFormData) {
+		
 		GetFormDataList action = new GetFormDataList();
-		String taxTypeParam = placeManager.getCurrentPlaceRequest()
-				.getParameter("nType", "");
-
-		getView().setTaxTypeLabel(
-				"Тип налога: " + TaxType.valueOf(taxTypeParam).getName());
-		filterFormData.setTaxType(TaxType.valueOf(taxTypeParam));
 		action.setFormDataFilter(filterFormData);
-
 		dispatcher.execute(action,
 				new AbstractCallback<GetFormDataListResult>() {
 					@Override
@@ -99,6 +94,7 @@ public class FormDataListPresenter extends
 						getView().setDepartmentMap(departmentMap);
 						getView().setReportPeriodMap(reportPeriodMap);
 
+						TitleUpdateEvent.fire(this, "Список налоговых форм", filterFormData.getTaxType().getName());
 						// Вручную вызывается onReveal. Вызываем его всегда,
 						// даже когда
 						// презентер в состоянии visible, т.к. нам необходима

@@ -98,7 +98,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
 				this);
 	}
-
+	
 	
 	protected void showReadOnlyModeButtons() {
 		MyView view = getView();

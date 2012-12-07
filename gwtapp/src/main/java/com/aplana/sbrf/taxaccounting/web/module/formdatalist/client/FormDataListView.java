@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import java.util.List;
+import java.util.Map;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.AbstractCell;
@@ -11,14 +14,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.List;
-import java.util.Map;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -30,10 +29,7 @@ public class FormDataListView extends
 	private final Widget widget;
 
 	@UiField
-	Label taxTypeLabel;
-
-	@UiField
-	HorizontalPanel filterContentPanel;
+	Panel filterContentPanel;
 
 	@UiField
 	CellTable<FormDataSearchResultItem> formDataTable;
@@ -136,11 +132,6 @@ public class FormDataListView extends
 	@Override
 	public void setReportPeriodMap(Map<Integer, String> reportPeriodMap) {
 		this.reportPeriodsMap = reportPeriodMap;
-	}
-
-	@Override
-	public void setTaxTypeLabel(String taxTypeLabel) {
-		this.taxTypeLabel.setText(taxTypeLabel);
 	}
 
 	@UiHandler("apply")

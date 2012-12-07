@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
 	<ui:style>
-		.panel {
+		.panelTitle {
 			padding: 10px;
 		}
 		
@@ -12,12 +12,13 @@
 			margin: 10px;
 			border-style: solid;
 			border-width: 2px;
-            border-radius: 5px;
-            border-color: #76bd43;
+			border-radius: 5px;
+			border-color: #76bd43;
 		}
 	</ui:style>
 
-	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
+	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
+		height="100%" width="100%">
 		<g:north size="90">
 			<g:HTMLPanel>
 				<div ui:field="loadingMessage" class="loadingStatusLabel">
@@ -38,15 +39,22 @@
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="0">
-			<g:HTMLPanel styleName="{style.panel}">
+		<g:north size="53">
+			<g:HTMLPanel ui:field="titlePanel" styleName="{style.panelTitle}">
 				<h2>
 					<g:Label text="Название презентора" ui:field="title" />
 				</h2>
+			</g:HTMLPanel>
+		</g:north>
+
+		<g:north size="45">
+
+			<g:HTMLPanel ui:field="descPanel" styleName="{style.panelTitle}">
 				<h3>
 					<g:Label text="Длинный комментарий для этого презентора"
 						ui:field="desc" />
 				</h3>
+
 			</g:HTMLPanel>
 		</g:north>
 
@@ -55,9 +63,9 @@
 				<g:FlowPanel ui:field="mainContentPanel" height="100%" />
 			</g:HTMLPanel>
 		</g:center>
-		
+
 		<!-- <g:south size='20'> <g:HTML>FOOTER</g:HTML> </g:south> -->
-		
+
 	</g:DockLayoutPanel>
 
 

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.error.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;

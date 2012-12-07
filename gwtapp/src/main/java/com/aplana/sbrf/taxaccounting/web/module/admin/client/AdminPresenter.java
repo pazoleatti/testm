@@ -14,6 +14,7 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.*;
 
 /**
@@ -82,6 +83,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	/**
 	 * TODO: Про этот интерфейс тоже надо почитать.
 	 */
+	@Title("Администрирование")
 	@ProxyCodeSplit
 	@NameToken(AdminNameTokens.adminPage)
 	public interface MyProxy extends Proxy<AdminPresenter>, Place {

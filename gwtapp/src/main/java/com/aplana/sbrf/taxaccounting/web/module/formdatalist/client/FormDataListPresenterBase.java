@@ -54,8 +54,6 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 
 		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
-
-		void setTaxTypeLabel(String taxTypeLabel);
 	}
 	
 	protected final PlaceManager placeManager;

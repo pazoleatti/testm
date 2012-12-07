@@ -9,10 +9,8 @@
 		<g:north size="160">
 
 			<g:VerticalPanel>
-				<g:Label ui:field="taxTypeLabel" />
 
-
-				<g:HorizontalPanel width="100%" ui:field="filterContentPanel" />
+				<g:FlowPanel width="100%" ui:field="filterContentPanel" />
 
 				<style:Bar>
 					<style:LeftBar>

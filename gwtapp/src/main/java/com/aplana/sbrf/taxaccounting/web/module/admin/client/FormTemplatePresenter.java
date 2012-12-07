@@ -20,6 +20,7 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
@@ -385,6 +386,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		Label getTitleLabel();
 	}
 
+	@Title("Администрирование")
 	@ProxyCodeSplit
 	@NameToken(AdminNameTokens.formTemplatePage)
 	public interface MyProxy extends Proxy<FormTemplatePresenter>, Place {
