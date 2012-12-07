@@ -26,6 +26,7 @@ public class LeftBar extends Composite implements HasWidgets{
 
 	@Override
 	public void add(Widget w) {
+		w.setStyleName("buttonWithMargin", true);
 		placeHolder.add(w);
 	}
 
