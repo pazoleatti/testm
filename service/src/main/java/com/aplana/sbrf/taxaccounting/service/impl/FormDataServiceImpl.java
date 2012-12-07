@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormDataWorkflowDao formDataWorkflowDao;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
@@ -93,6 +96,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
 		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
 		result.setKind(kind);
+		result.setReportPeriodId(reportPeriodDao.getCurrentPeriod(form.getType().getTaxType()).getId());
 
 		for (DataRow predefinedRow : form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
@@ -116,7 +120,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, int userId, FormData formData) {
 		if (formDataAccessService.canEdit(userId, formData.getId())) {
-			formDataScriptingService.executeScripts(userDao.getUser(userId), formData, FormDataEvent.CALCULATE, logger);
+			TAUser user = userDao.getUser(userId);
+			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
 			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		} else {
 			throw new AccessDeniedException(
@@ -188,7 +193,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 	}
 
-	private void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
+	@Override
+	public void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
 		List<Column> columns = formTemplate.getColumns();
 		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
 		messageDecorator.setScriptName("Проверка обязательных полей");

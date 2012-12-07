@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
@@ -75,4 +76,6 @@ public interface FormDataService {
 	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 
 	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind);
+
+	void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger);
 }

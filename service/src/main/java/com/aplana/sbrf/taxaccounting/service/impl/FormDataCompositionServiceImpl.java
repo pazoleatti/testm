@@ -23,7 +23,8 @@ import org.springframework.stereotype.Repository;
  * @author Vitalii Samolovskikh
  * @see com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
-@Repository
+@SuppressWarnings("UnusedDeclaration")
+@Repository("formDataCompositionService")
 public class FormDataCompositionServiceImpl implements FormDataCompositionService {
 
 	@Autowired
@@ -72,14 +73,17 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 		FormData formData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
 
 		// Create form data if doesn't exist.
-		if(formData == null){
+		if (formData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
 			formData = formDataService.createFormDataWithoutCheck(logger, null, formTemplateId, departmentId, kind);
 		}
 
 		// Execute composition scripts
-		// TODO: Надо подумать, что делать с пользователем.
+		// TODO: Надо подумать, что делать с пользователем да и вообще.
 		formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger);
+		formDataScriptingService.executeScripts(null, formData, FormDataEvent.CALCULATE, logger);
+		formDataService.checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
+		formDataDao.save(formData);
 	}
 }

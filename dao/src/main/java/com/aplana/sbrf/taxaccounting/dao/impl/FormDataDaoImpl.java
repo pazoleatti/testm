@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -343,14 +345,24 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	 */
 	@Override
 	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int periodId) {
-		int formDataId = getJdbcTemplate().queryForInt(
+		Long formDataId = getJdbcTemplate().query(
 				"select fd.id from form_data fd join form f on fd.form_id=f.id " +
 						"where f.type_id=? and fd.kind=? and fd.department_id=? and fd.report_period_id=?",
 				new Object[]{formTypeId, kind.getId(), departmentId, periodId},
-				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
+				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+				new ResultSetExtractor<Long>() {
+					@Override
+					public Long extractData(ResultSet rs) throws SQLException, DataAccessException {
+						if(rs.next()){
+							return rs.getLong("id");
+						} else {
+							return null;
+						}
+					}
+				}
 		);
 
-		if (formDataId > 0) {
+		if (formDataId != null) {
 			return get(formDataId);
 		} else {
 			return null;
