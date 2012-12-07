@@ -56,6 +56,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		cellTable.addColumn(createValueColumn(), "Значение");
 		selectionModel = new SingleSelectionModel<DictionaryItem<ValueType>>();
 		cellTable.setSelectionModel(selectionModel);
+		cellTable.setStyleName("dictionaryPickerTable");
 		selectionModel.addSelectionChangeHandler(
 				new SelectionChangeEvent.Handler() {
 					@Override
@@ -75,7 +76,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		});
 
 		pager.setDisplay(cellTable);
-		pager.setPageSize(10);
+		pager.setPageSize(15);
 
 		dataProvider = createDataProvider(dictionaryCode);
 		dataProvider.addDataDisplay(cellTable);
