@@ -247,8 +247,21 @@
 	<profiles>
 		<profile>
 			<id>development</id>
-
 			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+                		<includes>
+                    		<include>**/*</include>
+                		</includes>					
+					</resource>				
+					<resource>
+						<directory>src/main/resources-development</directory>
+                		<includes>
+                    		<include>**/*</include>
+                		</includes>					
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
@@ -287,6 +300,20 @@
 		<profile>
 			<id>production</id>
 			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+                		<includes>
+                    		<include>**/*</include>
+                		</includes>					
+					</resource>				
+					<resource >
+						<directory>src/main/resources-production</directory>
+                		<includes>
+                    		<include>**/*</include>
+                		</includes>					
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
@@ -305,7 +332,15 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>			
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>dynacache-spring</artifactId>
+					<version>${project.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>

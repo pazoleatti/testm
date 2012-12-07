@@ -16,7 +16,8 @@
 		<module>dao</module>
 		<module>service</module>		
 		<module>gwtapp</module>
-		<module>taxaccounting-ear</module>		
+		<module>taxaccounting-ear</module>
+		<module>dynacache-spring</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

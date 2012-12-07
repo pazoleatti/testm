@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class TAUserDaoImpl implements TAUserDao {
 	}
 
 	@Override
+	@Cacheable("User")
 	public TAUser getUser(int userId) {
 		TAUser user = userMapper.getUserById(userId);
 		if (user == null) {

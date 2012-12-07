@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	private DepartmentMapper departmentMapper;
 	
 	@Override
+	@Cacheable("Department")	
 	public Department getDepartment(int id) {
 		Department result = departmentMapper.get(id);
 		if (result == null) {
