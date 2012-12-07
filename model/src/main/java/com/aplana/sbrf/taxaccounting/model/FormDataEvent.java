@@ -11,13 +11,14 @@ public enum FormDataEvent implements Serializable {
 	CREATE(1, "Создать"),
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
-	INTEGRATION(4, "Обобщить"),
+	INTEGRATE(4, "Обобщить"),
+	DISINTEGRATE(5, "Отделить"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить"),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть в \"Создана\""),
-	MOVE_APPROVED_TO_ACCEPTED(103, "Принять"),
+	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),
 	MOVE_ACCEPTED_TO_APPROVED(104, "Вернуть в \"Принята\""),
-	MOVE_CREATED_TO_ACCEPTED(105, "Принять"),
+	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
 	MOVE_ACCEPTED_TO_CREATED(106, "Вернуть в \"Создана\"");
 
 	private String title;
