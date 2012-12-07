@@ -72,7 +72,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public static final String FORM_DATA_TYPE_ID = "formDataTypeId";
 
-	public static final String FORM_DATA_RPERIOD_ID = "formDataTypeId";
+	public static final String FORM_DATA_RPERIOD_ID = "formDataRPeriodId";
 
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;

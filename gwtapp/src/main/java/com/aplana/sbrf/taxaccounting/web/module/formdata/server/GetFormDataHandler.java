@@ -66,8 +66,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			Logger logger = new Logger();
 			formData = formDataService.createFormData(logger, userId, formTemplateDao.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
-			
-			result.setDepartmenName(departmentDao.getDepartment(user.getDepartmentId()).getName());
+
 			if(action.getReportPeriodId() != null){
 				System.out.println("-----" + formData.getReportPeriodId()+ ":" + reportPeriodDao.get(action.getReportPeriodId().intValue()));
 				result.setReportPeriod(reportPeriodDao.get(action.getReportPeriodId().intValue()).getName());
@@ -86,14 +85,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			result.setLogEntries(new ArrayList<LogEntry>());
 			
 			formData = formDataService.getFormData(userId, action.getFormDataId());
-			result.setDepartmenName(departmentDao.getDepartment(user.getDepartmentId()).getName());
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 			
 			Long formDataId = formData.getId();
 			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
 			result.setFormDataAccessParams(accessParams);
 		}
-		
+		result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
 		result.setFormData(formData);
 		
 		return result;

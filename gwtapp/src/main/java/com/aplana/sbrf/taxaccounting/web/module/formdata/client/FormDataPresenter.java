@@ -58,8 +58,8 @@ public class FormDataPresenter extends
 			GetFormData action = new GetFormData();
 			action.setFormDataId(Long.parseLong(request.getParameter(
 					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
-			action.setDepartmentId(Long.parseLong(request.getParameter(
-					DEPARTMENT_ID, String.valueOf(Long.MAX_VALUE))));
+			action.setDepartmentId(Integer.parseInt(request.getParameter(
+					DEPARTMENT_ID, String.valueOf(Integer.MAX_VALUE))));
 			action.setFormDataKind(Long.parseLong((request.getParameter(
 					FORM_DATA_KIND_ID, String.valueOf(Long.MAX_VALUE)))));
 			action.setFormDataTypeId((Long.parseLong((request.getParameter(

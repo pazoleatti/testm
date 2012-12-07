@@ -22,7 +22,7 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	
 	private Long reportPeriodId;
 
-	private Long departmentId;
+	private Integer departmentId;
 
     private Long formDataKind;
 
@@ -42,11 +42,11 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 		this.reportPeriodId = reportPeriodId;
 	}
 
-	public Long getDepartmentId() {
+	public Integer getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(Long departmentId) {
+	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
 	}
 
