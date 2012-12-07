@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.user.client.Timer;
 
 import java.io.Serializable;
 
@@ -43,6 +44,12 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	TextBox txtFind;
 	@UiField
 	SimplePager pager;
+
+	Timer timer = new Timer() {
+		public void run() {
+			find();
+		}
+	};
 
 	private DictionaryDataProvider<?, ValueType> dataProvider;
 
@@ -108,7 +115,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 			pager.previousPage();
 			// Не ищем, если пользователь просто передвигает курсор внутри поля для поиска
 		} else if ((keyCode != KeyCodes.KEY_LEFT) && (keyCode != KeyCodes.KEY_RIGHT)){
-			find();
+			timer.schedule(500);
 		}
 	}
 
