@@ -48,13 +48,11 @@
 		</g:north>
 
 		<g:north size="45">
-
 			<g:HTMLPanel ui:field="descPanel" styleName="{style.panelTitle}">
 				<h3>
 					<g:Label text="Длинный комментарий для этого презентора"
 						ui:field="desc" />
 				</h3>
-
 			</g:HTMLPanel>
 		</g:north>
 

@@ -2,6 +2,16 @@
 
 html,body {height:100%}
 
+h2{
+	color: #777777;
+	font-size: 22px;
+}
+
+h3{
+	color: #777777;
+	font-size: 16px;
+}
+
 .mainContent {
 	/* text-align: center;
 	margin: 0 auto;
