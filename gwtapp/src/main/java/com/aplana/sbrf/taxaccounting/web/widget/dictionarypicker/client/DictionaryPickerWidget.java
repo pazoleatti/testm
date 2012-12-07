@@ -56,7 +56,6 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		cellTable.addColumn(createValueColumn(), "Значение");
 		selectionModel = new SingleSelectionModel<DictionaryItem<ValueType>>();
 		cellTable.setSelectionModel(selectionModel);
-		cellTable.setStyleName("dictionaryPickerTable");
 		selectionModel.addSelectionChangeHandler(
 				new SelectionChangeEvent.Handler() {
 					@Override
@@ -107,7 +106,8 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 			pager.nextPage();
 		} else if (keyCode == KeyCodes.KEY_PAGEUP) {
 			pager.previousPage();
-		} else {
+			// Не ищем, если пользователь просто передвигает курсор внутри поля для поиска
+		} else if ((keyCode != KeyCodes.KEY_LEFT) && (keyCode != KeyCodes.KEY_RIGHT)){
 			find();
 		}
 	}
