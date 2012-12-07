@@ -19,7 +19,7 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 	 * @throws SQLException например, если в ответе не окажется нужного поля
 	 */
 	@Override
-	public String getValue(ResultSet rs) throws SQLException {
+	protected String getValue(ResultSet rs) throws SQLException {
 		return rs.getString("value");
 	}
 

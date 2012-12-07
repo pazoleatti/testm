@@ -20,7 +20,7 @@ public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<Bi
 	 * @throws SQLException например, если в ответе не окажется нужного поля
 	 */
 	@Override
-	public BigDecimal getValue(ResultSet rs) throws SQLException {
+	protected BigDecimal getValue(ResultSet rs) throws SQLException {
 		return rs.getBigDecimal("value");
 	}
 
