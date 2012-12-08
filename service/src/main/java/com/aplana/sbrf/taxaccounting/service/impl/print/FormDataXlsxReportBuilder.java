@@ -6,24 +6,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.ClassUtils;
@@ -62,7 +56,7 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	public FormDataXlsxReportBuilder(FormData data) throws IOException {
-		this.data = data;
+this.data = data;
 		
 		templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
@@ -73,6 +67,12 @@ public class FormDataXlsxReportBuilder {
 		
 		sheet.createRow(2).createCell(1).setCellValue(data.getKind().getName());
 		sheet.createRow(3).createCell(1).setCellValue(data.getDepartmentId());
+		CreationHelper createHelper = workBook.getCreationHelper();
+		CellStyle cellStyle = workBook.createCellStyle();
+		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat(dateFormater));
+		Cell cell = sheet.createRow(4).createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(new Date(System.currentTimeMillis()));
 	}
 
 
@@ -101,27 +101,103 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	private void createTableHeaders(){
-		Row row = sheet.createRow(rowNumber++);
+		System.out.println("Номер строки " + rowNumber);
+		Row row = sheet.createRow(rowNumber);
+		
 		CellStyle cellStyle = workBook.createCellStyle();
+		boolean isSecondTable = false;
+		
 		cellStyle.setFillBackgroundColor(HSSFColor.GREEN.index);
 		cellStyle.setFillPattern(HSSFColor.BRIGHT_GREEN.index);
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+
 		for (Column el : data.getFormColumns()) {
-			System.out.println("-------" + el.getName() + "-----" +el.getAlias() + "-----" + el.getOrder() + "-----" + el.getGroupName());
-			aliasMap.put(cellNumber, el.getAlias());
-			fillWidth(cellNumber,el.getName().length());
-			Cell cell = row.createCell(cellNumber++);
-			cell.setCellStyle(cellStyle);
-			cell.setCellValue(el.getName());
+			if(el.getGroupName()!=null){
+				isSecondTable = true;
+				break;
+			}
+		}
+		//System.out.println("Размер таблицы " + data.getFormColumns().size());
+		for (Column cell : data.getFormColumns()) {
+			System.out.println(cell.getName());
+		}
+		if(isSecondTable){
+			Row row2 = sheet.createRow(rowNumber + 1);
+			for(int i = 0;i<data.getFormColumns().size();i++){
+				if(data.getFormColumns().get(i).getGroupName()==null){
+					
+					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
+					fillWidth(i,data.getFormColumns().get(i).getName().length());
+					Cell cell = row.createCell(i);
+					cell.setCellStyle(cellStyle);
+					cell.setCellValue(data.getFormColumns().get(i).getName());
+					sheet.addMergedRegion(new CellRangeAddress(
+							rowNumber, 
+							rowNumber + 1, 
+							i, 
+							i));
+					
+				}
+				else{
+					int j;
+					for(j = i + 1;j<data.getFormColumns().size();j++){
+						/*System.out.println("-------" + data.getFormColumns().get(j).getName() + "-----" +data.getFormColumns().get(j).getAlias() + "-----" + 
+								data.getFormColumns().get(j).getOrder() + "-----" + data.getFormColumns().get(j).getGroupName());*/
+						if(data.getFormColumns().get(j).getGroupName() == null || !data.getFormColumns().get(j).getGroupName().
+								equals(data.getFormColumns().get(i).getGroupName())){
+							break;
+						}
+					}
+					groupCells(i,j - 1,row,row2,cellStyle);
+					i+=(j-i)-1;
+				}
+				
+			}
+			//rowNumber = rowNumber + 2;
+		}
+		else{
+			for (Column el : data.getFormColumns()) {
+				System.out.println("-------" + el.getName() + "-----" +el.getAlias() + "-----" + el.getOrder() + "-----" + el.getGroupName());
+				aliasMap.put(cellNumber, el.getAlias());
+				fillWidth(cellNumber,el.getName().length());
+				Cell cell = row.createCell(cellNumber++);
+				cell.setCellStyle(cellStyle);
+				cell.setCellValue(el.getName());
+			}
+			//rowNumber = rowNumber + 1;
 		}
 		
 		cellNumber = 0;
+		rowNumber = sheet.getLastRowNum() + 1;
+		System.out.println("Номер строки " + rowNumber);
+	}
+	
+	private void groupCells(int startCell,int endCell,Row row1,Row row2,CellStyle style){
+		
+		Cell cell = row1.createCell(startCell);
+		cell.setCellStyle(style);
+		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
+		
+		for(int i = startCell;i<=endCell;i++){
+			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
+			fillWidth(i,data.getFormColumns().get(i).getName().length());
+			cell = row2.createCell(i);
+			cell.setCellStyle(style);
+			cell.setCellValue(data.getFormColumns().get(i).getName());
+			//System.out.println(cell.getStringCellValue());
+		}
+		sheet.addMergedRegion(new CellRangeAddress(
+				rowNumber, 
+				rowNumber, 
+				startCell, 
+				endCell));
 	}
 	
 	private void createDataForTable(){
 		
 		for (DataRow dataRow : data.getDataRows()) {
 			Row row = sheet.createRow(rowNumber++);
-			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
+			System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
 				
