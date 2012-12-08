@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +49,8 @@ public class FormDataExcelController {
 		resp.setContentType(mimeType);
 		resp.setContentLength((int)file.length());
 		String fileName = file.getName();
-		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+		resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+		resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
 		
 		byte[] byteBuffer = new byte[BUFSIZE];
         DataInputStream in = new DataInputStream(new FileInputStream(file));
@@ -56,6 +58,7 @@ public class FormDataExcelController {
 			respOut.write(byteBuffer, 0, length);
         in.close();
         respOut.close();
+        file.delete();
 	}
 
 }
