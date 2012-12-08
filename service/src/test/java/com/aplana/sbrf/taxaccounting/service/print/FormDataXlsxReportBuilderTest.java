@@ -24,7 +24,7 @@ public class FormDataXlsxReportBuilderTest {
 	
 	@Before
 	public void init(){
-		formData = formDataService.getFormData(3, 10188);
+		formData = formDataService.getFormData(3, 3);
 		/*FormTemplate formTemplate = new FormTemplate();
 		formTemplate.setId(1);
 		formTemplate.setType(new FormType());

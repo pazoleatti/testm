@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -32,6 +31,7 @@ public class FormDataXlsxReportBuilder {
 	private static String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataPrintingService.class)
 			+ "/acctax.xlsx";
+	private static final int cellWidth = 10;
 	
 	private int rowNumber = 6;
 	private int cellNumber = 0;
@@ -56,7 +56,7 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	public FormDataXlsxReportBuilder(FormData data) throws IOException {
-this.data = data;
+		this.data = data;
 		
 		templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
@@ -67,9 +67,9 @@ this.data = data;
 		
 		sheet.createRow(2).createCell(1).setCellValue(data.getKind().getName());
 		sheet.createRow(3).createCell(1).setCellValue(data.getDepartmentId());
-		CreationHelper createHelper = workBook.getCreationHelper();
+		
 		CellStyle cellStyle = workBook.createCellStyle();
-		cellStyle.setDataFormat(createHelper.createDataFormat().getFormat(dateFormater));
+		cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
 		Cell cell = sheet.createRow(4).createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(new Date(System.currentTimeMillis()));
@@ -85,7 +85,7 @@ this.data = data;
 	}
 	
 	private String flush() throws IOException {
-		File file = File.createTempFile("test", ".xlsx");
+		File file = File.createTempFile("Налоговый отчет_", ".xlsx");
 		OutputStream out = new FileOutputStream(file);
 		workBook.setPrintArea(0, 0, aliasMap.size(), 0, data.getDataRows().size());
 		workBook.write(out);
@@ -101,15 +101,15 @@ this.data = data;
 	}
 	
 	private void createTableHeaders(){
-		System.out.println("Номер строки " + rowNumber);
 		Row row = sheet.createRow(rowNumber);
 		
 		CellStyle cellStyle = workBook.createCellStyle();
 		boolean isSecondTable = false;
 		
-		cellStyle.setFillBackgroundColor(HSSFColor.GREEN.index);
+		cellStyle.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
 		cellStyle.setFillPattern(HSSFColor.BRIGHT_GREEN.index);
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		cellStyle.setWrapText(true);
 
 		for (Column el : data.getFormColumns()) {
 			if(el.getGroupName()!=null){
@@ -118,16 +118,16 @@ this.data = data;
 			}
 		}
 		//System.out.println("Размер таблицы " + data.getFormColumns().size());
-		for (Column cell : data.getFormColumns()) {
+		/*for (Column cell : data.getFormColumns()) {
 			System.out.println(cell.getName());
-		}
+		}*/
 		if(isSecondTable){
 			Row row2 = sheet.createRow(rowNumber + 1);
 			for(int i = 0;i<data.getFormColumns().size();i++){
 				if(data.getFormColumns().get(i).getGroupName()==null){
 					
 					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
-					fillWidth(i,data.getFormColumns().get(i).getName().length());
+					//fillWidth(i,data.getFormColumns().get(i).getName().length());
 					Cell cell = row.createCell(i);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(data.getFormColumns().get(i).getName());
@@ -153,23 +153,19 @@ this.data = data;
 				}
 				
 			}
-			//rowNumber = rowNumber + 2;
 		}
 		else{
 			for (Column el : data.getFormColumns()) {
-				System.out.println("-------" + el.getName() + "-----" +el.getAlias() + "-----" + el.getOrder() + "-----" + el.getGroupName());
+				//System.out.println("-------" + el.getName() + "-----" +el.getAlias() + "-----" + el.getOrder() + "-----" + el.getGroupName());
 				aliasMap.put(cellNumber, el.getAlias());
-				fillWidth(cellNumber,el.getName().length());
 				Cell cell = row.createCell(cellNumber++);
 				cell.setCellStyle(cellStyle);
 				cell.setCellValue(el.getName());
 			}
-			//rowNumber = rowNumber + 1;
 		}
 		
 		cellNumber = 0;
 		rowNumber = sheet.getLastRowNum() + 1;
-		System.out.println("Номер строки " + rowNumber);
 	}
 	
 	private void groupCells(int startCell,int endCell,Row row1,Row row2,CellStyle style){
@@ -180,7 +176,7 @@ this.data = data;
 		
 		for(int i = startCell;i<=endCell;i++){
 			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
-			fillWidth(i,data.getFormColumns().get(i).getName().length());
+			//fillWidth(i,data.getFormColumns().get(i).getName().length());
 			cell = row2.createCell(i);
 			cell.setCellStyle(style);
 			cell.setCellValue(data.getFormColumns().get(i).getName());
@@ -208,10 +204,9 @@ this.data = data;
 				}
 				else if(obj instanceof Date){
 					Date date = (Date)obj;
-					CreationHelper createHelper = workBook.getCreationHelper();
 					Cell cell = row.createCell(alias.getKey());
 					CellStyle cellStyle = workBook.createCellStyle();
-					cellStyle.setDataFormat(createHelper.createDataFormat().getFormat(dateFormater));
+					cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(date);
 					fillWidth(alias.getKey(),String.valueOf(date).length());
@@ -235,11 +230,10 @@ this.data = data;
 	 * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
 	 */
 	private void fillWidth(Integer cellNumber,Integer length){
-		Integer l = widthCellsMap.get(cellNumber);
-		if(l == null)
+		if(widthCellsMap.get(cellNumber) == null && length >= cellWidth)
 			widthCellsMap.put(cellNumber, length);
-		else{
-			if (l.compareTo(length) < 0 )
+		else if(widthCellsMap.get(cellNumber) != null){
+			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 )
 				widthCellsMap.put(cellNumber, length);
 		}
 	}
