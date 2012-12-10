@@ -5,6 +5,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
@@ -110,12 +111,14 @@ public class FormDataPresenter extends
 							List<LogEntry> le = result.getLogEntries();
 							boolean hasError = false;
 							for (LogEntry logEntry : le) {
-								hasError = true;
+								if (LogLevel.ERROR.equals(logEntry.getLevel())){
+									hasError = true;
+								}
 							}
 							
 							if (hasError){
-								MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
 								getProxy().manualRevealFailed();
+								MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
 							} else {
 								getProxy().manualReveal(FormDataPresenter.this);
 							}
