@@ -47,14 +47,6 @@ public interface TransportTaxDao extends ScriptExposed {
 	public boolean validateTransportTypeCode(String code);
 
 	/**
-	 * Возвращает название типа транспортного средства по коду
-	 *
-	 * @param code код типа транспортного средства
-	 * @return название типа транспортного средства
-	 */
-	public String getTransportTypeName(String code);
-
-	/**
 	 * Проверяет существование кода единицы измерения
 	 *
 	 * @param code код

@@ -1,28 +1,21 @@
 package com.aplana.sbrf.taxaccounting.dao.dictionary.impl;
 
-import java.math.BigDecimal;
-
-import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryManager;
-import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
+import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
+import com.aplana.sbrf.taxaccounting.dao.dictionary.mapper.TransportTaxMapper;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
-import com.aplana.sbrf.taxaccounting.dao.dictionary.mapper.TransportTaxMapper;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import java.math.BigDecimal;
+import java.sql.Types;
 
 @Repository("transportTaxDao")
 @Transactional(readOnly = true)
-public class TransportTaxDaoImpl implements TransportTaxDao {
+public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
 	@Autowired
 	private TransportTaxMapper transportTaxMapper;
-
-	@Autowired
-	private DictionaryManager<String> stringDictionaryManager;
-
-	@Autowired
-	private DictionaryManager<BigDecimal> numericDictionaryManager;
 
 	@Override
 	public String getRegionName(String okato) {
@@ -43,6 +36,12 @@ public class TransportTaxDaoImpl implements TransportTaxDao {
 		return result.intValue();
 	}
 
+	/**
+	 * Возвращает название типа транспортного средства по коду
+	 *
+	 * @param tsTypeCode код типа транспортного средства
+	 * @return название типа транспортного средства
+	 */
 	@Override
 	public String getTsTypeName(String tsTypeCode) {
 		return transportTaxMapper.getTsTypeName(tsTypeCode);
@@ -56,7 +55,10 @@ public class TransportTaxDaoImpl implements TransportTaxDao {
 	 */
 	@Override
 	public boolean validateOkato(String okato) {
-		return stringDictionaryManager.getDataProvider("transportOkato").getItem(okato) != null;
+		return getJdbcTemplate().queryForInt(
+				"select count(*) from transport_okato where okato=?",
+				new Object[]{okato}, new int[]{Types.VARCHAR}
+		) > 0;
 	}
 
 	/**
@@ -67,23 +69,10 @@ public class TransportTaxDaoImpl implements TransportTaxDao {
 	 */
 	@Override
 	public boolean validateTransportTypeCode(String code) {
-		return stringDictionaryManager.getDataProvider("transportTypeCode").getItem(code) != null;
-	}
-
-	/**
-	 * Возвращает название типа транспортного средства по коду
-	 *
-	 * @param code код типа транспортного средства
-	 * @return название типа транспортного средства
-	 */
-	@Override
-	public String getTransportTypeName(String code) {
-		DictionaryItem<String> item = stringDictionaryManager.getDataProvider("transportTypeCode").getItem(code);
-		if (item != null) {
-			return item.getName();
-		} else {
-			return null;
-		}
+		return getJdbcTemplate().queryForInt(
+				"select count(*) from transport_type_code where code=?",
+				new Object[]{code}, new int[]{Types.VARCHAR}
+		) > 0;
 	}
 
 	/**
@@ -94,6 +83,9 @@ public class TransportTaxDaoImpl implements TransportTaxDao {
 	 */
 	@Override
 	public boolean validateTaxBaseUnit(BigDecimal code) {
-		return numericDictionaryManager.getDataProvider("transportTaxBaseUnitCode").getItem(code) != null;
+		return getJdbcTemplate().queryForInt(
+				"select count(*) from transport_unit_code where code=?",
+				new Object[]{code}, new int[]{Types.NUMERIC}
+		) > 0;
 	}
 }
