@@ -44,7 +44,8 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			"com.aplana.sbrf.taxaccounting.model",
 			"com.aplana.sbrf.taxaccounting.model.dictionary",
 			"com.aplana.sbrf.taxaccounting.model.log",
-			"com.aplana.sbrf.taxaccounting.model.security"
+			"com.aplana.sbrf.taxaccounting.model.security",
+			"com.aplana.sbrf.taxaccounting.dao.exсeption"
 	};
 	@Autowired
 	private FormTemplateDao formTemplateDao;

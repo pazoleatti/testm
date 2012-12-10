@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Types;
 
 @Repository("transportTaxDao")
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
 	@Autowired
 	private TransportTaxMapper transportTaxMapper;
