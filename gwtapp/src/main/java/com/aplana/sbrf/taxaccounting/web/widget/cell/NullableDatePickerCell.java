@@ -24,11 +24,6 @@ import java.util.Date;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
-/**
- * Стандартный DatePickerCell не позволяет работать с null-полями.
- * Данный класс-наследник исправляет его проблемы
- * TODO: нужно добавить возможность сброса значений в null
- */
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 	private static final String BUTTON_WIDTH = "133px";  //8.313em
