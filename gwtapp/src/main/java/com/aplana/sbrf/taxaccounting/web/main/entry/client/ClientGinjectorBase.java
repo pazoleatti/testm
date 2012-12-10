@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
+import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogPresenter;
+import com.google.gwt.inject.client.AsyncProvider;
 import com.google.gwt.inject.client.Ginjector;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
@@ -14,6 +16,8 @@ public interface ClientGinjectorBase extends Ginjector {
 	EventBus getEventBus();
 
 	Provider<MainPagePresenter> getMainPagePresenter();
+	
+	AsyncProvider<MessageDialogPresenter> getMessageDialogPresenter();
 	
 	DispatchAsync getDispatchAsync();
 

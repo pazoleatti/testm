@@ -11,7 +11,7 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LogEntriesWidget extends Composite implements LogEntries {
+public class LogEntriesWidget extends Composite implements LogEntriesView {
 
 	private static LogEntryWidgetUiBinder uiBinder = GWT
 			.create(LogEntryWidgetUiBinder.class);

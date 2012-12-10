@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
-public interface LogEntries {
+public interface LogEntriesView{
 	
 	void setLogEntries(List<LogEntry> entries);
 

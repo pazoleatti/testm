@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log">
+
+
+	<g:DialogBox modal="false">
+		<g:caption>
+			<b>Сообщение</b>
+		</g:caption>
+		<g:HTMLPanel>
+			<g:Label ui:field="message" />
+			<log:LogEntriesWidget ui:field="logEntriesView" />
+			<log:ThrowableWidget ui:field="throwableView" />
+			<g:Button ui:field="okButton">Ok</g:Button>
+		</g:HTMLPanel>
+	</g:DialogBox>
+
+</ui:UiBinder> 

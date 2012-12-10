@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
@@ -25,7 +26,7 @@ import com.gwtplatform.mvp.client.proxy.SetPlaceTitleHandler;
 public class MainPagePresenter extends
 		Presenter<MainPagePresenter.MyView, MainPagePresenter.MyProxy>
 		implements ScreenLockEvent.MyHandler, TitleUpdateEvent.MyHandler,
-		NavigationHandler {
+		MessageEvent.MyHandler, NavigationHandler {
 	/**
 	 * {@link MainPagePresenter}'s proxy.
 	 */
@@ -59,6 +60,8 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
+	
+	private final MessageDialogPresenter messageDialogPresenter;
 
 	private boolean titleUpdated = false;
 
@@ -67,11 +70,12 @@ public class MainPagePresenter extends
 	@Inject
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
-			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager) {
+			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager, MessageDialogPresenter messageDialogPresenter) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
 		this.placeManager = placeManager;
+		this.messageDialogPresenter = messageDialogPresenter;
 	}
 
 	@Override
@@ -149,4 +153,10 @@ public class MainPagePresenter extends
 		}
 	}
 
+	@ProxyEvent
+	@Override
+	public void onPopUpMessage(MessageEvent event) {
+		messageDialogPresenter.setMessageEvent(event);
+		addToPopupSlot(messageDialogPresenter);
+	}
 }

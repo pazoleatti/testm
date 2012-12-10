@@ -45,6 +45,8 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	HasText desc;
+	
+	
 
 	@Inject
 	public MainPageView(Binder binder) {

@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
@@ -102,14 +105,27 @@ public class FormDataPresenter extends
 									readOnlyMode ? "Налоговая форма"
 											: "Редактирование налоговой формы",
 									formData.getFormType().getName());
-
-							getProxy().manualReveal(FormDataPresenter.this);
+							
+							
+							List<LogEntry> le = result.getLogEntries();
+							boolean hasError = false;
+							for (LogEntry logEntry : le) {
+								hasError = true;
+							}
+							
+							if (hasError){
+								MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
+								getProxy().manualRevealFailed();
+							} else {
+								getProxy().manualReveal(FormDataPresenter.this);
+							}
 
 							super.onReqSuccess(result);
 						}
 					});
 		} catch (Exception e) {
-			ErrorEvent.fire(this, "Неудалось открыть/создать налоговую форму",
+			getProxy().manualRevealFailed();
+			MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму",
 					e);
 		}
 	}
