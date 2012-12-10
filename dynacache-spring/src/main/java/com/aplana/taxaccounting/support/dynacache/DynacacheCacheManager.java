@@ -13,6 +13,12 @@ import org.springframework.cache.support.AbstractCacheManager;
 
 import com.ibm.websphere.cache.DistributedObjectCache;
 
+/**
+ * Реализация Spring CacheManager для работы с Dynacahe
+ * 
+ * Настройки кэшей задаются в виде Map<String, String>, см. {@link #setCaches(Map)}
+ * @author dsultanbekov
+ */
 public class DynacacheCacheManager extends AbstractCacheManager {
 	private Map<String, String> caches;
 
@@ -28,7 +34,7 @@ public class DynacacheCacheManager extends AbstractCacheManager {
 	@Override
 	protected Collection<? extends Cache> loadCaches() {
 		if (caches == null) {
-			throw new IllegalStateException("cacheMap property is not initialized");
+			throw new IllegalStateException("caches property is not initialized");
 		}
 		List<DynacacheCache> result = new ArrayList<DynacacheCache>(caches.size());
 		

@@ -9,7 +9,6 @@ import com.ibm.websphere.cache.DistributedObjectCache;
 /**
  * Реализация интерфейса Cache для работы с IBM Dynacache 
  * @author DSultanbekov
- *
  */
 public class DynacacheCache implements Cache {
 	private Log logger = LogFactory.getLog(getClass());
@@ -29,7 +28,9 @@ public class DynacacheCache implements Cache {
 
 	@Override
 	public void evict(Object key) {
-		logger.info("Removing element with key = " + key + " from cache '" + name + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Removing element with key = " + key + " from cache '" + name + "'");
+		}
 		cache.remove(key);
 	}
 
@@ -38,10 +39,14 @@ public class DynacacheCache implements Cache {
 		final Object value = cache.get(key);
 		
 		if (value == null) {
-			logger.info("Value with key = " + key + " not found in cache '" + name + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Value with key = " + key + " not found in cache '" + name + "'");
+			}
 			return null;
 		} else {
-			logger.info("Value with key = " + key + " successfully found in cache '" + name + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Value with key = " + key + " found in cache '" + name + "'");
+			}
 			return new ValueWrapper() {
 				@Override
 				public Object get() {
@@ -64,8 +69,9 @@ public class DynacacheCache implements Cache {
 
 	@Override
 	public void put(Object key, Object value) {
-		logger.info("Saving element with key = " + key + " to cache '" + name + "'");		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Saving element with key = " + key + " to cache '" + name + "'");
+		}
 		cache.put(key, value);
 	}
-
 }
