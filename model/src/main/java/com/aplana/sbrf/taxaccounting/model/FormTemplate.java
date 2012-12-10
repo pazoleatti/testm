@@ -14,6 +14,7 @@ public class FormTemplate implements Serializable {
 	private Integer id;
 	private FormType type;
 	private String version;
+	private Integer edition;
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();
@@ -98,6 +99,33 @@ public class FormTemplate implements Serializable {
 	 */
 	public String getVersion() {
 		return version;
+	}
+
+	/**
+	 * Возвращает номер редакции данной записи 
+	 * (используется для предотвращения одновременного редактирования записи несколькими пользователями)
+	 * @return номер редакции
+	 */
+	public int getEdition() {
+		return edition;
+	}
+	
+	/**
+	 * Задать номер редакции
+	 * Этот номер используется для предотвращения одновременного редактирования записи несколькими пользователями.
+	 * Если при попытке сохранения FormTemplate обнаружится, что значение поля edition в БД отличается от того, которое записано
+	 * в модельном классе, то будет сгенерировано исключение.
+	 * Задать значение поля можно только один раз для каждого экземпляра FormTemplate, поэтому после каждого сохранения объекта в БД,
+	 * использовать этот объект далее нельзя, нужно перечитать объект из БД и создать новый экзепляр. 
+	 * @param edition
+	 */
+	public void setEdition(int edition) {
+		if (this.edition != null) {
+			throw new IllegalStateException("Edition property already initialized");
+		} else {
+			this.edition = edition;
+		}
+		
 	}
 
 	/**

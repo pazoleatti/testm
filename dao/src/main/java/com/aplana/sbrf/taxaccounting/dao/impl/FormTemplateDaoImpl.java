@@ -35,28 +35,29 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private ScriptDao scriptDao;
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
-	private class FormMapper implements RowMapper<FormTemplate> {
+	private class FormTemplateMapper implements RowMapper<FormTemplate> {
 		private boolean deepFetch;
 
-		public FormMapper(boolean deepFetch) {
+		public FormTemplateMapper(boolean deepFetch) {
 			this.deepFetch = deepFetch;
 		}
 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
-			FormTemplate form = new FormTemplate();
-			form.setId(rs.getInt("id"));
-			form.setType(formTypeDao.getType(rs.getInt("type_id")));
+			FormTemplate formTemplate = new FormTemplate();
+			formTemplate.setId(rs.getInt("id"));
+			formTemplate.setType(formTypeDao.getType(rs.getInt("type_id")));
+			formTemplate.setEdition(rs.getInt("edition"));
+			formTemplate.setVersion(rs.getString("version"));
 
 			if (deepFetch) {
-				form.getColumns().addAll(columnDao.getFormColumns(form.getId()));
-				scriptDao.fillFormScripts(form);
+				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
+				scriptDao.fillFormScripts(formTemplate);
 				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
-					form.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, form.getColumns()));
-					logger.warn("Disabled due incompartibility with WAS");
+					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns()));
 				}
 			}
-			return form;
+			return formTemplate;
 		}
 	}
 
@@ -68,40 +69,49 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				"select * from form where id = ?",
 				new Object[]{formId},
 				new int[]{Types.NUMERIC},
-				new FormMapper(true)
+				new FormTemplateMapper(true)
 		);
 		return form;
 	}
 
 	@Transactional(readOnly = false)
-	@CacheEvict(value = "FormTemplate", key = "#form.id")
-	public int save(final FormTemplate form) {
-		final int formTemplateId = form.getId().intValue();
+	@CacheEvict(value = "FormTemplate", key = "#formTemplate.id")
+	public int save(final FormTemplate formTemplate) {
+		final Integer formTemplateId = formTemplate.getId();
 
-		List<DataRow> rows = form.getRows();
-		if (rows != null && !rows.isEmpty()) {
-			String xml = xmlSerializationUtils.serialize(rows);
-			// TODO: создание новых версий формы потребует инсертов в form
-			getJdbcTemplate().update(
-					"update form set data_rows = ? where id = ?",
-					new Object[]{xml, formTemplateId},
-					new int[]{Types.VARCHAR, Types.NUMERIC}
-			);
-		} else {
-			getJdbcTemplate().update(
-					"update form set data_rows = null where id = ?",
-					new Object[]{formTemplateId},
-					new int[]{Types.NUMERIC}
-			);
+		if (formTemplateId == null) {
+			throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
 		}
+		
+		JdbcTemplate jt = getJdbcTemplate();
+		int storedEdition = jt.queryForInt("select edition from form where id = ? for update", formTemplateId);
+		
+		if (storedEdition != formTemplate.getEdition()) {
+			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +
+				" было изменено после того, как данные по ней были считаны");
+		}
+		
+		String dataRowsXml = null;
+		List<DataRow> rows = formTemplate.getRows();
+		if (rows != null && !rows.isEmpty()) {
+			dataRowsXml = xmlSerializationUtils.serialize(rows);
+		}
+		
+		// TODO: создание новых версий формы потребует инсертов в form
+		getJdbcTemplate().update(
+			"update form set data_rows = ?, edition = ? where id = ?",
+			dataRowsXml, 
+			storedEdition + 1, 
+			formTemplateId
+		);
 
-		columnDao.saveFormColumns(form);
-		scriptDao.saveFormScripts(form);
+		columnDao.saveFormColumns(formTemplate);
+		scriptDao.saveFormScripts(formTemplate);
 		return formTemplateId;
 	}
 
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select * from form", new FormMapper(false));
+		return getJdbcTemplate().query("select * from form", new FormTemplateMapper(false));
 	}
 
 	@Override
@@ -113,7 +123,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 					"select * from form where type_id = ? and is_active = ?",
 					new Object[]{formTypeId,1},
 					new int[]{Types.NUMERIC,Types.NUMERIC}, 
-					new FormMapper(false)
+					new FormTemplateMapper(false)
 					);
 			return form.getId();
 		} catch (EmptyResultDataAccessException e) {
