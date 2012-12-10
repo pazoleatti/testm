@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Types;
 
 @Repository("transportTaxDao")
+// TODO: чтобы корректно возвращалось DaoException
 //@Transactional(readOnly = true)
 public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
 	@Autowired
