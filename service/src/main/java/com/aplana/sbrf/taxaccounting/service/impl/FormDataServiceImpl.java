@@ -222,6 +222,11 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScripts(userDao.getUser(userId), formDataDao.get(formDataId), workflowMove.getEvent(), logger);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
+
+			if(workflowMove.getAfterEvent()!=null){
+				formDataScriptingService.executeScripts(userDao.getUser(userId), formDataDao.get(formDataId), workflowMove.getAfterEvent(), logger);
+			}
+
 			return true;
 		} else {
 			return false;

@@ -160,8 +160,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> map) {
-		throw new UnsupportedOperationException();
+	public void putAll(Map<? extends String, ?> map) {
+		for(Map.Entry<? extends String, ?> entry: map.entrySet()){
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
