@@ -15,6 +15,7 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
@@ -160,9 +161,24 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 
 		panel.setPopupPositionAndShow(new PositionCallback() {
 			public void setPosition(int offsetWidth, int offsetHeight) {
+				int windowHeight= Window.getClientHeight();
+				int windowWidth=Window.getClientWidth();
+
+				int exceedOffsetX = offsetX;
+				int exceedOffsetY = offsetY;
+
+				// Сдвигаем попап, если он не помещается в окно
+				if ((lastParent.getAbsoluteRight() + panel.getOffsetWidth()) > windowWidth) {
+
+					exceedOffsetX -= panel.getOffsetWidth();
+				}
+
+				if ((lastParent.getAbsoluteTop() + panel.getOffsetHeight()) > windowHeight) {
+					exceedOffsetY -= panel.getOffsetHeight();
+				}
 				panel.setPopupPosition(
-						lastParent.getAbsoluteLeft() + offsetX,
-						lastParent.getAbsoluteTop() + offsetY
+						lastParent.getAbsoluteLeft() + exceedOffsetX,
+						lastParent.getAbsoluteTop() + exceedOffsetY
 				);
 			}
 		});
