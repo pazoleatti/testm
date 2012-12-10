@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
@@ -24,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -36,6 +37,7 @@ import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
  * @author Vitalii Samolovskikh
  */
 @Service
+@Transactional
 public class FormDataServiceImpl implements FormDataService {
 
 	@Autowired
@@ -79,10 +81,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind, departmentId)) {
 			return createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind);
 		} else {
-			throw new AccessDeniedException(
-					"Can't create form: userId=%d, formTemplateId=%d, departmentId=%d, kind=%s",
-					userId, formTemplateId, departmentId, kind.name()
-			);
+			throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
 		}
 	}
 
@@ -124,10 +123,7 @@ public class FormDataServiceImpl implements FormDataService {
 			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
 			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		} else {
-			throw new AccessDeniedException(
-					"Can't calculate form: userId=%d, formDataId=%d",
-					userId, formData.getId()
-			);
+			throw new AccessDeniedException("Недостаточно прав для выполенения расчёта по налоговой форме");
 		}
 	}
 
@@ -145,10 +141,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canEdit(userId, formData.getId())) {
 			return formDataDao.save(formData);
 		} else {
-			throw new AccessDeniedException(
-					"Can't save form: userId=%d, formDataId=%d",
-					userId, formData.getId()
-			);
+			throw new AccessDeniedException("Недостаточно прав для изменения налоговой формы");
 		}
 	}
 
@@ -166,9 +159,8 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canRead(userId, formDataId)) {
 			return formDataDao.get(formDataId);
 		} else {
-			throw new AccessDeniedException(
-					"Can't read form: userId=%d, formDataId=%d",
-					userId, formDataId
+			throw new AccessDeniedException("Недостаточно прав на просмотр данных налоговой формы",
+				userId, formDataId
 			);
 		}
 	}
@@ -186,10 +178,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);
 		} else {
-			throw new AccessDeniedException(
-					"Can't delete form: userId=%d, formDataId=%d",
-					userId, formDataId
-			);
+			throw new AccessDeniedException("Недостаточно прав для удаления налоговой формы");
 		}
 	}
 
