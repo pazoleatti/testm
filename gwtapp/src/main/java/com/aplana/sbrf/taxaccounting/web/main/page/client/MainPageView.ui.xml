@@ -12,7 +12,6 @@
 			margin: 10px;
 			border-style: solid;
 			border-width: 2px;
-			border-radius: 5px;
 			border-color: #76bd43;
 		}
 	</ui:style>
