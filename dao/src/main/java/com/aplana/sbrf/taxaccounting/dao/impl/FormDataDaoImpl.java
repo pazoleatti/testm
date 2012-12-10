@@ -44,12 +44,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	private static class ValueRecord<T> {
 		private T value;
-		private String rowAlias;
+		private int order;
 		private int columnId;
 
-		public ValueRecord(T value, String rowAlias, int columnId) {
+		public ValueRecord(T value, int order, int columnId) {
 			this.value = value;
-			this.rowAlias = rowAlias;
+			this.order = order;
 			this.columnId = columnId;
 		}
 	}
@@ -208,28 +208,29 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 		final List<DataRow> dataRows = formData.getDataRows();
 		OrderUtils.reorder(dataRows);
+		// Теперь мы уверены, что order везде заполнен, уникален и идёт, начиная с 1, возрастая без пропусков.
 		final List<ValueRecord<BigDecimal>> numericValues = new ArrayList<ValueRecord<BigDecimal>>();
 		final List<ValueRecord<String>> stringValues = new ArrayList<ValueRecord<String>>();
 		final List<ValueRecord<Date>> dateValues = new ArrayList<ValueRecord<Date>>();
-
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int index) throws SQLException {
 				DataRow dr = dataRows.get(index);
 				String rowAlias = dr.getAlias();
+				int rowOrder = dr.getOrder();
 				ps.setString(1, rowAlias);
-				ps.setInt(2, dr.getOrder());
+				ps.setInt(2, rowOrder);
 
 				for (Column col: formData.getFormColumns()) {
 					Object val = dr.get(col.getAlias());
 					if (val == null) {
 						continue;
 					} else if (val instanceof BigDecimal) {
-						numericValues.add(new ValueRecord<BigDecimal>((BigDecimal)val, rowAlias, col.getId()));
+						numericValues.add(new ValueRecord<BigDecimal>((BigDecimal)val, rowOrder, col.getId()));
 					} else if (val instanceof String) {
-						stringValues.add(new ValueRecord<String>((String)val, rowAlias, col.getId()));
+						stringValues.add(new ValueRecord<String>((String)val, rowOrder, col.getId()));
 					} else if (val instanceof Date) {
-						dateValues.add(new ValueRecord<Date>((Date)val, rowAlias, col.getId()));
+						dateValues.add(new ValueRecord<Date>((Date)val, rowOrder, col.getId()));
 					}
 				}
 			}
@@ -240,32 +241,31 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		};
 
 		jt.batchUpdate("insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, " + formDataId + ", ?, ?)", bpss);
-		final Map<String, Long> rowsAliasToId = new HashMap<String, Long>(dataRows.size());
-		jt.query(
-			"select id, alias from data_row where form_data_id = ?",
+		
+		// Получаем массив идентификаторов строк, индекс записи в массиве соответствует порядковому номеру строки
+		final List<Long> rowIds = jt.queryForList(
+			"select id from data_row where form_data_id = ? order by ord",
 			new Object[] { formDataId },
 			new int[] { Types.NUMERIC },
-			new RowCallbackHandler() {
-				public void processRow(ResultSet rs) throws SQLException {
-					rowsAliasToId.put(rs.getString("alias"), rs.getLong("id"));
-				}
-			}
+			Long.class
 		);
-		insertValues("numeric_value", numericValues, rowsAliasToId);
-		insertValues("string_value", stringValues, rowsAliasToId);
-		insertValues("date_value", dateValues, rowsAliasToId);
+		
+		insertValues("numeric_value", numericValues, rowIds);
+		insertValues("string_value", stringValues, rowIds);
+		insertValues("date_value", dateValues, rowIds);
 
 		return formDataId;
 	}
 
-	private <T> void insertValues(String tableName, final List<ValueRecord<T>> values, final Map<String, Long> rowsAliasToId) {
+	private <T> void insertValues(String tableName, final List<ValueRecord<T>> values, final List<Long> rowIds) {
 		if (values.isEmpty()) {
 			return;
 		}
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			public void setValues(PreparedStatement ps, int index) throws SQLException {
 				ValueRecord<T> rec = values.get(index);
-				ps.setLong(1, rowsAliasToId.get(rec.rowAlias));
+				// В строках order начинается с 1 (см. OrderUtils.reorder), а в List индексы начинаются с нуля
+				ps.setLong(1, rowIds.get(rec.order - 1));
 				ps.setInt(2, rec.columnId);
 				if (rec.value instanceof Date) {
 					java.sql.Date sqlDate = new java.sql.Date(((Date)rec.value).getTime());
