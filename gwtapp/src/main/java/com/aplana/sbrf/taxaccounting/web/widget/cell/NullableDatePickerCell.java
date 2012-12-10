@@ -52,6 +52,10 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private final SafeHtmlRenderer<String> renderer;
 	private ValueUpdater<Date> valueUpdater;
 
+	private static int firstEditedColumn = -1;
+	private static int firstEditedIndex = -1;
+	private static boolean isValueInCellWasChanged = false;
+
 	/**
 	 * Constructs a new DatePickerCell that uses the date/time format given by
 	 * {@link DateTimeFormat#getFullDateFormat}.
@@ -151,6 +155,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
 				// Remember the values before hiding the popup.
+				isValueInCellWasChanged = true;
 				Element cellParent = lastParent;
 				Date oldValue = lastValue;
 				Object key = lastKey;
@@ -223,6 +228,17 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, Date value,
 								  NativeEvent event, ValueUpdater<Date> valueUpdater) {
+		/* Исправление ошибки (SBRFACCTAX-627 Проблема с DatePickerCell)
+		* На данный момент это больше как work around, пока не найдена главная причина проблемы.
+		* TODO: разобраться, почему при первом вызове любой функции у lastParent решает данную проблему и придумать
+		* наиболее 'красивый' способ решения.*/
+		if(!isValueInCellWasChanged && (!(firstEditedColumn == context.getColumn())
+				|| !(firstEditedIndex == context.getIndex()))){
+			firstEditedColumn = context.getColumn();
+			firstEditedIndex = context.getIndex();
+			lastParent.getAbsoluteLeft();
+		}
+
 		value = value == null ? new Date() : value;
 		this.lastKey = context.getKey();
 		this.lastParent = parent;

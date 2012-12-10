@@ -49,6 +49,10 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 	private ValueUpdater<ValueType> valueUpdater;
 	private final DictionaryPickerWidget<ValueType> selectWidget;
 
+	private static int firstEditedColumn = -1;
+	private static int firstEditedIndex = -1;
+	private static boolean isValueInCellWasChanged = false;
+
 	public DictionaryCell(String dictionaryCode) {
 		super(CLICK, KEYDOWN);
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
@@ -91,6 +95,7 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 				new ValueChangeHandler<ValueType>() {
 					@Override
 					public void onValueChange(ValueChangeEvent<ValueType> event) {
+						isValueInCellWasChanged = true;
 						// Remember the values before hiding the popup.
 						Element cellParent = lastParent;
 						ValueType oldValue = lastValue;
@@ -134,6 +139,16 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, ValueType value,
 								  NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
+		/* Исправление ошибки (SBRFACCTAX-613 Рендеринг ячеек с попапами.)
+		* На данный момент это больше как work around, пока не найдена главная причина проблемы.
+		* TODO: разобраться, почему при первом вызове любой функции у lastParent решает данную проблему и придумать
+		* наиболее 'красивый' способ решения.*/
+		if(!isValueInCellWasChanged && (!(firstEditedColumn == context.getColumn())
+				|| !(firstEditedIndex == context.getIndex()))){
+			firstEditedColumn = context.getColumn();
+			firstEditedIndex = context.getIndex();
+			lastParent.getAbsoluteLeft();
+		}
 		this.lastKey = context.getKey();
 		this.lastParent = parent;
 		this.lastValue = value;
