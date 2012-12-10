@@ -18,7 +18,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
@@ -37,7 +36,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private static final String BUTTON_CAPTION = "Очистить";
 
 	private static final int ESCAPE = 27;
-	private final DatePicker datePicker;
+	private final DatePickerWithYearSelector datePicker;
 	private final DateTimeFormat format;
 	private int offsetX = 10;
 	private int offsetY = 10;
@@ -47,7 +46,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private int lastColumn;
 	private Date lastValue;
 	private PopupPanel panel;
-	private Button button;
+	private Button clearDateButton;
 	private VerticalPanel datePickerAndButtonComposite = new VerticalPanel();
 	private final SafeHtmlRenderer<String> renderer;
 	private ValueUpdater<Date> valueUpdater;
@@ -105,7 +104,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 		this.format = format;
 		this.renderer = renderer;
 
-		this.datePicker = new DatePicker();
+		this.datePicker = new DatePickerWithYearSelector();
 		this.panel = new PopupPanel(true, false) {
 			@Override
 			protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
@@ -132,9 +131,13 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 			}
 		});
 
-		this.button = new Button();
+		this.clearDateButton = new Button();
 
-		button.addClickHandler(new ClickHandler() {
+		clearDateButton.setWidth(BUTTON_WIDTH);
+		clearDateButton.setHeight(BUTTON_HEIGHT);
+		clearDateButton.setText(BUTTON_CAPTION);
+
+		clearDateButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				ValueChangeEvent.fire(datePicker, null);
@@ -142,12 +145,8 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 		});
 
-
-		button.setWidth(BUTTON_WIDTH);
-		button.setHeight(BUTTON_HEIGHT);
-		button.setText(BUTTON_CAPTION);
 		datePickerAndButtonComposite.add(datePicker);
-		datePickerAndButtonComposite.add(button);
+		datePickerAndButtonComposite.add(clearDateButton);
 		panel.add(datePickerAndButtonComposite);
 
 
