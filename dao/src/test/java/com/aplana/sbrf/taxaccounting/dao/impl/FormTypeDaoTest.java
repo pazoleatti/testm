@@ -25,7 +25,7 @@ public class FormTypeDaoTest {
 		FormType t = formTypeDao.getType(Constants.DEMO_FORM_TYPE_ID);
 		Assert.assertEquals("DEMO", t.getName());
 		Assert.assertEquals(Constants.DEMO_FORM_TYPE_ID, t.getId());
-		Assert.assertEquals(TaxType.TRANSPORT, t.getTaxType());
+		Assert.assertEquals(TaxType.VAT, t.getTaxType());
 	}
 	
 	@Test(expected=DaoException.class)
