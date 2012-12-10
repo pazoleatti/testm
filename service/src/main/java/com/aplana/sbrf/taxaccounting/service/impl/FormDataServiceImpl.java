@@ -190,7 +190,7 @@ public class FormDataServiceImpl implements FormDataService {
 		logger.setMessageDecorator(messageDecorator);
 		int rowIndex = 0;
 		for (DataRow row : formData.getDataRows()) {
-			++rowIndex;
+			++rowIndex; // Для пользователя нумерация строк должна начинаться с 1
 			messageDecorator.setRowIndex(rowIndex);
 			List<String> columnNames = new ArrayList<String>();
 			for (Column col : columns) {

@@ -128,7 +128,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			int rowIndex = i.nextIndex();
 			DataRow row = i.next();
 
-			decorator.setRowIndex(rowIndex);
+			decorator.setRowIndex(rowIndex + 1); // Для пользователя нумерация строк должна начинаться с 1
 			engine.put("row", row);
 			engine.put("rowIndex", rowIndex);
 			engine.put("rowAlias", row.getAlias());
