@@ -74,6 +74,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public static final String FORM_DATA_RPERIOD_ID = "formDataRPeriodId";
 
+	public static final String WORK_FLOW_ID = "goWorkFlowId";
+
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;
 
@@ -137,6 +139,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 	protected void revealForm(Boolean readOnly) {
 		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
+				.with(FormDataPresenterBase.READ_ONLY, readOnly.toString()).with(
+						FormDataPresenterBase.FORM_DATA_ID,
+						formData.getId().toString()));
+	}
+
+	protected void revealForm(Boolean readOnly, Integer wfMove) {
+		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
+				.with(FormDataPresenterBase.WORK_FLOW_ID, wfMove.toString())
 				.with(FormDataPresenterBase.READ_ONLY, readOnly.toString()).with(
 						FormDataPresenterBase.FORM_DATA_ID,
 						formData.getId().toString()));

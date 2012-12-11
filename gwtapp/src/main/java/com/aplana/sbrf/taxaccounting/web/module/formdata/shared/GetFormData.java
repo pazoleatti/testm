@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -17,6 +18,8 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	public void setLogEntries(List<LogEntry> logEntries) {
 		this.logEntries = logEntries;
 	}
+
+	private WorkflowMove workFlowMove;
 
 	private Long formDataTypeId;
 	
@@ -65,6 +68,13 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	public void setFormDataTypeId(Long formDataTypeId) {
 		this.formDataTypeId = formDataTypeId;
 	}
-	
-	
+
+
+	public WorkflowMove getWorkFlowMove() {
+		return workFlowMove;
+	}
+
+	public void setWorkFlowMove(WorkflowMove workFlowMove) {
+		this.workFlowMove = workFlowMove;
+	}
 }

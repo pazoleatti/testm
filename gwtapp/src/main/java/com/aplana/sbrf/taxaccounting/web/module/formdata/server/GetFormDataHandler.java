@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import java.util.ArrayList;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,10 +61,14 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		GetFormDataResult result = new GetFormDataResult();
+		Logger logger = new Logger();
 
 		FormData formData;
+		if (action.getWorkFlowMove() != null) {
+			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger);
+			logger.getEntries().add(new LogEntry(LogLevel.INFO, "OLOLO"));
+		}
 		if(action.getFormDataId() == Long.MAX_VALUE){
-			Logger logger = new Logger();
 			formData = formDataService.createFormData(logger, userId, formTemplateDao.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 
@@ -71,8 +76,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 				System.out.println("-----" + formData.getReportPeriodId()+ ":" + reportPeriodDao.get(action.getReportPeriodId().intValue()));
 				result.setReportPeriod(reportPeriodDao.get(action.getReportPeriodId().intValue()).getName());
 			}
-			
-			result.setLogEntries(logger.getEntries());
+
 			result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
 			FormDataAccessParams accessParams = new FormDataAccessParams();
 			accessParams.setCanDelete(false);
@@ -91,7 +95,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
 			result.setFormDataAccessParams(accessParams);
 		}
-
+		result.setLogEntries(logger.getEntries());
 		result.setFormData(formData);
 		
 		return result;

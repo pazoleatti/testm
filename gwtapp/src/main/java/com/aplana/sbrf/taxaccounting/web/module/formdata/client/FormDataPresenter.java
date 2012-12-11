@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAc
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
@@ -60,6 +58,12 @@ public class FormDataPresenter extends
 					"true"));
 
 			GetFormData action = new GetFormData();
+			Integer wfId = Integer.parseInt(request.getParameter(WORK_FLOW_ID, "-1"));
+			if (wfId != -1) {
+				action.setWorkFlowMove(WorkflowMove.fromId(wfId));
+			} else {
+				action.setWorkFlowMove(null);
+			}
 			action.setFormDataId(Long.parseLong(request.getParameter(
 					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
 			action.setDepartmentId(Integer.parseInt(request.getParameter(
@@ -106,8 +110,8 @@ public class FormDataPresenter extends
 									readOnlyMode ? "Налоговая форма"
 											: "Редактирование налоговой формы",
 									formData.getFormType().getName());
-							
-							
+
+
 							List<LogEntry> le = result.getLogEntries();
 							boolean hasError = false;
 							for (LogEntry logEntry : le) {
@@ -115,7 +119,7 @@ public class FormDataPresenter extends
 									hasError = true;
 								}
 							}
-							
+
 							if (hasError){
 								getProxy().manualRevealFailed();
 								MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
@@ -226,17 +230,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onWorkflowMove(WorkflowMove wfMove) {
-		GoMoveAction action = new GoMoveAction();
-		action.setFormDataId(formData.getId());
-		action.setMove(wfMove);
-		dispatcher.execute(action, new AbstractCallback<GoMoveResult>() {
-			@Override
-			public void onReqSuccess(GoMoveResult result) {
-				getView().setLogMessages(result.getLogEntries());
-				revealForm(true);
-				super.onReqSuccess(result);
-			}
-		});
+		revealForm(true, wfMove.getId());
 	}
 
 	private void goToFormDataList() {

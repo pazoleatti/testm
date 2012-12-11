@@ -55,4 +55,13 @@ public enum WorkflowMove {
 	public FormDataEvent getAfterEvent() {
 		return afterEvent;
 	}
+
+	public static WorkflowMove fromId(int id) {
+		for(WorkflowMove state: values()) {
+			if (state.id == id) {
+				return state;
+			}
+		}
+		throw new IllegalArgumentException("Wrong WorkflowMove id: " + id);
+	}
 }
