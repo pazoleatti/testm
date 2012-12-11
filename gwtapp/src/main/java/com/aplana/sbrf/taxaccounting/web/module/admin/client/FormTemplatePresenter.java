@@ -302,6 +302,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
 				Window.alert("Форма сохранена.");
+				load();
 				super.onReqSuccess(result);
 			}
 		});
