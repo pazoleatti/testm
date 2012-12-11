@@ -66,7 +66,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		FormData formData;
 		if (action.getWorkFlowMove() != null) {
 			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger);
-			logger.getEntries().add(new LogEntry(LogLevel.INFO, "OLOLO"));
 		}
 		if(action.getFormDataId() == Long.MAX_VALUE){
 			formData = formDataService.createFormData(logger, userId, formTemplateDao.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
