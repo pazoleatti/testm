@@ -37,7 +37,6 @@ import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
  * @author Vitalii Samolovskikh
  */
 @Service
-@Transactional
 public class FormDataServiceImpl implements FormDataService {
 
 	@Autowired
@@ -118,7 +117,14 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void doCalc(Logger logger, int userId, FormData formData) {
-		if (formDataAccessService.canEdit(userId, formData.getId())) {
+		boolean canDo;
+		if (formData.getId() == null) {
+			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+		} else {
+			canDo = formDataAccessService.canEdit(userId, formData.getId());
+		}
+		
+		if (canDo) {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
 			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
@@ -137,8 +143,16 @@ public class FormDataServiceImpl implements FormDataService {
 	 *          если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
 	@Override
+	@Transactional
 	public long saveFormData(int userId, FormData formData) {
-		if (formDataAccessService.canEdit(userId, formData.getId())) {
+		boolean canDo;
+		if (formData.getId() == null) {
+			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+		} else {
+			canDo = formDataAccessService.canEdit(userId, formData.getId());
+		}
+		
+		if (canDo) {
 			return formDataDao.save(formData);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для изменения налоговой формы");
@@ -155,6 +169,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *          если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	@Override
+	@Transactional
 	public FormData getFormData(int userId, long formDataId) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
 			return formDataDao.get(formDataId);
@@ -174,6 +189,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *          если у пользователя недостаточно прав для удаления записи
 	 */
 	@Override
+	@Transactional
 	public void deleteFormData(int userId, long formDataId) {
 		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);

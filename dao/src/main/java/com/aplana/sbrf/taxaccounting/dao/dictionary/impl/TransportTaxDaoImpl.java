@@ -6,14 +6,14 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Types;
 
 @Repository("transportTaxDao")
-// TODO: чтобы корректно возвращалось DaoException
-//@Transactional(readOnly = true)
+@Transactional(readOnly = true)
 public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
 	@Autowired
 	private TransportTaxMapper transportTaxMapper;
