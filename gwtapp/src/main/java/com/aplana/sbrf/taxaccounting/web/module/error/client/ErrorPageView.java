@@ -1,6 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.error.client;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorPagePresenter.MyView;
+import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
+import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableView;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HasText;
@@ -16,13 +21,13 @@ public class ErrorPageView extends ViewImpl implements MyView {
 	private final Widget widget;
 	
 	@UiField
-	HasText msg;
+	HasText message;
 	
 	@UiField
-	HasText reason;
+	LogEntriesView logEntriesView;
 	
 	@UiField
-	HasText trace;
+	ThrowableView throwableView;
 
 	@Inject
 	public ErrorPageView(Binder binder) {
@@ -35,23 +40,21 @@ public class ErrorPageView extends ViewImpl implements MyView {
 	}
 
 	@Override
-	public void setMsg(String text) {
-		msg.setText(text);
+	public void setMessage(String text) {
+		message.setText(text);
 		
 	}
 
 	@Override
-	public void setReason(String text) {
-		reason.setText(text);
+	public void setStackTrace(Throwable throwable) {
+		throwableView.setThrowable(throwable);
 		
 	}
 
 	@Override
-	public void setTrace(String text) {
-		trace.setText(text);
+	public void setLog(List<LogEntry> log) {
+		logEntriesView.setLogEntries(log);
 		
 	}
-
-
 
 }

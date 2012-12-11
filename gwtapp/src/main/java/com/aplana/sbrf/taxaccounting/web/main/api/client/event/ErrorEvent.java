@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.event;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
@@ -12,7 +14,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * @author sgoryachkin
  * 
  */
-public class ErrorEvent extends GwtEvent<ErrorEvent.MyHandler> {
+public class ErrorEvent extends AbstractMessageEvent<ErrorEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
@@ -33,6 +35,21 @@ public class ErrorEvent extends GwtEvent<ErrorEvent.MyHandler> {
 		errorEvent.setThrowable(throwable);
 		source.fireEvent(errorEvent);
 	}
+	
+	public static void fire(HasHandlers source, String msg, List<LogEntry> logEntries) {
+		ErrorEvent errorEvent = new ErrorEvent();
+		errorEvent.setMessage(msg);
+		errorEvent.setLogEntries(logEntries);
+		source.fireEvent(errorEvent);
+	}
+	
+	public static void fire(HasHandlers source, AbstractMessageEvent<?> msgEvent) {
+		ErrorEvent errorEvent = new ErrorEvent();
+		errorEvent.setMessage(msgEvent.getMessage());
+		errorEvent.setLogEntries(msgEvent.getLogEntries());
+		errorEvent.setThrowable(msgEvent.getThrowable());
+		source.fireEvent(errorEvent);
+	}
 
 	public static void fire(HasHandlers source, String msg) {
 		ErrorEvent errorEvent = new ErrorEvent();
@@ -40,9 +57,6 @@ public class ErrorEvent extends GwtEvent<ErrorEvent.MyHandler> {
 		source.fireEvent(errorEvent);
 	}
 
-	private String message;
-
-	private Throwable throwable;
 
 	public ErrorEvent() {
 	}
@@ -55,22 +69,6 @@ public class ErrorEvent extends GwtEvent<ErrorEvent.MyHandler> {
 	@Override
 	public Type<MyHandler> getAssociatedType() {
 		return getType();
-	}
-
-	public Throwable getThrowable() {
-		return throwable;
-	}
-
-	public void setThrowable(Throwable throwable) {
-		this.throwable = throwable;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
 	}
 
 }

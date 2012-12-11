@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
@@ -60,7 +61,7 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
-	
+
 	private final MessageDialogPresenter messageDialogPresenter;
 
 	private boolean titleUpdated = false;
@@ -70,7 +71,8 @@ public class MainPagePresenter extends
 	@Inject
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
-			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager, MessageDialogPresenter messageDialogPresenter) {
+			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
+			MessageDialogPresenter messageDialogPresenter) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
@@ -156,7 +158,12 @@ public class MainPagePresenter extends
 	@ProxyEvent
 	@Override
 	public void onPopUpMessage(MessageEvent event) {
-		messageDialogPresenter.setMessageEvent(event);
-		addToPopupSlot(messageDialogPresenter);
+		if (isVisible()) {
+			messageDialogPresenter.setMessageEvent(event);
+			addToPopupSlot(messageDialogPresenter);
+		} else {
+			ErrorEvent.fire(this, event);
+		}
+		
 	}
 }

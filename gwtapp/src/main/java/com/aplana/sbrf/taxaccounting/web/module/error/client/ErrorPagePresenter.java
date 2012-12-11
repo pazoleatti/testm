@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.error.client;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.google.inject.Inject;
@@ -23,11 +26,11 @@ public class ErrorPagePresenter extends
 	}
 
 	public interface MyView extends View {
-		void setMsg(String text);
-
-		void setReason(String text);
-
-		void setTrace(String text);
+		void setMessage(String text);
+		
+		void setStackTrace(Throwable throwable);
+		
+		void setLog(List<LogEntry> log);
 	}
 
 	private PlaceManager placeManager;
@@ -49,11 +52,10 @@ public class ErrorPagePresenter extends
 	@ProxyEvent
 	public void onError(ErrorEvent event) {
 
-		getView().setMsg(event.getMessage());
+		getView().setMessage(event.getMessage());
 		if (event.getThrowable() != null) {
-			getView().setReason(event.getThrowable().getLocalizedMessage());
-			getView().setTrace(
-					event.getThrowable().getStackTrace()[0].getClassName());
+			getView().setStackTrace(event.getThrowable());
+			getView().setLog(event.getLogEntries());
 		}
 		placeManager.unlock();
 		placeManager.revealErrorPlace(placeManager.getCurrentPlaceRequest()

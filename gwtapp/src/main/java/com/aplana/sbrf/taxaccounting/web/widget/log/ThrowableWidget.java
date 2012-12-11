@@ -15,6 +15,9 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 	}
 
 	@UiField
+	HasText message;
+	
+	@UiField
 	HasText text;
 
 	public ThrowableWidget() {
@@ -27,11 +30,13 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 			StackTraceElement[] trace = throwable.getStackTrace();
 			StringBuilder sb = new StringBuilder();
 			for (StackTraceElement stackTraceElement : trace) {
-				sb.append(stackTraceElement.toString());
+				sb.append(stackTraceElement.toString()).append("\n");
 			}
 			text.setText(sb.toString());
+			message.setText(throwable.getLocalizedMessage());
 		} else {
 			text.setText("");
+			message.setText("");
 		}
 	}
 

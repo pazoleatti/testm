@@ -4,13 +4,12 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
- * Отображает сообщение в всплывающем диалоге
+ * Отображает сообщение во всплывающем диалоге
  */
-public class MessageEvent extends GwtEvent<MessageEvent.MyHandler> {
+public class MessageEvent extends AbstractMessageEvent<MessageEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
@@ -46,14 +45,6 @@ public class MessageEvent extends GwtEvent<MessageEvent.MyHandler> {
 	}
 	
 	private boolean modal;
-	
-	private String title;
-
-	private String message;
-	
-	private List<LogEntry> logEntries;
-
-	private Throwable throwable;
 
 	public MessageEvent() {
 	}
@@ -66,38 +57,6 @@ public class MessageEvent extends GwtEvent<MessageEvent.MyHandler> {
 	@Override
 	public Type<MyHandler> getAssociatedType() {
 		return getType();
-	}
-
-	public Throwable getThrowable() {
-		return throwable;
-	}
-
-	public void setThrowable(Throwable throwable) {
-		this.throwable = throwable;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
-
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
 	}
 
 	public boolean isModal() {
