@@ -8,64 +8,60 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
-	Данный класс используется сервисом DataHandlerServiceImpl.
-	DataHandlerServiceImpl получает FormDataFilter с пользовательской стороны и преобразует его в FormDataDaoFilter,
-	который дальше идет на DAO слой.
+	Объект, представляющий условие фильтрации списка данных по налоговым формам.
  */
 public class FormDataDaoFilter implements Serializable {
 
-	private static final long serialVersionUID = -961619115678926848L;
+	private static final long serialVersionUID = 1L;
 
-	private List<Integer> reportPeriodId;
+	private List<Integer> reportPeriodIds;
 
-	private List<Integer> departmentId;
+	private List<Integer> departmentIds;
 
-	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
-	private List<Integer> formTypeId;
+	private List<Integer> formTypeIds;
 
-	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
-	private List<FormDataKind> formDataKind;
+	private List<FormDataKind> formDataKinds;
 
-	private List<WorkflowState> formStates;
+	private List<WorkflowState> states;
 
 
-	public List<Integer> getReportPeriodId() {
-		return reportPeriodId;
+	public List<Integer> getReportPeriodIds() {
+		return reportPeriodIds;
 	}
 
-	public void setReportPeriodId(List<Integer> reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
+	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+		this.reportPeriodIds = reportPeriodIds;
 	}
 
-	public List<Integer> getDepartmentId() {
-		return departmentId;
+	public List<Integer> getDepartmentIds() {
+		return departmentIds;
 	}
 
-	public void setDepartmentId(List<Integer> departmentId) {
-		this.departmentId = departmentId;
+	public void setDepartmentId(List<Integer> departmentIds) {
+		this.departmentIds = departmentIds;
 	}
 
-	public List<Integer> getFormTypeId() {
-		return formTypeId;
+	public List<Integer> getFormTypeIds() {
+		return formTypeIds;
 	}
 
-	public void setFormTypeId(List<Integer> formTypeId) {
-		this.formTypeId = formTypeId;
+	public void setFormTypeId(List<Integer> formTypeIds) {
+		this.formTypeIds = formTypeIds;
 	}
 
-	public List<FormDataKind> getFormDataKind() {
-		return formDataKind;
+	public List<FormDataKind> getFormDataKinds() {
+		return formDataKinds;
 	}
 
-	public void setFormDataKind(List<FormDataKind> formDataKind) {
-		this.formDataKind = formDataKind;
+	public void setFormDataKind(List<FormDataKind> formDataKinds) {
+		this.formDataKinds = formDataKinds;
 	}
 
-	public List<WorkflowState> getFormStates() {
-		return formStates;
+	public List<WorkflowState> getStates() {
+		return states;
 	}
 
-	public void setFormStates(List<WorkflowState> formStates) {
-		this.formStates = formStates;
+	public void setStates(List<WorkflowState> states) {
+		this.states = states;
 	}
 }

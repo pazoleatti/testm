@@ -23,12 +23,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
 	@Override
 	public List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter dataFilter){
-		/*Перед тем как выполнять SQL запрос, нам нужно убедиться что:
-		 1)dataFilter.getFormtype() не пустой список
-		 2)dataFilter.getPeriod() не пустой список
-		 если один из списков пустой, то поиск не выполняем, а возвращаем пустой результат.
-		 */
-		if(dataFilter.getFormTypeId().isEmpty() || dataFilter.getReportPeriodId().isEmpty()){
+		if(dataFilter.getFormTypeIds().isEmpty() || dataFilter.getReportPeriodIds().isEmpty()){
 			return (new ArrayList<FormDataSearchResultItem>());
 		}
 
@@ -45,12 +40,27 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				"WHERE " +
 				"  EXISTS (SELECT 1 FROM FORM f WHERE f.id = fd.form_id AND f.type_id = ft.id) " +
 				"  AND dp.id = fd.department_id " +
-				"  AND rp.id = fd.report_period_id" +
-				"  AND ft.id in " + transformToSqlInStatement(dataFilter.getFormTypeId()) +
-				"  AND rp.id in " + transformToSqlInStatement(dataFilter.getReportPeriodId()) +
-				"  AND fd.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartmentId()) +
-				"  AND fd.kind in " + transformFormKindsToSqlInStatement(dataFilter.getFormDataKind()) +
-				"  AND fd.state in " + transformFormStatesToSqlInStatement(dataFilter.getFormStates());
+				"  AND rp.id = fd.report_period_id";
+		
+		if (dataFilter.getFormTypeIds() != null && !dataFilter.getFormTypeIds().isEmpty()) {
+			query += "  AND ft.id in " + transformToSqlInStatement(dataFilter.getFormTypeIds()); 
+		}
+		
+		if (dataFilter.getReportPeriodIds() != null && !dataFilter.getReportPeriodIds().isEmpty()) {
+			query += "  AND rp.id in " + transformToSqlInStatement(dataFilter.getReportPeriodIds()); 
+		}
+		
+		if (dataFilter.getDepartmentIds() != null && !dataFilter.getDepartmentIds().isEmpty()) {
+			query += "  AND fd.DEPARTMENT_ID in " + transformToSqlInStatement(dataFilter.getDepartmentIds());
+		}
+				
+		if (dataFilter.getFormDataKinds() != null && !dataFilter.getFormDataKinds().isEmpty()) {
+			query += "  AND fd.kind in " + transformFormKindsToSqlInStatement(dataFilter.getFormDataKinds());
+		}
+		
+		if (dataFilter.getStates() != null && !dataFilter.getStates().isEmpty()) {
+			query += "  AND fd.state in " + transformFormStatesToSqlInStatement(dataFilter.getStates());
+		}
 
 		return getJdbcTemplate().query(query, new FormDataSearchResultItemMapper());
 	}
