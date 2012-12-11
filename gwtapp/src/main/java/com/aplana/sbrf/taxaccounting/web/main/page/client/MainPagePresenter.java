@@ -12,6 +12,7 @@ import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
@@ -64,7 +65,11 @@ public class MainPagePresenter extends
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
-	private boolean titleUpdated = false;
+	/**
+	 * Флаг показывает, что заголовки обновлены через UpdateEvent и в обновлении
+	 * их через GWTP (@Title, @TitleFunction) - нет необходимости.
+	 */
+	private boolean titleUpdatedFromEvent = false;
 
 	private final PlaceManager placeManager;
 
@@ -110,28 +115,32 @@ public class MainPagePresenter extends
 	}
 
 	@Override
-	protected void onReset() {
-		if (!titleUpdated) {
-			placeManager.getCurrentTitle(new SetPlaceTitleHandler() {
-				@Override
-				public void onSetPlaceTitle(String title) {
-					updateTitle(title, null);
-				}
-			});
+	public void setInSlot(Object slot, PresenterWidget<?> content) {
+		if (TYPE_SetMainContent.equals(slot)) {
+			if (!titleUpdatedFromEvent) {
+				placeManager.getCurrentTitle(new SetPlaceTitleHandler() {
+					@Override
+					public void onSetPlaceTitle(String title) {
+						updateTitle(title, null);
+					}
+				});
+			}
+
 		}
-		super.onReset();
+		// TODO Auto-generated method stub
+		super.setInSlot(slot, content);
 	}
 
 	@Override
 	@ProxyEvent
 	public void onNavigation(NavigationEvent navigationEvent) {
-		titleUpdated = false;
+		titleUpdatedFromEvent = false;
 	}
 
 	@Override
 	@ProxyEvent
 	public void onTitleUpdate(final TitleUpdateEvent event) {
-		titleUpdated = true;
+		titleUpdatedFromEvent = true;
 		updateTitle(event.getTitle(), event.getDesc());
 	}
 
@@ -164,6 +173,7 @@ public class MainPagePresenter extends
 		} else {
 			ErrorEvent.fire(this, event);
 		}
-		
+
 	}
+
 }
