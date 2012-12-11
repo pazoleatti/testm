@@ -17,6 +17,7 @@ import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -27,7 +28,7 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
-	private static final String BUTTON_WIDTH = "133px";  //8.313em
+	private static final String BUTTON_WIDTH = "140px";  //8.313em
 	private static final String BUTTON_HEIGHT = "25px";  //1.563em
 	private static final String BUTTON_CAPTION = "Очистить";
 
@@ -141,6 +142,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 		});
 
+		datePickerAndButtonComposite.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		datePickerAndButtonComposite.add(datePicker);
 		datePickerAndButtonComposite.add(clearDateButton);
 		panel.add(datePickerAndButtonComposite);
