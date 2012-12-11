@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
-import com.aplana.sbrf.taxaccounting.dao.model.FormDataDaoFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,12 +12,9 @@ import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 
-@Repository
+@Repository("formDataSearchDao")
 @Transactional(readOnly = true)
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
-
-	@Autowired
-	private FormTemplateDao formTemplateDao;
 
 	@Override
 	public List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter dataFilter){

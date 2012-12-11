@@ -1,8 +1,5 @@
-package com.aplana.sbrf.taxaccounting.dao.model;
+package com.aplana.sbrf.taxaccounting.model;
 
-
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 import java.io.Serializable;
 import java.util.List;

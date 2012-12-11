@@ -198,7 +198,6 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		Bindings b = engine.createBindings();
 		b.putAll(scriptExposedBeans);
 		engine.setBindings(b, ScriptContext.ENGINE_SCOPE);
-		engine.put("formDataDao", formDataDao);
 		return engine;
 	}
 

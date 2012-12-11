@@ -36,7 +36,7 @@ import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
-@Repository
+@Repository("formDataDao")
 @Transactional(readOnly=true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
