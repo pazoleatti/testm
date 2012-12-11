@@ -22,16 +22,15 @@ public class ReportPeriodDaoTest {
 	* Тесты основываются на том, что в БД уже лежит отчетный период со значениями id = 1 tax_type = 'T' и is_active = 1
 	* TODO: переписать тесты, когда будут реализованы методы сохранения отчетных периодов
 	*/
-
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
 	@Test
 	public void getSuccessfulTest(){
 		ReportPeriod reportPeriod = reportPeriodDao.get(1);
-		assertEquals(reportPeriod.getName(), "Отчетный период 1");
-		assertEquals(reportPeriod.isActive(), true);
-		assertEquals(reportPeriod.getTaxType(), TaxType.TRANSPORT);
+		assertEquals("Отчетный период 1", reportPeriod.getName());
+		assertEquals(true, reportPeriod.isActive());
+		assertEquals(TaxType.TRANSPORT, reportPeriod.getTaxType());
 	}
 
 	@Test(expected = DaoException.class)
@@ -42,30 +41,30 @@ public class ReportPeriodDaoTest {
 	@Test
 	public void getCurrentPeriodSuccessfulTest(){
 	 	ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.TRANSPORT);
-		assertEquals(reportPeriod.getId(), 1);
-		assertEquals(reportPeriod.getName(), "Отчетный период 1");
-		assertEquals(reportPeriod.isActive(), true);
+		assertEquals(1, reportPeriod.getId());
+		assertEquals("Отчетный период 1", reportPeriod.getName());
+		assertEquals(true, reportPeriod.isActive());
 	}
 
 	@Test
 	public void getCurrentPeriodNullResultTest(){
-		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.VAT);
-		assertEquals(reportPeriod, null);
+		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.INCOME);
+		assertEquals(null, reportPeriod);
 	}
 
 	@Test
 	public void listAllPeriodsByTaxTypeSuccessfulTest(){
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.TRANSPORT);
-		assertEquals(reportPeriodList.size(), 1);
-		assertEquals(reportPeriodList.get(0).getId(), 1);
-		assertEquals(reportPeriodList.get(0).getName(), "Отчетный период 1");
-		assertEquals(reportPeriodList.get(0).getTaxType(), TaxType.TRANSPORT);
-		assertEquals(reportPeriodList.get(0).isActive(), true);
+		assertEquals(1, reportPeriodList.size());
+		assertEquals(1, reportPeriodList.get(0).getId());
+		assertEquals("Отчетный период 1", reportPeriodList.get(0).getName());
+		assertEquals(TaxType.TRANSPORT, reportPeriodList.get(0).getTaxType());
+		assertEquals(true, reportPeriodList.get(0).isActive());
 	}
 
 	@Test
 	public void listAllPeriodsByTaxTypeNullResultTest(){
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.VAT);
-		assertEquals(reportPeriodList.size(), 0);
+		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.INCOME);
+		assertEquals(0, reportPeriodList.size());
 	}
 }
