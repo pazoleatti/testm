@@ -74,8 +74,12 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		return form;
 	}
 
+	/**
+	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
+	 * Иначе, если версии ен совпадают кэш продолжает возвращать старую версию.
+	 */
 	@Transactional(readOnly = false)
-	@CacheEvict(value = "FormTemplate", key = "#formTemplate.id")
+	@CacheEvict(value = "FormTemplate", key = "#formTemplate.id", beforeInvocation = true)
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
 
