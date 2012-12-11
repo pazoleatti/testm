@@ -342,6 +342,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	 * @param kind         тип формы
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @param periodId     идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 * @return форма или null, если не найдена
 	 */
 	@Override
 	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int periodId) {
