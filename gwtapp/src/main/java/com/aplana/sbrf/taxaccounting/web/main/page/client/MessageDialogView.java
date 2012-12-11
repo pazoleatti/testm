@@ -16,21 +16,20 @@
 
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
-import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableView;
+import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewImpl;
+
+import java.util.List;
 
 /**
  * The view implementation for
@@ -45,15 +44,23 @@ public class MessageDialogView extends PopupViewImpl implements
 	public interface Binder extends UiBinder<PopupPanel, MessageDialogView> {
 	}
 	
+	@UiField
+	DialogBox dialogBox;
+
+	@UiField
+	VerticalPanel htmlPanel;
 
 	@UiField
 	HasText message;
+
+	@UiField
+	Button okButton;
 	
 	@UiField
-	LogEntriesView logEntriesView;
+	LogEntriesWidget logEntriesView;
 	
 	@UiField
-	ThrowableView throwableView;
+	ThrowableWidget throwableView;
 
 	private final PopupPanel widget;
 
@@ -61,6 +68,12 @@ public class MessageDialogView extends PopupViewImpl implements
 	public MessageDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
+		dialogBox.setText("Сообщение");
+
+		htmlPanel.setWidth("70em");
+	    htmlPanel.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		htmlPanel.getElement().getStyle().setMargin(1, Style.Unit.EM);
+
 	}
 
 	@Override

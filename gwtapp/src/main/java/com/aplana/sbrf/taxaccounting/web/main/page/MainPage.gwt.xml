@@ -6,5 +6,6 @@
 	<inherits name="com.google.gwt.uibinder.UiBinder" />
 	<inherits name="com.google.gwt.inject.Inject" />
 	<inherits name="com.gwtplatform.mvp.Mvp" />
-	<source path="client" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget"/>
+    <source path="client" />
 </module>

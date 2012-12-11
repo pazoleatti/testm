@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.widget.log;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 public class ThrowableWidget extends Composite implements ThrowableView {
 
@@ -15,18 +14,23 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 	}
 
 	@UiField
-	HasText message;
+	HTMLPanel htmlPanel;
+
+	@UiField
+	Label message;
 	
 	@UiField
-	HasText text;
+	TextArea text;
 
 	public ThrowableWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
+		htmlPanel.getElement().getStyle().setMargin(1, Style.Unit.EM);
 	}
 
 	@Override
 	public void setThrowable(Throwable throwable) {
 		if (throwable != null) {
+			text.setVisible(true);
 			StackTraceElement[] trace = throwable.getStackTrace();
 			StringBuilder sb = new StringBuilder();
 			for (StackTraceElement stackTraceElement : trace) {
@@ -35,6 +39,7 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 			text.setText(sb.toString());
 			message.setText(throwable.getLocalizedMessage());
 		} else {
+			text.setVisible(false);
 			text.setText("");
 			message.setText("");
 		}
