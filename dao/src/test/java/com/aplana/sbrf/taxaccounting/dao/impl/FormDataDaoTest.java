@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -26,6 +32,94 @@ public class FormDataDaoTest {
 	
 	@Autowired
 	FormDataDao formDataDao;
+	
+	@Test
+	public void testGet() {
+		FormData formData = formDataDao.get(-1);
+		
+		Assert.assertEquals(2, formData.getDataRows().size());
+
+		DataRow dr = formData.getDataRows().get(0);
+		Assert.assertEquals("testAlias", dr.getAlias());
+		Assert.assertEquals("Строка 1", (String)dr.get("stringColumn"));
+		Assert.assertTrue(dr.isManagedByScripts());
+		
+		BigDecimal numericValue1 = getNumericValue(1.01, 2);
+		Assert.assertEquals(numericValue1, (BigDecimal)dr.get("numericColumn"));
+		Assert.assertEquals(getDate(2012, 11, 31), (Date)dr.get("dateColumn"));
+		
+		dr = formData.getDataRows().get(1);
+		Assert.assertNull(dr.getAlias());
+		Assert.assertEquals("Строка 2", (String)dr.get("stringColumn"));
+		Assert.assertFalse(dr.isManagedByScripts());
+		BigDecimal numericValue2 = getNumericValue(2.02, 2);		
+		Assert.assertEquals(numericValue2, (BigDecimal)dr.get("numericColumn"));
+		Assert.assertEquals(getDate(2013, 0, 1), (Date)dr.get("dateColumn"));		
+	}
+	
+	private BigDecimal getNumericValue(double value, int scale) {
+		BigDecimal val = new BigDecimal(value);
+		val = val.setScale(scale, BigDecimal.ROUND_HALF_UP);
+		return val;
+		
+	}
+	
+	private Date getDate(int year, int month, int day) {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.YEAR, year);
+		cal.set(Calendar.MONTH, month);
+		cal.set(Calendar.DAY_OF_MONTH, day);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+	
+	@Test
+	public void testSave() {
+		FormTemplate formTemplate = formTemplateDao.get(1); 		
+		
+		FormData formData = new FormData(formTemplate);
+
+		DataRow dr = formData.appendDataRow();
+		dr.setManagedByScripts(false);
+		dr.put("stringColumn", "Строка 1");
+		dr.put("numericColumn", 1.01);
+		Date date1 = getDate(2012, 11, 31);
+		dr.put("dateColumn", date1);
+		
+		dr = formData.appendDataRow("newAlias");
+		dr.setManagedByScripts(true);
+		dr.put("stringColumn", "Строка 2");
+		dr.put("numericColumn", 2.02);
+		Date date2 = getDate(2013, 0, 1);
+		dr.put("dateColumn", date2);
+
+		formData.setState(WorkflowState.CREATED);
+		formData.setKind(FormDataKind.SUMMARY);
+		formData.setDepartmentId(1);
+		formData.setReportPeriodId(1);
+		
+		long formDataId = formDataDao.save(formData);
+		formData = formDataDao.get(formDataId);
+		
+		Assert.assertEquals(2, formData.getDataRows().size());
+		
+		dr = formData.getDataRows().get(0);
+		Assert.assertNull(dr.getAlias());
+		Assert.assertEquals("Строка 1", (String)dr.get("stringColumn"));
+		Assert.assertFalse(dr.isManagedByScripts());
+		Assert.assertEquals(getNumericValue(1.01, 2), (BigDecimal)dr.get("numericColumn"));
+		Assert.assertEquals(date1, (Date)dr.get("dateColumn"));
+		
+		dr = formData.getDataRows().get(1);
+		Assert.assertEquals("newAlias", dr.getAlias());
+		Assert.assertEquals("Строка 2", (String)dr.get("stringColumn"));
+		Assert.assertTrue(dr.isManagedByScripts());
+		Assert.assertEquals(getNumericValue(2.02, 2), (BigDecimal)dr.get("numericColumn"));
+		Assert.assertEquals(date2, (Date)dr.get("dateColumn"));		
+	}	
 	
 	@Test
 	public void testDao() {

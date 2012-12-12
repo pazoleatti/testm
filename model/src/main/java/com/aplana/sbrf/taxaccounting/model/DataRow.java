@@ -38,6 +38,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private Map<String, CellValue> data;
 	private String alias;
 	private int order;
+	private boolean managedByScripts;
 
 	public DataRow() {
 
@@ -194,6 +195,26 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public void setOrder(int order) {
 		this.order = order;
 	}
+
+	/**
+	 * Возвращает признак того, что содержимое строки контролируется скриптами
+	 * В частности, если у строки этот флаг установлен в true, то при проверке обязательности заполнения столбцов в налоговой форме,
+	 * для данной строки такие проверки выполняться не будут
+	 * @return признак того, что содержимое строки контролируется скриптами
+	 */
+	public boolean isManagedByScripts() {
+		return managedByScripts;
+	}
+
+	/**
+	 * Установливает признак того, что содержимое строки контролируется скриптами
+	 * @see {@link #isManagedByScripts()}
+	 * @param managedByScripts значение признака
+	 */
+	public void setManagedByScripts(boolean managedByScripts) {
+		this.managedByScripts = managedByScripts;
+	}
+	
 
 	@Override
 	public boolean equals(Object o) {
