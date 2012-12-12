@@ -1,5 +1,5 @@
 /**
- * Таблицы справочников
+ * РўР°Р±Р»РёС†С‹ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ
  */
 create table transport_okato (
 	id number(9) not null,
@@ -11,11 +11,11 @@ alter table transport_okato add constraint transport_okato_ok primary key(id);
 alter table transport_okato add constraint transport_okato_unique_okato unique (okato);
 alter table transport_okato add constraint transport_okato_fk_parent_id foreign key (parent_id) references transport_okato(id);
 
-comment on table transport_okato is 'Коды ОКАТО и Муниципальных образований';
-comment on column transport_okato.id is 'Идентификатор записи';
-comment on column transport_okato.parent_id is 'Идентификатор родительской записи';
-comment on column transport_okato.okato is 'Код ОКАТО';
-comment on column transport_okato.name is 'Наименование муниципального образования';
+comment on table transport_okato is 'РљРѕРґС‹ РћРљРђРўРћ Рё РњСѓРЅРёС†РёРїР°Р»СЊРЅС‹С… РѕР±СЂР°Р·РѕРІР°РЅРёР№';
+comment on column transport_okato.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column transport_okato.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕР№ Р·Р°РїРёСЃРё';
+comment on column transport_okato.okato is 'РљРѕРґ РћРљРђРўРћ';
+comment on column transport_okato.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РјСѓРЅРёС†РёРїР°Р»СЊРЅРѕРіРѕ РѕР±СЂР°Р·РѕРІР°РЅРёСЏ';
 ---------------------------------------------------------------------------------------------------
 
 create table transport_tax_rate (
@@ -29,14 +29,14 @@ create table transport_tax_rate (
 );
 alter table transport_tax_rate add constraint transport_tax_rate_pk primary key (id);
 
-comment on table transport_tax_rate is 'Ставки транспортного налога';
-comment on column transport_tax_rate.id is 'Первичный ключ (номер п.п.)';
-comment on column transport_tax_rate.code is 'Код транспортного средства';
-comment on column transport_tax_rate.min_age is 'Срок использования "От", лет';
-comment on column transport_tax_rate.max_age is 'Срок использования "До", лет';
-comment on column transport_tax_rate.min_power is 'Мощность "От", л.с.';
-comment on column transport_tax_rate.max_power is 'Мощность "До", л.с.';
-comment on column transport_tax_rate.value is 'Ставка, руб.';
+comment on table transport_tax_rate is 'РЎС‚Р°РІРєРё С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ РЅР°Р»РѕРіР°';
+comment on column transport_tax_rate.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡ (РЅРѕРјРµСЂ Рї.Рї.)';
+comment on column transport_tax_rate.code is 'РљРѕРґ С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ СЃСЂРµРґСЃС‚РІР°';
+comment on column transport_tax_rate.min_age is 'РЎСЂРѕРє РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ "РћС‚", Р»РµС‚';
+comment on column transport_tax_rate.max_age is 'РЎСЂРѕРє РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ "Р”Рѕ", Р»РµС‚';
+comment on column transport_tax_rate.min_power is 'РњРѕС‰РЅРѕСЃС‚СЊ "РћС‚", Р».СЃ.';
+comment on column transport_tax_rate.max_power is 'РњРѕС‰РЅРѕСЃС‚СЊ "Р”Рѕ", Р».СЃ.';
+comment on column transport_tax_rate.value is 'РЎС‚Р°РІРєР°, СЂСѓР±.';
 ---------------------------------------------------------------------------------------------------
 
 create table transport_type_code (
@@ -49,11 +49,11 @@ alter table transport_type_code add constraint transport_type_code_pk primary ke
 alter table transport_type_code add constraint transport_type_code_un_code unique (code);
 alter table transport_type_code add constraint transport_type_code_fk_parent foreign key(parent_id) references transport_type_code(id);
 
-comment on table transport_type_code is 'Код вида транспортного средства';
-comment on column transport_type_code.id is 'Идентификатор записи';
-comment on column transport_type_code.parent_id is 'Идентификатор родительской записи';
-comment on column transport_type_code.code is 'Код типа';
-comment on column transport_type_code.name is 'Наименование';
+comment on table transport_type_code is 'РљРѕРґ РІРёРґР° С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ СЃСЂРµРґСЃС‚РІР°';
+comment on column transport_type_code.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column transport_type_code.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕР№ Р·Р°РїРёСЃРё';
+comment on column transport_type_code.code is 'РљРѕРґ С‚РёРїР°';
+comment on column transport_type_code.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
 
 ---------------------------------------------------------------------------------------------------
 
@@ -64,10 +64,10 @@ name varchar2(128) not null,
 convention varchar2(16) not null
 );
 
-comment on table transport_unit_code is 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)';
-comment on column transport_unit_code.code is 'Код единиц измерения';
-comment on column transport_unit_code.name is 'Наименование единицы измерения';
-comment on column transport_unit_code.convention is 'Условное обозначение';
+comment on table transport_unit_code is 'РљРѕРґС‹ РµРґРёРЅРёС† РёР·РјРµСЂРµРЅРёСЏ РЅР°Р»РѕРіРѕРІРѕР№ Р±Р°Р·С‹ РЅР° РѕСЃРЅРѕРІР°РЅРёРё РћРљР•Р (Р’С‹РїРёСЃРєР°)';
+comment on column transport_unit_code.code is 'РљРѕРґ РµРґРёРЅРёС† РёР·РјРµСЂРµРЅРёСЏ';
+comment on column transport_unit_code.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РµРґРёРЅРёС†С‹ РёР·РјРµСЂРµРЅРёСЏ';
+comment on column transport_unit_code.convention is 'РЈСЃР»РѕРІРЅРѕРµ РѕР±РѕР·РЅР°С‡РµРЅРёРµ';
 ---------------------------------------------------------------------------------------------------
 create table transport_tax_benefit_code
 (
@@ -78,10 +78,10 @@ regulation varchar(128) not null
 
 alter table transport_tax_benefit_code add constraint transport_tax_benefit_code_pk primary key (code);
 
-comment on table transport_tax_benefit_code is 'Коды налоговых льгот';
-comment on column transport_tax_benefit_code.code is 'Код налоговых льгот';
-comment on column transport_tax_benefit_code.name is 'Наименование льготы';
-comment on column transport_tax_benefit_code.regulation is 'Основание';
+comment on table transport_tax_benefit_code is 'РљРѕРґС‹ РЅР°Р»РѕРіРѕРІС‹С… Р»СЊРіРѕС‚';
+comment on column transport_tax_benefit_code.code is 'РљРѕРґ РЅР°Р»РѕРіРѕРІС‹С… Р»СЊРіРѕС‚';
+comment on column transport_tax_benefit_code.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ Р»СЊРіРѕС‚С‹';
+comment on column transport_tax_benefit_code.regulation is 'РћСЃРЅРѕРІР°РЅРёРµ';
 
 ---------------------------------------------------------------------------------------------------
 create table transport_eco_class
@@ -92,6 +92,6 @@ name varchar2(20) not null
 
 alter table transport_eco_class add constraint transport_eco_class_pk primary key (code);
 
-comment on table transport_eco_class is 'Экономические классы транспортных средств';
-comment on column transport_eco_class.code is 'Код';
-comment on column transport_eco_class.name is 'Наименование';
+comment on table transport_eco_class is 'Р­РєРѕРЅРѕРјРёС‡РµСЃРєРёРµ РєР»Р°СЃСЃС‹ С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹С… СЃСЂРµРґСЃС‚РІ';
+comment on column transport_eco_class.code is 'РљРѕРґ';
+comment on column transport_eco_class.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';

@@ -6,11 +6,11 @@ create table form_type (
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
 
-comment on table form_type is 'Типы налоговых форм (названия)';
+comment on table form_type is 'РўРёРїС‹ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј (РЅР°Р·РІР°РЅРёСЏ)';
 
-comment on column form_type.id is 'Идентификатор';
-comment on column form_type.name is 'Наименование';
-comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column form_type.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ';
+comment on column form_type.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ';
+comment on column form_type.tax_type is 'Р’РёРґ РЅР°Р»РѕРіР° (I-РЅР° РїСЂРёР±С‹Р»СЊ, P-РЅР° РёРјСѓС‰РµСЃС‚РІРѕ, T-С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹Р№, V-РќР”РЎ)';
 
 ---------------------------------------------------------------------------------------------------
 create table report_period
@@ -25,11 +25,11 @@ alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
 alter table report_period add constraint report_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
 
-comment on table report_period is 'Отчетные периоды';
-comment on column report_period.id is 'Первичный ключ';
-comment on column report_period.name is 'Наименование периода';
-comment on column report_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
-comment on column report_period.is_active is 'Признак активности';
+comment on table report_period is 'РћС‚С‡РµС‚РЅС‹Рµ РїРµСЂРёРѕРґС‹';
+comment on column report_period.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column report_period.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРµСЂРёРѕРґР°';
+comment on column report_period.tax_type is 'Р’РёРґ РЅР°Р»РѕРіР° (I-РЅР° РїСЂРёР±С‹Р»СЊ, P-РЅР° РёРјСѓС‰РµСЃС‚РІРѕ, T-С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹Р№, V-РќР”РЎ)';
+comment on column report_period.is_active is 'РџСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё';
 
 ---------------------------------------------------------------------------------------------------
 create table form (
@@ -44,13 +44,13 @@ alter table form add constraint form_pk primary key (id);
 alter table form add constraint form_fk_type_id foreign key (type_id) references form_type(id);
 alter table form add constraint form_uniq_version unique(type_id, version);
 alter table form add constraint form_check_active check (is_active in (0, 1));
-comment on table form is 'Описания налоговых форм';
-comment on column form.data_rows is 'Предопределённые строки формы в формате JSON';
-comment on column form.id is 'Первичный ключ';
-comment on column form.is_active is 'Признак активности';
-comment on column form.type_id is 'Идентификатор вида налоговой формы';
-comment on column form.version is 'Версия формы (уникально в рамках типа)';
-comment on column form.edition is 'Номер редакции записи';
+comment on table form is 'РћРїРёСЃР°РЅРёСЏ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column form.data_rows is 'РџСЂРµРґРѕРїСЂРµРґРµР»С‘РЅРЅС‹Рµ СЃС‚СЂРѕРєРё С„РѕСЂРјС‹ РІ С„РѕСЂРјР°С‚Рµ JSON';
+comment on column form.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form.is_active is 'РџСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё';
+comment on column form.type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРёРґР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form.version is 'Р’РµСЂСЃРёСЏ С„РѕСЂРјС‹ (СѓРЅРёРєР°Р»СЊРЅРѕ РІ СЂР°РјРєР°С… С‚РёРїР°)';
+comment on column form.edition is 'РќРѕРјРµСЂ СЂРµРґР°РєС†РёРё Р·Р°РїРёСЃРё';
 ---------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
@@ -76,19 +76,19 @@ alter table form_column add constraint form_column_chk_editable check(editable i
 alter table form_column add constraint form_column_chk_mandatory check(mandatory in (0, 1));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 5) or (type <> 'N' and precision is null));
 
-comment on table form_column is 'Описания столбцов налоговых форм';
-comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
-comment on column form_column.dictionary_code is 'Код справочника (для строковых и числовых столбцов)';
-comment on column form_column.editable is 'Признак возможности редактирования пользователем';
-comment on column form_column.form_id is 'Идентификатор налоговой формы';
-comment on column form_column.group_name is 'Название группы столбцов';
-comment on column form_column.id is 'Первичный ключ';
-comment on column form_column.mandatory is 'Признак обязательности';
-comment on column form_column.name is 'Название столбца';
-comment on column form_column.ord is 'Порядковый номер';
-comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
-comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
-comment on column form_column.width is 'Ширина (в символах)';
+comment on table form_column is 'РћРїРёСЃР°РЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column form_column.alias is 'РљРѕРґ СЃС‚РѕР»Р±С†Р°, РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РІ СЃРєСЂРёРїС‚РёРЅРіРµ';
+comment on column form_column.dictionary_code is 'РљРѕРґ СЃРїСЂР°РІРѕС‡РЅРёРєР° (РґР»СЏ СЃС‚СЂРѕРєРѕРІС‹С… Рё С‡РёСЃР»РѕРІС‹С… СЃС‚РѕР»Р±С†РѕРІ)';
+comment on column form_column.editable is 'РџСЂРёР·РЅР°Рє РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј';
+comment on column form_column.form_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_column.group_name is 'РќР°Р·РІР°РЅРёРµ РіСЂСѓРїРїС‹ СЃС‚РѕР»Р±С†РѕРІ';
+comment on column form_column.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_column.mandatory is 'РџСЂРёР·РЅР°Рє РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚Рё';
+comment on column form_column.name is 'РќР°Р·РІР°РЅРёРµ СЃС‚РѕР»Р±С†Р°';
+comment on column form_column.ord is 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ';
+comment on column form_column.precision is 'РљРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ (С‚РѕР»СЊРєРѕ РґР»СЏ С‡РёСЃР»РѕРІС‹С… СЃС‚РѕР»Р±С†РѕРІ)';
+comment on column form_column.type is 'РўРёРї СЃС‚РѕР»Р±С†Р° (S- СЃС‚СЂРѕРєР°, N вЂ“ С‡РёСЃР»Рѕ, D вЂ“ РґР°С‚Р°)';
+comment on column form_column.width is 'РЁРёСЂРёРЅР° (РІ СЃРёРјРІРѕР»Р°С…)';
 
 ---------------------------------------------------------------------------------------------------
 create table form_script (
@@ -105,14 +105,14 @@ alter table form_script add constraint form_script_fk_form_id foreign key (form_
 alter table form_script add constraint form_script_chk_per_row check (per_row in (0,1));
 create sequence seq_form_script;
 
-comment on table form_script is 'Скрипты';
-comment on column form_script.body is 'Тело скрипта';
-comment on column form_script.condition is 'Условие выполнения скрипта';
-comment on column form_script.form_id is 'Идентификатор формы';
-comment on column form_script.id is 'Первичный ключ';
-comment on column form_script.name is 'Наименование скрипта';
-comment on column form_script.ord is 'Порядок исполнения';
-comment on column form_script.per_row is 'Признак строкового скрипта';
+comment on table form_script is 'РЎРєСЂРёРїС‚С‹';
+comment on column form_script.body is 'РўРµР»Рѕ СЃРєСЂРёРїС‚Р°';
+comment on column form_script.condition is 'РЈСЃР»РѕРІРёРµ РІС‹РїРѕР»РЅРµРЅРёСЏ СЃРєСЂРёРїС‚Р°';
+comment on column form_script.form_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РѕСЂРјС‹';
+comment on column form_script.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_script.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЃРєСЂРёРїС‚Р°';
+comment on column form_script.ord is 'РџРѕСЂСЏРґРѕРє РёСЃРїРѕР»РЅРµРЅРёСЏ';
+comment on column form_script.per_row is 'РџСЂРёР·РЅР°Рє СЃС‚СЂРѕРєРѕРІРѕРіРѕ СЃРєСЂРёРїС‚Р°';
 ---------------------------------------------------------------------------------------------------
 create table department
 (
@@ -123,11 +123,11 @@ type number(9) not null
 );
 alter table department add constraint department_pk primary key (id);
 
-comment on table department is 'Подразделения банка';
-comment on column department.id is 'Идентификатор записи';
-comment on column department.name is 'Наименование подразделения';
-comment on column department.parent_id is 'Идентификатор родительского подразделения';
-comment on column department.type is 'Тип подразделения';
+comment on table department is 'РџРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р±Р°РЅРєР°';
+comment on column department.id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р·Р°РїРёСЃРё';
+comment on column department.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.parent_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department.type is 'РўРёРї РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
 
 alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
@@ -149,13 +149,13 @@ alter table form_data add constraint form_data_fk_period_id foreign key (report_
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 
-comment on table form_data is 'Данные по налоговым формам';
-comment on column form_data.id is 'Первичный ключ';
-comment on column form_data.form_id is 'Идентификатор формы';
-comment on column form_data.department_id is 'Идентификатор подраздения';
-comment on column form_data.state is 'Код состояния';
-comment on column form_data.kind is 'Тип налоговой формы';
-comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
+comment on table form_data is 'Р”Р°РЅРЅС‹Рµ РїРѕ РЅР°Р»РѕРіРѕРІС‹Рј С„РѕСЂРјР°Рј';
+comment on column form_data.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column form_data.form_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РѕСЂРјС‹';
+comment on column form_data.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµРЅРёСЏ';
+comment on column form_data.state is 'РљРѕРґ СЃРѕСЃС‚РѕСЏРЅРёСЏ';
+comment on column form_data.kind is 'РўРёРї РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
+comment on column form_data.report_period_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°';
 
 create sequence seq_form_data;
 
@@ -173,12 +173,12 @@ alter table data_row add constraint data_row_fk_form_data_id foreign key (form_d
 alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord);
 alter table data_row add constraint data_row_managed_check check (MANAGED_BY_SCRIPTS IN (0, 1));
 
-comment on table data_row is 'Строки данных налоговых форм';
-comment on column data_row.alias is 'Идентификатор строки';
-comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
-comment on column data_row.id is 'Код строки для доступа из скриптов';
-comment on column data_row.ord is 'Номер строки в форме';
-comment on column data_row.managed_by_scripts is 'Признак того, что содержимое строки контролируется скриптами';
+comment on table data_row is 'РЎС‚СЂРѕРєРё РґР°РЅРЅС‹С… РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column data_row.alias is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+comment on column data_row.form_data_id is 'РЎСЃС‹Р»РєР° РЅР° Р·Р°РїРёСЃС‚СЊ РІ FORM_DATA';
+comment on column data_row.id is 'РљРѕРґ СЃС‚СЂРѕРєРё РґР»СЏ РґРѕСЃС‚СѓРїР° РёР· СЃРєСЂРёРїС‚РѕРІ';
+comment on column data_row.ord is 'РќРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С„РѕСЂРјРµ';
+comment on column data_row.managed_by_scripts is 'РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ СЃРѕРґРµСЂР¶РёРјРѕРµ СЃС‚СЂРѕРєРё РєРѕРЅС‚СЂРѕР»РёСЂСѓРµС‚СЃСЏ СЃРєСЂРёРїС‚Р°РјРё';
 
 create sequence seq_data_row;
 ---------------------------------------------------------------------------------------------------
@@ -191,10 +191,10 @@ create table numeric_value (
 alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
 alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
 alter table numeric_value add constraint numeric_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-comment on table numeric_value is 'Числовые значения налоговых форм';
-comment on column numeric_value.column_id is 'Идентификатор столбца';
-comment on column numeric_value.row_id is 'Идентификатор строки';
-comment on column numeric_value.value is 'Значение';
+comment on table numeric_value is 'Р§РёСЃР»РѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column numeric_value.column_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚РѕР»Р±С†Р°';
+comment on column numeric_value.row_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+comment on column numeric_value.value is 'Р—РЅР°С‡РµРЅРёРµ';
 ---------------------------------------------------------------------------------------------------
 
 create table string_value (
@@ -205,10 +205,10 @@ create table string_value (
 alter table string_value add constraint string_value_pk primary key (row_id, column_id);
 alter table string_value add constraint string_value_fk_column_id foreign key (column_id) references form_column(id);
 alter table string_value add constraint string_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-comment on table string_value is 'Строковые значения налоговых форм';
-comment on column string_value.column_id is 'Идентификатор столбца';
-comment on column string_value.row_id is 'Идентификатор строки';
-comment on column string_value.value is 'Значение';
+comment on table string_value is 'РЎС‚СЂРѕРєРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј';
+comment on column string_value.column_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚РѕР»Р±С†Р°';
+comment on column string_value.row_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+comment on column string_value.value is 'Р—РЅР°С‡РµРЅРёРµ';
 
 ---------------------------------------------------------------------------------------------------
 
@@ -220,10 +220,10 @@ create table date_value (
 alter table date_value add constraint date_value_pk primary key (row_id, column_id);
 alter table date_value add constraint date_value_fk_column_id foreign key (column_id) references form_column(id);
 alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-comment on table date_value is 'Значения налоговых форм типа дата';
-comment on column date_value.column_id is 'Идентификатор столбца';
-comment on column date_value.row_id is 'Идентификатор строки';
-comment on column date_value.value is 'Значение';
+comment on table date_value is 'Р—РЅР°С‡РµРЅРёСЏ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј С‚РёРїР° РґР°С‚Р°';
+comment on column date_value.column_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚РѕР»Р±С†Р°';
+comment on column date_value.row_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+comment on column date_value.value is 'Р—РЅР°С‡РµРЅРёРµ';
 
 ---------------------------------------------------------------------------------------------------
 create table department_form_type
@@ -237,9 +237,9 @@ alter table department_form_type add constraint dept_form_type_fk_type_id foreig
 
 alter table department_form_type add constraint dept_form_type_pk primary key (department_id, form_type_id);
 
-comment on table department_form_type is 'Связь подразделения банка с формой';
-comment on column department_form_type.department_id is 'Идентификатор подразделения';
-comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
+comment on table department_form_type is 'РЎРІСЏР·СЊ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р±Р°РЅРєР° СЃ С„РѕСЂРјРѕР№';
+comment on column department_form_type.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
+comment on column department_form_type.form_type_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРёРґР° РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹';
 ---------------------------------------------------------------------------------------------------
 create table event_script( 
   event_code number(9) not null, 
@@ -247,10 +247,10 @@ create table event_script(
   ord number(9) not null 
 );
 
-comment on table event_script is 'Привязка скриптов налоговой формы к событиям системы';
-comment on column event_script.event_code is 'Тип события';
-comment on column event_script.script_id is 'Идентификатор скрипта';
-comment on column event_script.ord is 'Порядок выполнения скрипта';
+comment on table event_script is 'РџСЂРёРІСЏР·РєР° СЃРєСЂРёРїС‚РѕРІ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ Рє СЃРѕР±С‹С‚РёСЏРј СЃРёСЃС‚РµРјС‹';
+comment on column event_script.event_code is 'РўРёРї СЃРѕР±С‹С‚РёСЏ';
+comment on column event_script.script_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРєСЂРёРїС‚Р°';
+comment on column event_script.ord is 'РџРѕСЂСЏРґРѕРє РІС‹РїРѕР»РЅРµРЅРёСЏ СЃРєСЂРёРїС‚Р°';
 
 alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 101, 102, 103, 104, 105, 106, 203, 204, 205, 206));
 
@@ -267,11 +267,11 @@ create table sec_user (
 alter table sec_user add constraint sec_user_pk primary key (id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
 
-comment on table sec_user is 'Пользователи системы';
-comment on column sec_user.id is 'Первичный ключ';
-comment on column sec_user.login is 'Логин пользователя';
-comment on column sec_user.name is 'Полное имя пользователя';
-comment on column sec_user.department_id is 'Идентификатор подразделения';
+comment on table sec_user is 'РџРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃРёСЃС‚РµРјС‹';
+comment on column sec_user.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column sec_user.login is 'Р›РѕРіРёРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user.name is 'РџРѕР»РЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user.department_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ';
 ---------------------------------------------------------------------------------------------------
 create table sec_role (
 	id number(9) not null,
@@ -282,10 +282,10 @@ create table sec_role (
 alter table sec_role add constraint sec_role_pk primary key (id);
 alter table sec_role add constraint sec_role_uniq_alias unique (alias); 
 
-comment on table sec_role is 'Системные роли';
-comment on column sec_role.id is 'Первичный ключ';
-comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
-comment on column sec_role.name is 'Наименование роли';
+comment on table sec_role is 'РЎРёСЃС‚РµРјРЅС‹Рµ СЂРѕР»Рё';
+comment on column sec_role.id is 'РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡';
+comment on column sec_role.alias is 'РљРѕРґ СЂРѕР»Рё (РјРЅРµРјРѕРЅРёС‡РµСЃРєРёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ)';
+comment on column sec_role.name is 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ СЂРѕР»Рё';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
 	user_id number(9) not null,
@@ -296,6 +296,6 @@ alter table sec_user_role add constraint sec_user_role_pk primary key (user_id, 
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
 
-comment on table sec_user_role is 'Привязка ролей к пользователям';
-comment on column sec_user_role.user_id is 'Идентификатор пользователя';
-comment on column sec_user_role.role_id is 'Идентификатор роли';
+comment on table sec_user_role is 'РџСЂРёРІСЏР·РєР° СЂРѕР»РµР№ Рє РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРј';
+comment on column sec_user_role.user_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ';
+comment on column sec_user_role.role_id is 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЂРѕР»Рё';
