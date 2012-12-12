@@ -27,7 +27,8 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 /**
- * TODO: Разделить класс на 2: показ и создание формы. Result можно оставить общий.
+ * Каноничный пример антипаттерна "Волшебный хандлер".
+ * TODO: Разделить класс на 3: показ, создание формы, изменение статуса формы. Result можно оставить общий.
  */
 @Service
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
