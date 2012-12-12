@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -86,6 +85,20 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	public boolean validateTaxBaseUnit(BigDecimal code) {
 		return getJdbcTemplate().queryForInt(
 				"select count(*) from transport_unit_code where code=?",
+				new Object[]{code}, new int[]{Types.NUMERIC}
+		) > 0;
+	}
+
+	/**
+	 * Проверяет существование кода экологического класса
+	 *
+	 * @param code код экологического класса
+	 * @return true - если код существует, false - если нет
+	 */
+	@Override
+	public boolean validateEcoClass(BigDecimal code) {
+		return getJdbcTemplate().queryForInt(
+				"select count(*) from transport_eco_class where code = ?",
 				new Object[]{code}, new int[]{Types.NUMERIC}
 		) > 0;
 	}

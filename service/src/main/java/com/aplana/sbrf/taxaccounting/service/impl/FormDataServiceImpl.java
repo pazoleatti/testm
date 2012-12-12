@@ -235,12 +235,14 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления");
 		}
 
-		formDataScriptingService.executeScripts(userDao.getUser(userId), formDataDao.get(formDataId), workflowMove.getEvent(), logger);
+		FormData formData = formDataDao.get(formDataId);
+		formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getEvent(), logger);
+		checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
 
 			if(workflowMove.getAfterEvent()!=null){
-				formDataScriptingService.executeScripts(userDao.getUser(userId), formDataDao.get(formDataId), workflowMove.getAfterEvent(), logger);
+				formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getAfterEvent(), logger);
 			}
 
 			return true;

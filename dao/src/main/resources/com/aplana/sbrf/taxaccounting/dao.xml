@@ -62,6 +62,12 @@
 						  p:sqlQuery="select code as value, name from transport_unit_code order by code"
 					/>
 				</entry>
+				<entry key="transportEcoClass">
+					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
+						  p:dictionaryName="ТН - Коды классов экологических стандартов"
+						  p:sqlQuery="select code as value, name from transport_eco_class order by code"
+					/>
+				</entry>
 			</map>
 		</property>
 	</bean>
