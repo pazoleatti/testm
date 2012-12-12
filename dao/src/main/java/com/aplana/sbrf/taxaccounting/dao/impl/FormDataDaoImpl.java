@@ -206,7 +206,19 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				new int[] { Types.NUMERIC }
 			);
 		}
+
+		insertRows(formData);
+		return formDataId;
+	}
+	
+	private void insertRows(final FormData formData) {
 		final List<DataRow> dataRows = formData.getDataRows();
+		if (dataRows.isEmpty()) {
+			return;
+		}
+		
+		final long formDataId = formData.getId();		
+		
 		OrderUtils.reorder(dataRows);
 		// Теперь мы уверены, что order везде заполнен, уникален и идёт, начиная с 1, возрастая без пропусков.
 		final List<ValueRecord<BigDecimal>> numericValues = new ArrayList<ValueRecord<BigDecimal>>();
@@ -240,8 +252,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			}
 		};
 
-		jt.batchUpdate("insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, " + formDataId + ", ?, ?)", bpss);
+		JdbcTemplate jt = getJdbcTemplate();
 		
+		jt.batchUpdate("insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, " + formDataId + ", ?, ?)", bpss);
+
 		// Получаем массив идентификаторов строк, индекс записи в массиве соответствует порядковому номеру строки
 		final List<Long> rowIds = jt.queryForList(
 			"select id from data_row where form_data_id = ? order by ord",
@@ -253,8 +267,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		insertValues("numeric_value", numericValues, rowIds);
 		insertValues("string_value", stringValues, rowIds);
 		insertValues("date_value", dateValues, rowIds);
-
-		return formDataId;
 	}
 
 	private <T> void insertValues(String tableName, final List<ValueRecord<T>> values, final List<Long> rowIds) {
