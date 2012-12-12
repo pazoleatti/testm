@@ -49,19 +49,15 @@ public class FormDataXlsxReportBuilder {
 	
 	
 	public FormDataXlsxReportBuilder() throws IOException {
-		InputStream templeteInputStream = Thread.currentThread().getContextClassLoader()
+		templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
 		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));
 		sheet = workBook.getSheet("List1");
 	}
 	
 	public FormDataXlsxReportBuilder(FormData data) throws IOException {
+		this();
 		this.data = data;
-		
-		templeteInputStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream(TEMPLATE);
-		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));
-		sheet = workBook.getSheet("List1");
 		//System.out.println("----sheet " + sheet + "------------- строка" + sheet.createRow(0).createCell(0));
 		sheet.createRow(0).createCell(0).setCellValue(data.getFormType().getName());
 		
@@ -106,8 +102,8 @@ public class FormDataXlsxReportBuilder {
 		CellStyle cellStyle = workBook.createCellStyle();
 		boolean isSecondTable = false;
 		
-		cellStyle.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
-		cellStyle.setFillPattern(HSSFColor.BRIGHT_GREEN.index);
+		/*cellStyle.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
+		cellStyle.setFillPattern(HSSFColor.BRIGHT_GREEN.index);*/
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		cellStyle.setWrapText(true);
 
