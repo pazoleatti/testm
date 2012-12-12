@@ -112,12 +112,15 @@ public class FormDataPresenter extends
 							for (LogEntry logEntry : le) {
 								if (LogLevel.ERROR.equals(logEntry.getLevel())){
 									hasError = true;
+									break;
 								}
 							}
 
 							if (hasError){
+								if (!isVisible()) {
+									MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
+								}
 								getProxy().manualRevealFailed();
-								MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
 							} else {
 								getProxy().manualReveal(FormDataPresenter.this);
 							}
