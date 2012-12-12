@@ -178,6 +178,7 @@ comment on column data_row.alias is 'Идентификатор строки';
 comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
 comment on column data_row.id is 'Код строки для доступа из скриптов';
 comment on column data_row.ord is 'Номер строки в форме';
+comment on column data_row.managed_by_scripts is 'Признак того, что содержимое строки контролируется скриптами';
 
 create sequence seq_data_row;
 ---------------------------------------------------------------------------------------------------
