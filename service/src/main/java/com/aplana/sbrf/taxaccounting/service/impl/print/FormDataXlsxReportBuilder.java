@@ -123,7 +123,8 @@ public class FormDataXlsxReportBuilder {
 				if(data.getFormColumns().get(i).getGroupName()==null){
 					
 					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
-					//fillWidth(i,data.getFormColumns().get(i).getName().length());
+					//System.out.println("--" + data.getFormColumns().get(i).getName() + ":" + data.getFormColumns().get(i).getWidth());
+					fillWidth(i,data.getFormColumns().get(i).getWidth());
 					Cell cell = row.createCell(i);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(data.getFormColumns().get(i).getName());
@@ -169,6 +170,8 @@ public class FormDataXlsxReportBuilder {
 		Cell cell = row1.createCell(startCell);
 		cell.setCellStyle(style);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
+		//System.out.println("--" + data.getFormColumns().get(startCell).getName() + ":" + data.getFormColumns().get(startCell).getWidth());
+		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
 		
 		for(int i = startCell;i<=endCell;i++){
 			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
