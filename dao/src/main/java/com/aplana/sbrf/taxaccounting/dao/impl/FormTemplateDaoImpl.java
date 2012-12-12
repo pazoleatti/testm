@@ -65,13 +65,16 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	public FormTemplate get(int formId) {
 		logger.info("Fetching FormTemplate with id = " + formId);
 		JdbcTemplate jt = getJdbcTemplate();
-		final FormTemplate form = jt.queryForObject(
-				"select * from form where id = ?",
-				new Object[]{formId},
-				new int[]{Types.NUMERIC},
-				new FormTemplateMapper(true)
-		);
-		return form;
+		try {
+			return jt.queryForObject(
+					"select * from form where id = ?",
+					new Object[]{formId},
+					new int[]{Types.NUMERIC},
+					new FormTemplateMapper(true)
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Не удалось найти описание налоговой формы с id = " + formId);
+		}
 	}
 
 	/**

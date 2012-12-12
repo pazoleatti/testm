@@ -5,6 +5,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -13,19 +14,34 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-//TODO: переработать, чтобы не было необходимости поднимать полный файл dao.xml, а то получается integration-тест вместо unit-теста 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
+@ContextConfiguration({"FormTypeDaoTest.xml"})
+@DirtiesContext
 public class FormTypeDaoTest {
 	@Autowired
 	private FormTypeDao formTypeDao;
 	
 	@Test
 	public void testGet() {
-		FormType t = formTypeDao.getType(Constants.DEMO_FORM_TYPE_ID);
-		Assert.assertEquals("DEMO", t.getName());
-		Assert.assertEquals(Constants.DEMO_FORM_TYPE_ID, t.getId());
+		FormType t = formTypeDao.getType(Constants.TRANSPORT_FORM_TYPE_ID);
+		Assert.assertEquals("FormType - Transport", t.getName());
+		Assert.assertEquals(Constants.TRANSPORT_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(TaxType.TRANSPORT, t.getTaxType());
+		
+		t = formTypeDao.getType(Constants.INCOME_FORM_TYPE_ID);
+		Assert.assertEquals("FormType - Income", t.getName());
+		Assert.assertEquals(Constants.INCOME_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(TaxType.INCOME, t.getTaxType());
+		
+		t = formTypeDao.getType(Constants.VAT_FORM_TYPE_ID);
+		Assert.assertEquals("FormType - VAT", t.getName());
+		Assert.assertEquals(Constants.VAT_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.VAT, t.getTaxType());
+		
+		t = formTypeDao.getType(Constants.PROPERTY_FORM_TYPE_ID);
+		Assert.assertEquals("FormType - Property", t.getName());
+		Assert.assertEquals(Constants.PROPERTY_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(TaxType.PROPERTY, t.getTaxType());		
 	}
 	
 	@Test(expected=DaoException.class)

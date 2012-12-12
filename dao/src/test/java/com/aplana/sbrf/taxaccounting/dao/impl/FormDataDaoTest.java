@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,9 +17,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
-//TODO: переработать, чтобы не было необходимости поднимать полный файл dao.xml, а то получается integration-тест вместо unit-теста 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
+@ContextConfiguration({"FormDataDaoTest.xml"})
+@DirtiesContext
 public class FormDataDaoTest {
 	@Autowired
 	FormTemplateDao formTemplateDao;
@@ -28,7 +29,8 @@ public class FormDataDaoTest {
 	
 	@Test
 	public void testDao() {
-		FormTemplate form = formTemplateDao.get(Constants.DEMO_FORM_TEMPLATE_ID);
+		// TODO: разбить метод на несколько тестов
+		FormTemplate form = formTemplateDao.get(1);
 		
 		FormData fd = new FormData(form);
 		

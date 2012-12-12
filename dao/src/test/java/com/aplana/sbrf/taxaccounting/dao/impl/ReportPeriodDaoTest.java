@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,57 +17,58 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-//TODO: переработать, чтобы не было необходимости поднимать полный файл dao.xml, а то получается integration-тест вместо unit-теста
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
+@ContextConfiguration({"ReportPeriodDaoTest.xml"})
+@DirtiesContext
 public class ReportPeriodDaoTest {
-	/*
-	* Тесты основываются на том, что в БД уже лежит отчетный период со значениями id = 1 tax_type = 'T' и is_active = 1
-	* TODO: переписать тесты, когда будут реализованы методы сохранения отчетных периодов
-	*/
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
 	@Test
 	public void getSuccessfulTest() {
 		ReportPeriod reportPeriod = reportPeriodDao.get(1);
-		assertEquals("Отчетный период 1", reportPeriod.getName());
-		assertEquals(true, reportPeriod.isActive());
+		assertEquals("Transport report period 1", reportPeriod.getName());
+		assertTrue(reportPeriod.isActive());
 		assertEquals(TaxType.TRANSPORT, reportPeriod.getTaxType());
 	}
 
 	@Test(expected = DaoException.class)
-	public void getDaoExceptionTest() {
-		reportPeriodDao.get(1000);
+	public void getNotExistantTest() {
+		reportPeriodDao.get(-1);
 	}
 
 	@Test
 	public void getCurrentPeriodSuccessfulTest() {
 		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.TRANSPORT);
-		assertEquals(1, reportPeriod.getId());
-		assertEquals("Отчетный период 1", reportPeriod.getName());
-		assertEquals(true, reportPeriod.isActive());
+		assertEquals("Transport report period 1", reportPeriod.getName());
+		assertTrue(reportPeriod.isActive());
+		assertEquals(TaxType.TRANSPORT, reportPeriod.getTaxType());
 	}
 
 	@Test
-	public void getCurrentPeriodNullResultTest() {
+	public void getCurrentPeriodEmptyTest() {
 		ReportPeriod reportPeriod = reportPeriodDao.getCurrentPeriod(TaxType.INCOME);
 		assertNull(reportPeriod);
 	}
+	
+	@Test(expected=DaoException.class)
+	public void getCurrentPeriodDuplicateTest() {
+		reportPeriodDao.getCurrentPeriod(TaxType.VAT);
+	}
+	
 
 	@Test
 	public void listAllPeriodsByTaxTypeSuccessfulTest() {
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.TRANSPORT);
-		assertEquals(1, reportPeriodList.size());
-		assertEquals(1, reportPeriodList.get(0).getId());
-		assertEquals("Отчетный период 1", reportPeriodList.get(0).getName());
-		assertEquals(TaxType.TRANSPORT, reportPeriodList.get(0).getTaxType());
-		assertTrue(reportPeriodList.get(0).isActive());
-	}
+		assertEquals(2, reportPeriodList.size());
+		
+		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.VAT);
+		assertEquals(3, reportPeriodList.size());
 
-	@Test
-	public void listAllPeriodsByTaxTypeNullResultTest() {
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.INCOME);
-		assertEquals(0, reportPeriodList.size());
+		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.INCOME);
+		assertEquals(1, reportPeriodList.size());
+		
+		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.PROPERTY);
+		assertEquals(0, reportPeriodList.size());		
 	}
 }

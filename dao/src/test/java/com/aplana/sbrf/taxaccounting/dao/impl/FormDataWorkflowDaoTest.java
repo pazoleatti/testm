@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -18,9 +19,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
-//TODO: переработать, чтобы не было необходимости поднимать полный файл dao.xml, а то получается integration-тест вместо unit-теста 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/applicationContext.xml", "classpath:com/aplana/sbrf/taxaccounting/dao.xml"})
+@ContextConfiguration({"FormDataWorkflowDaoTest.xml"})
+@DirtiesContext
 public class FormDataWorkflowDaoTest {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
@@ -35,7 +36,7 @@ public class FormDataWorkflowDaoTest {
 	
 	@Before
 	public void setup() {
-		FormTemplate ft = formTemplateDao.get(Constants.DEMO_FORM_TEMPLATE_ID);
+		FormTemplate ft = formTemplateDao.get(1);
 		FormData formData = new FormData(ft);
 		formData.setDepartmentId(Department.ROOT_BANK_ID);
 		formData.setKind(FormDataKind.SUMMARY);
