@@ -3,6 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<g:HTMLPanel>
 		<g:Label ui:field="userName" />
+		<br/>
 		<div><g:Anchor href="logout" text="выйти"/></div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
