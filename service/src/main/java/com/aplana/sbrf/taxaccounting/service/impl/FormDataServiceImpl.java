@@ -210,8 +210,11 @@ public class FormDataServiceImpl implements FormDataService {
 			messageDecorator.setRowIndex(rowIndex);
 			List<String> columnNames = new ArrayList<String>();
 			for (Column col : columns) {
-				if (col.isMandatory() && row.get(col.getAlias()) == null) {
-					columnNames.add(col.getName());
+				if (col.isMandatory()) {
+					Object value = row.get(col.getAlias());
+					if (value == null || (value instanceof String && ((String) value).isEmpty())) {
+						columnNames.add(col.getName());
+					}
 				}
 			}
 			if (!columnNames.isEmpty()) {
