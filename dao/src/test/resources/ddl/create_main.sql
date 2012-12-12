@@ -165,11 +165,14 @@ create table data_row (
 	id number(18) not null,
 	form_data_id number(18) not null,
 	alias varchar(20),
-	ord number(9) not null
+	ord number(9) not null,
+	MANAGED_BY_SCRIPTS number(1) default 0 not null
 );
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id);
 alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord);
+alter table data_row add constraint data_row_managed_check check (MANAGED_BY_SCRIPTS IN (0, 1));
+
 comment on table data_row is 'Строки данных налоговых форм';
 comment on column data_row.alias is 'Идентификатор строки';
 comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
