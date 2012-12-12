@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import java.util.ArrayList;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -56,7 +55,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	}
 	
 	@Override
-	public GetFormDataResult execute(GetFormData action, ExecutionContext context) throws ActionException {
+	public GetFormDataResult execute(GetFormData action, ExecutionContext context) throws ActionException, WrongInputDataServiceException {
 		checkAction(action);
 		
 		TAUser user = securityService.currentUser();
@@ -72,12 +71,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formData = formDataService.createFormData(logger, userId, formTemplateDao.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 
-			if(action.getReportPeriodId() != null){
-				System.out.println("-----" + formData.getReportPeriodId()+ ":" + reportPeriodDao.get(action.getReportPeriodId().intValue()));
-				result.setReportPeriod(reportPeriodDao.get(action.getReportPeriodId().intValue()).getName());
-			}
-
+			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId().intValue()).getName());
 			result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
+
 			FormDataAccessParams accessParams = new FormDataAccessParams();
 			accessParams.setCanDelete(false);
 			accessParams.setCanEdit(true);
@@ -106,8 +102,22 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		// Ничего не делаем
 	}
 	
-	private void checkAction(GetFormData action){
-		if(action.getFormDataId() == Long.MAX_VALUE && (action.getDepartmentId()==Long.MAX_VALUE || action.getFormDataKind()==Long.MAX_VALUE || action.getFormDataTypeId() == Long.MAX_VALUE))
-			throw new ServiceException("Не выбрано подразделение");
+	private void checkAction(GetFormData action) throws WrongInputDataServiceException {
+		String errorMessage = "";
+		if (action.getFormDataId() == Long.MAX_VALUE) {
+			if (action.getFormDataTypeId() == null) {
+				errorMessage += "не указан вид формы";
+			}
+			if (action.getFormDataKind() == null) {
+				errorMessage += ", не указан тип формы";
+			}
+			if (action.getDepartmentId() == null) {
+				errorMessage += ", не указано подразделение";
+			}
+			if (!errorMessage.isEmpty()) {
+				errorMessage =  errorMessage.startsWith(",") ? errorMessage.substring(1): errorMessage;
+				throw new WrongInputDataServiceException(errorMessage);
+			}
+		}
 	}
 }

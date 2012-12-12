@@ -142,9 +142,7 @@ public class FormDataListPresenter extends
 				.with(FormDataPresenter.DEPARTMENT_ID,
 						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId() : null))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
-						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null))
-				.with(FormDataPresenter.FORM_DATA_RPERIOD_ID,
-						String.valueOf(filterFormData.getReportPeriodId())));
+						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
 	}
 
 }

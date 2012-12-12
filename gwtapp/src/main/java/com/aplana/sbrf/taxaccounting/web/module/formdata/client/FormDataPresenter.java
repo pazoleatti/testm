@@ -9,14 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -66,14 +59,16 @@ public class FormDataPresenter extends
 			}
 			action.setFormDataId(Long.parseLong(request.getParameter(
 					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
-			action.setDepartmentId(Integer.parseInt(request.getParameter(
-					DEPARTMENT_ID, String.valueOf(Integer.MAX_VALUE))));
-			action.setFormDataKind(Long.parseLong((request.getParameter(
-					FORM_DATA_KIND_ID, String.valueOf(Long.MAX_VALUE)))));
-			action.setFormDataTypeId((Long.parseLong((request.getParameter(
-					FORM_DATA_TYPE_ID, String.valueOf(Long.MAX_VALUE))))));
-			action.setReportPeriodId(Long.parseLong(request.getParameter(
-					FORM_DATA_RPERIOD_ID, String.valueOf(Long.MAX_VALUE))));
+
+			String rawParam = "";
+			rawParam = request.getParameter(DEPARTMENT_ID, "null");
+			action.setDepartmentId( (rawParam == "" || rawParam == "null") ? null : Integer.parseInt(rawParam));
+
+			rawParam = request.getParameter(FORM_DATA_KIND_ID, "null");
+			action.setFormDataKind( (rawParam == "" || rawParam == "null") ? null : Long.parseLong(rawParam));
+
+			rawParam = request.getParameter(FORM_DATA_TYPE_ID, "null");
+			action.setFormDataTypeId((rawParam == "" || rawParam == "null") ? null :Long.parseLong(rawParam));
 
 			dispatcher.execute(action,
 					new AbstractCallback<GetFormDataResult>() {
@@ -129,6 +124,25 @@ public class FormDataPresenter extends
 
 							super.onReqSuccess(result);
 						}
+
+						@Override
+						protected void onReqFailure(Throwable throwable){
+							try {
+								throw throwable;
+							} catch (WrongInputDataServiceException exception) {
+								getProxy().manualRevealFailed();
+								MessageEvent.fire(this, "Неудалось создать налоговую форму: " + exception.getMessage());
+							} catch (Throwable exception) {
+								getProxy().manualRevealFailed();
+								MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму", exception);
+							}
+						}
+
+						@Override
+						protected boolean needErrorOnFailure(){
+							return false;
+						}
+
 					});
 		} catch (Exception e) {
 			getProxy().manualRevealFailed();
