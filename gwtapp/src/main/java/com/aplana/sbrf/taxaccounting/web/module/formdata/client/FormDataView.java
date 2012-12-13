@@ -24,6 +24,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
@@ -34,14 +35,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
-	private DataRowColumnFactory factory = new DataRowColumnFactory();	
+	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
 	@UiField
 	DockLayoutPanel dockPanel;
-	
+
 	@UiField
 	Widget logPanel;
-	
+
 	@UiField
 	Bar workflowBar;
 
@@ -96,7 +97,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
 				FormDataUiHandlers handlers = getUiHandlers();
-				if(handlers!=null){
+				if (handlers != null) {
 					handlers.onSelectRow();
 				}
 			}
@@ -129,8 +130,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setRowsData(List<DataRow> rowsData) {
-		formDataTable.setRowCount(rowsData.size());
-		formDataTable.setRowData(rowsData);
+		if (rowsData != null) {
+			formDataTable.setRowCount(rowsData.size());
+			formDataTable.setRowData(rowsData);
+		} else {
+			formDataTable.setRowCount(0);
+			formDataTable.setRowData(new ArrayList<DataRow>(0));
+		}
 		formDataTable.redraw();
 	}
 
@@ -139,8 +145,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		dockPanel.setWidgetHidden(logPanel, (logEntries == null || logEntries.isEmpty()));
 		if (logEntries != null) {
 			loggerList.setRowCount(logEntries.size());
+			loggerList.setRowData(logEntries);
+		} else {
+			loggerList.setRowCount(0);
+			loggerList.setRowData(new ArrayList<LogEntry>(0));
 		}
-		loggerList.setRowData(logEntries);
 		loggerList.redraw();
 	}
 
@@ -214,9 +223,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void setAdditionalFormInfo(String formType, String taxType,
+	public void setAdditionalFormInfo(
+			String formType, String taxType,
 			String formKind, String departmentId, String reportPeriod,
-			String state) {
+			String state
+	) {
 		taxTypeLabel.setText("Тип налога: " + taxType);
 		formTypeLabel.setText(" Вид налоговой формы: " + formType);
 		formKindLabel.setText("Тип налоговой формы: " + formKind);
@@ -232,9 +243,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setWorkflowButtons(List<WorkflowMove> moves) {
 		workflowButtons.clear();
-		
+
 		dockPanel.setWidgetHidden(workflowBar, (moves == null || moves.isEmpty()));
-		
+
 		if (moves != null) {
 			for (final WorkflowMove workflowMove : moves) {
 				Button button = new Button(workflowMove.getName(),

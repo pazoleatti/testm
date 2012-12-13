@@ -2,12 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -17,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataAction, SaveFormDataResult> {
+public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataAction, FormDataResult> {
     private final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
@@ -30,7 +29,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
     }
 
     @Override
-    public SaveFormDataResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
+    public FormDataResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
         try {
             Logger logger = new Logger();
             FormData formData = action.getFormData();
@@ -40,7 +39,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
 			formDataService.doCalc(logger, currentUser.getId(), formData);
 			formDataService.saveFormData(currentUser.getId(), formData);
 			logger.info("Данные успешно записаны");
-			SaveFormDataResult result = new SaveFormDataResult();
+			FormDataResult result = new FormDataResult();
 			result.setFormData(formData);
             result.setLogEntries(logger.getEntries());
             return result;
@@ -51,7 +50,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
     }
 
     @Override
-    public void undo(SaveFormDataAction action, SaveFormDataResult result, ExecutionContext context) throws ActionException {
+    public void undo(SaveFormDataAction action, FormDataResult result, ExecutionContext context) throws ActionException {
         // Nothing!
     }
 }

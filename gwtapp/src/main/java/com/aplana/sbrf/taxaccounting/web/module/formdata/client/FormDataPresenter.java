@@ -194,8 +194,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onPrintClicked() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadController/"
-				+ formData.getId(), "", "");
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadController/" + formData.getId(), "", "");
 		// Window.alert("В разработке");
 	}
 
@@ -204,8 +203,7 @@ public class FormDataPresenter extends
 		if (readOnlyMode || (formData.getId() == null)) {
 			goToFormDataList();
 		} else {
-			boolean isOK = Window
-					.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+			boolean isOK = Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 			if (isOK) {
 				revealForm(true);
 			}
@@ -216,23 +214,40 @@ public class FormDataPresenter extends
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(action, new AbstractCallback<SaveFormDataResult>() {
+		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
 			@Override
-			public void onReqSuccess(SaveFormDataResult result) {
-				FormDataPresenter.this.formData = result.getFormData();
-				getView().setLogMessages(result.getLogEntries());
-				getView().setRowsData(
-						FormDataPresenter.this.formData.getDataRows());
+			public void onReqSuccess(FormDataResult result) {
+				processFormDataResult(result);
 				super.onReqSuccess(result);
 			}
 		});
 
 	}
 
+	private void processFormDataResult(FormDataResult result) {
+		formData = result.getFormData();
+		getView().setLogMessages(result.getLogEntries());
+		getView().setRowsData(formData.getDataRows());
+	}
+
 	@Override
 	public void onAddRowClicked() {
+/*
 		formData.appendDataRow(null);
 		getView().setRowsData(formData.getDataRows());
+*/
+		AddRowAction action = new AddRowAction();
+		action.setFormData(formData);
+		dispatcher.execute(
+				action,
+				new AbstractCallback<FormDataResult>() {
+					@Override
+					public void onReqSuccess(FormDataResult result) {
+						processFormDataResult(result);
+						super.onReqSuccess(result);
+					}
+				}
+		);
 	}
 
 	@Override
@@ -248,16 +263,16 @@ public class FormDataPresenter extends
 	public void onRecalculateClicked() {
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(action,
-				new AbstractCallback<RecalculateFormDataResult>() {
+		dispatcher.execute(
+				action,
+				new AbstractCallback<FormDataResult>() {
 					@Override
-					public void onReqSuccess(RecalculateFormDataResult result) {
-						formData = result.getFormData();
-						getView().setRowsData(formData.getDataRows());
-						getView().setLogMessages(result.getLogEntries());
+					public void onReqSuccess(FormDataResult result) {
+						processFormDataResult(result);
 						super.onReqSuccess(result);
 					}
-				});
+				}
+		);
 	}
 
 	@Override

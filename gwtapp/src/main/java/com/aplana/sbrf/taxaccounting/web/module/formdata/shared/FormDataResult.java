@@ -6,12 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 /**
- * 
- * @author Eugene Stetsenko
- * Результат запроса для пересчета формы.
+ * Результат выполнения действий, которые моифицируют форму каким-либо образом.
  *
+ * @author Eugene Stetsenko
  */
-public class RecalculateFormDataResult implements Result {
+public class FormDataResult implements Result {
 	private List<LogEntry> logEntries;
 	private FormData formData;
 
