@@ -78,4 +78,13 @@ public interface FormDataService {
 	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind);
 
 	void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger);
+
+	/**
+	 * Добавляет строку в форму и выполняет соответствующие скрипты.
+	 *
+	 * @param logger логгер для регистрации ошибок
+	 * @param userId идентификатор пользователя
+	 * @param formData данные формы
+	 */
+	void addRow(Logger logger, int userId, FormData formData);
 }

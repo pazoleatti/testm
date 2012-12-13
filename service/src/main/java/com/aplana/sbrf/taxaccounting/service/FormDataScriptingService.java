@@ -19,4 +19,12 @@ public interface FormDataScriptingService {
 	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
 	 */
 	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger);
+
+	/**
+	 * Проверяет, есть ли скрипты для события формы
+	 *
+	 * @param formData форма
+	 * @param event событие
+	 */
+	boolean hasScripts(FormData formData, FormDataEvent event);
 }

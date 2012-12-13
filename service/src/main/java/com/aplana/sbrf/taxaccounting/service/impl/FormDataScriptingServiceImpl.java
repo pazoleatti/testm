@@ -79,7 +79,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
 
 		// execute scripts
-		List<Script> scripts = formTemplateDao.get(formData.getFormTemplateId()).getScriptsByEvent(event);
+		List<Script> scripts = getScriptsByEvent(formData, event);
 		for (Script script : scripts) {
 			if (script.isRowScript()) {
 				executeRowScript(engine, script, formData, logger);
@@ -87,6 +87,21 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 				executeFormScript(engine, script, logger);
 			}
 		}
+	}
+
+	/**
+	 * Проверяет, есть ли скрипты для события формы
+	 *
+	 * @param formData форма
+	 * @param event событие
+	 */
+	@Override
+	public boolean hasScripts(FormData formData, FormDataEvent event) {
+		return !getScriptsByEvent(formData, event).isEmpty();
+	}
+
+	private List<Script> getScriptsByEvent(FormData formData, FormDataEvent event) {
+		return formTemplateDao.get(formData.getFormTemplateId()).getScriptsByEvent(event);
 	}
 
 	/**

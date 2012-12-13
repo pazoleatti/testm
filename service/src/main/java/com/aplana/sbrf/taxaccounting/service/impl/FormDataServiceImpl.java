@@ -109,6 +109,34 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	/**
+	 * Добавляет строку в форму и выполняет соответствующие скрипты.
+	 *
+	 * @param logger логгер для регистрации ошибок
+	 * @param userId идентификатор пользователя
+	 * @param formData данные формы
+	 */
+	@Override
+	public void addRow(Logger logger, int userId, FormData formData) {
+		boolean canDo;
+		if (formData.getId() == null) {
+			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+		} else {
+			canDo = formDataAccessService.canEdit(userId, formData.getId());
+		}
+
+		if (canDo) {
+			if(formDataScriptingService.hasScripts(formData, FormDataEvent.ADD_ROW)){
+				TAUser user = userDao.getUser(userId);
+				formDataScriptingService.executeScripts(user, formData, FormDataEvent.ADD_ROW, logger);
+			} else {
+				formData.appendDataRow();
+			}
+		} else {
+			throw new AccessDeniedException("Недостаточно прав для добавления строки к налоговой форме");
+		}
+	}
+
+	/**
 	 * Выполнить расчёты по налоговой форме
 	 *
 	 * @param logger   логгер-объект для фиксации диагностических сообщений
