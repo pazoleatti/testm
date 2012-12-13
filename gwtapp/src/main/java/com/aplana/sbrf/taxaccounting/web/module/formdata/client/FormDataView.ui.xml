@@ -2,6 +2,15 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+    <ui:style>
+        @external .gwt-PopupPanel;
+        .gwt-PopupPanel {
+            border: 2px solid #3dbf0e;
+            padding: 2px;
+            background: white;
+        }
+    </ui:style>
+
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
 		ui:field="dockPanel">
 
