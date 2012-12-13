@@ -15,19 +15,18 @@
 
     <!-- Для декларативного управления транзакциями с помощью @Transactional -->
     <tx:annotation-driven/>
-
-    <!-- Встроенная тестовая база данных HSQLDB -->
-    <jdbc:embedded-database id="dataSource" type="HSQL" >
-    	<jdbc:script location="classpath:ddl/hsql_init.sql" encoding="UTF-8" execution="INIT"/>
-		<jdbc:script location="classpath:ddl/create_main.sql" encoding="UTF-8" execution="INIT"/>
-		<jdbc:script location="classpath:ddl/create_transport.sql" encoding="UTF-8" execution="INIT"/>
-		
-       	<jdbc:script location="classpath:ddl/hsql_init.sql" encoding="UTF-8" execution="DESTROY"/>
-		<jdbc:script location="classpath:ddl/drop_transport.sql" encoding="UTF-8" execution="DESTROY"/>    	
-		<jdbc:script location="classpath:ddl/drop_main.sql" encoding="UTF-8" execution="DESTROY"/>
-    </jdbc:embedded-database>
-
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">	
   		<property name="dataSource" ref="dataSource"/>
 	</bean>
+
+    <!-- Встроенная тестовая база данных HSQLDB -->
+    <jdbc:embedded-database id="dataSource" type="HSQL"/>
+    
+    <jdbc:initialize-database ignore-failures="DROPS">
+    	<jdbc:script location="classpath:ddl/hsql_init.sql" encoding="UTF-8"/>
+		<jdbc:script location="classpath:ddl/drop_transport.sql" encoding="UTF-8"/>    	
+		<jdbc:script location="classpath:ddl/drop_main.sql" encoding="UTF-8"/>
+		<jdbc:script location="classpath:ddl/create_main.sql" encoding="UTF-8"/>
+		<jdbc:script location="classpath:ddl/create_transport.sql" encoding="UTF-8"/>    
+    </jdbc:initialize-database>
 </beans>

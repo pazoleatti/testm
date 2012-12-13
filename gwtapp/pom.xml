@@ -141,10 +141,6 @@
 			<artifactId>spring-security-web</artifactId>
 			<version>${springsecurity.version}</version>
 		</dependency>
-
-		<!-- TODO: изменить обработку jdbc-драйверов -->
-		<!-- Зависимости необходимы только для отладки через gwt-maven-plugin. 
-			Добавить в зависимости только к плагину их не удалось. Нужно что нибудь придумать -->
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc</artifactId>
