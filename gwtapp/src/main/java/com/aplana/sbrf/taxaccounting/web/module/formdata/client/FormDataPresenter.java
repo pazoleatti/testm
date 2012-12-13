@@ -232,10 +232,6 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onAddRowClicked() {
-/*
-		formData.appendDataRow(null);
-		getView().setRowsData(formData.getDataRows());
-*/
 		AddRowAction action = new AddRowAction();
 		action.setFormData(formData);
 		dispatcher.execute(
