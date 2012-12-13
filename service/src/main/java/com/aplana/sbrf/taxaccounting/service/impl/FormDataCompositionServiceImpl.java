@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -79,11 +80,15 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			formData = formDataService.createFormDataWithoutCheck(logger, null, formTemplateId, departmentId, kind);
 		}
 
-		// Execute composition scripts
-		// TODO: Надо подумать, что делать с пользователем да и вообще.
-		formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger);
-		formDataScriptingService.executeScripts(null, formData, FormDataEvent.CALCULATE, logger);
-		formDataService.checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
-		formDataDao.save(formData);
+		if(formData.getState() == WorkflowState.CREATED){
+			// Execute composition scripts
+			// TODO: Надо подумать, что делать с пользователем да и вообще.
+			formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger);
+			formDataScriptingService.executeScripts(null, formData, FormDataEvent.CALCULATE, logger);
+			formDataService.checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
+			formDataDao.save(formData);
+		} else {
+			logger.error("Невозможно принять форму. Сводная форма вышестоящего уровня уже принята.");
+		}
 	}
 }

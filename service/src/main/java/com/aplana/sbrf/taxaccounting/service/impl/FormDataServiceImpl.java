@@ -207,18 +207,22 @@ public class FormDataServiceImpl implements FormDataService {
 		int rowIndex = 0;
 		for (DataRow row : formData.getDataRows()) {
 			++rowIndex; // Для пользователя нумерация строк должна начинаться с 1
-			messageDecorator.setRowIndex(rowIndex);
-			List<String> columnNames = new ArrayList<String>();
-			for (Column col : columns) {
-				if (col.isMandatory()) {
-					Object value = row.get(col.getAlias());
-					if (value == null || (value instanceof String && ((String) value).isEmpty())) {
-						columnNames.add(col.getName());
+
+			// Проверка не осуществляется для строк, генерируемых скриптом
+			if (!row.isManagedByScripts()) {
+				messageDecorator.setRowIndex(rowIndex);
+				List<String> columnNames = new ArrayList<String>();
+				for (Column col : columns) {
+					if (col.isMandatory()) {
+						Object value = row.get(col.getAlias());
+						if (value == null || (value instanceof String && ((String) value).isEmpty())) {
+							columnNames.add(col.getName());
+						}
 					}
 				}
-			}
-			if (!columnNames.isEmpty()) {
-				logger.error("Не заполнены столбцы %s", columnNames.toString());
+				if (!columnNames.isEmpty()) {
+					logger.error("Не заполнены столбцы %s", columnNames.toString());
+				}
 			}
 		}
 		logger.setMessageDecorator(null);
