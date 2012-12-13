@@ -37,8 +37,9 @@ public class FormDataPresenter extends
 	}
 
 	@Inject
-	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher) {
+	public FormDataPresenter(
+			EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher
+	) {
 		super(eventBus, view, proxy, placeManager, dispatcher);
 		getView().setUiHandlers(this);
 	}
@@ -47,28 +48,24 @@ public class FormDataPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		try {
 			super.prepareFromRequest(request);
-			readOnlyMode = Boolean.parseBoolean(request.getParameter(READ_ONLY,
-					"true"));
+			readOnlyMode = Boolean.parseBoolean(request.getParameter(READ_ONLY,	"true"));
 
 			GetFormData action = new GetFormData();
+
+			// Идентификатор жизненного цикла
 			Integer wfId = Integer.parseInt(request.getParameter(WORK_FLOW_ID, "-1"));
 			if (wfId != -1) {
 				action.setWorkFlowMove(WorkflowMove.fromId(wfId));
 			} else {
 				action.setWorkFlowMove(null);
 			}
-			action.setFormDataId(Long.parseLong(request.getParameter(
-					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
 
-			String rawParam = "";
-			rawParam = request.getParameter(DEPARTMENT_ID, "null");
-			action.setDepartmentId( (rawParam == "" || rawParam == "null") ? null : Integer.parseInt(rawParam));
+			// WTF? Почему Long.MAX_VALUE?
+			action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
 
-			rawParam = request.getParameter(FORM_DATA_KIND_ID, "null");
-			action.setFormDataKind( (rawParam == "" || rawParam == "null") ? null : Long.parseLong(rawParam));
-
-			rawParam = request.getParameter(FORM_DATA_TYPE_ID, "null");
-			action.setFormDataTypeId((rawParam == "" || rawParam == "null") ? null :Long.parseLong(rawParam));
+			action.setDepartmentId(integerParameter(request, DEPARTMENT_ID));
+			action.setFormDataKind(longParameter(request, FORM_DATA_KIND_ID));
+			action.setFormDataTypeId(longParameter(request, FORM_DATA_TYPE_ID));
 
 			dispatcher.execute(action,
 					new AbstractCallback<GetFormDataResult>() {
@@ -81,44 +78,46 @@ public class FormDataPresenter extends
 								getView().setWorkflowButtons(null);
 							} else {
 								showReadOnlyModeButtons();
-								getView().setWorkflowButtons(
-										accessParams
-												.getAvailableWorkflowMoves());
-
+								getView().setWorkflowButtons(accessParams.getAvailableWorkflowMoves());
 							}
+							manageDeleteRowButtonEnabled();
+
 							getView().setLogMessages(result.getLogEntries());
 							getView().setAdditionalFormInfo(
-									result.getFormData().getFormType()
-											.getName(),
-									result.getFormData().getFormType()
-											.getTaxType().getName(),
+									result.getFormData().getFormType().getName(),
+									result.getFormData().getFormType().getTaxType().getName(),
 									result.getFormData().getKind().getName(),
 									result.getDepartmenName(),
 									result.getReportPeriod(),
-									result.getFormData().getState().getName());
+									result.getFormData().getState().getName()
+							);
 
-							getView().setColumnsData(formData.getFormColumns(),
-									readOnlyMode);
+							getView().setColumnsData(formData.getFormColumns(), readOnlyMode);
 							getView().setRowsData(formData.getDataRows());
 
-							TitleUpdateEvent.fire(this,
-									readOnlyMode ? "Налоговая форма"
-											: "Редактирование налоговой формы",
-									formData.getFormType().getName());
+							TitleUpdateEvent.fire(
+									this,
+									readOnlyMode ? "Налоговая форма" : "Редактирование налоговой формы",
+									formData.getFormType().getName()
+							);
 
 
 							List<LogEntry> le = result.getLogEntries();
 							boolean hasError = false;
 							for (LogEntry logEntry : le) {
-								if (LogLevel.ERROR.equals(logEntry.getLevel())){
+								if (LogLevel.ERROR.equals(logEntry.getLevel())) {
 									hasError = true;
 									break;
 								}
 							}
 
-							if (hasError){
+							if (hasError) {
 								if (!isVisible()) {
-									MessageEvent.fire(FormDataPresenter.this, "Неудалось открыть/создать налоговую форму", result.getLogEntries());
+									MessageEvent.fire(
+											FormDataPresenter.this,
+											"Неудалось открыть/создать налоговую форму",
+											result.getLogEntries()
+									);
 								}
 								getProxy().manualRevealFailed();
 							} else {
@@ -129,7 +128,7 @@ public class FormDataPresenter extends
 						}
 
 						@Override
-						protected void onReqFailure(Throwable throwable){
+						protected void onReqFailure(Throwable throwable) {
 							try {
 								throw throwable;
 							} catch (WrongInputDataServiceException exception) {
@@ -142,15 +141,44 @@ public class FormDataPresenter extends
 						}
 
 						@Override
-						protected boolean needErrorOnFailure(){
+						protected boolean needErrorOnFailure() {
 							return false;
 						}
-
 					});
 		} catch (Exception e) {
 			getProxy().manualRevealFailed();
-			MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму",
-					e);
+			MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
+		}
+	}
+
+	private Integer integerParameter(PlaceRequest request, String name) {
+		String rawParam;
+		rawParam = request.getParameter(name, "null");
+		Integer value;
+		if (rawParam.equals("") || rawParam.equals("null")) {
+			value=null;
+		} else {
+			value = Integer.parseInt(rawParam);
+		}
+		return value;
+	}
+
+	private Long longParameter(PlaceRequest request, String name) {
+		String rawParam;
+		rawParam = request.getParameter(name, "null");
+		return (rawParam.equals("") || rawParam.equals("null")) ? null : Long.parseLong(rawParam);
+	}
+
+	@Override
+	public void onSelectRow() {
+		manageDeleteRowButtonEnabled();
+	}
+
+	private void manageDeleteRowButtonEnabled() {
+		if (!readOnlyMode) {
+			MyView view = getView();
+			DataRow dataRow = view.getSelectedRow();
+			view.enableRemoveRowButton(dataRow != null && !dataRow.isManagedByScripts());
 		}
 	}
 
@@ -208,9 +236,12 @@ public class FormDataPresenter extends
 	}
 
 	@Override
-	public void onRemoveRowClicked(DataRow dataRow) {
-		formData.getDataRows().remove(dataRow);
-		getView().setRowsData(formData.getDataRows());
+	public void onRemoveRowClicked() {
+		DataRow dataRow = getView().getSelectedRow();
+		if (dataRow != null && !dataRow.isManagedByScripts()) {
+			formData.getDataRows().remove(dataRow);
+			getView().setRowsData(formData.getDataRows());
+		}
 	}
 
 	@Override

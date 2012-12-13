@@ -59,6 +59,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void showManualInputButton(boolean show);
 
 		void showDeleteFormButton(boolean show);
+
+		DataRow getSelectedRow();
+
+		void enableRemoveRowButton(boolean enable);
 	}
 
 	public static final String NAME_TOKEN = "!formData";

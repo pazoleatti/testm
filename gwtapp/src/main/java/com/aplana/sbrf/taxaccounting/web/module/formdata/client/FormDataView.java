@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -27,6 +28,8 @@ import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
+
+	private SingleSelectionModel<DataRow> selectionModel;
 
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -87,6 +90,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		widget = binder.createAndBindUi(this);
 		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false);
 		formDataTable.setHeaderBuilder(builder);
+		selectionModel = new SingleSelectionModel<DataRow>();
+		formDataTable.setSelectionModel(selectionModel);
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+				FormDataUiHandlers handlers = getUiHandlers();
+				if(handlers!=null){
+					handlers.onSelectRow();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -109,8 +123,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 					.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
-			final SingleSelectionModel<DataRow> selectionModel = new SingleSelectionModel<DataRow>();
-			formDataTable.setSelectionModel(selectionModel);
 		}
 
 	}
@@ -157,10 +169,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("removeRowButton")
 	void onRemoveRowButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRemoveRowClicked(
-					((SingleSelectionModel<DataRow>) formDataTable
-							.getSelectionModel()).getSelectedObject());
+			getUiHandlers().onRemoveRowClicked();
 		}
+	}
+
+	@Override
+	public DataRow getSelectedRow() {
+		return selectionModel.getSelectedObject();
 	}
 
 	@UiHandler("manualInputButton")
@@ -257,6 +272,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showRemoveRowButton(boolean show) {
 		removeRowButton.setVisible(show);
+	}
+
+	@Override
+	public void enableRemoveRowButton(boolean enable) {
+		removeRowButton.setEnabled(enable);
 	}
 
 	@Override
