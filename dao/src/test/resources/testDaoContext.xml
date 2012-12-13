@@ -27,6 +27,6 @@
 		<jdbc:script location="classpath:ddl/drop_transport.sql" encoding="UTF-8"/>    	
 		<jdbc:script location="classpath:ddl/drop_main.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:ddl/create_main.sql" encoding="UTF-8"/>
-		<jdbc:script location="classpath:ddl/create_transport.sql" encoding="UTF-8"/>    
+		<jdbc:script location="classpath:ddl/create_transport.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

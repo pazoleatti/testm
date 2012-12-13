@@ -67,7 +67,7 @@ create table form_column (
 	group_name varchar(255)
 );
 alter table form_column add constraint form_column_pk primary key (id);
-create sequence seq_form_column;
+create sequence seq_form_column start with 10000;
 
 alter table form_column add constraint form_column_fk_form_id foreign key (form_id) references form(id);
 alter table form_column add constraint form_column_uniq_alias unique(form_id, alias);
@@ -103,7 +103,7 @@ create table form_script (
 alter table form_script add constraint form_script_pk primary key (id);
 alter table form_script add constraint form_script_fk_form_id foreign key (form_id) references form(id);
 alter table form_script add constraint form_script_chk_per_row check (per_row in (0,1));
-create sequence seq_form_script;
+create sequence seq_form_script start with 10000;
 
 comment on table form_script is 'Скрипты';
 comment on column form_script.body is 'Тело скрипта';
@@ -157,7 +157,7 @@ comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 
-create sequence seq_form_data;
+create sequence seq_form_data start with 10000;
 
 ---------------------------------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ comment on column data_row.id is 'Код строки для доступа из
 comment on column data_row.ord is 'Номер строки в форме';
 comment on column data_row.managed_by_scripts is 'Признак того, что содержимое строки контролируется скриптами';
 
-create sequence seq_data_row;
+create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
 
 create table numeric_value (

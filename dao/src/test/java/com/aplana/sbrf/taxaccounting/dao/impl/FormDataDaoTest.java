@@ -32,7 +32,7 @@ public class FormDataDaoTest {
 	
 	@Test
 	public void testGet() {
-		FormData formData = formDataDao.get(-1);
+		FormData formData = formDataDao.get(1);
 		
 		Assert.assertEquals(2, formData.getDataRows().size());
 
