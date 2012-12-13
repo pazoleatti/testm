@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Хандлер обрабатывает событие добавления строки к форме. Вызывает соответствующий метод сервиса, который
+ * добавляет выполняет скрипты добавления строки или добавляет строку, если скриптов нет.
+ *
  * @author Vitalii Samolovskikh
  */
 @Service
