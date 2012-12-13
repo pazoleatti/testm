@@ -67,7 +67,7 @@ create table form_column (
 	group_name varchar(255)
 );
 alter table form_column add constraint form_column_pk primary key (id);
-create sequence seq_form_column start with 10000;
+create sequence seq_form_column;
 
 alter table form_column add constraint form_column_fk_form_id foreign key (form_id) references form(id);
 alter table form_column add constraint form_column_uniq_alias unique(form_id, alias);
