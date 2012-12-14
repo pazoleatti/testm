@@ -5,11 +5,11 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.inject.Inject;
@@ -301,10 +301,21 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
-				Window.alert("Форма сохранена.");
+				MessageEvent.fire(FormTemplatePresenter.this, "Форма Сохранена");
 				load();
 				super.onReqSuccess(result);
 			}
+
+			@Override
+			protected boolean needErrorOnFailure(){
+				return false;
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable){
+				MessageEvent.fire(FormTemplatePresenter.this, "Request Failure", throwable);
+			}
+
 		});
 	}
 
