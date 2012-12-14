@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -71,6 +72,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 						if (selected != null) {
 							setValue(selected.getValue(), true);
 						}
+						focus();
 					}
 				}
 		);
@@ -78,19 +80,17 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		cellTable.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
 			@Override
 			public void onLoadingStateChanged(LoadingStateChangeEvent event) {
-				if(event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED){
+				if (event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED) {
 					focus();
 				}
 			}
 		});
 
-	    /*
 		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
 			public void onRangeChange(RangeChangeEvent event) {
-				txtFind.setFocus(true);
+				focus();
 			}
 		});
-		*/
 
 		pager.setDisplay(cellTable);
 		pager.setPageSize(15);
@@ -130,17 +130,21 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		} else if (keyCode == KeyCodes.KEY_PAGEUP) {
 			pager.previousPage();
 			// Не ищем, если пользователь просто передвигает курсор внутри поля для поиска
-		} else if ((keyCode != KeyCodes.KEY_LEFT) && (keyCode != KeyCodes.KEY_RIGHT)){
+		} else if (keyCode == KeyCodes.KEY_ENTER) {
 			timer.schedule(500);
 		}
 	}
 
 	private void find() {
-		dataProvider.setSearchPattern(txtFind.getValue());
-		if (cellTable.getVisibleRange().getStart() == 0) {
-			dataProvider.load(cellTable.getVisibleRange());
-		} else {
-			pager.firstPage();
+		String oldValue = dataProvider.getSearchPattern();
+		String newValue = txtFind.getValue();
+		if (oldValue != null ? !oldValue.equals(newValue) : newValue != null) {
+			dataProvider.setSearchPattern(txtFind.getValue());
+			if (cellTable.getVisibleRange().getStart() == 0) {
+				dataProvider.load(cellTable.getVisibleRange());
+			} else {
+				pager.firstPage();
+			}
 		}
 	}
 
@@ -171,12 +175,14 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		if (this.value != null ? !this.value.equals(value) : value != null) {
 			this.value = value;
 
-			txtFind.setValue(valueToString(value));
-			selectionModel.clear();
-
 			if (b) {
 				ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
 			}
 		}
+	}
+
+	public void clear(){
+		txtFind.setValue("");
+		find();
 	}
 }

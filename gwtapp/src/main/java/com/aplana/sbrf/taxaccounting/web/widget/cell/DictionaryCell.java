@@ -89,6 +89,13 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 			}
 		});
 
+		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
+			@Override
+			public void onClose(CloseEvent<PopupPanel> event) {
+				selectWidget.clear();
+			}
+		});
+
 		// Put selectWidget on panel
 		panel.add(selectWidget);
 
@@ -112,8 +119,6 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 						if (valueUpdater != null) {
 							valueUpdater.update(value);
 						}
-
-						panel.hide();
 					}
 				}
 		);
@@ -169,13 +174,13 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 
 				// Сдвигаем попап, если он не помещается в окно
 				if ((lastParent.getAbsoluteRight() + panel.getOffsetWidth()) > windowWidth) {
-
 					exceedOffsetX -= panel.getOffsetWidth();
 				}
 
 				if ((lastParent.getAbsoluteTop() + panel.getOffsetHeight()) > windowHeight) {
 					exceedOffsetY -= panel.getOffsetHeight();
 				}
+
 				panel.setPopupPosition(
 						lastParent.getAbsoluteLeft() + exceedOffsetX,
 						lastParent.getAbsoluteTop() + exceedOffsetY
