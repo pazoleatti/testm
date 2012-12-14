@@ -63,7 +63,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Cacheable("FormTemplate")
 	public FormTemplate get(int formId) {
-		logger.info("Fetching FormTemplate with id = " + formId);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Fetching FormTemplate with id = " + formId);	
+		}		
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(

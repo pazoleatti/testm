@@ -31,7 +31,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 
 	@Cacheable("FormType")
 	public FormType getType(int typeId) {
-		logger.info("Fetching FormType with id = " + typeId);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Fetching FormType with id = " + typeId);	
+		}		
 		try {
 			return getJdbcTemplate().queryForObject(
 				"select * from form_type where id = ?",
