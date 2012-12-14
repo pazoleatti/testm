@@ -24,7 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author Vitalii Samolovskikh
  * @see com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
-@SuppressWarnings("UnusedDeclaration")
 @Repository("formDataCompositionService")
 public class FormDataCompositionServiceImpl implements FormDataCompositionService {
 
