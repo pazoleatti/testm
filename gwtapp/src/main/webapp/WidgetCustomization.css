@@ -17,3 +17,17 @@
 .dictionaryPickerTable th{
     height: 1em;
 }
+.dictionaryPickerTable td{
+    background-color: transparent;
+
+}
+.dictionaryPickerTable tr{
+    background-color: transparent;
+}
+.dictionaryPickerTable tr:hover{
+    background-color: #4ebf61;
+    cursor: hand;
+}
+.dictionaryPickerTable tr:focus{
+    background-color: #4e9661;
+}
