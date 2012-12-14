@@ -12,25 +12,26 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Color;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.ClassUtils;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
 
 public class FormDataXlsxReportBuilder {
 	
-	private static String TEMPLATE = ClassUtils
+	/*private static String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataPrintingService.class)
-			+ "/acctax.xlsx";
+			+ "/acctax.xlsx";*/
 	private static final int cellWidth = 10;
 	
 	private int rowNumber = 6;
@@ -50,35 +51,51 @@ public class FormDataXlsxReportBuilder {
 	
 	
 	public FormDataXlsxReportBuilder() throws IOException {
-		templeteInputStream = Thread.currentThread().getContextClassLoader()
+		/*templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
-		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));
-		sheet = workBook.getSheet("List1");
+		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));*/
+		workBook = new SXSSFWorkbook();
+		sheet = workBook.createSheet("Учет налогов");
 		
 		cellStyle = workBook.createCellStyle();
-		/*cellStyle.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
-		cellStyle.setFillPattern(HSSFColor.BRIGHT_GREEN.index);*/
+		cellStyle.setFillForegroundColor(IndexedColors.GREEN.index);
+		cellStyle.setFillBackgroundColor(IndexedColors.GREEN.index);
+		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		cellStyle.setWrapText(true);
 		cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
 		cellStyle.setBorderTop(CellStyle.BORDER_THIN);
 		cellStyle.setBorderRight(CellStyle.BORDER_THIN);
 		cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+		sheet.addMergedRegion(new CellRangeAddress(	0,0,0,5));
+		
+		sheet.setColumnWidth(0, 20 * 256);
+		for(int i = 2;i < 5;i++){
+			sheet.createRow(i);
+		}
+		sheet.getRow(2).createCell(0).setCellValue("Тип формы");
+		sheet.getRow(3).createCell(0).setCellValue("Подразделение");
+		sheet.getRow(4).createCell(0).setCellValue("Дата формирования");
+		
+		CellStyle cellStyle = workBook.createCellStyle();
+		cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
+		Cell cell = sheet.getRow(4).createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(new Date(System.currentTimeMillis()));
+		
 	}
 	
 	public FormDataXlsxReportBuilder(FormData data) throws IOException {
 		this();
 		this.data = data;
-		sheet.createRow(0).createCell(0).setCellValue(data.getFormType().getName());
 		
-		sheet.createRow(2).createCell(1).setCellValue(data.getKind().getName());
-		sheet.createRow(3).createCell(1).setCellValue(data.getDepartmentId());
-		
+		Cell cell = sheet.createRow(0).createCell(0);
+		cell.setCellValue(data.getFormType().getName());
 		CellStyle cellStyle = workBook.createCellStyle();
-		cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
-		Cell cell = sheet.createRow(4).createCell(1);
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		cell.setCellStyle(cellStyle);
-		cell.setCellValue(new Date(System.currentTimeMillis()));
+		sheet.getRow(2).createCell(1).setCellValue(data.getKind().getName());
+		sheet.getRow(3).createCell(1).setCellValue(data.getDepartmentId());
 	}
 
 
@@ -108,11 +125,7 @@ public class FormDataXlsxReportBuilder {
 	
 	private void createTableHeaders(){
 		Row row = sheet.createRow(rowNumber);
-		
-		
 		boolean isSecondTable = false;
-		
-		
 
 		for (Column el : data.getFormColumns()) {
 			if(el.getGroupName()!=null){
@@ -146,7 +159,7 @@ public class FormDataXlsxReportBuilder {
 							break;
 						}
 					}
-					groupCells(i,j - 1,row,row2,cellStyle);
+					groupCells(i,j - 1,row,row2);
 					i+=(j-i)-1;
 				}
 				
@@ -166,10 +179,10 @@ public class FormDataXlsxReportBuilder {
 		rowNumber = sheet.getLastRowNum() + 1;
 	}
 	
-	private void groupCells(int startCell,int endCell,Row row1,Row row2,CellStyle style){
+	private void groupCells(int startCell,int endCell,Row row1,Row row2){
 		
 		Cell cell = row1.createCell(startCell);
-		cell.setCellStyle(style);
+		cell.setCellStyle(cellStyle);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
 		//System.out.println("--" + data.getFormColumns().get(startCell).getName() + ":" + data.getFormColumns().get(startCell).getWidth());
 		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
@@ -178,7 +191,7 @@ public class FormDataXlsxReportBuilder {
 			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
 			//fillWidth(i,data.getFormColumns().get(i).getName().length());
 			cell = row2.createCell(i);
-			cell.setCellStyle(style);
+			cell.setCellStyle(cellStyle);
 			cell.setCellValue(data.getFormColumns().get(i).getName());
 			//System.out.println(cell.getStringCellValue());
 		}
@@ -198,6 +211,7 @@ public class FormDataXlsxReportBuilder {
 		RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook);
 		RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook);
 		sheet.addMergedRegion(region);
+		
 	}
 	
 	private void createDataForTable(){
@@ -211,6 +225,13 @@ public class FormDataXlsxReportBuilder {
 				if(obj instanceof String){
 					String str = (String)obj;
 					Cell cell = row.createCell(alias.getKey());
+					CellStyle cellStyle = workBook.createCellStyle();
+					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+					cellStyle.setWrapText(true);
+					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(str);
 					//fillWidth(alias.getKey(),str.length());
@@ -232,6 +253,13 @@ public class FormDataXlsxReportBuilder {
 					BigDecimal bd = (BigDecimal)obj;
 					//System.out.println("BigDecimal" + bd.doubleValue());
 					Cell cell = row.createCell(alias.getKey());
+					CellStyle cellStyle = workBook.createCellStyle();
+					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+					cellStyle.setWrapText(true);
+					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(bd.doubleValue());
 					//fillWidth(alias.getKey(),String.valueOf(bd.doubleValue()).length());
