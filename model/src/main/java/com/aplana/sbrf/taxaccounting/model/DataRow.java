@@ -215,38 +215,6 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		this.managedByScripts = managedByScripts;
 	}
 	
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-
-		DataRow dataRow = (DataRow) o;
-
-		if (order != dataRow.order) {
-			return false;
-		}
-		if (alias != null ? !alias.equals(dataRow.alias) : dataRow.alias != null) {
-			return false;
-		}
-		if (data != null ? !data.equals(dataRow.data) : dataRow.data != null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = alias != null ? alias.hashCode() : 0;
-		result = 31 * result + order;
-		return result;
-	}
-
 	@Override
 	public String toString() {
 		return "DataRow{" +

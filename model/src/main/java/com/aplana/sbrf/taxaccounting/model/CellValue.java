@@ -91,42 +91,6 @@ public class CellValue implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o){ return true;}
-		if (o == null || getClass() != o.getClass()) {return false;}
-
-		CellValue cellValue = (CellValue) o;
-
-		if (column != null ? !column.equals(cellValue.column) : cellValue.column != null) {
-			return false;
-		}
-
-		// TODO: непонятно как сравнивать даты, т.к. этот класс используется как на клиенте, так и на сервере.
-		// На клиенте и на сервере используются разные механизмы для работы с датой. В частности на клиенте
-		// нельзя использовать java.util.Calendar и java.text.DateFormat.
-		// В то же время, нам надо сравнивать только дату, неучитывая часы, минуты и секунды.
-		//if (dateValue != null ? !dateValue.equals(cellValue.dateValue) : cellValue.dateValue != null) return false;
-
-		if (numericValue != null ? numericValue.compareTo(cellValue.numericValue) != 0 : cellValue.numericValue != null) {
-			return false;
-		}
-
-		if (stringValue != null ? !stringValue.equals(cellValue.stringValue) : cellValue.stringValue != null) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = stringValue != null ? stringValue.hashCode() : 0;
-		//result = 31 * result + (dateValue != null ? dateValue.hashCode() : 0);
-		result = 31 * result + (numericValue != null ? numericValue.hashCode() : 0);
-		return result;
-	}
-
-	@Override
 	public String toString() {
 		return "CellValue{" +
 				"stringValue='" + stringValue + '\'' +
