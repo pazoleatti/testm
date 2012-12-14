@@ -4,6 +4,7 @@ import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -15,11 +16,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 import java.util.Date;
 
@@ -28,23 +28,17 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
-	private static final String BUTTON_WIDTH = "140px";  //8.313em
-	private static final String BUTTON_HEIGHT = "25px";  //1.563em
-	private static final String BUTTON_CAPTION = "Очистить";
-
 	private static final int ESCAPE = 27;
-	private final DatePickerWithYearSelector datePicker;
+	private static final String CLEAR_IMAGE_SOURCE = "img/cancel_image.png";
+	private static final String CLEAR_IMAGE_WIDTH = "20px";
+	private static final String CLEAR_IMAGE_HEIGHT = "19px";
+
+	private PopupPanel rootPopupPanel;
+	private final HorizontalPanel datePickerAndImageComposite;
+	private final DateBox dateBox;
+	private final Image clearDateImage;
+
 	private final DateTimeFormat format;
-	private int offsetX = 10;
-	private int offsetY = 10;
-	private Object lastKey;
-	private Element lastParent;
-	private int lastIndex;
-	private int lastColumn;
-	private Date lastValue;
-	private PopupPanel panel;
-	private Button clearDateButton;
-	private VerticalPanel datePickerAndButtonComposite = new VerticalPanel();
 	private final SafeHtmlRenderer<String> renderer;
 	private ValueUpdater<Date> valueUpdater;
 
@@ -52,44 +46,16 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private static int firstEditedIndex = -1;
 	private static boolean isValueInCellWasChanged = false;
 
-	/**
-	 * Constructs a new DatePickerCell that uses the date/time format given by
-	 * {@link DateTimeFormat#getFullDateFormat}.
-	 */
-	@SuppressWarnings("deprecation")
-	public NullableDatePickerCell() {
-		this(DateTimeFormat.getFullDateFormat(),
-				SimpleSafeHtmlRenderer.getInstance());
-	}
+	private Element lastParent;
+	private Object lastKey;
+	private int lastIndex;
+	private int lastColumn;
+	private Date lastValue;
 
-	/**
-	 * Constructs a new DatePickerCell that uses the given date/time format and a
-	 * {@link SimpleSafeHtmlRenderer}.
-	 *
-	 * @param format a {@link DateTimeFormat} instance
-	 */
 	public NullableDatePickerCell(DateTimeFormat format) {
 		this(format, SimpleSafeHtmlRenderer.getInstance());
 	}
 
-	/**
-	 * Constructs a new DatePickerCell that uses the date/time format given by
-	 * {@link DateTimeFormat#getFullDateFormat} and the given
-	 * {@link SafeHtmlRenderer}.
-	 *
-	 * @param renderer a {@link SafeHtmlRenderer SafeHtmlRenderer<String>} instance
-	 */
-	public NullableDatePickerCell(SafeHtmlRenderer<String> renderer) {
-		this(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL), renderer);
-	}
-
-	/**
-	 * Constructs a new DatePickerCell that uses the given date/time format and
-	 * {@link SafeHtmlRenderer}.
-	 *
-	 * @param format a {@link DateTimeFormat} instance
-	 * @param renderer a {@link SafeHtmlRenderer SafeHtmlRenderer<String>} instance
-	 */
 	public NullableDatePickerCell(DateTimeFormat format, SafeHtmlRenderer<String> renderer) {
 		super(CLICK, KEYDOWN);
 		if (format == null) {
@@ -98,68 +64,23 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 		if (renderer == null) {
 			throw new IllegalArgumentException("renderer == null");
 		}
+
 		this.format = format;
 		this.renderer = renderer;
 
-		this.datePicker = new DatePickerWithYearSelector();
-		this.panel = new PopupPanel(true, false) {
-			@Override
-			protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-				if (Event.ONKEYUP == event.getTypeInt()) {
-					if (event.getNativeEvent().getKeyCode() == ESCAPE) {
-						// Dismiss when escape is pressed
-						panel.hide();
-					}
-				}
-			}
-		};
-		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
-			public void onClose(CloseEvent<PopupPanel> event) {
-				lastKey = null;
-				lastValue = null;
-				lastIndex = -1;
-				lastColumn = -1;
-				if (lastParent != null && !event.isAutoClosed()) {
-					// Refocus on the containing cell after the user selects a value, but
-					// not if the popup is auto closed.
-					lastParent.focus();
-				}
-				lastParent = null;
-			}
-		});
-
-		this.clearDateButton = new Button();
-
-		clearDateButton.setWidth(BUTTON_WIDTH);
-		clearDateButton.setHeight(BUTTON_HEIGHT);
-		clearDateButton.setText(BUTTON_CAPTION);
-
-		clearDateButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				ValueChangeEvent.fire(datePicker, null);
-			}
-
-		});
-
-		datePickerAndButtonComposite.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		datePickerAndButtonComposite.add(datePicker);
-		datePickerAndButtonComposite.add(clearDateButton);
-		panel.add(datePickerAndButtonComposite);
-
-
-		// Hide the panel and call valueUpdater.update when a date is selected
-		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
+		DatePickerWithYearSelector pickerForDateBox = new DatePickerWithYearSelector();
+		this.dateBox = new DateBox(pickerForDateBox, null, new DateBox.DefaultFormat(format));
+		this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
-				// Remember the values before hiding the popup.
+				// Запомнить значения перед тем как скрыть Popup панель
 				isValueInCellWasChanged = true;
 				Element cellParent = lastParent;
 				Date oldValue = lastValue;
 				Object key = lastKey;
 				int index = lastIndex;
 				int column = lastColumn;
-				panel.hide();
-				// Update the cell and value updater.
+				rootPopupPanel.hide();
+				// Обновить ячейку и ValueUpdater
 				Date date = event.getValue();
 				setViewData(key, date);
 
@@ -174,6 +95,57 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 				}
 			}
 		});
+
+		this.rootPopupPanel = new PopupPanel(true, false) {
+			@Override
+			protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+				if (Event.ONKEYUP == event.getTypeInt()) {
+					if (event.getNativeEvent().getKeyCode() == ESCAPE) {
+						// Dismiss when escape is pressed
+						rootPopupPanel.hide();
+					}
+				}
+			}
+		};
+		rootPopupPanel.getElement().getStyle().setBorderStyle(Style.BorderStyle.HIDDEN);
+		rootPopupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+			public void onClose(CloseEvent<PopupPanel> event) {
+				lastKey = null;
+				lastValue = null;
+				lastIndex = -1;
+				lastColumn = -1;
+				if (lastParent != null && !event.isAutoClosed()) {
+					// Refocus on the containing cell after the user selects a value, but
+					// not if the popup is auto closed.
+					lastParent.focus();
+				}
+				lastParent = null;
+			}
+		});
+
+		clearDateImage = new Image();
+		clearDateImage.setUrl(CLEAR_IMAGE_SOURCE);
+		clearDateImage.setWidth(CLEAR_IMAGE_WIDTH);
+		clearDateImage.setHeight(CLEAR_IMAGE_HEIGHT);
+		clearDateImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		clearDateImage.setTitle("Очистить значение");
+
+		clearDateImage.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				ValueChangeEvent.fire(dateBox, null);
+			}
+		});
+
+		datePickerAndImageComposite = new HorizontalPanel();
+		datePickerAndImageComposite.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		datePickerAndImageComposite.getElement().getStyle().setTop(0, Style.Unit.PX);
+		datePickerAndImageComposite.getElement().getStyle().setLeft(0, Style.Unit.PX);
+		clearDateImage.getElement().getStyle().setBackgroundColor("#FFFBB1");
+		datePickerAndImageComposite.add(dateBox);
+		datePickerAndImageComposite.add(clearDateImage);
+
+		rootPopupPanel.add(datePickerAndImageComposite);
 	}
 
 	@Override
@@ -192,7 +164,6 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 	@Override
 	public void render(Context context, Date value, SafeHtmlBuilder sb) {
-		// Get the view data.
 		Object key = context.getKey();
 		Date viewData = getViewData(key);
 
@@ -243,30 +214,20 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 		this.lastIndex = context.getIndex();
 		this.lastColumn = context.getColumn();
 		this.valueUpdater = valueUpdater;
-
 		Date viewData = getViewData(lastKey);
 		Date date = (viewData == null) ? lastValue : viewData;
-		datePicker.setCurrentMonth(date);
-		datePicker.setValue(date);
-		panel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+		dateBox.setValue(date);
+
+		rootPopupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 			public void setPosition(int offsetWidth, int offsetHeight) {
-				int windowHeight= Window.getClientHeight();
-				int windowWidth=Window.getClientWidth();
+				dateBox.getElement().getStyle().setWidth((lastParent.getClientWidth()) - clearDateImage.getElement()
+						.getClientWidth(), Style.Unit.PX);
+				dateBox.getElement().getStyle().setHeight(lastParent.getClientHeight(), Style.Unit.PX);
 
-				int exceedOffsetX = offsetX;
-				int exceedOffsetY = offsetY;
-
-				// Сдвигаем попап, если он не помещается в окно
-				if ((lastParent.getAbsoluteRight() + panel.getOffsetWidth()) > windowWidth) {
-
-					exceedOffsetX -= panel.getOffsetWidth();
-				}
-
-				if ((lastParent.getAbsoluteTop() + panel.getOffsetHeight()) > windowHeight) {
-					exceedOffsetY -= panel.getOffsetHeight();
-				}
-				panel.setPopupPosition(lastParent.getAbsoluteLeft() + exceedOffsetX,
-						lastParent.getAbsoluteTop() + exceedOffsetY);
+				datePickerAndImageComposite.getElement().getStyle().setWidth(lastParent.getClientWidth(), Style.Unit.PX);
+				datePickerAndImageComposite.getElement().getStyle().setHeight(lastParent.getClientHeight() , Style.Unit.PX);
+				rootPopupPanel.setPopupPosition(lastParent.getAbsoluteLeft() - 3,
+						lastParent.getAbsoluteTop() - 3);
 			}
 		});
 	}
