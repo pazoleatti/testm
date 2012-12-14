@@ -182,7 +182,8 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 				);
 			}
 		});
-		selectWidget.init();
+
+		selectWidget.focus();
 	}
 
 	@Override

@@ -12,16 +12,16 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.user.client.Timer;
 
 import java.io.Serializable;
 
@@ -75,17 +75,33 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 				}
 		);
 
+		cellTable.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
+			@Override
+			public void onLoadingStateChanged(LoadingStateChangeEvent event) {
+				if(event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED){
+					focus();
+				}
+			}
+		});
+
+	    /*
 		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
 			public void onRangeChange(RangeChangeEvent event) {
 				txtFind.setFocus(true);
 			}
 		});
+		*/
 
 		pager.setDisplay(cellTable);
 		pager.setPageSize(15);
 
 		dataProvider = createDataProvider(dictionaryCode);
 		dataProvider.addDataDisplay(cellTable);
+	}
+
+	public void focus() {
+		txtFind.setFocus(true);
+		txtFind.setCursorPos(txtFind.getText().length());
 	}
 
 	private class NameColumn extends TextColumn<DictionaryItem<ValueType>> {
@@ -162,9 +178,5 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 				ValueChangeEvent.fire(DictionaryPickerWidget.this, value);
 			}
 		}
-	}
-
-	public void init() {
-		txtFind.setFocus(true);
 	}
 }
