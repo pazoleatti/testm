@@ -181,8 +181,14 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		}
 	}
 
-	public void clear(){
+	public void clear() {
 		txtFind.setValue("");
-		find();
+		String pattern = dataProvider.getSearchPattern();
+		dataProvider.setSearchPattern("");
+		if ((pattern == null || pattern.isEmpty()) && cellTable.getVisibleRange().getStart() != 0) {
+			pager.firstPage();
+		} else if (pattern != null && !pattern.isEmpty()) {
+			dataProvider.load(cellTable.getVisibleRange());
+		}
 	}
 }

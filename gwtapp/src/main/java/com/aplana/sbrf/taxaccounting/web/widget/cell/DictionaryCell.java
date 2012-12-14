@@ -69,6 +69,7 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 					if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
 						// Dismiss when escape is pressed
 						panel.hide();
+						selectWidget.clear();
 					}
 				}
 			}
@@ -86,12 +87,6 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 					lastParent.focus();
 				}
 				lastParent = null;
-			}
-		});
-
-		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
-			@Override
-			public void onClose(CloseEvent<PopupPanel> event) {
 				selectWidget.clear();
 			}
 		});
@@ -111,6 +106,7 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 						int index = lastIndex;
 						int column = lastColumn;
 						panel.hide();
+						selectWidget.clear();
 
 						// Update the cell and value updater.
 						ValueType value = event.getValue();
