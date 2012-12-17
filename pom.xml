@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.aplana.taxaccounting</groupId>
@@ -92,9 +91,9 @@
 	</repositories>
 	
 	<scm>
-		<connection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX</connection>
-		<developerConnection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX</developerConnection>
+		<connection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/branches/0.1.0</connection>
+		<developerConnection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/branches/0.1.0</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://horse.aplana.com/svn/SBRFACCTAX</url>
+		<url>https://horse.aplana.com/svn/SBRFACCTAX/branches/0.1.0</url>
 	  </scm>
 </project>
