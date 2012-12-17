@@ -90,4 +90,11 @@
 			<url>http://repository.codehaus.org</url>
 		</repository>
 	</repositories>
+	
+	<scm>
+		<connection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX</connection>
+		<developerConnection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://horse.aplana.com/svn/SBRFACCTAX</url>
+	  </scm>
 </project>
