@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Types;
+import java.util.List;
 
 @Repository("transportTaxDao")
 @Transactional(readOnly = true)
@@ -24,16 +25,25 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 
 	@Override
 	public int getTaxRate(String code, BigDecimal age, BigDecimal power) {
-		Integer result = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue());
-		if (result == null && code.length() == 5) {
+		List<Integer> list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue());
+
+		if (list.size() <= 0) {
 			// Если не найдём совпадения по точному коду, то ищем совпадение по коду с плейсхолдерами
 			code = code.substring(0, 3) + "??";
-			result = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue());
+			list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue());
 		}
-		if (result == null) {
-			throw new DaoException("Не удалось определить значение ставки налога для транспортного средства");
+
+		if (list.size() == 1) {
+			return list.get(0);
+		} else if (list.size() <= 0) {
+			throw new DaoException("Не удалось определить значение ставки налога для транспортного средства.");
+		} else {
+			throw new DaoException(
+					"Не удалось определить значение ставки налога для транспортного средства, " +
+							"т.к. в справчонике существует более 1й записи, " +
+							"удовлетворяющей заданным параметрам транспортного средства."
+			);
 		}
-		return result.intValue();
 	}
 
 	/**

@@ -27,6 +27,7 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		// predefined script variables
 		engine.put("logger", logger);
 		engine.put("formData", formData);
-		if(user!=null){
+		if (user != null) {
 			engine.put("user", user);
 			engine.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
 		}
@@ -93,7 +94,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * Проверяет, есть ли скрипты для события формы
 	 *
 	 * @param formData форма
-	 * @param event событие
+	 * @param event    событие
 	 */
 	@Override
 	public boolean hasScripts(FormData formData, FormDataEvent event) {
@@ -184,6 +185,14 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			}
 
 			return true;
+		} catch (ScriptException e) {
+			Throwable cause = e.getCause();
+			if (cause != null && cause instanceof Exception) {
+				logger.error((Exception) cause);
+			} else {
+				logger.error(e);
+			}
+			return false;
 		} catch (Exception e) {
 			logger.error(e);
 			return false;
