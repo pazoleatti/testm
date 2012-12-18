@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -22,6 +20,8 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.List;
 
 public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
@@ -115,7 +115,7 @@ public class FormDataPresenter extends
 								if (!isVisible()) {
 									MessageEvent.fire(
 											FormDataPresenter.this,
-											"Неудалось открыть/создать налоговую форму",
+											"Не удалось открыть/создать налоговую форму",
 											result.getLogEntries()
 									);
 								}
@@ -133,10 +133,10 @@ public class FormDataPresenter extends
 								throw throwable;
 							} catch (WrongInputDataServiceException exception) {
 								getProxy().manualRevealFailed();
-								MessageEvent.fire(this, "Неудалось создать налоговую форму: " + exception.getMessage());
+								MessageEvent.fire(this, "Не удалось создать налоговую форму: " + exception.getMessage());
 							} catch (Throwable exception) {
 								getProxy().manualRevealFailed();
-								MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму", exception);
+								MessageEvent.fire(this, "Не удалось открыть/создать налоговую форму", exception);
 							}
 						}
 
@@ -147,7 +147,7 @@ public class FormDataPresenter extends
 					});
 		} catch (Exception e) {
 			getProxy().manualRevealFailed();
-			MessageEvent.fire(this, "Неудалось открыть/создать налоговую форму", e);
+			MessageEvent.fire(this, "Не удалось открыть/создать налоговую форму", e);
 		}
 	}
 

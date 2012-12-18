@@ -3,13 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter.MyView;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -32,6 +30,12 @@ public class MainPageView extends ViewImpl implements MyView {
 	Panel mainContentPanel;
 
 	@UiField
+	AbsolutePanel footerPanel;
+
+	@UiField
+	Label projectVersion;
+
+	@UiField
 	Element loadingMessage;
 
 	@UiField
@@ -51,6 +55,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	@Inject
 	public MainPageView(Binder binder) {
 		widget = binder.createAndBindUi(this);
+		footerPanel.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.BOTTOM);
 	}
 
 	@Override
@@ -108,5 +113,10 @@ public class MainPageView extends ViewImpl implements MyView {
 	public void setDesc(String text) {
 		dockPanel.setWidgetHidden(descPanel, text == null);
 		desc.setText(text);
+	}
+
+	@Override
+	public void setProjectVersion(String version){
+		projectVersion.setText("Версия: " + version);
 	}
 }

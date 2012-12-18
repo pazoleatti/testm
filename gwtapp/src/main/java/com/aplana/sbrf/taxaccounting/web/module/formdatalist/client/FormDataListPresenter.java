@@ -61,7 +61,7 @@ public class FormDataListPresenter extends
 			filterPresenter.initFilter(TaxType.valueOf(request.getParameter(
 					"nType", "")));
 		} catch (Exception e) {
-			ErrorEvent.fire(this, "Неудалось открыть список форм", e);
+			ErrorEvent.fire(this, "Не удалось открыть список форм", e);
 		}
 	}
 

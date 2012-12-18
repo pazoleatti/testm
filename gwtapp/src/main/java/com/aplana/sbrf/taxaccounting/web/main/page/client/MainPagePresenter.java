@@ -1,29 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
+import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersion;
+import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersionResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
-import com.gwtplatform.mvp.client.proxy.NavigationEvent;
-import com.gwtplatform.mvp.client.proxy.NavigationHandler;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
-import com.gwtplatform.mvp.client.proxy.RevealRootContentEvent;
-import com.gwtplatform.mvp.client.proxy.SetPlaceTitleHandler;
+import com.gwtplatform.mvp.client.proxy.*;
 
 public class MainPagePresenter extends
 		Presenter<MainPagePresenter.MyView, MainPagePresenter.MyProxy>
@@ -45,6 +43,8 @@ public class MainPagePresenter extends
 		void setTitle(String text);
 
 		void setDesc(String text);
+
+		void setProjectVersion(String version);
 	}
 
 	/**
@@ -65,6 +65,8 @@ public class MainPagePresenter extends
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
+	private final DispatchAsync dispatchAsync;
+
 	/**
 	 * Флаг показывает, что заголовки обновлены через UpdateEvent и в обновлении
 	 * их через GWTP (@Title, @TitleFunction) - нет необходимости.
@@ -77,12 +79,13 @@ public class MainPagePresenter extends
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
-			MessageDialogPresenter messageDialogPresenter) {
+			MessageDialogPresenter messageDialogPresenter, DispatchAsync dispatchAsync) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
 		this.placeManager = placeManager;
 		this.messageDialogPresenter = messageDialogPresenter;
+		this.dispatchAsync = dispatchAsync;
 	}
 
 	@Override
@@ -95,6 +98,13 @@ public class MainPagePresenter extends
 		super.onReveal();
 		setInSlot(TYPE_SignInContent, signInPresenter);
 		setInSlot(TYPE_MainMenuContent, mainMenuPresenter);
+		this.dispatchAsync.execute(new GetProjectVersion(),
+				new AbstractCallback<GetProjectVersionResult>() {
+					@Override
+					public void onReqSuccess(GetProjectVersionResult result) {
+						getView().setProjectVersion(result.getProjectVersion());
+					}
+				});
 	}
 
 	@Override
