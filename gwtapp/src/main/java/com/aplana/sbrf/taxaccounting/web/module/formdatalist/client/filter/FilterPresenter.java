@@ -66,6 +66,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 						FormDataFilter formDataFilter = new FormDataFilter();
 						formDataFilter.setDepartmentId(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId());
+						if (result.getCurrentReportPeriodId() != null) {
+							formDataFilter.setReportPeriodId(result.getCurrentReportPeriodId());	
+						}
 						getView().setDataFilter(formDataFilter);
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}

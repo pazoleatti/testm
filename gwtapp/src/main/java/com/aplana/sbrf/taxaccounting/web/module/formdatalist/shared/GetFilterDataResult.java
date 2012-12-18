@@ -9,13 +9,14 @@ import java.util.List;
 
 public class GetFilterDataResult implements Result {
 
-    public GetFilterDataResult(){
-
-    }
-
+	private Integer currentReportPeriodId;
     private List<Department> departments;
     private List<FormType> types;
 	private List<ReportPeriod> periods;
+	
+    public GetFilterDataResult(){
+
+    }
 
     public List<Department> getDepartments() {
         return departments;
@@ -41,4 +42,11 @@ public class GetFilterDataResult implements Result {
 		this.periods = periods;
 	}
 
+	public Integer getCurrentReportPeriodId() {
+		return currentReportPeriodId;
+	}
+
+	public void setCurrentReportPeriodId(Integer currentReportPeriodId) {
+		this.currentReportPeriodId = currentReportPeriodId;
+	}
 }
