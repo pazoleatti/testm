@@ -147,6 +147,11 @@
 			<scope>system</scope>
 			<systemPath>${pom.basedir}/../../libs/ojdbc6.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
