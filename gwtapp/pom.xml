@@ -192,6 +192,24 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<configuration>
+							<target>
+								<echo message="${project.version}" file="${project.build.outputDirectory}/com/aplana/sbrf/taxaccounting/version.txt"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencyManagement>
