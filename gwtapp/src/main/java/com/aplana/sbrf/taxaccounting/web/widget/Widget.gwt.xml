@@ -13,4 +13,5 @@
 	<source path="cell"/>
 	<source path="style"/>
 	<source path="log"/>
+    <source path="codemirror"/>
 </module>

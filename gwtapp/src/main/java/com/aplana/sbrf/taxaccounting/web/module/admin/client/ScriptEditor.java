@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client;
 
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.*;
 
@@ -48,7 +46,7 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	CheckBox perRow;
 
 	@UiField
-	TextArea body;
+	CodeMirror body;
 
 	/**
 	 * Флаг того, что элемент проинициализирован.
@@ -97,18 +95,6 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 			return driver.flush();
 		} else {
 			return null;
-		}
-	}
-
-	@UiHandler("body")
-	public void onTab(KeyPressEvent event){
-		if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_TAB) {
-			event.preventDefault();
-			event.stopPropagation();
-			int index = body.getCursorPos();
-			String text = body.getText();
-			body.setText(text.substring(0, index) + "\t" + text.substring(index));
-			body.setCursorPos(index + 1);
 		}
 	}
 }
