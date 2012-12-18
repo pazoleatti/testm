@@ -12,8 +12,6 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Color;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,7 +19,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.springframework.util.ClassUtils;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -50,7 +47,7 @@ public class FormDataXlsxReportBuilder {
 	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
 	
 	
-	public FormDataXlsxReportBuilder() throws IOException {
+	public FormDataXlsxReportBuilder() {
 		/*templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
 		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));*/
@@ -85,7 +82,7 @@ public class FormDataXlsxReportBuilder {
 		
 	}
 	
-	public FormDataXlsxReportBuilder(FormData data) throws IOException {
+	public FormDataXlsxReportBuilder(FormData data) {
 		this();
 		this.data = data;
 		
@@ -119,7 +116,6 @@ public class FormDataXlsxReportBuilder {
 		} catch (Exception e) {
 			// nothing
 		}
-		System.out.println("----" + file.getAbsolutePath());
 		return file.getAbsolutePath();
 	}
 	
@@ -140,20 +136,16 @@ public class FormDataXlsxReportBuilder {
 				if(data.getFormColumns().get(i).getGroupName()==null){
 					
 					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
-					//System.out.println("--" + data.getFormColumns().get(i).getName() + ":" + data.getFormColumns().get(i).getWidth());
 					fillWidth(i,data.getFormColumns().get(i).getWidth());
 					Cell cell = row.createCell(i);
 					cell.setCellStyle(cellStyle);
 					cell.setCellValue(data.getFormColumns().get(i).getName());
-					
 					tableBorders(i,i, rowNumber, rowNumber + 1);
 					
 				}
 				else{
 					int j;
 					for(j = i + 1;j<data.getFormColumns().size();j++){
-						/*System.out.println("-------" + data.getFormColumns().get(j).getName() + "-----" +data.getFormColumns().get(j).getAlias() + "-----" + 
-								data.getFormColumns().get(j).getOrder() + "-----" + data.getFormColumns().get(j).getGroupName());*/
 						if(data.getFormColumns().get(j).getGroupName() == null || !data.getFormColumns().get(j).getGroupName().
 								equals(data.getFormColumns().get(i).getGroupName())){
 							break;
@@ -167,7 +159,6 @@ public class FormDataXlsxReportBuilder {
 		}
 		else{
 			for (Column el : data.getFormColumns()) {
-				//System.out.println("-------" + el.getName() + "-----" +el.getAlias() + "-----" + el.getOrder() + "-----" + el.getGroupName());
 				aliasMap.put(cellNumber, el.getAlias());
 				Cell cell = row.createCell(cellNumber++);
 				cell.setCellStyle(cellStyle);
@@ -180,11 +171,10 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	private void groupCells(int startCell,int endCell,Row row1,Row row2){
-		
+		tableBorders(startCell,endCell,rowNumber, rowNumber);
 		Cell cell = row1.createCell(startCell);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
-		//System.out.println("--" + data.getFormColumns().get(startCell).getName() + ":" + data.getFormColumns().get(startCell).getWidth());
 		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
 		
 		for(int i = startCell;i<=endCell;i++){
@@ -193,13 +183,12 @@ public class FormDataXlsxReportBuilder {
 			cell = row2.createCell(i);
 			cell.setCellStyle(cellStyle);
 			cell.setCellValue(data.getFormColumns().get(i).getName());
-			//System.out.println(cell.getStringCellValue());
 		}
-		tableBorders(startCell,endCell,rowNumber, rowNumber);
-		
 	}
 	
 	private void tableBorders(int startCell,int endCell, int startRow, int endRow){
+		if(startCell == endCell && startRow == endRow)
+			return;
 		CellRangeAddress region = new CellRangeAddress(
 				startRow, 
 				endRow, 
@@ -218,10 +207,9 @@ public class FormDataXlsxReportBuilder {
 		
 		for (DataRow dataRow : data.getDataRows()) {
 			Row row = sheet.createRow(rowNumber++);
-			System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
+			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
-				
 				if(obj instanceof String){
 					String str = (String)obj;
 					Cell cell = row.createCell(alias.getKey());
@@ -264,11 +252,22 @@ public class FormDataXlsxReportBuilder {
 					cell.setCellValue(bd.doubleValue());
 					//fillWidth(alias.getKey(),String.valueOf(bd.doubleValue()).length());
 				}
+				else if(obj == null){
+					Cell cell = row.createCell(alias.getKey());
+					CellStyle cellStyle = workBook.createCellStyle();
+					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+					cell.setCellStyle(cellStyle);
+					cell.setCellValue("");
+				}
 			}
 			
 		}
 		for (Map.Entry<Integer, Integer> cellWidth : widthCellsMap.entrySet()) {
-			System.out.println("----n" + cellWidth.getKey() + ":" + cellWidth.getValue());
+			//System.out.println("----n" + cellWidth.getKey() + ":" + cellWidth.getValue());
 			sheet.setColumnWidth(cellWidth.getKey(), cellWidth.getValue().intValue()*256);
 		}
 	}
