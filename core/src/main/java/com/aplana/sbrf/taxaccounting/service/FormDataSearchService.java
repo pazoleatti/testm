@@ -11,7 +11,6 @@ import java.util.List;
  *
  */
 public interface FormDataSearchService {
-
 	/**
 	 * Данный метод, основываясь на текущем пользователе и formDataFilter, формирует параметры фильтра
 	 * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию
