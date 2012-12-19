@@ -41,9 +41,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			for(Department department : departmentList){
 				departmentIntegerList.add(department.getId());
 			}
-			formDataDaoFilter.setDepartmentId(departmentIntegerList);
+			formDataDaoFilter.setDepartmentIds(departmentIntegerList);
 		} else {
-			formDataDaoFilter.setDepartmentId(Arrays.asList(formDataFilter.getDepartmentId()));
+			formDataDaoFilter.setDepartmentIds(Arrays.asList(formDataFilter.getDepartmentId()));
 		}
 
 		if(formDataFilter.getReportPeriodId() == null){
@@ -71,9 +71,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			for(FormType formType : formTypeList){
 				formTypeIntegerList.add(formType.getId());
 			}
-			formDataDaoFilter.setFormTypeId(formTypeIntegerList);
+			formDataDaoFilter.setFormTypeIds(formTypeIntegerList);
 		} else {
-			formDataDaoFilter.setFormTypeId(Arrays.asList(formDataFilter.getFormTypeId()));
+			formDataDaoFilter.setFormTypeIds(Arrays.asList(formDataFilter.getFormTypeId()));
 		}
 
 		if(formDataFilter.getFormState() == null){

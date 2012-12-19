@@ -34,7 +34,7 @@ public class FormDataDaoFilter implements Serializable {
 		return departmentIds;
 	}
 
-	public void setDepartmentId(List<Integer> departmentIds) {
+	public void setDepartmentIds(List<Integer> departmentIds) {
 		this.departmentIds = departmentIds;
 	}
 
@@ -42,7 +42,7 @@ public class FormDataDaoFilter implements Serializable {
 		return formTypeIds;
 	}
 
-	public void setFormTypeId(List<Integer> formTypeIds) {
+	public void setFormTypeIds(List<Integer> formTypeIds) {
 		this.formTypeIds = formTypeIds;
 	}
 
