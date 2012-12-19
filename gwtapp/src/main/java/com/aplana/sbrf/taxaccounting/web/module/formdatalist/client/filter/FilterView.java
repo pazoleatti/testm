@@ -138,6 +138,9 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	public void setFormTypesMap(Map<Integer, String> formTypesMap){
 		formTypesMap.put(null, "");
 		this.formTypesMap = formTypesMap;
+		/** .setValue(null) see
+		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
+		formTypeId.setValue(null);
 		formTypeId.setAcceptableValues(formTypesMap.keySet());
 	}
 
@@ -145,6 +148,9 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	public void setReportPeriodMaps(Map<Integer, String> reportPeriodMaps) {
 		reportPeriodMaps.put(null, "");
 		this.reportPeriodMaps = reportPeriodMaps;
+		/** .setValue(null) see
+		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
+		reportPeriodId.setValue(null);
 		reportPeriodId.setAcceptableValues(reportPeriodMaps.keySet());
 	}
 
@@ -152,6 +158,9 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	public void setDepartmentMaps(Map<Integer, String> departmentMaps) {
 		departmentMaps.put(null, "");
 		this.departmentMaps = departmentMaps;
+		/** .setValue(null) see
+		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
+		departmentId.setValue(null);
 		departmentId.setAcceptableValues(departmentMaps.keySet());
 	}
 
