@@ -1,5 +1,9 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.gin;
 
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.AdminPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.AdminView;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 /**

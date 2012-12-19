@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -6,6 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.ScriptEditor;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
@@ -93,7 +96,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Поднимает скрипт в очереди на обюработку события на 1 позицию.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#upEventScript()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#upEventScript()
 	 */
 	@Override
 	public void upEventScript() {
@@ -115,7 +118,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Опускает скрипт в очереди на обработку события на 1 позицию.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#downEventScript()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#downEventScript()
 	 */
 	@Override
 	public void downEventScript() {
@@ -137,7 +140,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * биндит скрипты события на форму после выбора события.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#selectEvent()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#selectEvent()
 	 */
 	@Override
 	public void selectEvent() {
@@ -192,7 +195,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Добавляет скрипт на событие формы. В конец списка выполнения.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#addScriptToEvent()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#addScriptToEvent()
 	 */
 	@Override
 	public void addScriptToEvent() {
@@ -220,7 +223,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Удаляет скрипт из списка обработчиков события формы.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#removeScriptFromEvent()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#removeScriptFromEvent()
 	 */
 	@Override
 	public void removeScriptFromEvent() {
@@ -234,7 +237,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Биндит данные скрипта на форму редактирования скрипта
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#selectScript()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#selectScript()
 	 */
 	@Override
 	public void selectScript() {
@@ -244,7 +247,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Создает новый скрипт.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#createScript()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#createScript()
 	 */
 	@Override
 	public void createScript() {
@@ -261,7 +264,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Удаляет скрипт. Полностью.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#deleteScript()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#deleteScript()
 	 */
 	@Override
 	public void deleteScript() {
@@ -272,7 +275,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Загружает шабло формы и обновляет поля в представлении.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#load()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#load()
 	 */
 	@Override
 	public void load() {
@@ -291,7 +294,7 @@ public class FormTemplatePresenter extends Presenter<FormTemplatePresenter.MyVie
 	/**
 	 * Сохраняет шаблон формы. Отправляет его на сервер.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUiHandlers#save()
+	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#save()
 	 */
 	@Override
 	public void save() {

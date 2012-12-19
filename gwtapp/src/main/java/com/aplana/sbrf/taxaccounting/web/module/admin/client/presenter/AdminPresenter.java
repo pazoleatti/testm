@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.AdminUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -26,6 +26,23 @@ import com.gwtplatform.mvp.client.proxy.*;
  * @author Vitalii Samolovskikh
  */
 public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> implements AdminUiHandlers {
+
+	/**
+	 * {@link AdminPresenter}'s proxy.
+	 */
+	@Title("Администрирование")
+	@ProxyCodeSplit
+	@NameToken(AdminNameTokens.adminPage)
+	public interface MyProxy extends Proxy<AdminPresenter>, Place {
+	}
+
+	/**
+	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его Presenter.
+	 */
+	public interface MyView extends View, HasUiHandlers<AdminUiHandlers> {
+		void setFormTemplateTable(FormListResult result);
+	}
+
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
@@ -50,9 +67,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 		dispatcher.execute(new FormListAction(), new AbstractCallback<FormListResult>() {
 			@Override
 			public void onReqSuccess(FormListResult result) {
-			    CellTable<FormTemplate> table = getView().getFormTemplateTable();
-				table.setRowData(result.getForms());
-				super.onReqSuccess(result);
+				getView().setFormTemplateTable(result);
 			}
 		});
 	}
@@ -64,7 +79,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	 * @param id идентификатор шаблона формы
 	 */
 	@Override
-	public void select(Integer id) {
+	public void selectForm(Integer id) {
 			placeManager.revealPlace(
 					new PlaceRequest(AdminNameTokens.formTemplatePage).with(
 							FormTemplatePresenter.PARAM_FORM_TEMPLATE_ID, String.valueOf(id)
@@ -72,27 +87,9 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 			);
 	}
 
-	/**
-	 * TODO: понять
-	 */
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
 
-	/**
-	 * TODO: Про этот интерфейс тоже надо почитать.
-	 */
-	@Title("Администрирование")
-	@ProxyCodeSplit
-	@NameToken(AdminNameTokens.adminPage)
-	public interface MyProxy extends Proxy<AdminPresenter>, Place {
-	}
-
-	/**
-	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его Presenter.
-	 */
-	public interface MyView extends View, HasUiHandlers<AdminUiHandlers> {
-		CellTable<FormTemplate> getFormTemplateTable();
-	}
 }

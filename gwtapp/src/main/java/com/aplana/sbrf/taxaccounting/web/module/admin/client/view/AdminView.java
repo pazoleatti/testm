@@ -1,6 +1,8 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.AdminPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -42,15 +44,12 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 
 		// колонка с кнопкой "Изменить"
 		formTemplateTable.addColumn(new Column<FormTemplate, Integer>(
-				new ActionCell<Integer>(
-						"Изменить",
-						new ActionCell.Delegate<Integer>() {
-							@Override
-							public void execute(Integer id) {
-								getUiHandlers().select(id);
-							}
-						}
-				)
+			new ActionCell<Integer>("Изменить", new ActionCell.Delegate<Integer>() {
+				@Override
+				public void execute(Integer id) {
+					getUiHandlers().selectForm(id);
+				}
+			})
 		) {
 			@Override
 			public Integer getValue(FormTemplate formTemplate) {
@@ -64,11 +63,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 		return widget;
 	}
 
-	/**
-	 * @see AdminPresenter.MyView
-	 */
 	@Override
-	public CellTable<FormTemplate> getFormTemplateTable() {
-		return formTemplateTable;
+	public void setFormTemplateTable(FormListResult result) {
+		formTemplateTable.setRowData(result.getForms());
 	}
+
 }

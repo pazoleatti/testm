@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -7,15 +7,14 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * В нашем случае <code>AdminPresenter</code>.
  *
  * @author Vitalii Samolovskikh
- * @see AdminPresenter
+ * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.AdminPresenter
  * @see AdminView
  */
 public interface AdminUiHandlers extends UiHandlers {
 	/**
 	 * Обработчик события выбора шаблона формы.
 	 *
-	 * @param id идентификатор шаблона выбранной формы. Это, конечно, нарушает чистоту модели MVP, но с другой стороны...
-	 *           Ну а что делать?
+	 * @param id идентификатор шаблона выбранной формы.
 	 */
-	public void select(Integer id);
+	public void selectForm(Integer id);
 }

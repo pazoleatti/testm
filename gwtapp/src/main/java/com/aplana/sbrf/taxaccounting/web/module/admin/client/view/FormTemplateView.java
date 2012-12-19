@@ -1,10 +1,13 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.ScriptEditor;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplatePresenter;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,6 +42,9 @@ public class FormTemplateView extends ViewWithUiHandlers<FormTemplateUiHandlers>
 
 	@UiField
 	Label titleLabel;
+
+	@UiField
+	Button upEventScript;
 
 	private final Widget widget;
 

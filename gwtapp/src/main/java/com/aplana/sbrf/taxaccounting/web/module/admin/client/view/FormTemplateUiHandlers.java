@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.admin.client;
+package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * Интерфейс обработчика событий формы (представления) редактирования шаблона формы (налоговой формы).
  *
  * @see FormTemplateView
- * @see FormTemplatePresenter
+ * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplatePresenter
  * @author Vitalii Samolovskikh
  */
 public interface FormTemplateUiHandlers extends UiHandlers {
