@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.dataprovider.impl;
 
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 import java.sql.ResultSet;
@@ -39,6 +41,11 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 				new int[]{Types.VARCHAR, Types.VARCHAR},
 				new ItemRowMapper()
 		);
+	}
+
+	@Override
+	public PaginatedSearchResult<DictionaryItem<String>> getValues(String pattern, PaginatedSearchParams pageParams) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 }
 

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.dataprovider;
 import java.io.Serializable;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
@@ -11,19 +13,28 @@ import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 public interface DictionaryDataProvider<ValueType extends Serializable> {
 	/**
 	 * Возвращает все значения из справочника.
-	 *
 	 * @return список значений справочника
 	 */
 	public List<DictionaryItem<ValueType>> getValues();
 
 	/**
-	 * Возвращает отфйильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
+	 * Возвращает отфильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
 	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
 	 *
 	 * @param pattern паттерн поиска
 	 * @return отфильтрованный список значений справочника
+	 * @deprecated не использовать, нужно использовать вариант с паджинацией
 	 */
 	public List<DictionaryItem<ValueType>> getValues(String pattern);
+	
+	/**
+	 * Возвращает отфильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
+	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
+	 * @param pattern паттерн поиска, если null, то фильтрация не производится
+	 * @param pageParams {@link PaginatedSearchParams параметры} для выбора диапазона записей
+	 * @return отфильтрованный список значений справочника
+	 */	
+	public PaginatedSearchResult<DictionaryItem<ValueType>> getValues(String pattern, PaginatedSearchParams pageParams);
 
 	/**
 	 * Возвращает запись св справочнике по значению. Запись может содержать так же и название значения.
