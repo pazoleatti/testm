@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
@@ -12,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.Filte
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -23,12 +23,18 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
 		FormDataListUiHandlers, FilterReadyEvent.MyHandler {
+
+
+	private static final int PAGE_SIZE = 20;
+	private static boolean IS_FIRST_TIME = false;
+	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
@@ -45,6 +51,7 @@ public class FormDataListPresenter extends
 			FilterPresenter filterPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter);
 		getView().setUiHandlers(this);
+		getView().assignDataProvider(PAGE_SIZE, dataProvider);
 	}
 
 	/*
@@ -71,40 +78,22 @@ public class FormDataListPresenter extends
 	 * @param filterFormData
 	 */
 	private void loadFormDataList(final FormDataFilter filterFormData) {
-		
+		final int LOAD_DATA_FROM_FIRST_RECORD = 0;
+		filterFormData.setStartIndex(LOAD_DATA_FROM_FIRST_RECORD);
+		filterFormData.setCountOfRecords(PAGE_SIZE);
+
 		GetFormDataList action = new GetFormDataList();
 		action.setFormDataFilter(filterFormData);
-		dispatcher.execute(action,
-				new AbstractCallback<GetFormDataListResult>() {
-					@Override
-					public void onReqSuccess(GetFormDataListResult result) {
-						Map<Integer, String> departmentMap = new HashMap<Integer, String>();
-						for (Department department : result.getDepartments()) {
-							departmentMap.put(department.getId(),
-									department.getName());
-						}
+		refreshTable();
 
-						Map<Integer, String> reportPeriodMap = new HashMap<Integer, String>();
-						for (ReportPeriod period : result.getReportPeriods()) {
-							reportPeriodMap.put(period.getId(),
-									period.getName());
-						}
-
-						getView().setFormDataList(result.getRecords());
-						getView().setDepartmentMap(departmentMap);
-						getView().setReportPeriodMap(reportPeriodMap);
-
-						TitleUpdateEvent.fire(this, "Список налоговых форм", filterFormData.getTaxType().getName());
-						// Вручную вызывается onReveal. Вызываем его всегда,
-						// даже когда
-						// презентер в состоянии visible, т.к. нам необходима
-						// его разблокировка.
-						// Почему GWTP вызывает блокировку даже если страница
-						// уже видна - непонятно.
-						getProxy().manualReveal(FormDataListPresenter.this);
-
-					}
-				});
+		TitleUpdateEvent.fire(this, "Список налоговых форм", filterFormData.getTaxType().getName());
+		// Вручную вызывается onReveal. Вызываем его всегда,
+		// даже когда
+		// презентер в состоянии visible, т.к. нам необходима
+		// его разблокировка.
+		// Почему GWTP вызывает блокировку даже если страница
+		// уже видна - непонятно.
+		getProxy().manualReveal(FormDataListPresenter.this);
 	}
 
 	@Override
@@ -130,6 +119,10 @@ public class FormDataListPresenter extends
 		}
 	}
 
+	public void refreshTable() {
+		dataProvider.update();
+	}
+
 	@Override
 	public void onCreateClicked() {
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
@@ -143,6 +136,72 @@ public class FormDataListPresenter extends
 						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId() : null))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
 						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
+	}
+
+	private class TableDataProvider extends AsyncDataProvider<FormDataSearchResultItem> {
+
+		public void update() {
+			for (HasData<FormDataSearchResultItem> display: getDataDisplays()) {
+				onRangeChanged(display);
+			}
+		}
+
+		@Override
+		protected void onRangeChanged(HasData<FormDataSearchResultItem> display) {
+			final Range range = display.getVisibleRange();
+			GetFormDataList requestData = createRequestData(range);
+			dispatcher.execute(requestData,
+					new AbstractCallback<GetFormDataListResult>() {
+						@Override
+						public void onReqSuccess(GetFormDataListResult result) {
+							if(result == null || result.getTotalCountOfRecords() == 0){
+								getView().setFormDataList(range.getStart(), 0, new ArrayList<FormDataSearchResultItem>());
+							} else {
+								handleResponse(result, range);
+							}
+						}
+					});
+		}
+
+		private GetFormDataList createRequestData(Range range) {
+			// TODO: Данное условие - откровенный костыль, который нужно убирать и реализовать нормально данную функциональность.
+			// Зачем нужен это костыль сейчас:
+			// когда приложение стартует первый раз, создается SimplePager, который во время инициализации вызывает
+			// функцию (onRangeChanged()), которая, в свою очередь, вызывает данную функцию. В данной функции есть строка
+			// {@code FormDataFilter filter = filterPresenter.getFilterData(); }, при исполнении которой, в итоге,
+			// вызывается {@code driver.flush();}.
+			// Все вышеописанное - абсолютно нормальное поведение, но проблема заключается в том, что SimplePager
+			// инициализируется раньше чем успевает инициализироваться фильтр, и вызов {@code driver.flush()} раньше
+			// чем {@driver.edit()} приводит к зависанию приложения.
+			if(IS_FIRST_TIME){
+				FormDataFilter filter = filterPresenter.getFilterData();
+				filter.setCountOfRecords(PAGE_SIZE);
+				filter.setStartIndex(range.getStart());
+				GetFormDataList request = new GetFormDataList();
+				request.setFormDataFilter(filter);
+				return request;
+			}
+			IS_FIRST_TIME = true;
+			return (new GetFormDataList());
+		}
+
+		private void handleResponse(GetFormDataListResult response, Range range) {
+			Map<Integer, String> departmentMap = new HashMap<Integer, String>();
+			for (Department department : response.getDepartments()) {
+				departmentMap.put(department.getId(),
+						department.getName());
+			}
+
+			Map<Integer, String> reportPeriodMap = new HashMap<Integer, String>();
+			for (ReportPeriod period : response.getReportPeriods()) {
+				reportPeriodMap.put(period.getId(),
+						period.getName());
+			}
+
+			getView().setFormDataList(range.getStart(), response.getTotalCountOfRecords(), response.getRecords());
+			getView().setDepartmentMap(departmentMap);
+			getView().setReportPeriodMap(reportPeriodMap);
+		}
 	}
 
 }

@@ -23,6 +23,12 @@ public class FormDataFilter implements Serializable{
 
 	private WorkflowState formState;
 
+	/*Стартовый индекс списка записей */
+	private int startIndex;
+
+	/*Количество записей, которые нужно вернуть*/
+	private int countOfRecords;
+
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
@@ -71,4 +77,19 @@ public class FormDataFilter implements Serializable{
 		this.formState = formState;
 	}
 
+	public int getStartIndex() {
+		return startIndex;
+	}
+
+	public void setStartIndex(int startIndex) {
+		this.startIndex = startIndex;
+	}
+
+	public int getCountOfRecords() {
+		return countOfRecords;
+	}
+
+	public void setCountOfRecords(int countOfRecords) {
+		this.countOfRecords = countOfRecords;
+	}
 }

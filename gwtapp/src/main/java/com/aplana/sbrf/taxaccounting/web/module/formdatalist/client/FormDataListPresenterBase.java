@@ -16,12 +16,10 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
+import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -30,6 +28,9 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -49,7 +50,9 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 		
-		void setFormDataList(List<FormDataSearchResultItem> records);
+		void setFormDataList(int start, long totalCount, List<FormDataSearchResultItem> records);
+
+		void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data);
 
 		void setDepartmentMap(Map<Integer, String> departmentMap);
 

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -32,7 +31,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 
 	@Override
-	public List<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
+	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		if(formDataFilter.getDepartmentId() == null){
@@ -83,7 +82,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
 		}
 
-		return formDataSearchDao.findByFilter(formDataDaoFilter);
+		PaginatedSearchResult<FormDataSearchResultItem> resultPage = formDataSearchDao.findPage(formDataDaoFilter,
+				FormDataSearchOrdering.DEPARTMENT_NAME, true, new PaginatedSearchParams(formDataFilter.getStartIndex(),
+				formDataFilter.getCountOfRecords()));
+
+
+		return resultPage;
 	}
 
 	@Override

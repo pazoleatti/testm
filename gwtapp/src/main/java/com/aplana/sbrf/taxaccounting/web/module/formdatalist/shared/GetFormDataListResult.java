@@ -11,6 +11,9 @@ public class GetFormDataListResult implements Result {
 	private List<FormDataSearchResultItem> records;
 	private List<Department> departments;
 	private List<ReportPeriod> reportPeriods;
+
+	//общее количество записей (на всех страницах)
+	private long totalCountOfRecords;
 	
 	public GetFormDataListResult() {
 		
@@ -42,5 +45,13 @@ public class GetFormDataListResult implements Result {
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		this.reportPeriods = reportPeriods;
+	}
+
+	public long getTotalCountOfRecords() {
+		return totalCountOfRecords;
+	}
+
+	public void setTotalCountOfRecords(long totalCountOfRecords) {
+		this.totalCountOfRecords = totalCountOfRecords;
 	}
 }

@@ -10,9 +10,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -33,6 +36,9 @@ public class FormDataListView extends
 
 	@UiField
 	CellTable<FormDataSearchResultItem> formDataTable;
+
+	@UiField
+	VerticalPanel verticalPanelWithTable;
 
 	private Map<Integer, String> departmentsMap;
 	private Map<Integer, String> reportPeriodsMap;
@@ -99,6 +105,10 @@ public class FormDataListView extends
 		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
 		formDataTable.addColumn(stateColumn, "Статус формы");
 
+		SimplePager pager = createDefaultPager();
+		pager.setDisplay(formDataTable);
+		verticalPanelWithTable.add(pager);
+
 	}
 
 	@Override
@@ -119,10 +129,15 @@ public class FormDataListView extends
 	}
 
 	@Override
-	public void setFormDataList(List<FormDataSearchResultItem> records) {
-		formDataTable.setPageSize(records.size());
-		formDataTable.setRowCount(records.size());
-		formDataTable.setRowData(0, records);
+	public void setFormDataList(int start, long totalCount, List<FormDataSearchResultItem> records) {
+		formDataTable.setRowCount((int) totalCount);
+		formDataTable.setRowData(start, records);
+	}
+
+	@Override
+	public void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data) {
+		formDataTable.setPageSize(pageSize);
+		data.addDataDisplay(formDataTable);
 	}
 
 	@Override
@@ -149,4 +164,15 @@ public class FormDataListView extends
 		}
 	}
 
+	private static SimplePager createDefaultPager(){
+		final boolean showFastForwardButton = false;
+		final int fastForwardRows = 0;
+		final boolean showLastPageButton = true;
+		SimplePager pager =  new SimplePager(SimplePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
+				showLastPageButton);
+		pager.setRangeLimited(true);
+		pager.getElement().getStyle().setProperty("marginLeft", "auto");
+		pager.getElement().getStyle().setProperty("marginRight", "auto");
+		return pager;
+	}
 }

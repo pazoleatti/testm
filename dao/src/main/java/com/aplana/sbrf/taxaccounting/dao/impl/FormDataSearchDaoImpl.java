@@ -2,12 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,6 +105,10 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	
 	@Override
 	public PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams) {
+		// TODO: Уберу данное условие, когда разберусь с мапами!
+		if(filter.getFormTypeIds().isEmpty() || filter.getReportPeriodIds().isEmpty()){
+			return (new PaginatedSearchResult<FormDataSearchResultItem>());
+		}
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, filter);
