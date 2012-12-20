@@ -299,3 +299,11 @@ alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (r
 comment on table sec_user_role is 'Привязка ролей к пользователям';
 comment on column sec_user_role.user_id is 'Идентификатор пользователя';
 comment on column sec_user_role.role_id is 'Идентификатор роли';
+
+----------------------------------------------------------------------------------------------------
+ create index i_department_parent_id on tax_0_1.department(parent_id);
+ create index i_data_row_form_data_id on tax_0_1.data_row(form_data_id);
+ create index i_form_data_report_period_id on tax_0_1.form_data(report_period_id);
+ create index i_form_data_form_id on tax_0_1.form_data(form_id);
+ create index i_form_data_department_id on tax_0_1.form_data(department_id);
+ create index i_form_data_kind on tax_0_1.form_data(kind);
