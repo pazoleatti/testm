@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.NumericCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -21,7 +22,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	private NumberFormat numberFormat;
 
 	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable) {
-		super(new EditTextCell(), column);
+		super(new NumericCell(), column);
 //		final Cell cell = getCell();
 
 		StringBuffer mask = new StringBuffer("#");
