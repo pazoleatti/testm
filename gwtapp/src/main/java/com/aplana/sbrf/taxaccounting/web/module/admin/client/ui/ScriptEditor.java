@@ -39,7 +39,7 @@ public class ScriptEditor extends Composite implements Editor<Script>, TakesValu
 	TextBox name;
 
 	@UiField
-	TextArea condition;
+	CodeMirror condition;
 
 	@UiField
 	@Path("rowScript")

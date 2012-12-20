@@ -27,7 +27,12 @@ public class CodeMirror extends Composite implements LeafValueEditor<String>, Ta
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				wrapper.setValue(value);
+				if (value != null) {
+					wrapper.setValue(value);
+				}
+				else {
+					wrapper.setValue("");
+				}
 			}
 		});
 	}
