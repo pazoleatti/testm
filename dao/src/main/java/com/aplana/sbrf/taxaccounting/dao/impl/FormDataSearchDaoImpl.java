@@ -106,9 +106,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	@Override
 	public PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams) {
 		// TODO: Уберу данное условие, когда разберусь с мапами!
-		if(filter.getFormTypeIds().isEmpty() || filter.getReportPeriodIds().isEmpty()){
-			return (new PaginatedSearchResult<FormDataSearchResultItem>());
-		}
+		//if(filter.getFormTypeIds().isEmpty() || filter.getReportPeriodIds().isEmpty()){
+		//	return (new PaginatedSearchResult<FormDataSearchResultItem>());
+		//}
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, filter);
