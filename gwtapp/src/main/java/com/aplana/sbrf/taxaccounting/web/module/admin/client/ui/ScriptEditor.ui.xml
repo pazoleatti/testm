@@ -5,10 +5,11 @@
     <ui:style>
         @external .CodeMirror-scroll;
         .CodeMirror-scroll {
-            height: 230px;
+            height: 240px;
             outline: medium none;
             overflow: auto;
             position: relative;
+            background-color: white;
         }
     </ui:style>
 

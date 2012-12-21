@@ -1,0 +1,17 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+<g:HTMLPanel>
+    <g:Label text="Шаблон формы" ui:field="titleLabel"/>
+
+    <t:Bar>
+        <t:LeftBar>
+            <g:Button text="Сохранить" ui:field="saveButton"/>
+            <g:Button text="Сбросить" ui:field="resetButton"/>
+            <g:Button text="Отмена" ui:field="cancelButton"/>
+        </t:LeftBar>
+    </t:Bar>
+    <npui:SimpleTabPanel ui:field="tabPanel" />
+</g:HTMLPanel>
+</ui:UiBinder>
