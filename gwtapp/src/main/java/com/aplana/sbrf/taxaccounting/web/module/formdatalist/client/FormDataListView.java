@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
-import java.util.Map;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -40,9 +39,6 @@ public class FormDataListView extends
 	@UiField
 	VerticalPanel verticalPanelWithTable;
 
-	private Map<Integer, String> departmentsMap;
-	private Map<Integer, String> reportPeriodsMap;
-
 	@Inject
 	public FormDataListView(final MyBinder binder) {
 
@@ -58,14 +54,14 @@ public class FormDataListView extends
 		TextColumn<FormDataSearchResultItem> departmentColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return departmentsMap.get(object.getDepartmentId());
+				return object.getDepartmentName();
 			}
 		};
 
 		TextColumn<FormDataSearchResultItem> reportPeriodColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return reportPeriodsMap.get(object.getReportPeriodId());
+				return object.getReportPeriodName();
 			}
 		};
 
@@ -138,16 +134,6 @@ public class FormDataListView extends
 	public void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data) {
 		formDataTable.setPageSize(pageSize);
 		data.addDataDisplay(formDataTable);
-	}
-
-	@Override
-	public void setDepartmentMap(Map<Integer, String> departmentMap) {
-		this.departmentsMap = departmentMap;
-	}
-
-	@Override
-	public void setReportPeriodMap(Map<Integer, String> reportPeriodMap) {
-		this.reportPeriodsMap = reportPeriodMap;
 	}
 
 	@UiHandler("apply")

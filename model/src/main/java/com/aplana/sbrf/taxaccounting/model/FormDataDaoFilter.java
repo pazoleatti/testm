@@ -21,6 +21,7 @@ public class FormDataDaoFilter implements Serializable {
 
 	private List<WorkflowState> states;
 
+	private List<TaxType> taxTypes;
 
 	public List<Integer> getReportPeriodIds() {
 		return reportPeriodIds;
@@ -60,5 +61,13 @@ public class FormDataDaoFilter implements Serializable {
 
 	public void setStates(List<WorkflowState> states) {
 		this.states = states;
+	}
+
+	public List<TaxType> getTaxTypes() {
+		return taxTypes;
+	}
+
+	public void setTaxTypes(List<TaxType> taxTypes) {
+		this.taxTypes = taxTypes;
 	}
 }

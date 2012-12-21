@@ -30,7 +30,6 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -54,9 +53,6 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 
 		void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data);
 
-		void setDepartmentMap(Map<Integer, String> departmentMap);
-
-		void setReportPeriodMap(Map<Integer, String> reportPeriodMap);
 	}
 	
 	protected final PlaceManager placeManager;

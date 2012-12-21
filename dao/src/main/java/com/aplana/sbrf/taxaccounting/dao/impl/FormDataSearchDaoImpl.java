@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
@@ -25,14 +24,18 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			sql.append(" AND ft.id in ").append(transformToSqlInStatement(filter.getFormTypeIds())); 
 		}
 
+		if (filter.getTaxTypes() != null && !filter.getTaxTypes().isEmpty()) {
+			sql.append(" AND ft.tax_type in ").append(transformTaxTypeToSqlInStatement(filter.getTaxTypes()));
+		}
+
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-			sql.append(" AND rp.id in ").append(transformToSqlInStatement(filter.getReportPeriodIds())); 
+			sql.append(" AND rp.id in ").append(transformToSqlInStatement(filter.getReportPeriodIds()));
 		}
 
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			sql.append(" AND fd.DEPARTMENT_ID in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
 		}
-		
+
 		if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
 			sql.append(" AND fd.kind in ").append(transformFormKindsToSqlInStatement(filter.getFormDataKinds()));
 		}
@@ -51,11 +54,6 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	
 	@Override
 	public List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter dataFilter) {
-		// TODO: Зачем это условие здесь???
-		if(dataFilter.getFormTypeIds().isEmpty() || dataFilter.getReportPeriodIds().isEmpty()){
-			return (new ArrayList<FormDataSearchResultItem>());
-		}
-
 		StringBuilder sql = new StringBuilder();
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, dataFilter);
@@ -105,10 +103,6 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	
 	@Override
 	public PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams) {
-		// TODO: Уберу данное условие, когда разберусь с мапами!
-		//if(filter.getFormTypeIds().isEmpty() || filter.getReportPeriodIds().isEmpty()){
-		//	return (new PaginatedSearchResult<FormDataSearchResultItem>());
-		//}
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, filter);

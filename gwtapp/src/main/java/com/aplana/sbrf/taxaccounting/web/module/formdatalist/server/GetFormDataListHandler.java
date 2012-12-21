@@ -34,9 +34,6 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 				.findDataByUserIdAndFilter(securityService.currentUser(), action.getFormDataFilter());
 		res.setTotalCountOfRecords(resultPage.getTotalRecordCount());
 		res.setRecords(resultPage.getRecords());
-		res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
-				.getDepartmentId()));
-		res.setReportPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getFormDataFilter().getTaxType()));
 		return res;
 	}
 

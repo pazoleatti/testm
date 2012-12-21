@@ -82,6 +82,15 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setStates(Arrays.asList(formDataFilter.getFormState()));
 		}
 
+		if(formDataFilter.getTaxType() == null){
+			//В текущей реализации мы всегда идем по ветке else и сюда не попадаем, но  данное условие
+			//добавлено, на случай, если в дальнейщем будет функциональность выбора по всем типам налога.
+			TaxType[] taxTypes = TaxType.values();
+			formDataDaoFilter.setTaxTypes(Arrays.asList(taxTypes));
+		} else {
+			formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
+		}
+
 		PaginatedSearchResult<FormDataSearchResultItem> resultPage = formDataSearchDao.findPage(formDataDaoFilter,
 				FormDataSearchOrdering.DEPARTMENT_NAME, true, new PaginatedSearchParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));

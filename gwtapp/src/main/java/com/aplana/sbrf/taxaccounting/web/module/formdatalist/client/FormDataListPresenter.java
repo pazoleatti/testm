@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
@@ -24,8 +26,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
@@ -186,21 +186,7 @@ public class FormDataListPresenter extends
 		}
 
 		private void handleResponse(GetFormDataListResult response, Range range) {
-			Map<Integer, String> departmentMap = new HashMap<Integer, String>();
-			for (Department department : response.getDepartments()) {
-				departmentMap.put(department.getId(),
-						department.getName());
-			}
-
-			Map<Integer, String> reportPeriodMap = new HashMap<Integer, String>();
-			for (ReportPeriod period : response.getReportPeriods()) {
-				reportPeriodMap.put(period.getId(),
-						period.getName());
-			}
-
 			getView().setFormDataList(range.getStart(), response.getTotalCountOfRecords(), response.getRecords());
-			getView().setDepartmentMap(departmentMap);
-			getView().setReportPeriodMap(reportPeriodMap);
 		}
 	}
 
