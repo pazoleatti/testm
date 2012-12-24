@@ -3,11 +3,9 @@ package com.aplana.sbrf.taxaccounting.service;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -20,8 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.service.impl.FormDataPrintingServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.impl.FormDataServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
 
 public class FormDataPrintingServiceTestMock {
 	
