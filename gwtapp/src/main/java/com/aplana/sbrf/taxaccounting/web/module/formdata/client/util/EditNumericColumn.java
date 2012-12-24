@@ -22,7 +22,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	private NumberFormat numberFormat;
 
 	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable) {
-		super(new NumericCell(), column);
+		super(new NumericCell(column.getPrecision()), column);
 //		final Cell cell = getCell();
 
 		StringBuffer mask = new StringBuffer("#");

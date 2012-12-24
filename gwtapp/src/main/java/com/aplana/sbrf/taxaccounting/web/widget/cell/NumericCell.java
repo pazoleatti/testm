@@ -6,19 +6,23 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Window;
 
-import static com.google.gwt.user.client.Event.sinkEvents;
-
+// TODO: по возможности нужно порефакторить этот класс или найти лучшую реализацию
 public class NumericCell extends EditTextCell {
 
-	InputElement inputField;
+	private InputElement inputField;
+	private int precision;
 
+	public NumericCell(int precision) {
+		this.precision = precision;
+	}
 	@Override
 	protected void edit(Context context, Element parent, String value) {
 		super.edit(context, parent, value);
 		inputField = parent.getFirstChild().<InputElement> cast();
-		addCutHandler(inputField);
+		addPasteHandler(inputField);
 	}
 	@Override
 	public void onBrowserEvent(Context context, final Element parent,
@@ -30,13 +34,37 @@ public class NumericCell extends EditTextCell {
 		if(isEditing){
 			if (Window.Navigator.getUserAgent().contains("MSIE")) {
 				inputField = parent.getFirstChild().<InputElement> cast();
-				addCutHandler(inputField);
+				addPasteHandler(inputField);
 			}
-			if (!isWhatWeNeed(event)) {
-				event.preventDefault();
-				return;
+			if ("keydown".equals(event.getType())) {
+				// Проверяем подходящий ли символ нажат. Дополнительно проверяем корректность для видимых символов
+				if (isWhatWeNeed(event)) {
+					String ourString = (new StringBuffer(inputField.getValue())).insert(getPos(inputField), convertKeyCodeToChar(event.getKeyCode())).toString();
+					if (isSymbolValue(event.getKeyCode()) && !isCorrectValue(ourString)) {
+						event.preventDefault();
+						return;
+					}
+				} else {
+					event.preventDefault();
+					return;
+				}
 			}
 		}
+	}
+
+	private char convertKeyCodeToChar(int keyCode) {
+		char inputtedChar;
+		if ((keyCode==46) || (keyCode==110)) {
+			inputtedChar = '.';
+		} else if ((keyCode==189) || (keyCode==109)) {
+			inputtedChar = '-';
+		} else if ((keyCode>=96) && (keyCode<=105)) {
+			keyCode-=48;
+			inputtedChar = (char)keyCode;
+		} else{
+			inputtedChar = (char)keyCode;
+		}
+		return inputtedChar;
 	}
 
 	/**
@@ -47,18 +75,21 @@ public class NumericCell extends EditTextCell {
 	 */
 	private boolean isWhatWeNeed(NativeEvent event) {
 		if(event!=null){
-			if (((event.getKeyCode()>=48) && (event.getKeyCode()<=57)) // Number keys
-					|| ((event.getKeyCode()>=96) && (event.getKeyCode()<=105)) //Num keys
-					|| ((event.getKeyCode()==190) || (event.getKeyCode()==8) || (event.getKeyCode()==46) // backspace delete dot
-					|| ((event.getKeyCode()>=37) && (event.getKeyCode()<=40)) )  //Arrow keys
-					|| ((event.getKeyCode()==35) || (event.getKeyCode()==36)) // Home End
+			if (
+				(event.getKeyCode()== KeyCodes.KEY_BACKSPACE)
+					|| (event.getKeyCode()==KeyCodes.KEY_DELETE)
+					|| (event.getKeyCode()==KeyCodes.KEY_HOME)
+					|| (event.getKeyCode()==KeyCodes.KEY_END) // Home End
+					|| (event.getKeyCode()==KeyCodes.KEY_LEFT)
+					|| (event.getKeyCode()==KeyCodes.KEY_RIGHT)   //Arrow keys
+					|| (event.getKeyCode()==KeyCodes.KEY_UP)
+					|| (event.getKeyCode()==KeyCodes.KEY_DOWN)   //Arrow keys
 					|| ((event.getCtrlKey() && event.getKeyCode()==65)) // Ctrl+A
 					|| ((event.getCtrlKey() && event.getKeyCode()==67)) // Ctrl+C
 					|| ((event.getCtrlKey() && event.getKeyCode()==86)) // Ctrl+V
 					|| ((event.getCtrlKey() && event.getKeyCode()==88)) // Ctrl+X
-					|| (event.getKeyCode() == 189)                      // Minus
-					|| (event.getKeyCode() == 109)                      // Num Minus
-					|| (event.getKeyCode() == 110)                      // Num dot
+					|| (isSymbolValue(event.getKeyCode()) && !event.getShiftKey())
+
 				)
 			{
 				return true;
@@ -67,7 +98,7 @@ public class NumericCell extends EditTextCell {
 		return false;
 	}
 
-	private native void addCutHandler(Element elementID)
+	private native void addPasteHandler(Element elementID)
     /*-{
 	    var temp = this;
 	    var pastedText = undefined;
@@ -81,17 +112,64 @@ public class NumericCell extends EditTextCell {
 	    }
     }-*/;
 
-	public void handlePaste(String value) {
+	private native int getPos(Element ctrl)
+	/*-{
+		var CaretPos = 0;
+		if (document.selection) {
+			ctrl.focus ();
+			var Sel = document.selection.createRange ();
+			Sel.moveStart ('character', -ctrl.value.length);
+			CaretPos = Sel.text.length;
+		}
+		else if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+			CaretPos = ctrl.selectionStart;
+		}
+		return (CaretPos);
+
+	}-*/;
+
+	private void handlePaste(String value) {
 		final String oldValue = inputField.getValue();
-		try {
-			Double.parseDouble(value);
-		} catch (NumberFormatException e) {
+		if (!isCorrectValue(value)) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 				@Override
 				public void execute() {
 					inputField.setValue(oldValue);
 				}
 			});
+		}
+	}
+
+	private boolean isSymbolValue(int value) {
+		if (
+			(value == 189)                      // Minus
+				|| (value == 109)               // Num Minus
+				|| (value==46)                  // dot
+				|| (value == 110)               // Num dot
+				|| ((value>=48) && (value<=57)) // Number keys
+				|| ((value>=96) && (value<=105))// Num keys
+
+		) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isCorrectValue(String value) {
+
+		if ((precision == 0) && value.contains(".")) {
+			return false;
+		} else if (value.contains(".") && value.substring(value.indexOf(".")).length() > precision+1) {
+			return false;
+		} else if (value.equals("-")) {
+			return true;
+		} else {
+			try {
+				Double.parseDouble(value);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
 		}
 	}
 }
