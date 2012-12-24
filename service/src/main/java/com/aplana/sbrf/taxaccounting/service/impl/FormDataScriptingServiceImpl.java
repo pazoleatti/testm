@@ -1,5 +1,26 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import groovy.lang.GroovyClassLoader;
+
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -13,25 +34,6 @@ import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import groovy.lang.GroovyClassLoader;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Service;
-
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -54,9 +56,27 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	private FormDataDao formDataDao;
 	@Autowired
 	private DepartmentDao departmentDao;
+	
+	private ScriptEngine scriptEngine;
 
 	private Map<String, Object> scriptExposedBeans;
 
+	public FormDataScriptingServiceImpl() {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		this.scriptEngine = factory.getEngineByName("groovy");
+
+		// Predefined imports
+		CompilerConfiguration config = new CompilerConfiguration();
+		ImportCustomizer ic = new ImportCustomizer();
+		ic.addStarImports(PREDEFINED_IMPORTS);
+		config.addCompilationCustomizers(ic);
+
+		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) this.scriptEngine;
+		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
+		classLoader = new GroovyClassLoader(classLoader, config, false);
+		groovyScriptEngine.setClassLoader(classLoader);
+	}
+	
 	/**
 	 * Выполняет скрипты формы по определенному событию.
 	 *
@@ -68,25 +88,35 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 */
 	@Override
 	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger) {
-		ScriptEngine engine = getScriptEngine();
 
+		Bindings b = scriptEngine.createBindings();
+		b.putAll(scriptExposedBeans);
+		
 		// predefined script variables
-		engine.put("logger", logger);
-		engine.put("formData", formData);
+		b.put("logger", logger);
+		b.put("formData", formData);
 		if (user != null) {
-			engine.put("user", user);
-			engine.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
+			b.put("user", user);
+			b.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
 		}
-		engine.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
+		b.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
 
-		// execute scripts
-		List<Script> scripts = getScriptsByEvent(formData, event);
-		for (Script script : scripts) {
-			if (script.isRowScript()) {
-				executeRowScript(engine, script, formData, logger);
-			} else {
-				executeFormScript(engine, script, logger);
+		try {
+			// execute scripts
+			List<Script> scripts = getScriptsByEvent(formData, event);
+			for (Script script : scripts) {
+				if (script.isRowScript()) {
+					executeRowScript(b, script, formData, logger);
+				} else {
+					executeFormScript(b, script, logger);
+				}
 			}
+		} finally {
+			b.remove("logger");
+			b.remove("formData");
+			b.remove("user");
+			b.remove("userDepartment");
+			b.remove("formDataDepartment");
 		}
 	}
 
@@ -112,11 +142,11 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @param script скрипт формы
 	 * @param logger логгер
 	 */
-	private void executeFormScript(ScriptEngine engine, Script script, Logger logger) {
+	private void executeFormScript(Bindings bindings, Script script, Logger logger) {
 		ScriptMessageDecorator d = new ScriptMessageDecorator();
 		logger.setMessageDecorator(d);
 
-		executeScript(engine, script, logger, d);
+		executeScript(bindings, script, logger, d);
 
 		logger.setMessageDecorator(null);
 	}
@@ -129,7 +159,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @param formData данные формы
 	 * @param logger   логгер
 	 */
-	private void executeRowScript(ScriptEngine engine, Script script, FormData formData, Logger logger) {
+	private void executeRowScript(Bindings bindings, Script script, FormData formData, Logger logger) {
 		RowScriptMessageDecorator decorator = new RowScriptMessageDecorator();
 		logger.setMessageDecorator(decorator);
 
@@ -145,13 +175,13 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			DataRow row = i.next();
 
 			decorator.setRowIndex(rowIndex + 1); // Для пользователя нумерация строк должна начинаться с 1
-			engine.put("row", row);
-			engine.put("rowIndex", rowIndex);
-			engine.put("rowAlias", row.getAlias());
+			
+			bindings.put("row", row);
+			bindings.put("rowIndex", rowIndex);
+			bindings.put("rowAlias", row.getAlias());
 
-			error = !executeScript(engine, script, logger, decorator);
+			error = !executeScript(bindings, script, logger, decorator);
 
-			Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 			bindings.remove("row");
 			bindings.remove("rowIndex");
 			bindings.remove("rowAlias");
@@ -168,20 +198,20 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	 * @param logger    логгер
 	 * @param decorator декоратор для ошибок
 	 */
-	private boolean executeScript(ScriptEngine engine, Script script, Logger logger, ScriptMessageDecorator decorator) {
+	private boolean executeScript(Bindings bindings, Script script, Logger logger, ScriptMessageDecorator decorator) {
 		try {
 			boolean executeCondition = true;
 
 			// Condition
 			if (script.getCondition() != null) {
 				decorator.setScriptName(script.getName() + " - Условие исполнения");
-				executeCondition = (Boolean) engine.eval(script.getCondition());
+				executeCondition = (Boolean) scriptEngine.eval(script.getCondition(), bindings);
 			}
 
 			// If condition is absent or is true then execute script
 			if (executeCondition) {
 				decorator.setScriptName(script.getName());
-				engine.eval(script.getBody());
+				scriptEngine.eval(script.getBody(), bindings);
 			}
 
 			return true;
@@ -197,32 +227,6 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			logger.error(e);
 			return false;
 		}
-	}
-
-	/**
-	 * Создает и возвращает среду выполнения для скрипта
-	 *
-	 * @return engine
-	 */
-	private ScriptEngine getScriptEngine() {
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName("groovy");
-
-		// Predefined imports
-		CompilerConfiguration config = new CompilerConfiguration();
-		ImportCustomizer ic = new ImportCustomizer();
-		ic.addStarImports(PREDEFINED_IMPORTS);
-		config.addCompilationCustomizers(ic);
-
-		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) engine;
-		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
-		classLoader = new GroovyClassLoader(classLoader, config, false);
-		groovyScriptEngine.setClassLoader(classLoader);
-
-		Bindings b = engine.createBindings();
-		b.putAll(scriptExposedBeans);
-		engine.setBindings(b, ScriptContext.ENGINE_SCOPE);
-		return engine;
 	}
 
 	@Override
