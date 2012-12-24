@@ -14,12 +14,10 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<!-- Convenience property to set the GWT version -->
-		<gwtVersion>2.5.0</gwtVersion>
-		<gwtpVersion>0.7</gwtpVersion>
-		<!-- GWT needs at least java 1.5 -->
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<gwt.version>2.5.0</gwt.version>
+		<gwtp.version>0.7</gwtp.version>
 	</properties>
 
 	<dependencies>
@@ -36,13 +34,13 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<version>${gwtVersion}</version>
+			<version>${gwt.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
-			<version>${gwtVersion}</version>
+			<version>${gwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>		
 
@@ -57,7 +55,7 @@
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-mvp-client</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -65,21 +63,21 @@
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-dispatch-client</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 			<scope>provided</scope> <!-- Remove for GWTP 0.5.1 and earlier -->
 		</dependency>
 
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-dispatch-server-spring</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 		</dependency>
 
 		<!-- Crawler component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-crawler</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>servlet-api</artifactId>
@@ -92,7 +90,7 @@
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-processors</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -100,7 +98,7 @@
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-tester</artifactId>
-			<version>${gwtpVersion}</version>
+			<version>${gwtp.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -123,7 +121,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>${org.springframework.version}</version>
+			<version>${springframework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -159,7 +157,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>${gwtVersion}</version>
+				<version>${gwt.version}</version>
 				<configuration>
 					<logLevel>INFO</logLevel>
 					<style>${gwt.style}</style>
@@ -222,42 +220,42 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-beans</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-expression</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-asm</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-tx</artifactId>
-				<version>${org.springframework.version}</version>
+				<version>${springframework.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -284,7 +282,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>${gwtVersion}</version>
+						<version>${gwt.version}</version>
 						<configuration>
 							<draftCompile>true</draftCompile>
 							<validateOnly>true</validateOnly>
@@ -346,7 +344,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>${gwtVersion}</version>
+						<version>${gwt.version}</version>
 						<configuration>
 							<optimizationLevel>9</optimizationLevel>
 						</configuration>

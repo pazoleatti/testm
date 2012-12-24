@@ -21,9 +21,9 @@
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
-		<springsecurity.version>3.1.3.RELEASE</springsecurity.version>
 		<!-- maven.test.skip>true</maven.test.skip -->
+		<springframework.version>3.1.3.RELEASE</springframework.version>
+		<springsecurity.version>3.1.3.RELEASE</springsecurity.version>
 	</properties>
 	<dependencies>
 		<dependency>
