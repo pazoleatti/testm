@@ -1,17 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,6 +29,10 @@ public class FormDataListView extends
 	}
 
 	private final Widget widget;
+
+	private FormDataSearchOrdering sortByColumn;
+
+	private boolean isAscSorting;
 
 	@UiField
 	Panel filterContentPanel;
@@ -95,11 +99,11 @@ public class FormDataListView extends
 			}
 		};
 
-		formDataTable.addColumn(formKindColumn, "Тип налоговой формы");
-		formDataTable.addColumn(linkColumn, "Вид налоговой формы");
-		formDataTable.addColumn(departmentColumn, "Подразделение");
-		formDataTable.addColumn(reportPeriodColumn, "Отчетный период");
-		formDataTable.addColumn(stateColumn, "Статус формы");
+		formDataTable.addColumn(formKindColumn, getHeader("Тип налоговой формы"));
+		formDataTable.addColumn(linkColumn, getHeader("Вид налоговой формы"));
+		formDataTable.addColumn(departmentColumn, getHeader("Подразделение"));
+		formDataTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
+		formDataTable.addColumn(stateColumn, getHeader("Статус формы"));
 
 		SimplePager pager = createDefaultPager();
 		pager.setDisplay(formDataTable);
@@ -136,6 +140,21 @@ public class FormDataListView extends
 		data.addDataDisplay(formDataTable);
 	}
 
+	@Override
+	public FormDataSearchOrdering getSearchOrdering(){
+		final String DEFAULT_SORTING_BY_ID = "";
+		if (sortByColumn != null){
+			return sortByColumn;
+		}
+		setSortByColumn(DEFAULT_SORTING_BY_ID);
+		return sortByColumn;
+	}
+
+	@Override
+	public boolean isAscSorting(){
+		return isAscSorting;
+	}
+
 	@UiHandler("apply")
 	void onApplyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -160,5 +179,46 @@ public class FormDataListView extends
 		pager.getElement().getStyle().setProperty("marginLeft", "auto");
 		pager.getElement().getStyle().setProperty("marginRight", "auto");
 		return pager;
+	}
+
+	private Header<String> getHeader(final String columnName){
+		Header<String> columnHeader = new Header<String>(new SortingHeaderCell()) {
+			@Override
+			public String getValue() {
+				return columnName;
+			}
+		};
+
+		columnHeader.setUpdater(new ValueUpdater<String>() {
+			@Override
+			public void update(String value) {
+				setAscSorting(!isAscSorting);
+				setSortByColumn(columnName);
+				if (getUiHandlers() != null) {
+					getUiHandlers().onSortingChanged();
+				}
+			}
+		});
+		return columnHeader;
+	}
+
+	private void setSortByColumn(String sortByColumn){
+		if("Тип налоговой формы".equals(sortByColumn)){
+			this.sortByColumn = FormDataSearchOrdering.KIND;
+		} else if ("Вид налоговой формы".equals(sortByColumn)){
+			this.sortByColumn = FormDataSearchOrdering.FORM_TYPE_NAME;
+		} else if ("Подразделение".equals(sortByColumn)){
+			this.sortByColumn = FormDataSearchOrdering.DEPARTMENT_NAME;
+		} else if ("Отчетный период".equals(sortByColumn)){
+			this.sortByColumn = FormDataSearchOrdering.REPORT_PERIOD_NAME;
+		} else if ("Статус формы".equals(sortByColumn)){
+			this.sortByColumn = FormDataSearchOrdering.STATE;
+		} else {
+			this.sortByColumn = FormDataSearchOrdering.ID;
+		}
+	}
+
+	private void setAscSorting(boolean ascSorting){
+		this.isAscSorting = ascSorting;
 	}
 }

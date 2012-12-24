@@ -91,12 +91,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			formDataDaoFilter.setTaxTypes(Arrays.asList(formDataFilter.getTaxType()));
 		}
 
-		PaginatedSearchResult<FormDataSearchResultItem> resultPage = formDataSearchDao.findPage(formDataDaoFilter,
-				FormDataSearchOrdering.DEPARTMENT_NAME, true, new PaginatedSearchParams(formDataFilter.getStartIndex(),
+		return formDataSearchDao.findPage(formDataDaoFilter, formDataFilter.getSearchOrdering(),
+				formDataFilter.isAscSorting(), new PaginatedSearchParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));
-
-
-		return resultPage;
 	}
 
 	@Override

@@ -29,6 +29,11 @@ public class FormDataFilter implements Serializable{
 	/*Количество записей, которые нужно вернуть*/
 	private int countOfRecords;
 
+	private FormDataSearchOrdering searchOrdering;
+
+	/*true, если сортируем по возрастанию, false - по убыванию*/
+	private boolean ascSorting;
+
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
@@ -91,5 +96,21 @@ public class FormDataFilter implements Serializable{
 
 	public void setCountOfRecords(int countOfRecords) {
 		this.countOfRecords = countOfRecords;
+	}
+
+	public FormDataSearchOrdering getSearchOrdering() {
+		return searchOrdering;
+	}
+
+	public void setSearchOrdering(FormDataSearchOrdering searchOrdering) {
+		this.searchOrdering = searchOrdering;
+	}
+
+	public boolean isAscSorting() {
+		return ascSorting;
+	}
+
+	public void setAscSorting(boolean ascSorting) {
+		this.ascSorting = ascSorting;
 	}
 }

@@ -16,6 +16,7 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
@@ -53,6 +54,9 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 
 		void assignDataProvider(int pageSize, AbstractDataProvider<FormDataSearchResultItem> data);
 
+		FormDataSearchOrdering getSearchOrdering();
+
+		boolean isAscSorting();
 	}
 	
 	protected final PlaceManager placeManager;

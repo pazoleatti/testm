@@ -8,4 +8,6 @@ public interface FormDataListUiHandlers extends UiHandlers{
 
     void onCreateClicked();
 
+	void onSortingChanged();
+
 }

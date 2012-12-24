@@ -138,7 +138,14 @@ public class FormDataListPresenter extends
 						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
 	}
 
+	@Override
+	public void onSortingChanged(){
+		refreshTable();
+	}
+
 	private class TableDataProvider extends AsyncDataProvider<FormDataSearchResultItem> {
+
+		private int ZERO_RECORDS_COUNT = 0;
 
 		public void update() {
 			for (HasData<FormDataSearchResultItem> display: getDataDisplays()) {
@@ -154,8 +161,9 @@ public class FormDataListPresenter extends
 					new AbstractCallback<GetFormDataListResult>() {
 						@Override
 						public void onReqSuccess(GetFormDataListResult result) {
-							if(result == null || result.getTotalCountOfRecords() == 0){
-								getView().setFormDataList(range.getStart(), 0, new ArrayList<FormDataSearchResultItem>());
+							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
+								getView().setFormDataList(range.getStart(), ZERO_RECORDS_COUNT,
+										new ArrayList<FormDataSearchResultItem>());
 							} else {
 								handleResponse(result, range);
 							}
@@ -177,6 +185,8 @@ public class FormDataListPresenter extends
 				FormDataFilter filter = filterPresenter.getFilterData();
 				filter.setCountOfRecords(PAGE_SIZE);
 				filter.setStartIndex(range.getStart());
+				filter.setAscSorting(getView().isAscSorting());
+				filter.setSearchOrdering(getView().getSearchOrdering());
 				GetFormDataList request = new GetFormDataList();
 				request.setFormDataFilter(filter);
 				return request;
