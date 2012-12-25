@@ -19,6 +19,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.ui;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import com.gwtplatform.mvp.client.Tab;
@@ -40,7 +41,7 @@ public abstract class BaseTabPanel extends Composite implements TabPanel {
   Tab currentActiveTab;
 
   @UiField
-  FlowPanel tabContentContainer;
+  HTMLPanel tabContentContainer;
 
   @UiField
   FlowPanel tabPanel;

@@ -11,7 +11,6 @@ import com.google.gwt.inject.client.AsyncProvider;
  */
 public interface AdminGinjector {
     AsyncProvider<AdminPresenter> getAdminPresenter();
-	AsyncProvider<FormTemplatePresenter> getFormTemplatePresenter();
 	AsyncProvider<FormTemplateMainPresenter> getFormTemplateMainPresenter();
 	AsyncProvider<FormTemplateScriptPresenter> getFormTemplateScriptPresenter();
 	AsyncProvider<FormTemplateEventPresenter> getFormTemplateEventPresenter();

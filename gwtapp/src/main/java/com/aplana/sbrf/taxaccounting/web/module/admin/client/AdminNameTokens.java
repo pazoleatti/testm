@@ -7,9 +7,10 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client;
  * @author Vitalii Samolovskikh
  */
 public class AdminNameTokens {
-    public static final String adminPage = "admin";
-	public static final String formTemplatePage = "formTemplate";
-	public static final String formTemplateScriptPage = "formTemplateScript";
-	public static final String formTemplateEventPage = "formTemplateEvent";
-	public static final String formTemplateMainPage = "formTemplateMain";
+    public static final String adminPage = "!admin";
+	public static final String formTemplatePage = "!formTemplate";
+	public static final String formTemplateScriptPage = "!formTemplateScript";
+	public static final String formTemplateEventPage = "!formTemplateEvent";
+	public static final String formTemplateMainPage = "!formTemplateMain";
+	public static final String formTemplateId = "formTemplateId";
 }

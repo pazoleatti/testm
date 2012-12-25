@@ -6,17 +6,20 @@
         @external .CodeMirror-scroll;
         .CodeMirror-scroll {
             height: 240px;
-            outline: medium none;
-            overflow: auto;
-            position: relative;
             background-color: white;
+            border-top: 1px solid #92C1F0;
+        }
+
+        @external .CodeMirror-gutter;
+        .CodeMirror-gutter {
+            border-right: 1px solid #92C1F0;
         }
     </ui:style>
 
 	<g:HTMLPanel>
 		<g:Label text="Название"/>
 
-		<g:TextBox width="100%" ui:field="name"/>
+		<g:TextBox width="50%" ui:field="name"/>
 
 		<g:Label text="Условие"/>
 		<c:CodeMirror ui:field="condition"/>

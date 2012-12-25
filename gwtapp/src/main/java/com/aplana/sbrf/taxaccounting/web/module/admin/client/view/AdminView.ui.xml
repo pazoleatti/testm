@@ -3,8 +3,8 @@
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
 			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 			 >
-	<g:VerticalPanel width="100%" height="100%">
-        <g:cell><g:Label text="Администрирование"/></g:cell>
-		<g:cell height="100%"><style:GenericCellTable ui:field="formTemplateTable" width="100%" /></g:cell>
-	</g:VerticalPanel>
+	<g:HTMLPanel>
+        <g:Label text="Администрирование"/>
+		<style:GenericCellTable ui:field="formTemplateTable" width="100%" />
+	</g:HTMLPanel>
 </ui:UiBinder>

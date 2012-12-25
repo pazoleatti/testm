@@ -97,7 +97,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	/**
 	 * Поднимает скрипт в очереди на обюработку события на 1 позицию.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#upEventScript()
 	 */
 	public void upEventScript() {
 		Script script = getSelectedScript(eventScriptListBox);
@@ -117,7 +116,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	/**
 	 * Опускает скрипт в очереди на обработку события на 1 позицию.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#downEventScript()
 	 */
 	public void downEventScript() {
 		Script script = getSelectedScript(eventScriptListBox);
@@ -137,7 +135,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	/**
 	 * биндит скрипты события на форму после выбора события.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#selectEvent()
 	 */
 	@Override
 	public void selectEvent() {
@@ -173,7 +170,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	/**
 	 * Добавляет скрипт на событие формы. В конец списка выполнения.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#addScriptToEvent()
 	 */
 	private void addScriptToEvent() {
 		Script script = getSelectedScript(remainScriptListBox);
@@ -186,7 +182,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	/**
 	 * Удаляет скрипт из списка обработчиков события формы.
 	 *
-	 * @see com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateUiHandlers#removeScriptFromEvent()
 	 */
 	private void removeScriptFromEvent() {
 		Script script = getSelectedScript(eventScriptListBox);

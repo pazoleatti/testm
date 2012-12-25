@@ -9,6 +9,8 @@
             float: left;
             margin-right: 8px;
             padding: 2px 13px;
+            color: black;
+            font-weight: bold;
         }
 
         .active {
@@ -16,7 +18,7 @@
         }
 
         .inactive {
-            background-color: darkPanelColor;
+            background-color: darkTabColor;
         }
 
         .active a,.active a:visited,.active a:hover {

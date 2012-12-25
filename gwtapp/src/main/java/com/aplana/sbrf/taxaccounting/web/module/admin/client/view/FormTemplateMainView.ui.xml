@@ -12,6 +12,6 @@
             <g:Button text="Отмена" ui:field="cancelButton"/>
         </t:LeftBar>
     </t:Bar>
-    <npui:SimpleTabPanel ui:field="tabPanel" />
+    <npui:SimpleTabPanel ui:field="tabPanel"/>
 </g:HTMLPanel>
 </ui:UiBinder>

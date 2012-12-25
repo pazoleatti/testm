@@ -4,6 +4,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormTemplateMainUiHandlers extends UiHandlers {
 	void save();
-	void load();
+	void reset();
 	void close();
 }

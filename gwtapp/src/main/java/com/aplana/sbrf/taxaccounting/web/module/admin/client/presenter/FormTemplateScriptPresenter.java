@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateCloseEvent;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateResetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSaveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateScriptUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
@@ -17,10 +20,16 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.List;
 
-public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPresenter.MyView, FormTemplateScriptPresenter.MyProxy> implements FormTemplateScriptUiHandlers {
+import static com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUtil.saveFormTemplate;
+
+public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPresenter.MyView, FormTemplateScriptPresenter.MyProxy>
+		implements FormTemplateScriptUiHandlers, FormTemplateResetEvent.MyHandler, FormTemplateSaveEvent.MyHandler,
+		FormTemplateCloseEvent.MyHandler{
+
 	/**
 	 * {@link FormTemplateMainPresenter}'s proxy.
 	 */
+	@Title("Администрирование")
 	@ProxyCodeSplit
 	@NameToken(AdminNameTokens.formTemplateScriptPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
@@ -31,38 +40,63 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateScriptUiHandlers>{
 		void bindScripts(List<Script> scriptList);
+		void doFlush();
 	}
 
-	public static final String PARAM_FORM_TEMPLATE_SCRIPT_ID = "formTemplateScriptId";
 	private int formId;
 	private DispatchAsync dispatcher;
 	private FormTemplate formTemplate;
+	private PlaceManager placeManager;
+	private boolean isSelected = false;
 
 	@Inject
-	public FormTemplateScriptPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
+	public FormTemplateScriptPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
+		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
+	}
+
+	@ProxyEvent
+	@Override
+	public void onReset(FormTemplateResetEvent event) {
+		reset();
+	}
+
+	@ProxyEvent
+	@Override
+	public void onSave(FormTemplateSaveEvent event) {
+		if (isSelected) {
+			getView().doFlush();
+			saveFormTemplate(this, formTemplate, dispatcher);
+		}
+	}
+
+	@ProxyEvent
+	@Override
+	public void onClose(FormTemplateCloseEvent event) {
+		reset();
 	}
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		formId = Integer.valueOf(request.getParameter(PARAM_FORM_TEMPLATE_SCRIPT_ID, "0"));
-		GetFormAction action = new GetFormAction();
-		action.setId(formId);
-		dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-			@Override
-			public void onReqSuccess(GetFormResult result) {
-				formTemplate = result.getForm();
-				getView().bindScripts(formTemplate.getScripts());
-			}
-		});
 	}
 
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
+	}
+
+	@Override
+	protected void onReveal() {
+		isSelected = true;
+		bindScripts();
+	}
+
+	@Override
+	protected void onHide() {
+		isSelected = false;
 	}
 
 	@Override
@@ -77,5 +111,27 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	public void deleteScript(Script selectedScript) {
 		formTemplate.removeScript(selectedScript);
 		getView().bindScripts(formTemplate.getScripts());
+	}
+
+	private void reset() {
+		formId = 0;
+		formTemplate = null;
+		bindScripts();
+	}
+
+	private void bindScripts() {
+		int newFormId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
+		if (newFormId != 0 && formId != newFormId) {
+			formId = newFormId;
+			GetFormAction action = new GetFormAction();
+			action.setId(formId);
+			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+				@Override
+				public void onReqSuccess(GetFormResult result) {
+					formTemplate = result.getForm();
+					getView().bindScripts(formTemplate.getScripts());
+				}
+			});
+		}
 	}
 }

@@ -18,8 +18,6 @@ import java.util.List;
 
 public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScriptUiHandlers> implements FormTemplateScriptPresenter.MyView {
 
-	/**
-	 */
 	public interface Binder extends UiBinder<Widget, FormTemplateScriptView> { }
 
 	private final Widget widget;
@@ -49,7 +47,6 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 
 	@UiHandler("createScriptButton")
 	public void onCreate(ClickEvent event){
-		System.out.println("createScriptButton");
 		getUiHandlers().createScript();
 	}
 
@@ -61,14 +58,18 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 	@Override
 	public void bindScripts(List<Script> scriptList) {
 		this.scriptList = scriptList;
-
-		scriptListBox.clear();
 		int i = 0;
+		scriptListBox.clear();
 		for (Script script : scriptList) {
 			scriptListBox.addItem(script.getName(), String.valueOf(i++));
 		}
 		scriptListBox.setSelectedIndex(0);
 		selectScript();
+	}
+
+	@Override
+	public void doFlush() {
+		scriptEditor.flush();
 	}
 
 	private void selectScript() {

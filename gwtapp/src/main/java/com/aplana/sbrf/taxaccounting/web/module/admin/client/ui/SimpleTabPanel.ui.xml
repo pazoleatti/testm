@@ -5,39 +5,28 @@
 
     <ui:style src='defines.css'>
         .container {
-            background-color: darkPanelColor;
-            padding: 3px 3px 3px;
-        }
-
-        .titlebar {
-            background-color: darkPanelColor;
-            padding: 3px 5px 3px;
-        }
-
-        .title {
-            font-weight: titleFontWeight;
-            font-size: titleFontSize;
-            color: titleColor;
+            background-color: whitePanelColor;
+            padding: 0 3px 3px;
         }
 
         .bar {
-            background-color: darkPanelColor;
+            background-color: whitePanelColor;
         }
 
         .panel {
             background-color: lightPanelColor;
-            padding: 5px;
+            padding: 2px;
             overflow: hidden;
         }
     </ui:style>
 
     <g:HTMLPanel>
         <div class="{style.container}">
-            <g:HTMLPanel addStyleNames="{style.bar}">
+            <g:HTMLPanel addStyleNames="{style.bar} ">
                 <g:FlowPanel ui:field="tabPanel" />
                 <div style="clear: both;" />
             </g:HTMLPanel>
-            <g:FlowPanel ui:field="tabContentContainer"
+            <g:HTMLPanel ui:field="tabContentContainer"
                          addStyleNames="{style.panel}" />
         </div>
     </g:HTMLPanel>

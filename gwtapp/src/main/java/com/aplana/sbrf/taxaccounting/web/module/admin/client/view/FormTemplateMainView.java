@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.SimpleTabPanel;
@@ -9,6 +10,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -49,9 +51,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@Override
 	public Tab addTab(TabData tabData, String historyToken) {
 		if(formId !=0) {
-			return tabPanel.addTab(tabData, historyToken + ";" + historyToken + "Id" + "=" + formId);
+			return tabPanel.addTab(tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=" + formId);
 		}
-		return tabPanel.addTab(tabData, historyToken + ";" + historyToken + "Id" + "=");
+		return tabPanel.addTab(tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=");
 	}
 
 	@Override
@@ -76,7 +78,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@Override
 	public void changeTab(Tab tab, TabData tabData, String historyToken) {
-		tabPanel.changeTab(tab, tabData, historyToken + ";" + historyToken + "Id" + "=");
+		tabPanel.changeTab(tab, tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=" + formId);
 	}
 
 	@Override
@@ -98,7 +100,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@UiHandler("resetButton")
 	public void onReset(ClickEvent event){
 		if(getUiHandlers()!=null){
-			getUiHandlers().load();
+			getUiHandlers().reset();
 		}
 	}
 
