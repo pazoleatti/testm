@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -105,7 +106,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
 		formDataTable.addColumn(stateColumn, getHeader("Статус формы"));
 
-		SimplePager pager = createDefaultPager();
+		FlexiblePager pager = createFlexiblePager();
 		pager.setDisplay(formDataTable);
 		verticalPanelWithTable.add(pager);
 
@@ -169,11 +170,11 @@ public class FormDataListView extends
 		}
 	}
 
-	private static SimplePager createDefaultPager(){
+	private static FlexiblePager createFlexiblePager(){
 		final boolean showFastForwardButton = false;
 		final int fastForwardRows = 0;
 		final boolean showLastPageButton = true;
-		SimplePager pager =  new SimplePager(SimplePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
+		FlexiblePager pager =  new FlexiblePager(SimplePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
 				showLastPageButton);
 		pager.setRangeLimited(true);
 		pager.getElement().getStyle().setProperty("marginLeft", "auto");
