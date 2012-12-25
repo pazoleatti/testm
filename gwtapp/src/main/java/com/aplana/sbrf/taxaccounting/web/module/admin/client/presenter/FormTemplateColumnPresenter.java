@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateCloseEvent;
@@ -17,11 +18,14 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUtil.saveFormTemplate;
 
 public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPresenter.MyView, FormTemplateColumnPresenter.MyProxy>
 		implements FormTemplateColumnUiHandlers, FormTemplateResetEvent.MyHandler, FormTemplateSaveEvent.MyHandler,
@@ -42,34 +46,36 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 
 	private DispatchAsync dispatcher;
 	private FormTemplate formTemplate;
+	private PlaceManager placeManager;
 	private int formId;
 	private boolean isSelected = false;
 
 	@Inject
-	public FormTemplateColumnPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, final DispatchAsync dispatcher) {
+	public FormTemplateColumnPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, final DispatchAsync dispatcher, final PlaceManager placeManager) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
+		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
 	}
 
 	@ProxyEvent
 	@Override
 	public void onReset(FormTemplateResetEvent event) {
-		System.out.println("FormTemplateColumnPresenter onReset");
+		reset();
 	}
 
 	@ProxyEvent
 	@Override
 	public void onSave(FormTemplateSaveEvent event) {
 		if (isSelected) {
-			System.out.println("FormTemplateColumnPresenter onSave");
+			saveFormTemplate(this, formTemplate, dispatcher);
 		}
 	}
 
 	@ProxyEvent
 	@Override
 	public void onClose(FormTemplateCloseEvent event) {
-		System.out.println("FormTemplateColumnPresenter onClose");
+		reset();
 	}
 
 	@Override
@@ -94,8 +100,24 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 		isSelected = false;
 	}
 
+	@Override
+	public void addColumn() {
+		Column newColumn = new StringColumn();
+		newColumn.setName("колонка заглушка");
+		formTemplate.getColumns().add(newColumn);
+		getView().setColumnList(formTemplate.getColumns());
+	}
+
+	@Override
+	public void removeColumn(int index) {
+		formTemplate.getColumns().remove(index);
+		getView().setColumnList(formTemplate.getColumns());
+	}
+
 	private void setColumnList() {
-		if (formId != 0) {
+		int newFormId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
+		if (newFormId != 0) {
+			formId = newFormId;
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);
 			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
@@ -106,5 +128,11 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 				}
 			});
 		}
+	}
+
+	private void reset() {
+		formId = 0;
+		formTemplate = null;
+		setColumnList();
 	}
 }

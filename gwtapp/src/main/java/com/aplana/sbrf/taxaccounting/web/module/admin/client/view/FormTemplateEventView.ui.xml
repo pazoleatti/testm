@@ -8,7 +8,7 @@
 
     <g:HTMLPanel addStyleNames="{style.whiteColor}">
         <g:HorizontalPanel width="100%" height="100%">
-            <g:cell width="20%">
+            <g:cell width="25%">
                 <g:VerticalPanel width="100%" height="100%">
                     <g:cell>
                         <g:Label text="События"/>
@@ -18,7 +18,7 @@
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
-            <g:cell width="80%">
+            <g:cell width="75%">
                 <g:VerticalPanel height="100%" width="100%">
                     <g:cell>
                         <g:Label text="Скрипты события"/>
