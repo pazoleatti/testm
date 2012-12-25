@@ -61,6 +61,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		super.prepareFromRequest(request);
 		int formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
 		getView().setFormId(formId);
+
 		placeManager.revealPlace(
 				new PlaceRequest(AdminNameTokens.formTemplateScriptPage).with(
 						AdminNameTokens.formTemplateId, String.valueOf(formId)
