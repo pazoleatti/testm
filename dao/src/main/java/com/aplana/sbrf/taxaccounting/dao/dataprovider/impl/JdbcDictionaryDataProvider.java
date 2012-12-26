@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 /**
@@ -23,6 +24,14 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 
 	private static final String EMPTY_PATTERN = "%";
 
+	public String getPagedSqlQuery() {
+		return pagedSqlQuery;
+	}
+
+	public void setPagedSqlQuery(String pagedSqlQuery) {
+		this.pagedSqlQuery = pagedSqlQuery;
+	}
+
 	protected class ItemRowMapper implements RowMapper<DictionaryItem<ValueType>> {
 		@Override
 		public DictionaryItem<ValueType> mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -36,6 +45,7 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 
 	private String dictionaryName;
 	private String sqlQuery;
+	private String pagedSqlQuery;
 
 	/**
 	 * Возвращает все значения из справочника.
@@ -117,5 +127,17 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 		prepared = '%' + prepared + '%';
 
 		return prepared;
+	}
+
+	public long getRowCount(String pattern) {
+		String preparedPattern = preparePattern(pattern);
+		return getJdbcTemplate().queryForLong(
+				"select count(*) from (" + sqlQuery +")" ,
+				new Object[]{
+						preparedPattern,
+						preparedPattern
+				},
+				new int[]{Types.VARCHAR, Types.VARCHAR}
+		);
 	}
 }

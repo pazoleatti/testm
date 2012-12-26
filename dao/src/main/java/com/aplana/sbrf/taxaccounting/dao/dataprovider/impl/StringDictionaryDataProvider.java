@@ -30,22 +30,30 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
 	 *
 	 * @param pattern паттерн поиска
+	 * @param pageParams страница
 	 * @return отфильтрованный список значений справочника
 	 */
 	@Override
-	public List<DictionaryItem<String>> getValues(String pattern) {
-		String preparedPattern = preparePattern(pattern);
-		return getJdbcTemplate().query(
-				"select * from (" + getSqlQuery() + ") where lower(value) like ? escape '\\' or lower(name) like ? escape '\\'",
-				new Object[]{preparedPattern, preparedPattern},
-				new int[]{Types.VARCHAR, Types.VARCHAR},
-				new ItemRowMapper()
-		);
-	}
-
-	@Override
 	public PaginatedSearchResult<DictionaryItem<String>> getValues(String pattern, PaginatedSearchParams pageParams) {
-		throw new UnsupportedOperationException("not implemented");
+		String preparedPattern = preparePattern(pattern);
+		PaginatedSearchResult<DictionaryItem<String>> result = new PaginatedSearchResult<DictionaryItem<String>>();
+		result.setRecords(
+				getJdbcTemplate().query(
+						"select * from (" + getPagedSqlQuery() + ") ",
+						new Object[]{
+								preparedPattern,
+								preparedPattern,
+								pageParams.getStartIndex() + 1,
+								pageParams.getStartIndex() + pageParams.getCount()
+						},
+						new int[]{Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.NUMERIC},
+						new ItemRowMapper()
+				)
+		);
+
+		result.setTotalRecordCount(getRowCount(pattern));
+
+		return result;
 	}
 }
 

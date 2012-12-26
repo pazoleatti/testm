@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.server;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult;
@@ -33,27 +35,21 @@ public abstract class DictionaryHandler<A extends DictionaryAction<T>, T extends
 	@Override
 	public DictionaryResult<T> execute(A action, ExecutionContext context) throws ActionException {
 		DictionaryDataProvider<T> dictionaryDataProvider = getDictionaryDataProvider(action.getDictionaryCode());
-
-		List<DictionaryItem<T>> items;
-		if (action.getSearchPattern() != null && !action.getSearchPattern().isEmpty()) {
-			items = dictionaryDataProvider.getValues(action.getSearchPattern());
-		} else {
-			items = dictionaryDataProvider.getValues();
-		}
+		PaginatedSearchResult<DictionaryItem<T>> items = dictionaryDataProvider.getValues(
+					action.getSearchPattern()!=null ? action.getSearchPattern() : "",
+					new PaginatedSearchParams(action.getOffset(), action.getMax())
+		);
 
 		DictionaryResult<T> result = new DictionaryResult<T>();
-		int begin = action.getOffset();
-		int end = action.getOffset() + action.getMax();
-		int size = items.size();
-		if (begin < size && (begin > 0 || end < size)) {
-			end = Math.min(end, size);
-			result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(items.subList(begin, end)));
-		} else if (begin > size) {
+		long begin = action.getOffset();
+		long size = items.getTotalRecordCount();
+		if (begin > size) {
 			result.setDictionaryItems(new ArrayList<DictionaryItem<T>>(0));
 		} else {
-			result.setDictionaryItems(items);
+			result.setDictionaryItems(items.getRecords());
 		}
-		result.setSize(size);
+		result.setSize(items.getTotalRecordCount());
+
 		return result;
 	}
 

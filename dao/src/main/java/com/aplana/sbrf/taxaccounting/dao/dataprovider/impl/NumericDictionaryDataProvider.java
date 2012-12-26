@@ -31,21 +31,33 @@ public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<Bi
 	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
 	 *
 	 * @param pattern паттерн поиска
+	 * @param pageParams страница
+	 *
+	 *
 	 * @return отфильтрованный список значений справочника
 	 */
 	@Override
-	public List<DictionaryItem<BigDecimal>> getValues(String pattern) {
+	public PaginatedSearchResult<DictionaryItem<BigDecimal>> getValues(String pattern, PaginatedSearchParams pageParams) {
 		String preparedPattern = preparePattern(pattern);
-		return getJdbcTemplate().query(
-				"select * from (" + getSqlQuery() + ") where to_nchar(value) like ? escape '\\' or lower(name) like ? escape '\\'",
-				new Object[]{preparedPattern, preparedPattern},
-				new int[]{Types.VARCHAR, Types.VARCHAR},
+		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = new PaginatedSearchResult<DictionaryItem<BigDecimal>>();
+		result.setRecords(
+			getJdbcTemplate().query(
+				"select * from (" + getPagedSqlQuery() + ") ",
+				new Object[]{
+						preparedPattern,
+						preparedPattern,
+						pageParams.getStartIndex() + 1,
+						pageParams.getStartIndex() + pageParams.getCount()
+				},
+				new int[]{Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.NUMERIC},
 				new ItemRowMapper()
+			)
 		);
+
+		result.setTotalRecordCount(getRowCount(pattern));
+
+		return result;
 	}
 
-	@Override
-	public PaginatedSearchResult<DictionaryItem<BigDecimal>> getValues(String pattern, PaginatedSearchParams pageParams) {
-		throw new UnsupportedOperationException("not implemented");
-	}
+
 }

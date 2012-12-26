@@ -61,7 +61,7 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 			@Override
 			public void onReqSuccess(DictionaryResult<T> result) {
 				updateRowData(offset, result.getDictionaryItems());
-				updateRowCount(result.getSize(), true);
+				updateRowCount(result.getSize().intValue(), true);
 			}
 		});
 	}
