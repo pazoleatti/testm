@@ -1,22 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.util.Collections;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormDataSearchDaoTest.xml"})
@@ -26,12 +23,73 @@ public class FormDataSearchDaoTest {
 	
 	@Test
 	public void testFindByFilter() {
-		// TODO: сделать тесты
+		FormDataDaoFilter filter = new FormDataDaoFilter();
+		final long TOTAL_RECORDS_COUNT = formDataSearchDao.findByFilter(filter).size();
+		List<FormDataSearchResultItem> res;
+
+		List<TaxType> taxTypes 				= new ArrayList<TaxType>();
+		List<FormDataKind> formDataKinds 	= new ArrayList<FormDataKind>();
+		List<WorkflowState> workflowStates 	= new ArrayList<WorkflowState>();
+		List<Integer> formTypes 			= new ArrayList<Integer>();
+		List<Integer> departments 			= new ArrayList<Integer>();
+		List<Integer> reportPeriods 		= new ArrayList<Integer>();
+
+		//Если условия фильтрации не заданы, проверяем что findByFilter вернет все записи.
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(TOTAL_RECORDS_COUNT, res.size());
+
+		//Добавляем в фильтр Тип Налога
+		taxTypes.add(TaxType.TRANSPORT);
+		filter.setTaxTypes(taxTypes);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(14, res.size());
+
+		//Добавляем в фильтр Тип Налоговой Формы
+		formDataKinds.add(FormDataKind.SUMMARY);
+		filter.setFormDataKind(formDataKinds);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(9, res.size());
+
+		//Добавляем в фильтр Статус Формы
+		workflowStates.add(WorkflowState.ACCEPTED);
+		filter.setStates(workflowStates);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(4, res.size());
+
+		//Добавляем в фильтр Вид Налоговой Формы
+		formTypes.add(1);
+		filter.setFormTypeIds(formTypes);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(4, res.size());
+
+		//Добавляем в фильтр Департамент
+		departments.add(1);
+		filter.setDepartmentIds(departments);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(2, res.size());
+
+		//Добавляем в фильтр Отчетный период
+		reportPeriods.add(1);
+		filter.setReportPeriodIds(reportPeriods);
+		res = formDataSearchDao.findByFilter(filter);
+		assertEquals(2, res.size());
 	}
 	
 	@Test
 	public void testFindPage() {
-		// TODO: сделать тесты
+		FormDataDaoFilter filter = new FormDataDaoFilter();
+		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 0);
+		PaginatedSearchResult<FormDataSearchResultItem> res;
+		final long TOTAL_RECORDS_COUNT = formDataSearchDao.getCount(filter);
+
+		for(int requestedCount = 0; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 5){
+			pageParams.setStartIndex(0);
+			pageParams.setCount(requestedCount);
+			res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, true, pageParams);
+			assertEquals(requestedCount, res.getRecords().size());
+			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalRecordCount());
+		}
+
 	}
 	
 	/**
@@ -54,18 +112,25 @@ public class FormDataSearchDaoTest {
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
 		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res.getRecords());
 
-		// TODO: добавить проверку, что порядок записей верный, для каждого из вариантов сортировки		
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.FORM_TYPE_NAME, true, pageParams);
+		assertIdsEquals(new long[] {4, 8, 12, 16, 3}, res.getRecords());
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.FORM_TYPE_NAME, false, pageParams);
+		assertIdsEquals(new long[] {17, 13, 9, 5, 1}, res.getRecords());
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.KIND, true, pageParams);
+		assertIdsEquals(new long[] {1, 3, 5, 7, 9}, res.getRecords());
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.KIND, false, pageParams);
+		assertIdsEquals(new long[] {18, 16, 14, 12, 10}, res.getRecords());
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
+		assertIdsEquals(new long[] {1, 4, 7, 10, 13}, res.getRecords());
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
+		assertIdsEquals(new long[] {18, 15, 12, 9, 6}, res.getRecords());
 
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, true, pageParams);
-		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, false, pageParams);		
+		assertIdsEquals(new long[] {1, 5, 9, 13, 17}, res.getRecords());
+		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.STATE, false, pageParams);
+		assertIdsEquals(new long[] {16, 12, 8, 4, 15}, res.getRecords());
 	}
 	
 	@Test
