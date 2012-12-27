@@ -39,7 +39,9 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 		PaginatedSearchResult<DictionaryItem<String>> result = new PaginatedSearchResult<DictionaryItem<String>>();
 		result.setRecords(
 				getJdbcTemplate().query(
-						"select * from (" + getPagedSqlQuery() + ") ",
+						"select value, name from (select rownum as r, value, name from ( " +
+								getSqlQuery() +
+								" ) where lower(value) like ? escape '\\' or lower(name) like ? escape '\\') where r between ? and ?",
 						new Object[]{
 								preparedPattern,
 								preparedPattern,

@@ -34,22 +34,19 @@
 				<entry key="transportTypeCode">
 					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
 						p:dictionaryName="ТН - Коды видов ТС"
-						p:sqlQuery="select code as value, name from transport_type_code where lower(code) like ? escape '\' or lower(name) like ? escape '\'"
-                        p:pagedSqlQuery="select code as value, name from (select o.*, rownum r from transport_type_code o where lower(code) like ? escape '\' or lower(name) like ? escape '\' order by code) where r &gt;= ? and r &lt;= ? "
+						p:sqlQuery="select code as value, name from transport_type_code order by code"
 					/>
 				</entry>
 				<entry key="transportOkato">
 					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
 						p:dictionaryName="ТН - Коды ОКАТО"
-						p:sqlQuery="select okato as value, name from transport_okato where lower(okato) like ? escape '\' or lower(name) like ? escape '\'"
-                        p:pagedSqlQuery="select okato as value, name from (select o.*, rownum r from transport_okato o where lower(okato) like ? escape '\' or lower(name) like ? escape '\' order by okato) where r &gt;= ? and r &lt;= ? "
+						p:sqlQuery="select okato as value, name from transport_okato order by okato"
 					/>
 				</entry>
 				<entry key="transportTaxBenefitCode">
 					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
 						p:dictionaryName="ТН - Коды налоговых льгот"
-						p:sqlQuery="select code as value, name from transport_tax_benefit_code where lower(code) like ? escape '\' or lower(name) like ? escape '\'"
-                        p:pagedSqlQuery="select code as value, name from (select o.*, rownum r from transport_tax_benefit_code o where lower(code) like ? escape '\' or lower(name) like ? escape '\' order by code) where r &gt;= ? and r &lt;= ? "
+						p:sqlQuery="select code as value, name from transport_tax_benefit_code order by code"
 					/>
 				</entry>
 			</map>
@@ -62,15 +59,13 @@
 				<entry key="transportTaxBaseUnitCode">
 					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
 						  p:dictionaryName="ТН - Коды единиц измерения"
-						  p:sqlQuery="select code as value, name from transport_unit_code where lower(code) like ? escape '\' or lower(name) like ? escape '\'"
-                          p:pagedSqlQuery="select code as value, name from (select o.*, rownum r from transport_unit_code o where lower(code) like ? escape '\' or lower(name) like ? escape '\' order by code) where r &gt;= ? and r &lt;= ?"
+						  p:sqlQuery="select code as value, name from transport_unit_code order by code"
 					/>
 				</entry>
 				<entry key="transportEcoClass">
 					<bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
 						  p:dictionaryName="ТН - Коды классов экологических стандартов"
-						  p:sqlQuery="select code as value, name from transport_eco_class where lower(code) like ? escape '\' or lower(name) like ? escape '\'"
-                          p:pagedSqlQuery="select code as value, name from (select o.*, rownum r from transport_eco_class o where lower(code) like ? escape '\' or lower(name) like ? escape '\' order by code) where r &gt;= ? and r &lt;= ? "
+						  p:sqlQuery="select code as value, name from transport_eco_class order by code"
 					/>
 				</entry>
 			</map>

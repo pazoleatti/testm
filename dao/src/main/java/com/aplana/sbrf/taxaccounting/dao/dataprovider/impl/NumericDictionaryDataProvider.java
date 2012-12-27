@@ -42,7 +42,9 @@ public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<Bi
 		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = new PaginatedSearchResult<DictionaryItem<BigDecimal>>();
 		result.setRecords(
 			getJdbcTemplate().query(
-				"select * from (" + getPagedSqlQuery() + ") ",
+					"select value, name from (select rownum as r, value, name from ( " +
+							getSqlQuery() +
+							" ) where lower(value) like ? escape '\\' or lower(name) like ? escape '\\') where r between ? and ?",
 				new Object[]{
 						preparedPattern,
 						preparedPattern,
