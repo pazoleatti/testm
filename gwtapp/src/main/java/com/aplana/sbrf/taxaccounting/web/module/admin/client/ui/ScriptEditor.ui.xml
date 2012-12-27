@@ -20,7 +20,7 @@
     </ui:style>
 
 	<g:HTMLPanel>
-        <g:VerticalSplitPanel height="550px" width="100%">
+        <g:VerticalSplitPanel height="600px" width="100%">
             <g:VerticalPanel width="100%">
                 <g:Label text="Название"/>
                 <g:TextBox width="50%" ui:field="name"/>
