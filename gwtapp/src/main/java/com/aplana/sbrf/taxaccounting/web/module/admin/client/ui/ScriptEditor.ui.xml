@@ -5,9 +5,12 @@
     <ui:style>
         @external .CodeMirror-scroll;
         .CodeMirror-scroll {
-            height: 240px;
+            height: 100%;
             background-color: white;
             border-top: 1px solid #92C1F0;
+            outline: medium none;
+            overflow: hidden;
+            position: inherit;
         }
 
         @external .CodeMirror-gutter;
@@ -22,13 +25,16 @@
 		<g:TextBox width="50%" ui:field="name"/>
 
 		<g:Label text="Условие"/>
-		<c:CodeMirror ui:field="condition"/>
 
-        <g:HorizontalPanel>
-		    <g:CheckBox ui:field="perRow"/>
-		    <g:Label text="применять для каждой строки"/>
-        </g:HorizontalPanel>
-
-        <c:CodeMirror ui:field="body"/>
+        <g:VerticalSplitPanel height="550px" width="100%">
+            <c:CodeMirror ui:field="condition"/>
+            <g:VerticalPanel width="100%">
+                <g:HorizontalPanel>
+                    <g:CheckBox ui:field="perRow"/>
+                    <g:Label text="применять для каждой строки"/>
+                </g:HorizontalPanel>
+                <c:CodeMirror ui:field="body"/>
+            </g:VerticalPanel>
+        </g:VerticalSplitPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>
