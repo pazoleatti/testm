@@ -24,10 +24,11 @@
 
 		<g:TextBox width="50%" ui:field="name"/>
 
-		<g:Label text="Условие"/>
-
         <g:VerticalSplitPanel height="550px" width="100%">
-            <c:CodeMirror ui:field="condition"/>
+            <g:VerticalPanel width="100%">
+                <g:Label text="Условие"/>
+                <c:CodeMirror ui:field="condition"/>
+            </g:VerticalPanel>
             <g:VerticalPanel width="100%">
                 <g:HorizontalPanel>
                     <g:CheckBox ui:field="perRow"/>
