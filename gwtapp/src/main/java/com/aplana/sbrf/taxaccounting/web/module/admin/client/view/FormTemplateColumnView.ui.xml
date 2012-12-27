@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:u='urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui'>
     <ui:style>
         .whiteColor {
             background-color: white;
@@ -20,10 +21,28 @@
                     </g:HorizontalPanel>
                 </g:HTMLPanel>
             </g:cell>
+
             <g:cell width="75%">
                 <g:HTMLPanel>
-                    <g:Label text="Список атрибутов"/>
-                    <g:ListBox height="100%" width="100%" visibleItemCount="25" ui:field="columnAttributeListBox"/>
+                    <g:Label height="20px" text="Список атрибутов"/>
+                    <g:Label height="30px" text="Основные атрибуты:"/>
+                    <u:ColumnAttributeEditor ui:field="columnAttributeEditor"/>
+
+                    <g:Label height="30px" text="Дополнительные атрибуты:"/>
+                    <g:HorizontalPanel height="30px">
+                        <g:Label width="150px">Тип столбца:</g:Label>
+                        <g:ValueListBox width="200px" ui:field="typeColumnDropBox"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel height="30px" visible="false" ui:field="dictionaryCodePanel">
+                        <g:Label width="150px">Код справочника:</g:Label>
+                        <g:TextBox width="300px" ui:field="dictionaryCodeBox"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel height="30px" visible="false" ui:field="precisionPanel">
+                        <g:Label width="150px">Точность:</g:Label>
+                        <g:IntegerBox width="100px" ui:field="precisionBox"/>
+                    </g:HorizontalPanel>
                 </g:HTMLPanel>
             </g:cell>
         </g:HorizontalPanel>

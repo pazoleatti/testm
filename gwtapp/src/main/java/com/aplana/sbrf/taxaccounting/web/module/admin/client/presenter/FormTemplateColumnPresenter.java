@@ -41,6 +41,7 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateColumnUiHandlers> {
+		void doFlush();
 		void setColumnList(List<Column> columnList);
 	}
 
@@ -68,6 +69,7 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	@Override
 	public void onSave(FormTemplateSaveEvent event) {
 		if (isSelected) {
+			getView().doFlush();
 			saveFormTemplate(this, formTemplate, dispatcher);
 		}
 	}
@@ -103,7 +105,10 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	@Override
 	public void addColumn() {
 		Column newColumn = new StringColumn();
-		newColumn.setName("колонка заглушка");
+		newColumn.setName("Новый столбец");
+		newColumn.setAlias("Новый");
+		newColumn.setWidth(5);
+		newColumn.setOrder(formTemplate.getColumns().size() + 1);
 		formTemplate.getColumns().add(newColumn);
 		getView().setColumnList(formTemplate.getColumns());
 	}
