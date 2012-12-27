@@ -20,12 +20,10 @@
     </ui:style>
 
 	<g:HTMLPanel>
-		<g:Label text="Название"/>
-
-		<g:TextBox width="50%" ui:field="name"/>
-
         <g:VerticalSplitPanel height="550px" width="100%">
             <g:VerticalPanel width="100%">
+                <g:Label text="Название"/>
+                <g:TextBox width="50%" ui:field="name"/>
                 <g:Label text="Условие"/>
                 <c:CodeMirror ui:field="condition"/>
             </g:VerticalPanel>
