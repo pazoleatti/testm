@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTempl
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.ColumnAttributeEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -82,6 +85,15 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		});
 
+		typeColumnDropBox.addHandler(new ValueChangeHandler<Integer>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				createNewColumnType();
+				selectColumn();
+			}
+		}, ValueChangeEvent.getType());
+
 		widget = uiBinder.createAndBindUi(this);
 	}
 
@@ -94,6 +106,21 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@Override
 	public Widget asWidget() {
 		return widget;
+	}
+
+	@UiHandler("precisionBox")
+	public void onPrecisionKeyUp(KeyUpEvent event){
+		((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(precisionBox.getValue());
+	}
+
+	@UiHandler("dictionaryCodeBox")
+	public void onDictionaryCodeKeyUp(KeyUpEvent event){
+		if (typeColumnDropBox.getValue() == STRING_TYPE) {
+			((StringColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(dictionaryCodeBox.getValue());
+		}
+		if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
+			((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(dictionaryCodeBox.getValue());
+		}
 	}
 
 	@UiHandler("upColumn")
@@ -120,6 +147,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void setColumnList(List<Column> columnList) {
 		columns = columnList;
 		setColumnList();
+		columnListBox.setSelectedIndex(0);
 		selectColumn();
 		setUniqueParameters();
 	}
@@ -128,13 +156,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		Column column = columns.get(columnListBox.getSelectedIndex());
 
 		if (column instanceof StringColumn) {
-			typeColumnDropBox.setValue(0);
+			typeColumnDropBox.setValue(STRING_TYPE);
 		}
         else if (column instanceof NumericColumn) {
-			typeColumnDropBox.setValue(1);
+			typeColumnDropBox.setValue(NUMERIC_TYPE);
 		}
-		else if (column instanceof DateColumn) {
-			typeColumnDropBox.setValue(2);
+		else {
+			typeColumnDropBox.setValue(DATE_TYPE);
 		}
 		populateUniqueParameters();
 		typeColumnDropBox.setAcceptableValues(columnTypeNameMaps.keySet());
@@ -143,16 +171,19 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private void populateUniqueParameters() {
 		precisionPanel.setVisible(false);
 		dictionaryCodePanel.setVisible(false);
+		dictionaryCodeBox.setValue(null);
+		precisionBox.setValue(null);
+		Column column = columns.get(columnListBox.getSelectedIndex());
 
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
-			dictionaryCodeBox.setText(((StringColumn) columns.get(columnListBox.getSelectedIndex())).getDictionaryCode());
+			dictionaryCodeBox.setValue(((StringColumn) column).getDictionaryCode());
 			dictionaryCodePanel.setVisible(true);
 		}
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			dictionaryCodeBox.setValue(((NumericColumn) columns.get(columnListBox.getSelectedIndex())).getDictionaryCode());
 			precisionBox.setValue(((NumericColumn) columns.get(columnListBox.getSelectedIndex())).getPrecision());
-			dictionaryCodePanel.setVisible(true);
 			precisionPanel.setVisible(true);
+			dictionaryCodePanel.setVisible(true);
 		}
 	}
 
@@ -162,7 +193,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			for (Column column : columns) {
 				columnListBox.addItem(column.getName(), String.valueOf(columns.indexOf(column)));
 			}
-			columnListBox.setSelectedIndex(0);
 		}
 	}
 
@@ -208,30 +238,60 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 	}
 
+	@Override
 	public void doFlush() {
 		columnAttributeEditor.flush();
-		Column column = columns.get(columnListBox.getSelectedIndex());
-
-		if (column instanceof StringColumn) {
-			if (dictionaryCodeBox.getValue() != null) {
-				((StringColumn) column).setDictionaryCode(dictionaryCodeBox.getValue());
-			}
-		}
-
-		if (column instanceof NumericColumn) {
-			if (dictionaryCodeBox.getValue() != null) {
-				((StringColumn) column).setDictionaryCode(dictionaryCodeBox.getValue());
-			}
-
-			if (precisionBox.getValue() != null) {
-				((NumericColumn) column).setPrecision(precisionBox.getValue());
-			}
-		}
 	}
 
 	private void selectColumn() {
 		columnAttributeEditor.flush();
 		columnAttributeEditor.setValue(columns.get(columnListBox.getSelectedIndex()));
+	}
+
+	private void createNewColumnType() {
+		int index = columnListBox.getSelectedIndex();
+		Column column = columns.get(index);
+		columnAttributeEditor.flush();
+
+		if (typeColumnDropBox.getValue() == STRING_TYPE) {
+			StringColumn stringColumn = new StringColumn();
+			copyMainAttribute(column, stringColumn);
+
+			if (dictionaryCodeBox.getValue() != null) {
+				stringColumn.setDictionaryCode(dictionaryCodeBox.getText());
+			}
+			columns.set(index, stringColumn);
+		}
+		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
+			NumericColumn numericColumn = new NumericColumn();
+			copyMainAttribute(column, numericColumn);
+
+			if (dictionaryCodeBox.getValue() != null) {
+				numericColumn.setDictionaryCode(dictionaryCodeBox.getText());
+			}
+			if (precisionBox.getValue() != null) {
+				numericColumn.setPrecision(precisionBox.getValue());
+			}
+			columns.set(index, numericColumn);
+		}
+		else {
+			DateColumn dateColumn = new DateColumn();
+			copyMainAttribute(column, dateColumn);
+			columns.set(index, dateColumn);
+		}
+
+		populateUniqueParameters();
+	}
+
+	private void copyMainAttribute(Column from, Column to) {
+		to.setId(from.getId());
+		to.setName(from.getName());
+		to.setAlias(from.getAlias());
+		to.setGroupName(from.getGroupName());
+		to.setWidth(from.getWidth());
+		to.setEditable(from.isEditable());
+		to.setMandatory(from.isMandatory());
+		to.setOrder(from.getOrder());
 	}
 
 }
