@@ -88,5 +88,5 @@
 		<connection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/trunk</connection>
 		<developerConnection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/trunk</developerConnection>
 		<url>https://horse.aplana.com/svn/SBRFACCTAX/trunk</url>
-	  </scm>
+	</scm>
 </project>
