@@ -1,26 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.security.TARole;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 // TODO: добавить учёт ролей пользователя, но для прототипа достаточно только привязки к депаратаментам
@@ -33,6 +27,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormDataDao formDataDao;
 	@Autowired
 	private DepartmentDao departmentDao;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 	
 	@Override
 	public boolean canRead(int userId, long formDataId) {
@@ -61,11 +57,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canEdit(TAUser user, Department userDepartment, FormData formData) {
+		if(!isReportPeriodActive(formData.getReportPeriodId())){
+			return false;
+		}
+
 		WorkflowState state = formData.getState();
-		
 		if (userDepartment.getType() == DepartmentType.ROOT_BANK) {
 			return (state == WorkflowState.CREATED && formData.getDepartmentId() == userDepartment.getId())
-				|| (state == WorkflowState.CREATED || state == WorkflowState.APPROVED && formData.getDepartmentId() != userDepartment.getId());
+					|| (state == WorkflowState.CREATED || state == WorkflowState.APPROVED && formData.getDepartmentId() != userDepartment.getId());
 		} else {
 			return (state == WorkflowState.CREATED && formData.getDepartmentId() == user.getDepartmentId());
 		}
@@ -114,7 +113,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных
-		if (!canRead(user, userDepartment, formData)) {
+		if (!canRead(user, userDepartment, formData) || !isReportPeriodActive(formData.getReportPeriodId())) {
 			return result;
 		}
 		WorkflowState state = formData.getState();
@@ -169,5 +168,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		result.setCanDelete(canDelete(user, userDepartment, formData));
 		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment));
 		return result;
+	}
+
+	private boolean isReportPeriodActive(int reportPeriodId){
+		return reportPeriodDao.get(reportPeriodId).isActive();
 	}
 }

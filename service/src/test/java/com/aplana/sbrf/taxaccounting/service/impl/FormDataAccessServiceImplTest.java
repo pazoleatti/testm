@@ -1,31 +1,23 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
-import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.security.TARole;
+import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
+import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
@@ -36,41 +28,55 @@ public class FormDataAccessServiceImplTest {
 	private static final long TB1_CREATED_FORMDATA_ID = 1;
 	private static final long TB1_APPROVED_FORMDATA_ID = 2;
 	private static final long TB1_ACCEPTED_FORMDATA_ID = 3;
-	
+
 	private static final long TB2_CREATED_FORMDATA_ID = 4;
 	private static final long TB2_APPROVED_FORMDATA_ID = 5;
 	private static final long TB2_ACCEPTED_FORMDATA_ID = 6;
-	
+
 	private static final long BANK_CREATED_FORMDATA_ID = 7;
 	private static final long BANK_ACCEPTED_FORMDATA_ID = 9;
-	
+
+	private static final long INACTIVE_FORMDATA_ID = 10;
+
 	private static final int TB1_CONTROL_USER_ID = 1;
 	private static final int BANK_CONTROL_USER_ID = 3;
-	
+
+	private static final int REPORT_PERIOD_ACTIVE_ID = 1;
+	private static final int REPORT_PERIOD_INACTIVE_ID = 2;
+	private static final boolean REPORT_PERIOD_ACTIVE = true;
+	private static final boolean REPORT_PERIOD_INACTIVE = false;
+
 	@BeforeClass
 	public static void tearUp() {
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData fd;
 		
-		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED);
+		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED);
+		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED);
+		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED);
+		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED);
+		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED);
+		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED);
+		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED);
+		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		
+		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
+
+
 		ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
 		
 		TAUserDao userDao = mock(TAUserDao.class);
@@ -91,6 +97,14 @@ public class FormDataAccessServiceImplTest {
 		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
 		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+
+		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
+		ReportPeriod rp;
+		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE);
+		when(reportPeriodDao.get(REPORT_PERIOD_ACTIVE_ID)).thenReturn(rp);
+		rp = mockReportPeriod(REPORT_PERIOD_INACTIVE);
+		when(reportPeriodDao.get(REPORT_PERIOD_INACTIVE_ID)).thenReturn(rp);
+		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 	}
 	
 	@Test
@@ -99,7 +113,7 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		
+
 		// Контролёр тербанка не может просматривать записи в чужом тербанке
 		assertFalse(service.canRead(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID));
 		assertFalse(service.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID));
@@ -143,6 +157,10 @@ public class FormDataAccessServiceImplTest {
 		// Контролёр уровня банка может редактировать записи в тербанке в статусе "Созадана"
 		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
+
+		// Никто не может редактировать записи, если отчетный период не активный
+		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
 	}
 	
 	@Test
@@ -168,7 +186,11 @@ public class FormDataAccessServiceImplTest {
 		// Контролёр банка может удалить налоговую форму на уровне тербанка в статусе "Создана"
 		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));		
+		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+
+		// Никто не может удалять записи, если отчетный период неактивен
+		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
+		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
 	}
 	
 	@Test 
@@ -226,6 +248,10 @@ public class FormDataAccessServiceImplTest {
 			new Object[] { WorkflowMove.ACCEPTED_TO_CREATED }, 
 			service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray()
 		);
+
+		// Никто не может выполнять переходы, если отчетный период неактивен
+		assertEquals(0, service.getAvailableMoves(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID).size());
 	}
 	
 	@Test
