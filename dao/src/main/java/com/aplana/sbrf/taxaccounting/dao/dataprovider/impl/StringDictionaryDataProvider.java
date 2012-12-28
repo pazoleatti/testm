@@ -57,6 +57,20 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 
 		return result;
 	}
+
+	@Override
+	public long getRowCount(String pattern) {
+		String preparedPattern = preparePattern(pattern);
+		return getJdbcTemplate().queryForLong(
+				"select count(*) from (" + getSqlQuery() + ") " +
+						"where lower(value) like ? escape '\\' or lower(name) like ? escape '\\'",
+				new Object[]{
+						preparedPattern,
+						preparedPattern
+				},
+				new int[]{Types.VARCHAR, Types.VARCHAR}
+		);
+	}
 }
 
 

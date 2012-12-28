@@ -94,6 +94,13 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 	protected abstract ValueType getValue(ResultSet rs) throws SQLException;
 
 	/**
+	 * Возвращает количество записей соответствующих фильтру
+	 * @param pattern фильтр
+	 * @return количество записей
+	 */
+	protected abstract  long getRowCount(String pattern);
+
+	/**
 	 * Подготавливает паттерн поиска. Обрезает со всех сторон. Эскейпит всякие символы. Обрамляет в %.
 	 *
 	 * @param pattern исходный паттерн поиска
@@ -120,16 +127,5 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 		return prepared;
 	}
 
-	public long getRowCount(String pattern) {
-		String preparedPattern = preparePattern(pattern);
-		return getJdbcTemplate().queryForLong(
-				"select count(*) from (" + sqlQuery + ") " +
-				"where lower(value) like ? escape '\\' or lower(name) like ? escape '\\'",
-				new Object[]{
-						preparedPattern,
-						preparedPattern
-				},
-				new int[]{Types.VARCHAR, Types.VARCHAR}
-		);
-	}
+
 }

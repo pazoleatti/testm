@@ -44,7 +44,7 @@ public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<Bi
 			getJdbcTemplate().query(
 					"select value, name from (select rownum as r, value, name from ( " +
 							getSqlQuery() +
-							" ) where lower(value) like ? escape '\\' or lower(name) like ? escape '\\') where r between ? and ?",
+							" ) where value like ? escape '\\' or lower(name) like ? escape '\\') where r between ? and ?",
 				new Object[]{
 						preparedPattern,
 						preparedPattern,
@@ -61,5 +61,18 @@ public class NumericDictionaryDataProvider extends JdbcDictionaryDataProvider<Bi
 		return result;
 	}
 
+	@Override
+	public long getRowCount(String pattern) {
+		String preparedPattern = preparePattern(pattern);
+		return getJdbcTemplate().queryForLong(
+				"select count(*) from (" + getSqlQuery() + ") " +
+						"where value like ? escape '\\' or lower(name) like ? escape '\\'",
+				new Object[]{
+						preparedPattern,
+						preparedPattern
+				},
+				new int[]{Types.VARCHAR, Types.VARCHAR}
+		);
+	}
 
 }
