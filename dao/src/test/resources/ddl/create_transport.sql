@@ -95,3 +95,5 @@ alter table transport_eco_class add constraint transport_eco_class_pk primary ke
 comment on table transport_eco_class is 'Экономические классы транспортных средств';
 comment on column transport_eco_class.code is 'Код';
 comment on column transport_eco_class.name is 'Наименование';
+
+create index I_TRANSPORT_TAX_RATE_CODE on TRANSPORT_TAX_RATE (CODE);
