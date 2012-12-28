@@ -19,21 +19,20 @@
         }
     </ui:style>
 
-	<g:HTMLPanel>
-        <g:VerticalSplitPanel height="600px" width="100%">
-            <g:VerticalPanel width="100%">
-                <g:Label text="Название"/>
-                <g:TextBox width="50%" ui:field="name"/>
-                <g:Label text="Условие"/>
-                <c:CodeMirror ui:field="condition"/>
-            </g:VerticalPanel>
-            <g:VerticalPanel width="100%">
-                <g:HorizontalPanel>
-                    <g:CheckBox ui:field="perRow"/>
-                    <g:Label text="применять для каждой строки"/>
-                </g:HorizontalPanel>
-                <c:CodeMirror ui:field="body"/>
-            </g:VerticalPanel>
-        </g:VerticalSplitPanel>
-	</g:HTMLPanel>
+    <g:VerticalSplitPanel height="100%" width="100%">
+        <g:HTMLPanel width="100%">
+            <g:Label text="Название"/>
+            <g:TextBox width="50%" ui:field="name"/>
+            <g:Label text="Условие"/>
+            <c:CodeMirror ui:field="condition"/>
+        </g:HTMLPanel>
+        <g:HTMLPanel height="100%" width="100%">
+            <g:HorizontalPanel>
+                <g:CheckBox ui:field="perRow"/>
+                <g:Label text="применять для каждой строки"/>
+            </g:HorizontalPanel>
+            <c:CodeMirror ui:field="body"/>
+        </g:HTMLPanel>
+    </g:VerticalSplitPanel>
+
 </ui:UiBinder>

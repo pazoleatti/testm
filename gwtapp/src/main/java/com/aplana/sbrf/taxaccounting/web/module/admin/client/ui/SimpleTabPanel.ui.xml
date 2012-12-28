@@ -26,7 +26,7 @@
                 <g:FlowPanel ui:field="tabPanel" />
                 <div style="clear: both;" />
             </g:HTMLPanel>
-            <g:HTMLPanel ui:field="tabContentContainer"
+            <g:HTMLPanel ui:field="tabContentContainer" width="100%" height="600px"
                          addStyleNames="{style.panel}" />
         </div>
     </g:HTMLPanel>
