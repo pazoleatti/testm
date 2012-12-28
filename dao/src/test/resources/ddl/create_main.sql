@@ -307,3 +307,4 @@ comment on column sec_user_role.role_id is 'Идентификатор роли'
  create index i_form_data_form_id on form_data(form_id);
  create index i_form_data_department_id on form_data(department_id);
  create index i_form_data_kind on form_data(kind);
+ create index I_TRANSPORT_TAX_RATE_CODE on TRANSPORT_TAX_RATE (CODE);
