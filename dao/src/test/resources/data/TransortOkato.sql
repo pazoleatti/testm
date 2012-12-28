@@ -1,0 +1,10 @@
+insert into transport_okato (id, parent_id, okato, name) values (1, 1, 'value1', 'name1');
+insert into transport_okato (id, parent_id, okato, name) values (2, 1, 'value2', 'name2');
+insert into transport_okato (id, parent_id, okato, name) values (3, 1, 'value3', 'name3');
+insert into transport_okato (id, parent_id, okato, name) values (4, 1, 'value4', 'name4');
+insert into transport_okato (id, parent_id, okato, name) values (5, 1, 'value5', 'name5');
+insert into transport_okato (id, parent_id, okato, name) values (6, 1, 'value6', 'name6');
+insert into transport_okato (id, parent_id, okato, name) values (7, 1, 'value7', 'name7');
+insert into transport_okato (id, parent_id, okato, name) values (8, 1, 'value8', 'name8');
+insert into transport_okato (id, parent_id, okato, name) values (9, 1, 'value9', 'name9');
+insert into transport_okato (id, parent_id, okato, name) values (10, 1, 'value10', 'name10');
