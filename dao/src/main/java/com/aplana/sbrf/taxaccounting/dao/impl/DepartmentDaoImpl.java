@@ -1,32 +1,50 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
-import com.aplana.sbrf.taxaccounting.model.Department;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
+import com.aplana.sbrf.taxaccounting.model.Department;
 
 @Repository("departmentDao")
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl implements DepartmentDao {
+	private final Log logger = LogFactory.getLog(getClass());
+	
+	@Autowired
+	private BeanFactory beanFactory;
+	
 	@Autowired 
 	private DepartmentMapper departmentMapper;
 	
 	@Override
 	@Cacheable("Department")	
 	public Department getDepartment(int id) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Fetching department with id = " + id  + " from database");
+		}
 		Department result = departmentMapper.get(id);
 		if (result == null) {
 			throw new DaoException("Не удалось найти подразделение банка с id = " + id);
 		}
+		
+		Set<Integer> formTypes = departmentMapper.getDepartmentFormTypes(id);
+		result.setFormTypeIds(formTypes);
+		
 		return result;
 	}
 
+	@Override
 	public List<Department> getChildren(int parentDepartmentId){
 		return departmentMapper.getChildren(parentDepartmentId);
 	}

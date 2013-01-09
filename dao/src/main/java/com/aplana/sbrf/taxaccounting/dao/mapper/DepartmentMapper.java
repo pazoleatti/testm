@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
@@ -34,4 +35,7 @@ public interface DepartmentMapper {
     @Select("select * from department")
     @ResultMap("departmentMap")
     List<Department> getAll();
+    
+    @Select("select form_type_id from department_form_type where department_id = #{departmentId}")
+    Set<Integer> getDepartmentFormTypes(@Param("departmentId") int departmentId);
 }
