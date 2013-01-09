@@ -43,7 +43,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		if (userDepartment.getType() == DepartmentType.ROOT_BANK) {
 			return true;
 		} else {
-			// В противном случае доступ на чтение имеют только пользователи того же подразделения 
+			// В противном случае доступ на чтение имеют только пользователи того же подразделения
 			return user.getDepartmentId() == formData.getDepartmentId();
 		}
 	}
@@ -53,11 +53,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		TAUser user = userDao.getUser(userId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());		
 		FormData formData = formDataDao.get(formDataId);
-		return canEdit(user, userDepartment, formData);
+		return canEdit(user, userDepartment, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 	
-	private boolean canEdit(TAUser user, Department userDepartment, FormData formData) {
-		if(!isReportPeriodActive(formData.getReportPeriodId())){
+	private boolean canEdit(TAUser user, Department userDepartment, FormData formData, ReportPeriod formDataReportPeriod) {
+		if(!formDataReportPeriod.isActive()){
 			return false;
 		}
 
@@ -93,11 +93,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canDelete(TAUser user, Department userDepartment, FormData formData) {
-		if (formData.getState() != WorkflowState.CREATED) {
-			return false;
-		}
-		return canEdit(user, userDepartment, formData);
-	}
+        return formData.getState() == WorkflowState.CREATED && canEdit(user, userDepartment, formData,
+                reportPeriodDao.get(formData.getReportPeriodId()));
+    }
 	
 	
 	@Override
@@ -106,14 +104,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		FormData formData = formDataDao.get(formDataId);
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
-		return getAvailableMoves(user, userDepartment, formData, formDataDepartment);
+		return getAvailableMoves(user, userDepartment, formData, formDataDepartment,
+                reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 	
-	private List<WorkflowMove> getAvailableMoves(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
+	private List<WorkflowMove> getAvailableMoves(TAUser user, Department userDepartment, FormData formData,
+                                                 Department formDataDepartment, ReportPeriod formDataReportPeriod) {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
-		// на чтение соответствующей карточки данных
-		if (!canRead(user, userDepartment, formData) || !isReportPeriodActive(formData.getReportPeriodId())) {
+		// на чтение соответствующей карточки данных и отчетный период должен быть активным
+		if (!canRead(user, userDepartment, formData) || !formDataReportPeriod.isActive()) {
 			return result;
 		}
 		WorkflowState state = formData.getState();
@@ -161,16 +161,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		FormData formData = formDataDao.get(formDataId);
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
-		
+		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
+
 		FormDataAccessParams result = new FormDataAccessParams();
 		result.setCanRead(canRead(user, userDepartment, formData));
-		result.setCanEdit(canEdit(user, userDepartment, formData));
+		result.setCanEdit(canEdit(user, userDepartment, formData, reportPeriod));
 		result.setCanDelete(canDelete(user, userDepartment, formData));
-		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment));
+		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment, reportPeriod));
 		return result;
-	}
-
-	private boolean isReportPeriodActive(int reportPeriodId){
-		return reportPeriodDao.get(reportPeriodId).isActive();
 	}
 }
