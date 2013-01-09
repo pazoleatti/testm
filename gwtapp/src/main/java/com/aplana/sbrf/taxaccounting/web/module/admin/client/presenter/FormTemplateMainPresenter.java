@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateCloseEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateResetEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSaveEvent;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -42,6 +44,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
+	private FormTemplate formTemplate;
 
 	@Inject
 	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -60,7 +63,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 		int formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
-		getView().setFormId(formId);
 
 		placeManager.revealPlace(
 				new PlaceRequest(AdminNameTokens.formTemplateScriptPage).with(
@@ -76,24 +78,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Override
 	protected void onReveal() {
-		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
-
-		if (formId != 0) {
-			getView().setFormId(formId);
-			GetFormAction action = new GetFormAction();
-			action.setId(formId);
-			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-				@Override
-				public void onReqSuccess(GetFormResult result) {
-					getView().setTitle(result.getForm().getType().getName());
-				}
-			});
-		}
+		resetFormTemplate();
 	}
 
 	@Override
 	public void reset() {
-		FormTemplateResetEvent.fire(FormTemplateMainPresenter.this);
+		resetFormTemplate();
 	}
 
 	/**
@@ -102,7 +92,26 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void save() {
-		FormTemplateSaveEvent.fire(FormTemplateMainPresenter.this);
+		UpdateFormAction action = new UpdateFormAction();
+		action.setForm(formTemplate);
+		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
+			@Override
+			public void onReqSuccess(UpdateFormResult result) {
+				MessageEvent.fire(this, "Форма Сохранена");
+				resetFormTemplate();
+			}
+
+			@Override
+			protected boolean needErrorOnFailure() {
+				return false;
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				MessageEvent.fire(this, "Request Failure", throwable);
+				resetFormTemplate();
+			}
+		});
 	}
 
 	/**
@@ -110,8 +119,29 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		FormTemplateCloseEvent.fire(FormTemplateMainPresenter.this);
+		resetFormTemplate();
 		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
+	}
+
+	public FormTemplate getFormTemplate() {
+		return formTemplate;
+	}
+
+	private void resetFormTemplate() {
+		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
+		if (formId != 0) {
+			getView().setFormId(formId);
+			GetFormAction action = new GetFormAction();
+			action.setId(formId);
+			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+				@Override
+				public void onReqSuccess(GetFormResult result) {
+					formTemplate = result.getForm();
+					getView().setTitle(formTemplate.getType().getName());
+					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this);
+				}
+			});
+		}
 	}
 
 }

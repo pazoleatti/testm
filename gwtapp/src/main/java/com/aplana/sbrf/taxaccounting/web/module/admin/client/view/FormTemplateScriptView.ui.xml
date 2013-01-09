@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui">
+             xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui"
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
     <ui:style>
         .whiteColor {
             background-color: white;
@@ -14,16 +15,10 @@
                     <g:ListBox height="100%" width="100%" visibleItemCount="10"
                                ui:field="scriptListBox"/>
                 </g:cell>
-                <g:cell>
-                    <g:HorizontalPanel >
-                        <g:cell>
-                            <g:Button text="Создать" ui:field="createScriptButton"/>
-                        </g:cell>
-                        <g:cell>
-                            <g:Button text="Удалить" ui:field="deleteScriptButton"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                </g:cell>
+                <t:LeftBar>
+                    <g:Button text="Создать" ui:field="createScriptButton"/>
+                    <g:Button text="Удалить" ui:field="deleteScriptButton"/>
+                </t:LeftBar>
             </g:VerticalPanel>
         </g:cell>
         <g:cell width="75%" height="100%">

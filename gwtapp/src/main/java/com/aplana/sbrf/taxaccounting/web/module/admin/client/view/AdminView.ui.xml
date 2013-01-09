@@ -4,7 +4,6 @@
 			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 			 >
 	<g:HTMLPanel>
-        <g:Label text="Администрирование"/>
 		<style:GenericCellTable ui:field="formTemplateTable" width="100%" />
 	</g:HTMLPanel>
 </ui:UiBinder>

@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
     <ui:style>
         .whiteColor {
             background-color: white;
@@ -26,28 +27,20 @@
                     <g:cell height="50%">
                         <g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="eventScriptListBox"/>
                     </g:cell>
-                    <g:cell>
-                        <g:HorizontalPanel>
-                            <g:cell>
-                                <g:Button text="Вверх" ui:field="upEventScript"/>
-                            </g:cell>
-                            <g:cell>
-                                <g:Button text="Вниз" ui:field="downEventScript"/>
-                            </g:cell>
-                            <g:cell>
-                                <g:Button text="Удалить" ui:field="removeScriptFromEvent"/>
-                            </g:cell>
-                        </g:HorizontalPanel>
-                    </g:cell>
+                        <t:LeftBar>
+                            <g:Button text="Вверх" ui:field="upEventScript"/>
+                            <g:Button text="Вниз" ui:field="downEventScript"/>
+                            <g:Button text="Удалить" ui:field="removeScriptFromEvent"/>
+                        </t:LeftBar>
                     <g:cell>
                         <g:Label text="Остальные скрипты"/>
                     </g:cell>
                     <g:cell height="50%">
                         <g:ListBox height="100%" width="100%" visibleItemCount="10" ui:field="remainScriptListBox"/>
                     </g:cell>
-                    <g:cell>
+                    <t:LeftBar>
                         <g:Button text="Добавить" ui:field="addScriptToEvent"/>
-                    </g:cell>
+                    </t:LeftBar>
                 </g:VerticalPanel>
             </g:cell>
         </g:HorizontalPanel>

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateColumnPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.ColumnAttributeEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -86,7 +87,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		});
 
 		typeColumnDropBox.addHandler(new ValueChangeHandler<Integer>() {
-
 			@Override
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				createNewColumnType();
@@ -95,6 +95,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}, ValueChangeEvent.getType());
 
 		widget = uiBinder.createAndBindUi(this);
+
+		columnAttributeEditor.addDomHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				columnAttributeEditor.flush();
+			}
+		}, ChangeEvent.getType());
 	}
 
 	@UiHandler("columnListBox")
@@ -238,11 +245,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 	}
 
-	@Override
-	public void doFlush() {
-		columnAttributeEditor.flush();
-	}
-
 	private void selectColumn() {
 		columnAttributeEditor.flush();
 		columnAttributeEditor.setValue(columns.get(columnListBox.getSelectedIndex()));
@@ -255,7 +257,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			StringColumn stringColumn = new StringColumn();
-			copyMainAttribute(column, stringColumn);
+			copyMainColumnAttributes(column, stringColumn);
 
 			if (dictionaryCodeBox.getValue() != null) {
 				stringColumn.setDictionaryCode(dictionaryCodeBox.getText());
@@ -264,7 +266,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			NumericColumn numericColumn = new NumericColumn();
-			copyMainAttribute(column, numericColumn);
+			copyMainColumnAttributes(column, numericColumn);
 
 			if (dictionaryCodeBox.getValue() != null) {
 				numericColumn.setDictionaryCode(dictionaryCodeBox.getText());
@@ -276,14 +278,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 		else {
 			DateColumn dateColumn = new DateColumn();
-			copyMainAttribute(column, dateColumn);
+			copyMainColumnAttributes(column, dateColumn);
 			columns.set(index, dateColumn);
 		}
 
 		populateUniqueParameters();
 	}
 
-	private void copyMainAttribute(Column from, Column to) {
+	private void copyMainColumnAttributes(Column from, Column to) {
 		to.setId(from.getId());
 		to.setName(from.getName());
 		to.setAlias(from.getAlias());

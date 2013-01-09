@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateScriptPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.ScriptEditor;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.ListBox;
@@ -33,6 +35,20 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 	@Inject
 	public FormTemplateScriptView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
+
+		scriptEditor.addDomHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				scriptEditor.flush();
+			}
+		}, ChangeEvent.getType());
+
+		scriptEditor.addDomHandler(new KeyUpHandler() {
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				scriptEditor.flush();
+			}
+		}, KeyUpEvent.getType());
 	}
 
 	@Override
@@ -65,11 +81,6 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 		}
 		scriptListBox.setSelectedIndex(0);
 		selectScript();
-	}
-
-	@Override
-	public void doFlush() {
-		scriptEditor.flush();
 	}
 
 	private void selectScript() {

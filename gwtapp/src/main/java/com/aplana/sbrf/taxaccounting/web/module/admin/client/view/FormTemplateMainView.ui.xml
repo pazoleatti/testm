@@ -5,13 +5,12 @@
 <g:HTMLPanel>
     <g:Label text="Шаблон формы" ui:field="titleLabel"/>
 
-    <t:Bar>
-        <t:LeftBar>
-            <g:Button text="Сохранить" ui:field="saveButton"/>
-            <g:Button text="Сбросить" ui:field="resetButton"/>
-            <g:Button text="Отмена" ui:field="cancelButton"/>
-        </t:LeftBar>
-    </t:Bar>
+    <t:LeftBar>
+        <g:Button text="Сохранить" ui:field="saveButton"/>
+        <g:Button text="Сбросить" ui:field="resetButton"/>
+        <g:Button text="Отмена" ui:field="cancelButton"/>
+    </t:LeftBar>
+
     <npui:SimpleTabPanel ui:field="tabPanel"/>
 </g:HTMLPanel>
 </ui:UiBinder>

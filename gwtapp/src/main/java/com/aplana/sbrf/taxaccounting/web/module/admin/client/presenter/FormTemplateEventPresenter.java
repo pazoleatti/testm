@@ -4,17 +4,11 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateCloseEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateResetEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSaveEvent;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateEventUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -25,11 +19,8 @@ import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.web.module.admin.client.FormTemplateUtil.saveFormTemplate;
-
 public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPresenter.MyView, FormTemplateEventPresenter.MyProxy>
-		implements FormTemplateEventUiHandlers, FormTemplateResetEvent.MyHandler, FormTemplateSaveEvent.MyHandler,
-		FormTemplateCloseEvent.MyHandler {
+		implements FormTemplateEventUiHandlers, FormTemplateSetEvent.MyHandler{
 
 	/**
 	 * {@link FormTemplateEventPresenter}'s proxy.
@@ -47,58 +38,34 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 		public void selectEvent();
 	}
 
-	private DispatchAsync dispatcher;
 	private FormTemplate formTemplate;
-	private int formId;
-	private boolean isSelected = false;
 
 	@Inject
-	public FormTemplateEventPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, final DispatchAsync dispatcher) {
+	public FormTemplateEventPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
 		super(eventBus, view, proxy);
-		this.dispatcher = dispatcher;
 		getView().setUiHandlers(this);
 	}
 
 	@ProxyEvent
 	@Override
-	public void onReset(FormTemplateResetEvent event) {
-		selectEvent();
-	}
-
-	@ProxyEvent
-	@Override
-	public void onSave(FormTemplateSaveEvent event) {
-		if (isSelected) {
-			saveFormTemplate(this, formTemplate, dispatcher);
-		}
-	}
-
-	@ProxyEvent
-	@Override
-	public void onClose(FormTemplateCloseEvent event) {
-		selectEvent();
+	public void onSet(FormTemplateSetEvent event) {
+		FormTemplateMainPresenter source = (FormTemplateMainPresenter) event.getSource();
+		formTemplate = source.getFormTemplate();
+		getView().selectEvent();
 	}
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
-		selectEvent();
+
+		if (formTemplate != null) {
+			getView().selectEvent();
+		}
 	}
 
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
-	}
-
-	@Override
-	protected void onReveal() {
-		isSelected = true;
-	}
-
-	@Override
-	protected void onHide() {
-		isSelected = false;
 	}
 
 	@Override
@@ -121,19 +88,5 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 	@Override
 	public List<Script> getScripts() {
 		return formTemplate.getScripts();
-	}
-
-	private void selectEvent() {
-		if (formId != 0) {
-			GetFormAction action = new GetFormAction();
-			action.setId(formId);
-			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-				@Override
-				public void onReqSuccess(GetFormResult result) {
-					formTemplate = result.getForm();
-					getView().selectEvent();
-				}
-			});
-		}
 	}
 }

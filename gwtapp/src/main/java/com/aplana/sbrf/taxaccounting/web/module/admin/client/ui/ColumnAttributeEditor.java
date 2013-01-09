@@ -76,8 +76,4 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 		}
 	}
 
-
-
-
-
 }

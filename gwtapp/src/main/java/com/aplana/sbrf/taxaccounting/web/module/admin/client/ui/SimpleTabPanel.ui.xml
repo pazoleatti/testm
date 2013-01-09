@@ -6,7 +6,12 @@
     <ui:style src='defines.css'>
         .container {
             background-color: whitePanelColor;
-            padding: 0 3px 3px;
+
+            bottom: 30px;
+            left: 10px;
+            position: absolute;
+            right: 10px;
+            top: 60px
         }
 
         .bar {
@@ -17,6 +22,7 @@
             background-color: lightPanelColor;
             padding: 2px;
             overflow: hidden;
+
         }
     </ui:style>
 
@@ -26,7 +32,7 @@
                 <g:FlowPanel ui:field="tabPanel" />
                 <div style="clear: both;" />
             </g:HTMLPanel>
-            <g:HTMLPanel ui:field="tabContentContainer" width="100%" height="600px"
+            <g:HTMLPanel height="100%" ui:field="tabContentContainer"
                          addStyleNames="{style.panel}" />
         </div>
     </g:HTMLPanel>
