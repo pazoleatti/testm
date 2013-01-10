@@ -38,7 +38,7 @@ public class FormTemplateSetEvent extends GwtEvent<FormTemplateSetEvent.MyHandle
 		return getType();
 	}
 
-	public FormTemplate getFormTempltate() {
+	public FormTemplate getFormTemplate() {
 		return formTemplate;
 	}
 

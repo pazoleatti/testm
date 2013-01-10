@@ -46,7 +46,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTempltate();
+		formTemplate = event.getFormTemplate();
 		getView().bindScripts(formTemplate.getScripts());
 	}
 
