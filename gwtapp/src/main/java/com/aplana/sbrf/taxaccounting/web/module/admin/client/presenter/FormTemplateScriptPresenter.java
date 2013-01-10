@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateScriptUiHandlers;
 import com.google.inject.Inject;
@@ -16,8 +17,7 @@ import java.util.List;
 
 
 public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPresenter.MyView, FormTemplateScriptPresenter.MyProxy>
-		implements FormTemplateScriptUiHandlers, FormTemplateSetEvent.MyHandler {
-
+		implements FormTemplateScriptUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
 	/**
 	 * {@link FormTemplateMainPresenter}'s proxy.
 	 */
@@ -32,6 +32,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateScriptUiHandlers>{
 		void bindScripts(List<Script> scriptList);
+		void flush();
 	}
 
 	private FormTemplate formTemplate;
@@ -45,9 +46,14 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		FormTemplateMainPresenter source = (FormTemplateMainPresenter) event.getSource();
-		formTemplate = source.getFormTemplate();
+		formTemplate = event.getFormTempltate();
 		getView().bindScripts(formTemplate.getScripts());
+	}
+
+	@ProxyEvent
+	@Override
+	public void onFlush(FormTemplateFlushEvent event) {
+		getView().flush();
 	}
 
 	@Override

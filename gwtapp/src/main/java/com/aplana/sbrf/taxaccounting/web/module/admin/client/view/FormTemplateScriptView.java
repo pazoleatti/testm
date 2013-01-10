@@ -35,20 +35,6 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 	@Inject
 	public FormTemplateScriptView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
-
-		scriptEditor.addDomHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				scriptEditor.flush();
-			}
-		}, ChangeEvent.getType());
-
-		scriptEditor.addDomHandler(new KeyUpHandler() {
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				scriptEditor.flush();
-			}
-		}, KeyUpEvent.getType());
 	}
 
 	@Override
@@ -81,6 +67,11 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 		}
 		scriptListBox.setSelectedIndex(0);
 		selectScript();
+	}
+
+	@Override
+	public void flush() {
+		scriptEditor.flush();
 	}
 
 	private void selectScript() {

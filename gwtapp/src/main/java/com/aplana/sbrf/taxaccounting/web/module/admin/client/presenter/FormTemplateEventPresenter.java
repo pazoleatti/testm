@@ -49,8 +49,7 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		FormTemplateMainPresenter source = (FormTemplateMainPresenter) event.getSource();
-		formTemplate = source.getFormTemplate();
+		formTemplate = event.getFormTempltate();
 		getView().selectEvent();
 	}
 

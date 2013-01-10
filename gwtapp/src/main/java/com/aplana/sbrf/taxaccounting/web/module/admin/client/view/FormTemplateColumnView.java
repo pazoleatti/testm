@@ -95,13 +95,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}, ValueChangeEvent.getType());
 
 		widget = uiBinder.createAndBindUi(this);
-
-		columnAttributeEditor.addDomHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				columnAttributeEditor.flush();
-			}
-		}, ChangeEvent.getType());
 	}
 
 	@UiHandler("columnListBox")
@@ -157,6 +150,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		columnListBox.setSelectedIndex(0);
 		selectColumn();
 		setUniqueParameters();
+	}
+
+	@Override
+	public void flush() {
+		columnAttributeEditor.flush();
 	}
 
 	private void setUniqueParameters() {

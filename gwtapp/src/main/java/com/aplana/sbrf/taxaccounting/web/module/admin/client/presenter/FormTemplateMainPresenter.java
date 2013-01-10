@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -92,6 +94,43 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void save() {
+		FormTemplateFlushEvent.fire(this);
+
+		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+			@Override
+			public void execute() {
+				saveAfterFlush();
+			}
+		});
+	}
+
+	/**
+	 * Закрыть форму редактирования и вернуться на форму администрирования со списком шаблонов форм.
+	 */
+	@Override
+	public void close() {
+		resetFormTemplate();
+		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
+	}
+
+	private void resetFormTemplate() {
+		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
+		if (formId != 0) {
+			getView().setFormId(formId);
+			GetFormAction action = new GetFormAction();
+			action.setId(formId);
+			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
+				@Override
+				public void onReqSuccess(GetFormResult result) {
+					formTemplate = result.getForm();
+					getView().setTitle(formTemplate.getType().getName());
+					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
+				}
+			});
+		}
+	}
+
+	private void saveAfterFlush() {
 		UpdateFormAction action = new UpdateFormAction();
 		action.setForm(formTemplate);
 		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
@@ -112,36 +151,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				resetFormTemplate();
 			}
 		});
-	}
-
-	/**
-	 * Закрыть форму редактирования и вернуться на форму администрирования со списком шаблонов форм.
-	 */
-	@Override
-	public void close() {
-		resetFormTemplate();
-		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
-	}
-
-	public FormTemplate getFormTemplate() {
-		return formTemplate;
-	}
-
-	private void resetFormTemplate() {
-		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
-		if (formId != 0) {
-			getView().setFormId(formId);
-			GetFormAction action = new GetFormAction();
-			action.setId(formId);
-			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-				@Override
-				public void onReqSuccess(GetFormResult result) {
-					formTemplate = result.getForm();
-					getView().setTitle(formTemplate.getType().getName());
-					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this);
-				}
-			});
-		}
 	}
 
 }

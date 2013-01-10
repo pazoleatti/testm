@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateColumnUiHandlers;
 import com.google.inject.Inject;
@@ -19,7 +20,7 @@ import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 import java.util.List;
 
 public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPresenter.MyView, FormTemplateColumnPresenter.MyProxy>
-		implements FormTemplateColumnUiHandlers, FormTemplateSetEvent.MyHandler {
+		implements FormTemplateColumnUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
 
 	@Title("Администрирование")
 	@ProxyCodeSplit
@@ -32,6 +33,7 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateColumnUiHandlers> {
 		void setColumnList(List<Column> columnList);
+		void flush();
 	}
 
 	private FormTemplate formTemplate;
@@ -45,9 +47,14 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		FormTemplateMainPresenter source = (FormTemplateMainPresenter) event.getSource();
-		formTemplate = source.getFormTemplate();
+		formTemplate = event.getFormTempltate();
 		getView().setColumnList(formTemplate.getColumns());
+	}
+
+	@ProxyEvent
+	@Override
+	public void onFlush(FormTemplateFlushEvent event) {
+		getView().flush();
 	}
 
 	@Override
