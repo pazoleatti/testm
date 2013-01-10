@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -15,6 +10,10 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDat
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, GetFilterDataResult> {
@@ -40,7 +39,8 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
         GetFilterDataResult res = new GetFilterDataResult();
         res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
 				.getDepartmentId()));
-        res.setFormTypes(formDataSearchService.listFormTypesByTaxType(action.getTaxType()));
+        res.setFormTypes(formDataSearchService.getAvailableFormTypes(securityService.currentUser().getId(),
+                action.getTaxType()));
 		res.setPeriods(formDataSearchService.listReportPeriodsByTaxType(action.getTaxType()));
 		
 		try {

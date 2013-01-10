@@ -58,4 +58,23 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 					new FormTypeMapper()
 			);
 	}
+
+    public List<FormType> listAllByDepartmentIdAndTaxType(int departmentId, TaxType taxType){
+        if (logger.isDebugEnabled()) {
+            logger.debug("Fetching FormTypes by DepartmentId = " + departmentId + " and TaxType  = " + taxType);
+        }
+        return getJdbcTemplate().query(
+                "SELECT * FROM form_type ft WHERE ft.tax_type = ? " +
+                        "AND EXISTS (SELECT 1 FROM department_form_type dft WHERE ft.id = dft.form_type_id and dft.department_id = ?)",
+                new Object[]{
+                        String.valueOf(taxType.getCode()),
+                        departmentId
+                },
+                new int[]{
+                        Types.CHAR,
+                        Types.INTEGER
+                },
+                new FormTypeMapper()
+            );
+    }
 }

@@ -35,11 +35,13 @@ public interface FormDataSearchService {
 	List<FormType> listFormTypes();
 
 	/**
-	 * Получить список видов налоговых форм с определенным видом налога
+	 * Получить список видов налоговых форм с определенным видом налога и для определенного пользователя.
+     * С каждым подразделением связывается список видов налоговых форм, с которыми можно работать сотрудникам данного подразделения.
 	 * @param taxType вид налога
+     * @param userId идентификатор пользователя
 	 * @return список налоговых форм с определенным видом налога
 	 */
-	List<FormType> listFormTypesByTaxType(TaxType taxType);
+	List<FormType> getAvailableFormTypes(int userId, TaxType taxType);
 
 	/**
 	 * Получить список отчетных периодов с определенным видом налога

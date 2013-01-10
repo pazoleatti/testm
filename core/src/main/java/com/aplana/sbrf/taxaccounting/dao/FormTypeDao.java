@@ -28,4 +28,12 @@ public interface FormTypeDao {
 	 * @return Список видов налоговых форм с определенным типом налога
 	 */
 	List<FormType> listAllByTaxType(TaxType taxType);
+
+    /**
+     * Получить список видов налоговых форм для определенного департамента и с определенным типом налога
+     * @param departmentId идентификатор департамента
+     * @param taxType тип налога
+     * @return Список видов налоговых форм для определенного департамента и с определенным типом налога
+     */
+    List<FormType> listAllByDepartmentIdAndTaxType(int departmentId, TaxType taxType);
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -29,6 +30,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 
+    @Autowired
+    private TAUserDao taUserDao;
 
 	@Override
 	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
@@ -110,8 +113,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	@Override
-	public List<FormType> listFormTypesByTaxType(TaxType taxType){
-		return formTypeDao.listAllByTaxType(taxType);
+	public List<FormType> getAvailableFormTypes(int userId, TaxType taxType){
+		return formTypeDao.listAllByDepartmentIdAndTaxType(taUserDao.getUser(userId).getDepartmentId(), taxType);
 	}
 
 	@Override
