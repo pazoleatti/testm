@@ -1,28 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import groovy.lang.GroovyClassLoader;
-
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
@@ -31,9 +9,29 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import groovy.lang.GroovyClassLoader;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Service;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -53,13 +51,11 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
-	private FormDataDao formDataDao;
-	@Autowired
 	private DepartmentDao departmentDao;
+
+	private ApplicationContext applicationContext;
 	
 	private ScriptEngine scriptEngine;
-
-	private Map<String, Object> scriptExposedBeans;
 
 	public FormDataScriptingServiceImpl() {
 		ScriptEngineManager factory = new ScriptEngineManager();
@@ -90,7 +86,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger) {
 
 		Bindings b = scriptEngine.createBindings();
-		b.putAll(scriptExposedBeans);
+		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));
 		
 		// predefined script variables
 		b.put("logger", logger);
@@ -121,6 +117,56 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	}
 
 	/**
+	 * Возвращает спринг-бины доятупные для использования в скрипте.
+	 *
+	 * @param taxType тип налога
+	 * @param event событие
+	 */
+	private Map<String, ?> getScriptExposedBeans(TaxType taxType, FormDataEvent event){
+		Map<String, Object> beans = new HashMap<String, Object>();
+
+		for(Map.Entry<String, ?> entry:applicationContext.getBeansWithAnnotation(ScriptExposed.class).entrySet()){
+			Object bean = entry.getValue();
+			ScriptExposed scriptExposed = AnnotationUtils.findAnnotation(bean.getClass(), ScriptExposed.class);
+			boolean flag = true;
+
+			if(scriptExposed.taxTypes().length>0){
+				boolean has = false;
+
+				for(TaxType tt: scriptExposed.taxTypes()){
+					if(taxType == tt){
+						has = true;
+					}
+				}
+
+				if(!has){
+					flag = false;
+				}
+			}
+
+			if(scriptExposed.formDataEvents().length>0){
+				boolean has = false;
+
+				for(FormDataEvent ev:scriptExposed.formDataEvents()){
+					if(ev == event){
+						has = true;
+					}
+				}
+
+				if(!has){
+					flag = false;
+				}
+			}
+
+			if(flag){
+				beans.put(entry.getKey(), bean);
+			}
+		}
+
+		return beans;
+	}
+
+	/**
 	 * Проверяет, есть ли скрипты для события формы
 	 *
 	 * @param formData форма
@@ -138,7 +184,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	/**
 	 * Выполняет скрипт для всей формы в целом.
 	 *
-	 * @param engine задает среду выполнения скрипта
+	 * @param bindings переменные окружения скрипта
 	 * @param script скрипт формы
 	 * @param logger логгер
 	 */
@@ -154,7 +200,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	/**
 	 * Выполняет скрипт для каждой строки формы.
 	 *
-	 * @param engine   задает среду выполнения скрипта
+	 * @param bindings переменные окружения скрипта
 	 * @param script   скрипт строки
 	 * @param formData данные формы
 	 * @param logger   логгер
@@ -193,7 +239,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	/**
 	 * Выполняет любой скрипт, ловит ошибки, записывает их в логгер.
 	 *
-	 * @param engine    задает средуу выполнения скрипта
+	 * @param bindings переменные окружения скрипта
 	 * @param script    скрипт
 	 * @param logger    логгер
 	 * @param decorator декоратор для ошибок
@@ -231,7 +277,6 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		scriptExposedBeans = new ConcurrentHashMap<String, Object>();
-		scriptExposedBeans.putAll(context.getBeansOfType(ScriptExposed.class));
+		this.applicationContext = context;
 	}
 }

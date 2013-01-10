@@ -14,7 +14,8 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author srybakov
  *
  */
-public interface FormDataSearchDao extends ScriptExposed {
+@ScriptExposed
+public interface FormDataSearchDao {
 
 	/**
 	 * Возвращает список {@link FormDataSearchResultItem}, представляющий набор данных по налоговым формам, удовлетворяющих 

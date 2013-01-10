@@ -1,0 +1,36 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		">
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTypeDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ScriptDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTemplateDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ColumnDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DepartmentDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao"/>
+	</bean>
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.security.TAUserDao"/>
+	</bean>
+</beans>

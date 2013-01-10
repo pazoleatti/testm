@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
+
 /**
  * Сервис, отвечающий за интеграцию/дезинтеграцию форм. Поставляется в скрипты и позволяет формам посылать события
  * интеграции другим формам.
@@ -11,7 +13,13 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author Vitalii Samolovskikh
  * @see com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
-public interface FormDataCompositionService extends ScriptExposed {
+@ScriptExposed(formDataEvents = {
+		AFTER_MOVE_APPROVED_TO_ACCEPTED,
+		AFTER_MOVE_ACCEPTED_TO_APPROVED,
+		AFTER_MOVE_CREATED_TO_ACCEPTED,
+		AFTER_MOVE_ACCEPTED_TO_CREATED
+})
+public interface FormDataCompositionService {
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
 	 * <ol>

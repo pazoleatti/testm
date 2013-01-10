@@ -9,7 +9,8 @@ import java.util.List;
 /**
  * DAO для работы с данными по налоговым формам
  */
-public interface FormDataDao extends ScriptExposed {
+@ScriptExposed
+public interface FormDataDao {
 	/**
 	 * Получить данные по налоговой формы
 	 *
