@@ -33,6 +33,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	private final DispatchAsync dispatchAsync;
 	private static final int DEFAULT_DEPARTMENT_ITEM = 0;
+    private static Map<TaxType, FormDataFilter> savedFilterData = new HashMap<TaxType, FormDataFilter>();
 	
 	private TaxType taxType;
 
@@ -41,6 +42,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 			DispatchAsync dispatchAsync) {
 		super(eventBus, view);
 		this.dispatchAsync = dispatchAsync;
+        initSavedFilterDataMap();
 	}
 
 	public FormDataFilter getFilterData() {
@@ -49,31 +51,41 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		return formDataFilter;
 	}
 
-	public void initFilter(TaxType taxType) {
-		this.taxType = taxType;
-		GetFilterData action = new GetFilterData();
-		action.setTaxType(taxType);
-		dispatchAsync.execute(action,
-				new AbstractCallback<GetFilterDataResult>() {
-					@Override
-					public void onReqSuccess(GetFilterDataResult result) {
+    public void updateSavedFilterData(FormDataFilter formDataFilter){
+        savedFilterData.put(this.taxType, formDataFilter);
+    }
 
-						getView().setFormTypesMap(fillFormTypesMap(result));
-						getView().setReportPeriodMaps(fillReportPeriodsMap(result));
-						getView().setDepartmentMaps(fillDepartmentsMap(result));
-						getView().setKindList(fillFormKindList());
-						getView().setFormStateList(fillFormStateList());
+	public void initFilter(final TaxType taxType) {
+        this.taxType = taxType;
+        GetFilterData action = new GetFilterData();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action,
+                new AbstractCallback<GetFilterDataResult>() {
+                    @Override
+                    public void onReqSuccess(GetFilterDataResult result) {
 
-						FormDataFilter formDataFilter = new FormDataFilter();
-						formDataFilter.setDepartmentId(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId());
-						if (result.getCurrentReportPeriodId() != null) {
-							formDataFilter.setReportPeriodId(result.getCurrentReportPeriodId());	
-						}
-						getView().setDataFilter(formDataFilter);
-						FilterReadyEvent.fire(FilterPresenter.this);
-					}
-				});
+                        getView().setFormTypesMap(fillFormTypesMap(result));
+                        getView().setReportPeriodMaps(fillReportPeriodsMap(result));
+                        getView().setDepartmentMaps(fillDepartmentsMap(result));
+                        getView().setKindList(fillFormKindList());
+                        getView().setFormStateList(fillFormStateList());
 
+                        FormDataFilter formDataFilter = new FormDataFilter();
+                        if(savedFilterData.get(taxType) == null){
+                            //Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
+                            formDataFilter.setDepartmentId(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId());
+                            if (result.getCurrentReportPeriodId() != null) {
+                                formDataFilter.setReportPeriodId(result.getCurrentReportPeriodId());
+                            }
+                        } else {
+                            //В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,
+                            formDataFilter = savedFilterData.get(taxType);
+                        }
+
+                        getView().setDataFilter(formDataFilter);
+                        FilterReadyEvent.fire(FilterPresenter.this);
+                    }
+                });
 	}
 
 	private Map<Integer, String> fillDepartmentsMap(GetFilterDataResult source){
@@ -114,4 +126,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 		return formState;
 	}
 
+    private void initSavedFilterDataMap(){
+        for(TaxType taxType : TaxType.values()){
+            savedFilterData.put(taxType, null);
+        }
+    }
 }

@@ -100,6 +100,7 @@ public class FormDataListPresenter extends
 	public void onApplyFilter() {
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
 		loadFormDataList(filterFormData);
+        filterPresenter.updateSavedFilterData(filterFormData);
 	}
 
 	/*
