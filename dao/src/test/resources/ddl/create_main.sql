@@ -304,6 +304,26 @@ comment on column sec_user_role.user_id is 'Идентификатор поль�
 comment on column sec_user_role.role_id is 'Идентификатор роли';
 
 ----------------------------------------------------------------------------------------------------
+CREATE TABLE CELL_SPAN_INFO
+(
+row_id number(18) not null,
+column_id number(9) not null,
+colspan number(3), 
+rowspan number(3)
+);
+
+alter table cell_span_info add constraint cell_span_pk primary key (row_id, column_id);
+alter table CELL_SPAN_INFO add constraint cell_span_info_fk_row_id foreign key (ROW_ID) references data_row (ID) on delete cascade;
+alter table CELL_SPAN_INFO add constraint cell_span_info_fk_column_id foreign key (COLUMN_ID) references form_column (ID);
+alter table CELL_SPAN_INFO add constraint cell_span_info_chk_span  check (colspan is not null or rowspan is not null);
+
+comment on table cell_span_info is 'Информация об объединении ячеек в налоговой форме';
+comment on column cell_span_info.row_id is 'Идентификатор строки';
+comment on column cell_span_info.column_id is 'Идентификатор столбца';
+comment on column cell_span_info.colspan is 'Число ячеек, которые должны быть объединены по горизонтали';
+comment on column cell_span_info.rowspan is 'Число ячеек, которые должны быть объединены по вертикали';
+
+----------------------------------------------------------------------------------------------------
  create index i_department_parent_id on department(parent_id);
  create index i_data_row_form_data_id on data_row(form_data_id);
  create index i_form_data_report_period_id on form_data(report_period_id);
