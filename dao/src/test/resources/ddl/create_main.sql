@@ -2,7 +2,7 @@ create table form_type (
 	id number(9) not null,
 	name varchar(200) not null,
 	tax_type char(1) not null,
-	fixed_rows number(9) not null
+	fixed_rows number(1) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
