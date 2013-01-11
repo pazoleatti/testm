@@ -11,6 +11,8 @@ public class CellValue implements Serializable {
 	private Date dateValue;
 	private BigDecimal numericValue;
 	private Column column;
+	private Integer colSpan;
+	private Integer rowSpan;
 
 	public Object getValue() {
 		if (stringValue != null) {
@@ -88,6 +90,48 @@ public class CellValue implements Serializable {
 
 	public void setColumn(Column column) {
 		this.column = column;
+	}
+
+	/**
+	 * Возвращает количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
+	 * @return значение атрибута colSpan 
+	 */
+	public Integer getColSpan() {
+		return colSpan;
+	}
+
+	/**
+	 * Задаёт количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
+	 * Если значение null, то объединение ячеек не требуется 
+	 * @param colSpan значение атрибута colSpan
+	 * @throws IllegalArgumentException если задаётся значение меньше 2
+	 */	
+	public void setColSpan(Integer colSpan) {
+		if (colSpan != null && colSpan <= 1) {
+			throw new IllegalArgumentException("colSpan value must be greater than 1");
+		}		
+		this.colSpan = colSpan;
+	}
+
+	/**
+	 * Возвращает количество строк, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
+	 * @return значение атрибута rowSpan 
+	 */
+	public Integer getRowSpan() {
+		return rowSpan;
+	}
+
+	/**
+	 * Задаёт количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
+	 * Если значение null, то объединение ячеек не требуется 
+	 * @param rowSpan значение атрибута rowSpan
+	 * @throws IllegalArgumentException если задаётся значение меньше 2 
+	 */	
+	public void setRowSpan(Integer rowSpan) {
+		if (rowSpan != null && rowSpan <= 1) {
+			throw new IllegalArgumentException("rowSpan value must be greater than 1");
+		}
+		this.rowSpan = rowSpan;
 	}
 
 	@Override

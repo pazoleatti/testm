@@ -130,7 +130,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		return entries;
 	}
 
-	private CellValue getCellValue(String columnAlias) {
+	public CellValue getCellValue(String columnAlias) {
 		CellValue cellValue = data.get(columnAlias);
 		if (cellValue == null) {
 			throw new IllegalArgumentException("Wrong column alias: " + columnAlias);
