@@ -15,4 +15,5 @@
     <source path="log"/>
     <source path="codemirror"/>
     <source path="pager"/>
+    <source path="datarow"/>
 </module>

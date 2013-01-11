@@ -27,7 +27,7 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	@NameToken(AdminNameTokens.formTemplateColumnPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
 			label = "Описание столбцов",
-			priority = 2)
+			priority = 2) // The 3 Tab
 	public interface MyProxy extends TabContentProxyPlace<FormTemplateColumnPresenter> {
 	}
 

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
+package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
@@ -9,7 +9,6 @@ import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.cell.client.Cell.Context;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.util.DataRowColumn;
 
 public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> {
 	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter) {

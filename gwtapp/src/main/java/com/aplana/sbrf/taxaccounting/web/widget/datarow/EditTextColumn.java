@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
+package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import java.math.BigDecimal;
 
@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.user.client.Window;
+
 /**
  * 
  * @author Eugene Stetsenko

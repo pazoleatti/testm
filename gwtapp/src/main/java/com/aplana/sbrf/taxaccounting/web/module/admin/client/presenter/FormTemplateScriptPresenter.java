@@ -26,7 +26,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	@NameToken(AdminNameTokens.formTemplateScriptPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
 			label = "Скрипты",
-			priority = 0)
+			priority = 0) // The 1 Tab
 	public interface MyProxy extends TabContentProxyPlace<FormTemplateScriptPresenter> {
 	}
 

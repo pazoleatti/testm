@@ -11,6 +11,7 @@ public class AdminNameTokens {
 	public static final String formTemplateScriptPage = "!formTemplateScript";
 	public static final String formTemplateEventPage = "!formTemplateEvent";
 	public static final String formTemplateColumnPage = "!formTemplateColumn";
+	public static final String formTemplateRowPage = "!formTemplateRow";
 	public static final String formTemplateMainPage = "!formTemplateMain";
 	public static final String formTemplateId = "formTemplateId";
 }

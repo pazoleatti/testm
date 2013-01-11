@@ -15,6 +15,7 @@ public interface AdminGinjector {
 	AsyncProvider<FormTemplateScriptPresenter> getFormTemplateScriptPresenter();
 	AsyncProvider<FormTemplateEventPresenter> getFormTemplateEventPresenter();
 	AsyncProvider<FormTemplateColumnPresenter> getFormTemplateColumnPresenter();
+	AsyncProvider<FormTemplateRowPresenter> getFormTemplateRowPresenter();
 
 	SimpleTabPanel getSimpleTabPanel();
 }

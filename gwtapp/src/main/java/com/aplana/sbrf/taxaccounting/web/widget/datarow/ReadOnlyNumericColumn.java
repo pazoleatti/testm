@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdata.client.util;
+package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import java.math.BigDecimal;
 

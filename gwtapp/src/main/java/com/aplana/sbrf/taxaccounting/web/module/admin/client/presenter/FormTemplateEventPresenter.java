@@ -30,7 +30,7 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 	@NameToken(AdminNameTokens.formTemplateEventPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
 			label = "События",
-			priority = 1) // The second tab in the home tab
+			priority = 1) // The 2 tab
 	public interface MyProxy extends TabContentProxyPlace<FormTemplateEventPresenter> {
 	}
 
