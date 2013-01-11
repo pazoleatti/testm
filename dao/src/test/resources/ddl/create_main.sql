@@ -1,16 +1,19 @@
 create table form_type (
 	id number(9) not null,
 	name varchar(200) not null,
-	tax_type char(1) not null
+	tax_type char(1) not null,
+	fixed_rows number(9) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+alter table form_type add constraint form_type_chk_fixed_rows check(fixed_rows in (0, 1));
 
 comment on table form_type is 'Типы налоговых форм (названия)';
 
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column form_type.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 
 ---------------------------------------------------------------------------------------------------
 create table report_period
