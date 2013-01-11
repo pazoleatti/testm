@@ -2,10 +2,10 @@ insert into department (id, name, parent_id, type) values (1, 'А - департ
 insert into department (id, name, parent_id, type) values (2, 'Б - департамент', 1, 2);
 insert into department (id, name, parent_id, type) values (3, 'В - департамент', 1, 2);
 
-insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
-insert into form_type (id, name, tax_type) values (2, 'Б - тип', 'I');
-insert into form_type (id, name, tax_type) values (3, 'В - тип', 'T');
-insert into form_type (id, name, tax_type) values (4, 'Г - тип', 'T');
+insert into form_type (id, name, tax_type, fixed_rows) values (1, 'А - тип', 'T', 1);
+insert into form_type (id, name, tax_type, fixed_rows) values (2, 'Б - тип', 'I', 1);
+insert into form_type (id, name, tax_type, fixed_rows) values (3, 'В - тип', 'T', 1);
+insert into form_type (id, name, tax_type, fixed_rows) values (4, 'Г - тип', 'T', 1);
 
 insert into form (id, type_id, data_rows, version, is_active, edition) values (1, 1, null, '0.1', 1, 1);
 insert into form (id, type_id, data_rows, version, is_active, edition) values (2, 2, null, '0.1', 1, 1);
