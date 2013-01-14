@@ -34,6 +34,8 @@ comment on column report_period.name is 'Наименование периода
 comment on column report_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
 comment on column report_period.is_active is 'Признак активности';
 
+create sequence seq_report_period start with 100;
+
 ---------------------------------------------------------------------------------------------------
 create table form (
 	id number(9) not null,
