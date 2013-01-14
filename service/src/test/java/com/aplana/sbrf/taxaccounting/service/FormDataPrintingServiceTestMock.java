@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -97,7 +98,9 @@ public class FormDataPrintingServiceTestMock {
 		when(formData.getDepartmentId()).thenReturn(1);
 		
 		FormDataService formDataService = mock(FormDataService.class);
-		when(formDataService.getFormData(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID)).thenReturn(formData);
+
+		// TODO: заменить логгер или вообще использовать дао класс
+		when(formDataService.getFormData(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID, new Logger())).thenReturn(formData);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataService", formDataService);
 	}
 	

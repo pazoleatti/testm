@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.io.IOException;
 
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,8 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 	
 	@Override
 	public String generateExcel(int userId, long formDataId) {
-		FormData formData = formDataService.getFormData(userId, formDataId);
+		// TODO: заменить логгер или вообще использовать дао класс
+		FormData formData = formDataService.getFormData(userId, formDataId, new Logger());
 		try {
 			FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(formData);
 			return builder.createReport();

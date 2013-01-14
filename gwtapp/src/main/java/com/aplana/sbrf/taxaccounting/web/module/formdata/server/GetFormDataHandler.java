@@ -80,11 +80,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			accessParams.setCanRead(true);
 			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
 			result.setFormDataAccessParams(accessParams);
-		}
-		else{
-			result.setLogEntries(new ArrayList<LogEntry>());
-
-			formData = formDataService.getFormData(userId, action.getFormDataId());
+		} else{
+			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 			result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
 			Long formDataId = formData.getId();

@@ -198,9 +198,13 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(int userId, long formDataId) {
+	public FormData getFormData(int userId, long formDataId, Logger logger) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
-			return formDataDao.get(formDataId);
+			FormData formData = formDataDao.get(formDataId);
+
+			formDataScriptingService.executeScripts(userDao.getUser(userId), formData, FormDataEvent.AFTER_LOAD, logger);
+
+			return formData;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав на просмотр данных налоговой формы",
 				userId, formDataId
