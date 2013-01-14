@@ -12,6 +12,12 @@ import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
  */
 public interface DictionaryDataProvider<ValueType extends Serializable> {
 	/**
+	 * Возвращает наименование справочника
+	 * @return понятное пользователю наименование справочника
+	 */
+	public String getDictionaryName();
+	
+	/**
 	 * Возвращает все значения из справочника.
 	 * @return список значений справочника
 	 */

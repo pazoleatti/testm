@@ -1,16 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.dataprovider.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
-import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
+
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
  * Простая JDBC-реализация источника данных для справочников
@@ -68,6 +68,7 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 		}
 	}
 
+	@Override
 	public String getDictionaryName() {
 		return dictionaryName;
 	}

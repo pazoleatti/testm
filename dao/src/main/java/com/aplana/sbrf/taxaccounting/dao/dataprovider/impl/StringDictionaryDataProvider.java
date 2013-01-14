@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.dataprovider.impl;
 
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
  * Источник данных для строковых справочников
