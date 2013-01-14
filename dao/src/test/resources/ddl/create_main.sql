@@ -255,7 +255,7 @@ comment on column event_script.event_code is 'Тип события';
 comment on column event_script.script_id is 'Идентификатор скрипта';
 comment on column event_script.ord is 'Порядок выполнения скрипта';
 
-alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 101, 102, 103, 104, 105, 106, 203, 204, 205, 206, 301));
+alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 101, 102, 103, 104, 105, 106, 203, 204, 205, 206, 301, 302));
 
 alter table event_script add constraint event_script_pk primary key (event_code, script_id); 
 alter table event_script add constraint event_script_fk_script_id foreign key (script_id) references form_script (ID);
