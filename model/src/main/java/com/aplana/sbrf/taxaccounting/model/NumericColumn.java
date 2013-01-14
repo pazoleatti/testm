@@ -43,7 +43,7 @@ public class NumericColumn extends Column implements Serializable {
 	 */
 	public void setPrecision(int precision) {
 		if (precision < 0 || precision > MAX_PRECISION) {
-			throw new IllegalArgumentException("Value " + precision + " is not supported for NumericAttribute");
+			throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
 		}
 		this.precision = precision;
 	}
