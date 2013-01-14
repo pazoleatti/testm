@@ -2,6 +2,7 @@ drop table string_value;
 drop table numeric_value;
 drop table date_value;
 
+drop table cell_span_info;
 drop table form_column;
 drop sequence seq_form_column;
 
@@ -12,7 +13,6 @@ drop sequence seq_form_script;
 drop table data_row;
 drop sequence seq_data_row;
 
-drop table cell_span_info;
 drop table form_data;
 drop sequence seq_form_data;
 
