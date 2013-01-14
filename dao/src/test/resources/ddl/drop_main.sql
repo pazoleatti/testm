@@ -25,4 +25,5 @@ drop table form;
 drop table form_type;
 
 drop table department;
+drop sequence seq_report_period;
 drop table report_period;
