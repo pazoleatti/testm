@@ -14,6 +14,12 @@ import java.math.BigDecimal;
  */
 public class NumericColumn extends Column implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Максимально допустимое значение точности для числового столбца
+	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
+	 */
+	public static final int MAX_PRECISION = 4;
 
 	private int precision = 0;
 
@@ -36,6 +42,9 @@ public class NumericColumn extends Column implements Serializable {
 	 * @param precision желаемое значение точности
 	 */
 	public void setPrecision(int precision) {
+		if (precision < 0 || precision > MAX_PRECISION) {
+			throw new IllegalArgumentException("Value " + precision + " is not supported for NumericAttribute");
+		}
 		this.precision = precision;
 	}
 
