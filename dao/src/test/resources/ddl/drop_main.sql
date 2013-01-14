@@ -12,6 +12,7 @@ drop sequence seq_form_script;
 drop table data_row;
 drop sequence seq_data_row;
 
+drop table cell_span_info;
 drop table form_data;
 drop sequence seq_form_data;
 
@@ -25,4 +26,3 @@ drop table form_type;
 
 drop table department;
 drop table report_period;
-drop table cell_span_info;
