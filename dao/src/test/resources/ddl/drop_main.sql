@@ -25,3 +25,4 @@ drop table form_type;
 
 drop table department;
 drop table report_period;
+drop table cell_span_info;
