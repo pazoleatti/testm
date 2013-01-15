@@ -11,8 +11,10 @@ public class CellValue implements Serializable {
 	private Date dateValue;
 	private BigDecimal numericValue;
 	private Column column;
-	private Integer colSpan;
-	private Integer rowSpan;
+	
+	// Значение диапазона (пока используется для объединения ячеек)
+	private Integer colSpan = 1;
+	private Integer rowSpan = 1;
 
 	public Object getValue() {
 		if (stringValue != null) {
