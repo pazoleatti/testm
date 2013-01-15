@@ -28,22 +28,31 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private final Widget widget;
 	private List<Column> columns;
-	private static final HashMap<Integer, String> columnTypeNameMaps = new HashMap<Integer, String>();
-	private static final HashMap<Integer, String> precisionMaps = new HashMap<Integer, String>();
+	private static final HashMap<Integer, String> columnTypeNameMap = new HashMap<Integer, String>();
+	private static final HashMap<Integer, String> precisionMap = new HashMap<Integer, String>();
+	private static final HashMap<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
+	private static final HashMap<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
 	private static final int STRING_TYPE = 0;
 	private static final int NUMERIC_TYPE = 1;
 	private static final int DATE_TYPE = 2;
 
 	static {
-		columnTypeNameMaps.put(STRING_TYPE, "Строка");
-		columnTypeNameMaps.put(NUMERIC_TYPE, "Число");
-		columnTypeNameMaps.put(DATE_TYPE, "Дата");
+		columnTypeNameMap.put(STRING_TYPE, "Строка");
+		columnTypeNameMap.put(NUMERIC_TYPE, "Число");
+		columnTypeNameMap.put(DATE_TYPE, "Дата");
 
-		precisionMaps.put(0, "0");
-		precisionMaps.put(1, "1");
-		precisionMaps.put(2, "2");
-		precisionMaps.put(3, "3");
-		precisionMaps.put(4, "4");
+		stringDictionaryCodeMap.put("transportTypeCode", "ТН - Коды видов ТС");
+		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
+		stringDictionaryCodeMap.put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
+
+		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
+		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
+
+		precisionMap.put(0, "0");
+		precisionMap.put(1, "1");
+		precisionMap.put(2, "2");
+		precisionMap.put(3, "3");
+		precisionMap.put(4, "4");
 	}
 
 	@UiField
@@ -67,11 +76,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@UiField(provided = true)
 	ValueListBox<Integer> typeColumnDropBox;
 
-	@UiField
-	TextBox nameBox;
+	@UiField(provided = true)
+	ValueListBox<String> stringDictionaryCodeBox;
+
+	@UiField(provided = true)
+	ValueListBox<String> numericDictionaryCodeBox;
 
 	@UiField
-	TextBox dictionaryCodeBox;
+	TextBox nameBox;
 
 	@UiField(provided = true)
 	ValueListBox<Integer> precisionBox;
@@ -96,7 +108,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				if (object == null) {
 					return "";
 				}
-				return columnTypeNameMaps.get(object);
+				return columnTypeNameMap.get(object);
 			}
 		});
 		typeColumnDropBox.addHandler(new ValueChangeHandler<Integer>() {
@@ -110,7 +122,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		precisionBox = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
 			@Override
 			public String render(Integer object) {
-				return precisionMaps.get(object);
+				return precisionMap.get(object);
 			}
 		});
 
@@ -119,6 +131,36 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				precisionPanel.setVisible(true);
 				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(precisionBox.getValue());
+			}
+		}, ValueChangeEvent.getType());
+
+		stringDictionaryCodeBox = new ValueListBox<String>(new AbstractRenderer<String>() {
+			@Override
+			public String render(String object) {
+				return stringDictionaryCodeMap.get(object);
+			}
+		});
+		stringDictionaryCodeBox.setAcceptableValues(stringDictionaryCodeMap.keySet());
+
+		stringDictionaryCodeBox.addHandler(new ValueChangeHandler<Integer>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				((StringColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(stringDictionaryCodeBox.getValue());
+			}
+		}, ValueChangeEvent.getType());
+
+		numericDictionaryCodeBox = new ValueListBox<String>(new AbstractRenderer<String>() {
+			@Override
+			public String render(String object) {
+				return numericDictionaryCodeMap.get(object);
+			}
+		});
+		numericDictionaryCodeBox.setAcceptableValues(numericDictionaryCodeMap.keySet());
+
+		numericDictionaryCodeBox.addHandler(new ValueChangeHandler<Integer>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(numericDictionaryCodeBox.getValue());
 			}
 		}, ValueChangeEvent.getType());
 	}
@@ -134,6 +176,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		return widget;
 	}
 
+	/*
 	@UiHandler("dictionaryCodeBox")
 	public void onDictionaryCodeKeyUp(KeyUpEvent event){
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
@@ -142,7 +185,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(dictionaryCodeBox.getValue());
 		}
-	}
+	}*/
 
 	@UiHandler("upColumn")
 	public void onUpColumn(ClickEvent event){
@@ -254,25 +297,42 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 
 		populateUniqueParameters();
-		typeColumnDropBox.setAcceptableValues(columnTypeNameMaps.keySet());
+		typeColumnDropBox.setAcceptableValues(columnTypeNameMap.keySet());
 	}
 
 	private void populateUniqueParameters() {
 		Column column = columns.get(columnListBox.getSelectedIndex());
 		precisionPanel.setVisible(false);
 		dictionaryCodePanel.setVisible(false);
-		dictionaryCodeBox.setValue(null);
+		stringDictionaryCodeBox.setVisible(false);
+		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
 
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
-			dictionaryCodeBox.setValue(((StringColumn) column).getDictionaryCode());
+			String code = ((StringColumn) column).getDictionaryCode();
+			if (stringDictionaryCodeMap.containsKey(code)) {
+				stringDictionaryCodeBox.setValue(code);
+			}
+			else {
+				stringDictionaryCodeBox.setValue(null);
+			}
+
+			stringDictionaryCodeBox.setVisible(true);
 			dictionaryCodePanel.setVisible(true);
 		}
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
-			dictionaryCodeBox.setValue(((NumericColumn) column).getDictionaryCode());
+			String code = ((NumericColumn) column).getDictionaryCode();
+			if (numericDictionaryCodeMap.containsKey(code)) {
+				numericDictionaryCodeBox.setValue(code);
+			}
+			else {
+				numericDictionaryCodeBox.setValue(null);
+			}
+
+			numericDictionaryCodeBox.setVisible(true);
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
-			precisionBox.setAcceptableValues(precisionMaps.keySet());
+			precisionBox.setAcceptableValues(precisionMap.keySet());
 			dictionaryCodePanel.setVisible(true);
 		}
 	}
@@ -298,10 +358,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			StringColumn stringColumn = new StringColumn();
 			copyMainColumnAttributes(column, stringColumn);
-
-			if (dictionaryCodeBox.getValue() != null) {
-				stringColumn.setDictionaryCode(dictionaryCodeBox.getText());
-			}
 			columns.set(index, stringColumn);
 
 			getUiHandlers().removeColumn(column);
@@ -310,13 +366,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			NumericColumn numericColumn = new NumericColumn();
 			copyMainColumnAttributes(column, numericColumn);
-
-			if (dictionaryCodeBox.getValue() != null) {
-				numericColumn.setDictionaryCode(dictionaryCodeBox.getText());
-			}
-			if (precisionBox.getValue() != null) {
-				numericColumn.setPrecision(precisionBox.getValue());
-			}
 			columns.set(index, numericColumn);
 
 			getUiHandlers().removeColumn(column);

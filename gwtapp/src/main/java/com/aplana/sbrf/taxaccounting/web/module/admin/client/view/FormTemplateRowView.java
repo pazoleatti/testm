@@ -63,6 +63,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				checkEnableUpDownButton();
 			}
 		});
+		factory.setEditOnly(true);
 	}
 
 	@Override
