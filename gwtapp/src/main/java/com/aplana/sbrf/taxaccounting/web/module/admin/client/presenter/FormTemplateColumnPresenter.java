@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
@@ -68,20 +66,16 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	}
 
 	@Override
-	public void addColumn() {
-		Column newColumn = new StringColumn();
-		newColumn.setName("Новый столбец");
-		newColumn.setAlias("Новый");
-		newColumn.setWidth(5);
-		newColumn.setOrder(formTemplate.getColumns().size() + 1);
-		formTemplate.getColumns().add(newColumn);
-		getView().setColumnList(formTemplate.getColumns());
+	public void addColumn(Column column) {
+		for (DataRow row : formTemplate.getRows()) {
+			row.addColumn(column);
+		}
 	}
 
 	@Override
-	public void removeColumn(int index) {
-		formTemplate.getColumns().remove(index);
-		getView().setColumnList(formTemplate.getColumns());
+	public void removeColumn(Column column) {
+		for (DataRow row : formTemplate.getRows()) {
+			row.remove(column.getAlias());
+		}
 	}
-
 }

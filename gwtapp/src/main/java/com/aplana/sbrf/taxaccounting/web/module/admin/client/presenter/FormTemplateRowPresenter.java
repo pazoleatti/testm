@@ -57,6 +57,11 @@ public class FormTemplateRowPresenter  extends Presenter<FormTemplateRowPresente
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
+
+		if (formTemplate != null) {
+			getView().setColumnsData(formTemplate.getColumns());
+			getView().setRowsData(formTemplate.getRows());
+		}
 	}
 
 	@Override

@@ -2,11 +2,6 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:HTMLPanel>
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Имя:</g:Label>
-            <g:TextBox width="300px" ui:field="name"/>
-        </g:HorizontalPanel>
-
-        <g:HorizontalPanel height="30px">
             <g:Label width="150px">Псевдоним:</g:Label>
             <g:TextBox width="300px" ui:field="alias"/>
         </g:HorizontalPanel>

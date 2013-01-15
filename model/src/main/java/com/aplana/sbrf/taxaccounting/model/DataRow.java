@@ -94,6 +94,18 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		}
 	}
 
+	/**
+	 * Добавить столбец в существующую мапу
+	 * Этот метод нужен для админки
+	 *
+	 * @param col столбец
+	 */
+	public void addColumn(Column col) {
+		CellValue cellValue = new CellValue();
+		cellValue.setColumn(col);
+		data.put(col.getAlias(), cellValue);
+	}
+
 	public String getAlias() {
 		return alias;
 	}

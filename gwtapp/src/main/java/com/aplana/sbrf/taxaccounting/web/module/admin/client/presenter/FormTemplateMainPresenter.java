@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -20,6 +21,9 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.*;
 import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy> implements FormTemplateMainUiHandlers {
@@ -94,8 +98,17 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void save() {
-		FormTemplateFlushEvent.fire(this);
+		Set<String> checkSet = new HashSet<String>();
+		for (Column column : formTemplate.getColumns()) {
+			if (!checkSet.add(column.getAlias())) {
+				MessageEvent.fire(FormTemplateMainPresenter.this, "Форма не может быть сохранена," +
+																  " найден повторяющийся алиас: " + column.getAlias() +
+																  " для столбца: " + column.getName());
+				return;
+			}
+		}
 
+		FormTemplateFlushEvent.fire(this);
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {

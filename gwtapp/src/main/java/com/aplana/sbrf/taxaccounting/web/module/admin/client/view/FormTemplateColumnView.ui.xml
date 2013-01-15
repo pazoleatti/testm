@@ -6,6 +6,10 @@
         .whiteColor {
             background-color: white;
         }
+
+        .marginLeft {
+            margin-left: 50px;
+        }
     </ui:style>
 
     <g:HTMLPanel width="100%" height="100%" addStyleNames="{style.whiteColor}">
@@ -28,9 +32,15 @@
             </g:cell>
 
             <g:cell width="75%">
-                <g:HTMLPanel>
-                    <g:Label height="20px" text="Список атрибутов"/>
+                <g:HTMLPanel addStyleNames="{style.marginLeft}">
+                    <g:Label height="50px" text="Список атрибутов"/>
                     <g:Label height="30px" text="Основные атрибуты:"/>
+
+                    <g:HorizontalPanel height="30px">
+                        <g:Label width="150px">Имя:</g:Label>
+                        <g:TextBox width="300px" ui:field="nameBox"/>
+                    </g:HorizontalPanel>
+
                     <u:ColumnAttributeEditor ui:field="columnAttributeEditor"/>
 
                     <g:Label height="30px" text="Дополнительные атрибуты:"/>
@@ -44,9 +54,9 @@
                         <g:TextBox width="300px" ui:field="dictionaryCodeBox"/>
                     </g:HorizontalPanel>
 
-                    <g:HorizontalPanel height="30px" visible="false" ui:field="precisionPanel">
+                    <g:HorizontalPanel height="30px" ui:field="precisionPanel">
                         <g:Label width="150px">Точность:</g:Label>
-                        <g:IntegerBox width="100px" ui:field="precisionBox"/>
+                        <g:ValueListBox width="200px" ui:field="precisionBox"/>
                     </g:HorizontalPanel>
                 </g:HTMLPanel>
             </g:cell>
