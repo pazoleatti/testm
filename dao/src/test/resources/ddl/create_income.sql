@@ -1,4 +1,4 @@
-
+п»ї
 /*Таблицы справочников - Налог на прибыль*/
 
 create table income_accounting_tax_code
