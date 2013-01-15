@@ -1,0 +1,1 @@
+drop table INCOME_ACCOUNTING_TAX_CODE;
