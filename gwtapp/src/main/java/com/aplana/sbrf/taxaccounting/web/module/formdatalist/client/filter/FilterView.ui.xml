@@ -6,6 +6,17 @@
 		.important {
 			font-weight: bold;
 		}
+
+        .departmentTextBox{
+            font-weight: bold;
+            background-color: #ffffff;
+        }
+
+        .departmentSelectionButton{
+            text-align: center;
+            font-weight: bold;
+        }
+
 	</ui:style>
 
 	<g:HorizontalPanel width="50%">
@@ -14,7 +25,10 @@
 		    <g:ValueListBox width="200px" ui:field="reportPeriodId" />
 
 	        <g:Label width="200px" text="Подразделение" />
-	        <g:ValueListBox width="200px" ui:field="departmentId" />
+            <g:HorizontalPanel >
+                <g:TextBox  enabled="false" ui:field="selectedDepartmentTextBox" width="170px" addStyleNames="{style.departmentTextBox}"/>
+                <g:Button ui:field="selectDepartmentButton" text="..." addStyleNames="{style.departmentSelectionButton}"/>
+            </g:HorizontalPanel>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">

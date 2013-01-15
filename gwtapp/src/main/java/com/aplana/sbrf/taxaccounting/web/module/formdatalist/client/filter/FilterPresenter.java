@@ -25,15 +25,22 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 		void setFormTypesMap(Map<Integer, String> formTypesMap);
 
-		void setDepartmentMaps(Map<Integer, String> departmentMaps);
-
 		void setReportPeriodMaps(Map<Integer, String> reportPeriodMaps);
+
+		void setDepartmentsList(List<Department> list);
+
+		Integer getSelectedDepartmentId();
+
+		String getSelectedDepartmentName();
+
+		void setSelectedDepartment(Integer departmentId, String departmentName);
 
 	}
 
 	private final DispatchAsync dispatchAsync;
 	private static final int DEFAULT_DEPARTMENT_ITEM = 0;
     private static Map<TaxType, FormDataFilter> savedFilterData = new HashMap<TaxType, FormDataFilter>();
+	private static Map<TaxType, String> savedDepartmentsMap = new HashMap<TaxType, String>();
 	
 	private TaxType taxType;
 
@@ -47,12 +54,14 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 	public FormDataFilter getFilterData() {
 		FormDataFilter formDataFilter = getView().getDataFilter();
+		formDataFilter.setDepartmentId(getView().getSelectedDepartmentId());
 		formDataFilter.setTaxType(this.taxType);
 		return formDataFilter;
 	}
 
     public void updateSavedFilterData(FormDataFilter formDataFilter){
         savedFilterData.put(this.taxType, formDataFilter);
+	    savedDepartmentsMap.put(this.taxType, getView().getSelectedDepartmentName());
     }
 
 	public void initFilter(final TaxType taxType) {
@@ -66,34 +75,30 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
                         getView().setFormTypesMap(fillFormTypesMap(result));
                         getView().setReportPeriodMaps(fillReportPeriodsMap(result));
-                        getView().setDepartmentMaps(fillDepartmentsMap(result));
                         getView().setKindList(fillFormKindList());
                         getView().setFormStateList(fillFormStateList());
+	                    getView().setDepartmentsList(result.getDepartments());
 
                         FormDataFilter formDataFilter = new FormDataFilter();
                         if(savedFilterData.get(taxType) == null){
                             //Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
                             formDataFilter.setDepartmentId(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId());
+	                        getView().setSelectedDepartment(result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId(),
+			                        result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getName());
                             if (result.getCurrentReportPeriodId() != null) {
                                 formDataFilter.setReportPeriodId(result.getCurrentReportPeriodId());
                             }
                         } else {
                             //В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,
                             formDataFilter = savedFilterData.get(taxType);
+	                        getView().setSelectedDepartment(formDataFilter.getDepartmentId(),
+			                        savedDepartmentsMap.get(taxType));
                         }
 
                         getView().setDataFilter(formDataFilter);
                         FilterReadyEvent.fire(FilterPresenter.this);
                     }
                 });
-	}
-
-	private Map<Integer, String> fillDepartmentsMap(GetFilterDataResult source){
-		Map<Integer, String> departmentsMap = new HashMap<Integer, String>();
-		for(Department department : source.getDepartments()){
-			departmentsMap.put(department.getId(), department.getName());
-		}
-		return departmentsMap;
 	}
 
 	private Map<Integer, String> fillReportPeriodsMap(GetFilterDataResult source){
