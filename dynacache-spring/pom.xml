@@ -12,11 +12,10 @@
 
 	<dependencies>	
 		<dependency>
-			<groupId>com.ibm.websphere</groupId>
-			<artifactId>websphere-runtime</artifactId>
+			<groupId>com.ibm.websphere.appserver</groupId>
+			<artifactId>was_public</artifactId>
 			<version>8.0.0</version>
-			<scope>system</scope>
-			<systemPath>${pom.basedir}/../../libs/com.ibm.ws.runtime.jar</systemPath>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
