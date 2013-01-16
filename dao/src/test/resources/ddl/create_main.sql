@@ -43,12 +43,14 @@ create table form (
 	data_rows clob,
 	version varchar2(20) not null,
 	is_active number(9) default 1 not null,
-	edition number(9) not null
+	edition number(9) not null,
+    numbered_columns NUMBER(1) not null
 );
 alter table form add constraint form_pk primary key (id);
 alter table form add constraint form_fk_type_id foreign key (type_id) references form_type(id);
 alter table form add constraint form_uniq_version unique(type_id, version);
 alter table form add constraint form_check_active check (is_active in (0, 1));
+alter table form add constraint form_chk_numbered_columns check (numbered_columns in (0, 1));
 comment on table form is 'Описания налоговых форм';
 comment on column form.data_rows is 'Предопределённые строки формы в формате JSON';
 comment on column form.id is 'Первичный ключ';
@@ -56,6 +58,7 @@ comment on column form.is_active is 'Признак активности';
 comment on column form.type_id is 'Идентификатор вида налоговой формы';
 comment on column form.version is 'Версия формы (уникально в рамках типа)';
 comment on column form.edition is 'Номер редакции записи';
+comment on column form.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
 ---------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
