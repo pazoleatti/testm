@@ -1,30 +1,3 @@
-create table form_style
-(
-  id          number(9) not null,
-  alias       varchar(20) not null,
-  form_id     number(9) not null,
-  font_color  number(3) null,
-  back_color  number(3) null,
-  italic      number(1) not null, 
-  bold        number(1) not null
-);
-alter table form_style add constraint FORM_STYLE_PK primary key (ID);
-alter table form_style add constraint FORM_STYLE_FK_FORM_ID foreign key (FORM_ID) references FORM (ID);
-alter table form_style add constraint FORM_STYLE_CHK_FONT_COLOR check (font_color in (0,1,2,3,4));
-alter table form_style add constraint FORM_STYLE_CHK_BACK_COLOR check (back_color in (0,1,2,3,4));
-alter table form_style add constraint FORM_STYLE_CHK_ITALIC check (italic in (0,1));
-alter table form_style add constraint FORM_STYLE_CHK_BOLD check (bold in (0,1));
-alter table form_style add constraint FORM_STYLE_UNIQ_ALIAS unique (form_id, alias);
-
-comment on table form_style is 'Стили ячеек в налоговой форме';
-comment on column form_style.id is 'Первичный ключ';
-comment on column form_style.alias is 'Алиас стиля';
-comment on column form_style.form_id is 'идентификатор налоговой формы';
-comment on column form_style.font_color is 'код цвета шрифта';
-comment on column form_style.back_color is 'код цвета фона';
-comment on column form_style.italic is 'признак использования курсива';
-comment on column form_style.bold is 'признак жирного шрифта';
----------------------------------------------------------------------------------------------------
 create table form_type (
 	id number(9) not null,
 	name varchar(200) not null,
@@ -86,6 +59,33 @@ comment on column form.type_id is 'Идентификатор вида нало�
 comment on column form.version is 'Версия формы (уникально в рамках типа)';
 comment on column form.edition is 'Номер редакции записи';
 comment on column form.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
+---------------------------------------------------------------------------------------------------
+create table form_style
+(
+  id          number(9) not null,
+  alias       varchar(20) not null,
+  form_id     number(9) not null,
+  font_color  number(3) null,
+  back_color  number(3) null,
+  italic      number(1) not null, 
+  bold        number(1) not null
+);
+alter table form_style add constraint FORM_STYLE_PK primary key (ID);
+alter table form_style add constraint FORM_STYLE_FK_FORM_ID foreign key (FORM_ID) references FORM (ID);
+alter table form_style add constraint FORM_STYLE_CHK_FONT_COLOR check (font_color in (0,1,2,3,4));
+alter table form_style add constraint FORM_STYLE_CHK_BACK_COLOR check (back_color in (0,1,2,3,4));
+alter table form_style add constraint FORM_STYLE_CHK_ITALIC check (italic in (0,1));
+alter table form_style add constraint FORM_STYLE_CHK_BOLD check (bold in (0,1));
+alter table form_style add constraint FORM_STYLE_UNIQ_ALIAS unique (form_id, alias);
+
+comment on table form_style is 'Стили ячеек в налоговой форме';
+comment on column form_style.id is 'Первичный ключ';
+comment on column form_style.alias is 'Алиас стиля';
+comment on column form_style.form_id is 'идентификатор налоговой формы';
+comment on column form_style.font_color is 'код цвета шрифта';
+comment on column form_style.back_color is 'код цвета фона';
+comment on column form_style.italic is 'признак использования курсива';
+comment on column form_style.bold is 'признак жирного шрифта';
 ---------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
