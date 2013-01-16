@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -44,7 +45,7 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 	@UiField
 	TextBox txtFind;
 	@UiField
-	SimplePager pager;
+	FlexiblePager pager;
 
 	Timer timer = new Timer() {
 		public void run() {

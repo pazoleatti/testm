@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.widget.pager;
 
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.view.client.Range;
 
 public class FlexiblePager extends SimplePager {
 
+	@UiConstructor
 	public FlexiblePager(TextLocation location, boolean showFastForwardButton, int fastForwardRows, boolean showLastPageButton) {
 		super(location, showFastForwardButton, fastForwardRows, showLastPageButton);    //To change body of overridden methods use File | Settings | File Templates.
 	}

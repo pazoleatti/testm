@@ -3,6 +3,7 @@
 			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
 			 xmlns:c="urn:import:com.google.gwt.user.cellview.client"
 			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
 		>
 	<g:VerticalPanel>
 		<g:cell width="100%" horizontalAlignment="CENTER">
@@ -14,7 +15,7 @@
 		<g:cell>
 			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
 				<g:cell>
-					<c:SimplePager ui:field='pager' location='CENTER'/>
+					<pager:FlexiblePager ui:field='pager' location='CENTER' showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
 				</g:cell>
 				<g:cell horizontalAlignment='ALIGN_RIGHT'>
 					<g:Button ui:field="btnClear" text="Очистить"/>

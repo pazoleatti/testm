@@ -8,6 +8,7 @@
 	<inherits name="com.gwtplatform.dispatch.DispatchShared"/>
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.entry.MainEntry"/>
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
-	<source path='client' />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget"/>
+    <source path='client' />
 	<source path="shared"/>
 </module>
