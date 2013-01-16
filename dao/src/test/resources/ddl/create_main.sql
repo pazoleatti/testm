@@ -87,6 +87,20 @@ comment on column form_style.back_color is 'код цвета фона';
 comment on column form_style.italic is 'признак использования курсива';
 comment on column form_style.bold is 'признак жирного шрифта';
 ---------------------------------------------------------------------------------------------------
+create table cell_style
+(
+  row_id    number(18) not null,
+  column_id number(9) not null,
+  style_id  number(9) not null
+ );
+alter table cell_style add constraint CELL_STYLE_PK primary key (row_id, column_id);
+alter table cell_style add constraint CELL_STYLE_FK_STYLE_ID foreign key (style_id) references FORM_STYLE (ID);
+
+comment on table cell_style is 'Привязка стилей к ячейкам налоговой формы';
+comment on column cell_style.row_id is 'Идентификатор строки';
+comment on column cell_style.column_id is 'идентификатор столбца';
+comment on column cell_style.style_id is 'идентификатор стиля';
+----------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
 	name varchar(200) not null,
