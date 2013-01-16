@@ -145,6 +145,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
 				MessageEvent.fire(this, "Форма Сохранена");
+				setFormTemplate();
 			}
 
 			@Override
