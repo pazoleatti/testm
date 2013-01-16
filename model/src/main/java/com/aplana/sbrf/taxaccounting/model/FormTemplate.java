@@ -5,8 +5,7 @@ import java.util.*;
 
 /**
  * Описание налоговой формы (шаблон налоговой формы)
- *
- * @author dsultanbekov
+  * @author dsultanbekov
  */
 public class FormTemplate implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -15,6 +14,7 @@ public class FormTemplate implements Serializable {
 	private FormType type;
 	private String version;
 	private Integer edition;
+	private boolean numberedColumns;
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();
@@ -29,24 +29,46 @@ public class FormTemplate implements Serializable {
 	 */
 	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
 
-	private int workflowId;
-
+	/**
+	 * Получить идентификатор шаблона
+	 * @return идентификатор шаблона НФ, если null, то означает, что форма еще не сохранялась в БД
+	 */
 	public Integer getId() {
 		return id;
 	}
 
+	/**
+	 * Задать идентификатор шаблона
+	 * @return значение идентификатора шаблона НФ, если шаблон формы еще не сохранялась в БД, у идентификатора должно быть значение null
+	 */	
 	public void setId(int id) {
 		this.id = id;
 	}
 
+	/**
+	 * Возвращает список {@link Column столбцов}, образующих налоговую форму.
+	 * Порядок столбцов в коллекции соответствует тому порядку, в котором они должны выводиться в налоговой форме.
+	 * Коллекция создаётся в момент создания объекта FormTemplate и не может быть изменена в ходе жизни объекта. Если
+	 * требуется внести изменения в список элементов необходимо добавлять и удалять элементы из существующего экземпляра
+	 * списка.
+	 * @return список столбцов, образующих налоговую форму. 
+	 */
 	public List<Column> getColumns() {
 		return columns;
 	}
 
+	/**
+	 * Задаёт {@link FormType вид налоговой формы}
+	 * @param type вид налоговой формы
+	 */
 	public void setType(FormType type) {
 		this.type = type;
 	}
 
+	/**
+	 * Возвращает {@link FormType вид налоговой формы}
+	 * @return вид налоговой формы
+	 */
 	public FormType getType() {
 		return type;
 	}
@@ -150,13 +172,25 @@ public class FormTemplate implements Serializable {
 		return rows;
 	}
 
-	public int getWorkflowId() {
-		return workflowId;
+	/**
+	 * Возвращает признак того, что столбцы налоговой формы должны быть пронумерованы
+	 * Если значание установлено в true, то в заголовке налоговой формы появляется новая строка (внизу заголовка),
+	 * в которой каждому столбцу присваивается номер, начиная с 1. Нумерация соответствует порядку столбцов в форме и отдельно
+	 * нигде не хранится. 
+	 * @return если возвращает true, то нумеровать столбцы нужно, если false, то не нужно
+	 */
+	public boolean isNumberedColumns() {
+		return numberedColumns;
 	}
 
-	public void setWorkflowId(int workflowId) {
-		this.workflowId = workflowId;
+	/**
+	 * Устанавливает признак того, что столбцы налоговой формы должны быть пронумерованы
+	 * @param numberedColumns true - нумеровать столбцы нужно, false - не нужно
+	 */
+	public void setNumberedColumns(boolean numberedColumns) {
+		this.numberedColumns = numberedColumns;
 	}
+	
 
 	/**
 	 * Возвращает маппинг скриптов на события формы. в виде отображения события на списки скриптов.
