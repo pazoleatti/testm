@@ -5,12 +5,18 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 
+/**
+ * Класс, содержащий информацию о ячейке таблицы налоговой формы: значение, стиль оформления, параметры объединения ячеек и т.п. 
+ * @author dsultanbekov
+ */
 public class CellValue implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String stringValue;
 	private Date dateValue;
 	private BigDecimal numericValue;
 	private Column column;
+
+	private String styleAlias;
 	
 	// Значение диапазона (пока используется для объединения ячеек)
 	private Integer colSpan = 1;
@@ -134,6 +140,24 @@ public class CellValue implements Serializable {
 			throw new IllegalArgumentException("rowSpan value must be greater than 1");
 		}
 		this.rowSpan = rowSpan;
+	}
+
+	/**
+	 * Получить {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+	 * Если значение алиаса стиля равно null, то нужно использовать стиль по-умолчанию. 
+	 * @return {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой
+	 */
+	public String getStyleAlias() {
+		return styleAlias;
+	}
+
+	/**
+	 * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой. Стиль с таким алиасом должен быть определён
+	 * в {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном налоговой формы 
+	 * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+	 */
+	public void setStyleAlias(String styleAlias) {
+		this.styleAlias = styleAlias;
 	}
 
 	@Override
