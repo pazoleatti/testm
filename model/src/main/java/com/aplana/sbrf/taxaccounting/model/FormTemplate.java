@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Описание налоговой формы (шаблон налоговой формы)
@@ -18,6 +21,7 @@ public class FormTemplate implements Serializable {
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();
+	private List<FormStyle> styles = new ArrayList<FormStyle>();	
 
 	/**
 	 * Все скрипты формы.
@@ -56,6 +60,16 @@ public class FormTemplate implements Serializable {
 	public List<Column> getColumns() {
 		return columns;
 	}
+	
+	/**
+	 * Возвращает коллекцию {@link FormStyle стилей формы}
+	 * Коллекция создаётся в момент создания объекта FormTemplate и не может быть изменена в ходе жизни объекта. Если
+	 * требуется внести изменения в список элементов необходимо добавлять и удалять элементы из существующего экземпляра
+	 * @return список стилей, определённых в налоговой форме
+	 */
+	public List<FormStyle> getStyles() {
+		return styles;
+	}	
 
 	/**
 	 * Задаёт {@link FormType вид налоговой формы}
@@ -282,7 +296,7 @@ public class FormTemplate implements Serializable {
 	/**
 	 * @param script script
 	 * @return индекс скрипта в списке скриптов
-	 *         TODO: может перетащить в DAO?
+	 *         TODO: нужно перетащить в DAO?
 	 */
 	public int indexOfScript(Script script) {
 		return scripts.indexOf(script);
@@ -298,5 +312,24 @@ public class FormTemplate implements Serializable {
 		} else {
 			return new ArrayList<Script>(0);
 		}
+	}
+	
+	/**
+	 * Получить определение стиля по его алиасу
+	 * @param alias алиас стиля
+	 * @return объект, описывающий {@link стиль FormStyle}, заданный алиасом
+	 * @throws NullPointerException если в качеcтве аргумента передан null
+	 * @throws IllegalArgumentException если  
+	 */
+	public FormStyle getStyle(String alias) {
+		if (alias == null) {
+			throw new NullPointerException("Style alias cannot be null");
+		}
+		for (FormStyle style: styles) {
+			if (alias.equals(style.getAlias())) {
+				return style;
+			}
+		}
+		throw new IllegalArgumentException("Wrong style alias: '" + alias + '\'');
 	}
 }
