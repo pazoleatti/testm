@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,14 +18,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
@@ -48,6 +47,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setType(formTypeDao.getType(rs.getInt("type_id")));
 			formTemplate.setEdition(rs.getInt("edition"));
 			formTemplate.setVersion(rs.getString("version"));
+			formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
 
 			if (deepFetch) {
 				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));

@@ -7,10 +7,10 @@ insert into form_type (id, name, tax_type, fixed_rows) values (2, 'Б - тип',
 insert into form_type (id, name, tax_type, fixed_rows) values (3, 'В - тип', 'T', 1);
 insert into form_type (id, name, tax_type, fixed_rows) values (4, 'Г - тип', 'T', 1);
 
-insert into form (id, type_id, data_rows, version, is_active, edition) values (1, 1, null, '0.1', 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition) values (2, 2, null, '0.1', 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition) values (3, 3, null, '0.1', 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition) values (4, 4, null, '0.1', 1, 1);
+insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (1, 1, null, '0.1', 1, 1, 1);
+insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (2, 2, null, '0.1', 1, 1, 1);
+insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (3, 3, null, '0.1', 1, 1, 1);
+insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (4, 4, null, '0.1', 1, 1, 1);
 
 insert into report_period (id, name, tax_type, is_active) values (1, '1 - период', 'T', 1)
 insert into report_period (id, name, tax_type, is_active) values (2, '2 - период', 'T', 1)
