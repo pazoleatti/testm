@@ -21,6 +21,7 @@ drop table sec_role;
 drop table sec_user;
 drop table department_form_type;
 
+drop table form_style;
 drop table form;
 drop table form_type;
 
