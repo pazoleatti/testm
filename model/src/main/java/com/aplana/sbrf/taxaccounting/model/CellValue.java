@@ -19,8 +19,8 @@ public class CellValue implements Serializable {
 	private String styleAlias;
 	
 	// Значение диапазона (пока используется для объединения ячеек)
-	private Integer colSpan = 1;
-	private Integer rowSpan = 1;
+	private int colSpan = 1;
+	private int rowSpan = 1;
 
 	public Object getValue() {
 		if (stringValue != null) {
@@ -104,19 +104,19 @@ public class CellValue implements Serializable {
 	 * Возвращает количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
 	 * @return значение атрибута colSpan 
 	 */
-	public Integer getColSpan() {
+	public int getColSpan() {
 		return colSpan;
 	}
 
 	/**
 	 * Задаёт количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
-	 * Если значение null, то объединение ячеек не требуется 
+	 * Если значение 1, то объединение ячеек не требуется 
 	 * @param colSpan значение атрибута colSpan
-	 * @throws IllegalArgumentException если задаётся значение меньше 2
+	 * @throws IllegalArgumentException если задаётся значение меньше 1
 	 */	
-	public void setColSpan(Integer colSpan) {
-		if (colSpan != null && colSpan <= 1) {
-			throw new IllegalArgumentException("colSpan value must be greater than 1");
+	public void setColSpan(int colSpan) {
+		if (colSpan < 1) {
+			throw new IllegalArgumentException("colSpan value can not be less than 1");
 		}		
 		this.colSpan = colSpan;
 	}
@@ -125,19 +125,19 @@ public class CellValue implements Serializable {
 	 * Возвращает количество строк, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
 	 * @return значение атрибута rowSpan 
 	 */
-	public Integer getRowSpan() {
+	public int getRowSpan() {
 		return rowSpan;
 	}
 
 	/**
-	 * Задаёт количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
-	 * Если значение null, то объединение ячеек не требуется 
+	 * Задаёт количество строк, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
+	 * Если значение 1, то объединение ячеек не требуется 
 	 * @param rowSpan значение атрибута rowSpan
-	 * @throws IllegalArgumentException если задаётся значение меньше 2 
+	 * @throws IllegalArgumentException если задаётся значение меньше 1
 	 */	
-	public void setRowSpan(Integer rowSpan) {
-		if (rowSpan != null && rowSpan <= 1) {
-			throw new IllegalArgumentException("rowSpan value must be greater than 1");
+	public void setRowSpan(int rowSpan) {
+		if (rowSpan < 1) {
+			throw new IllegalArgumentException("rowSpan value can not be less than 1");
 		}
 		this.rowSpan = rowSpan;
 	}
@@ -162,10 +162,11 @@ public class CellValue implements Serializable {
 
 	@Override
 	public String toString() {
-		return "CellValue{" +
-				"stringValue='" + stringValue + '\'' +
-				", dateValue=" + dateValue +
-				", numericValue=" + numericValue +
-				'}';
+		return "CellValue [stringValue=" + stringValue + ", dateValue="
+				+ dateValue + ", numericValue=" + numericValue + ", column="
+				+ column + ", colSpan=" + colSpan + ", rowSpan=" + rowSpan
+				+ "]";
 	}
+
+
 }

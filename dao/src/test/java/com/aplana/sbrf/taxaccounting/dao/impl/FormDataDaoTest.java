@@ -178,10 +178,8 @@ public class FormDataDaoTest {
 			// Это нормально - записи нет в БД
 		}
 	}
-
-	@Test
-	public void saveSpansTest() {
-
+	
+	private FormData fillFormData(){
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		FormData formData = new FormData(formTemplate);
 
@@ -195,11 +193,7 @@ public class FormDataDaoTest {
 		dr = formData.appendDataRow("newAlias");
 		dr.setManagedByScripts(true);
 		dr.put("stringColumn", "Строка 2");
-
 		dr.put("numericColumn", 2.02);
-		dr.getCellValue("numericColumn").setColSpan(2);
-		dr.getCellValue("numericColumn").setRowSpan(2);
-
 		Date date2 = getDate(2013, 0, 1);
 		dr.put("dateColumn", date2);
 
@@ -207,28 +201,45 @@ public class FormDataDaoTest {
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
 		formData.setReportPeriodId(1);
+		
+		return formData;
+	}
 
+	@Test
+	public void spansSaveGetSuccess() {
+
+		FormData formData = fillFormData();
+
+		DataRow dr = formData.getDataRow("newAlias");
+		dr.getCellValue("numericColumn").setColSpan(2);
+		dr.getCellValue("numericColumn").setRowSpan(2);
+		
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
 
 		dr = formData.getDataRows().get(0);
-
-		Assert.assertEquals(Integer.valueOf(1), dr
-				.getCellValue("numericColumn").getColSpan());
-		Assert.assertEquals(Integer.valueOf(1), dr
-				.getCellValue("numericColumn").getRowSpan());
+		Assert.assertEquals(1, dr.getCellValue("numericColumn").getColSpan());
+		Assert.assertEquals(1, dr.getCellValue("numericColumn").getRowSpan());
 
 		dr = formData.getDataRows().get(1);
+		Assert.assertEquals(2, dr.getCellValue("numericColumn").getColSpan());
+		Assert.assertEquals(2, dr.getCellValue("numericColumn").getRowSpan());
+		Assert.assertEquals(1, dr.getCellValue("stringColumn").getColSpan());
+		Assert.assertEquals(1, dr.getCellValue("stringColumn").getRowSpan());
 
-		Assert.assertEquals(Integer.valueOf(2), dr
-				.getCellValue("numericColumn").getColSpan());
-		Assert.assertEquals(Integer.valueOf(2), dr
-				.getCellValue("numericColumn").getRowSpan());
+	}
 
-		Assert.assertEquals(Integer.valueOf(1), dr.getCellValue("stringColumn")
-				.getColSpan());
-		Assert.assertEquals(Integer.valueOf(1), dr.getCellValue("stringColumn")
-				.getRowSpan());
+	@Test(expected = IllegalArgumentException.class)
+	public void spansColError() {
+		FormData formData = fillFormData();
+		DataRow dr = formData.getDataRow("newAlias");
+		dr.getCellValue("numericColumn").setColSpan(0);
+	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void spansRowError() {
+		FormData formData = fillFormData();
+		DataRow dr = formData.getDataRow("newAlias");
+		dr.getCellValue("numericColumn").setRowSpan(-1);
 	}
 }
