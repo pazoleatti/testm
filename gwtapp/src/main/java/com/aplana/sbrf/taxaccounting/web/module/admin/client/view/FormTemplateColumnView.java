@@ -176,17 +176,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		return widget;
 	}
 
-	/*
-	@UiHandler("dictionaryCodeBox")
-	public void onDictionaryCodeKeyUp(KeyUpEvent event){
-		if (typeColumnDropBox.getValue() == STRING_TYPE) {
-			((StringColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(dictionaryCodeBox.getValue());
-		}
-		if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
-			((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(dictionaryCodeBox.getValue());
-		}
-	}*/
-
 	@UiHandler("upColumn")
 	public void onUpColumn(ClickEvent event){
 		int ind = columnListBox.getSelectedIndex();
@@ -347,6 +336,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	private void setColumnAttributeEditor(int index) {
+		flush();
 		columnAttributeEditor.setValue(columns.get(index));
 	}
 

@@ -68,9 +68,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		int formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
 
-		placeManager.revealPlace(
+		int formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
+        placeManager.revealPlace(
 				new PlaceRequest(AdminNameTokens.formTemplateScriptPage).with(
 						AdminNameTokens.formTemplateId, String.valueOf(formId)
 				)
@@ -79,17 +79,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Override
 	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
-	}
-
-	@Override
-	protected void onReveal() {
-		resetFormTemplate();
+		setFormTemplate();
 	}
 
 	@Override
 	public void reset() {
-		resetFormTemplate();
+		setFormTemplate();
 	}
 
 	/**
@@ -122,14 +117,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		resetFormTemplate();
 		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
 	}
 
-	private void resetFormTemplate() {
+	private void setFormTemplate() {
 		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
 		if (formId != 0) {
-			getView().setFormId(formId);
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);
 			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
@@ -137,6 +130,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				public void onReqSuccess(GetFormResult result) {
 					formTemplate = result.getForm();
 					getView().setTitle(formTemplate.getType().getName());
+					getView().setFormId(formTemplate.getId());
+					RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
 					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
 				}
 			});
@@ -150,7 +145,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
 				MessageEvent.fire(this, "Форма Сохранена");
-				resetFormTemplate();
 			}
 
 			@Override
@@ -161,7 +155,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 			@Override
 			protected void onReqFailure(Throwable throwable) {
 				MessageEvent.fire(this, "Request Failure", throwable);
-				resetFormTemplate();
 			}
 		});
 	}
