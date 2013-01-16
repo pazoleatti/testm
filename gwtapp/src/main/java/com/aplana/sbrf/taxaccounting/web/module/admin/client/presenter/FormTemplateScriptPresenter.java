@@ -64,6 +64,10 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
+
+		if(formTemplate != null) {
+			getView().bindScripts(formTemplate.getScripts());
+		}
 	}
 
 	@Override
