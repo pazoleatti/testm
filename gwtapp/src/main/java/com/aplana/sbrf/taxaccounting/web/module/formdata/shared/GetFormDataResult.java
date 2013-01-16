@@ -24,6 +24,8 @@ public class GetFormDataResult implements Result {
 	
 	private FormDataAccessParams formDataAccessParams;
 
+	private boolean numberedHeader;
+
 	
 	public FormData getFormData() {
 		return formData;
@@ -64,5 +66,12 @@ public class GetFormDataResult implements Result {
 	public void setLogEntries(List<LogEntry> logEntries) {
 		this.logEntries = logEntries;
 	}
-	
+
+	public boolean isNumberedHeader() {
+		return numberedHeader;
+	}
+
+	public void setNumberedHeader(boolean numberedHeader) {
+		this.numberedHeader = numberedHeader;
+	}
 }

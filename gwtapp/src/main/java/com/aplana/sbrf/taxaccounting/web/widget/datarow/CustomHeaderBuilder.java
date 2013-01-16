@@ -11,8 +11,10 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.cell.client.Cell.Context;
 
 public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> {
-	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter) {
+	boolean numberedColumns;
+	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns) {
 		super(table, isFooter);
+		this.numberedColumns = numberedColumns;
     }
 	@Override
 	protected boolean buildHeaderOrFooterImpl() {
@@ -49,6 +51,10 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		}
 		tr.endTR();
 
+		if (numberedColumns) {
+			makeNumbered(tr);
+		}
+
 		return true;
     }
 
@@ -76,5 +82,17 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		Style style = getTable().getResources().style();
 		TableCellBuilder th = out.startTH().colSpan(len).className(style.header());
 		th.text(groupName).endTH();
+	}
+
+	/**
+	 * Метод добавляет дополнительную строку к заголовку содержащую номера столбцов
+	 */
+	private void makeNumbered(TableRowBuilder out) {
+		Style style = getTable().getResources().style();
+		out.startTR();
+		for (int col = 1; col <= getTable().getColumnCount(); col++) {
+			out.startTH().className(style.header()).text(String.valueOf(col)).endTH();
+		}
+		out.endTR();
 	}
 }

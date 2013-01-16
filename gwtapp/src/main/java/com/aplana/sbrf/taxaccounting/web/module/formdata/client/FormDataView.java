@@ -90,8 +90,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Inject
 	public FormDataView(final Binder binder) {
 		widget = binder.createAndBindUi(this);
-		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false);
-		formDataTable.setHeaderBuilder(builder);
+
 		selectionModel = new SingleSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -139,6 +138,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			formDataTable.setRowData(new ArrayList<DataRow>(0));
 		}
 		formDataTable.redraw();
+	}
+
+	@Override
+	public void addCustomHeader(boolean addNumberedHeader) {
+		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader);
+		formDataTable.setHeaderBuilder(builder);
 	}
 
 	@Override

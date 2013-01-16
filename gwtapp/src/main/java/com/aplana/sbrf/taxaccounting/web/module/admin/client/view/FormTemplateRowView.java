@@ -51,9 +51,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public FormTemplateRowView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
 
-		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false);
-		formDataTable.setHeaderBuilder(builder);
-
 		selectionModel = new SingleSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
 
@@ -118,6 +115,12 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		upRowButton.setEnabled(false);
 		downRowButton.setEnabled(false);
 		formDataTable.redraw();
+	}
+
+	@Override
+	public void addCustomHeader(boolean addNumberedHeader) {
+		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader);
+		formDataTable.setHeaderBuilder(builder);
 	}
 
 	@UiHandler("addRowButton")

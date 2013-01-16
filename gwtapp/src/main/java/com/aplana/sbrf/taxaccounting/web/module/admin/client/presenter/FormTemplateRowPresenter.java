@@ -36,6 +36,7 @@ public class FormTemplateRowPresenter  extends Presenter<FormTemplateRowPresente
 	public interface MyView extends View, HasUiHandlers<FormTemplateRowUiHandlers> {
 		void setColumnsData(List<Column> columnsData);
 		void setRowsData(List<DataRow> rows);
+		void addCustomHeader(boolean addNumberedHeader);
 	}
 
 	private FormTemplate formTemplate;
@@ -50,8 +51,7 @@ public class FormTemplateRowPresenter  extends Presenter<FormTemplateRowPresente
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
-		getView().setColumnsData(formTemplate.getColumns());
-		getView().setRowsData(formTemplate.getRows());
+		setViewData();
 	}
 
 	@Override
@@ -59,8 +59,7 @@ public class FormTemplateRowPresenter  extends Presenter<FormTemplateRowPresente
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 
 		if (formTemplate != null) {
-			getView().setColumnsData(formTemplate.getColumns());
-			getView().setRowsData(formTemplate.getRows());
+			setViewData();
 		}
 	}
 
@@ -76,6 +75,12 @@ public class FormTemplateRowPresenter  extends Presenter<FormTemplateRowPresente
 			formTemplate.getRows().remove(row);
 			getView().setRowsData(formTemplate.getRows());
 		}
+	}
+
+	private void setViewData() {
+		getView().setColumnsData(formTemplate.getColumns());
+		getView().setRowsData(formTemplate.getRows());
+		getView().addCustomHeader(formTemplate.isNumberedColumns());
 	}
 
 }

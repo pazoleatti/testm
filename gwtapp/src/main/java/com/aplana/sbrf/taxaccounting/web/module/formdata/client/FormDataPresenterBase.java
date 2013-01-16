@@ -31,6 +31,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setRowsData(List<DataRow> rowsData);
 
+		void addCustomHeader(boolean addNumberedHeader);
+
 		void setLogMessages(List<LogEntry> logEntries);
 
 		void setAdditionalFormInfo(String formType, String taxType,
