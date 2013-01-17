@@ -257,7 +257,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void setColumnList(List<Column> columnList) {
 		columns = columnList;
 		setupColumns(0);
-		setColumnAttributeEditor(0);
 	}
 
 	@Override

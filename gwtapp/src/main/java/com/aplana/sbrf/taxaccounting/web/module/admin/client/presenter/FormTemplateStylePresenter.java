@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
@@ -13,6 +14,8 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
+
+import java.util.List;
 
 public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePresenter.MyView, FormTemplateStylePresenter.MyProxy>
 		implements FormTemplateStyleUiHandlers, FormTemplateSetEvent.MyHandler{
@@ -29,9 +32,8 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateStyleUiHandlers> {
+		void setViewData(List<FormStyle> styles);
 	}
-
-	private FormTemplate formTemplate;
 
 	@Inject
 	public FormTemplateStylePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
@@ -42,8 +44,7 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
-		//getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns());
+		getView().setViewData(event.getFormTemplate().getStyles());
 	}
 
 	@Override
