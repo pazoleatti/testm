@@ -9,7 +9,7 @@ import java.util.Date;
  * Класс, содержащий информацию о ячейке таблицы налоговой формы: значение, стиль оформления, параметры объединения ячеек и т.п. 
  * @author dsultanbekov
  */
-public class CellValue implements Serializable {
+public class Cell implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String stringValue;
 	private Date dateValue;

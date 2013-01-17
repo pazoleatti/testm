@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
-	private Map<String, CellValue> data;
+	private Map<String, Cell> data;
 	private String alias;
 	private int order;
 	private boolean managedByScripts;
@@ -46,9 +46,9 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	static class MapEntry implements Map.Entry<String, Object> {
 
-		private Map.Entry<String, CellValue> sourceEntry;
+		private Map.Entry<String, Cell> sourceEntry;
 
-		private MapEntry(Map.Entry<String, CellValue> sourceEntry) {
+		private MapEntry(Map.Entry<String, Cell> sourceEntry) {
 			this.sourceEntry = sourceEntry;
 		}
 
@@ -59,7 +59,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 		@Override
 		public Object getValue() {
-			CellValue value = sourceEntry.getValue();
+			Cell value = sourceEntry.getValue();
 			return value == null ? null : value.getValue();
 		}
 
@@ -86,9 +86,9 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	 * @param formColumns список столбцов
 	 */
 	public void setFormColumns(List<Column> formColumns) {
-		data = new HashMap<String, CellValue>(formColumns.size());
+		data = new HashMap<String, Cell>(formColumns.size());
 		for (Column col : formColumns) {
-			CellValue cellValue = new CellValue();
+			Cell cellValue = new Cell();
 			cellValue.setColumn(col);
 			data.put(col.getAlias(), cellValue);
 		}
@@ -101,7 +101,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	 * @param col столбец
 	 */
 	public void addColumn(Column col) {
-		CellValue cellValue = new CellValue();
+		Cell cellValue = new Cell();
 		cellValue.setColumn(col);
 		data.put(col.getAlias(), cellValue);
 	}
@@ -135,24 +135,24 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
 		if (data != null) {
-			for (Map.Entry<String, CellValue> entry : data.entrySet()) {
+			for (Map.Entry<String, Cell> entry : data.entrySet()) {
 				entries.add(new MapEntry(entry));
 			}
 		}
 		return entries;
 	}
 
-	public CellValue getCellValue(String columnAlias) {
-		CellValue cellValue = data.get(columnAlias);
-		if (cellValue == null) {
+	public Cell getCell(String columnAlias) {
+		Cell cell = data.get(columnAlias);
+		if (cell == null) {
 			throw new IllegalArgumentException("Wrong column alias: " + columnAlias);
 		}
-		return cellValue;
+		return cell;
 	}
 
 	@Override
 	public Object get(Object key) {
-		CellValue cellValue = getCellValue((String) key);
+		Cell cellValue = getCell((String) key);
 		return cellValue.getValue();
 	}
 
@@ -168,7 +168,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Object put(String key, Object value) {
-		CellValue cellValue = getCellValue((String) key);
+		Cell cellValue = getCell((String) key);
 		return cellValue.setValue(value);
 	}
 
@@ -192,7 +192,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public Collection<Object> values() {
 		List<Object> values = new ArrayList<Object>(data.size());
-		for (Map.Entry<String, CellValue> entry : data.entrySet()) {
+		for (Map.Entry<String, Cell> entry : data.entrySet()) {
 			values.add(entry.getValue().getValue());
 		}
 		return values;
