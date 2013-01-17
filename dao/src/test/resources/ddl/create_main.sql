@@ -86,6 +86,8 @@ comment on column form_style.font_color is 'код цвета шрифта';
 comment on column form_style.back_color is 'код цвета фона';
 comment on column form_style.italic is 'признак использования курсива';
 comment on column form_style.bold is 'признак жирного шрифта';
+
+create sequence seq_form_style start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table cell_style
 (
