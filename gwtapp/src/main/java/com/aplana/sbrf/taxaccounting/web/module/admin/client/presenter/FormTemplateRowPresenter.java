@@ -5,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateRowUiHandlers;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -78,9 +80,15 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 	}
 
 	private void setViewData() {
-		getView().setColumnsData(formTemplate.getColumns());
-		getView().setRowsData(formTemplate.getRows());
-		getView().addCustomHeader(formTemplate.isNumberedColumns());
+		FormTemplateFlushEvent.fire(this);
+		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+			@Override
+			public void execute() {
+				getView().setColumnsData(formTemplate.getColumns());
+				getView().setRowsData(formTemplate.getRows());
+				getView().addCustomHeader(formTemplate.isNumberedColumns());
+			}
+		});
 	}
 
 }
