@@ -13,7 +13,13 @@ import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 public class StringColumn extends Column  implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Максимально допустимое значение поля {@link #setMaxLength}
+	 * (Ограничение накладывается параметрами таблицы STRING_VALUE в БД)
+	 */
+	public static final int MAX_LENGTH = 500;
 	private String dictionaryCode;
+	private int maxLength;
 
 	/**
 	 * Получить код справочника, связанного с данным столбцов.
@@ -41,4 +47,28 @@ public class StringColumn extends Column  implements Serializable {
 	public void setDictionaryCode(String dictionaryCode) {
 		this.dictionaryCode = dictionaryCode;
 	}
+
+	/**
+	 * Получить максимально допустимую длину строки в этом столбце
+	 * @return максимальная длина строки
+	 */
+	public int getMaxLength() {
+		return maxLength;
+	}
+
+	/**
+	 * Задать максимально допустимую длину строки
+	 * Значение должно быть больше нуля и меньше либо равно, чем {@link #MAX_LENGTHЪ -  предел, задаваемый БД
+	 * @param maxLength максимальная длина строки
+	 * @throws IllegalArgumentException если maxLength меньше или равно нулю, или если оно больше, чем {#link MAX_LENGTH}
+	 */
+	public void setMaxLength(int maxLength) {
+		if (maxLength <= 0) {
+			throw new IllegalArgumentException("maxLength must be greater than 0");
+		} else if (maxLength > MAX_LENGTH) {
+			throw new IllegalArgumentException("maxLength must be lower than " + MAX_LENGTH);
+		}		
+		this.maxLength = maxLength;
+	}
+	
 }
