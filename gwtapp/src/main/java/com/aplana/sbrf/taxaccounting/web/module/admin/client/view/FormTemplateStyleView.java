@@ -81,7 +81,6 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 
 	@UiHandler("styleListBox")
 	public void onSelectColumn(ChangeEvent event){
-		System.out.println("onSelectColumn");
 		flush();
 		setStyleParams(styleListBox.getSelectedIndex());
 	}
@@ -98,7 +97,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiHandler("addStyle")
 	public void onAddStyle(ClickEvent event){
 		FormStyle newStyle = new FormStyle();
-		newStyle.setAlias("Новый стиль");
+		newStyle.setAlias("Новый");
 		newStyle.setBackColor(Color.WHITE);
 		newStyle.setFontColor(Color.WHITE);
 		styles.add(newStyle);
