@@ -1,15 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -17,13 +10,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly=true)
@@ -66,25 +57,26 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 	}
 
+	@Transactional(readOnly = false)
 	@Override
 	public void saveFormColumns(final FormTemplate form) {
 		int formId = form.getId();
-		
+
 		JdbcTemplate jt = getJdbcTemplate();
-		
+
 		final Set<Integer> removedColumns = new HashSet<Integer>(jt.queryForList(
 			"select id from form_column where form_id = ?",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			Integer.class
 		));
-		
+
 		final List<Column> newColumns = new ArrayList<Column>();
 		final List<Column> oldColumns = new ArrayList<Column>();
-		
+
 		List<Column> columns = form.getColumns();
 		OrderUtils.reorder(columns);
-		
+
 		int order = 0;
 		for (Column col: columns) {
 			col.setOrder(++order);
@@ -95,31 +87,32 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				removedColumns.remove(col.getId());
 			}
 		}
-		
-		jt.batchUpdate(
-			"delete from form_column where id = ?",
-			new BatchPreparedStatementSetter() {
-				
-				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					ps.setInt(1, iterator.next());
-				}
-				
-				@Override
-				public int getBatchSize() {
-					return removedColumns.size();
-				}
-				
-				private Iterator<Integer> iterator = removedColumns.iterator();
-			}
-		);
-		
+		if(!removedColumns.isEmpty()){
+			jt.batchUpdate(
+					"delete from form_column where id = ?",
+					new BatchPreparedStatementSetter() {
+
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							ps.setInt(1, iterator.next());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return removedColumns.size();
+						}
+
+						private Iterator<Integer> iterator = removedColumns.iterator();
+					}
+			);
+		}
+
 		jt.batchUpdate(
 			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name) " +
 			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {					 
+				public void setValues(PreparedStatement ps, int index) throws SQLException {
 					Column col = newColumns.get(index);
 					ps.setString(1, col.getName());
 					ps.setString(2, col.getAlias());
@@ -127,7 +120,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					ps.setInt(4, col.isEditable() ? 1 : 0);
 					ps.setInt(5, col.isMandatory() ? 1 : 0);
 					ps.setInt(6, col.getWidth());
-					
+
 					if (col instanceof NumericColumn) {
 						ps.setInt(7, ((NumericColumn)col).getPrecision());
 					} else {
@@ -145,55 +138,56 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					ps.setInt(9, col.getOrder());
 					ps.setString(10, col.getGroupName());
 				}
-				
+
 				@Override
 				public int getBatchSize() {
 					return newColumns.size();
 				}
 			}
 		);
-		
-		
-		jt.batchUpdate(
-			"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ? " +
-			"where id = ?",
-			new BatchPreparedStatementSetter() {
-				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					Column col = oldColumns.get(index);
-					ps.setString(1, col.getName());
-					ps.setString(2, col.getAlias());
-					ps.setString(3, getTypeFromCode(col));
-					ps.setInt(4, col.isEditable() ? 1 : 0);
-					ps.setInt(5, col.isMandatory() ? 1 : 0);
-					ps.setInt(6, col.getWidth());
 
-					if (col instanceof NumericColumn) {
-						ps.setInt(7, ((NumericColumn)col).getPrecision());
-					} else {
-						ps.setNull(7, Types.NUMERIC);
+		if(!oldColumns.isEmpty()){
+			jt.batchUpdate(
+					"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ? " +
+							"where id = ?",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							Column col = oldColumns.get(index);
+							ps.setString(1, col.getName());
+							ps.setString(2, col.getAlias());
+							ps.setString(3, getTypeFromCode(col));
+							ps.setInt(4, col.isEditable() ? 1 : 0);
+							ps.setInt(5, col.isMandatory() ? 1 : 0);
+							ps.setInt(6, col.getWidth());
+
+							if (col instanceof NumericColumn) {
+								ps.setInt(7, ((NumericColumn)col).getPrecision());
+							} else {
+								ps.setNull(7, Types.NUMERIC);
+							}
+
+							if (col instanceof StringColumn) {
+								ps.setString(8, ((StringColumn)col).getDictionaryCode());
+							} else if(col instanceof NumericColumn){
+								ps.setString(8, ((NumericColumn)col).getDictionaryCode());
+							} else {
+								ps.setNull(8, Types.VARCHAR);
+							}
+
+							ps.setInt(9, col.getOrder());
+							ps.setString(10, col.getGroupName());
+							ps.setInt(11, col.getId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return oldColumns.size();
+						}
 					}
+			);
+		}
 
-					if (col instanceof StringColumn) {
-						ps.setString(8, ((StringColumn)col).getDictionaryCode());
-					} else if(col instanceof NumericColumn){
-						ps.setString(8, ((NumericColumn)col).getDictionaryCode());
-					} else {
-						ps.setNull(8, Types.VARCHAR);
-					}
-
-					ps.setInt(9, col.getOrder());
-					ps.setString(10, col.getGroupName());
-					ps.setInt(11, col.getId());
-				}
-				
-				@Override
-				public int getBatchSize() {
-					return oldColumns.size();
-				}
-			}
-		);
-		
 		jt.query(
 			"select id, alias from form_column where form_id = " + formId,
 			new RowCallbackHandler() {
@@ -206,7 +200,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			}
 		);
 	}
-	
+
 	private String getTypeFromCode(Column col) {
 		if (col instanceof NumericColumn) {
 			return "N";
