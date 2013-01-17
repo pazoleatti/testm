@@ -211,21 +211,21 @@ public class FormDataDaoTest {
 		FormData formData = fillFormData();
 
 		DataRow dr = formData.getDataRow("newAlias");
-		dr.getCellValue("numericColumn").setColSpan(2);
-		dr.getCellValue("numericColumn").setRowSpan(2);
+		dr.getCell("numericColumn").setColSpan(2);
+		dr.getCell("numericColumn").setRowSpan(2);
 		
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
 
 		dr = formData.getDataRows().get(0);
-		Assert.assertEquals(1, dr.getCellValue("numericColumn").getColSpan());
-		Assert.assertEquals(1, dr.getCellValue("numericColumn").getRowSpan());
+		Assert.assertEquals(1, dr.getCell("numericColumn").getColSpan());
+		Assert.assertEquals(1, dr.getCell("numericColumn").getRowSpan());
 
 		dr = formData.getDataRows().get(1);
-		Assert.assertEquals(2, dr.getCellValue("numericColumn").getColSpan());
-		Assert.assertEquals(2, dr.getCellValue("numericColumn").getRowSpan());
-		Assert.assertEquals(1, dr.getCellValue("stringColumn").getColSpan());
-		Assert.assertEquals(1, dr.getCellValue("stringColumn").getRowSpan());
+		Assert.assertEquals(2, dr.getCell("numericColumn").getColSpan());
+		Assert.assertEquals(2, dr.getCell("numericColumn").getRowSpan());
+		Assert.assertEquals(1, dr.getCell("stringColumn").getColSpan());
+		Assert.assertEquals(1, dr.getCell("stringColumn").getRowSpan());
 
 	}
 
@@ -233,13 +233,13 @@ public class FormDataDaoTest {
 	public void spansColError() {
 		FormData formData = fillFormData();
 		DataRow dr = formData.getDataRow("newAlias");
-		dr.getCellValue("numericColumn").setColSpan(0);
+		dr.getCell("numericColumn").setColSpan(0);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void spansRowError() {
 		FormData formData = fillFormData();
 		DataRow dr = formData.getDataRow("newAlias");
-		dr.getCellValue("numericColumn").setRowSpan(-1);
+		dr.getCell("numericColumn").setRowSpan(-1);
 	}
 }

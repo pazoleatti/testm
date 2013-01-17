@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.CellValue;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
@@ -214,7 +214,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								DataRow row = rowMap.get(rowId);
 								Column col = formTemplate.getColumn(spanRecord
 										.getColumnId());
-								CellValue cellValue = row.getCellValue(col
+								Cell cellValue = row.getCell(col
 										.getAlias());
 
 								cellValue.setColSpan(spanRecord.getColSpan());
@@ -337,7 +337,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 				for (Column col : formData.getFormColumns()) {
 					Object val = dr.get(col.getAlias());
-					CellValue cellValue = dr.getCellValue(col.getAlias());
+					Cell cellValue = dr.getCell(col.getAlias());
 
 					if (val == null) {
 						continue;
