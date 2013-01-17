@@ -4,8 +4,29 @@
         .whiteColor {
             background-color: white;
         }
+
+        .formStyle {
+            top: 50px;
+            left: 30px;
+            position: absolute;
+            background-color: #949494;
+            padding: 15px;
+            text-decoration-color: white;
+            color: white;
+            border-color: #828282;
+        }
     </ui:style>
     <g:HTMLPanel height="100%" addStyleNames="{style.whiteColor}">
-        <g:Label>Основая информация</g:Label>
+        <g:HTMLPanel addStyleNames="{style.formStyle}">
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Версия</g:Label>
+                <g:TextBox width="100px" ui:field="versionBox"/>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Использовать нумерованные столбцы</g:Label>
+                <g:CheckBox ui:field="numberedColumnsBox"/>
+            </g:HorizontalPanel>
+        </g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>

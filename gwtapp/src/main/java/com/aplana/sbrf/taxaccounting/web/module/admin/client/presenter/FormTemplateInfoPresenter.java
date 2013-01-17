@@ -29,6 +29,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
+		void setViewData(String version, boolean numberedColumns);
 	}
 
 	private FormTemplate formTemplate;
@@ -43,16 +44,21 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
-		//setViewData();
+		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns());
 	}
 
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
-
-		if (formTemplate != null) {
-			//setViewData();
-		}
 	}
 
+	@Override
+	public void setNumberedColumns(boolean numberedColumns) {
+		formTemplate.setNumberedColumns(numberedColumns);
+	}
+
+	@Override
+	public void setVersion(String version) {
+		formTemplate.setVersion(version);
+	}
 }
