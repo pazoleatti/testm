@@ -156,6 +156,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 			@Override
 			protected void onReqFailure(Throwable throwable) {
 				MessageEvent.fire(this, "Request Failure", throwable);
+				setFormTemplate();
 			}
 		});
 	}
