@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -32,6 +29,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private ColumnDao columnDao;
 	@Autowired
 	private ScriptDao scriptDao;
+	@Autowired
+	private FormStyleDao formStyleDao;
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
 	private class FormTemplateMapper implements RowMapper<FormTemplate> {
@@ -48,6 +47,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setEdition(rs.getInt("edition"));
 			formTemplate.setVersion(rs.getString("version"));
 			formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
+		    formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
 				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
@@ -114,7 +114,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.isNumberedColumns(),
 			formTemplateId
 		);
-
+		formStyleDao.saveFormStyles(formTemplate);
 		columnDao.saveFormColumns(formTemplate);
 		scriptDao.saveFormScripts(formTemplate);
 		return formTemplateId;
