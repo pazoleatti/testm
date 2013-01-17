@@ -42,7 +42,7 @@ public final class AdminConstants {
 		public static final String formTemplateScriptLabel = "Скрипты";
 		public static final String formTemplateEventLabel = "События";
 		public static final String formTemplateColumnLabel = "Описание столбцов";
-		public static final String formTemplateStyleLabel = "Начальные данные";
+		public static final String formTemplateStyleLabel = "Наборы стилей";
 		public static final String formTemplateRowLabel = "Начальные данные";
 	}
 }
