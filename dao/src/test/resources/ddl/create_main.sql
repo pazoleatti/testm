@@ -115,7 +115,8 @@ create table form_column (
 	width number(9) not null,
 	precision number(9),
 	dictionary_code varchar2(30),
-	group_name varchar(255)
+	group_name varchar(255),
+	max_length number(4)
 );
 alter table form_column add constraint form_column_pk primary key (id);
 create sequence seq_form_column start with 10000;
@@ -126,6 +127,7 @@ alter table form_column add constraint form_column_chk_type check(type in ('N', 
 alter table form_column add constraint form_column_chk_editable check(editable in (0, 1));
 alter table form_column add constraint form_column_chk_mandatory check(mandatory in (0, 1));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 5) or (type <> 'N' and precision is null));
+alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
