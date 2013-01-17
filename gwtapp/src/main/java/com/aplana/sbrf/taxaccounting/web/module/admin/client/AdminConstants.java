@@ -17,6 +17,7 @@ public final class AdminConstants {
 		public static final String formTemplateColumnPage = "!formTemplateColumn";
 		public static final String formTemplateRowPage = "!formTemplateRow";
 		public static final String formTemplateInfoPage = "!formTemplateInfo";
+		public static final String formTemplateStylePage = "!formTemplateStyle";
 		public static final String formTemplateMainPage = "!formTemplateMain";
 		public static final String formTemplateId = "formTemplateId";
 	}
@@ -29,7 +30,8 @@ public final class AdminConstants {
 		public static final int formTemplateScriptPriority = 1;
 		public static final int formTemplateEventPriority = 2;
 		public static final int formTemplateColumnPriority = 3;
-		public static final int formTemplateRowPriority = 4;
+		public static final int formTemplateStylePriority = 4;
+		public static final int formTemplateRowPriority = 5;
 	}
 
 	/**
@@ -40,6 +42,7 @@ public final class AdminConstants {
 		public static final String formTemplateScriptLabel = "Скрипты";
 		public static final String formTemplateEventLabel = "События";
 		public static final String formTemplateColumnLabel = "Описание столбцов";
+		public static final String formTemplateStyleLabel = "Начальные данные";
 		public static final String formTemplateRowLabel = "Начальные данные";
 	}
 }
