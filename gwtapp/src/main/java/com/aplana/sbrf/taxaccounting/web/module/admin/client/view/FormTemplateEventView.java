@@ -24,7 +24,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 
 	private final Widget widget;
 
-	// элементы управления назначения скриптов на задания
 	@UiField
 	ListBox eventListBox;
 

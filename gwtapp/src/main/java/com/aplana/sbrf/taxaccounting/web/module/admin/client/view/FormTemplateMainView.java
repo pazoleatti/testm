@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.SimpleTabPanel;
@@ -10,7 +10,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -51,9 +50,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@Override
 	public Tab addTab(TabData tabData, String historyToken) {
 		if(formId !=0) {
-			return tabPanel.addTab(tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=" + formId);
+			return tabPanel.addTab(tabData, historyToken + ";" + AdminConstants.NameTokens.formTemplateId + "=" + formId);
 		}
-		return tabPanel.addTab(tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=");
+		return tabPanel.addTab(tabData, historyToken + ";" + AdminConstants.NameTokens.formTemplateId + "=");
 	}
 
 	@Override
@@ -78,7 +77,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@Override
 	public void changeTab(Tab tab, TabData tabData, String historyToken) {
-		tabPanel.changeTab(tab, tabData, historyToken + ";" + AdminNameTokens.formTemplateId + "=" + formId);
+		tabPanel.changeTab(tab, tabData, historyToken + ";" + AdminConstants.NameTokens.formTemplateId + "=" + formId);
 	}
 
 	@Override

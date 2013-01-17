@@ -46,7 +46,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiField
 	Button downRowButton;
 
-	// Элементы управления редактирования скриптов
 	@Inject
 	public FormTemplateRowView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);

@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateMainUiHandlers;
@@ -30,7 +30,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Title("Администрирование")
 	@ProxyCodeSplit
-	@NameToken(AdminNameTokens.formTemplateMainPage)
+	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
 	public interface MyProxy extends ProxyPlace<FormTemplateMainPresenter>, Place {
 	}
 
@@ -69,10 +69,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 
-		int formId = Integer.valueOf(request.getParameter(AdminNameTokens.formTemplateId, "0"));
+		int formId = Integer.valueOf(request.getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
         placeManager.revealPlace(
-				new PlaceRequest(AdminNameTokens.formTemplateScriptPage).with(
-						AdminNameTokens.formTemplateId, String.valueOf(formId)
+				new PlaceRequest(AdminConstants.NameTokens.formTemplateInfoPage).with(
+						AdminConstants.NameTokens.formTemplateId, String.valueOf(formId)
 				)
 		);
 	}
@@ -117,11 +117,11 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(AdminNameTokens.adminPage));
+		placeManager.revealPlace(new PlaceRequest(AdminConstants.NameTokens.adminPage));
 	}
 
 	private void setFormTemplate() {
-		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminNameTokens.formTemplateId, "0"));
+		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
 		if (formId != 0) {
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);

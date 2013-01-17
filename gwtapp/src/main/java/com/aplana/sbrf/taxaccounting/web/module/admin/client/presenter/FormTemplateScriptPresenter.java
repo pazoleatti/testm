@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateScriptUiHandlers;
@@ -23,10 +23,10 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	 */
 	@Title("Администрирование")
 	@ProxyCodeSplit
-	@NameToken(AdminNameTokens.formTemplateScriptPage)
+	@NameToken(AdminConstants.NameTokens.formTemplateScriptPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
-			label = "Скрипты",
-			priority = 0) // The 1 Tab
+			label = AdminConstants.TabLabels.formTemplateScriptLabel,
+			priority = AdminConstants.TabPriorities.formTemplateScriptPriority)
 	public interface MyProxy extends TabContentProxyPlace<FormTemplateScriptPresenter> {
 	}
 

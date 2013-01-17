@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .whiteColor {
+            background-color: white;
+        }
+    </ui:style>
+    <g:HTMLPanel height="100%" addStyleNames="{style.whiteColor}">
+        <g:Label>Основая информация</g:Label>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.AdminUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
@@ -32,7 +32,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	 */
 	@Title("Администрирование")
 	@ProxyCodeSplit
-	@NameToken(AdminNameTokens.adminPage)
+	@NameToken(AdminConstants.NameTokens.adminPage)
 	public interface MyProxy extends Proxy<AdminPresenter>, Place {
 	}
 
@@ -81,8 +81,8 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	@Override
 	public void selectForm(Integer id) {
 			placeManager.revealPlace(
-					new PlaceRequest(AdminNameTokens.formTemplateMainPage).with(
-							AdminNameTokens.formTemplateId, String.valueOf(id)
+					new PlaceRequest(AdminConstants.NameTokens.formTemplateMainPage).with(
+							AdminConstants.NameTokens.formTemplateId, String.valueOf(id)
 					)
 			);
 	}
