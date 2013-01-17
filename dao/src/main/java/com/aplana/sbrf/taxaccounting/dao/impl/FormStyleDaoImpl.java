@@ -72,23 +72,25 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 			}
 		}
 
-		jt.batchUpdate(
-				"delete from form_style where id = ?",
-				new BatchPreparedStatementSetter() {
+		if(!removedStyles.isEmpty()){
+			jt.batchUpdate(
+					"delete from form_style where id = ?",
+					new BatchPreparedStatementSetter() {
 
-					@Override
-					public void setValues(PreparedStatement ps, int index) throws SQLException {
-						ps.setInt(1, iterator.next());
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							ps.setInt(1, iterator.next());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return removedStyles.size();
+						}
+
+						private Iterator<Integer> iterator = removedStyles.iterator();
 					}
-
-					@Override
-					public int getBatchSize() {
-						return removedStyles.size();
-					}
-
-					private Iterator<Integer> iterator = removedStyles.iterator();
-				}
-		);
+			);
+		}
 
 		jt.batchUpdate(
 				"insert into form_style (id, alias, form_id, font_color, back_color, italic, bold) " +
@@ -111,29 +113,29 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 				}
 		);
 
+		if(!oldStyles.isEmpty()){
+			jt.batchUpdate(
+					"update form_style set alias = ?, font_color = ?, back_color = ?, italic = ?, bold = ? " +
+							"where id = ?",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							FormStyle formStyle = oldStyles.get(index);
+							ps.setString(1, formStyle.getAlias());
+							ps.setInt(2, formStyle.getFontColor().getId());
+							ps.setInt(3, formStyle.getBackColor().getId());
+							ps.setInt(4, formStyle.isItalic() ? 1 : 0);
+							ps.setInt(5, formStyle.isBold() ? 1 : 0);
+							ps.setInt(6, formStyle.getId());
+						}
 
-		jt.batchUpdate(
-				"update form_style set alias = ?, font_color = ?, back_color = ?, italic = ?, bold = ? " +
-						"where id = ?",
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int index) throws SQLException {
-						FormStyle formStyle = oldStyles.get(index);
-						ps.setString(1, formStyle.getAlias());
-						ps.setInt(2, formStyle.getFontColor().getId());
-						ps.setInt(3, formStyle.getBackColor().getId());
-						ps.setInt(4, formStyle.isItalic() ? 1 : 0);
-						ps.setInt(5, formStyle.isBold() ? 1 : 0);
-						ps.setInt(6, formStyle.getId());
+						@Override
+						public int getBatchSize() {
+							return oldStyles.size();
+						}
 					}
-
-					@Override
-					public int getBatchSize() {
-						return oldStyles.size();
-					}
-				}
-		);
-
+			);
+		}
 		jt.query(
 				"select id, alias from form_style where form_id = " + formId,
 				new RowCallbackHandler() {
