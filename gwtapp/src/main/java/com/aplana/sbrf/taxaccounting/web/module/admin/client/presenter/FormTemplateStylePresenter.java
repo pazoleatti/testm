@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateStyleUiHandlers;
