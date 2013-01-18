@@ -64,6 +64,11 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 		}
 	}
 
+	@Override
+	public void onFlush() {
+		flush();
+	}
+
 	private void setupStyles(int index) {
 		setStyleList();
 		setStyleParams(index);
