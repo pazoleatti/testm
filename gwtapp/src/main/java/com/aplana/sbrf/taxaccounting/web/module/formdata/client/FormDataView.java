@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
@@ -102,6 +103,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
+		CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable);
+		formDataTable.setTableBuilder(builder);
 	}
 
 	@Override
