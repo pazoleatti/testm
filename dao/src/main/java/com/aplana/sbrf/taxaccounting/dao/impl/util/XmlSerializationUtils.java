@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
@@ -29,8 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Класс для сериализации преопределенные строки формы в XML. В идеале вообще любых объектов.
- *
+ * Класс для сериализации преопределенные строки формы в XML. В идеале вообще
+ * любых объектов.
+ * 
  * @author Vitalii Samolovskikh
  */
 public final class XmlSerializationUtils {
@@ -42,6 +44,9 @@ public final class XmlSerializationUtils {
 	private static final String ATTR_DATE_VALUE = "dateValue";
 	private static final String ATTR_NUMERIC_VALUE = "numericValue";
 	private static final String ATTR_STRING_VALUE = "stringValue";
+	private static final String ATTR_ROWSPAN = "rowSpan";
+	private static final String ATTR_COLSPAN = "colSpan";
+	private static final String ATTR_STYLE_ALIAS = "styleAlias";
 
 	private static final String ENCODING = "utf-8";
 
@@ -63,11 +68,13 @@ public final class XmlSerializationUtils {
 
 	/**
 	 * Сериализует список строк
-	 *
-	 * @param rows список строк формы
+	 * 
+	 * @param rows
+	 *            список строк формы
 	 * @return Строка, содержащая XML
-	 * @throws XmlSerializationException если не удалось сериализовать. Например, не поддерживается тип значения.
-	 *                                   Или что-то не так с поддержкой XML.
+	 * @throws XmlSerializationException
+	 *             если не удалось сериализовать. Например, не поддерживается
+	 *             тип значения. Или что-то не так с поддержкой XML.
 	 */
 	public String serialize(List<DataRow> rows) {
 		Document document = createEmptyDocument();
@@ -85,12 +92,13 @@ public final class XmlSerializationUtils {
 
 	/**
 	 * Создает пустой DOM-документ
-	 *
+	 * 
 	 * @return DOM-документ
 	 */
 	private Document createEmptyDocument() {
 		try {
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.newDocument();
 		} catch (ParserConfigurationException e) {
 			// Маловероятно, конечно, но всё же.
 			throw new XmlSerializationException(e);
@@ -99,11 +107,14 @@ public final class XmlSerializationUtils {
 
 	/**
 	 * Сериализует строку в XML-элемент.
-	 *
-	 * @param document документ
-	 * @param dataRow  сериализуемая строка
+	 * 
+	 * @param document
+	 *            документ
+	 * @param dataRow
+	 *            сериализуемая строка
 	 * @return XML-элемент
-	 * @throws XmlSerializationException {@link #serializeCell(org.w3c.dom.Document, String, Object)}
+	 * @throws XmlSerializationException
+	 *             {@link #serializeCell(org.w3c.dom.Document, String, Object)}
 	 */
 	private Element serializeRow(Document document, DataRow dataRow) {
 		Element row = document.createElement(TAG_ROW);
@@ -112,58 +123,76 @@ public final class XmlSerializationUtils {
 		}
 		row.setAttribute(ATTR_ORDER, String.valueOf(dataRow.getOrder()));
 
-		if(dataRow.isManagedByScripts()){
-			row.setAttribute(ATTR_MANAGED_BY_SCRIPTS, String.valueOf(dataRow.isManagedByScripts()));
+		if (dataRow.isManagedByScripts()) {
+			row.setAttribute(ATTR_MANAGED_BY_SCRIPTS,
+					String.valueOf(dataRow.isManagedByScripts()));
 		}
 
 		for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 			String alias = entry.getKey();
-			Object value = entry.getValue();
+			Cell cell = dataRow.getCell(alias);
 
-			if (value != null) {
-				row.appendChild(serializeCell(document, alias, value));
-			}
+			// if (entry.getValue() != null) {
+			row.appendChild(serializeCell(document, alias, cell));
+			// }
 		}
 		return row;
 	}
 
 	/**
 	 * Сериализует ячейку строки.
-	 *
-	 * @param document DOM-документ
-	 * @param alias    алиас столбца ячейки
-	 * @param value    значение
+	 * 
+	 * @param document
+	 *            DOM-документ
+	 * @param alias
+	 *            алиас столбца ячейки
+	 * @param value
+	 *            значение
 	 * @return XML-элемент
-	 * @throws XmlSerializationException в случае если тип значения не поддерживается
+	 * @throws XmlSerializationException
+	 *             в случае если тип значения не поддерживается
 	 */
-	private Element serializeCell(Document document, String alias, Object value) {
-		Element cell = document.createElement(TAG_CELL);
-		cell.setAttribute(ATTR_ALIAS, alias);
-		if (value instanceof Date) {
-			cell.setAttribute(ATTR_DATE_VALUE, FormatUtils.getShortDateFormat().format(value));
-		} else if (value instanceof Number) {
-			cell.setAttribute(ATTR_NUMERIC_VALUE, FormatUtils.getSimpleNumberFormat().format(value));
-		} else if (value instanceof String) {
-			cell.setAttribute(ATTR_STRING_VALUE, (String) value);
-		} else {
-			throw new XmlSerializationException("Unsupported type value.");
+	private Element serializeCell(Document document, String alias, Cell cell) {
+		Element element = document.createElement(TAG_CELL);
+		element.setAttribute(ATTR_ALIAS, alias);
+		Object value = cell.getValue();
+		if (value != null) {
+			if (value instanceof Date) {
+				element.setAttribute(ATTR_DATE_VALUE, FormatUtils
+						.getShortDateFormat().format(value));
+			} else if (value instanceof Number) {
+				element.setAttribute(ATTR_NUMERIC_VALUE, FormatUtils
+						.getSimpleNumberFormat().format(value));
+			} else if (value instanceof String) {
+				element.setAttribute(ATTR_STRING_VALUE, (String) value);
+			} else {
+				throw new XmlSerializationException("Unsupported type value.");
+			}
 		}
-		return cell;
+		element.setAttribute(ATTR_COLSPAN, String.valueOf(cell.getColSpan()));
+		element.setAttribute(ATTR_ROWSPAN, String.valueOf(cell.getRowSpan()));
+		if (cell.getStyleAlias() != null && !cell.getStyleAlias().isEmpty()) {
+			element.setAttribute(ATTR_STYLE_ALIAS,
+					String.valueOf(cell.getStyleAlias()));
+		}
+		return element;
 	}
 
 	/**
 	 * Преобразует документ в XML-строку.
-	 *
-	 * @param doc документ
+	 * 
+	 * @param doc
+	 *            документ
 	 * @return XML-строка с документом.
 	 */
 	private String documentToString(Document doc) {
 		try {
-			//set up a transformer
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			// set up a transformer
+			Transformer transformer = TransformerFactory.newInstance()
+					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
 
-			//create string from xml tree
+			// create string from xml tree
 			StringWriter writer = new StringWriter();
 			StreamResult result = new StreamResult(writer);
 			DOMSource source = new DOMSource(doc);
@@ -171,17 +200,21 @@ public final class XmlSerializationUtils {
 
 			return writer.toString();
 		} catch (TransformerException e) {
-			throw new XmlSerializationException("Can't convert document to XML string.", e);
+			throw new XmlSerializationException(
+					"Can't convert document to XML string.", e);
 		}
 	}
 
 	/**
 	 * Десериализует из XML-строки строки банковской формы.
-	 *
-	 * @param str     XML-строка
-	 * @param columns список столбцов формы
+	 * 
+	 * @param str
+	 *            XML-строка
+	 * @param columns
+	 *            список столбцов формы
 	 * @return список строк формы
-	 * @throws XmlSerializationException любая ошибка
+	 * @throws XmlSerializationException
+	 *             любая ошибка
 	 */
 	public List<DataRow> deserialize(String str, List<Column> columns) {
 		List<DataRow> rows = new ArrayList<DataRow>();
@@ -198,9 +231,11 @@ public final class XmlSerializationUtils {
 
 	/**
 	 * Разбирает строку данных
-	 *
-	 * @param element елемент строки данных
-	 * @param columns список столбцов формы
+	 * 
+	 * @param element
+	 *            елемент строки данных
+	 * @param columns
+	 *            список столбцов формы
 	 */
 	private DataRow parseDataRow(Element element, List<Column> columns) {
 		DataRow dataRow = new DataRow(columns);
@@ -212,11 +247,13 @@ public final class XmlSerializationUtils {
 		}
 
 		// Order
-		dataRow.setOrder(Integer.valueOf(element.getAttributes().getNamedItem(ATTR_ORDER).getNodeValue()));
+		dataRow.setOrder(Integer.valueOf(element.getAttributes()
+				.getNamedItem(ATTR_ORDER).getNodeValue()));
 
 		// Managed by scripts
 		String scriptManaged = element.getAttribute(ATTR_MANAGED_BY_SCRIPTS);
-		dataRow.setManagedByScripts(scriptManaged!=null && !scriptManaged.isEmpty() && Boolean.valueOf(scriptManaged));
+		dataRow.setManagedByScripts(scriptManaged != null
+				&& !scriptManaged.isEmpty() && Boolean.valueOf(scriptManaged));
 
 		// Value
 		NodeList cells = element.getElementsByTagName(TAG_CELL);
@@ -239,7 +276,8 @@ public final class XmlSerializationUtils {
 			valueNode = attributes.getNamedItem(ATTR_DATE_VALUE);
 			if (valueNode != null) {
 				try {
-					dataRow.put(columnAlias, FormatUtils.getShortDateFormat().parse(valueNode.getNodeValue()));
+					dataRow.put(columnAlias, FormatUtils.getShortDateFormat()
+							.parse(valueNode.getNodeValue()));
 				} catch (ParseException e) {
 					throw new XmlSerializationException(e);
 				}
@@ -249,24 +287,46 @@ public final class XmlSerializationUtils {
 			valueNode = attributes.getNamedItem(ATTR_NUMERIC_VALUE);
 			if (valueNode != null) {
 				try {
-					dataRow.put(columnAlias, FormatUtils.getSimpleNumberFormat().parse(valueNode.getNodeValue()));
+					dataRow.put(
+							columnAlias,
+							FormatUtils.getSimpleNumberFormat().parse(
+									valueNode.getNodeValue()));
 				} catch (ParseException e) {
 					throw new XmlSerializationException(e);
 				}
 			}
+
+			valueNode = attributes.getNamedItem(ATTR_COLSPAN);
+			if (valueNode != null) {
+				dataRow.getCell(columnAlias).setColSpan(
+						Integer.parseInt(valueNode.getNodeValue()));
+			}
+			valueNode = attributes.getNamedItem(ATTR_ROWSPAN);
+			if (valueNode != null) {
+				dataRow.getCell(columnAlias).setRowSpan(
+						Integer.parseInt(valueNode.getNodeValue()));
+			}
+			valueNode = attributes.getNamedItem(ATTR_STYLE_ALIAS);
+			if (valueNode != null) {
+				dataRow.getCell(columnAlias).setStyleAlias(
+						valueNode.getNodeValue());
+			}
+
 		}
 		return dataRow;
 	}
 
 	/**
 	 * Читает DOM-документ из XML-строки
-	 *
-	 * @param str XML-строка
+	 * 
+	 * @param str
+	 *            XML-строка
 	 * @return DOM-документ
 	 */
 	private Document stringToDocument(String str) {
 		try {
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(str.getBytes(ENCODING)));
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.parse(new ByteArrayInputStream(str.getBytes(ENCODING)));
 		} catch (SAXException e) {
 			throw new XmlSerializationException(e);
 		} catch (IOException e) {

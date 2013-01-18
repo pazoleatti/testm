@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -10,13 +11,14 @@ import static org.junit.Assert.*;
 
 /**
  * Тестируем "сериализацию" строк данных.
- *
+ * 
  * @author Vitalii Samolovskikh
  */
 public class XmlSerializationUtilsTest {
 
 	private List<Column> columns;
-	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
+	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils
+			.getInstance();
 
 	public XmlSerializationUtilsTest() {
 		// Columns
@@ -56,12 +58,17 @@ public class XmlSerializationUtilsTest {
 		System.out.println(string);
 
 		// Deserialize
-		List<DataRow> deserializedData = xmlSerializationUtils.deserialize(string, columns);
-		assertNotNull("The result of deserialization is null.", deserializedData);
-		assertFalse("The result of deserialization is empty.", deserializedData.isEmpty());
+		List<DataRow> deserializedData = xmlSerializationUtils.deserialize(
+				string, columns);
+		assertNotNull("The result of deserialization is null.",
+				deserializedData);
+		assertFalse("The result of deserialization is empty.",
+				deserializedData.isEmpty());
 
 		// Check equals
-		assertTrue("The result of deserialization doesn't equals the initial data.", equals(data, deserializedData));
+		assertTrue(
+				"The result of deserialization doesn't equals the initial data.",
+				equals(data, deserializedData));
 	}
 
 	public List<DataRow> prepareData() {
@@ -77,12 +84,15 @@ public class XmlSerializationUtilsTest {
 		rows.add(row);
 		row.setManagedByScripts(true);
 
-
 		row = new DataRow("withColumns", columns);
 		row.put("stringColumn", "test тест");
 		row.put("numericColumn", new BigDecimal(1234.56));
 		row.put("dateColumn", new Date());
 		rows.add(row);
+
+		row.getCell("stringColumn").setColSpan(2);
+		row.getCell("stringColumn").setRowSpan(3);
+		row.getCell("stringColumn").setStyleAlias("sa");
 
 		return rows;
 	}
@@ -111,6 +121,33 @@ public class XmlSerializationUtilsTest {
 		return true;
 	}
 
+	/**
+	 * Сравнение некоторых полей Cell
+	 * 
+	 * @param cell1
+	 * @param cell2
+	 * @return
+	 */
+	private boolean equals(Cell cell1, Cell cell2) {
+
+		if (cell1 == cell2)
+			return true;
+
+		Cell other = (Cell) cell2;
+		if (cell1.getColSpan() != other.getColSpan())
+			return false;
+		if (cell1.getRowSpan() != other.getRowSpan())
+			return false;
+		if (cell1.getStyleAlias() == null) {
+			if (other.getStyleAlias() != null)
+				return false;
+		} else if (!cell1.getStyleAlias().equals(other.getStyleAlias()))
+			return false;
+
+		return true;
+
+	}
+
 	private boolean equals(DataRow row1, DataRow row2) {
 		if (row1 == row2) {
 			return true;
@@ -120,7 +157,8 @@ public class XmlSerializationUtilsTest {
 			return false;
 		}
 
-		if (row1.getAlias() != null ? !row1.getAlias().equals(row2.getAlias()) : row2.getAlias() != null) {
+		if (row1.getAlias() != null ? !row1.getAlias().equals(row2.getAlias())
+				: row2.getAlias() != null) {
 			return false;
 		}
 
@@ -137,8 +175,10 @@ public class XmlSerializationUtilsTest {
 		}
 
 		for (String key : row1.keySet()) {
-			Object val1 = row1.get(key);
-			Object val2 = row2.get(key);
+			Cell cell1 = row1.getCell(key);
+			Cell cell2 = row2.getCell(key);
+			Object val1 = cell1.getValue();
+			Object val2 = cell2.getValue();
 
 			if (val1 != null && val2 != null) {
 				if (val1.getClass() != val2.getClass()) {
@@ -168,6 +208,11 @@ public class XmlSerializationUtilsTest {
 						return false;
 					}
 				}
+
+				if (!equals(cell1, cell2)) {
+					return false;
+				}
+
 			} else if (val1 != null || val2 != null) {
 				return false;
 			}
