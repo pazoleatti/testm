@@ -326,6 +326,22 @@ comment on column sec_user.login is 'Логин пользователя';
 comment on column sec_user.name is 'Полное имя пользователя';
 comment on column sec_user.department_id is 'Идентификатор подразделения';
 ---------------------------------------------------------------------------------------------------
+create table object_lock
+(
+  object_id number(20) not null,
+  class varchar(100) not null,
+  user_id  number(9) not null,
+  lock_time date not null
+ );
+alter table object_lock add constraint object_lock_pk primary key (object_id, class);
+alter table object_lock add constraint object_lock_fk_user_id foreign key (user_id) references  sec_user (id) on delete cascade;
+
+comment on table object_lock is 'Сведения о пользовательских блокировках объектов';
+comment on column object_lock.object_id is 'идентификатор объекта';
+comment on column object_lock.class is 'имя класса объекта';
+comment on column object_lock.user_id is 'идентифкатор пользователя, заблокировавшего объект';
+comment on column object_lock.lock_time is 'время блокировки';
+-------------------------------------------------------------------------------------------------------------------------------------
 create table sec_role (
 	id number(9) not null,
 	alias varchar(20) not null,

@@ -18,6 +18,8 @@ drop sequence seq_form_data;
 
 drop table sec_user_role;
 drop table sec_role;
+
+drop table object_lock;
 drop table sec_user;
 drop table department_form_type;
 
