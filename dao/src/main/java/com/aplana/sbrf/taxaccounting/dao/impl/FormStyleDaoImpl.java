@@ -44,6 +44,26 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 		);
 	}
 
+	@Override
+	public Map<Integer, FormStyle> getIdToFormStyleMap(int formId){
+		Map<Integer, FormStyle> result = new HashMap<Integer, FormStyle>();
+		List<FormStyle> formStyleList = getFormStyles(formId);
+		for(FormStyle formStyle : formStyleList){
+			result.put(formStyle.getId(), formStyle);
+		}
+		return result;
+	}
+
+	@Override
+	public Map<String, FormStyle> getAliasToFormStyleMap(int formId){
+		Map<String, FormStyle> result = new HashMap<String, FormStyle>();
+		List<FormStyle> formStyleList = getFormStyles(formId);
+		for(FormStyle formStyle : formStyleList){
+			result.put(formStyle.getAlias(), formStyle);
+		}
+		return result;
+	}
+
 	@Transactional(readOnly = false)
 	@Override
 	public void saveFormStyles(final FormTemplate form) {

@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,15 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "FormDataDaoTest.xml" })
@@ -186,14 +180,18 @@ public class FormDataDaoTest {
 		DataRow dr = formData.appendDataRow();
 		dr.setManagedByScripts(false);
 		dr.put("stringColumn", "Строка 1");
+		dr.getCell("stringColumn").setStyleAlias("alias1");
 		dr.put("numericColumn", 1.01);
+		dr.getCell("numericColumn").setStyleAlias("alias1");
 		Date date1 = getDate(2012, 11, 31);
 		dr.put("dateColumn", date1);
 
 		dr = formData.appendDataRow("newAlias");
 		dr.setManagedByScripts(true);
 		dr.put("stringColumn", "Строка 2");
+		dr.getCell("stringColumn").setStyleAlias("alias1");
 		dr.put("numericColumn", 2.02);
+		dr.getCell("numericColumn").setStyleAlias("alias1");
 		Date date2 = getDate(2013, 0, 1);
 		dr.put("dateColumn", date2);
 
@@ -201,7 +199,7 @@ public class FormDataDaoTest {
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
 		formData.setReportPeriodId(1);
-		
+
 		return formData;
 	}
 
@@ -227,6 +225,33 @@ public class FormDataDaoTest {
 		Assert.assertEquals(1, dr.getCell("stringColumn").getColSpan());
 		Assert.assertEquals(1, dr.getCell("stringColumn").getRowSpan());
 
+	}
+
+	@Test
+	public void stylesSaveGetSuccess() {
+
+		FormData formData = fillFormData();
+
+		DataRow dr = formData.getDataRow("newAlias");
+		dr.getCell("numericColumn").setStyleAlias("alias2");
+
+		long formDataId = formDataDao.save(formData);
+		formData = formDataDao.get(formDataId);
+
+		dr = formData.getDataRows().get(0);
+		Assert.assertEquals("alias1", dr.getCell("numericColumn").getStyleAlias());
+
+		dr = formData.getDataRows().get(1);
+		Assert.assertEquals("alias2", dr.getCell("numericColumn").getStyleAlias());
+		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyleAlias());
+	}
+
+	@Test(expected = DaoException.class)
+	public void stylesSaveErrorStyleNotExist() {
+		FormData formData = fillFormData();
+		DataRow dr = formData.getDataRow("newAlias");
+		dr.getCell("numericColumn").setStyleAlias("not existing style");
+		formDataDao.save(formData);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

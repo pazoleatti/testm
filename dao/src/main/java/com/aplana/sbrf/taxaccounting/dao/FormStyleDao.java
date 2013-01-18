@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dao для работы с коллекции стилей
@@ -17,6 +18,21 @@ public interface FormStyleDao {
 	 * @return список стилей формы
 	 */
 	List<FormStyle> getFormStyles(int formId);
+
+	/**
+	 * Получить мапку, где ключ - id стиля, значение - стиль
+	 * @param formId идентификатор формы
+	 * @return мапка
+	 */
+	Map<Integer, FormStyle> getIdToFormStyleMap(int formId);
+
+	/**
+	 * Получить мапку, где ключ - alias стиля, значение - стиль
+	 * @param formId идентификатор формы
+	 * @return мапка
+	 */
+	Map<String, FormStyle> getAliasToFormStyleMap(int formId);
+
 	/**
 	 * Сохранить список стилей формы
 	 * @param form форма
