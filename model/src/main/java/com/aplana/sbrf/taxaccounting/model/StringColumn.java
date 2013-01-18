@@ -19,7 +19,7 @@ public class StringColumn extends Column  implements Serializable {
 	 */
 	public static final int MAX_LENGTH = 500;
 	private String dictionaryCode;
-	private int maxLength;
+	private int maxLength = MAX_LENGTH;
 
 	/**
 	 * Получить код справочника, связанного с данным столбцов.
@@ -50,6 +50,7 @@ public class StringColumn extends Column  implements Serializable {
 
 	/**
 	 * Получить максимально допустимую длину строки в этом столбце
+	 * По умолчанию значение равно {@link #MAX_LENGTH} 
 	 * @return максимальная длина строки
 	 */
 	public int getMaxLength() {
@@ -59,6 +60,7 @@ public class StringColumn extends Column  implements Serializable {
 	/**
 	 * Задать максимально допустимую длину строки
 	 * Значение должно быть больше нуля и меньше либо равно, чем {@link #MAX_LENGTHЪ -  предел, задаваемый БД
+	 * По умолчанию значение равно {@link #MAX_LENGTH}
 	 * @param maxLength максимальная длина строки
 	 * @throws IllegalArgumentException если maxLength меньше или равно нулю, или если оно больше, чем {#link MAX_LENGTH}
 	 */
