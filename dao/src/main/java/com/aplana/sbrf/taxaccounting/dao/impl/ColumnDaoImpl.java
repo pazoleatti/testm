@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -33,6 +34,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			} else if ("S".equals(type)) {
 				result = new StringColumn();
 				((StringColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
+				((StringColumn) result).setMaxLength(rs.getInt("max_length"));
 			} else {
 				throw new IllegalArgumentException("Unknown column type: " + type);
 			}
@@ -60,6 +62,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	@Transactional(readOnly = false)
 	@Override
 	public void saveFormColumns(final FormTemplate form) {
+		final Logger log = new Logger();
+
 		int formId = form.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
@@ -108,8 +112,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name) " +
-			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name, max_length) " +
+			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -129,6 +133,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 					if (col instanceof StringColumn) {
 						ps.setString(8, ((StringColumn) col).getDictionaryCode());
+						//TODO: Продумать данный момент. Сейчас, если максимальное значение превышается, то мы
+						// "пропускаем" значение в базу и просто выводим предупреждение.
+						if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
+							log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
+						}
+						ps.setInt(11, ((StringColumn) col).getMaxLength());
 					} else if (col instanceof NumericColumn) {
 						ps.setString(8, ((NumericColumn) col).getDictionaryCode());
 					} else {
@@ -148,7 +158,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
-					"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ? " +
+					"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ? " +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
@@ -169,6 +179,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 							if (col instanceof StringColumn) {
 								ps.setString(8, ((StringColumn)col).getDictionaryCode());
+								ps.setInt(11, ((StringColumn) col).getMaxLength());
 							} else if(col instanceof NumericColumn){
 								ps.setString(8, ((NumericColumn)col).getDictionaryCode());
 							} else {
@@ -177,7 +188,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 							ps.setInt(9, col.getOrder());
 							ps.setString(10, col.getGroupName());
-							ps.setInt(11, col.getId());
+							ps.setInt(12, col.getId());
 						}
 
 						@Override

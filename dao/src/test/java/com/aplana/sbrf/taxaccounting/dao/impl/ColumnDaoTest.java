@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,7 @@ public class ColumnDaoTest {
 		Assert.assertEquals("Строковый столбец", listOfColumnsInDb.get(FIST_COLUMN).getName());
 		Assert.assertEquals(1, listOfColumnsInDb.get(FIST_COLUMN).getOrder());
 		Assert.assertEquals("stringColumn", listOfColumnsInDb.get(FIST_COLUMN).getAlias());
+		Assert.assertEquals(500, ((StringColumn)listOfColumnsInDb.get(FIST_COLUMN)).getMaxLength());
 
 		Assert.assertEquals(Integer.valueOf(2), listOfColumnsInDb.get(SECOND_COLUMN).getId());
 		Assert.assertEquals("Числовой столбец", listOfColumnsInDb.get(SECOND_COLUMN).getName());
