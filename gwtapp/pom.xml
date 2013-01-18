@@ -161,7 +161,7 @@
 					<style>${gwt.style}</style>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<copyWebapp>true</copyWebapp>
-					<runTarget>Main.html</runTarget>
+					<runTarget>Main.jsp</runTarget>
 					<modules>
 						<module>com.aplana.sbrf.taxaccounting.web.main.Main</module>
 					</modules>
