@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateInfoUiHandlers;
 import com.google.inject.Inject;
@@ -15,7 +16,7 @@ import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresenter.MyView, FormTemplateInfoPresenter.MyProxy>
-		implements FormTemplateInfoUiHandlers, FormTemplateSetEvent.MyHandler{
+		implements FormTemplateInfoUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
 	/**
 	 * {@link FormTemplateInfoPresenter}'s proxy.
 	 */
@@ -30,6 +31,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
 		void setViewData(String version, boolean numberedColumns);
+		void onFlush();
 	}
 
 	private FormTemplate formTemplate;
@@ -45,6 +47,12 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
 		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns());
+	}
+
+	@ProxyEvent
+	@Override
+	public void onFlush(FormTemplateFlushEvent event) {
+		getView().onFlush();
 	}
 
 	@Override

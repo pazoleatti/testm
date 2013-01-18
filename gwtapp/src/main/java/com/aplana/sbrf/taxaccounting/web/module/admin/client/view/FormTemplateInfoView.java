@@ -36,13 +36,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		numberedColumnsBox.setValue(numberedColumns);
 	}
 
-	@UiHandler("versionBox")
-	void setVersionBox(ChangeEvent event){
+	@Override
+	public void onFlush() {
 		getUiHandlers().setVersion(versionBox.getValue());
-	}
-
-	@UiHandler("numberedColumnsBox")
-	void setNumberedColumnsBox(ClickEvent event){
 		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
 	}
 
