@@ -1,21 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.Color;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateStylePresenter;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleUiHandlers>
 		implements FormTemplateStylePresenter.MyView, Editor<FormStyle> {
@@ -28,6 +34,15 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	private final Widget widget;
 	private final MyDriver driver;
 	private List<FormStyle> styles;
+	private static final Map<Color, String> colorMap = new HashMap<Color, String>();
+
+	static {
+		colorMap.put(Color.WHITE, "белый");
+		colorMap.put(Color.BLACK, "черный");
+		colorMap.put(Color.BLUE, "синий");
+		colorMap.put(Color.GREEN, "зеленый");
+		colorMap.put(Color.RED, "красный");
+	}
 
 	@UiField
 	ListBox styleListBox;
@@ -47,8 +62,37 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiField
 	TextBox alias;
 
+	@UiField(provided = true)
+	ValueListBox<Color> fontColor;
+
+	@UiField(provided = true)
+	ValueListBox<Color> backColor;
+
 	@Inject
+	@UiConstructor
 	public FormTemplateStyleView(final Binder uiBinder, final MyDriver driver) {
+		fontColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
+			@Override
+			public String render(Color object) {
+				if (object == null) {
+					return "";
+				}
+				return colorMap.get(object);
+			}
+		});
+		fontColor.setAcceptableValues(colorMap.keySet());
+
+		backColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
+			@Override
+			public String render(Color object) {
+				if (object == null) {
+					return "";
+				}
+				return colorMap.get(object);
+			}
+		});
+		backColor.setAcceptableValues(colorMap.keySet());
+
 		widget = uiBinder.createAndBindUi(this);
 		this.driver = driver;
 		this.driver.initialize(this);
