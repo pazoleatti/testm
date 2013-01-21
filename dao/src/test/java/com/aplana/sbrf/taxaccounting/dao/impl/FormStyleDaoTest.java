@@ -61,7 +61,7 @@ public class FormStyleDaoTest {
 
 	@Test
 	public void saveFormStyles(){
-		//Given FORM_ID_FOR_TEST, listOfStylesInDb
+		//Given FORM_ID_FOR_TEST
 		List<FormStyle> formStyleList = formStyleDao.getFormStyles(FORM_ID_FOR_TEST);
 		//Создадим один новый стиль, которого нету в БД
 		FormStyle newFormsStyle = new FormStyle();

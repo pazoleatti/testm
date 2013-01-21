@@ -141,8 +141,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						ps.setInt(11, ((StringColumn) col).getMaxLength());
 					} else if (col instanceof NumericColumn) {
 						ps.setString(8, ((NumericColumn) col).getDictionaryCode());
+						ps.setNull(11, Types.INTEGER);
 					} else {
 						ps.setNull(8, Types.VARCHAR);
+						ps.setNull(11, Types.INTEGER);
 					}
 
 					ps.setInt(9, col.getOrder());
@@ -182,8 +184,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								ps.setInt(11, ((StringColumn) col).getMaxLength());
 							} else if(col instanceof NumericColumn){
 								ps.setString(8, ((NumericColumn)col).getDictionaryCode());
+								ps.setNull(11, Types.INTEGER);
 							} else {
 								ps.setNull(8, Types.VARCHAR);
+								ps.setNull(11, Types.INTEGER);
 							}
 
 							ps.setInt(9, col.getOrder());

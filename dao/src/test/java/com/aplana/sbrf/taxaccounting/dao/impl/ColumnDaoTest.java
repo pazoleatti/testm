@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -54,18 +55,14 @@ public class ColumnDaoTest {
 
 	@Test
 	public void saveFormColumns(){
-		//TODO: переделать тест, чтобы не падал! Займусь после того как сделаю:
-		// SBRFACCTAX-963	SBRFACCTAX-881 Реализовать поддержку стилей на уровне DAO для данных формы (CELL_STYLE)
-		// SBRFACCTAX-962	SBRFACCTAX-911 Добавить в StringColumn поле maxLength
-	/*
-		//Given FORM_ID_FOR_TEST, listOfStylesInDb
+		//Given FORM_ID_FOR_TEST
 		List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
-		//Создадим один новый стиль, которого нету в БД
+		//Создадим column, которого нету в БД
 		StringColumn newColumn = new StringColumn();
 		newColumn.setAlias("newColumn");
 		newColumn.setName("Новый столбец");
 		newColumn.setOrder(4);
-		newColumn.setMaxLength(10);
+		newColumn.setMaxLength(100);
 		columnList.add(newColumn);
 
 		FormTemplate formTemplate = new FormTemplate();
@@ -84,6 +81,6 @@ public class ColumnDaoTest {
 		Assert.assertEquals("newColumn", newColumn.getAlias());
 		Assert.assertEquals("Новый столбец", newColumn.getName());
 		Assert.assertEquals(4, newColumn.getOrder());
-	*/
+		Assert.assertEquals(100, newColumn.getMaxLength());
 	}
 }
