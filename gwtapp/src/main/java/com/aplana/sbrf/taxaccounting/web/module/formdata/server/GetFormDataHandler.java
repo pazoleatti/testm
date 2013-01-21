@@ -2,25 +2,24 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import java.util.ArrayList;
 
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -48,7 +47,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	private DepartmentDao departmentDao;
 	
 	@Autowired
-	FormTemplateDao formTemplateDao;
+	FormTemplateService formTemplateService;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -68,7 +67,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger);
 		}
 		if(action.getFormDataId() == Long.MAX_VALUE){
-			formData = formDataService.createFormData(logger, userId, formTemplateDao.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
+			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId().intValue()).getName());
@@ -88,8 +87,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
 			result.setFormDataAccessParams(accessParams);
 		}
-		result.setNumberedHeader(formTemplateDao.get(formData.getFormTemplateId()).isNumberedColumns());
-		result.setAllStyles(formTemplateDao.get(formData.getFormTemplateId()).getStyles());
+		result.setNumberedHeader(formTemplateService.get(formData.getFormTemplateId()).isNumberedColumns());
+		result.setAllStyles(formTemplateService.get(formData.getFormTemplateId()).getStyles());
 		result.setLogEntries(logger.getEntries());
 		result.setFormData(formData);
 

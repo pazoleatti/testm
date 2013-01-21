@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.server;
 
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListAction;
 import com.aplana.sbrf.taxaccounting.web.module.admin.shared.FormListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Get all form types.
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FormListHandler extends AbstractActionHandler<FormListAction, FormListResult> {
-    private FormTemplateDao formTemplateDao;
+	@Autowired
+	private FormTemplateService formTemplateService;
 
     public FormListHandler() {
         super(FormListAction.class);
@@ -25,17 +27,12 @@ public class FormListHandler extends AbstractActionHandler<FormListAction, FormL
     @Override
     public FormListResult execute(FormListAction formListAction, ExecutionContext executionContext) throws ActionException {
         FormListResult result = new FormListResult();
-        result.setForms(formTemplateDao.listAll());
+        result.setForms(formTemplateService.listAll());
         return result;
     }
 
     @Override
     public void undo(FormListAction formListAction, FormListResult formListResult, ExecutionContext executionContext) throws ActionException {
         // Nothing!!!
-    }
-
-    @Autowired
-    public void setFormDao(FormTemplateDao formDao) {
-        this.formTemplateDao = formDao;
     }
 }
