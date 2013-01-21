@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-public class NumberValidationStrategy implements MaskedTextInputCell.ValidationStrategy {
+public class NumberValidationStrategy implements ValidatedInputCell.ValidationStrategy {
 	int precision;
 	public NumberValidationStrategy(int precision) {
 		this.precision = precision;

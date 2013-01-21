@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 
-public class MaskedTextInputCell extends KeyPressableTextInputCell {
+public class ValidatedInputCell extends KeyPressableTextInputCell {
 	public interface ValidationStrategy {
 		public boolean matches(String valueToCheck);
 	}
@@ -14,10 +14,18 @@ public class MaskedTextInputCell extends KeyPressableTextInputCell {
 	private ValidationStrategy overallFormValidationStrategy;
 	private ValidationStrategy validKeystrokeValidationStrategy;
 
-	public MaskedTextInputCell(int precision) {
+	public ValidatedInputCell(ValidationStrategy overallFormValidationStrategy, ValidationStrategy validKeystrokeValidationStrategy) {
+		if (overallFormValidationStrategy != null) {
+			this.overallFormValidationStrategy = overallFormValidationStrategy;
+		} else {
+			this.overallFormValidationStrategy = new DefaultValidationStrategy();
+		}
 
-		this.overallFormValidationStrategy = new NumberValidationStrategy(precision);
-		this.validKeystrokeValidationStrategy = new RegularExpressionValidationStrategy("[0-9.-]");
+		if (validKeystrokeValidationStrategy != null) {
+			this.validKeystrokeValidationStrategy = validKeystrokeValidationStrategy;
+		} else {
+			this.validKeystrokeValidationStrategy = new DefaultValidationStrategy();
+		}
 	}
 
 	@Override
@@ -70,13 +78,13 @@ public class MaskedTextInputCell extends KeyPressableTextInputCell {
 		    } else if (e.clipboardData && e.clipboardData.getData) {
 			    pastedText = e.clipboardData.getData('text/plain');
 		    }
-		    temp.@com.aplana.sbrf.taxaccounting.web.widget.cell.MaskedTextInputCell::handlePaste(Ljava/lang/String;Lcom/google/gwt/dom/client/InputElement;)(pastedText, elementID);
+		    temp.@com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell::handlePaste(Ljava/lang/String;Lcom/google/gwt/dom/client/InputElement;)(pastedText, elementID);
 	    }
     }-*/;
 
 	private void handlePaste(String value, final InputElement input) {
 		final String oldValue = input.getValue();
-		if (!overallFormValidationStrategy.matches(value)) {
+		if (!overallFormValidationStrategy.matches(oldValue+value)) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 				@Override
 				public void execute() {

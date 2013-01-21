@@ -174,7 +174,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	 * @param rowSpan количество объединяемых строк
 	 * @param colSpan количество объединяемых столбцов
 	 */
-	//TODO: Необходимо добавить проверку на пересекающиеся диапазоны спана
 	private void spanCells(TableCellBuilder out, Integer rowIndex, int colIndex, int rowSpan, int colSpan) {
 		out.rowSpan(rowSpan);
 		out.colSpan(colSpan);

@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.DefaultValidationStrategy;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.TextValidationStrategy;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 
@@ -16,7 +19,8 @@ import com.google.gwt.cell.client.FieldUpdater;
 public class EditTextColumn extends DataRowColumn<String> {
 
     public EditTextColumn(StringColumn col) {
-        super(new EditTextCell(), col);
+        super(new ValidatedInputCell(new TextValidationStrategy(col.getMaxLength()),
+		        new DefaultValidationStrategy()), col);
         this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
 			@Override
 			public void update(int index, DataRow dataRow, String value) {

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-public class RegularExpressionValidationStrategy implements MaskedTextInputCell.ValidationStrategy {
+public class RegularExpressionValidationStrategy implements ValidatedInputCell.ValidationStrategy {
 	private String regularExpression;
 	public RegularExpressionValidationStrategy(String regularExpression) {
 		this.regularExpression = regularExpression;
