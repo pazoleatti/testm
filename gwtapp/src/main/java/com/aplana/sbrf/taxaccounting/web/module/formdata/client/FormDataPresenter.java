@@ -95,6 +95,7 @@ public class FormDataPresenter extends
 							getView().setColumnsData(formData.getFormColumns(), readOnlyMode);
 							getView().setRowsData(formData.getDataRows());
 							getView().addCustomHeader(result.isNumberedHeader());
+							getView().addCustomTableStyles(result.getAllStyles());
 							TitleUpdateEvent.fire(
 									this,
 									readOnlyMode ? "Налоговая форма" : "Редактирование налоговой формы",

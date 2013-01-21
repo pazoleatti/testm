@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.DivBuilder;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
@@ -30,12 +32,14 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 	private Map<Integer, List<Integer>> globalSpans = new HashMap<Integer, List<Integer>>();
 
+	private final List<FormStyle> allStyles;
+
 	/**
 	 * Construct a new table builder.
 	 *
 	 * @param cellTable the table this builder will build rows for
 	 */
-	public CustomTableBuilder(AbstractCellTable<T> cellTable) {
+	public CustomTableBuilder(AbstractCellTable<T> cellTable, List<FormStyle> allStyles) {
 		super(cellTable);
 
 		AbstractCellTable.Style style = cellTable.getResources().style();
@@ -48,6 +52,8 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		firstColumnStyle = " " + style.firstColumn();
 		lastColumnStyle = " " + style.lastColumn();
 		selectedCellStyle = " " + style.selectedRowCell();
+
+		this.allStyles = allStyles;
 
 	}
 
@@ -129,6 +135,19 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
+				FormStyle currentCellStyle = null;
+				for (FormStyle oneStyle : allStyles) {
+					if (oneStyle.getAlias().equals(currentCell.getStyleAlias())) {
+						currentCellStyle = oneStyle;
+						break;
+					}
+				}
+				if (currentCellStyle != null) {
+					applyOurCustomStyles(td, currentCellStyle);
+				} else {
+					// Error
+				}
+
 				// Add the inner div.
 				DivBuilder div = td.startDiv();
 				div.style().outlineStyle(Style.OutlineStyle.NONE).endStyle();
@@ -171,5 +190,23 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 			globalSpans.put(rowIndex+1+rsp, spn);
 		}
 
+	}
+
+	private void applyOurCustomStyles(TableCellBuilder out, FormStyle ourStyle) {
+		out.style()
+//
+				.fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
+				.fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)
+				.trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()))
+				.trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
+			.endStyle();
+	}
+
+	private String convertColorToRGBString(Color color) {
+		return "rgb(" +
+					color.getRed() + "," +
+					color.getGreen() + "," +
+					color.getBlue() +
+				")";
 	}
 }

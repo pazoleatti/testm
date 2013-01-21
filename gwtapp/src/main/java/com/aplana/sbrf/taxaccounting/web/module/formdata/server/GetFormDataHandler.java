@@ -89,9 +89,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			result.setFormDataAccessParams(accessParams);
 		}
 		result.setNumberedHeader(formTemplateDao.get(formData.getFormTemplateId()).isNumberedColumns());
+		result.setAllStyles(formTemplateDao.get(formData.getFormTemplateId()).getStyles());
 		result.setLogEntries(logger.getEntries());
 		result.setFormData(formData);
-		
+
 		return result;
 	}
 

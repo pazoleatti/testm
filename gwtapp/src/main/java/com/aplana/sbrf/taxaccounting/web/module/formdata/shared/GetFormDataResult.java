@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 /**
@@ -26,7 +27,8 @@ public class GetFormDataResult implements Result {
 
 	private boolean numberedHeader;
 
-	
+	private List<FormStyle> allStyles;
+
 	public FormData getFormData() {
 		return formData;
 	}
@@ -73,5 +75,13 @@ public class GetFormDataResult implements Result {
 
 	public void setNumberedHeader(boolean numberedHeader) {
 		this.numberedHeader = numberedHeader;
+	}
+
+	public List<FormStyle> getAllStyles() {
+		return allStyles;
+	}
+
+	public void setAllStyles(List<FormStyle> allStyles) {
+		this.allStyles = allStyles;
 	}
 }
