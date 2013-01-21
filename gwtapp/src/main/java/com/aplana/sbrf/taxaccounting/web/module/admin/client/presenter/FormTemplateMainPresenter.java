@@ -28,7 +28,6 @@ import java.util.Set;
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy> implements FormTemplateMainUiHandlers {
 
-	@Title("Администрирование")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
 	public interface MyProxy extends ProxyPlace<FormTemplateMainPresenter>, Place {
@@ -58,23 +57,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
-	}
-
-	/**
-	 * Подготовка формы. Здесь мы получаем с сервера шаблон формы и биндим его на форму.
-	 *
-	 * @param request запрос, из него мы получаем идентификатор шаблона формы.
-	 */
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-
-		int formId = Integer.valueOf(request.getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
-        placeManager.revealPlace(
-				new PlaceRequest(AdminConstants.NameTokens.formTemplateInfoPage).with(
-						AdminConstants.NameTokens.formTemplateId, String.valueOf(formId)
-				)
-		);
 	}
 
 	@Override

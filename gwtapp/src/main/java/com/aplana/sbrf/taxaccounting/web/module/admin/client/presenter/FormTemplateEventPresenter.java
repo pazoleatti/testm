@@ -54,15 +54,6 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 	}
 
 	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-
-		if (formTemplate != null) {
-			getView().selectEvent();
-		}
-	}
-
-	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 	}

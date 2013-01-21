@@ -81,7 +81,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	@Override
 	public void selectForm(Integer id) {
 			placeManager.revealPlace(
-					new PlaceRequest(AdminConstants.NameTokens.formTemplateMainPage).with(
+					new PlaceRequest(AdminConstants.NameTokens.formTemplateInfoPage).with(
 							AdminConstants.NameTokens.formTemplateId, String.valueOf(id)
 					)
 			);

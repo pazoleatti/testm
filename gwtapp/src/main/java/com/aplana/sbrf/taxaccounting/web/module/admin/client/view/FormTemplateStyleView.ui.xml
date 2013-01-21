@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:c='urn:import:com.aplana.sbrf.taxaccounting.web.widget.colorpicker'>
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
     <ui:style>
         .marginLeft {
             margin-left: 50px;

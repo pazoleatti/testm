@@ -83,6 +83,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	ValueListBox<String> numericDictionaryCodeBox;
 
 	@UiField
+	IntegerBox maxLengthBox;
+
+	@UiField
 	TextBox nameBox;
 
 	@UiField(provided = true)
@@ -93,6 +96,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiField
 	HorizontalPanel dictionaryCodePanel;
+
+	@UiField
+	HorizontalPanel maxLengthPanel;
 
 	@Inject
 	@UiConstructor
@@ -253,6 +259,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 	}
 
+	@UiHandler("maxLengthBox")
+	public void onMaxLengthBox(KeyUpEvent event) {
+		((StringColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(maxLengthBox.getValue());
+	}
+
 	@Override
 	public void setColumnList(List<Column> columnList) {
 		columns = columnList;
@@ -293,18 +304,23 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		precisionPanel.setVisible(false);
 		dictionaryCodePanel.setVisible(false);
 		stringDictionaryCodeBox.setVisible(false);
+		maxLengthPanel.setVisible(false);
 		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
 
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			String code = ((StringColumn) column).getDictionaryCode();
+			int maxLength = ((StringColumn) column).getMaxLength();
+
 			if (stringDictionaryCodeMap.containsKey(code)) {
 				stringDictionaryCodeBox.setValue(code);
 			}
 			else {
 				stringDictionaryCodeBox.setValue(null);
 			}
+			maxLengthBox.setValue(maxLength);
 
+			maxLengthPanel.setVisible(true);
 			stringDictionaryCodeBox.setVisible(true);
 			dictionaryCodePanel.setVisible(true);
 		}

@@ -56,11 +56,6 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	}
 
 	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-	}
-
-	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 	}

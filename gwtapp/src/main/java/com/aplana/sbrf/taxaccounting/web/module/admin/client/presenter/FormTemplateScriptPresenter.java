@@ -57,11 +57,6 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	}
 
 	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
-	}
-
-	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 
