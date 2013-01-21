@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,10 +9,9 @@ import java.util.Map;
  * Описание налоговой формы (шаблон налоговой формы)
   * @author dsultanbekov
  */
-public class FormTemplate implements Serializable {
+public class FormTemplate extends IdentityObject<Integer> {
 	private static final long serialVersionUID = 1L;
 
-	private Integer id;
 	private FormType type;
 	private String version;
 	private Integer edition;
@@ -32,22 +30,6 @@ public class FormTemplate implements Serializable {
 	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется <code>java.util.List</code>.
 	 */
 	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
-
-	/**
-	 * Получить идентификатор шаблона
-	 * @return идентификатор шаблона НФ, если null, то означает, что форма еще не сохранялась в БД
-	 */
-	public Integer getId() {
-		return id;
-	}
-
-	/**
-	 * Задать идентификатор шаблона
-	 * @return значение идентификатора шаблона НФ, если шаблон формы еще не сохранялась в БД, у идентификатора должно быть значение null
-	 */	
-	public void setId(int id) {
-		this.id = id;
-	}
 
 	/**
 	 * Возвращает список {@link Column столбцов}, образующих налоговую форму.

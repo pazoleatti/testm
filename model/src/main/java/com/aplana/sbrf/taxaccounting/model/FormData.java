@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,9 +7,9 @@ import java.util.List;
  * Данные по отчётной форме
  * @author dsultanbekov
  */
-public class FormData implements Serializable {
+public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
-	private Long id;
+	
 	private WorkflowState state;
 	private FormDataKind kind;
 	private Integer departmentId;
@@ -28,14 +27,6 @@ public class FormData implements Serializable {
 		initFormTemplateParams(form);
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public WorkflowState getState() {
 		return state;
 	}
