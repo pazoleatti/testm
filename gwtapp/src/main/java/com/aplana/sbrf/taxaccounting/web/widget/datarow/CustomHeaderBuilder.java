@@ -11,9 +11,11 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.cell.client.Cell.Context;
 
 public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> {
-	boolean numberedColumns;
-	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns) {
+	private boolean numberedColumns;
+	private boolean offset = false;
+	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns, boolean offset) {
 		super(table, isFooter);
+		this.offset = offset;
 		this.numberedColumns = numberedColumns;
     }
 	@Override
@@ -89,8 +91,15 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 	 */
 	private void makeNumbered(TableRowBuilder out) {
 		Style style = getTable().getResources().style();
+		int columnCount = getTable().getColumnCount();
 		out.startTR();
-		for (int col = 1; col <= getTable().getColumnCount(); col++) {
+
+		if (offset) {
+			out.startTH().className(style.header()).text("").endTH();
+			columnCount--;
+		}
+
+		for (int col = 1; col <= columnCount; col++) {
 			out.startTH().className(style.header()).text(String.valueOf(col)).endTH();
 		}
 		out.endTR();
