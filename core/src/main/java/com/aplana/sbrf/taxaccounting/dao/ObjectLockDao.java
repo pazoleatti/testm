@@ -35,8 +35,8 @@ public interface ObjectLockDao {
 	 * @param id идентификатор объекта
 	 * @param clazz тип объекта
 	 * @param userId идентификатор пользователя, снимающего блокировку
-	 * @throws LockException если объект не заблокирован, или заблокирован другим пользователем. Истёкшие по тайм-ауту блокировки
-	 * снимаются без выбрасывания исключения
+	 * @throws LockException если объект не заблокирован, или заблокирован другим пользователем. Истёкшие по тайм-ауту блокировки, созданные 
+	 * текущим пользователем снимаются без выбрасывания исключения
 	 */	
 	<IdType extends Number> void unlockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
 }
