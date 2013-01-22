@@ -180,7 +180,10 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	@UiHandler("selectDepartmentButton")
 	void onSelectDepartmentButtonClicked(ClickEvent clickEvent){
 		DepartmentSelectionTree departmentSelection = new DepartmentSelectionTree(availableDepartments);
-		departmentSelection.show(clickEvent.getX(), clickEvent.getY() + 300);
+		Widget popup = selectedDepartmentTextBox.asWidget();
+		departmentSelection.show(popup.getAbsoluteLeft(),
+				popup.getAbsoluteTop() + popup.getOffsetHeight()
+		);
 	}
 
 
