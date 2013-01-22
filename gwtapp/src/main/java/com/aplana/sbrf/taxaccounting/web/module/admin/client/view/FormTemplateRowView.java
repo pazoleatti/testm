@@ -89,7 +89,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			}
 		});
 		formDataTable.addColumn(editTextAliasColumn, "Код строки");
-		formDataTable.setColumnWidth(editTextAliasColumn, "4em");
+		formDataTable.setColumnWidth(editTextAliasColumn, "10em");
 
 		//create form columns
 		for (Column col : columnsData) {
