@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 import java.util.List;
 

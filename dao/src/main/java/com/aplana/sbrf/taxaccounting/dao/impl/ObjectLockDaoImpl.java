@@ -15,11 +15,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.LockException;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 @Repository
 @Transactional

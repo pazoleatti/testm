@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

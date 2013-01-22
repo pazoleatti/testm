@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})

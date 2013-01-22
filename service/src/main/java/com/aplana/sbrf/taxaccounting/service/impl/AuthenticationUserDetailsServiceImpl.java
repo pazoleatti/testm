@@ -14,9 +14,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 public class AuthenticationUserDetailsServiceImpl implements
 		AuthenticationUserDetailsService<Authentication> {

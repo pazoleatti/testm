@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.security;
+package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 

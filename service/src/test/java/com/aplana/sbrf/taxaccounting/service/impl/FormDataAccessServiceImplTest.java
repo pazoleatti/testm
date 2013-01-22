@@ -3,10 +3,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;

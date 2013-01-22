@@ -1,6 +1,6 @@
-package com.aplana.sbrf.taxaccounting.dao.security;
+package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 /**
  * DAO-интерфейс для работы с пользователями системы

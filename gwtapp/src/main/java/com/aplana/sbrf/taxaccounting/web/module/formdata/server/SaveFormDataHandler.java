@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;

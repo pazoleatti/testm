@@ -8,6 +8,6 @@
 	<mappers>
 		<mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/DepartmentMapper.xml"/>
         <mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/ReportPeriodMapper.xml"/>
-		<mapper resource="com/aplana/sbrf/taxaccounting/dao/security/mapper/TAUserMapper.xml"/>
+		<mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/TAUserMapper.xml"/>
 	</mappers>	
 </configuration>

@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}

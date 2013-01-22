@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.aplana.sbrf.taxaccounting.dao.security.mapper.TAUserMapper">
-	<resultMap type="com.aplana.sbrf.taxaccounting.model.security.TAUser" id="userMap">
+<mapper namespace="com.aplana.sbrf.taxaccounting.dao.mapper.TAUserMapper">
+	<resultMap type="com.aplana.sbrf.taxaccounting.model.TAUser" id="userMap">
 		<result property="id"/>
 		<result property="login"/>		
 		<result property="name"/>

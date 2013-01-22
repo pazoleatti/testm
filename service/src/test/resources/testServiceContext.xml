@@ -31,6 +31,6 @@
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.security.TAUserDao"/>
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TAUserDao"/>
 	</bean>
 </beans>

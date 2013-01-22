@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.security.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import java.util.List;
 
@@ -9,11 +9,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.security.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.security.mapper.TAUserMapper;
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.dao.mapper.TAUserMapper;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 @Repository
 @Transactional(readOnly=true)

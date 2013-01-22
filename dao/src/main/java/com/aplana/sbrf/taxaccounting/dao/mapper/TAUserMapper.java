@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.security.mapper;
+package com.aplana.sbrf.taxaccounting.dao.mapper;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 
-import com.aplana.sbrf.taxaccounting.model.security.TARole;
-import com.aplana.sbrf.taxaccounting.model.security.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 /**
  * Mapper-интерфейс для работы с данными по пользователям и их ролями

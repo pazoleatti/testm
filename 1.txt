@@ -1,0 +1,988 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] taxaccounting
+[INFO] model
+[INFO] core
+[INFO] dao
+[INFO] test-utils
+[INFO] service
+[INFO] dynacache-spring
+[INFO] gwtapp
+[INFO] taxaccounting-ear
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building taxaccounting 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building model 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ model ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory D:\workspace_tax\taxaccounting\model\src\main\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ model ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ model ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory D:\workspace_tax\taxaccounting\model\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ model ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ model ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\model\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.aplana.sbrf.taxaccounting.model.ColorTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 sec
+Running com.aplana.sbrf.taxaccounting.model.FormDataKindTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+Running com.aplana.sbrf.taxaccounting.model.FormTemplateTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.aplana.sbrf.taxaccounting.model.TaxTypeTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+Running com.aplana.sbrf.taxaccounting.model.WorkflowMoveTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec
+Running com.aplana.sbrf.taxaccounting.model.WorkflowStateTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+
+Results :
+
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ model ---
+[INFO] 
+[INFO] >>> maven-source-plugin:2.2:jar (attach-sources) @ model >>>
+[INFO] 
+[INFO] <<< maven-source-plugin:2.2:jar (attach-sources) @ model <<<
+[INFO] 
+[INFO] --- maven-source-plugin:2.2:jar (attach-sources) @ model ---
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building core 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ core ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ core ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory D:\workspace_tax\taxaccounting\core\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ core ---
+[INFO] No tests to run.
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\core\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+
+Results :
+
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ core ---
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dao 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ dao ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 5 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ dao ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ dao ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 31 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ dao ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ dao ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\dao\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.aplana.sbrf.taxaccounting.dao.dictionary.impl.TransportTaxDaoTest
+18.01.2013 10:41:38 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.dictionary.impl.TransportTaxDaoTest]: using defaults.
+18.01.2013 10:41:39 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/dictionary/impl/TransportTaxDaoTest.xml]
+18.01.2013 10:41:39 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:39 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:39 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@3f77b3cd: startup date [Fri Jan 18 10:41:39 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:39 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6c3c9c31: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:39 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 5 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 3 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 3 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 77 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 13 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/TransportTaxData.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/TransportTaxData.sql] in 13 ms.
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.954 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.ColumnDaoTest
+18.01.2013 10:41:40 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.ColumnDaoTest]: using defaults.
+18.01.2013 10:41:40 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/FormTemplateDaoTest.xml]
+18.01.2013 10:41:40 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:40 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:40 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@31ca1a68: startup date [Fri Jan 18 10:41:40 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:40 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@5c76458f: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 0 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:40 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 48 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 115 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 13 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormType.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormType.sql] in 3 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormTemplate.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormTemplate.sql] in 9 ms.
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.398 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.DepartmentDaoTest
+18.01.2013 10:41:41 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.DepartmentDaoTest]: using defaults.
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/DepartmentDaoTest.xml]
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:41 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@41697023: startup date [Fri Jan 18 10:41:41 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:41 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@49e4585: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 30 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 72 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 10 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormType.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormType.sql] in 1 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/Department.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/Department.sql] in 2 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/DepartmentFormType.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/DepartmentFormType.sql] in 2 ms.
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.493 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormDataDaoTest
+18.01.2013 10:41:41 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormDataDaoTest]: using defaults.
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/FormDataDaoTest.xml]
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:41 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:41 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@5b31fd9: startup date [Fri Jan 18 10:41:41 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:41 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@14a97f68: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 0 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:41 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 31 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 70 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 11 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormType.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormType.sql] in 1 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormTemplate.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormTemplate.sql] in 2 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/Department.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/Department.sql] in 1 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/ReportPeriod.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/ReportPeriod.sql] in 2 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormData.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormData.sql] in 4 ms.
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.505 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormDataSearchDaoTest
+18.01.2013 10:41:42 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormDataSearchDaoTest]: using defaults.
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/FormDataSearchDaoTest.xml]
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:42 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@44ac5e: startup date [Fri Jan 18 10:41:42 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:42 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@b90ffa7: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 0 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 35 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 54 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 12 ms.
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormDataSearch.sql]
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormDataSearch.sql] in 9 ms.
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.595 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormDataWorkflowDaoTest
+18.01.2013 10:41:42 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormDataWorkflowDaoTest]: using defaults.
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/FormDataWorkflowDaoTest.xml]
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:42 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:42 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@4eb0a518: startup date [Fri Jan 18 10:41:42 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:42 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@45ea414e: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:42 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 2 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 30 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 60 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 11 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormType.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormType.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormTemplate.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormTemplate.sql] in 2 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/Department.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/Department.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/ReportPeriod.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/ReportPeriod.sql] in 1 ms.
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.391 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormStyleDaoTest
+18.01.2013 10:41:43 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormStyleDaoTest]: using defaults.
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormTemplateDaoTest
+18.01.2013 10:41:43 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormTemplateDaoTest]: using defaults.
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.01 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.FormTypeDaoTest
+18.01.2013 10:41:43 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.FormTypeDaoTest]: using defaults.
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/FormTypeDaoTest.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:43 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@4daa34dc: startup date [Fri Jan 18 10:41:43 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:43 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@5b181df3: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 24 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 53 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 7 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/FormType.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/FormType.sql] in 1 ms.
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.308 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.NumericDictionaryDataProviderTest
+18.01.2013 10:41:43 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.NumericDictionaryDataProviderTest]: using defaults.
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/NumericDictionaryDataProviderTest.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:43 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@5406f513: startup date [Fri Jan 18 10:41:43 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:43 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@8fd9b4d: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 2 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 30 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 58 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 9 ms.
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/TransportEcoClass.sql]
+18.01.2013 10:41:43 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/TransportEcoClass.sql] in 3 ms.
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.371 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.ReportPeriodDaoTest
+18.01.2013 10:41:43 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.ReportPeriodDaoTest]: using defaults.
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/ReportPeriodDaoTest.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:43 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@1558473e: startup date [Fri Jan 18 10:41:44 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@1cf536e8: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 0 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 26 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 49 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 9 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/ReportPeriod.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/ReportPeriod.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/ReportPeriod-dirty.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/ReportPeriod-dirty.sql] in 2 ms.
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.368 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.StringDictionaryDataProviderTest
+18.01.2013 10:41:44 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.StringDictionaryDataProviderTest]: using defaults.
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/StringDictionaryDataProviderTest.xml]
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@70d18a80: startup date [Fri Jan 18 10:41:44 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6e6f83e2: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 21 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 57 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 12 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/TransortOkato.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/TransortOkato.sql] in 3 ms.
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.369 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.TAUserDaoTest
+18.01.2013 10:41:44 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.dao.impl.TAUserDaoTest]: using defaults.
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao/impl/TAUserDaoTest.xml]
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testDaoContext.xml]
+18.01.2013 10:41:44 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/dao.xml]
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@4965391b: startup date [Fri Jan 18 10:41:44 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@43be87a0: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory initDatabase
+INFO: Creating embedded database 'dataSource'
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/hsql_init.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/hsql_init.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_transport.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/drop_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/drop_main.sql] in 20 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_main.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_main.sql] in 27 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [ddl/create_transport.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [ddl/create_transport.sql] in 5 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/Department.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/Department.sql] in 1 ms.
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Executing SQL script from class path resource [data/TAUser.sql]
+18.01.2013 10:41:44 org.springframework.jdbc.datasource.init.ResourceDatabasePopulator executeSqlScript
+INFO: Done executing SQL script from class path resource [data/TAUser.sql] in 3 ms.
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.289 sec
+Running com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtilsTest
+<?xml version="1.0" encoding="utf-8" standalone="no"?><rows><row ord="0"/><row alias="alias" managedByScripts="true" ord="1001"/><row alias="withColumns" ord="0"><cell alias="numericColumn" numericValue="1234.56"/><cell alias="stringColumn" stringValue="test тест"/><cell alias="dateColumn" dateValue="2013-01-18"/></row></rows>
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.02 sec
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@1558473e: startup date [Fri Jan 18 10:41:44 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@44ac5e: startup date [Fri Jan 18 10:41:42 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@3f77b3cd: startup date [Fri Jan 18 10:41:39 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@4965391b: startup date [Fri Jan 18 10:41:44 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.beans.factory.support.DefaultSingletonBeanRegistry destroySingletons
+INFO: Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@b90ffa7: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:44 org.springframework.beans.factory.support.DefaultSingletonBeanRegistry destroySingletons
+INFO: Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6c3c9c31: defining beans [namedParameterJdbcTemplate,org.springframework.aop.config.internalAutoProxyCreator,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,sqlSessionFactory,org.mybatis.spring.mapper.MapperScannerConfigurer#0,stringDictionaryManager,numericDictionaryManager,columnDaoImpl,departmentDao,formDataDao,formDataSearchDao,formDataWorkflowDaoImpl,formStyleDaoImpl,formTemplateDaoImpl,formTypeDaoImpl,reportPeriodDaoImpl,scriptDaoImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,transportTaxDao,TAUserDaoImpl,transactionManager,dataSource,org.springframework.jdbc.datasource.init.DataSourceInitializer#0,org.springframework.jdbc.datasource.init.DataSourceInitializer#1,transportTaxMapper,TAUserMapper,departmentMapper,reportPeriodMapper,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@41697023: startup date [Fri Jan 18 10:41:41 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@5b31fd9: startup date [Fri Jan 18 10:41:41 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:44 org.springframework.context.support.AbstractApplicationContext doClose
+INFO: Closing org.springframework.context.support.GenericApplicationContext@31ca1a68: startup date [Fri Jan 18 10:41:40 YEKT 2013]; root of context hierarchy
+
+Results :
+
+Tests run: 46, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ dao ---
+[INFO] Building jar: D:\workspace_tax\taxaccounting\dao\target\dao-0.2.0-SNAPSHOT.jar
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building test-utils 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ test-utils ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ test-utils ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ test-utils ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ test-utils ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ test-utils ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\test-utils\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+
+Results :
+
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ test-utils ---
+[INFO] Building jar: D:\workspace_tax\taxaccounting\test-utils\target\test-utils-0.2.0-SNAPSHOT.jar
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building service 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ service ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ service ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ service ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ service ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\service\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.aplana.sbrf.taxaccounting.ContextTest
+18.01.2013 10:41:46 org.springframework.test.context.TestContextManager retrieveTestExecutionListeners
+INFO: @TestExecutionListeners is not present for class [class com.aplana.sbrf.taxaccounting.ContextTest]: using defaults.
+18.01.2013 10:41:46 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [testServiceContext.xml]
+18.01.2013 10:41:46 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+INFO: Loading XML bean definitions from class path resource [com/aplana/sbrf/taxaccounting/service.xml]
+18.01.2013 10:41:46 org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.context.support.GenericApplicationContext@509df6f1: startup date [Fri Jan 18 10:41:46 YEKT 2013]; root of context hierarchy
+18.01.2013 10:41:46 org.springframework.beans.factory.support.DefaultListableBeanFactory preInstantiateSingletons
+INFO: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@d3576a2: defining beans [org.mockito.Mockito#0,org.mockito.Mockito#1,org.mockito.Mockito#2,org.mockito.Mockito#3,org.mockito.Mockito#4,org.mockito.Mockito#5,org.mockito.Mockito#6,org.mockito.Mockito#7,org.mockito.Mockito#8,org.mockito.Mockito#9,formDataAccessServiceImpl,formDataCompositionService,formDataPrintingServiceImpl,formDataScriptingServiceImpl,formDataSearchServiceImpl,formDataServiceImpl,org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,org.springframework.context.annotation.ConfigurationClassPostProcessor.importAwareProcessor]; root of factory hierarchy
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.05 sec
+Running com.aplana.sbrf.taxaccounting.service.impl.FormDataAccessServiceImplTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 sec
+Running com.aplana.sbrf.taxaccounting.service.impl.FormDataServiceTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 sec
+
+Results :
+
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ service ---
+[INFO] Building jar: D:\workspace_tax\taxaccounting\service\target\service-0.2.0-SNAPSHOT.jar
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building dynacache-spring 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ dynacache-spring ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ dynacache-spring ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ dynacache-spring ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ dynacache-spring ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ dynacache-spring ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\dynacache-spring\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+
+Results :
+
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.3.2:jar (default-jar) @ dynacache-spring ---
+[INFO] Building jar: D:\workspace_tax\taxaccounting\dynacache-spring\target\dynacache-spring-0.2.0-SNAPSHOT.jar
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building gwtapp 0.2.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.7:run (default) @ gwtapp ---
+[INFO] Executing tasks
+
+main:
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ gwtapp ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ gwtapp ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ gwtapp ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory D:\workspace_tax\taxaccounting\gwtapp\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:testCompile (default-testCompile) @ gwtapp ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.10:test (default-test) @ gwtapp ---
+[INFO] Surefire report directory: D:\workspace_tax\taxaccounting\gwtapp\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+
+Results :
+
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- gwt-maven-plugin:2.5.0:compile (default) @ gwtapp ---
+[INFO] Compiling module com.aplana.sbrf.taxaccounting.web.main.Main
+[INFO]    Computing all possible rebind results for 'com.gwtplatform.dispatch.shared.DispatchService'
+[INFO]       Rebinding com.gwtplatform.dispatch.shared.DispatchService
+[INFO]          Invoking generator com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator
+[INFO]             Generating client proxy for remote service interface 'com.gwtplatform.dispatch.shared.DispatchService'
+[INFO]                Analyzing 'com.gwtplatform.dispatch.shared.DispatchService' for serializable types
+[INFO]                   Analyzing methods:
+[INFO]                      public abstract void undo(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<com.gwtplatform.dispatch.shared.Result> action, com.gwtplatform.dispatch.shared.Result result) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Parameter: com.gwtplatform.dispatch.shared.Result result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]                      public abstract com.gwtplatform.dispatch.shared.Result execute(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<?> action) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Return type: com.gwtplatform.dispatch.shared.Result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]       Rebinding com.gwtplatform.dispatch.shared.DispatchService
+[INFO]          Invoking generator com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator
+[INFO]             Generating client proxy for remote service interface 'com.gwtplatform.dispatch.shared.DispatchService'
+[INFO]                Analyzing 'com.gwtplatform.dispatch.shared.DispatchService' for serializable types
+[INFO]                   Analyzing methods:
+[INFO]                      public abstract void undo(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<com.gwtplatform.dispatch.shared.Result> action, com.gwtplatform.dispatch.shared.Result result) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Parameter: com.gwtplatform.dispatch.shared.Result result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]                      public abstract com.gwtplatform.dispatch.shared.Result execute(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<?> action) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Return type: com.gwtplatform.dispatch.shared.Result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]       Rebinding com.gwtplatform.dispatch.shared.DispatchService
+[INFO]          Invoking generator com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator
+[INFO]             Generating client proxy for remote service interface 'com.gwtplatform.dispatch.shared.DispatchService'
+[INFO]                Analyzing 'com.gwtplatform.dispatch.shared.DispatchService' for serializable types
+[INFO]                   Analyzing methods:
+[INFO]                      public abstract void undo(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<com.gwtplatform.dispatch.shared.Result> action, com.gwtplatform.dispatch.shared.Result result) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Parameter: com.gwtplatform.dispatch.shared.Result result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]                      public abstract com.gwtplatform.dispatch.shared.Result execute(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<?> action) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Return type: com.gwtplatform.dispatch.shared.Result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]       Rebinding com.gwtplatform.dispatch.shared.DispatchService
+[INFO]          Invoking generator com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator
+[INFO]             Generating client proxy for remote service interface 'com.gwtplatform.dispatch.shared.DispatchService'
+[INFO]                Analyzing 'com.gwtplatform.dispatch.shared.DispatchService' for serializable types
+[INFO]                   Analyzing methods:
+[INFO]                      public abstract void undo(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<com.gwtplatform.dispatch.shared.Result> action, com.gwtplatform.dispatch.shared.Result result) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Parameter: com.gwtplatform.dispatch.shared.Result result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]                      public abstract com.gwtplatform.dispatch.shared.Result execute(java.lang.String cookieSentByRPC, com.gwtplatform.dispatch.shared.Action<?> action) throws com.gwtplatform.dispatch.shared.ActionException, com.gwtplatform.dispatch.shared.ServiceException
+[INFO]                         Return type: com.gwtplatform.dispatch.shared.Result
+[INFO]                            com.gwtplatform.dispatch.shared.Result
+[INFO]                               Verifying instantiability
+[INFO]                                  com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>
+[INFO]                                     Checking parameters of 'com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult<? extends java.io.Serializable>'
+[INFO]                                        java.io.Serializable[]
+[INFO]                                           Analyzing component type:
+[INFO]                                              java.io.Serializable
+[INFO]                                                 Verifying instantiability
+[INFO]                                                    java.util.IdentityHashMap<? extends java.lang.Object, ? extends java.lang.Object>
+[INFO]                                                       [WARN] Checking all subtypes of Object which qualify for serialization
+[INFO]                                                          com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                             Verifying instantiability
+[INFO]                                                                com.google.gwt.validation.client.impl.PathImpl
+[INFO]                                                                   Analyzing the fields of type 'com.google.gwt.validation.client.impl.PathImpl' that qualify for serialization
+[INFO]                                                                      [WARN] Field 'private final java.util.List<javax.validation.Path.Node> nodes' will not be serialized because it is final
+[INFO]    Compiling 4 permutations
+[INFO]       Compiling permutation 0...
+[INFO]       Process output
+[INFO]          Compiling
+[INFO]             Compiling permutation 3...
+[INFO]       Process output
+[INFO]          Compiling
+[INFO]             Compiling permutation 1...
+[INFO]       Process output
+[INFO]          Compiling
+[INFO]             Compiling permutation 2...
+[INFO]    Compile of permutations succeeded
