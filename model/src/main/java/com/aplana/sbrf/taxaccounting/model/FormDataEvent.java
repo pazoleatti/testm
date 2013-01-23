@@ -12,6 +12,7 @@ public enum FormDataEvent implements Serializable {
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
 	COMPOSE(4, "Обобщить"),
+	CHECK(5, "Проверить"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить"),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),

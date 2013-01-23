@@ -41,6 +41,14 @@ public interface FormDataService {
 	void doCalc(Logger logger, int userId, FormData formData);
 	
 	/**
+	 * Выполнить проверки по налоговой форме
+	 * @param logger логгер-объект для фиксации диагностических сообщений
+	 * @param userId идентификатор пользователя, запросившего операцию
+	 * @param formData объект с данными по налоговой форме
+	 */
+	void doCheck(Logger logger, int userId, FormData formData);
+	
+	/**
 	 * Сохранить данные по налоговой форме
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formData объект с данными налоговой формы

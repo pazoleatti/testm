@@ -155,10 +155,19 @@ public class FormDataServiceImpl implements FormDataService {
 		if (canDo) {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
+			// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
 			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для выполенения расчёта по налоговой форме");
 		}
+	}
+	
+	@Override
+	public void doCheck(Logger logger, int userId, FormData formData) {
+		TAUser user = userDao.getUser(userId);
+		formDataScriptingService.executeScripts(user, formData, FormDataEvent.CHECK, logger);
+		// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
+		checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 	}
 
 	/**
@@ -231,6 +240,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
+	// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
 	public void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
 		List<Column> columns = formTemplate.getColumns();
 		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
