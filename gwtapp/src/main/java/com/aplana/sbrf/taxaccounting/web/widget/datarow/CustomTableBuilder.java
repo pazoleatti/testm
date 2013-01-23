@@ -88,8 +88,11 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		for (int curColumn = 0; curColumn < columnCount; curColumn++) {
 			if (globalSpans.get(absRowIndex) == null || !globalSpans.get(absRowIndex).contains(curColumn)) {
 				Column<T, ?> column = cellTable.getColumn(curColumn);
-				com.aplana.sbrf.taxaccounting.model.Cell currentCell =
-						((DataRow) rowValue).getCell(((DataRowColumn)column).getAlias() );
+				com.aplana.sbrf.taxaccounting.model.Cell currentCell = null;
+				if (((DataRowColumn)column).getAlias() != null) {
+					currentCell =
+							((DataRow) rowValue).getCell(((DataRowColumn)column).getAlias() );
+				}
 				// Create the cell styles.
 				StringBuilder tdClasses = new StringBuilder(cellStyle);
 				tdClasses.append(isEven ? evenCellStyle : oddCellStyle);
@@ -125,7 +128,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					td.vAlign(vAlign.getVerticalAlignString());
 				}
 
-				if ( (currentCell.getRowSpan() > 1) || (currentCell.getColSpan() > 1) ) {
+				if ( (currentCell != null) && ((currentCell.getRowSpan() > 1) || (currentCell.getColSpan() > 1) )) {
 					int rowSpan = currentCell.getRowSpan();
 					int colSpan = currentCell.getColSpan();
 					if ((curColumn+colSpan <= columnCount) && (absRowIndex+rowSpan <= rowCount)) {
@@ -135,17 +138,19 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
-				FormStyle currentCellStyle = null;
-				for (FormStyle oneStyle : allStyles) {
-					if (oneStyle.getAlias().equals(currentCell.getStyleAlias())) {
-						currentCellStyle = oneStyle;
-						break;
+				if (currentCell != null) {
+					FormStyle currentCellStyle = null;
+					for (FormStyle oneStyle : allStyles) {
+						if (oneStyle.getAlias().equals(currentCell.getStyleAlias())) {
+							currentCellStyle = oneStyle;
+							break;
+						}
 					}
-				}
-				if (currentCellStyle != null) {
-					applyOurCustomStyles(td, currentCellStyle);
-				} else {
-					// Error
+					if (currentCellStyle != null) {
+						applyOurCustomStyles(td, currentCellStyle);
+					} else {
+						// Error
+					}
 				}
 
 				// Add the inner div.
