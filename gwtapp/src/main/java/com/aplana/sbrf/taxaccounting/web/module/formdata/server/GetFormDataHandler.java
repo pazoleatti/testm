@@ -1,18 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -23,6 +14,12 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataSe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Каноничный пример антипаттерна "Волшебный хандлер".
@@ -67,10 +64,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger);
 		}
 		if(action.getFormDataId() == Long.MAX_VALUE){
-			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId().intValue(),
+			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 
-			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId().intValue()).getName());
+			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 			result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
 
 			FormDataAccessParams accessParams = new FormDataAccessParams();
@@ -80,6 +77,14 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
 			result.setFormDataAccessParams(accessParams);
 		} else{
+			if(action.isLockFormData()){
+				//Если пользователь открывает НФ для редактирования, то блокируем ее
+				formDataService.lock(action.getFormDataId(), userId);
+			}
+
+			//Собираем информацию о блокировке НФ
+			setLockInformation(userId, action.getFormDataId(), result);
+
 			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
 			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 			result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
@@ -117,5 +122,30 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 				throw new WrongInputDataServiceException(errorMessage);
 			}
 		}
+	}
+
+	private void setLockInformation(int userId, long formDataId, GetFormDataResult result){
+		ObjectLock lockInformation = formDataService.getObjectLock(formDataId);
+		if(lockInformation != null){
+			//Если данная форма уже заблокирована другим пользотелем
+			result.setFormDataLocked(true);
+			result.setLockedByUser(securityService.getUserById(lockInformation.getUserId()).getName());
+			result.setLockDate(getFormedDate(lockInformation.getLockTime()));
+			if(lockInformation.getUserId() == userId){
+				result.setLockedByCurrentUser(true);
+			} else {
+				result.setLockedByCurrentUser(false);
+			}
+		} else {
+			//Если данная форма никем не заблокирована
+			result.setFormDataLocked(false);
+		}
+	}
+
+	private static String getFormedDate(Date dateToForm){
+		//Преобразуем Date в строку вида "dd.mm.yyyy hh:mm"
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		formatter.format(dateToForm);
+		return (formatter.format(dateToForm));
 	}
 }

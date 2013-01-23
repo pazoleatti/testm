@@ -66,18 +66,36 @@ public class FormDataPresenter extends
 			action.setDepartmentId(integerParameter(request, DEPARTMENT_ID));
 			action.setFormDataKind(longParameter(request, FORM_DATA_KIND_ID));
 			action.setFormDataTypeId(longParameter(request, FORM_DATA_TYPE_ID));
+			action.setLockFormData(!readOnlyMode);
 
 			dispatcher.execute(action,
 					new AbstractCallback<GetFormDataResult>() {
 						@Override
 						public void onReqSuccess(GetFormDataResult result) {
+							isFormDataLocked = result.isFormDataLocked();
+							isLockedByCurrentUser = result.isLockedByCurrentUser();
 							formData = result.getFormData();
 							accessParams = result.getFormDataAccessParams();
+							final boolean isLockModeEnabled = isFormDataLocked && !isLockedByCurrentUser;
+
+							if (isLockModeEnabled){
+								readOnlyMode = true;
+							}
+
 							if (!readOnlyMode && accessParams.isCanEdit()) {
+								//Открываем форму в режиме редактирования
 								showEditModeButtons();
 								getView().setWorkflowButtons(null);
 							} else {
-								showReadOnlyModeButtons();
+								//Открываем форму в режиме чтения
+								if(isLockModeEnabled){
+									//Если другой пользователь уже открыл данную форму в режиме редактирования (залочил ее),
+									//то выводим сообщение пользователю и "сокращаем" список возможных действий в этом режиме
+									setFormDataLockedMode(true, result.getLockedByUser(), result.getLockDate());
+								} else {
+									setFormDataLockedMode(false, null, null);
+								}
+								showReadOnlyModeButtons(isLockModeEnabled);
 								getView().setWorkflowButtons(accessParams.getAvailableWorkflowMoves());
 							}
 							manageDeleteRowButtonEnabled();
@@ -206,6 +224,7 @@ public class FormDataPresenter extends
 		} else {
 			boolean isOK = Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 			if (isOK) {
+				unlockForm(formData.getId());
 				revealForm(true);
 			}
 		}

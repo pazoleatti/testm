@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
+
+import java.util.List;
 /**
  * 
  * @author Eugene Stetsenko
@@ -28,6 +28,17 @@ public class GetFormDataResult implements Result {
 	private boolean numberedHeader;
 
 	private List<FormStyle> allStyles;
+
+	private boolean isFormDataLocked;
+
+	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
+	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
+	таком формате строку*/
+	private String lockDate;
+
+	private String lockedByUser;
+
+	private boolean lockedByCurrentUser;
 
 	public FormData getFormData() {
 		return formData;
@@ -83,5 +94,37 @@ public class GetFormDataResult implements Result {
 
 	public void setAllStyles(List<FormStyle> allStyles) {
 		this.allStyles = allStyles;
+	}
+
+	public boolean isFormDataLocked() {
+		return isFormDataLocked;
+	}
+
+	public void setFormDataLocked(boolean formDataLocked) {
+		isFormDataLocked = formDataLocked;
+	}
+
+	public String getLockDate() {
+		return lockDate;
+	}
+
+	public void setLockDate(String lockDate) {
+		this.lockDate = lockDate;
+	}
+
+	public String getLockedByUser() {
+		return lockedByUser;
+	}
+
+	public void setLockedByUser(String lockedByUser) {
+		this.lockedByUser = lockedByUser;
+	}
+
+	public boolean isLockedByCurrentUser() {
+		return lockedByCurrentUser;
+	}
+
+	public void setLockedByCurrentUser(boolean lockedByCurrentUser) {
+		this.lockedByCurrentUser = lockedByCurrentUser;
 	}
 }

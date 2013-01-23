@@ -9,56 +9,64 @@
             padding: 2px;
             background: white;
         }
+
+        .lockInformation {
+            font-weight: bold;
+            color: #ff4500;
+        }
     </ui:style>
 
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
 		ui:field="dockPanel">
 
-		<g:north size="70">
+		<g:north size="90">
 			<g:HorizontalPanel width="100%">
 				<g:VerticalPanel spacing="5">
 					<g:Label ui:field="taxTypeLabel" />
 					<g:Label ui:field="formTypeLabel" />
 					<g:Label ui:field="formKindLabel" />
-				</g:VerticalPanel>
+                </g:VerticalPanel>
 				<g:VerticalPanel spacing="5">
 					<g:Label ui:field="departmentIdLabel" />
 					<g:Label ui:field="reportPeriodLabel" />
 					<g:Label ui:field="stateLabel" />
 				</g:VerticalPanel>
-			</g:HorizontalPanel>
+            </g:HorizontalPanel>
 		</g:north>
 
 		<g:north size="30">
-
-			<style:Bar>
-				<style:LeftBar>
-					<g:Button ui:field="addRowButton">Добавить строку</g:Button>
-					<g:Button ui:field="removeRowButton">Удалить строку</g:Button>
-					<g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
-					<g:Button ui:field="recalculateButton">Пересчитать</g:Button>
-					<g:Button ui:field="printButton">Печать</g:Button>
-				</style:LeftBar>
-				<style:RightBar>
-					<g:Button ui:field="manualInputButton">Ручной ввод</g:Button>
-					<g:Button ui:field="deleteFormButton">Удалить</g:Button>
-					<g:Button ui:field="saveButton">Сохранить</g:Button>
-					<g:Button ui:field="cancelButton">Отмена</g:Button>
-				</style:RightBar>
-			</style:Bar>
+                <style:Bar>
+                    <style:LeftBar>
+					    <g:Button ui:field="addRowButton">Добавить строку</g:Button>
+					    <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+					    <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
+					    <g:Button ui:field="recalculateButton">Пересчитать</g:Button>
+					    <g:Button ui:field="printButton">Печать</g:Button>
+				    </style:LeftBar>
+				    <style:RightBar>
+					    <g:Button ui:field="manualInputButton">Ручной ввод</g:Button>
+					    <g:Button ui:field="deleteFormButton">Удалить</g:Button>
+					    <g:Button ui:field="saveButton">Сохранить</g:Button>
+					    <g:Button ui:field="cancelButton">Отмена</g:Button>
+				    </style:RightBar>
+			    </style:Bar>
 		</g:north>
 		
 		<g:north size="30">
-			<style:Bar ui:field="workflowBar">
-				<style:LeftBar ui:field="workflowButtons" />
-			</style:Bar>
-		</g:north>
+            <style:Bar ui:field="workflowBar">
+                <style:LeftBar ui:field="workflowButtons" />
+            </style:Bar>
+        </g:north>
 
 		<g:north size="80">
 			<g:ScrollPanel width="100%" ui:field="logPanel">
 				<c:CellList ui:field="loggerList" />
 			</g:ScrollPanel>
 		</g:north>
+
+        <g:north size="30">
+            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}"/>
+        </g:north>
 
 		<g:center>
 			<style:GenericDataGrid ui:field="formDataTable" />

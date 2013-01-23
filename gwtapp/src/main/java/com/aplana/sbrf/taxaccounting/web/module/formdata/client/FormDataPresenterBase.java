@@ -2,7 +2,12 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormDataResult;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -59,6 +64,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showDeleteFormButton(boolean show);
 
+		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
+
+		void showWorkflowButton(boolean show);
+
 		DataRow getSelectedRow();
 
 		void enableRemoveRowButton(boolean enable);
@@ -79,18 +88,37 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public static final String WORK_FLOW_ID = "goWorkFlowId";
 
+	private HandlerRegistration closeFormDataHandlerRegistration;
+
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;
 
 	protected FormData formData;
 	protected FormDataAccessParams accessParams;
 	protected boolean readOnlyMode;
+	protected boolean isFormDataLocked;
+	protected boolean isLockedByCurrentUser;
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
+	}
+
+	@Override
+	protected void onReveal() {
+		super.onReveal();
+		closeFormDataHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+			@Override
+			public void onWindowClosing(Window.ClosingEvent event) {
+				setFormDataLockedMode(false, null, null);
+				if (isFormDataLocked && isLockedByCurrentUser) {
+					unlockForm(formData.getId());
+				}
+				closeFormDataHandlerRegistration.removeHandler();
+			}
+		});
 	}
 
 	@Override
@@ -103,9 +131,18 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
 				this);
 	}
-	
-	
-	protected void showReadOnlyModeButtons() {
+
+	@Override
+	protected void onHide() {
+		super.onHide();
+		closeFormDataHandlerRegistration.removeHandler();
+		if(isFormDataLocked && isLockedByCurrentUser){
+			unlockForm(formData.getId());
+		}
+		setFormDataLockedMode(false, null, null);
+	}
+
+	protected void showReadOnlyModeButtons(boolean isLockedModeEnabled) {
 		MyView view = getView();
 
 		view.showSaveButton(false);
@@ -116,8 +153,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showPrintButton(true);
 
-		view.showManualInputButton(accessParams.isCanEdit());
-		view.showDeleteFormButton(accessParams.isCanDelete());
+		view.showManualInputButton(accessParams.isCanEdit() && !isLockedModeEnabled);
+		view.showDeleteFormButton(accessParams.isCanDelete() && !isLockedModeEnabled);
 	}
 
 	protected void showEditModeButtons() {
@@ -139,6 +176,21 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
 	}
+
+	protected void setFormDataLockedMode(boolean isLocked, String lockedBy, String lockDate){
+		MyView view = getView();
+		if(isLocked){
+			view.showManualInputButton(false);
+			view.showDeleteFormButton(false);
+			view.showWorkflowButton(false);
+			view.setLockInformation(true, lockDate, lockedBy);
+		} else {
+			view.showManualInputButton(true);
+			view.showDeleteFormButton(true);
+			view.showWorkflowButton(true);
+			view.setLockInformation(false, null, null);
+		}
+	}
 	
 	protected void revealForm(Boolean readOnly) {
 		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
@@ -153,5 +205,21 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				.with(FormDataPresenterBase.READ_ONLY, readOnly.toString()).with(
 						FormDataPresenterBase.FORM_DATA_ID,
 						formData.getId().toString()));
+	}
+
+	protected void unlockForm(long formId){
+		UnlockFormData action = new UnlockFormData();
+		action.setFormId(formId);
+		dispatcher.execute(action,
+				new AbstractCallback<UnlockFormDataResult>() {
+					@Override
+					public void onReqSuccess(UnlockFormDataResult result) {
+						if(result.isUnlockedSuccessfully()){
+							isFormDataLocked = false;
+							isLockedByCurrentUser = false;
+							getView().setLockInformation(false, null, null);
+						}
+					}
+				});
 	}
 }

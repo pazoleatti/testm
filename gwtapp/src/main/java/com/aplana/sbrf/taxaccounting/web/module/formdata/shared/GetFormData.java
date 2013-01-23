@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
+
+import java.util.List;
 
 public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	private Long formDataId;
@@ -26,6 +26,8 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	private Integer departmentId;
 
     private Long formDataKind;
+
+	private boolean lockFormData;
 
 	public Long getFormDataId() {
 		return formDataId;
@@ -67,4 +69,13 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 	public void setWorkFlowMove(WorkflowMove workFlowMove) {
 		this.workFlowMove = workFlowMove;
 	}
+
+	public boolean isLockFormData() {
+		return lockFormData;
+	}
+
+	public void setLockFormData(boolean lockFormData) {
+		this.lockFormData = lockFormData;
+	}
+
 }

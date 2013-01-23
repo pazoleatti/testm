@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -77,6 +77,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Label taxTypeLabel;
 	@UiField
 	Label formKindLabel;
+	@UiField
+	Label lockInformation;
 	@UiField
 	Label departmentIdLabel;
 	@UiField
@@ -296,6 +298,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
+	public void showWorkflowButton(boolean show){
+		workflowButtons.setVisible(show);
+	}
+
+	@Override
 	public void showRemoveRowButton(boolean show) {
 		removeRowButton.setVisible(show);
 	}
@@ -318,6 +325,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showDeleteFormButton(boolean show) {
 		deleteFormButton.setVisible(show);
+	}
+
+	@Override
+	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
+		lockInformation.setVisible(isVisible);
+		if(lockedBy != null && lockDate != null){
+			lockInformation.setText("Данная налоговая форма в настоящий момент редактируется пользователем \"" + lockedBy
+					+ "\" (с "+ lockDate + " )");
+		}
 	}
 
 }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +26,14 @@ public class SecurityService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String login = auth.getName();
 		return userDao.getUser(login);
+	}
+
+	public TAUser getUserById(int userId){
+		if(SecurityContextHolder.getContext().getAuthentication() == null){
+			return null;
+		} else {
+			return userDao.getUser(userId);
+		}
 	}
 
 	@Autowired

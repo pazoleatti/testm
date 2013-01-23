@@ -1,35 +1,22 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -53,6 +40,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataAccessService formDataAccessService;
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
+	@Autowired
+	private ObjectLockDao lockDao;
 
 	/**
 	 * Создать налоговую форму заданного типа
@@ -305,4 +294,32 @@ public class FormDataServiceImpl implements FormDataService {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean lock(long formDataId, int userId){
+		ObjectLock objectLock = getObjectLock(formDataId);
+		if(objectLock != null && objectLock.getUserId() != userId){
+			return false;
+		} else {
+			lockDao.lockObject(formDataId, FormData.class ,userId);
+			return true;
+		}
+	}
+
+	@Override
+	public boolean unlock(long formDataId, int userId){
+		ObjectLock objectLock = getObjectLock(formDataId);
+		if(objectLock != null && objectLock.getUserId() != userId){
+			return false;
+		} else {
+			lockDao.unlockObject(formDataId, FormData.class, userId);
+			return true;
+		}
+	}
+
+	@Override
+	public  ObjectLock getObjectLock(long formDataId){
+		return lockDao.getObjectLock(formDataId, FormData.class);
+	}
+
 }

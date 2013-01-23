@@ -27,10 +27,13 @@
 	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataDao"/>
 	</bean>
-	<bean class="org.mockito.Mockito" factory-method="mock">
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ObjectLockDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao"/>
 	</bean>
-	<bean class="org.mockito.Mockito" factory-method="mock">
+    <bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TAUserDao"/>
 	</bean>
 </beans>

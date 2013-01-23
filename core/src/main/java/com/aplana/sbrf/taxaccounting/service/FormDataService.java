@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
@@ -39,7 +35,7 @@ public interface FormDataService {
 	 * @param formData объект с данными по налоговой форме
 	 */
 	void doCalc(Logger logger, int userId, FormData formData);
-	
+
 	/**
 	 * Выполнить проверки по налоговой форме
 	 * @param logger логгер-объект для фиксации диагностических сообщений
@@ -47,7 +43,7 @@ public interface FormDataService {
 	 * @param formData объект с данными по налоговой форме
 	 */
 	void doCheck(Logger logger, int userId, FormData formData);
-	
+
 	/**
 	 * Сохранить данные по налоговой форме
 	 * @param userId идентификатор пользователя, выполняющего операцию
@@ -65,7 +61,7 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	FormData getFormData(int userId, long formDataId, Logger logger);
-	
+
 	/**
 	 * Удалить данные по налоговой форме
 	 * @param userId идентификатор пользователя, выполняющего операцию
@@ -95,4 +91,27 @@ public interface FormDataService {
 	 * @param formData данные формы
 	 */
 	void addRow(Logger logger, int userId, FormData formData);
+
+	/**
+    *  Установить блокировку с FormData.
+	 * @param formDataId - идентификатор налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return true - если удалось заблокировать налоговую форму, иначе - false
+	 */
+	boolean lock(long formDataId, int userId);
+
+	/**
+	 * Снять блокировку с FormData.
+	 * @param formDataId - идентификатор налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return true - если удалось разблокировать налоговую форму, иначе - false
+	 * */
+	boolean unlock(long formDataId, int userId);
+
+	/**
+	 * Получить информацию о состоянии блокировки налоговой формы.
+	 * @param formDataId - идентификатор налоговой формы
+	 * @return информацию о блокировке объекта
+	 */
+	ObjectLock getObjectLock(long formDataId);
 }
