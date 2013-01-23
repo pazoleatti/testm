@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
@@ -38,6 +39,7 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 	public interface MyView extends View, HasUiHandlers<FormTemplateRowUiHandlers> {
 		void setColumnsData(List<Column> columnsData);
 		void setRowsData(List<DataRow> rows);
+		void setStylesData(List<FormStyle> styles);
 		void addCustomHeader(boolean addNumberedHeader);
 	}
 
@@ -86,6 +88,7 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 			public void execute() {
 				getView().setColumnsData(formTemplate.getColumns());
 				getView().setRowsData(formTemplate.getRows());
+				getView().setStylesData(formTemplate.getStyles());
 				getView().addCustomHeader(formTemplate.isNumberedColumns());
 			}
 		});

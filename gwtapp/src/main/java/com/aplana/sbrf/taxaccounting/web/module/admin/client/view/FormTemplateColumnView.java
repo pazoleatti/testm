@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,18 +29,18 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private final Widget widget;
 	private List<Column> columns;
-	private static final HashMap<Integer, String> columnTypeNameMap = new HashMap<Integer, String>();
-	private static final HashMap<Integer, String> precisionMap = new HashMap<Integer, String>();
+	private static final List<String> columnTypeNameList = new ArrayList<String>();
+	private static final List<Integer> precisionList = new ArrayList<Integer>();
 	private static final HashMap<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
 	private static final HashMap<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
-	private static final int STRING_TYPE = 0;
-	private static final int NUMERIC_TYPE = 1;
-	private static final int DATE_TYPE = 2;
+	private static final String STRING_TYPE = "Строка";
+	private static final String NUMERIC_TYPE = "Число";
+	private static final String DATE_TYPE = "Дата";
 
 	static {
-		columnTypeNameMap.put(STRING_TYPE, "Строка");
-		columnTypeNameMap.put(NUMERIC_TYPE, "Число");
-		columnTypeNameMap.put(DATE_TYPE, "Дата");
+		columnTypeNameList.add(STRING_TYPE);
+		columnTypeNameList.add(NUMERIC_TYPE);
+		columnTypeNameList.add(DATE_TYPE);
 
 		stringDictionaryCodeMap.put("transportTypeCode", "ТН - Коды видов ТС");
 		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
@@ -48,11 +49,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
 		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
 
-		precisionMap.put(0, "0");
-		precisionMap.put(1, "1");
-		precisionMap.put(2, "2");
-		precisionMap.put(3, "3");
-		precisionMap.put(4, "4");
+		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
+			precisionList.add(i);
+		}
 	}
 
 	@UiField
@@ -74,7 +73,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	ColumnAttributeEditor columnAttributeEditor;
 
 	@UiField(provided = true)
-	ValueListBox<Integer> typeColumnDropBox;
+	ValueListBox<String> typeColumnDropBox;
 
 	@UiField(provided = true)
 	ValueListBox<String> stringDictionaryCodeBox;
@@ -108,13 +107,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	private void init() {
-		typeColumnDropBox = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
+		typeColumnDropBox = new ValueListBox<String>(new AbstractRenderer<String>() {
 			@Override
-			public String render(Integer object) {
+			public String render(String object) {
 				if (object == null) {
 					return "";
 				}
-				return columnTypeNameMap.get(object);
+				return object;
 			}
 		});
 		typeColumnDropBox.addHandler(new ValueChangeHandler<Integer>() {
@@ -128,7 +127,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		precisionBox = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
 			@Override
 			public String render(Integer object) {
-				return precisionMap.get(object);
+				return "" + object;
 			}
 		});
 
@@ -296,7 +295,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 
 		populateUniqueParameters();
-		typeColumnDropBox.setAcceptableValues(columnTypeNameMap.keySet());
+		typeColumnDropBox.setAcceptableValues(columnTypeNameList);
 	}
 
 	private void populateUniqueParameters() {
@@ -336,7 +335,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			numericDictionaryCodeBox.setVisible(true);
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
-			precisionBox.setAcceptableValues(precisionMap.keySet());
+			precisionBox.setAcceptableValues(precisionList);
 			dictionaryCodePanel.setVisible(true);
 		}
 	}

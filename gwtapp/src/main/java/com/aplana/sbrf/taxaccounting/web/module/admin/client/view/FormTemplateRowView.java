@@ -3,15 +3,20 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateRowPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -26,10 +31,13 @@ import java.util.List;
 public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers> implements FormTemplateRowPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
+	private StyleCellPopup styleCellPopup = new StyleCellPopup();
 	private SingleSelectionModel<DataRow> selectionModel;
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 	private final Widget widget;
+	private static final String GWT_CELL_ATTR = "__gwt_cell";
 	private List<DataRow> rows;
+	private List<Column> columns;
 
 	@UiField
 	DataGrid<DataRow> formDataTable;
@@ -60,6 +68,36 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			}
 		});
 		factory.setEditOnly(true);
+
+		formDataTable.addDomHandler(new ContextMenuHandler() {
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+                if (!Element.is(eventTarget)) {
+					return;
+				}
+                com.google.gwt.user.client.Element target = eventTarget.cast();
+                if (target == null || target.getAttribute(GWT_CELL_ATTR).isEmpty()) {
+					return;
+				}
+
+				Element td = DOM.getParent(target);
+				Element tr = DOM.getParent(td);
+				int columnIndex = DOM.getChildIndex(tr, td) - 1;
+
+				if(columnIndex >= 0) {
+					event.preventDefault();
+					event.stopPropagation();
+
+					Element body = DOM.getParent(tr);
+					int rowIndex = DOM.getChildIndex(body, tr);
+					Cell cell = rows.get(rowIndex).getCell(columns.get(columnIndex).getAlias());
+					styleCellPopup.show(target.getAbsoluteLeft(), target.getAbsoluteTop());
+					styleCellPopup.setValue(cell);
+				}
+
+			}
+		}, ContextMenuEvent.getType());
 	}
 
 	@Override
@@ -69,6 +107,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	@Override
 	public void setColumnsData(List<Column> columnsData) {
+		columns = columnsData;
+
 		// Clean columns
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
@@ -92,7 +132,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		formDataTable.setColumnWidth(editTextAliasColumn, "10em");
 
 		//create form columns
-		for (Column col : columnsData) {
+		for (Column col : columns) {
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
 					.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
@@ -114,6 +154,11 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		upRowButton.setEnabled(false);
 		downRowButton.setEnabled(false);
 		formDataTable.redraw();
+	}
+
+	@Override
+	public void setStylesData(List<FormStyle> styles) {
+		styleCellPopup.setStyleAlias(styles);
 	}
 
 	@Override
