@@ -10,7 +10,20 @@ public class TARole implements Serializable {
 	/**
 	 * Алиас роли "Оператор"
 	 */
-	public static final String ROLE_OPERATOR = "ROLE_OPERATOR";
+	public static final String ROLE_OPERATOR = "ROLE_OPER";
+	/**
+	 * Алиас роли "Контролёр УНП"
+	 */
+	public static final String ROLE_CONTROL_UNP = "ROLE_CONTROL_UNP";
+	/**
+	 * Алиас роли "Настройщик"
+	 */
+	public static final String ROLE_CONF = "ROLE_CONF";
+	/**
+	 * Алиас роли "Администратор"
+	 */
+	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+	
 	
 	
 	private static final long serialVersionUID = 1L;
