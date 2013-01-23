@@ -168,6 +168,12 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScripts(user, formData, FormDataEvent.CHECK, logger);
 		// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
 		checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
+		
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			logger.error("Проверка завершена, обнаружены ошибки");
+		} else {
+			logger.info("Проверка завершена, ошибок не обнаружено");
+		}
 	}
 
 	/**
