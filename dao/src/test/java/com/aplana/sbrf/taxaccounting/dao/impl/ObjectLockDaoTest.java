@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 
@@ -23,29 +26,25 @@ public class ObjectLockDaoTest {
 	private ObjectLockDao objectLockDao; 
 
 	@Test
-	public void testGetObjectLockNull() {
-		ObjectLock<Long> lock = objectLockDao.getObjectLock(1l, FormData.class);
+	public void testGetObjectLockNotLocked() {
+		ObjectLock<Long> lock = objectLockDao.getObjectLock(41l, FormData.class);
 		assertNull(lock);
 	}
 	
 	@Test
-	public void testGetObjectLockNotNull() {
-		ObjectLock<Long> lock = objectLockDao.getObjectLock(3l, FormData.class);
-		
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.YEAR, 2000);
-		cal.set(Calendar.MONTH, Calendar.FEBRUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 3);
-		cal.set(Calendar.HOUR_OF_DAY, 12);
-		cal.set(Calendar.MINUTE, 20);
-		cal.set(Calendar.SECOND, 34);
-		cal.set(Calendar.MILLISECOND, 0);
-		
-		assertEquals(3l, lock.getObjectId());
+	public void testGetObjectLock() {
+		ObjectLock<Long> lock = objectLockDao.getObjectLock(42l, FormData.class);
+		assertEquals(42l, lock.getObjectId());
 		assertEquals(FormData.class, lock.getObjectClass());
 		assertEquals(1, lock.getUserId());
-		assertEquals(cal.getTime(), lock.getLockTime());
 	}
+	
+	@Test
+	public void testGetObjectLockTimedOut() {
+		ObjectLock<Long> lock = objectLockDao.getObjectLock(43l, FormData.class);
+		assertNull(lock);
+	}
+	
 	
 	@Test
 	public void testLock() {
@@ -115,4 +114,39 @@ public class ObjectLockDaoTest {
 		objectLockDao.unlockObject(15l, FormData.class, 1);
 	}
 	
+	@Test
+	public void testIsLocked() {
+		assertFalse(objectLockDao.isLockedByUser(21l, FormData.class, 1));
+		assertTrue(objectLockDao.isLockedByUser(22l, FormData.class, 1));
+		assertFalse(objectLockDao.isLockedByUser(23l, FormData.class, 1));
+		assertFalse(objectLockDao.isLockedByUser(24l, FormData.class, 1));
+		assertFalse(objectLockDao.isLockedByUser(25l, FormData.class, 1));
+	}
+	
+	@Test(expected=LockException.class)
+	public void testRefreshLockNotLocked() {
+		objectLockDao.refreshLock(31l, FormData.class, 1);
+	}	
+	
+	@Test
+	public void testRefreshLock() {
+		objectLockDao.refreshLock(32l, FormData.class, 1);
+		assertNotNull(objectLockDao.getObjectLock(32l, FormData.class));
+	}
+	
+	@Test(expected=LockException.class)
+	public void testRefreshLockLockedButTimedOut() {
+		objectLockDao.refreshLock(33l, FormData.class, 1);
+	}
+	
+	@Test(expected=LockException.class)
+	public void testRefreshLockLockedByDifferentUser() {
+		objectLockDao.refreshLock(34l, FormData.class, 1);
+	}
+	
+	@Test(expected=LockException.class)
+	public void testtestRefreshLockLockedByDifferentUserButTimedOut() {
+		objectLockDao.refreshLock(35l, FormData.class, 1);
+	}
+
 }

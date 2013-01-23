@@ -58,7 +58,12 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 	
 	@Override
 	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz) {
-		return getObjectLock(id, clazz, false);
+		ObjectLock<IdType> lock = getObjectLock(id, clazz, false); 
+		if (lock != null && isLockTimedOut(lock)) {
+			return null;
+		} else {
+			return lock;
+		}
 	}
 	
 	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz, boolean forUpdate) {
@@ -120,7 +125,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 					userId
 				);
 			} catch (DataIntegrityViolationException e) {
-				// Такое возможно если другая транзация вставит запись в таблицу сразу же после того,
+				// Такое возможно если другая транзакция вставит запись в таблицу сразу же после того,
 				// как мы проверим отсутствие записи в таблице (вероятность такого события очень низка)
 				throw new LockException("Не удалось заблокировать объект типа " + clazz.getName() + " с идентификатором " + id);
 			}
@@ -132,6 +137,11 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 		cal.setTime(lock.getLockTime());
 		cal.add(Calendar.SECOND, LOCK_TIMEOUT);
 		return cal.getTime();
+	}
+	
+	private boolean isLockTimedOut(ObjectLock<?> lock) {
+		Date currentTime = new Date();
+		return currentTime.after(getLockTimeoutTime(lock));
 	}
 
 	@Override
@@ -164,5 +174,26 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 				
 			}
 		}
+	}
+
+	@Override
+	public <IdType extends Number> void refreshLock(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
+		if (!isLockedByUser(id, clazz, userId)) {
+			TAUser user = userDao.getUser(userId);
+			throw new LockException("Невозможно обновить блокировку пользователем %s объекта типа %s с id = %d, так как он не заблокирован этим пользователем, или его блокировка истекла", user.getName(), clazz.getName(), id);
+		}
+		getJdbcTemplate().update(
+			"update object_lock set lock_time = ? where object_id = ? and class = ?",
+			new Date(),
+			id,
+			clazz.getName()
+		);
+
+	}
+
+	@Override
+	public <IdType extends Number> boolean isLockedByUser(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
+		ObjectLock<?> lock = getObjectLock(id, clazz, true);
+		return lock != null && lock.getUserId() == userId && !isLockTimedOut(lock);
 	}
 }

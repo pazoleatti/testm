@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.dao.exсeption.LockException;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 
@@ -18,8 +19,7 @@ public interface ObjectLockDao {
 	 * Получить информацию о блокировке объекта
 	 * @param id идентификатор объекта
 	 * @param clazz тип объекта
-	 * @return объект, представляющий {@link ObjectLock информацию о блокировке} или null, если объект не заблокирован. 
-	 * В случае, если объект блокировался, но время блокировки истекло, всё равно будет возвращён непустой объект 
+	 * @return объект, представляющий {@link ObjectLock информацию о блокировке} или null, если объект не заблокирован или блокировка истекла. 
 	 */
 	<IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id, Class<? extends IdentityObject<IdType>> clazz);
 	/**
@@ -39,4 +39,22 @@ public interface ObjectLockDao {
 	 * текущим пользователем снимаются без выбрасывания исключения
 	 */	
 	<IdType extends Number> void unlockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
+	
+	/**
+	 * Обновляет блокировку на объекте системы (чтобы предотвратить "просрочку" блокировки
+	 * @param id идентификатор объекта
+	 * @param clazz тип объекта
+	 * @param userId идентификатор пользователя, продлевающего блокировку
+	 * @throws LockException если объект не заблокирован, данным пользователем
+	 */
+	<IdType extends Number> void refreshLock(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
+	
+	/**
+	 * Проверяет, что пользователь имеет действующую блокировку на объекте
+	 * @param id идентификатор объекта
+	 * @param clazz тип объекта
+	 * @param userId идентификатор пользователя, продлевающего блокировку
+	 * @return true, если на объекте есть действующая (непросроченная) блокировка сделанная пользователем userId, false - в противном случае
+	 */
+	<IdType extends Number> boolean isLockedByUser(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);	
 }

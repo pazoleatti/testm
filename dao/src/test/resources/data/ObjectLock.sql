@@ -29,3 +29,35 @@ insert into object_lock(object_id, class, lock_time, user_id) values (12, 'com.a
 insert into object_lock(object_id, class, lock_time, user_id) values (13, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 1);
 insert into object_lock(object_id, class, lock_time, user_id) values (14, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 2);
 insert into object_lock(object_id, class, lock_time, user_id) values (15, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 2);
+
+-- Данные для проверки isLocked
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (21, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (22, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (23, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (24, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (25, 1, 1, 1, 1, 1);
+
+insert into object_lock(object_id, class, lock_time, user_id) values (22, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 1);
+insert into object_lock(object_id, class, lock_time, user_id) values (23, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 1);
+insert into object_lock(object_id, class, lock_time, user_id) values (24, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 2);
+insert into object_lock(object_id, class, lock_time, user_id) values (25, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 2);
+
+-- Данные для проверки refreshLock
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (31, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (32, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (33, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (34, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (35, 1, 1, 1, 1, 1);
+
+insert into object_lock(object_id, class, lock_time, user_id) values (32, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 1);
+insert into object_lock(object_id, class, lock_time, user_id) values (33, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 1);
+insert into object_lock(object_id, class, lock_time, user_id) values (34, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 2);
+insert into object_lock(object_id, class, lock_time, user_id) values (35, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 2);
+
+-- Данные для проверки getLock
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (41, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (42, 1, 1, 1, 1, 1);
+insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (43, 1, 1, 1, 1, 1);
+
+insert into object_lock(object_id, class, lock_time, user_id) values (42, 'com.aplana.sbrf.taxaccounting.model.FormData', sysdate, 1);
+insert into object_lock(object_id, class, lock_time, user_id) values (43, 'com.aplana.sbrf.taxaccounting.model.FormData', timestamp '2000-02-03 12:20:34.000', 1);
