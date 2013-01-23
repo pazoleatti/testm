@@ -9,29 +9,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
- * Строка данных отчётной формы
- * Для упрощения скриптинга, класс реализует интерфейс Map<String, Object>, чтобы в скриптах можно было писать
- * конструкции вида <code>row.property = anotherRow.property</code>
- * Можно считать что строка данных - это Map, в котором ключи - {@link Column#getAlias алиасы столбцов}, а значение -
- * значения содержащиеся в соответствующих столбцах.
+ * Строка данных отчётной формы Для упрощения скриптинга, класс реализует
+ * интерфейс Map<String, Object>, чтобы в скриптах можно было писать конструкции
+ * вида <code>row.property = anotherRow.property</code> Можно считать что строка
+ * данных - это Map, в котором ключи - {@link Column#getAlias алиасы столбцов},
+ * а значение - значения содержащиеся в соответствующих столбцах.
  * <p/>
- * Обращаю внимание, что часть методов интерфейса не реализована, при их вызове будет возникать UnsupportedOperationException.
+ * Обращаю внимание, что часть методов интерфейса не реализована, при их вызове
+ * будет возникать UnsupportedOperationException.
  * <p/>
- * Фактически класс является обёрткой над обычным HashMap, но при этом содержит ряд дополнительных атрибутов,
- * содержащих информацию о строке в отчётной форме, а также операции по работе с Map реализованы таким образом,
- * чтобы предотвратить заполнение строки данными неверного типа. При использовании метода put проводится проверка данных
- * на соответствие типу соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не позволяет
- * добавлять в строку данные по столбцам, которые отсутствуют в определении формы
- * Для некоторых числовых типов реализовано автоматическое приведение к BigDecimal.
+ * Фактически класс является обёрткой над обычным HashMap, но при этом содержит
+ * ряд дополнительных атрибутов, содержащих информацию о строке в отчётной
+ * форме, а также операции по работе с Map реализованы таким образом, чтобы
+ * предотвратить заполнение строки данными неверного типа. При использовании
+ * метода put проводится проверка данных на соответствие типу соответствующего
+ * столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не
+ * позволяет добавлять в строку данные по столбцам, которые отсутствуют в
+ * определении формы Для некоторых числовых типов реализовано автоматическое
+ * приведение к BigDecimal.
  * <p/>
- * Для облегчения идентификации нужной строки среди строк данных по форме, можно использовать строковые алиасы. Их стоит использовать
- * для строк, несущих особую смысловую нагрузку (например "Итого" и т.п.).
+ * Для облегчения идентификации нужной строки среди строк данных по форме, можно
+ * использовать строковые алиасы. Их стоит использовать для строк, несущих
+ * особую смысловую нагрузку (например "Итого" и т.п.).
  * <p/>
- * Данный объект обязательно должен обладать сведениями о столбцах формы, к которой принадлежит строка.Этого можно достичь либо
- * создав объект вызовом конструктора, принимающего список {@link Column столбцов}, либо использовать конструктор по-умолчанию и после этого
- * вызвать метод {@linkplain #setFormColumns}.
+ * Данный объект обязательно должен обладать сведениями о столбцах формы, к
+ * которой принадлежит строка.Этого можно достичь либо создав объект вызовом
+ * конструктора, принимающего список {@link Column столбцов}, либо использовать
+ * конструктор по-умолчанию и после этого вызвать метод
+ * {@linkplain #setFormColumns}.
  */
 public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -80,10 +86,11 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	/**
-	 * Задать информацию о столбцах, допустимых в строке
-	 * Внимание: использование данного метода сбрасывает значение всех столбцов в строке в null
-	 *
-	 * @param formColumns список столбцов
+	 * Задать информацию о столбцах, допустимых в строке Внимание: использование
+	 * данного метода сбрасывает значение всех столбцов в строке в null
+	 * 
+	 * @param formColumns
+	 *            список столбцов
 	 */
 	public void setFormColumns(List<Column> formColumns) {
 		data = new HashMap<String, Cell>(formColumns.size());
@@ -95,10 +102,22 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	/**
-	 * Добавить столбец в существующую мапу
-	 * Этот метод нужен для админки
-	 *
-	 * @param col столбец
+	 * Исправляет ошибки связанные с изменением данных столбца.
+	 */
+	void fixAliases() {
+		Map<String, Cell> fixedData = new HashMap<String, Cell>();
+		for (Map.Entry<String, Cell> entry : data.entrySet()) {
+			Cell cellValue = entry.getValue();
+			fixedData.put(cellValue.getColumn().getAlias(), cellValue);
+		}
+		data = fixedData;
+	}
+
+	/**
+	 * Добавить столбец в существующую мапу Этот метод нужен для админки
+	 * 
+	 * @param col
+	 *            столбец
 	 */
 	public void addColumn(Column col) {
 		Cell cellValue = new Cell();
@@ -145,7 +164,8 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public Cell getCell(String columnAlias) {
 		Cell cell = data.get(columnAlias);
 		if (cell == null) {
-			throw new IllegalArgumentException("Wrong column alias: " + columnAlias);
+			throw new IllegalArgumentException("Wrong column alias: "
+					+ columnAlias);
 		}
 		return cell;
 	}
@@ -174,7 +194,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		for(Map.Entry<? extends String, ?> entry: map.entrySet()){
+		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
@@ -209,9 +229,11 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	/**
-	 * Возвращает признак того, что содержимое строки контролируется скриптами
-	 * В частности, если у строки этот флаг установлен в true, то при проверке обязательности заполнения столбцов в налоговой форме,
-	 * для данной строки такие проверки выполняться не будут
+	 * Возвращает признак того, что содержимое строки контролируется скриптами В
+	 * частности, если у строки этот флаг установлен в true, то при проверке
+	 * обязательности заполнения столбцов в налоговой форме, для данной строки
+	 * такие проверки выполняться не будут
+	 * 
 	 * @return признак того, что содержимое строки контролируется скриптами
 	 */
 	public boolean isManagedByScripts() {
@@ -219,20 +241,20 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	/**
-	 * Установливает признак того, что содержимое строки контролируется скриптами
+	 * Установливает признак того, что содержимое строки контролируется
+	 * скриптами
+	 * 
 	 * @see {@link #isManagedByScripts()}
-	 * @param managedByScripts значение признака
+	 * @param managedByScripts
+	 *            значение признака
 	 */
 	public void setManagedByScripts(boolean managedByScripts) {
 		this.managedByScripts = managedByScripts;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "DataRow{" +
-				"data=" + data +
-				", alias='" + alias + '\'' +
-				", order=" + order +
-				'}';
+		return "DataRow{" + "data=" + data + ", alias='" + alias + '\''
+				+ ", order=" + order + '}';
 	}
 }

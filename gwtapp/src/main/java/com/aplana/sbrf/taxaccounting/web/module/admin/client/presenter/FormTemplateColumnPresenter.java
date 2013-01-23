@@ -52,6 +52,7 @@ public class FormTemplateColumnPresenter extends Presenter<FormTemplateColumnPre
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().flush();
+		formTemplate.findFixCorruptions();
 	}
 
 	@Override
