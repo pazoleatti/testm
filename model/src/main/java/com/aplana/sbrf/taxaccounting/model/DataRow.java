@@ -110,6 +110,9 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 			Cell cellValue = entry.getValue();
 			fixedData.put(cellValue.getColumn().getAlias(), cellValue);
 		}
+		if (data.size() != fixedData.size()) {
+			throw new IllegalStateException("Существувуют дубликаты алиасов");
+		}
 		data = fixedData;
 	}
 
@@ -122,7 +125,13 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public void addColumn(Column col) {
 		Cell cellValue = new Cell();
 		cellValue.setColumn(col);
-		data.put(col.getAlias(), cellValue);
+		Cell oldValue = data.get(col.getAlias());
+		if (oldValue == null) {
+			data.put(col.getAlias(), cellValue);
+		} else {
+			throw new IllegalArgumentException("Алиас столбца + '"
+					+ col.getAlias() + "' уже существует в шаблоне");
+		}
 	}
 
 	public String getAlias() {

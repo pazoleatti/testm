@@ -271,7 +271,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@Override
 	public void flush() {
-		columnAttributeEditor.flush();
+		Column column = columnAttributeEditor.flush();
+		if (column!=null){
+			getUiHandlers().flashColumn(column);
+		}
 	}
 
 	private void setupColumns(int index) {
@@ -396,6 +399,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		to.setEditable(from.isEditable());
 		to.setMandatory(from.isMandatory());
 		to.setOrder(from.getOrder());
+	}
+
+	@Override
+	public void setColumn(Column column) {
+		columnAttributeEditor.setValue(column);
 	}
 
 }
