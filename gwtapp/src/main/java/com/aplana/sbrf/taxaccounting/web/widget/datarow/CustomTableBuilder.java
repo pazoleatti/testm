@@ -20,6 +20,8 @@ import java.util.Map;
 
 public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
+	public static final String TD_ATTRIBUTE = "colInd";
+
 	private final String evenRowStyle;
 	private final String oddRowStyle;
 	private final String selectedRowStyle;
@@ -119,7 +121,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				HasVerticalAlignment.VerticalAlignmentConstant vAlign = column.getVerticalAlignment();
 
 				TableCellBuilder td = tr.startTD();
-
+				td.attribute(TD_ATTRIBUTE, curColumn);
 				td.className(tdClasses.toString());
 				if (hAlign != null) {
 					td.align(hAlign.getTextAlignString());

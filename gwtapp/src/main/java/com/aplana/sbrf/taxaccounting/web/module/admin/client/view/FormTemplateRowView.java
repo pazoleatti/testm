@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.rpc.server.Pair;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -87,37 +86,23 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				}
 
 				Element td = DOM.getParent(target);
-				Element tr = DOM.getParent(td);
-				int tdIndex = DOM.getChildIndex(tr, td) - 1;
+				int tdAttr = Integer.valueOf(td.getAttribute(CustomTableBuilder.TD_ATTRIBUTE));
 
-				if(tdIndex >= 0) {
-					int columnIndex = 0;
-					event.preventDefault();
-					event.stopPropagation();
+				if (tdAttr > 0) {
+			 		currentColumnIndex = tdAttr - 1;
 
-					Element body = DOM.getParent(tr);
-                    Element table = DOM.getParent(body);
-					Element columnGroup = table.getFirstChild().cast();
+			 		event.preventDefault();
+			 		event.stopPropagation();
 
-					int targetAbsoluteLeft = target.getAbsoluteLeft();
+			 		Element tr = DOM.getParent(td);
+			 		Element body = DOM.getParent(tr);
+			 		currentRowIndex = DOM.getChildIndex(body, tr);
 
-					int popupLeft = targetAbsoluteLeft + (target.getAbsoluteRight() - targetAbsoluteLeft)/2 - 100;
-
-					for(int i = 1; i < columnGroup.getChildCount(); i++) {
-						Element column = (Element)columnGroup.getChild(i).cast();
-						if(column.getAbsoluteLeft() <= targetAbsoluteLeft && column.getAbsoluteRight() >= targetAbsoluteLeft) {
-							columnIndex = i - 1;
-						}
-					}
-
-					int rowIndex = DOM.getChildIndex(body, tr);
-					DataRow currentRow = rows.get(rowIndex);
-
-					currentRowIndex = rowIndex;
-					currentColumnIndex = columnIndex;
-					Cell cell = currentRow.getCell(columns.get(columnIndex).getAlias());
-					styleCellPopup.setValue(cell);
-					styleCellPopup.show(popupLeft, target.getAbsoluteTop());
+			 		int popupLeft = target.getAbsoluteLeft() + (target.getAbsoluteRight() - target.getAbsoluteLeft())/2 - 100;
+			 		DataRow currentRow = rows.get(currentRowIndex);
+			 		Cell cell = currentRow.getCell(columns.get(currentColumnIndex).getAlias());
+			 		styleCellPopup.setValue(cell);
+			 		styleCellPopup.show(popupLeft, target.getAbsoluteTop());
 				}
 			}
 		}, ContextMenuEvent.getType());
@@ -251,7 +236,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		checkEnableUpDownButton();
 	}
 
-	void checkEnableUpDownButton() {
+	private void checkEnableUpDownButton() {
 		upRowButton.setEnabled(false);
 		downRowButton.setEnabled(false);
 
