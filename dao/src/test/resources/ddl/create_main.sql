@@ -210,6 +210,8 @@ comment on column declaration_template.is_active is 'признак активн
 comment on column declaration_template.create_script is 'скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.jasper is 'скомпилированный макет JasperReports для формирования печатного представления формы';
+
+create sequence seq_declaration_template start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration
 (
@@ -234,6 +236,8 @@ comment on column declaration.report_period_id is 'отчётный период
 comment on column declaration.department_id is 'подразделение';
 comment on column declaration.data is 'данные декларации в формате законодателя (XML) ';
 comment on column declaration.is_accepted is 'признак того, что декларация принята';
+
+create sequence seq_declaration start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
 	id number(18) not null,
