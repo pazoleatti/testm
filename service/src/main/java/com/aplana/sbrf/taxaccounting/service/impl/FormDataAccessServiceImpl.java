@@ -33,39 +33,82 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.get(formDataId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		return canRead(user, userDepartment, formData);
+		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		return canRead(user, userDepartment, formData, formDataDepartment);
 	}
 
-	private boolean canRead(TAUser user, Department userDepartment, FormData formData) {
-		// Контролёр уровня "Банк" имеет доступ ко всем сводным формам
-		if (userDepartment.getType() == DepartmentType.ROOT_BANK) {
-			return true;
-		} else {
-			// В противном случае доступ на чтение имеют только пользователи того же подразделения
-			return user.getDepartmentId() == formData.getDepartmentId();
-		}
+	private boolean canRead(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
+		final boolean isOperatorOfCurrentLevel = user.hasRole(TARole.ROLE_OPERATOR)
+				&& (user.getDepartmentId() == formDataDepartment.getId());
+		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (user.getDepartmentId() == formDataDepartment.getId());
+		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (userDepartment.getId() == formDataDepartment.getParentId());
+
+		return user.hasRole(TARole.ROLE_CONTROL_UNP) || isOperatorOfCurrentLevel || isControllerOfCurrentLevel || isControllerOfUpLevel;
 	}
 
 	@Override
 	public boolean canEdit(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());		
 		FormData formData = formDataDao.get(formDataId);
-		return canEdit(user, userDepartment, formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
+		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		return canEdit(user, userDepartment, formData, formDataDepartment, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 	
-	private boolean canEdit(TAUser user, Department userDepartment, FormData formData, ReportPeriod formDataReportPeriod) {
-		if(!formDataReportPeriod.isActive()){
+	private boolean canEdit(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment,
+	                        ReportPeriod formDataReportPeriod) {
+		/* Логика данной функции основана на бизнес-требованиях, которые заданы в следующей таблице:
+		 ---------------------------------------------
+		 - Состояние    |  Кто может редактировать   -
+		 ---------------------------------------------
+		 - Создана      |  Оператор                  -
+		 -              |  Контролер текущего уровня -
+		 -              |  Контролер вышест. уровня  -
+		 -              |  Контролер УНП             -
+		 ---------------------------------------------
+		 - Подготовлена |  Контролер текущего уровня -
+         -              |  Контролер вышест. уровня  -
+         -              |  Контролер УНП             -
+         ---------------------------------------------
+         - Утверждена   |  Контролер вышест. уровня  -
+         -              |  Контролер УНП             -
+         ---------------------------------------------
+         - Принята      |   ---------------------    -
+         ---------------------------------------------
+		 */
+		WorkflowState state = formData.getState();
+		if(!formDataReportPeriod.isActive() || state == WorkflowState.ACCEPTED){
+			//Нельзя редактировать НФ для неактивного налогового периода или если НФ находится в состоянии "Принята"
 			return false;
 		}
 
-		WorkflowState state = formData.getState();
-		if (userDepartment.getType() == DepartmentType.ROOT_BANK) {
-			return (state == WorkflowState.CREATED && formData.getDepartmentId() == userDepartment.getId())
-					|| (state == WorkflowState.CREATED || state == WorkflowState.APPROVED && formData.getDepartmentId() != userDepartment.getId());
-		} else {
-			return (state == WorkflowState.CREATED && formData.getDepartmentId() == user.getDepartmentId());
+		if(user.hasRole(TARole.ROLE_CONTROL_UNP)){
+			return true;
 		}
+
+		final boolean isOperatorOfCurrentLevel = user.hasRole(TARole.ROLE_OPERATOR)
+				&& (user.getDepartmentId() == formDataDepartment.getId());
+		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (user.getDepartmentId() == formDataDepartment.getId());
+		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (userDepartment.getId() == formDataDepartment.getParentId());
+
+		if(state == WorkflowState.APPROVED){
+	        if(isControllerOfUpLevel){
+		        return true;
+	        }
+		} else if (state == WorkflowState.PREPARED){
+			if(isControllerOfCurrentLevel || isControllerOfUpLevel){
+				return true;
+			}
+		} else if (state == WorkflowState.CREATED){
+			if(isOperatorOfCurrentLevel || isControllerOfCurrentLevel || isControllerOfUpLevel){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -87,11 +130,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormData formData = formDataDao.get(formDataId);
 		TAUser user = userDao.getUser(userId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		return canDelete(user, userDepartment, formData);
+		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		return canDelete(user, userDepartment, formData, formDataDepartment);
 	}
 	
-	private boolean canDelete(TAUser user, Department userDepartment, FormData formData) {
-        return formData.getState() == WorkflowState.CREATED && canEdit(user, userDepartment, formData,
+	private boolean canDelete(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
+        return formData.getState() == WorkflowState.CREATED && canEdit(user, userDepartment, formData, formDataDepartment,
                 reportPeriodDao.get(formData.getReportPeriodId()));
     }
 	
@@ -111,7 +155,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(user, userDepartment, formData) || !formDataReportPeriod.isActive()) {
+		if (!canRead(user, userDepartment, formData, formDataDepartment) || !formDataReportPeriod.isActive()) {
 			return result;
 		}
 		WorkflowState state = formData.getState();
@@ -155,16 +199,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public FormDataAccessParams getFormDataAccessParams(int userId,	long formDataId) {
-		TAUser user = userDao.getUser(userId);		
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
+		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.get(formDataId);
+		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
 		FormDataAccessParams result = new FormDataAccessParams();
-		result.setCanRead(canRead(user, userDepartment, formData));
-		result.setCanEdit(canEdit(user, userDepartment, formData, reportPeriod));
-		result.setCanDelete(canDelete(user, userDepartment, formData));
+		result.setCanRead(canRead(user, userDepartment, formData, formDataDepartment));
+		result.setCanEdit(canEdit(user, userDepartment, formData, formDataDepartment, reportPeriod));
+		result.setCanDelete(canDelete(user, userDepartment, formData, formDataDepartment));
 		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment, reportPeriod));
 		return result;
 	}
