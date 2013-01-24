@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.rpc.server.Pair;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -39,6 +40,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private List<DataRow> rows;
 	private List<Column> columns;
 	private List<FormStyle> styles;
+	private int currentRowIndex;
+	private int currentColumnIndex;
 
 	@UiField
 	DataGrid<DataRow> formDataTable;
@@ -110,6 +113,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 					int rowIndex = DOM.getChildIndex(body, tr);
 					DataRow currentRow = rows.get(rowIndex);
 
+					currentRowIndex = rowIndex;
+					currentColumnIndex = columnIndex;
 					Cell cell = currentRow.getCell(columns.get(columnIndex).getAlias());
 					styleCellPopup.setValue(cell);
 					styleCellPopup.show(popupLeft, target.getAbsoluteTop());
@@ -156,11 +161,29 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			formDataTable.addColumn(tableCol, col.getName());
 			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 		}
-
 	}
 
 	public void refresh() {
 		setRowsData(rows);
+	}
+
+	public boolean validateCellsUnionRange(int rowSpan, int colSpan) {
+		if (columns.size() < currentColumnIndex + colSpan || rows.size() < currentRowIndex + rowSpan) {
+			return false;
+		}
+
+		for (int i = currentRowIndex; i < currentRowIndex + rowSpan; i++) {
+			for (int j = currentColumnIndex; j < currentColumnIndex + colSpan; j++) {
+				if (i != currentRowIndex || j != currentColumnIndex) {
+					DataRow currentRow = rows.get(i);
+					Cell cell = currentRow.getCell(columns.get(j).getAlias());
+					if (cell.getRowSpan() > 1 || cell.getColSpan() > 1) {
+						return false;
+					}
+				}
+ 			}
+		}
+		return true;
 	}
 
 	@Override

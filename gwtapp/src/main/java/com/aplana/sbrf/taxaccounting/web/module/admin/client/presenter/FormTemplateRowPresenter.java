@@ -68,12 +68,6 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 	}
 
 	@Override
-	public void onAddButton() {
-		formTemplate.getRows().add(new DataRow("Новый код", formTemplate.getColumns()));
-		getView().setRowsData(formTemplate.getRows());
-	}
-
-	@Override
 	public void onRemoveButton(DataRow row) {
 		if (row != null && !row.isManagedByScripts()) {
 			formTemplate.getRows().remove(row);

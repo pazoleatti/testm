@@ -5,6 +5,5 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormTemplateRowUiHandlers extends UiHandlers {
-	void onAddButton();
 	void onRemoveButton(DataRow row);
 }
