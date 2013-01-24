@@ -191,9 +191,16 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		// Оставляем текущую ячейку
 		globalSpans.put(rowIndex, spn.subList(1,spn.size()));
 		for (int rsp=0; rsp<rowSpan-1; rsp++) {
-			globalSpans.put(rowIndex+1+rsp, spn);
-		}
 
+			if (globalSpans.get(rowIndex+1+rsp) != null) {
+				List<Integer> tmp = globalSpans.get(rowIndex+1+rsp);
+				tmp.addAll(spn);
+				globalSpans.put(rowIndex+1+rsp, tmp);
+			} else {
+				globalSpans.put(rowIndex+1+rsp, spn);
+			}
+
+		}
 	}
 
 	private void applyOurCustomStyles(TableCellBuilder out, FormStyle ourStyle) {
