@@ -88,7 +88,13 @@ public class FormDataServiceImpl implements FormDataService {
 		for (DataRow predefinedRow : form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
 			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
-				dataRow.put(entry.getKey(), entry.getValue());
+				String columnAlias = entry.getKey();				
+				dataRow.put(columnAlias, entry.getValue());
+				Cell cell = dataRow.getCell(columnAlias); 
+				Cell predefinedCell = predefinedRow.getCell(columnAlias);
+				cell.setColSpan(predefinedCell.getColSpan());
+				cell.setRowSpan(predefinedCell.getRowSpan());
+				cell.setStyleAlias(predefinedCell.getStyleAlias());
 			}
 		}
 
