@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.admin.client.ui;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateRowView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -28,6 +29,7 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 	private final MyDriver driver = GWT.create(MyDriver.class);
 	private PopupPanel popup = new PopupPanel();
 	private List<String> stylesAlias = new ArrayList<String>();
+	private final FormTemplateRowView parent;
 
 	@UiField(provided = true)
 	ValueListBox<String> styleAlias;
@@ -42,8 +44,9 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 	Button saveButton;
 
 	@UiConstructor
-	public StyleCellPopup() {
+	public StyleCellPopup(FormTemplateRowView parent) {
 		super();
+		this.parent = parent;
 
 		styleAlias = new ValueListBox<String>(new AbstractRenderer<String>() {
 			@Override
@@ -75,6 +78,7 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 	@UiHandler("saveButton")
 	public void onClickSaveButton(ClickEvent event) {
 		getValue();
+		parent.refresh();
 		popup.hide();
 	}
 

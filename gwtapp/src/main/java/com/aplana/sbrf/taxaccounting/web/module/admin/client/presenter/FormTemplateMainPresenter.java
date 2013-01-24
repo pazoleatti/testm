@@ -75,16 +75,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void save() {
-		Set<String> checkSet = new HashSet<String>();
-		for (Column column : formTemplate.getColumns()) {
-			if (!checkSet.add(column.getAlias())) {
-				MessageEvent.fire(FormTemplateMainPresenter.this, "Форма не может быть сохранена," +
-																  " найден повторяющийся алиас: " + column.getAlias() +
-																  " для столбца: " + column.getName());
-				return;
-			}
-		}
-
 		FormTemplateFlushEvent.fire(this);
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override

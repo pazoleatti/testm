@@ -5,16 +5,16 @@
         <h3>Стиль ячейки</h3>
 
         <g:HorizontalPanel height="25px">
-            <g:Label width="100px">Стиль:</g:Label>
+            <g:Label width="75px">Стиль:</g:Label>
             <g:ValueListBox width="100px" ui:field="styleAlias"/>
         </g:HorizontalPanel>
         <g:HorizontalPanel height="25px">
-            <g:Label width="100px">colSpan:</g:Label>
-            <g:IntegerBox width="100px" ui:field="colSpan"/>
+            <g:Label width="75px">colSpan:</g:Label>
+            <g:IntegerBox width="95px" ui:field="colSpan"/>
         </g:HorizontalPanel>
         <g:HorizontalPanel height="25px">
-            <g:Label width="100px">rowSpan:</g:Label>
-            <g:IntegerBox width="100px" ui:field="rowSpan"/>
+            <g:Label width="75px">rowSpan:</g:Label>
+            <g:IntegerBox width="95px" ui:field="rowSpan"/>
         </g:HorizontalPanel>
 
         <t:LeftBar>

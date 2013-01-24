@@ -86,9 +86,9 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
+				getView().setStylesData(formTemplate.getStyles());
 				getView().setColumnsData(formTemplate.getColumns());
 				getView().setRowsData(formTemplate.getRows());
-				getView().setStylesData(formTemplate.getStyles());
 				getView().addCustomHeader(formTemplate.isNumberedColumns());
 			}
 		});

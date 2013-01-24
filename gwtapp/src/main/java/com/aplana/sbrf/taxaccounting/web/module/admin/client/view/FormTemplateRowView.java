@@ -5,11 +5,11 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,13 +31,14 @@ import java.util.List;
 public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers> implements FormTemplateRowPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
-	private StyleCellPopup styleCellPopup = new StyleCellPopup();
-	private SingleSelectionModel<DataRow> selectionModel;
-	private DataRowColumnFactory factory = new DataRowColumnFactory();
+	private final StyleCellPopup styleCellPopup;
+	private final SingleSelectionModel<DataRow> selectionModel;
+	private final DataRowColumnFactory factory = new DataRowColumnFactory();
 	private final Widget widget;
 	private static final String GWT_CELL_ATTR = "__gwt_cell";
 	private List<DataRow> rows;
 	private List<Column> columns;
+	private List<FormStyle> styles;
 
 	@UiField
 	DataGrid<DataRow> formDataTable;
@@ -58,16 +59,17 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public FormTemplateRowView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
 
+		factory.setEditOnly(true);
+		styleCellPopup = new StyleCellPopup(this);
+
 		selectionModel = new SingleSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
-
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
 				checkEnableUpDownButton();
 			}
 		});
-		factory.setEditOnly(true);
 
 		formDataTable.addDomHandler(new ContextMenuHandler() {
 			@Override
@@ -83,19 +85,35 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 				Element td = DOM.getParent(target);
 				Element tr = DOM.getParent(td);
-				int columnIndex = DOM.getChildIndex(tr, td) - 1;
+				int tdIndex = DOM.getChildIndex(tr, td) - 1;
 
-				if(columnIndex >= 0) {
+				if(tdIndex >= 0) {
+					int columnIndex = 0;
 					event.preventDefault();
 					event.stopPropagation();
 
 					Element body = DOM.getParent(tr);
-					int rowIndex = DOM.getChildIndex(body, tr);
-					Cell cell = rows.get(rowIndex).getCell(columns.get(columnIndex).getAlias());
-					styleCellPopup.show(target.getAbsoluteLeft(), target.getAbsoluteTop());
-					styleCellPopup.setValue(cell);
-				}
+                    Element table = DOM.getParent(body);
+					Element columnGroup = table.getFirstChild().cast();
 
+					int targetAbsoluteLeft = target.getAbsoluteLeft();
+
+					int popupLeft = targetAbsoluteLeft + (target.getAbsoluteRight() - targetAbsoluteLeft)/2 - 100;
+
+					for(int i = 1; i < columnGroup.getChildCount(); i++) {
+						Element column = (Element)columnGroup.getChild(i).cast();
+						if(column.getAbsoluteLeft() <= targetAbsoluteLeft && column.getAbsoluteRight() >= targetAbsoluteLeft) {
+							columnIndex = i - 1;
+						}
+					}
+
+					int rowIndex = DOM.getChildIndex(body, tr);
+					DataRow currentRow = rows.get(rowIndex);
+
+					Cell cell = currentRow.getCell(columns.get(columnIndex).getAlias());
+					styleCellPopup.setValue(cell);
+					styleCellPopup.show(popupLeft, target.getAbsoluteTop());
+				}
 			}
 		}, ContextMenuEvent.getType());
 	}
@@ -141,11 +159,17 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	}
 
+	public void refresh() {
+		setRowsData(rows);
+	}
+
 	@Override
 	public void setRowsData(List<DataRow> rowsData) {
-		if (rowsData != null && rowsData.size() != 0) {
-			rows = rowsData;
+		rows = rowsData;
+		if (rowsData.size() != 0) {
 			formDataTable.setRowData(rowsData);
+			CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, styles);
+			formDataTable.setTableBuilder(builder);
 		} else {
 			formDataTable.setRowCount(0);
 			formDataTable.setRowData(new ArrayList<DataRow>(0));
@@ -153,11 +177,11 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 		upRowButton.setEnabled(false);
 		downRowButton.setEnabled(false);
-		formDataTable.redraw();
 	}
 
 	@Override
 	public void setStylesData(List<FormStyle> styles) {
+		this.styles = styles;
 		styleCellPopup.setStyleAlias(styles);
 	}
 
@@ -169,9 +193,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	@UiHandler("addRowButton")
 	public void onAddButton(ClickEvent event){
-		if(getUiHandlers()!=null){
-			getUiHandlers().onAddButton();
-		}
+		rows.add(new DataRow("Новый код", columns));
+		setRowsData(rows);
 	}
 
 	@UiHandler("removeRowButton")
