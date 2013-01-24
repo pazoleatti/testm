@@ -29,7 +29,8 @@ drop sequence seq_form_style;
 drop table form_style;
 drop table form;
 drop table form_type;
-
+drop table declaration;
+drop table declaration_template;
 drop table department;
 drop sequence seq_report_period;
 drop table report_period;

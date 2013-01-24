@@ -186,7 +186,55 @@ alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id =
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
 
 ---------------------------------------------------------------------------------------------------
+create table declaration_template
+(
+  id             number(9) not null,
+  edition        number(9) not null,
+  tax_type       char(1) not null,
+  version        varchar2(20) not null,
+  is_active      number(1) not null,
+  create_script  CLOB,
+  jrxml          CLOB,
+  jasper         BLOB
+);
+alter table declaration_template add constraint declaration_template_pk primary key (id);
+alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
+alter table declaration_template add constraint declaration_t_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
 
+comment on table declaration_template is 'Шаблоны налоговых деклараций';
+comment on column declaration_template.id is 'идентификатор (первичный ключ)';
+comment on column declaration_template.edition is 'номер редакции';
+comment on column declaration_template.tax_type is 'тип налога';
+comment on column declaration_template.version is 'версия';
+comment on column declaration_template.is_active is 'признак активности';
+comment on column declaration_template.create_script is 'скрипт формирования декларации';
+comment on column declaration_template.jrxml is 'макет JasperReports для формирования печатного представления формы';
+comment on column declaration_template.jasper is 'скомпилированный макет JasperReports для формирования печатного представления формы';
+-----------------------------------------------------------------------------------------------------------------------------------
+create table declaration
+(
+  id                      number(18) not null,
+  declaration_template_id number(9) not null,
+  report_period_id        number(9) not null,
+  department_id           number(9) not null,
+  data                    clob,
+  is_accepted             number(1) not null
+);
+alter table declaration add constraint declaration_pk primary key (id);
+alter table declaration add constraint declaration_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
+alter table declaration add constraint declaration_fk_report_p_id foreign key (report_period_id) references report_period (id);
+alter table declaration add constraint declaration_fk_department_id foreign key (department_id) references department (id);
+alter table declaration add constraint declaration_chk_is_accepted check (is_accepted in (0,1));
+alter table declaration add constraint declaration_uniq_template unique(report_period_id, department_id, declaration_template_id);
+
+comment on table declaration is 'Налоговые декларации';
+comment on column declaration.id is 'идентификатор (первичный ключ)';
+comment on column declaration.declaration_template_id is 'ссылка шаблон декларации';
+comment on column declaration.report_period_id is 'отчётный период';
+comment on column declaration.department_id is 'подразделение';
+comment on column declaration.data is 'данные декларации в формате законодателя (XML) ';
+comment on column declaration.is_accepted is 'признак того, что декларация принята';
+------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
 	id number(18) not null,
 	form_id number(9) not null,
