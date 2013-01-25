@@ -9,6 +9,7 @@
 			/WEB-INF/security.xml
 			/WEB-INF/security-preauth.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
+            classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml
 			classpath:com/aplana/sbrf/taxaccounting/cache.xml
 		</param-value>
