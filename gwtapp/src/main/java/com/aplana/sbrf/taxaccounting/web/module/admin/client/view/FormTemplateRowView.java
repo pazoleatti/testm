@@ -205,6 +205,11 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		formDataTable.setHeaderBuilder(builder);
 	}
 
+	@UiHandler("addRowButton")
+	public void onAddButton(ClickEvent event){
+		rows.add(new DataRow("Новый код", columns, styles));
+		setRowsData(rows);
+	}
 
 	@UiHandler("removeRowButton")
 	public void onRemoveButton(ClickEvent event){
