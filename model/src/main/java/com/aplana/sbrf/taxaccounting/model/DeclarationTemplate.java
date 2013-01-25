@@ -11,7 +11,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private String version;
 	private boolean active;
 	private String createScript;	
-	private byte[] jrxml;
 
 	/**
 	 * Получить вид налога
@@ -75,21 +74,5 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 */
 	public void setCreateScript(String createScript) {
 		this.createScript = createScript;
-	}
-
-	/**
-	 * Получить описание Jrxml-шаблона для формирования декларации
-	 * @return jrxml-файл в виде байтового массива
-	 */
-	public byte[] getJrxml() {
-		return jrxml;
-	}
-
-	/**
-	 * Задать описание Jrxml-шаблона для формирования декларации
-	 * @param jrxml jrxml-файл в виде байтового массива
-	 */
-	public void setJrxml(byte[] jrxml) {
-		this.jrxml = jrxml;
 	}
 }
