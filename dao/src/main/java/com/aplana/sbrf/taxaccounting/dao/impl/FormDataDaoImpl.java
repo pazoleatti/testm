@@ -46,11 +46,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private static class StyleRecord {
 		private int columnId;
 		private Long rowId;
+		private Integer id;
 
-		private StyleRecord(int columnId, Long rowId, String styleAlias) {
+		private StyleRecord(int columnId, Long rowId, Integer id) {
 			this.columnId = columnId;
 			this.rowId = rowId;
-			this.styleAlias = styleAlias;
+			this.id = id;
 		}
 
 		public int getColumnId() {
@@ -69,15 +70,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			this.rowId = rowId;
 		}
 
-		public String getStyleAlias() {
-			return styleAlias;
+		public Integer getId() {
+			return id;
 		}
 
-		public void setStyleAlias(String styleAlias) {
-			this.styleAlias = styleAlias;
+		public void setId(Integer id) {
+			this.id = id;
 		}
 
-		private String styleAlias;
 	}
 
 	/**
@@ -192,9 +192,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					}
 				});
 
-		final Map<Integer, FormStyle> styleIdToAlias = formStyleDao.getIdToFormStyleMap(formTemplate.getId());
-
-		readStyle(formTemplate, styleIdToAlias, rowIdToAlias, formData.getId());
+		readStyle(formTemplate, rowIdToAlias, formData.getId());
 		readSpan(formTemplate, rowIdToAlias, formData.getId());
 		readValues("numeric_value", formTemplate, rowIdToAlias, formData);
 		readValues("string_value", formTemplate, rowIdToAlias, formData);
@@ -218,8 +216,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 	}
 
-	private void readStyle(final FormTemplate formTemplate, final Map<Integer, FormStyle> styleIdToAlias,
-	                       final Map<Long, DataRow> rowMap, Long formDataId){
+	private void readStyle(final FormTemplate formTemplate, final Map<Long, DataRow> rowMap, Long formDataId){
 
 		String sqlQuery = "SELECT row_id, column_id, style_id FROM cell_style cs " +
 				"WHERE exists (SELECT 1 from data_row r WHERE r.id = cs.row_id and r.form_data_id = ?)";
@@ -233,7 +230,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								DataRow row = rowMap.get(rowId);
 								Column col = formTemplate.getColumn(rs.getInt("column_id"));
 								Cell cell = row.getCell(col.getAlias());
-								cell.setStyleAlias(styleIdToAlias.get(rs.getInt("style_id")).getAlias());
+								cell.setStyleAlias(cell.getStyle().getAlias());
 							}
 						});
 	}
@@ -411,8 +408,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								cellValue.getRowSpan(), col.getId(), null));
 						spanOrders.add(rowOrder);
 					}
-					if(cellValue.getStyleAlias() != null && !cellValue.getStyleAlias().equals("")){
-						styleValues.add(new StyleRecord(col.getId(), null, cellValue.getStyleAlias()));
+					if(cellValue.getStyle() != null){
+						styleValues.add(new StyleRecord(col.getId(), null, cellValue.getStyle().getId()));
 						styleOrders.add(rowOrder);
 					}
 				}
@@ -497,12 +494,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 									ps.setLong(1, rec.getRowId());
 									ps.setInt(2, rec.getColumnId());
-									if(styleAliasToId.get(rec.getStyleAlias()) != null){
-										ps.setInt(3, styleAliasToId.get(rec.getStyleAlias()).getId());
-									} else {
-										throw new DaoException("Стиль с алиасом " + rec.getStyleAlias() + " не найден " +
-												"в таблице FORM_STYLE");
-									}
+									ps.setInt(3, rec.getId());
+
 								}
 
 								public int getBatchSize() {

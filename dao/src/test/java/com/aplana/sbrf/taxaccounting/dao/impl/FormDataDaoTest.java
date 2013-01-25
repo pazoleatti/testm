@@ -239,11 +239,11 @@ public class FormDataDaoTest {
 		formData = formDataDao.get(formDataId);
 
 		dr = formData.getDataRows().get(0);
-		Assert.assertEquals("alias1", dr.getCell("numericColumn").getStyleAlias());
+		Assert.assertEquals("alias1", dr.getCell("numericColumn").getStyle().getAlias());
 
 		dr = formData.getDataRows().get(1);
-		Assert.assertEquals("alias2", dr.getCell("numericColumn").getStyleAlias());
-		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyleAlias());
+		Assert.assertEquals("alias2", dr.getCell("numericColumn").getStyle().getAlias());
+		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyle().getAlias());
 	}
 
 	@Test(expected = DaoException.class)

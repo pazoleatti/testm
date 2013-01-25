@@ -1,7 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
@@ -10,7 +17,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -23,9 +32,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers> implements FormTemplateRowPresenter.MyView{
@@ -91,18 +97,18 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				if (tdAttr > 0) {
 			 		currentColumnIndex = tdAttr - 1;
 
-			 		event.preventDefault();
-			 		event.stopPropagation();
+					event.preventDefault();
+					event.stopPropagation();
 
 			 		Element tr = DOM.getParent(td);
-			 		Element body = DOM.getParent(tr);
+					Element body = DOM.getParent(tr);
 			 		currentRowIndex = DOM.getChildIndex(body, tr);
 
 			 		int popupLeft = target.getAbsoluteLeft() + (target.getAbsoluteRight() - target.getAbsoluteLeft())/2 - 100;
 			 		DataRow currentRow = rows.get(currentRowIndex);
 			 		Cell cell = currentRow.getCell(columns.get(currentColumnIndex).getAlias());
-			 		styleCellPopup.setValue(cell);
-			 		styleCellPopup.show(popupLeft, target.getAbsoluteTop());
+					styleCellPopup.setValue(cell);
+					styleCellPopup.show(popupLeft, target.getAbsoluteTop());
 				}
 			}
 		}, ContextMenuEvent.getType());
@@ -199,11 +205,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		formDataTable.setHeaderBuilder(builder);
 	}
 
-	@UiHandler("addRowButton")
-	public void onAddButton(ClickEvent event){
-		rows.add(new DataRow("Новый код", columns));
-		setRowsData(rows);
-	}
 
 	@UiHandler("removeRowButton")
 	public void onRemoveButton(ClickEvent event){

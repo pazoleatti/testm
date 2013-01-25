@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 import org.w3c.dom.Document;
@@ -171,9 +172,9 @@ public final class XmlSerializationUtils {
 		}
 		element.setAttribute(ATTR_COLSPAN, String.valueOf(cell.getColSpan()));
 		element.setAttribute(ATTR_ROWSPAN, String.valueOf(cell.getRowSpan()));
-		if (cell.getStyleAlias() != null && !cell.getStyleAlias().isEmpty()) {
+		if (cell.getStyle() != null) {
 			element.setAttribute(ATTR_STYLE_ALIAS,
-					String.valueOf(cell.getStyleAlias()));
+					String.valueOf(cell.getStyle().getAlias()));
 		}
 		return element;
 	}
@@ -216,14 +217,14 @@ public final class XmlSerializationUtils {
 	 * @throws XmlSerializationException
 	 *             любая ошибка
 	 */
-	public List<DataRow> deserialize(String str, List<Column> columns) {
+	public List<DataRow> deserialize(String str, List<Column> columns, List<FormStyle> styles ) {
 		List<DataRow> rows = new ArrayList<DataRow>();
 
 		Document document = stringToDocument(str);
 		Element root = document.getDocumentElement();
 		NodeList nodeList = root.getElementsByTagName(TAG_ROW);
 		for (int i = 0; i < nodeList.getLength(); i++) {
-			rows.add(parseDataRow((Element) nodeList.item(i), columns));
+			rows.add(parseDataRow((Element) nodeList.item(i), columns, styles));
 		}
 
 		return rows;
@@ -237,8 +238,8 @@ public final class XmlSerializationUtils {
 	 * @param columns
 	 *            список столбцов формы
 	 */
-	private DataRow parseDataRow(Element element, List<Column> columns) {
-		DataRow dataRow = new DataRow(columns);
+	private DataRow parseDataRow(Element element, List<Column> columns, List<FormStyle> styles) {
+		DataRow dataRow = new DataRow(columns, styles);
 
 		// Alias
 		Node aliasNode = element.getAttributes().getNamedItem(ATTR_ALIAS);

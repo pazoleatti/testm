@@ -4,9 +4,12 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Класс, содержащий информацию о ячейке таблицы налоговой формы: значение, стиль оформления, параметры объединения ячеек и т.п. 
+ * Класс, содержащий информацию о ячейке таблицы налоговой формы: значение,
+ * стиль оформления, параметры объединения ячеек и т.п.
+ * 
  * @author dsultanbekov
  */
 public class Cell implements Serializable {
@@ -16,11 +19,24 @@ public class Cell implements Serializable {
 	private BigDecimal numericValue;
 	private Column column;
 
-	private String styleAlias;
-	
+	private List<FormStyle> formStyleList;
+	private FormStyle style;
+
 	// Значение диапазона (пока используется для объединения ячеек)
 	private int colSpan = 1;
 	private int rowSpan = 1;
+	
+	/**
+	 * Конструктор только для сериализации
+	 */
+	public Cell(){
+		
+	}
+	
+	public Cell(Column column, List<FormStyle> formStyleList){
+		this.column = column;
+		this.formStyleList = formStyleList;
+	}
 
 	public Object getValue() {
 		if (stringValue != null) {
@@ -43,7 +59,8 @@ public class Cell implements Serializable {
 		}
 		if (column instanceof NumericColumn && value != null) {
 			int precision = ((NumericColumn) column).getPrecision();
-			value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
+			value = ((BigDecimal) value).setScale(precision,
+					RoundingMode.HALF_UP);
 		}
 
 		if (value == null) {
@@ -57,7 +74,8 @@ public class Cell implements Serializable {
 		} else if (value instanceof String) {
 			setStringValue((String) value);
 		} else {
-			throw new IllegalArgumentException("Values of type " + value.getClass().getName() + " are not supported");
+			throw new IllegalArgumentException("Values of type "
+					+ value.getClass().getName() + " are not supported");
 		}
 		return getValue();
 	}
@@ -101,63 +119,99 @@ public class Cell implements Serializable {
 	}
 
 	/**
-	 * Возвращает количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
-	 * @return значение атрибута colSpan 
+	 * Возвращает количество столбцов, на которые должна "растягиваться" данная
+	 * ячейка (аналогично атрибуту colspan html-тега TD)
+	 * 
+	 * @return значение атрибута colSpan
 	 */
 	public int getColSpan() {
 		return colSpan;
 	}
 
 	/**
-	 * Задаёт количество столбцов, на которые должна "растягиваться" данная ячейка (аналогично атрибуту colspan html-тега TD)
-	 * Если значение 1, то объединение ячеек не требуется 
-	 * @param colSpan значение атрибута colSpan
-	 * @throws IllegalArgumentException если задаётся значение меньше 1
-	 */	
+	 * Задаёт количество столбцов, на которые должна "растягиваться" данная
+	 * ячейка (аналогично атрибуту colspan html-тега TD) Если значение 1, то
+	 * объединение ячеек не требуется
+	 * 
+	 * @param colSpan
+	 *            значение атрибута colSpan
+	 * @throws IllegalArgumentException
+	 *             если задаётся значение меньше 1
+	 */
 	public void setColSpan(int colSpan) {
 		if (colSpan < 1) {
-			throw new IllegalArgumentException("colSpan value can not be less than 1");
-		}		
+			throw new IllegalArgumentException(
+					"colSpan value can not be less than 1");
+		}
 		this.colSpan = colSpan;
 	}
 
 	/**
-	 * Возвращает количество строк, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
-	 * @return значение атрибута rowSpan 
+	 * Возвращает количество строк, на которые должна "растягиваться" данная
+	 * ячейка (аналогично атрибуту rowspan html-тега TD)
+	 * 
+	 * @return значение атрибута rowSpan
 	 */
 	public int getRowSpan() {
 		return rowSpan;
 	}
 
 	/**
-	 * Задаёт количество строк, на которые должна "растягиваться" данная ячейка (аналогично атрибуту rowspan html-тега TD)
-	 * Если значение 1, то объединение ячеек не требуется 
-	 * @param rowSpan значение атрибута rowSpan
-	 * @throws IllegalArgumentException если задаётся значение меньше 1
-	 */	
+	 * Задаёт количество строк, на которые должна "растягиваться" данная ячейка
+	 * (аналогично атрибуту rowspan html-тега TD) Если значение 1, то
+	 * объединение ячеек не требуется
+	 * 
+	 * @param rowSpan
+	 *            значение атрибута rowSpan
+	 * @throws IllegalArgumentException
+	 *             если задаётся значение меньше 1
+	 */
 	public void setRowSpan(int rowSpan) {
 		if (rowSpan < 1) {
-			throw new IllegalArgumentException("rowSpan value can not be less than 1");
+			throw new IllegalArgumentException(
+					"rowSpan value can not be less than 1");
 		}
 		this.rowSpan = rowSpan;
 	}
 
 	/**
 	 * Получить {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
-	 * Если значение алиаса стиля равно null, то нужно использовать стиль по-умолчанию. 
+	 * Если значение алиаса стиля равно null, то нужно использовать стиль
+	 * по-умолчанию.
+	 * 
 	 * @return {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой
 	 */
-	public String getStyleAlias() {
-		return styleAlias;
+	// public String getStyleAlias() {
+	// return style.getAlias();
+	// }
+
+	public FormStyle getStyle() {
+		return style;
 	}
 
 	/**
-	 * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой. Стиль с таким алиасом должен быть определён
-	 * в {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном налоговой формы 
-	 * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+	 * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
+	 * Стиль с таким алиасом должен быть определён в
+	 * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
+	 * налоговой формы
+	 * 
+	 * @param styleAlias
+	 *            {@link FormStyle#getAlias() алиас стиля}, связанного с
+	 *            ячейкой.
 	 */
 	public void setStyleAlias(String styleAlias) {
-		this.styleAlias = styleAlias;
+		for (FormStyle formStyle : formStyleList) {
+			if (formStyle.getAlias()!=null && formStyle.getAlias().equals(styleAlias)) {
+				style = formStyle;
+				return;
+			}
+		}
+		throw new IllegalStateException("Стиля с алиасом '" + styleAlias
+				+ "' не существует в шаблоне");
+	}
+	
+	public String getStyleAlias(){
+		return style!=null ? style.getAlias() : null;
 	}
 
 	@Override
@@ -167,6 +221,5 @@ public class Cell implements Serializable {
 				+ column + ", colSpan=" + colSpan + ", rowSpan=" + rowSpan
 				+ "]";
 	}
-
 
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -58,8 +59,16 @@ public class XmlSerializationUtilsTest {
 		System.out.println(string);
 
 		// Deserialize
+		List<FormStyle> styles = new ArrayList<FormStyle>();
+		FormStyle fs = new FormStyle();
+		fs.setAlias("sa");
+		styles.add(fs);
+		fs = new FormStyle();
+		fs.setAlias("sa1");
+		styles.add(fs);
+		
 		List<DataRow> deserializedData = xmlSerializationUtils.deserialize(
-				string, columns);
+				string, columns, styles);
 		assertNotNull("The result of deserialization is null.",
 				deserializedData);
 		assertFalse("The result of deserialization is empty.",
@@ -69,22 +78,45 @@ public class XmlSerializationUtilsTest {
 		assertTrue(
 				"The result of deserialization doesn't equals the initial data.",
 				equals(data, deserializedData));
+		
+		styles = new ArrayList<FormStyle>();
+		fs = new FormStyle();
+		fs.setAlias("saa");
+		styles.add(fs);
+		fs = new FormStyle();
+		fs.setAlias("sa1");
+		styles.add(fs);
+		
+		try{
+			xmlSerializationUtils.deserialize(
+					string, columns, styles);
+		} catch (IllegalStateException e){
+			return;
+		}
+		Assert.fail("Должно всплыть исключение о том что стиль не найден в шаблоне");
 	}
 
 	public List<DataRow> prepareData() {
 		List<DataRow> rows = new ArrayList<DataRow>();
+		List<FormStyle> styles = new ArrayList<FormStyle>();
+		FormStyle fs = new FormStyle();
+		fs.setAlias("sa");
+		styles.add(fs);
+		fs = new FormStyle();
+		fs.setAlias("sa1");
+		styles.add(fs);
 
 		// Empty row
-		rows.add(new DataRow(columns));
+		rows.add(new DataRow(columns, styles));
 
 		// Row with alias and order parameter
-		DataRow row = new DataRow(columns);
+		DataRow row = new DataRow(columns, styles);
 		row.setAlias("alias");
 		row.setOrder(1001);
 		rows.add(row);
 		row.setManagedByScripts(true);
 
-		row = new DataRow("withColumns", columns);
+		row = new DataRow("withColumns", columns, styles);
 		row.put("stringColumn", "test тест");
 		row.put("numericColumn", new BigDecimal(1234.56));
 		row.put("dateColumn", new Date());
@@ -138,10 +170,10 @@ public class XmlSerializationUtilsTest {
 			return false;
 		if (cell1.getRowSpan() != other.getRowSpan())
 			return false;
-		if (cell1.getStyleAlias() == null) {
-			if (other.getStyleAlias() != null)
+		if (cell1.getStyle() == null) {
+			if (other.getStyle() != null)
 				return false;
-		} else if (!cell1.getStyleAlias().equals(other.getStyleAlias()))
+		} else if (!cell1.getStyle().getAlias().equals(other.getStyle().getAlias()))
 			return false;
 
 		return true;

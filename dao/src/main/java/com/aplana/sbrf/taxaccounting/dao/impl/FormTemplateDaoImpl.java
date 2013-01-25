@@ -54,7 +54,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				scriptDao.fillFormScripts(formTemplate);
 				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
-					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns()));
+					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles()));
 				}
 			}
 			return formTemplate;

@@ -34,8 +34,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 	private Map<Integer, List<Integer>> globalSpans = new HashMap<Integer, List<Integer>>();
 
-	private final List<FormStyle> allStyles;
-
 	/**
 	 * Construct a new table builder.
 	 *
@@ -54,9 +52,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		firstColumnStyle = " " + style.firstColumn();
 		lastColumnStyle = " " + style.lastColumn();
 		selectedCellStyle = " " + style.selectedRowCell();
-
-		this.allStyles = allStyles;
-
 	}
 
 	@Override
@@ -91,9 +86,9 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 			if (globalSpans.get(absRowIndex) == null || !globalSpans.get(absRowIndex).contains(curColumn)) {
 				Column<T, ?> column = cellTable.getColumn(curColumn);
 				com.aplana.sbrf.taxaccounting.model.Cell currentCell = null;
-				if (((DataRowColumn)column).getAlias() != null) {
+				if (((DataRowColumn<?>)column).getAlias() != null) {
 					currentCell =
-							((DataRow) rowValue).getCell(((DataRowColumn)column).getAlias() );
+							((DataRow) rowValue).getCell(((DataRowColumn<?>)column).getAlias() );
 				}
 				// Create the cell styles.
 				StringBuilder tdClasses = new StringBuilder(cellStyle);
@@ -141,13 +136,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				}
 
 				if (currentCell != null) {
-					FormStyle currentCellStyle = null;
-					for (FormStyle oneStyle : allStyles) {
-						if (oneStyle.getAlias().equals(currentCell.getStyleAlias())) {
-							currentCellStyle = oneStyle;
-							break;
-						}
-					}
+					FormStyle currentCellStyle = currentCell.getStyle();
 					if (currentCellStyle != null) {
 						applyOurCustomStyles(td, currentCellStyle);
 					} else {

@@ -43,9 +43,13 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
 	private Map<String, Cell> data;
 	private String alias;
+	private List<FormStyle> formStyleList;
 	private int order;
 	private boolean managedByScripts;
 
+	/**
+	 * Конструктор нужен для сериализации
+	 */
 	public DataRow() {
 
 	}
@@ -76,12 +80,14 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	}
 
-	public DataRow(String alias, List<Column> formColumns) {
-		this(formColumns);
+	public DataRow(String alias, List<Column> formColumns, List<FormStyle> formStyleList) {
+		this(formColumns, formStyleList);
 		this.alias = alias;
+		
 	}
 
-	public DataRow(List<Column> formColumns) {
+	public DataRow(List<Column> formColumns, List<FormStyle> formStyleList) {
+		this.formStyleList = formStyleList;
 		setFormColumns(formColumns);
 	}
 
@@ -95,9 +101,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	public void setFormColumns(List<Column> formColumns) {
 		data = new HashMap<String, Cell>(formColumns.size());
 		for (Column col : formColumns) {
-			Cell cellValue = new Cell();
-			cellValue.setColumn(col);
-			data.put(col.getAlias(), cellValue);
+			addColumn(col);
 		}
 	}
 
@@ -123,10 +127,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	 *            столбец
 	 */
 	public void addColumn(Column col) {
-		Cell cellValue = new Cell();
-		cellValue.setColumn(col);
+
 		Cell oldValue = data.get(col.getAlias());
 		if (oldValue == null) {
+			Cell cellValue = new Cell(col, formStyleList);
 			data.put(col.getAlias(), cellValue);
 		} else {
 			throw new IllegalArgumentException("Алиас столбца + '"

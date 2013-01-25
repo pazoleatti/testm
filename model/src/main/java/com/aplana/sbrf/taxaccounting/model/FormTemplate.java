@@ -46,7 +46,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	public List<Column> getColumns() {
 		return columns;
 	}
-
+	
 	/**
 	 * Возвращает коллекцию {@link FormStyle стилей формы} Коллекция создаётся в
 	 * момент создания объекта FormTemplate и не может быть изменена в ходе
@@ -124,7 +124,8 @@ public class FormTemplate extends IdentityObject<Integer> {
 		}
 		throw new IllegalArgumentException("Wrong columnAlias: " + columnAlias);
 	}
-
+	
+	
 	/**
 	 * Получить версию формы: для каждого типа формы может существовать
 	 * несколько версий
