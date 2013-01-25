@@ -206,7 +206,7 @@ public class Cell implements Serializable {
 				return;
 			}
 		}
-		throw new IllegalStateException("Стиля с алиасом '" + styleAlias
+		throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias
 				+ "' не существует в шаблоне");
 	}
 	

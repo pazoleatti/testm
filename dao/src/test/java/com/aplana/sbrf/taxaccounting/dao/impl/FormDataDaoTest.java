@@ -246,7 +246,7 @@ public class FormDataDaoTest {
 		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyle().getAlias());
 	}
 
-	@Test(expected = DaoException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void stylesSaveErrorStyleNotExist() {
 		FormData formData = fillFormData();
 		DataRow dr = formData.getDataRow("newAlias");

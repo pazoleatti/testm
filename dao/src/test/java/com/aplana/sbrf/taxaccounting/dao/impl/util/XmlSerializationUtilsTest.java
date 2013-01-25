@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -45,6 +46,7 @@ public class XmlSerializationUtilsTest {
 	}
 
 	@Test
+	@Transactional
 	public void testSerialization() {
 		// Prepare
 		List<DataRow> data = prepareData();
@@ -90,7 +92,7 @@ public class XmlSerializationUtilsTest {
 		try{
 			xmlSerializationUtils.deserialize(
 					string, columns, styles);
-		} catch (IllegalStateException e){
+		} catch (IllegalArgumentException e){
 			return;
 		}
 		Assert.fail("Должно всплыть исключение о том что стиль не найден в шаблоне");

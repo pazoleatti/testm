@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Vitalii Samolovskikh
@@ -22,6 +23,7 @@ public class FormTemplateDaoTest {
 	private FormTemplateDao formTemplateDao;
 
 	@Test
+	@Transactional
 	public void testGet(){
 		FormTemplate ft = formTemplateDao.get(1);
 		Assert.assertEquals(1, ft.getId().intValue());
@@ -30,6 +32,7 @@ public class FormTemplateDaoTest {
 	}
 	
 	@Test(expected=DaoException.class)
+	@Transactional
 	public void testNotexistingGet() {
 		formTemplateDao.get(-1000);
 	}

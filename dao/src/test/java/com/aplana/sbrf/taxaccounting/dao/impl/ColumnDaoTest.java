@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class ColumnDaoTest {
 	private static final int THIRD_COLUMN  = 2;
 
 	@Test
+	@Transactional
 	public void getFormColumns(){
 		//Given FORM_ID_FOR_TEST, NUMBER_OF_STYLES
 
@@ -54,6 +56,7 @@ public class ColumnDaoTest {
 	}
 
 	@Test
+	@Transactional
 	public void saveFormColumns(){
 		//Given FORM_ID_FOR_TEST
 		List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);

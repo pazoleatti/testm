@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class FormStyleDaoTest {
 	private static final int THIRD_STYLE  = 2;
 
 	@Test
+	@Transactional
 	public void getFormStyles(){
 	    //Given FORM_ID_FOR_TEST, NUMBER_OF_STYLES
 
@@ -60,6 +62,7 @@ public class FormStyleDaoTest {
 	}
 
 	@Test
+	@Transactional
 	public void saveFormStyles(){
 		//Given FORM_ID_FOR_TEST
 		List<FormStyle> formStyleList = formStyleDao.getFormStyles(FORM_ID_FOR_TEST);
