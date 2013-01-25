@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.range.Range;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,11 +22,13 @@ import java.util.List;
 
 public class ScriptUtils {
 
-	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны" +
+	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
 
-	private static final String WRONG_COLUMN_RANGE = "Указанный диапазон столбцов %d - %d выходит за границы таблицы." +
+	private static final String WRONG_COLUMN_RANGE = "Указанный диапазон столбцов %d - %d выходит за границы таблицы. " +
 			"В таблице количество столбцов = %d";
+
+	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
 
 	/**
 	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0
@@ -33,6 +38,7 @@ public class ScriptUtils {
 	 * @return сумма диапазона
 	 */
 	public static double summ(FormData formData, Range range) {
+		logger.info("summ start");
 		checks(formData, range);
 
 		double sum = 0;
@@ -41,7 +47,9 @@ public class ScriptUtils {
 		for (int i = range.getRowFrom(); i < range.getRowTo(); i++) {
 			DataRow row = rows.get(i);
 			for (int j = range.getColFrom(); j < range.getColTo(); j++) {
-				BigDecimal value = (BigDecimal)row.get(cols.get(j).getAlias());
+				Column col = cols.get(j);
+				logger.info("col name = " + col.getName());
+				BigDecimal value = (BigDecimal)row.get(col.getAlias());
 				if (value != null) {
 					sum += value.doubleValue();
 				}
@@ -86,7 +94,8 @@ public class ScriptUtils {
 	 */
 	private static void checkNumericColumns(FormData formData, Range range) {
 		List<Column> cols = formData.getFormColumns();
-		for (Column col : cols) {
+		for (int j = range.getColFrom(); j < range.getColTo(); j++) {
+			Column col = cols.get(j);
 			if (!(col instanceof NumericColumn))
 				throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
 						cols.get(range.getColFrom()).getName(),
