@@ -136,7 +136,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiHandler("addStyle")
 	public void onAddStyle(ClickEvent event){
 		FormStyle newStyle = new FormStyle();
-		newStyle.setAlias("Новый");
+		newStyle.setAlias(Color.WHITE.getTitle());
 		newStyle.setBackColor(Color.WHITE);
 		newStyle.setFontColor(Color.WHITE);
 		styles.add(newStyle);
