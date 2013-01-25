@@ -12,35 +12,37 @@ public enum Color {
 	/**
 	 * Чёрный цвет
 	 */
-	BLACK(0, 0, 0, 0),
+	BLACK(0, 0, 0, 0, "Чёрный"),
 	/**
 	 * Красный цвет
 	 */
-	RED(1, 255, 0, 0),
+	RED(1, 255, 0, 0, "Красный"),
 	/**
 	 * Зелёный цвет
 	 */
-	GREEN(2, 0, 255, 0),
+	GREEN(2, 0, 255, 0, "Зелёный"),
 	/**
 	 * Синий цвет
 	 */
-	BLUE(3, 0, 0, 255),
+	BLUE(3, 0, 0, 255, "Синий"),
 	/**
 	 * Белый цвет
 	 */
-	WHITE(4, 255, 255, 255);
+	WHITE(4, 255, 255, 255, "Белый");
 	
-	private Color(int id, int red, int green, int blue) {
+	private Color(int id, int red, int green, int blue, String title) {
 		this.id = id;
 		this.red = red;
 		this.green = green;
 		this.blue = blue;
+		this.title = title;
 	}
 	
 	private final int id;
 	private final int red;
 	private final int green;
 	private final int blue;
+	private final String title;
 	
 	/**
 	 * Возвращает код цвета (используется при записи в БД и сериализации в XML)
@@ -69,6 +71,13 @@ public enum Color {
 	 */
 	public int getBlue() {
 		return blue;
+	}
+
+	/**
+	 * Возвращает название цвета (используется в админке)
+	 */
+	public String getTitle() {
+		return title;
 	}
 	
 	/**
