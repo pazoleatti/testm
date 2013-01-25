@@ -22,12 +22,14 @@ public interface DeclarationTemplateDao {
 	 */
 	int save(DeclarationTemplate declarationTemplate);
 	/**
-	 * Задать шаблон Jrxml-файла
+	 * Задать Jrxml-файла и jasper-файл
+	 * Предполагается, что jasper-файл - это откомпилированная версия jrxml-файла 
 	 * @param declarationTemplateId идентификатор шаблона декларации 
 	 * @param jrxml jrxml в виде строки
+	 * @param jasper jasper-файл в виде массива байт
 	 * @throws DaoException если не существует шаблона декларации с таким id
 	 */
-	void setJrxml(int declarationTemplateId, String jrxml);
+	void setJrxmlAndJasper(int declarationTemplateId, String jrxml, byte[] jasper);
 	/**
 	 * Получить шаблон Jrxml-файла
 	 * @param declarationTemplateId
@@ -35,4 +37,11 @@ public interface DeclarationTemplateDao {
 	 * @throws DaoException если не существует шаблона декларации с таким id 
 	 */
 	String getJrxml(int declarationTemplateId);
+	/**
+	 * Получить jasper-файл для формирования декларации
+	 * @param declarationTemplateId
+	 * @return jasper-файл в виде байтового массива
+	 * @throws DaoException если не существует шаблона декларации с таким id 
+	 */
+	byte[] getJasper(int declarationTemplateId);	
 }
