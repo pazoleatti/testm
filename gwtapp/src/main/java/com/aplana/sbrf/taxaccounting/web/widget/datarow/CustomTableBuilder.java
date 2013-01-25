@@ -13,10 +13,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.view.client.SelectionModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
@@ -32,7 +29,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	private final String lastColumnStyle;
 	private final String selectedCellStyle;
 
-	private Map<Integer, List<Integer>> globalSpans = new HashMap<Integer, List<Integer>>();
+	private Map<Integer, Collection<Integer>> globalSpans = new HashMap<Integer, Collection<Integer>>();
 
 	/**
 	 * Construct a new table builder.
@@ -180,11 +177,18 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 			spn.add(colIndex + sp);
 		}
 		// Оставляем текущую ячейку
-		globalSpans.put(rowIndex, spn.subList(1,spn.size()));
+		//TODO: попробовать сделать проще.
+		if ((globalSpans.get(rowIndex) != null) ) {
+			Set<Integer> tmp = new HashSet<Integer>(globalSpans.get(rowIndex));
+			tmp.addAll(spn.subList(1, spn.size()));
+			globalSpans.put(rowIndex, tmp);
+		} else {
+			globalSpans.put(rowIndex, spn.subList(1,spn.size()));
+		}
 		for (int rsp=0; rsp<rowSpan-1; rsp++) {
 
-			if (globalSpans.get(rowIndex+1+rsp) != null) {
-				List<Integer> tmp = globalSpans.get(rowIndex+1+rsp);
+			if ((globalSpans.get(rowIndex+1+rsp) != null)) {
+				Set<Integer> tmp = new HashSet<Integer>(globalSpans.get(rowIndex+1+rsp));
 				tmp.addAll(spn);
 				globalSpans.put(rowIndex+1+rsp, tmp);
 			} else {
