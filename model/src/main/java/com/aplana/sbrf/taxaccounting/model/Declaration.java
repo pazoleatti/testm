@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 /**
- * Налоговая декларация
+ * Налоговая декларация.
+ * 
+ * Обращаю внимание, что сами данные декларации (XML-файл в формате законодателя) в модели не содержатся
+ * Работа с ними должна вестись через отдельные методы на dao и сервисном слое
  * @author dsultanbekov
  */
 public class Declaration extends IdentityObject<Long> {
@@ -10,7 +13,7 @@ public class Declaration extends IdentityObject<Long> {
 	private int declarationTemplateId;	
 	private int reportPeriodId;
 	private int departmentId;
-	private String xml;
+	private boolean accepted;
 
 	/**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
@@ -61,18 +64,18 @@ public class Declaration extends IdentityObject<Long> {
 	}
 	
 	/**
-	 * Получить представление декларации в формате законодателя
-	 * @return данные декларации в виде XML-строки
+	 * Возвращает признак того, что декларация принята
+	 * @return true - декларация принята, false - не принята
 	 */
-	public String getXml() {
-		return xml;
+	public boolean isAccepted() {
+		return accepted;
 	}
-	
+
 	/**
-	 * Задать представление декларации в формате законодателя
-	 * @param xml данные декларации в виде XML-строки
+	 * Задать признак того, что декларация принята
+	 * @param accepted true - декларация принята, false - не принята
 	 */
-	public void setXml(String xml) {
-		this.xml = xml;
+	public void setAccepted(boolean accepted) {
+		this.accepted = accepted;
 	}
 }
