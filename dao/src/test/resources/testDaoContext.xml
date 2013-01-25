@@ -10,8 +10,7 @@
     <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
 
     <!-- Для декларативного управления транзакциями с помощью @Transactional -->
-    <tx:annotation-driven/>
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
   		<property name="dataSource" ref="dataSource"/>
 	</bean>
 

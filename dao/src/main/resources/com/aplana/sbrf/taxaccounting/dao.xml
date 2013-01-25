@@ -12,8 +12,8 @@
 	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
-	
-	<tx:annotation-driven/>	
+
+	<tx:annotation-driven/>
 
 	<!--  MyBatis configuration and DAOs--> 	
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
