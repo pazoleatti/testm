@@ -25,15 +25,15 @@ public class Cell implements Serializable {
 	// Значение диапазона (пока используется для объединения ячеек)
 	private int colSpan = 1;
 	private int rowSpan = 1;
-	
+
 	/**
 	 * Конструктор только для сериализации
 	 */
-	public Cell(){
-		
+	public Cell() {
+
 	}
-	
-	public Cell(Column column, List<FormStyle> formStyleList){
+
+	public Cell(Column column, List<FormStyle> formStyleList) {
 		this.column = column;
 		this.formStyleList = formStyleList;
 	}
@@ -200,8 +200,13 @@ public class Cell implements Serializable {
 	 *            ячейкой.
 	 */
 	public void setStyleAlias(String styleAlias) {
+		if (styleAlias == null) {
+			style = null;
+			return;
+		}
 		for (FormStyle formStyle : formStyleList) {
-			if (formStyle.getAlias()!=null && formStyle.getAlias().equals(styleAlias)) {
+			if (formStyle.getAlias() != null
+					&& formStyle.getAlias().equals(styleAlias)) {
 				style = formStyle;
 				return;
 			}
@@ -209,9 +214,9 @@ public class Cell implements Serializable {
 		throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias
 				+ "' не существует в шаблоне");
 	}
-	
-	public String getStyleAlias(){
-		return style!=null ? style.getAlias() : null;
+
+	public String getStyleAlias() {
+		return style != null ? style.getAlias() : null;
 	}
 
 	@Override

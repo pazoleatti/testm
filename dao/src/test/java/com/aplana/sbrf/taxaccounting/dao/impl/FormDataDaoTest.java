@@ -172,8 +172,8 @@ public class FormDataDaoTest {
 			// Это нормально - записи нет в БД
 		}
 	}
-	
-	private FormData fillFormData(){
+
+	private FormData fillFormData() {
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		FormData formData = new FormData(formTemplate);
 
@@ -211,7 +211,7 @@ public class FormDataDaoTest {
 		DataRow dr = formData.getDataRow("newAlias");
 		dr.getCell("numericColumn").setColSpan(2);
 		dr.getCell("numericColumn").setRowSpan(2);
-		
+
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
 
@@ -232,18 +232,26 @@ public class FormDataDaoTest {
 
 		FormData formData = fillFormData();
 
-		DataRow dr = formData.getDataRow("newAlias");
+		DataRow dr = formData.getDataRows().get(0);
+		dr.getCell("stringColumn").setStyleAlias(null);
+
+		dr = formData.getDataRow("newAlias");
 		dr.getCell("numericColumn").setStyleAlias("alias2");
 
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
 
 		dr = formData.getDataRows().get(0);
-		Assert.assertEquals("alias1", dr.getCell("numericColumn").getStyle().getAlias());
+		Assert.assertEquals("alias1", dr.getCell("numericColumn").getStyle()
+				.getAlias());
+		Assert.assertEquals(null, dr.getCell("dateColumn").getStyle());
 
 		dr = formData.getDataRows().get(1);
-		Assert.assertEquals("alias2", dr.getCell("numericColumn").getStyle().getAlias());
-		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyle().getAlias());
+		Assert.assertEquals("alias2", dr.getCell("numericColumn").getStyle()
+				.getAlias());
+		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyle()
+				.getAlias());
+
 	}
 
 	@Test(expected = IllegalArgumentException.class)
