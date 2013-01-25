@@ -45,9 +45,13 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			"com.aplana.sbrf.taxaccounting.model",
 			"com.aplana.sbrf.taxaccounting.model.dictionary",
 			"com.aplana.sbrf.taxaccounting.model.log",
-			"com.aplana.sbrf.taxaccounting.model.security",
 			"com.aplana.sbrf.taxaccounting.dao.exсeption"
 	};
+
+	private static final String[] PREDEFINED_STATIC_IMPORTS = new String[]{
+			"com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
+	};
+
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -65,6 +69,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		CompilerConfiguration config = new CompilerConfiguration();
 		ImportCustomizer ic = new ImportCustomizer();
 		ic.addStarImports(PREDEFINED_IMPORTS);
+		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
 		config.addCompilationCustomizers(ic);
 
 		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) this.scriptEngine;

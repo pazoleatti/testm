@@ -1,7 +1,7 @@
-package com.aplana.sbrf.taxaccounting.dao.dictionary.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.script;
 
-import com.aplana.sbrf.taxaccounting.dao.dictionary.TransportTaxDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.script.TransportTaxDao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

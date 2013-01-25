@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.script;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.DictionaryManagerImpl;
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider;

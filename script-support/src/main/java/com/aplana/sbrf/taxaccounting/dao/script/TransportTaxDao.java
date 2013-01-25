@@ -1,9 +1,9 @@
-package com.aplana.sbrf.taxaccounting.dao.dictionary;
-
-import java.math.BigDecimal;
+package com.aplana.sbrf.taxaccounting.dao.script;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
+import java.math.BigDecimal;
 
 @ScriptExposed(taxTypes = TaxType.TRANSPORT)
 public interface TransportTaxDao {
