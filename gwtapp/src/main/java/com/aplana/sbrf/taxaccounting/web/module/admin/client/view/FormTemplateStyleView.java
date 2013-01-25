@@ -19,9 +19,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleUiHandlers>
 		implements FormTemplateStylePresenter.MyView, Editor<FormStyle> {
@@ -34,15 +32,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	private final Widget widget;
 	private final MyDriver driver;
 	private List<FormStyle> styles;
-	private static final Map<Color, String> colorMap = new HashMap<Color, String>();
-
-	static {
-		colorMap.put(Color.WHITE, "белый");
-		colorMap.put(Color.BLACK, "черный");
-		colorMap.put(Color.BLUE, "синий");
-		colorMap.put(Color.GREEN, "зеленый");
-		colorMap.put(Color.RED, "красный");
-	}
+	private static final List<Color> colorTitles = new ArrayList<Color>();
 
 	@UiField
 	ListBox styleListBox;
@@ -71,27 +61,29 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@Inject
 	@UiConstructor
 	public FormTemplateStyleView(final Binder uiBinder, final MyDriver driver) {
+		Collections.addAll(colorTitles, Color.values());
+
 		fontColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
 			@Override
-			public String render(Color object) {
-				if (object == null) {
+			public String render(Color color) {
+				if (color == null) {
 					return "";
 				}
-				return colorMap.get(object);
+				return color.getTitle();
 			}
 		});
-		fontColor.setAcceptableValues(colorMap.keySet());
+		fontColor.setAcceptableValues(colorTitles);
 
 		backColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
 			@Override
-			public String render(Color object) {
-				if (object == null) {
+			public String render(Color color) {
+				if (color == null) {
 					return "";
 				}
-				return colorMap.get(object);
+				return color.getTitle();
 			}
 		});
-		backColor.setAcceptableValues(colorMap.keySet());
+		backColor.setAcceptableValues(colorTitles);
 
 		widget = uiBinder.createAndBindUi(this);
 		this.driver = driver;
