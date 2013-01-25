@@ -82,7 +82,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	/**
 	 * Запись в таблице cell_span_info
-	 *
+	 * 
 	 * @author sgoryachkin
 	 */
 	private static class SpanRecord {
@@ -201,7 +201,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
 	private boolean checkValueType(Object value,
-	                               Class<? extends Column> columnType) {
+			Class<? extends Column> columnType) {
 		// TODO: в будущем возможны спец-ячейки, тип которых отличается от типа
 		// столбца
 		if (value == null) {
@@ -216,100 +216,107 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 	}
 
-	private void readStyle(final FormTemplate formTemplate, final Map<Long, DataRow> rowMap, Long formDataId){
+	private void readStyle(final FormTemplate formTemplate,
+			final Map<Long, DataRow> rowMap, Long formDataId) {
 
-		String sqlQuery = "SELECT row_id, column_id, style_id FROM cell_style cs " +
-				"WHERE exists (SELECT 1 from data_row r WHERE r.id = cs.row_id and r.form_data_id = ?)";
+		String sqlQuery = "SELECT row_id, column_id, style_id FROM cell_style cs "
+				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = cs.row_id and r.form_data_id = ?)";
 
-		getJdbcTemplate()
-				.query( sqlQuery, new Object[] { formDataId }, new int[] { Types.NUMERIC },
-						new RowCallbackHandler() {
-							public void processRow(ResultSet rs)
-									throws SQLException {
-								Long rowId = rs.getLong("row_id");
-								DataRow row = rowMap.get(rowId);
-								Column col = formTemplate.getColumn(rs.getInt("column_id"));
-								Cell cell = row.getCell(col.getAlias());
-								cell.setStyleAlias(cell.getStyle().getAlias());
-							}
-						});
+		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
+				new int[] { Types.NUMERIC }, new RowCallbackHandler() {
+					public void processRow(ResultSet rs) throws SQLException {
+						Long rowId = rs.getLong("row_id");
+						DataRow row = rowMap.get(rowId);
+						Column col = formTemplate.getColumn(rs
+								.getInt("column_id"));
+						Cell cell = row.getCell(col.getAlias());
+						cell.setStyleAlias(ModelUtils.findByProperties(
+								formTemplate.getStyles(),
+								rs.getInt("style_id"),
+								new ModelUtils.GetPropertiesFunc<FormStyle>() {
+									@Override
+									public Object getProperties(FormStyle object) {
+										return object.getId();
+									}
+								}).getAlias());
+					}
+				});
 	}
 
 	/**
 	 * Получение данных о диапазоне ячейки
-	 *
+	 * 
 	 * @param formTemplate
 	 * @param rowMap
 	 * @param formDataId
 	 */
 	private void readSpan(final FormTemplate formTemplate,
-	                      final Map<Long, DataRow> rowMap, Long formDataId) {
+			final Map<Long, DataRow> rowMap, Long formDataId) {
 		getJdbcTemplate()
 				.query("select column_id, row_id, colspan, rowspan from cell_span_info v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 						new Object[] { formDataId },
 						new int[] { Types.NUMERIC }, new RowCallbackHandler() {
-					public void processRow(ResultSet rs)
-							throws SQLException {
-						SpanRecord spanRecord = new SpanRecord(rs
-								.getInt("colspan"), rs
-								.getInt("rowspan"), rs
-								.getInt("column_id"), rs
-								.getLong("row_id"));
-						Long rowId = rs.getLong("row_id");
+							public void processRow(ResultSet rs)
+									throws SQLException {
+								SpanRecord spanRecord = new SpanRecord(rs
+										.getInt("colspan"), rs
+										.getInt("rowspan"), rs
+										.getInt("column_id"), rs
+										.getLong("row_id"));
+								Long rowId = rs.getLong("row_id");
 
-						DataRow row = rowMap.get(rowId);
-						Column col = formTemplate.getColumn(spanRecord
-								.getColumnId());
-						Cell cellValue = row.getCell(col
-								.getAlias());
+								DataRow row = rowMap.get(rowId);
+								Column col = formTemplate.getColumn(spanRecord
+										.getColumnId());
+								Cell cellValue = row.getCell(col.getAlias());
 
-						cellValue.setColSpan(spanRecord.getColSpan());
-						cellValue.setRowSpan(spanRecord.getRowSpan());
-					}
-				});
+								cellValue.setColSpan(spanRecord.getColSpan());
+								cellValue.setRowSpan(spanRecord.getRowSpan());
+							}
+						});
 	}
 
 	private void readValues(String tableName, final FormTemplate formTemplate,
-	                        final Map<Long, DataRow> rowMap, final FormData formData) {
+			final Map<Long, DataRow> rowMap, final FormData formData) {
 		getJdbcTemplate()
 				.query("select * from "
 						+ tableName
 						+ " v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 						new Object[] { formData.getId() },
 						new int[] { Types.NUMERIC }, new RowCallbackHandler() {
-					public void processRow(ResultSet rs)
-							throws SQLException {
-						int columnId = rs.getInt("column_id");
-						Long rowId = rs.getLong("row_id");
-						Object value = rs.getObject("value");
-						if (value != null) {
-							DataRow row = rowMap.get(rowId);
-							Column col = formTemplate
-									.getColumn(columnId);
-							String columnAlias = col.getAlias();
-							// TODO: думаю, стоит зарефакторить
-							if (value instanceof java.sql.Date) {
-								value = new java.util.Date(
-										((java.sql.Date) value)
-												.getTime());
-							}
+							public void processRow(ResultSet rs)
+									throws SQLException {
+								int columnId = rs.getInt("column_id");
+								Long rowId = rs.getLong("row_id");
+								Object value = rs.getObject("value");
+								if (value != null) {
+									DataRow row = rowMap.get(rowId);
+									Column col = formTemplate
+											.getColumn(columnId);
+									String columnAlias = col.getAlias();
+									// TODO: думаю, стоит зарефакторить
+									if (value instanceof java.sql.Date) {
+										value = new java.util.Date(
+												((java.sql.Date) value)
+														.getTime());
+									}
 
-							boolean typeOk = checkValueType(value,
-									col.getClass());
-							if (!typeOk) {
-								logger.warn("Cannot assign value '"
-										+ value + "'("
-										+ value.getClass().getName()
-										+ ") to column '" + columnAlias
-										+ "'("
-										+ col.getClass().getName()
-										+ ")");
-								value = null;
+									boolean typeOk = checkValueType(value,
+											col.getClass());
+									if (!typeOk) {
+										logger.warn("Cannot assign value '"
+												+ value + "'("
+												+ value.getClass().getName()
+												+ ") to column '" + columnAlias
+												+ "'("
+												+ col.getClass().getName()
+												+ ")");
+										value = null;
+									}
+									row.put(columnAlias, value);
+								}
 							}
-							row.put(columnAlias, value);
-						}
-					}
-				});
+						});
 	}
 
 	@Override
@@ -367,12 +374,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		final List<ValueRecord<String>> stringValues = new ArrayList<ValueRecord<String>>();
 		final List<ValueRecord<Date>> dateValues = new ArrayList<ValueRecord<Date>>();
 
-
 		final List<SpanRecord> spanValues = new ArrayList<SpanRecord>();
 		final List<StyleRecord> styleValues = new ArrayList<StyleRecord>();
 		final List<Integer> spanOrders = new ArrayList<Integer>();
 		final List<Integer> styleOrders = new ArrayList<Integer>();
-		final Map<String, FormStyle> styleAliasToId = formStyleDao.getAliasToFormStyleMap(formData.getFormTemplateId());
+		// final Map<String, FormStyle> styleAliasToId =
+		// formStyleDao.getAliasToFormStyleMap(formData.getFormTemplateId());
 
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
@@ -408,8 +415,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								cellValue.getRowSpan(), col.getId(), null));
 						spanOrders.add(rowOrder);
 					}
-					if(cellValue.getStyle() != null){
-						styleValues.add(new StyleRecord(col.getId(), null, cellValue.getStyle().getId()));
+					if (cellValue.getStyle() != null) {
+						styleValues.add(new StyleRecord(col.getId(), null,
+								cellValue.getStyle().getId()));
 						styleOrders.add(rowOrder);
 					}
 				}
@@ -438,12 +446,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		insertValues("string_value", stringValues, rowIds);
 		insertValues("date_value", dateValues, rowIds);
 
-		insertStyles(styleValues, styleAliasToId, styleOrders, rowIds);
+		insertStyles(styleValues, styleOrders, rowIds);
 		insertSpans(spanValues, spanOrders, rowIds);
 	}
 
 	private <T> void insertValues(String tableName,
-	                              final List<ValueRecord<T>> values, final List<Long> rowIds) {
+			final List<ValueRecord<T>> values, final List<Long> rowIds) {
 		if (values.isEmpty()) {
 			return;
 		}
@@ -479,15 +487,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						+ " (row_id, column_id, value) values (?, ?, ?)", bpss);
 	}
 
-	private void insertStyles(final List<StyleRecord> values, final Map<String, FormStyle> styleAliasToId,
-	                          final List<Integer> orders, final List<Long> rowIds){
+	private void insertStyles(final List<StyleRecord> values,
+			final List<Integer> orders, final List<Long> rowIds) {
 		if (!values.isEmpty()) {
 			getJdbcTemplate()
 					.batchUpdate(
 							"insert into cell_style (row_id, column_id, style_id) values (?, ?, ?)",
 							new BatchPreparedStatementSetter() {
 								public void setValues(PreparedStatement ps,
-								                      int index) throws SQLException {
+										int index) throws SQLException {
 
 									StyleRecord rec = values.get(index);
 									rec.setRowId(rowIds.get(orders.get(index) - 1));
@@ -506,7 +514,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
 	private <T> void insertSpans(final List<SpanRecord> values,
-	                             final List<Integer> orders, final List<Long> rowIds) {
+			final List<Integer> orders, final List<Long> rowIds) {
 		if (values.isEmpty()) {
 			return;
 		}
@@ -515,7 +523,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						"insert into cell_span_info (row_id, column_id, colspan, rowspan) values (?, ?, ?, ?)",
 						new BatchPreparedStatementSetter() {
 							public void setValues(PreparedStatement ps,
-							                      int index) throws SQLException {
+									int index) throws SQLException {
 								SpanRecord rec = values.get(index);
 								rec.setRowId(rowIds.get(orders.get(index) - 1));
 
@@ -566,7 +574,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	/**
 	 * Ищет налоговую форму по заданным параметрам.
-	 *
+	 * 
 	 * @param formTypeId
 	 *            идентификатор
 	 *            {@link com.aplana.sbrf.taxaccounting.model.FormType вида
@@ -585,7 +593,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	 */
 	@Override
 	public FormData find(int formTypeId, FormDataKind kind, int departmentId,
-	                     int periodId) {
+			int periodId) {
 		Long formDataId = getJdbcTemplate()
 				.query("select fd.id from form_data fd join form f on fd.form_id=f.id "
 						+ "where f.type_id=? and fd.kind=? and fd.department_id=? and fd.report_period_id=?",

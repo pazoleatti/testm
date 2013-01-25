@@ -19,6 +19,11 @@ public class FormData extends IdentityObject<Long> {
 	private int formTemplateId;
 	private List<Column> formColumns;
 	private List<FormStyle> formStyles;
+	
+	public List<FormStyle> getFormStyles() {
+		return formStyles;
+	}
+
 	private List<DataRow> dataRows;
 	private FormType formType;
 
