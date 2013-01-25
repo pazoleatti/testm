@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.Color;
-import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateStylePresenter;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
