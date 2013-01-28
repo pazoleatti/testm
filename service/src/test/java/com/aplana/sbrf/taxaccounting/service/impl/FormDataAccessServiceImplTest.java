@@ -36,6 +36,8 @@ public class FormDataAccessServiceImplTest {
 	private static final long BANK_ACCEPTED_FORMDATA_ID = 9;
 	private static final long BANK_PREPARED_FORMDATA_ID = 11;
 	private static final long BANK_APPROVED_FORMDATA_ID = 12;
+	private static final long BANK_CREATED_SUMMARY_FORMDATA_ID = 14;
+	private static final long BANK_ACCEPTED_SUMMARY_FORMDATA_ID = 15;
 
 	private static final long GOSB_TB1_CREATED_FORMDATA_ID = 13;
 
@@ -44,6 +46,8 @@ public class FormDataAccessServiceImplTest {
 	private static final long INACTIVE_FORMDATA_ID = 10;
 
 	private static final int TB1_CONTROL_USER_ID = 1;
+	private static final int TB1_OPERATOR_USER_ID = 7;
+	private static final int TB1_CONTROL_UNP_USER_ID = 8;
 	private static final int BANK_CONTROL_USER_ID = 3;
 	private static final int BANK_OPERATOR_USER_ID = 4;
 	private static final int BANK_CONTROL_UNP_USER_ID = 5;
@@ -59,35 +63,39 @@ public class FormDataAccessServiceImplTest {
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData fd;
 		
-		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB1_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID);
 		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(TB2_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID);
 		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_PREPARED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_PREPARED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_PREPARED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_APPROVED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.APPROVED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_APPROVED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.APPROVED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(GOSB_TB1_CREATED_FORMDATA_ID, GOSB_TB1_ID, WorkflowState.CREATED, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_CREATED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		when(formDataDao.get(BANK_CREATED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(BANK_ACCEPTED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		when(formDataDao.get(BANK_ACCEPTED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(GOSB_TB1_CREATED_FORMDATA_ID, GOSB_TB1_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(GOSB_TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_INACTIVE_ID);
 		when(formDataDao.get(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 		ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
 		
@@ -96,6 +104,10 @@ public class FormDataAccessServiceImplTest {
 		
 		user = mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL);
 		when(userDao.getUser(TB1_CONTROL_USER_ID)).thenReturn(user);
+		user = mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR);
+		when(userDao.getUser(TB1_OPERATOR_USER_ID)).thenReturn(user);
+		user = mockUser(TB1_CONTROL_UNP_USER_ID, TB1_ID, TARole.ROLE_CONTROL_UNP);
+		when(userDao.getUser(TB1_CONTROL_UNP_USER_ID)).thenReturn(user);
 		user = mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL);
 		when(userDao.getUser(BANK_CONTROL_USER_ID)).thenReturn(user);
 		user = mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR);
@@ -261,49 +273,95 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
 		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
 	}
-	
+
 	@Test
-	public void testGetAvailableMoves() {
-		
-		// Контролёр ТБ может утрверждать и отменять утверждение
-		assertArrayEquals(
-			new Object[] { WorkflowMove.CREATED_TO_APPROVED }, 
-			service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray()
-		);		
-		assertArrayEquals(
-			new Object[] { WorkflowMove.APPROVED_TO_CREATED }, 
-			service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray()
-		);		
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).size());
-		
+	public void testGetAvailableMovesForFirstLifeCycle(){
+		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+
+		//Перевести из состояния "Создана" в "Подготовлена" может любой пользователь
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
+				service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+
+		//Перевести из состояния "Подготовлена" в "Создана" и из "Подготовлена" в "Принята" может контролер текущего уровня,
+		// контролер вышестоящего уровня или контролер УНП.
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
+
+		//Перевести из состояния "Принята" в "Подготовлена" может контролер вышестоящего уровня и контролер УНП.
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_PREPARED},
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
+	}
+
+	@Test
+	public void testGetAvailableMovesForSecondLifeCycle(){
+		/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+
+		//Перевести из состояния "Создана" в "Принята" может контролер текущего уровня, контролер вышестоящего уровня,
+		//контролер УНП
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+
+		//Перевести из состояния "Принята" в "Создана" может контролер вышестоящего уровня или контролер УНП
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED },
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+
+	}
+
+	@Test
+	public void testGetAvailableMovesForThirdLifeCycle(){
+		/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+
+
+		//Переводить из состояния "Создана" в "Утверждена" может контролер текущего уровня, контролер вышестоящего уровня
+		// и контролер УНП
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
+				service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
+				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+
+		//Перевести из состояния "Утверждена" в "Создана" и из "Утверждена" в "Принята" контролер вышестоящего уровня или контролер УНП.
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
+				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+
+		//Перевести из состояния "Принята" в "Утверждена" контролер вышестоящего уровня или контролер УНП.
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
+				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
+				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+	}
+
+	@Test
+	public void testGetAvailableMovesCommon() {
 		// Контролёр ТБ не может изменять статус в чужом тербанке
 		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID).size());
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID).size());
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID).size());
-		
-		// Контролёр Банка может выполнять все переходы на уровне тербанка 
-		assertArrayEquals(
-			new Object[] { WorkflowMove.CREATED_TO_APPROVED }, 
-			service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray()
-		);
-		assertArrayEquals(
-			new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED }, 
-			service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray()
-		);
-		assertArrayEquals(
-			new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED }, 
-			service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray()
-		);
-		
-		// Контролёр Банка может выполнять все переходы на уровне банка, но там ЖЦ состоит только из двух стадий 
-		assertArrayEquals(
-			new Object[] { WorkflowMove.CREATED_TO_ACCEPTED }, 
-			service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID).toArray()
-		);
-		assertArrayEquals(
-			new Object[] { WorkflowMove.ACCEPTED_TO_CREATED }, 
-			service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray()
-		);
+		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID).size());
 
 		// Никто не может выполнять переходы, если отчетный период неактивен
 		assertEquals(0, service.getAvailableMoves(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID).size());
@@ -319,7 +377,7 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
 		assertArrayEquals(
-			new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED }, 
+			new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
 			params.getAvailableWorkflowMoves().toArray()
 		);
 

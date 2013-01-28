@@ -149,9 +149,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		return getAvailableMoves(user, userDepartment, formData, formDataDepartment,
                 reportPeriodDao.get(formData.getReportPeriodId()));
 	}
-	
+
 	private List<WorkflowMove> getAvailableMoves(TAUser user, Department userDepartment, FormData formData,
-                                                 Department formDataDepartment, ReportPeriod formDataReportPeriod) {
+	                                             Department formDataDepartment, ReportPeriod formDataReportPeriod) {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
@@ -159,42 +159,80 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return result;
 		}
 		WorkflowState state = formData.getState();
-		
-		boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
-		boolean isBankLevelUser = userDepartment.getType() == DepartmentType.ROOT_BANK;
-		
-		switch (state) {
-		case CREATED:
-			if (isBankLevelFormData) {
-				result.add(WorkflowMove.CREATED_TO_ACCEPTED);
-			} else {
-				result.add(WorkflowMove.CREATED_TO_APPROVED);
+
+		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
+		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (user.getDepartmentId() == formDataDepartment.getId());
+		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+				&& (userDepartment.getId() == formDataDepartment.getParentId());
+		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
+
+		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+			switch (state){
+				case CREATED:
+					result.add(WorkflowMove.CREATED_TO_PREPARED);
+					break;
+				case PREPARED:
+					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.PREPARED_TO_CREATED);
+						result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
+					}
+					break;
+				case ACCEPTED:
+					if(isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
+					}
+					break;
+				default:
+					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
 			}
-			break;
-		case PREPARED:
-			// Для ЖЦ прототипа не требуется
-			break;
-		case APPROVED:
-			if (isBankLevelFormData) {
-				logger.warn("Bank-level formData couldn't be in APPROVED state!");
-			} else {
-				result.add(WorkflowMove.APPROVED_TO_CREATED);
-				if (isBankLevelUser) {
-					result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
-				}
+		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+			switch (state){
+				case CREATED:
+					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+					}
+					break;
+				case ACCEPTED:
+					if(isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.ACCEPTED_TO_CREATED);
+					}
+					break;
+				default:
+					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
 			}
-			break;
-		case ACCEPTED:
-			if (isBankLevelFormData) {
-				result.add(WorkflowMove.ACCEPTED_TO_CREATED);
-			} else {
-				if (isBankLevelUser) {
-					result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
-				}
+		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+			switch (state){
+				case CREATED:
+					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.CREATED_TO_APPROVED);
+					}
+					break;
+				case APPROVED:
+					if(isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
+						result.add(WorkflowMove.APPROVED_TO_CREATED);
+					}
+					break;
+				case ACCEPTED:
+					if(isControllerOfUpLevel || isControllerOfUNP){
+						result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+					}
+					break;
+				default:
+					logger.warn("FormData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
 			}
-			break;
 		}
-		return result; 
+		return result;
 	}
 
 	@Override
