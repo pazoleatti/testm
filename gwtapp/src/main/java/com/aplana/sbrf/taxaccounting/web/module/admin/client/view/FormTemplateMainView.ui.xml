@@ -1,9 +1,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+<ui:style>
+    .align {
+        float: right;
+    }
+</ui:style>
+
 <g:HTMLPanel>
-    <g:Label text="Шаблон формы" ui:field="titleLabel"/>
+    <g:ScrollPanel height="60px" width="40%" ui:field="logPanel" addStyleNames="{style.align}">
+        <c:CellList ui:field="loggerList" />
+    </g:ScrollPanel>
+
+    <g:Label height="20px" text="Шаблон формы" ui:field="titleLabel"/>
 
     <t:LeftBar>
         <g:Button text="Сохранить" ui:field="saveButton"/>
@@ -12,5 +23,6 @@
     </t:LeftBar>
 
     <npui:SimpleTabPanel ui:field="tabPanel"/>
+
 </g:HTMLPanel>
 </ui:UiBinder>

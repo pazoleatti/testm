@@ -10,7 +10,7 @@
             left: 10px;
             position: absolute;
             right: 10px;
-            top: 60px
+            top: 70px
         }
 
         .bar {

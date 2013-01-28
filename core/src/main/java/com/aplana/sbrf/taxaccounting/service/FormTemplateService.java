@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 
 /**
@@ -14,7 +15,7 @@ public interface FormTemplateService {
 	 * Получить полный список всех описаний налоговых форм
 	 * (Внимание, объекты в результирующей коллекции могут быть только частично инициализированы,
 	 * в них может остаться незаполненной информация по столбцам, скрипта и т.д.) 
-	 * @return
+	 * @return список всех FormTemplate
 	 */
 	List<FormTemplate> listAll();
 	/**
@@ -23,6 +24,12 @@ public interface FormTemplateService {
 	 * @return объект, представляющий описание налоговой формы
 	 */
 	FormTemplate get(int formTemplateId);
+	/**
+	 * Валидировать модель данных для описания налоговой формы
+	 * @param formTemplate объект, содержащий описание налоговой формы
+	 * @param logger объект, для ведения логов
+	 */
+	void validateFormTemplate(FormTemplate formTemplate, Logger logger);
 	/**
 	 * Сохранить описание налоговой формы
 	 * @param formTemplate объект, содержащий описание налоговой формы

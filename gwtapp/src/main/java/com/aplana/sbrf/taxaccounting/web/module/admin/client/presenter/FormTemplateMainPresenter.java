@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -34,8 +35,11 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 
+import java.util.List;
 
-public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy> implements FormTemplateMainUiHandlers {
+
+public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
+		implements FormTemplateMainUiHandlers {
 
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
@@ -45,6 +49,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	public interface MyView extends TabView, HasUiHandlers<FormTemplateMainUiHandlers> {
 		void setTitle(String title);
 		void setFormId(int formId);
+		void setLogMessages(List<LogEntry> entries);
 	}
 
 	@RequestTabs
@@ -110,6 +115,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				@Override
 				public void onReqSuccess(GetFormResult result) {
 					formTemplate = result.getForm();
+					getView().setLogMessages(null);
 					getView().setTitle(formTemplate.getType().getName());
 					getView().setFormId(formTemplate.getId());
 					RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -125,8 +131,14 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
-				MessageEvent.fire(this, "Форма Сохранена");
-				setFormTemplate();
+				if (result.getLogEntries().isEmpty()) {
+					MessageEvent.fire(this, "Форма сохранена");
+					setFormTemplate();
+				}
+				else {
+					MessageEvent.fire(this, "Форма не сохранена");
+					getView().setLogMessages(result.getLogEntries());
+				}
 			}
 
 			@Override
