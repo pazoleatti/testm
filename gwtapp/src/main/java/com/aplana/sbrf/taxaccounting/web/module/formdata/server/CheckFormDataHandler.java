@@ -1,0 +1,49 @@
+package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
+
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * @author Eugene Stetsenko
+ *         Обработчик запроса для проверки формы.
+ */
+@Service
+public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAction, FormDataResult> {
+
+	@Autowired
+	private FormDataService formDataService;
+
+	@Autowired
+	private SecurityService securityService;
+
+	public CheckFormDataHandler() {
+		super(CheckFormDataAction.class);
+	}
+
+	@Override
+	public FormDataResult execute(CheckFormDataAction action, ExecutionContext context) throws ActionException {
+		TAUser user = securityService.currentUser();
+		Integer userId = user.getId();
+		Logger logger = new Logger();
+		FormData formData = action.getFormData();
+		formDataService.doCheck(logger, userId, formData);
+		FormDataResult result = new FormDataResult();
+		result.setLogEntries(logger.getEntries());
+		return result;
+	}
+
+	@Override
+	public void undo(CheckFormDataAction action, FormDataResult result, ExecutionContext context) throws ActionException {
+		// Ничего не делаем
+	}
+}

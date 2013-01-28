@@ -41,6 +41,7 @@
 					    <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
 					    <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
 					    <g:Button ui:field="recalculateButton">Пересчитать</g:Button>
+                        <g:Button ui:field="checkButton">Проверить</g:Button>
 					    <g:Button ui:field="printButton">Печать</g:Button>
 				    </style:LeftBar>
 				    <style:RightBar>

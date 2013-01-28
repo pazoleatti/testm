@@ -54,6 +54,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showRecalculateButton(boolean show);
 
+		void showCheckButton(boolean show);
+
 		void showAddRowButton(boolean show);
 
 		void showRemoveRowButton(boolean show);

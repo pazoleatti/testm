@@ -64,6 +64,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button recalculateButton;
 	@UiField
+	Button checkButton;
+	@UiField
 	Button printButton;
 	@UiField
 	Button deleteFormButton;
@@ -225,6 +227,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+	@UiHandler("checkButton")
+	void onCheckButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCheckClicked();
+		}
+	}
+
 	@UiHandler("printButton")
 	void onPrintButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -290,6 +299,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showRecalculateButton(boolean show) {
 		recalculateButton.setVisible(show);
+	}
+
+	@Override
+	public void showCheckButton(boolean show) {
+		checkButton.setVisible(show);
 	}
 
 	@Override

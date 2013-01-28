@@ -18,6 +18,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 	public void onOriginalVersionClicked();
 	
 	public void onRecalculateClicked();
+
+	public void onCheckClicked();
 	
 	public void onPrintClicked();
 	

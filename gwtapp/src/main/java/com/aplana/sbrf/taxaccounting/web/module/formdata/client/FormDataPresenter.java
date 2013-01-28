@@ -82,6 +82,8 @@ public class FormDataPresenter extends
 								readOnlyMode = true;
 							}
 
+							getView().showCheckButton(accessParams.isCanRead());
+
 							if (!readOnlyMode && accessParams.isCanEdit()) {
 								//Открываем форму в режиме редактирования
 								showEditModeButtons();
@@ -285,6 +287,22 @@ public class FormDataPresenter extends
 					@Override
 					public void onReqSuccess(FormDataResult result) {
 						processFormDataResult(result);
+						super.onReqSuccess(result);
+					}
+				}
+		);
+	}
+
+	@Override
+	public void onCheckClicked() {
+		CheckFormDataAction checkAction = new CheckFormDataAction();
+		checkAction.setFormData(formData);
+		dispatcher.execute(
+				checkAction,
+				new AbstractCallback<FormDataResult>() {
+					@Override
+					protected void onReqSuccess(FormDataResult result) {
+						getView().setLogMessages(result.getLogEntries());
 						super.onReqSuccess(result);
 					}
 				}
