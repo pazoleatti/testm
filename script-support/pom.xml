@@ -15,8 +15,7 @@
     </parent>
 
     <properties>
-        <maven-surefire-plugin.version>2.10</maven-surefire-plugin.version>
-        <surefire-junit4.version>2.12</surefire-junit4.version>
+        <maven-surefire-plugin.version>2.13</maven-surefire-plugin.version>
         <hsqldb.version>2.2.9</hsqldb.version>
     </properties>
 
@@ -53,13 +52,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit4</artifactId>
-                        <version>${surefire-junit4.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <additionalClasspathElements>
                         <!-- Подключаем ресурсы, необходимые для инициализации тестового контекста БД -->
