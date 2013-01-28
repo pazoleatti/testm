@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -15,6 +16,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * @author Vitalii Samolovskikh
  */
 @Service
+@PreAuthorize("hasRole('ROLE_CONF')")
 public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetFormResult> {
     @Autowired
 	private FormTemplateService formTemplateService;

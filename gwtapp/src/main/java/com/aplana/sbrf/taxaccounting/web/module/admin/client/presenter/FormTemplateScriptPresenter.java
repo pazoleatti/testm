@@ -21,7 +21,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	/**
 	 * {@link FormTemplateMainPresenter}'s proxy.
 	 */
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateScriptPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,

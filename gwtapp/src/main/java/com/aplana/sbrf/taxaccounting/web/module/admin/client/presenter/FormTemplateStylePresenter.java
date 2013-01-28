@@ -22,7 +22,7 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	/**
 	 * {@link FormTemplateStylePresenter}'s proxy.
 	 */
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateStylePage)
 	@TabInfo(container = FormTemplateMainPresenter.class,

@@ -27,7 +27,7 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 	/**
 	 * {@link FormTemplateRowPresenter}'s proxy.
 	 */
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateRowPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,

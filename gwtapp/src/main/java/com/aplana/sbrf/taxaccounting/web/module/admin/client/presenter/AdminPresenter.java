@@ -30,7 +30,7 @@ public class AdminPresenter extends Presenter<AdminPresenter.MyView, AdminPresen
 	/**
 	 * {@link AdminPresenter}'s proxy.
 	 */
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.adminPage)
 	public interface MyProxy extends Proxy<AdminPresenter>, Place {

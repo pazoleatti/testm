@@ -28,7 +28,7 @@ public class FormTemplateColumnPresenter
 		implements FormTemplateColumnUiHandlers,
 		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
 
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateColumnPage)
 	@TabInfo(container = FormTemplateMainPresenter.class, label = AdminConstants.TabLabels.formTemplateColumnLabel, priority = AdminConstants.TabPriorities.formTemplateColumnPriority)

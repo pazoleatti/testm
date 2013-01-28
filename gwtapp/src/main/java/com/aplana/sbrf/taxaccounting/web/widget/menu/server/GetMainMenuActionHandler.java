@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -23,6 +25,9 @@ public class GetMainMenuActionHandler extends
 		super(GetMainMenuAction.class);
 	}
 
+	@Autowired
+	private SecurityService securityService;
+
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
 			ExecutionContext context) throws ActionException {
@@ -33,7 +38,9 @@ public class GetMainMenuActionHandler extends
 		menuItems.add(new MenuItem("Налог на прибыль", FormDataListNameTokens.FORM_DATA_LIST + ";nType=" + TaxType.INCOME));
 		menuItems.add(new MenuItem("Налог на имущество", FormDataListNameTokens.FORM_DATA_LIST + ";nType=" + TaxType.PROPERTY));
 		menuItems.add(new MenuItem("НДС", FormDataListNameTokens.FORM_DATA_LIST + ";nType=" + TaxType.VAT));
-        menuItems.add(new MenuItem("Администрирование", AdminConstants.NameTokens.adminPage));
+		if (securityService.currentUser().hasRole("ROLE_CONF")) {
+	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
+		}
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);

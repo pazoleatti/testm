@@ -24,7 +24,7 @@ public class FormTemplateEventPresenter extends Presenter<FormTemplateEventPrese
 	/**
 	 * {@link FormTemplateEventPresenter}'s proxy.
 	 */
-	@Title("Администрирование")
+	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateEventPage)
 	@TabInfo(container = FormTemplateMainPresenter.class,
