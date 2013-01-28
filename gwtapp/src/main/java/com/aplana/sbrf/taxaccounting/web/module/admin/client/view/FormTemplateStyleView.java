@@ -121,9 +121,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiHandler("styleListBox")
 	public void onSelectColumn(ChangeEvent event){
 		flush();
-		if (styles != null) {
-			setStyleParams(styleListBox.getSelectedIndex());
-		}
+		setStyleParams(styleListBox.getSelectedIndex());
 	}
 
 	@Override
@@ -132,7 +130,9 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	}
 
 	private void setStyleParams(int index) {
-		driver.edit(styles.get(index));
+		if (!styles.isEmpty()) {
+			driver.edit(styles.get(index));
+		}
 	}
 
 	@UiHandler("addStyle")
@@ -170,7 +170,9 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	}
 
 	private void flush() {
-		driver.flush();
+		if (!styles.isEmpty()) {
+			driver.flush();
+		}
 	}
 
 }
