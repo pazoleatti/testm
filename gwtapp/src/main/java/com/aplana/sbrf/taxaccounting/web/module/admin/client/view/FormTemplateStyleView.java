@@ -121,7 +121,9 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiHandler("styleListBox")
 	public void onSelectColumn(ChangeEvent event){
 		flush();
-		setStyleParams(styleListBox.getSelectedIndex());
+		if (styles != null) {
+			setStyleParams(styleListBox.getSelectedIndex());
+		}
 	}
 
 	@Override
