@@ -30,6 +30,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	private int formId;
 
 	@UiField
+	DockLayoutPanel dockPanel;
+
+	@UiField
 	Widget logPanel;
 
 	@UiField
@@ -141,7 +144,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@Override
 	public void setLogMessages(List<LogEntry> entries) {
-		logPanel.setVisible(false);
+		dockPanel.setWidgetHidden(logPanel, (entries == null || entries.isEmpty()));
 		if (entries != null && !entries.isEmpty()) {
 			for (LogEntry entry : entries) {
 				System.out.println(entry.getMessage());

@@ -131,13 +131,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
 			@Override
 			public void onReqSuccess(UpdateFormResult result) {
-				if (result.getLogEntries().isEmpty()) {
-					MessageEvent.fire(this, "Форма сохранена");
-					setFormTemplate();
+				if (!result.getLogEntries().isEmpty()) {
+					getView().setLogMessages(result.getLogEntries());
 				}
 				else {
-					MessageEvent.fire(this, "Форма не сохранена");
-					getView().setLogMessages(result.getLogEntries());
+					MessageEvent.fire(this, "Форма сохранена");
+					setFormTemplate();
 				}
 			}
 

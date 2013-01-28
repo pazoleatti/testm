@@ -6,11 +6,11 @@
     <ui:style src='defines.css'>
         .container {
             background-color: whitePanelColor;
-            bottom: 35px;
-            left: 10px;
+            bottom: 25px;
+            left: 5px;
             position: absolute;
-            right: 10px;
-            top: 70px
+            right: 5px;
+            top: 10px
         }
 
         .bar {

@@ -3,26 +3,28 @@
              xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.admin.client.ui'
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:c="urn:import:com.google.gwt.user.cellview.client">
-<ui:style>
-    .align {
-        float: right;
-    }
-</ui:style>
 
-<g:HTMLPanel>
-    <g:ScrollPanel height="60px" width="40%" ui:field="logPanel" addStyleNames="{style.align}">
-        <c:CellList ui:field="loggerList" />
-    </g:ScrollPanel>
+<g:DockLayoutPanel unit='PX' height="100%" width="100%" ui:field="dockPanel">
+    <g:north size="15">
+        <g:Label text="Шаблон формы" ui:field="titleLabel"/>
+    </g:north>
 
-    <g:Label height="20px" text="Шаблон формы" ui:field="titleLabel"/>
+    <g:north size="30">
+        <t:LeftBar>
+            <g:Button text="Сохранить" ui:field="saveButton"/>
+            <g:Button text="Сбросить" ui:field="resetButton"/>
+            <g:Button text="Отмена" ui:field="cancelButton"/>
+        </t:LeftBar>
+    </g:north>
 
-    <t:LeftBar>
-        <g:Button text="Сохранить" ui:field="saveButton"/>
-        <g:Button text="Сбросить" ui:field="resetButton"/>
-        <g:Button text="Отмена" ui:field="cancelButton"/>
-    </t:LeftBar>
+    <g:north size="80">
+        <g:ScrollPanel width="100%" ui:field="logPanel">
+            <c:CellList ui:field="loggerList" />
+        </g:ScrollPanel>
+    </g:north>
 
-    <npui:SimpleTabPanel ui:field="tabPanel"/>
-
-</g:HTMLPanel>
+    <g:center>
+        <npui:SimpleTabPanel ui:field="tabPanel"/>
+    </g:center>
+</g:DockLayoutPanel>
 </ui:UiBinder>

@@ -51,6 +51,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
 	@Override
+	public int save(FormTemplate formTemplate) {
+		return formTemplateDao.save(formTemplate);
+	}
+
+	@Override
+	public int getActiveFormTemplateId(int formTypeId) {
+		return formTemplateDao.getActiveFormTemplateId(formTypeId);
+	}
+
+	@Override
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
 		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
 
@@ -65,16 +75,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		validateFormRows(formTemplate.getRows(), logger);
 	}
 
-	@Override
-	public int save(FormTemplate formTemplate) {
-		return formTemplateDao.save(formTemplate);
-	}
-
-	@Override
-	public int getActiveFormTemplateId(int formTypeId) {
-		return formTemplateDao.getActiveFormTemplateId(formTypeId);
-	}
-
 	private void validateFormColumns(List<Column> columns, Logger logger){
 		checkSet.clear();
 
@@ -84,11 +84,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 						" для столбца " + column.getName());
 			}
 
-			if (column.getName().length() > FORM_COLUMN_NAME_MAX_LENGTH) {
+			if (column.getName() != null && column.getName().length() > FORM_COLUMN_NAME_MAX_LENGTH) {
 				logger.error("длина " + column.getName().length() + " для имени столбца " + column.getName() +
 						" превышает допустимое значение " + FORM_COLUMN_NAME_MAX_LENGTH);
 			}
-			if (column.getAlias().length() > FORM_COLUMN_ALIAS_MAX_LENGTH) {
+			if (column.getAlias() != null && column.getAlias().length() > FORM_COLUMN_ALIAS_MAX_LENGTH) {
 				logger.error("длина " + column.getAlias().length() + " для алиаса столбца " + column.getAlias() +
 						" превышает допустимое значение " + FORM_COLUMN_ALIAS_MAX_LENGTH);
 			}
@@ -112,7 +112,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private void validateFormRows(List<DataRow> rows, Logger logger) {
 		//TODO: подумать о уникальности порядка строк
 		for (DataRow row : rows) {
-			if (row.getAlias().length() > DATA_ROW_ALIAS_MAX_LENGTH) {
+			if (row.getAlias() != null && row.getAlias().length() > DATA_ROW_ALIAS_MAX_LENGTH) {
 				logger.error("длина " + row.getAlias().length() + " для кода строки " + row.getAlias() +
 						" превышает допустимое значение " + DATA_ROW_ALIAS_MAX_LENGTH);
 			}
@@ -121,7 +121,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private void validateFormScripts(List<Script> scrips, Logger logger) {
 		for (Script script : scrips) {
-			if (script.getName().length() > FORM_SCRIPT_NAME_MAX_LENGTH) {
+			if (script.getName() != null && script.getName().length() > FORM_SCRIPT_NAME_MAX_LENGTH) {
 				logger.error("длина " + script.getName().length() + " для имени скрипта " + script.getName() +
 						" превышает допустимое значение " + FORM_SCRIPT_NAME_MAX_LENGTH);
 			}
@@ -136,7 +136,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 				logger.error("найден повторяющийся алиас стиля " + style.getAlias());
 			}
 
-			if (style.getAlias().length() > FORM_STYLE_ALIAS_MAX_LENGTH) {
+			if (style.getAlias() != null && style.getAlias().length() > FORM_STYLE_ALIAS_MAX_LENGTH) {
 				logger.error("длина " + style.getAlias().length() + " для алиаса стиля " + style.getAlias() +
 						" превышает допустимое значение " + FORM_STYLE_ALIAS_MAX_LENGTH);
 			}
