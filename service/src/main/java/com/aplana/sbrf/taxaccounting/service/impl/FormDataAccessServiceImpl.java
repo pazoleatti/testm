@@ -42,9 +42,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
 				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
 				&& (userDepartment.getId() == formDataDepartment.getParentId());
-
 		return user.hasRole(TARole.ROLE_CONTROL_UNP) || isOperatorOfCurrentLevel || isControllerOfCurrentLevel || isControllerOfUpLevel;
 	}
 
@@ -92,7 +91,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
 				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
 				&& (userDepartment.getId() == formDataDepartment.getParentId());
 
 		if(state == WorkflowState.APPROVED){
@@ -163,7 +162,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
 		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
 				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = user.hasRole(TARole.ROLE_CONTROL)
+		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
 				&& (userDepartment.getId() == formDataDepartment.getParentId());
 		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
 
