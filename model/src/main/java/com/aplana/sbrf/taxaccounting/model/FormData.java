@@ -177,6 +177,27 @@ public class FormData extends IdentityObject<Long> {
 		throw new IllegalArgumentException("Wrong row alias requested: "
 				+ rowAlias);
 	}
+	
+	/**
+	 * Возвращает индекс строки, имеющий заданный алиас (с нуля).
+	 * @param rowAlias алиас строки
+	 * @return индекс строки
+	 * @throws NullPointerException если rowAlias null
+	 * @throws IllegalArgumentException если такого алиас не существует в объекте FormData
+	 */
+	public int getDataRowIndex(String rowAlias) {
+		if (rowAlias == null) {
+			throw new NullPointerException("Row alias cannot be null");
+		}
+		for (int index = 0; index < dataRows.size(); ++index) {
+			DataRow row = dataRows.get(index);
+			if (rowAlias.equals(row.getAlias())) {
+				return index;
+			}
+		}
+		throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
+	}
+	
 
 	@Override
 	public String toString() {
@@ -205,4 +226,5 @@ public class FormData extends IdentityObject<Long> {
 		sb.append('-');
 		return sb.toString();
 	}
+	
 }
