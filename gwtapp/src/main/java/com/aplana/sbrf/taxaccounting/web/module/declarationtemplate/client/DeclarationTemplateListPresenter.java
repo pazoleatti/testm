@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -11,6 +15,8 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.List;
 
 /**
  * Presenter для страницы администрирования деклараций. Выполняет следующие действия:
@@ -29,10 +35,10 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	}
 
 	/**
-	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его Presenter.
+	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
 	 */
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateListUiHandlers> {
-		//void setDeclarationTemplateTable(FormListResult result);
+		void setDeclarationTemplateRows(List<DeclarationTemplate> result);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -56,13 +62,15 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		/*
-		dispatcher.execute(new DeclarationTemplateListAction(), new AbstractCallback<DeclarationTemplateList>() {
+
+		dispatcher.execute(new DeclarationListAction(), new AbstractCallback<DeclarationListResult>() {
 			@Override
-			public void onReqSuccess(DeclarationTemplateListResult result) {
-				getView().setDeclarationTemplateTable(result);
+			public void onReqSuccess(DeclarationListResult result) {
+				if (result.getDeclarations() != null && !result.getDeclarations().isEmpty()) {
+					getView().setDeclarationTemplateRows(result.getDeclarations());
+				}
 			}
-		});*/
+		});
 	}
 
 	/**

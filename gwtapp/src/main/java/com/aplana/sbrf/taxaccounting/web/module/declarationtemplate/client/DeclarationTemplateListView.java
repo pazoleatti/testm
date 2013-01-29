@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.List;
+
 /**
  * Представление для страницы администрирования деклараций.
  *
@@ -36,7 +38,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
 			@Override
 			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getId().toString();
+				return declarationTemplate.getTaxType().getName();
 			}
 		});
 
@@ -61,10 +63,9 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 		return widget;
 	}
 
-	/*
 	@Override
-	public void setDeclarationTemplateTable(FormListResult result) {
-		declarationTemplateTable.setRowData(result.getForms());
-	}*/
+	public void setDeclarationTemplateRows(List<DeclarationTemplate> templates) {
+		declarationTemplateTable.setRowData(templates);
+	}
 
 }

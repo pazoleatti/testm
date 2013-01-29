@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+
+<g:HTMLPanel height="100%" width="100%">
+    <g:Label text="Шаблон декларации" ui:field="titleLabel"/>
+    <t:LeftBar>
+        <g:Button text="Сохранить" ui:field="saveButton"/>
+        <g:Button text="Сбросить" ui:field="resetButton"/>
+        <g:Button text="Отмена" ui:field="cancelButton"/>
+    </t:LeftBar>
+</g:HTMLPanel>
+</ui:UiBinder>

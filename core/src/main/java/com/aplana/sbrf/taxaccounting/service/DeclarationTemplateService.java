@@ -4,11 +4,18 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 
+import java.util.List;
+
 /**
  * Сервис для работы с шаблонами деклараций 
  * @author dsultanbekov
   */
 public interface DeclarationTemplateService {
+	/**
+	 * Получить полный список всех деклараций
+	 * @return список всех DeclarationTemplate
+	 */
+	List<DeclarationTemplate> listAll();
 	/**
 	 * Получить шаблон декларации
 	 * @param declarationTemplateId идентификатор шаблона декларации

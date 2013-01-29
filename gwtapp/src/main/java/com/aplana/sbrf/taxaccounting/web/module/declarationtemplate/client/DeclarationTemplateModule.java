@@ -7,6 +7,8 @@ public class DeclarationTemplateModule extends AbstractPresenterModule {
 	protected void configure() {
 		bindPresenter(DeclarationTemplateListPresenter.class, DeclarationTemplateListPresenter.MyView.class,
 				DeclarationTemplateListView.class, DeclarationTemplateListPresenter.MyProxy.class);
+		bindPresenter(DeclarationTemplatePresenter.class, DeclarationTemplatePresenter.MyView.class,
+				DeclarationTemplateView.class, DeclarationTemplatePresenter.MyProxy.class);
 	}
 
 }
