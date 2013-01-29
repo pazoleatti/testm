@@ -31,7 +31,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Override
 	public boolean canRead(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		return canRead(user, userDepartment, formData, formDataDepartment);
@@ -107,7 +107,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Override
 	public boolean canEdit(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		return canEdit(user, userDepartment, formData, formDataDepartment, reportPeriodDao.get(formData.getReportPeriodId()));
@@ -213,7 +213,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public boolean canDelete(int userId, long formDataId) {
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
 		TAUser user = userDao.getUser(userId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
@@ -230,7 +230,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);		
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		return getAvailableMoves(user, userDepartment, formData, formDataDepartment,
                 reportPeriodDao.get(formData.getReportPeriodId()));
@@ -324,7 +324,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Override
 	public FormDataAccessParams getFormDataAccessParams(int userId,	long formDataId) {
 		TAUser user = userDao.getUser(userId);
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
 		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());

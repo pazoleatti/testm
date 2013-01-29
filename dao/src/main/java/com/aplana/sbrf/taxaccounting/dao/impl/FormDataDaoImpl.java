@@ -161,6 +161,20 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	}
 
+	private class FormDataWithOutRowRowMapper implements RowMapper<FormData> {
+		public FormData mapRow(ResultSet rs, int index)
+				throws SQLException {
+			FormData result = new FormData();
+			result.setId(rs.getLong("id"));
+			result.setDepartmentId(rs.getInt("department_id"));
+			result.setState(WorkflowState.fromId(rs.getInt("state")));
+			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
+			result.setReportPeriodId(rs.getInt("report_period_id"));
+			return result;
+		}
+
+	}
+
 	public FormData get(final long formDataId) {
 		JdbcTemplate jt = getJdbcTemplate();
 		final FormData formData;
@@ -617,6 +631,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			return get(formDataId);
 		} else {
 			return null;
+		}
+	}
+
+	@Override
+	public FormData getWithoutRows(long formDataId){
+		JdbcTemplate jt = getJdbcTemplate();
+		try{
+			return jt.queryForObject(
+					"SELECT id, department_id, state, kind, report_period_id" +
+							" FROM form_data WHERE id = ?",
+					new Object[] { formDataId }, new int[] { Types.NUMERIC },
+					new FormDataWithOutRowRowMapper());
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Записи в таблице FORM_DATA с id = "
+					+ formDataId + " не найдено");
 		}
 	}
 }

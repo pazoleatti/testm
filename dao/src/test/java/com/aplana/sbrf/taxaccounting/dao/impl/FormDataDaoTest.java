@@ -48,6 +48,24 @@ public class FormDataDaoTest {
 		Assert.assertEquals(getDate(2013, 0, 1), (Date) dr.get("dateColumn"));
 	}
 
+	@Test
+	public void testGetWithoutRows(){
+		FormData formData = formDataDao.get(1);
+		FormData formDataWithoutRows = formDataDao.getWithoutRows(1);
+
+		Assert.assertEquals(Long.valueOf(1), formDataWithoutRows.getId());
+		Assert.assertEquals(Integer.valueOf(1), formDataWithoutRows.getReportPeriodId());
+		Assert.assertEquals(Integer.valueOf(1), formDataWithoutRows.getDepartmentId());
+		Assert.assertEquals(FormDataKind.SUMMARY, formDataWithoutRows.getKind());
+		Assert.assertEquals(WorkflowState.CREATED, formDataWithoutRows.getState());
+
+		Assert.assertEquals(formData.getId(), formDataWithoutRows.getId());
+		Assert.assertEquals(formData.getReportPeriodId(), formDataWithoutRows.getReportPeriodId());
+		Assert.assertEquals(formData.getDepartmentId(), formDataWithoutRows.getDepartmentId());
+		Assert.assertEquals(formData.getKind(), formDataWithoutRows.getKind());
+		Assert.assertEquals(formData.getState(), formDataWithoutRows.getState());
+	}
+
 	private BigDecimal getNumericValue(double value, int scale) {
 		BigDecimal val = new BigDecimal(value);
 		val = val.setScale(scale, BigDecimal.ROUND_HALF_UP);
