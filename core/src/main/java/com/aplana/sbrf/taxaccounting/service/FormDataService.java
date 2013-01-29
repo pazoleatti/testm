@@ -113,5 +113,5 @@ public interface FormDataService {
 	 * @param formDataId - идентификатор налоговой формы
 	 * @return информацию о блокировке объекта
 	 */
-	ObjectLock getObjectLock(long formDataId);
+	ObjectLock<Long> getObjectLock(long formDataId);
 }

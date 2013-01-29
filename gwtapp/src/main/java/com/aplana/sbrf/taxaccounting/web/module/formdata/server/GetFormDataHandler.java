@@ -24,6 +24,8 @@ import java.util.Date;
 /**
  * Каноничный пример антипаттерна "Волшебный хандлер".
  * TODO: Разделить класс на 3: показ, создание формы, изменение статуса формы. Result можно оставить общий.
+ *       Непонятно. При изменении статуса и переходе по воркфлоу нужно получать форму обратно. Логика одинаковая, 
+ *       только добавляется переход. 
  */
 @Service
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
@@ -53,56 +55,83 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	@Override
 	public GetFormDataResult execute(GetFormData action, ExecutionContext context) throws ActionException, WrongInputDataServiceException {
 		checkAction(action);
-		
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
+
+		Integer userId = securityService.currentUser().getId();
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
-
-		FormData formData;
-		if (action.getWorkFlowMove() != null) {
-			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger);
-		}
-		if(action.getFormDataId() == Long.MAX_VALUE){
-			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId(),
-					FormDataKind.fromId(action.getFormDataKind().intValue()));
-
-			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
-			result.setDepartmenName(departmentDao.getDepartment(action.getDepartmentId()).getName());
-
-			FormDataAccessParams accessParams = new FormDataAccessParams();
-			accessParams.setCanDelete(false);
-			accessParams.setCanEdit(true);
-			accessParams.setCanRead(true);
-			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
-			result.setFormDataAccessParams(accessParams);
-		} else{
-			if(action.isLockFormData()){
-				//Если пользователь открывает НФ для редактирования, то блокируем ее
-				formDataService.lock(action.getFormDataId(), userId);
-			}
-
-			//Собираем информацию о блокировке НФ
-			setLockInformation(userId, action.getFormDataId(), result);
-
-			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
-			result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
-			result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
-			Long formDataId = formData.getId();
-			FormDataAccessParams accessParams = accessService.getFormDataAccessParams(userId, formDataId);
-			result.setFormDataAccessParams(accessParams);
-		}
-		result.setNumberedHeader(formTemplateService.get(formData.getFormTemplateId()).isNumberedColumns());
-		result.setAllStyles(formTemplateService.get(formData.getFormTemplateId()).getStyles());
+	
+		fillLockData(action, userId, logger, result);
+		workFlowMove(action, userId, logger);
+		fillFormAndTemplateData(action, userId, logger, result);
+		fillFormDataAccessParams(action, userId, logger, result);
+		
 		result.setLogEntries(logger.getEntries());
-		result.setFormData(formData);
-
 		return result;
 	}
 
 	@Override
 	public void undo(GetFormData action, GetFormDataResult result, ExecutionContext context) throws ActionException {
 		// Ничего не делаем
+	}
+	
+	/**
+	 * Выполняет переход по workflow, если это необходимо
+	 *  
+	 * @param action
+	 * @param userId
+	 * @param logger
+	 */
+	private void workFlowMove(GetFormData action, int userId, Logger logger){
+		if (action.getWorkFlowMove() != null) {
+			// Если необходимо выполнить переход, то выполняем его
+			formDataService.doMove(action.getFormDataId(), userId, action.getWorkFlowMove(), logger); 
+		}
+	}
+	
+	
+	/**
+	 * Получает/создает данные налоговой формы
+	 * 
+	 * @param action
+	 * @param userId
+	 * @param logger
+	 * @param result
+	 */
+	private void fillFormAndTemplateData(GetFormData action, int userId, Logger logger, GetFormDataResult result){
+		FormData formData;
+		if(action.getFormDataId() == Long.MAX_VALUE){
+			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId(),
+					FormDataKind.fromId(action.getFormDataKind().intValue()));
+		} else{
+			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
+		}
+		result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
+		result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
+		result.setNumberedHeader(formTemplateService.get(formData.getFormTemplateId()).isNumberedColumns());
+		result.setAllStyles(formTemplateService.get(formData.getFormTemplateId()).getStyles());
+		result.setFormData(formData);
+	}
+	
+	/**
+	 * Заполняет параметры доступа для формы
+	 * 
+	 * @param action
+	 * @param userId
+	 * @param logger
+	 * @param result
+	 */
+	private void fillFormDataAccessParams(GetFormData action, int userId, Logger logger, GetFormDataResult result){
+		FormDataAccessParams accessParams;
+		if(action.getFormDataId() == Long.MAX_VALUE){
+			accessParams = new FormDataAccessParams();
+			accessParams.setCanDelete(false);
+			accessParams.setCanEdit(true);
+			accessParams.setCanRead(true);
+			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
+		} else {
+		    accessParams = accessService.getFormDataAccessParams(userId, result.getFormData().getId());
+		}
+		result.setFormDataAccessParams(accessParams);
 	}
 	
 	private void checkAction(GetFormData action) throws WrongInputDataServiceException {
@@ -123,9 +152,25 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			}
 		}
 	}
+	
+	/**
+	 * Блокирует форму при необходимости, заполняет состояние блокировки
+	 * 
+	 * @param action
+	 * @param userId
+	 * @param logger
+	 * @param result
+	 * @throws WrongInputDataServiceException
+	 */
+	private void fillLockData(GetFormData action, int userId, Logger logger, GetFormDataResult result) throws WrongInputDataServiceException{
+		if(action.isLockFormData() && action.getFormDataId() != Long.MAX_VALUE){
+			// Если пользователь открывает НФ для редактирования, и это не новая форма, то пытаемся блокировать её
+			if (!formDataService.lock(action.getFormDataId(), userId)){
+				throw new WrongInputDataServiceException("форма уже редактируется другим пользователем");
+			}
+		}
 
-	private void setLockInformation(int userId, long formDataId, GetFormDataResult result){
-		ObjectLock lockInformation = formDataService.getObjectLock(formDataId);
+		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action.getFormDataId());
 		if(lockInformation != null){
 			//Если данная форма уже заблокирована другим пользотелем
 			result.setFormDataLocked(true);
@@ -137,7 +182,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 				result.setLockedByCurrentUser(false);
 			}
 		} else {
-			//Если данная форма никем не заблокирована
+			//Если данная форма никем не заблокирована или это новая форма
 			result.setFormDataLocked(false);
 		}
 	}

@@ -38,6 +38,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
 			// Перед сохранением формы всегда делаем её пересчет.
 			formDataService.doCalc(logger, currentUser.getId(), formData);
 			formDataService.saveFormData(currentUser.getId(), formData);
+			formDataService.lock(formData.getId(), currentUser.getId());
 			logger.info("Данные успешно записаны");
 			FormDataResult result = new FormDataResult();
 			result.setFormData(formData);

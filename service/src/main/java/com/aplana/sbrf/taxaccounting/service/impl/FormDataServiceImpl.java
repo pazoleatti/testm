@@ -183,6 +183,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public long saveFormData(int userId, FormData formData) {
+		checkLockedByAnotherUser(formData.getId(), userId);
 		boolean canDo;
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
@@ -233,6 +234,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public void deleteFormData(int userId, long formDataId) {
+		checkLockedByAnotherUser(formDataId, userId);
 		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);
 		} else {
@@ -280,6 +282,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public boolean doMove(long formDataId, int userId, WorkflowMove workflowMove, Logger logger) {
+		checkLockedByAnotherUser(formDataId, userId);
 		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userId, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления");
@@ -300,10 +303,24 @@ public class FormDataServiceImpl implements FormDataService {
 			return false;
 		}
 	}
+	
+	/**
+	 * Проверяет, не заблокирована ли форма другим пользователем
+	 * @param formDataId
+	 * @param userId
+	 */
+	private void checkLockedByAnotherUser(Long formDataId, int userId){
+		if (formDataId!=null){
+			ObjectLock<Long> objectLock = getObjectLock(formDataId);
+			if(objectLock != null && objectLock.getUserId() != userId){
+				throw new AccessDeniedException("Форма заблокирована другим пользователем");
+			}
+		}
+	}
 
 	@Override
 	public boolean lock(long formDataId, int userId){
-		ObjectLock objectLock = getObjectLock(formDataId);
+		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if(objectLock != null && objectLock.getUserId() != userId){
 			return false;
 		} else {
@@ -314,7 +331,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public boolean unlock(long formDataId, int userId){
-		ObjectLock objectLock = getObjectLock(formDataId);
+		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if(objectLock != null && objectLock.getUserId() != userId){
 			return false;
 		} else {
@@ -324,7 +341,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public  ObjectLock getObjectLock(long formDataId){
+	public  ObjectLock<Long> getObjectLock(long formDataId){
 		return lockDao.getObjectLock(formDataId, FormData.class);
 	}
 
