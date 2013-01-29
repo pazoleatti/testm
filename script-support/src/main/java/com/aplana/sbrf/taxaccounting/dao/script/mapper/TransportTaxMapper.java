@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.mapper.script;
+package com.aplana.sbrf.taxaccounting.dao.script.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

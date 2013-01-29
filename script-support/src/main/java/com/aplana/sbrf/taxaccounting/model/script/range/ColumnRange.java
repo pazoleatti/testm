@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.range;
+package com.aplana.sbrf.taxaccounting.model.script.range;
 
 /**
  * Описывает диапазон ячеек в рамках одного столбца

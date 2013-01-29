@@ -1,20 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.range.Range;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Библиотека функций для вызова из скриптов
+ * Библиотека скриптовых функций
  *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 22.01.13 16:34
@@ -59,8 +58,16 @@ public class ScriptUtils {
 		return sum;
 	}
 
+	/**
+	 * Округляет число до требуемой точности. Например, round(3.12345, 3) = 3.123, round(1.5, 0) = 2
+	 *
+	 * @param value округляемое число
+	 * @param precision точность округления, знаки после запятой
+	 * @return округленное число
+	 */
 	public static double round(double value, int precision) {
-		return value; //TODO реализовать округление
+		double factor = Math.pow(10, precision);
+		return Math.round(value * factor) / factor;
 	}
 
 	/**
@@ -79,6 +86,7 @@ public class ScriptUtils {
 	 *
 	 * @param formData таблица значений
 	 * @param range проверяемый диапазон ячеек
+	 * @throws IndexOutOfBoundsException если указанный дипазон выходит за границы таблицы
 	 */
 	private static void checkColumnsRange(FormData formData, Range range) {
 		if (range.getColTo() > formData.getFormColumns().size() || range.getColFrom() < 1) {
@@ -96,6 +104,7 @@ public class ScriptUtils {
 	 *
 	 * @param formData таблица значений
 	 * @param range проверяемый диапазон ячеек
+	 * @throws IllegalArgumentException если в диапазоне есть нечисловые столбцы
 	 */
 	private static void checkNumericColumns(FormData formData, Range range) {
 		List<Column> cols = formData.getFormColumns();

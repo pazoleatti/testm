@@ -15,7 +15,6 @@
     </parent>
 
     <properties>
-        <maven-surefire-plugin.version>2.13</maven-surefire-plugin.version>
         <hsqldb.version>2.2.9</hsqldb.version>
     </properties>
 
@@ -28,6 +27,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -45,21 +49,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <additionalClasspathElements>
-                        <!-- Подключаем ресурсы, необходимые для инициализации тестового контекста БД -->
-                        <additionalClasspathElement>${basedir}/../dao/src/test/resources</additionalClasspathElement>
-                    </additionalClasspathElements>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

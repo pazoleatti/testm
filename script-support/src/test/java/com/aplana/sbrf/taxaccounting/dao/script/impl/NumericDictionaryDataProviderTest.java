@@ -1,7 +1,7 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.script;
+package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.DictionaryManagerImpl;
-import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider;
+import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
@@ -14,34 +14,36 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.math.BigDecimal;
+
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"StringDictionaryDataProviderTest.xml"})
-public class StringDictionaryDataProviderTest {
+@ContextConfiguration({"NumericDictionaryDataProviderTest.xml"})
+public class NumericDictionaryDataProviderTest {
 
-	@Qualifier("stringDictionaryManager")
+	@Qualifier("numericDictionaryManager")
 	@Autowired
-	private DictionaryManagerImpl stringDictionaryData;
+	private DictionaryManagerImpl numericDictionaryData;
 
 	private PaginatedSearchParams page = new PaginatedSearchParams(0, 5);
 
-	private  StringDictionaryDataProvider dp;
+	private  NumericDictionaryDataProvider dp;
 
 	@Before
 	public void prepareTestEnv() {
-		 dp = (StringDictionaryDataProvider) stringDictionaryData.getDataProvider("transportOkato");
+		dp = (NumericDictionaryDataProvider) numericDictionaryData.getDataProvider("transportEcoClass");
 	}
 
 	@Test
 	public void testSimple(){
-		assertNotNull(stringDictionaryData);
+		assertNotNull(numericDictionaryData);
 	}
 
 	@Test
 	public void testSize() {
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("", page);
+		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = dp.getValues("", page);
 		Assert.assertEquals(result.getTotalRecordCount(), 10);
 		Assert.assertEquals(result.getRecords().size(), 5);
 	}
@@ -50,7 +52,7 @@ public class StringDictionaryDataProviderTest {
 	public void testValueSearch() {
 
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("value5", page);
+		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = dp.getValues("5", page);
 		Assert.assertEquals(result.getRecords().size(), 1);
 		Assert.assertEquals(result.getTotalRecordCount(), 1);
 	}
@@ -58,14 +60,14 @@ public class StringDictionaryDataProviderTest {
 	@Test
 	public void testNameSearch() {
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("name5", page);
+		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = dp.getValues("name5", page);
 		Assert.assertEquals(result.getRecords().size(), 1);
 		Assert.assertEquals(result.getTotalRecordCount(), 1);
 	}
 
 	@Test
 	public void testEmptySearch() {
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("Нет такого значения", page);
+		PaginatedSearchResult<DictionaryItem<BigDecimal>> result = dp.getValues("Нет такого значения", page);
 		Assert.assertEquals(result.getRecords().size(), 0);
 		Assert.assertEquals(result.getTotalRecordCount(), 0);
 	}

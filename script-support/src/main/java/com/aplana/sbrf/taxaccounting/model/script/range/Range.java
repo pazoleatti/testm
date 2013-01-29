@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.range;
+package com.aplana.sbrf.taxaccounting.model.script.range;
 
 import java.io.Serializable;
 import com.aplana.sbrf.taxaccounting.model.Column;

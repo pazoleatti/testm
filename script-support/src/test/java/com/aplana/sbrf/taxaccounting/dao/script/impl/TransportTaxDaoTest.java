@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.script;
+package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.script.TransportTaxDao;
