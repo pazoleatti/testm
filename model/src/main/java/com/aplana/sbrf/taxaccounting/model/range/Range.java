@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model.range;
 
 import java.io.Serializable;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 
 /**
  * Описывает диапазон ячеек таблицы. Используется в аналогах Excel-функций внутри скриптов.
- * Диапазон задается границей ячеек с координатами от (colFrom; rowFrom) до (colTo; rowTo) включительно
+ * Диапазон задается границей ячеек с координатами от [colFrom; rowFrom] до [colTo; rowTo].
+ * Диапазон столбцов и строк начинается с 1 согласно {@link Column#getOrder} и {@link DataRow#getOrder}
  *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 25.01.13 14:47
@@ -32,7 +35,7 @@ public class Range implements Serializable {
 	 * @param rowTo индекс нижней строки
 	 */
 	public Range(int colFrom, int rowFrom, int colTo, int rowTo) {
-		if (colTo < colFrom || rowTo < rowFrom || colFrom < 0 || rowFrom < 0)
+		if (colTo < colFrom || rowTo < rowFrom || colFrom < 1 || rowFrom < 1)
 			throw new IllegalArgumentException(String.format(WRONG_BOUNDS, colFrom, rowFrom, colTo, rowTo));
 		this.colFrom = colFrom;
 		this.rowFrom = rowFrom;

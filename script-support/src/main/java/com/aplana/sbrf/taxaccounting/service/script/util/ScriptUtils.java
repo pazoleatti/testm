@@ -28,6 +28,9 @@ public class ScriptUtils {
 	private static final String WRONG_COLUMN_RANGE = "Указанный диапазон столбцов %d - %d выходит за границы таблицы. " +
 			"В таблице количество столбцов = %d";
 
+	private static final String WRONG_ROW_RANGE = "Указанный диапазон строк %d - %d выходит за границы таблицы. " +
+			"В таблице количество строк = %d";
+
 	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
 
 	/**
@@ -38,17 +41,15 @@ public class ScriptUtils {
 	 * @return сумма диапазона
 	 */
 	public static double summ(FormData formData, Range range) {
-		logger.info("summ start");
 		checks(formData, range);
 
 		double sum = 0;
 		List<DataRow> rows = formData.getDataRows();
 		List<Column> cols = formData.getFormColumns();
-		for (int i = range.getRowFrom(); i < range.getRowTo(); i++) {
-			DataRow row = rows.get(i);
-			for (int j = range.getColFrom(); j < range.getColTo(); j++) {
-				Column col = cols.get(j);
-				logger.info("col name = " + col.getName());
+		for (int i = range.getRowFrom(); i <= range.getRowTo(); i++) {
+			DataRow row = rows.get(i - 1);
+			for (int j = range.getColFrom(); j <= range.getColTo(); j++) {
+				Column col = cols.get(j - 1);
 				BigDecimal value = (BigDecimal)row.get(col.getAlias());
 				if (value != null) {
 					sum += value.doubleValue();
@@ -80,9 +81,13 @@ public class ScriptUtils {
 	 * @param range проверяемый диапазон ячеек
 	 */
 	private static void checkColumnsRange(FormData formData, Range range) {
-		if (range.getColTo() >= formData.getFormColumns().size()) {
-			throw new IllegalArgumentException(String.format(WRONG_COLUMN_RANGE, range.getColFrom(), range.getColTo(),
+		if (range.getColTo() > formData.getFormColumns().size() || range.getColFrom() < 1) {
+			throw new IndexOutOfBoundsException(String.format(WRONG_COLUMN_RANGE, range.getColFrom(), range.getColTo(),
 					formData.getFormColumns().size()));
+		}
+		if (range.getRowTo() > formData.getDataRows().size() || range.getRowFrom() < 1) {
+			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, range.getRowFrom(), range.getRowTo(),
+					formData.getDataRows().size()));
 		}
 	}
 
@@ -94,8 +99,8 @@ public class ScriptUtils {
 	 */
 	private static void checkNumericColumns(FormData formData, Range range) {
 		List<Column> cols = formData.getFormColumns();
-		for (int j = range.getColFrom(); j < range.getColTo(); j++) {
-			Column col = cols.get(j);
+		for (int j = range.getColFrom(); j <= range.getColTo(); j++) {
+			Column col = cols.get(j - 1);
 			if (!(col instanceof NumericColumn))
 				throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
 						cols.get(range.getColFrom()).getName(),

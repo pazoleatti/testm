@@ -177,4 +177,32 @@ public class FormData extends IdentityObject<Long> {
 		throw new IllegalArgumentException("Wrong row alias requested: "
 				+ rowAlias);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nColumns:\n\t");
+		for (Column col : getFormColumns()) {
+			sb.append(col.getName());
+			sb.append(" | ");
+		}
+		sb.append("\n\t");
+		for (Column col : getFormColumns()) {
+			sb.append(col.getAlias());
+			sb.append(" | ");
+		}
+		sb.append("\nRows:\n\t");
+		for (DataRow row : getDataRows()) {
+			sb.append(row.getAlias());
+			sb.append(" | ");
+			for (Column col : getFormColumns()) {
+				Object value = row.getCell(col.getAlias()).getValue();
+				sb.append(value == null ? "null" : value.toString());
+				sb.append(" | ");
+			}
+			sb.append("\n\t");
+		}
+		sb.append('-');
+		return sb.toString();
+	}
 }
