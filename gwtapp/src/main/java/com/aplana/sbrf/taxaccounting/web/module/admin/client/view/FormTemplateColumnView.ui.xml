@@ -13,7 +13,7 @@
             <g:cell width="25%" height="100%">
                 <g:VerticalPanel width="100%" height="100%">
                     <g:Label text="Столбцы"/>
-                    <g:cell height="100%">
+                    <g:cell height="92%">
                         <g:ListBox width="100%" height="100%" visibleItemCount="25" ui:field="columnListBox"/>
                     </g:cell>
                     <t:Bar>
