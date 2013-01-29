@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ public class GetMainMenuActionHandler extends
 		menuItems.add(new MenuItem("НДС", FormDataListNameTokens.FORM_DATA_LIST + ";nType=" + TaxType.VAT));
 		if (securityService.currentUser().hasRole("ROLE_CONF")) {
 	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
+			menuItems.add(new MenuItem("Шаблоны деклараций", DeclarationTemplateTokens.declarationTemplateList));
 		}
 
 		GetMainMenuResult result = new GetMainMenuResult();

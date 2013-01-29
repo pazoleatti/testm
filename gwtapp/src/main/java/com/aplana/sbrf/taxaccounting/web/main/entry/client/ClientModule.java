@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPageView;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.gin.AdminModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
@@ -53,6 +54,7 @@ public class ClientModule extends AbstractPresenterModule {
     install(new SignInClientModule());
     install(new MainMenuClientModule());
     install(new AdminModule());
+	install(new DeclarationTemplateModule());
     install(new ErrorModule());
     
   }
