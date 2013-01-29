@@ -38,6 +38,9 @@ public class FormDataAccessServiceImplTest {
 	private static final long BANK_APPROVED_FORMDATA_ID = 12;
 	private static final long BANK_CREATED_SUMMARY_FORMDATA_ID = 14;
 	private static final long BANK_ACCEPTED_SUMMARY_FORMDATA_ID = 15;
+	private static final long BANK_CREATED_ADDITIONAL_FORMDATA_ID = 16;
+	private static final long BANK_PREPARED_ADDITIONAL_FORMDATA_ID = 17;
+	private static final long BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID = 18;
 
 	private static final long GOSB_TB1_CREATED_FORMDATA_ID = 13;
 
@@ -93,6 +96,12 @@ public class FormDataAccessServiceImplTest {
 		when(formDataDao.get(BANK_CREATED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
 		fd = mockFormData(BANK_ACCEPTED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(BANK_ACCEPTED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(BANK_CREATED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		when(formDataDao.get(BANK_CREATED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(BANK_PREPARED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		when(formDataDao.get(BANK_PREPARED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
+		fd = mockFormData(BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		when(formDataDao.get(BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
 		fd = mockFormData(GOSB_TB1_CREATED_FORMDATA_ID, GOSB_TB1_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
 		when(formDataDao.get(GOSB_TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
 		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_INACTIVE_ID);
@@ -139,126 +148,125 @@ public class FormDataAccessServiceImplTest {
 		when(reportPeriodDao.get(REPORT_PERIOD_INACTIVE_ID)).thenReturn(rp);
 		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 	}
-	
+
 	@Test
-	public void testCanRead() {
-		// Контролёр тербанка может просматривать любые записи в своём тербанке
+	public void testCanReadForFirstLifeCycle(){
+	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+
+		//Любой пользователь может читать Выходные формы данного жизненного цикла, находящиеся в любом состоянии
+		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+	}
+
+	@Test
+	public void testCanReadForSecondLifeCycle(){
+	/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+
+		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
+		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+
+		//Оператор не имеет прав на чтение НФ данного жизненного цикла
+		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+
+
+	}
+
+	@Test
+	public void testCanReadForThirdLifeCycle(){
+	/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+
+		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 
-		// Контролёр тербанка не может просматривать записи в чужом тербанке
-		assertFalse(service.canRead(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID));
-		assertFalse(service.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID));
-		assertFalse(service.canRead(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID));
-
-		// Контролёр тербанка не может просматривать записи в вышестоящем уровне
-		assertFalse(service.canRead(TB1_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canRead(TB1_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-		
-		// Контролёр уровня банка может просматривать записи в банке
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-
-		// Контролёр уровня банка может просматривать записи в тербанках
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		//Оператор не имеет прав на чтение НФ данного жизненного цикла
+		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 	}
 
 	@Test
-	public void testOperatorCanEdit() {
-		// Оператор может редактировать НФ в статусе "Создана" и только принадлежащую назначенному подразделению пользователя
-		assertTrue(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, TB2_CREATED_FORMDATA_ID));
+	public void testCanEditForFirstLifeCycle(){
+	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
 
-		// Оператор любого уровня не может редактировать НФ в статусах "Подготовлена", "Утверждена", "Принята"
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_PREPARED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
+		//Все могут редактировать форму в статусе "Создана"
+		assertTrue(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+
+		//Все, кроме Оператора, могут редактировать форму в статусе "Подготовлена"
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+
+		//Никто не может редактировать НФ в статусе "Принята"
+		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
 	}
-	
+
 	@Test
-	public void testControllerCanEdit() {
-		// Контролёр тербанка может редактировать записи в тербанке в статусе "Создана" 
-		assertTrue(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
+	public void testCanEditForSecondLifeCycle(){
+	/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+
+		//Все, кроме Оператора, могут редактировать форму в статусе "Создана"
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+
+		//Никто не может редактировать НФ в статусе "Принята"
+		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+	}
+
+	@Test
+	public void testCanEditForThirdLifeCycle(){
+	/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+
+		//Никто не может редактировать НФ данного жизненного цикла
+		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-
-		// Контролёр тербанка не может редактировать записи в чужом тербанке
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID));
-
-		// Контролёр тербанка не может редактировать записи на вышестоящем уровне
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-		
-		// Контролёр уровня банка может редактировать записи в тербанке в статусе "Создана" и "Утверждена"
-		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-
-		// Контролёр уровня банка может редактировать записи в тербанке в статусе "Создана"
-		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-
-		// Контролер уровня Госбанка, может редактировать записи в госбанке
-		assertTrue(service.canEdit(GOSBANK_CONTROL_USER_ID, GOSB_TB1_CREATED_FORMDATA_ID));
-
-		// Контролер уровня Тербанка, может редактировать записи в госбанке
-		assertTrue(service.canEdit(TB1_CONTROL_USER_ID, GOSB_TB1_CREATED_FORMDATA_ID));
-
-		// Контролер уровня Банка, не может редактировать записи в госбанке
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, GOSB_TB1_CREATED_FORMDATA_ID));
-
-		// Никто не может редактировать записи, если отчетный период не активный
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
-	}
-
-	@Test
-	public void testControllerUNPCanEdit() {
-		// Контролер УНП может редактировать налогувую форму в любом состоянии (кроме "Принята") и любого подразделения
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_APPROVED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB2_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, GOSB_TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-
+		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanDelete() {
-		// Контролёр тербанка может удалить налоговую форму своего банка в статусе "Создана"
-		assertTrue(service.canDelete(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));		
-		
-		// Контролёр тербанка не может удалить налоговую форму в чужом тербанке
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID));		
-		
-		// Контролёр тербанка не может удалить налоговую форму на вышестоящем уровне
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-	
-		// Контролёр банка может удалить налоговую форму на уровне банка в статусе "Создана"
-		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID));
-		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID));
-		
-		// Контролёр банка может удалить налоговую форму на уровне тербанка в статусе "Создана"
-		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-
-		// Никто не может удалять записи, если отчетный период неактивен
-		assertFalse(service.canDelete(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
-		assertFalse(service.canDelete(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID));
+		// Удалять можно налоговые формы, находящиеся в состоянии "Создана" и для которых canEdit() == true
+		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
 	}
 	
 	@Test 
@@ -328,7 +336,6 @@ public class FormDataAccessServiceImplTest {
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 
-
 		//Переводить из состояния "Создана" в "Утверждена" может контролер текущего уровня, контролер вышестоящего уровня
 		// и контролер УНП
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
@@ -372,12 +379,12 @@ public class FormDataAccessServiceImplTest {
 	public void testGetAccessParams() {
 		// Проверяем только один случай, так как этот метод просто аггрегирует результаты других методов,
 		// а мы их уже оттестировали отдельно
-		FormDataAccessParams params = service.getFormDataAccessParams(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID);
+		FormDataAccessParams params = service.getFormDataAccessParams(BANK_CONTROL_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
 		assertTrue(params.isCanRead());
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
 		assertArrayEquals(
-			new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
+			new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
 			params.getAvailableWorkflowMoves().toArray()
 		);
 

@@ -38,13 +38,70 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	private boolean canRead(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
-		final boolean isOperatorOfCurrentLevel = user.hasRole(TARole.ROLE_OPERATOR)
-				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
 				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
 				&& (userDepartment.getId() == formDataDepartment.getParentId());
-		return user.hasRole(TARole.ROLE_CONTROL_UNP) || isOperatorOfCurrentLevel || isControllerOfCurrentLevel || isControllerOfUpLevel;
+		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
+		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
+
+		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
+			 Логика, согласно Бизнес-требованиям:
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Подготовлена |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   +    |     +      |      +      |      +      |
+             ---------------|--------------------------------------------------
+			 */
+			return true;
+		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
+			 			 Логика, согласно Бизнес-требованиям:
+		     ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     +      |      +      |      +      |
+             ---------------|--------------------------------------------------
+			 */
+
+			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+				return true;
+			}
+		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
+            Логика, согласно Бизнес-требованиям:
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Утверждена   |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     +      |      +      |      +      |
+             ---------------|--------------------------------------------------
+			*/
+			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -55,57 +112,87 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
 		return canEdit(user, userDepartment, formData, formDataDepartment, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
-	
+
 	private boolean canEdit(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment,
 	                        ReportPeriod formDataReportPeriod) {
-		/* Логика данной функции основана на бизнес-требованиях, которые заданы в следующей таблице:
-		 ---------------------------------------------
-		 - Состояние    |  Кто может редактировать   -
-		 ---------------------------------------------
-		 - Создана      |  Оператор                  -
-		 -              |  Контролер текущего уровня -
-		 -              |  Контролер вышест. уровня  -
-		 -              |  Контролер УНП             -
-		 ---------------------------------------------
-		 - Подготовлена |  Контролер текущего уровня -
-         -              |  Контролер вышест. уровня  -
-         -              |  Контролер УНП             -
-         ---------------------------------------------
-         - Утверждена   |  Контролер вышест. уровня  -
-         -              |  Контролер УНП             -
-         ---------------------------------------------
-         - Принята      |   ---------------------    -
-         ---------------------------------------------
-		 */
 		WorkflowState state = formData.getState();
 		if(!formDataReportPeriod.isActive() || state == WorkflowState.ACCEPTED){
 			//Нельзя редактировать НФ для неактивного налогового периода или если НФ находится в состоянии "Принята"
 			return false;
 		}
 
-		if(user.hasRole(TARole.ROLE_CONTROL_UNP)){
-			return true;
-		}
-
-		final boolean isOperatorOfCurrentLevel = user.hasRole(TARole.ROLE_OPERATOR)
-				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
 				&& (user.getDepartmentId() == formDataDepartment.getId());
 		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
 				&& (userDepartment.getId() == formDataDepartment.getParentId());
+		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
+		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
 
-		if(state == WorkflowState.APPROVED){
-	        if(isControllerOfUpLevel){
-		        return true;
-	        }
-		} else if (state == WorkflowState.PREPARED){
-			if(isControllerOfCurrentLevel || isControllerOfUpLevel){
+		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
+             Логика, согласно Бизнес-требованиям:
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Подготовлена |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     -      |      -      |      -      |
+             ---------------|--------------------------------------------------
+             *Контролер ТУ - Контролер текущего уровня
+             *Контролер ВСУ - Контролер вышестоящего уровня
+			 */
+			switch (formData.getState()){
+				case CREATED:
+					return true;
+				case PREPARED:
+					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+						return true;
+					} else {
+						return false;
+					}
+				default:
+					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
+			}
+		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
+			 Логика, согласно Бизнес-требованиям:
+		     ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     -      |      -      |      -      |
+             ---------------|--------------------------------------------------
+			 */
+			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
 				return true;
 			}
-		} else if (state == WorkflowState.CREATED){
-			if(isOperatorOfCurrentLevel || isControllerOfCurrentLevel || isControllerOfUpLevel){
-				return true;
-			}
+		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
+			 Логика, согласно Бизнес-требованиям:
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   -    |     -      |      -      |      -      |
+             ---------------|-------------------------------------------------|
+             | Утверждена   |   -    |     -      |      -      |      -      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     -      |      -      |      -      |
+             ---------------|--------------------------------------------------
+			*/
+			return false;
 		}
 		return false;
 	}
