@@ -24,9 +24,6 @@ public class ScriptUtils {
 	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
 
-	private static final String WRONG_COLUMN_RANGE = "Указанный диапазон столбцов %d - %d выходит за границы таблицы. " +
-			"В таблице количество столбцов = %d";
-
 	private static final String WRONG_ROW_RANGE = "Указанный диапазон строк %d - %d выходит за границы таблицы. " +
 			"В таблице количество строк = %d";
 
@@ -45,11 +42,13 @@ public class ScriptUtils {
 		double sum = 0;
 		List<DataRow> rows = formData.getDataRows();
 		List<Column> cols = formData.getFormColumns();
+		int colFrom = getColumnIndex(formData, range.getColFromAlias());
+		int colTo = getColumnIndex(formData, range.getColToAlias());
 		for (int i = range.getRowFrom(); i <= range.getRowTo(); i++) {
-			DataRow row = rows.get(i - 1);
-			for (int j = range.getColFrom(); j <= range.getColTo(); j++) {
-				Column col = cols.get(j - 1);
-				BigDecimal value = (BigDecimal)row.get(col.getAlias());
+			DataRow row = rows.get(i);
+			for (int j = colFrom; j <= colTo; j++) {
+				Column col = cols.get(j);
+				BigDecimal value = (BigDecimal) row.get(col.getAlias());
 				if (value != null) {
 					sum += value.doubleValue();
 				}
@@ -77,7 +76,7 @@ public class ScriptUtils {
 	 * @param range проверяемый диапазон ячеек
 	 */
 	private static void checks(FormData formData, Range range) {
-		checkColumnsRange(formData, range);
+		checkRange(formData, range);
 		checkNumericColumns(formData, range);
 	}
 
@@ -88,12 +87,17 @@ public class ScriptUtils {
 	 * @param range проверяемый диапазон ячеек
 	 * @throws IndexOutOfBoundsException если указанный дипазон выходит за границы таблицы
 	 */
-	private static void checkColumnsRange(FormData formData, Range range) {
-		if (range.getColTo() > formData.getFormColumns().size() || range.getColFrom() < 1) {
-			throw new IndexOutOfBoundsException(String.format(WRONG_COLUMN_RANGE, range.getColFrom(), range.getColTo(),
-					formData.getFormColumns().size()));
+	static void checkRange(FormData formData, Range range) {
+		int colFrom = getColumnIndex(formData, range.getColFromAlias());
+		int colTo = getColumnIndex(formData, range.getColToAlias());
+		if (colFrom > colTo) {
+			// переставляем в диапазоне столбцы местами
+			String from = range.getColFromAlias();
+			String to = range.getColToAlias();
+			range.setColFromAlias(to);
+			range.setColToAlias(from);
 		}
-		if (range.getRowTo() > formData.getDataRows().size() || range.getRowFrom() < 1) {
+		if (range.getRowTo() > formData.getDataRows().size() || range.getRowFrom() < 0) {
 			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, range.getRowFrom(), range.getRowTo(),
 					formData.getDataRows().size()));
 		}
@@ -106,32 +110,36 @@ public class ScriptUtils {
 	 * @param range проверяемый диапазон ячеек
 	 * @throws IllegalArgumentException если в диапазоне есть нечисловые столбцы
 	 */
-	private static void checkNumericColumns(FormData formData, Range range) {
+	static void checkNumericColumns(FormData formData, Range range) {
 		List<Column> cols = formData.getFormColumns();
-		for (int j = range.getColFrom(); j <= range.getColTo(); j++) {
-			Column col = cols.get(j - 1);
+		int colFrom = getColumnIndex(formData, range.getColFromAlias());
+		int colTo = getColumnIndex(formData, range.getColToAlias());
+		for (int j = colFrom; j <= colTo; j++) {
+			Column col = cols.get(j);
 			if (!(col instanceof NumericColumn))
 				throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
-						cols.get(range.getColFrom()).getName(),
-						cols.get(range.getColTo()).getName(),
+						cols.get(colFrom).getName(),
+						cols.get(colTo).getName(),
 						col.getName()));
 		}
 	}
 
 	/**
-	 * Возвращает по алиасу столбец
+	 * Возвращает по алиасу индекс столбца
 	 *
 	 * @param formData таблица значений
-	 * @param alias алиас столбца
-	 * @return столбец таблицы
+	 * @param colAlias псевдоним столбца
+	 * @return индекс столбца
+	 * @throws IllegalArgumentException если такого псевдонима столбца не существует в объекте FormData
 	 */
-	public static Column getColumn(FormData formData, String alias) {
-		for (Column col : formData.getFormColumns()) {
-			if (col.getAlias().equals(alias)) {
-				return col;
+	static int getColumnIndex(FormData formData, String colAlias) {
+		List<Column> cols = formData.getFormColumns();
+		for (int i = 0; i < cols.size(); i++) {
+			if (cols.get(i).getAlias().equals(colAlias)) {
+				return i;
 			}
 		}
-		return null;
+		throw new IllegalArgumentException("Wrong column alias requested: " + colAlias);
 	}
 
 }

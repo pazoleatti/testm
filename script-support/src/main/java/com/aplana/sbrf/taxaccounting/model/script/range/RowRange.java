@@ -13,11 +13,11 @@ public class RowRange extends Range {
 	 *  Конструктор по умолчанию
 	 *
 	 * @param row индекс строки, диапазон ячеек которой требуется получить
-	 * @param colFrom индекс столбца (начало диапазона)
-	 * @param colTo индекс столбца (конец диапазона)
+	 * @param colFromAlias псевдоним столбца (начало диапазона)
+	 * @param colToAlias псевдоним столбца (конец диапазона)
 	 */
-	public RowRange(int row, int colFrom, int colTo) {
-		super(colFrom, row, colTo, row);
+	public RowRange(int row, String colFromAlias, String colToAlias) {
+		super(colFromAlias, row, colToAlias, row);
 	}
 
 }

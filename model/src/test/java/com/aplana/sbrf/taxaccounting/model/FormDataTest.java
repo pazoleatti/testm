@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 /**
+ * Тесты для FormData
+ *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 29.01.13 14:03
  */

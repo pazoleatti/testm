@@ -1,12 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
-/**
- * Тесты для ScriptUtils
- *
- * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
- * @since 28.01.13 14:31
- */
-
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
@@ -15,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange;
+import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
@@ -23,6 +17,12 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Date;
 
+/**
+ * Тесты для ScriptUtils
+ *
+ * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
+ * @since 28.01.13 14:31
+ */
 public class ScriptUtilsTest {
 
 	private static final Log logger = LogFactory.getLog(ScriptUtilsTest.class);
@@ -78,7 +78,7 @@ public class ScriptUtilsTest {
 	public void summTest() {
 		FormData fd = getTestFormData();
 		logger.info(fd);
-		double r = ScriptUtils.summ(fd, new ColumnRange(2, 1, 2));
+		double r = ScriptUtils.summ(fd, new ColumnRange(NUMBER_ALIAS, 0, 1));
 		logger.info("summ = " + r);
 		Assert.assertTrue(Math.abs(r) > Constants.EPS);
 	}
@@ -94,9 +94,45 @@ public class ScriptUtilsTest {
 	}
 
 	@Test
-	public void getColumnTest() {
-
+	public void getColumnIndexTest1() {
+		Assert.assertEquals(ScriptUtils.getColumnIndex(getTestFormData(), DATE_ALIAS), 2);
 	}
 
+	@Test
+	public void getColumnIndexTest2() {
+		Assert.assertEquals(ScriptUtils.getColumnIndex(getTestFormData(), STRING_ALIAS), 0);
+	}
+
+	@Test
+	public void checkNumericColumnsTest1() {
+		ScriptUtils.checkNumericColumns(getTestFormData(), new Range(NUMBER_ALIAS, 0, NUMBER_ALIAS, 2));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void checkNumericColumnsTest2() {
+		ScriptUtils.checkNumericColumns(getTestFormData(), new Range(STRING_ALIAS, 0, NUMBER_ALIAS, 2));
+	}
+
+	@Test
+	public void checkRangeTest1() {
+		Range range = new Range(STRING_ALIAS, 0, NUMBER_ALIAS, 2);
+		ScriptUtils.checkRange(getTestFormData(), range);
+	}
+
+	@Test
+	public void checkRangeTest2() {
+		Range range = new Range(DATE_ALIAS, 0, STRING_ALIAS, 2);
+		ScriptUtils.checkRange(getTestFormData(), range);
+		String colFrom = range.getColFromAlias();
+		Assert.assertEquals(colFrom, STRING_ALIAS);
+		String colTo = range.getColToAlias();
+		Assert.assertEquals(colTo, DATE_ALIAS);
+	}
+
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void checkRangeTest3() {
+		Range range = new Range(DATE_ALIAS, 0, STRING_ALIAS, 6);
+		ScriptUtils.checkRange(getTestFormData(), range);
+	}
 
 }

@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 
 /**
  * Описывает диапазон ячеек таблицы. Используется в аналогах Excel-функций внутри скриптов.
- * Диапазон задается границей ячеек с координатами от [colFrom; rowFrom] до [colTo; rowTo].
+ * Диапазон задается границей ячеек с координатами от [colFromAlias; rowFrom] до [colToAlias; rowTo].
  * Диапазон столбцов и строк начинается с 1 согласно {@link Column#getOrder} и {@link DataRow#getOrder}
  *
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -15,40 +15,40 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 
 public class Range implements Serializable {
 
-	private static final String WRONG_BOUNDS = "Неверно указан диапазон: (%d; %d) - (%d; %d)";
+	private static final String WRONG_BOUNDS = "Неверно указан диапазон: (%s; %d) - (%s; %d)";
 
 	/** левая граница диапазона */
-	private int colFrom;
+	private String colFromAlias;
 	/** верхняя граница диапазона */
 	private int rowFrom;
 	/** правая граница диапазона */
-	private int colTo;
+	private String colToAlias;
 	/** нижняя граница диапазона */
 	private int rowTo;
 
 	/**
 	 * Конструктор по умолчанию
 	 *
-	 * @param colFrom индекс левого столбца
+	 * @param colFromAlias псевдоним левого столбца
 	 * @param rowFrom индекс верхней строки
-	 * @param colTo индекс правого столбца
+	 * @param colToAlias псевдоним правого столбца
 	 * @param rowTo индекс нижней строки
 	 */
-	public Range(int colFrom, int rowFrom, int colTo, int rowTo) {
-		if (colTo < colFrom || rowTo < rowFrom || colFrom < 1 || rowFrom < 1)
-			throw new IllegalArgumentException(String.format(WRONG_BOUNDS, colFrom, rowFrom, colTo, rowTo));
-		this.colFrom = colFrom;
+	public Range(String colFromAlias, int rowFrom, String colToAlias, int rowTo) {
+		if (rowTo < rowFrom || rowFrom < 0)
+			throw new IllegalArgumentException(String.format(WRONG_BOUNDS, colFromAlias, rowFrom, colToAlias, rowTo));
+		this.colFromAlias = colFromAlias;
 		this.rowFrom = rowFrom;
-		this.colTo = colTo;
+		this.colToAlias = colToAlias;
 		this.rowTo = rowTo;
 	}
 
-	public int getColFrom() {
-		return colFrom;
+	public String getColFromAlias() {
+		return colFromAlias;
 	}
 
-	public void setColFrom(int colFrom) {
-		this.colFrom = colFrom;
+	public void setColFromAlias(String colFromAlias) {
+		this.colFromAlias = colFromAlias;
 	}
 
 	public int getRowFrom() {
@@ -59,12 +59,12 @@ public class Range implements Serializable {
 		this.rowFrom = rowFrom;
 	}
 
-	public int getColTo() {
-		return colTo;
+	public String getColToAlias() {
+		return colToAlias;
 	}
 
-	public void setColTo(int colTo) {
-		this.colTo = colTo;
+	public void setColToAlias(String colToAlias) {
+		this.colToAlias = colToAlias;
 	}
 
 	public int getRowTo() {
@@ -78,9 +78,9 @@ public class Range implements Serializable {
 	@Override
 	public String toString() {
 		return "Range{" +
-				"colFrom=" + colFrom +
+				"colFromAlias=" + colFromAlias +
 				", rowFrom=" + rowFrom +
-				", colTo=" + colTo +
+				", colToAlias=" + colToAlias +
 				", rowTo=" + rowTo +
 				'}';
 	}
