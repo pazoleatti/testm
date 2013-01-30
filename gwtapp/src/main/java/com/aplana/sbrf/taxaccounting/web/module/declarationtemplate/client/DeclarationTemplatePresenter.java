@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -22,7 +23,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-		void setTitle(String title);
+		void setDeclarationTemplate(DeclarationTemplate declaration);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -49,6 +50,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	@Override
+	public boolean useManualReveal() {
+		return true;
+	}
+
+	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
@@ -66,6 +72,13 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void save() {
 		UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplate(declarationTemplate);
+
+		System.out.println("declarationTemplate.getTaxType() " + declarationTemplate.getTaxType() +
+			" declarationTemplate.getId() " + declarationTemplate.getId() +
+			" declarationTemplate.getVersion() " + declarationTemplate.getVersion() +
+			" declarationTemplate.getCreateScript() " + declarationTemplate.getCreateScript() +
+			" declarationTemplate.isActive() " + declarationTemplate.isActive());
+
 		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
 			@Override
 			public void onReqSuccess(UpdateDeclarationResult result) {
@@ -95,9 +108,18 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	private void setDeclarationTemplate() {
-		getView().setTitle("Самая лучшая декларация");
-		int declarationId = 0;
-		//int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
+		declarationTemplate = new DeclarationTemplate();
+		declarationTemplate.setId(3);
+		declarationTemplate.setActive(true);
+		declarationTemplate.setCreateScript("super script");
+		declarationTemplate.setTaxType(TaxType.PROPERTY);
+		declarationTemplate.setVersion("super version");
+
+		getView().setDeclarationTemplate(declarationTemplate);
+		getProxy().manualReveal(this);
+		/*
+		int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
+
 		if (declarationId != 0) {
 			GetDeclarationAction action = new GetDeclarationAction();
 			action.setId(declarationId);
@@ -105,9 +127,10 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 				@Override
 				public void onReqSuccess(GetDeclarationResult result) {
 					declarationTemplate = result.getDeclarationTemplate();
-					getView().setTitle(declarationTemplate.getTaxType().getName());
+					getView().setDeclarationTemplate(declarationTemplate);
+					getProxy().manualReveal(DeclarationTemplatePresenter.this);
 				}
 			});
-		}
+		}*/
 	}
 }
