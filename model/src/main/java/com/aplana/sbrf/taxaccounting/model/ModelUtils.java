@@ -34,6 +34,15 @@ public class ModelUtils {
 		return null;
 	}
 	
+	public static <T> boolean containsLink(Collection<T> collection, T linkTo){
+		for (T object : collection) {
+			if (object == linkTo){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	//mapByProperties(){
 	//	
 	//}

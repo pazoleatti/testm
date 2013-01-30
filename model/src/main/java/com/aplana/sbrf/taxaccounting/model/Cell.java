@@ -186,6 +186,10 @@ public class Cell implements Serializable {
 	// }
 
 	public FormStyle getStyle() {
+		if (!ModelUtils.containsLink(formStyleList, style)){
+			// Обнуляем отсутствующий стиль
+			style = null;
+		}
 		return style;
 	}
 

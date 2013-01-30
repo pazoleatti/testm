@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -222,6 +223,7 @@ public class FormDataDaoTest {
 	}
 
 	@Test
+	@Transactional
 	public void spansSaveGetSuccess() {
 
 		FormData formData = fillFormData();
@@ -243,6 +245,22 @@ public class FormDataDaoTest {
 		Assert.assertEquals(1, dr.getCell("stringColumn").getColSpan());
 		Assert.assertEquals(1, dr.getCell("stringColumn").getRowSpan());
 
+	}
+	
+	@Test
+	@Transactional
+	public void stylesRemoveStyleSuccess() {
+		FormData formData = fillFormData();
+		DataRow dr = formData.getDataRows().get(0);
+		dr.getCell("stringColumn").setStyleAlias("alias2");
+		
+		Assert.assertEquals("alias2", dr.getCell("stringColumn").getStyle().getAlias());
+		Assert.assertEquals("alias2", dr.getCell("stringColumn").getStyleAlias());
+		
+		formData.getFormStyles().clear();
+		
+		Assert.assertNull(dr.getCell("stringColumn").getStyle());
+		Assert.assertNull(dr.getCell("stringColumn").getStyleAlias());
 	}
 
 	@Test
