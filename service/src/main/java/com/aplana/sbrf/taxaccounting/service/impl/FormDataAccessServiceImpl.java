@@ -141,7 +141,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|-------------------------------------------------|
              | Подготовлена |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
-             | Принята      |   -    |     -      |      -      |      -      |
+             | Принята      |   -    |     -      |      -      |      -      |-> это состояние хэндлится в начале функции
              ---------------|--------------------------------------------------
              *Контролер ТУ - Контролер текущего уровня
              *Контролер ВСУ - Контролер вышестоящего уровня
@@ -152,8 +152,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case PREPARED:
 					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
 						return true;
-					} else {
-						return false;
 					}
 				default:
 					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
@@ -168,14 +166,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              |  Состояние   |-------------------------------------------------|
              |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
              ------------------------------------------------------------------
-             | Создана      |   -    |     +      |      +      |      +      |
+             | Создана      |   -    |     -      |      -      |      -      |
              ---------------|-------------------------------------------------|
              | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
 			 */
-			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
-				return true;
-			}
+			return false;
 		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
@@ -185,14 +181,25 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              |  Состояние   |-------------------------------------------------|
              |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
              ------------------------------------------------------------------
-             | Создана      |   -    |     -      |      -      |      -      |
+             | Создана      |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
              | Утверждена   |   -    |     -      |      -      |      -      |
              ---------------|-------------------------------------------------|
-             | Принята      |   -    |     -      |      -      |      -      |
+             | Принята      |   -    |     -      |      -      |      -      |-> это состояние хэндлится в начале функции
              ---------------|--------------------------------------------------
 			*/
-			return false;
+			switch (state){
+				case CREATED:
+					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+						return true;
+					}
+					break;
+				case APPROVED:
+					return false;
+				default:
+					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
+			}
 		}
 		return false;
 	}

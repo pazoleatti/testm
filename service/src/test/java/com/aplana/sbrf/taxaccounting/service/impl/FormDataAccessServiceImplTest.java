@@ -229,12 +229,10 @@ public class FormDataAccessServiceImplTest {
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
 
-		//Все, кроме Оператора, могут редактировать форму в статусе "Создана"
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		//Никто не может редактировать налоговые формы данного жизненного цикла
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-
-		//Никто не может редактировать НФ в статусе "Принята"
 		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
@@ -245,14 +243,18 @@ public class FormDataAccessServiceImplTest {
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 
-		//Никто не может редактировать НФ данного жизненного цикла
+		//Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
+		assertTrue(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+
+		//Оператор не может редактировать НФ данного жизненного цикла в состоянии "Создана"
 		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
+
+		//Никто не может редактировать НФ данного жизненного цикла в состоянии "Утверждена" и "Принята"
 		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
@@ -262,11 +264,12 @@ public class FormDataAccessServiceImplTest {
 	@Test
 	public void testCanDelete() {
 		// Удалять можно налоговые формы, находящиеся в состоянии "Создана" и для которых canEdit() == true
-		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
 		assertTrue(service.canDelete(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
 		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
 		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canDelete(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canDelete(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
 	}
 	
 	@Test 
