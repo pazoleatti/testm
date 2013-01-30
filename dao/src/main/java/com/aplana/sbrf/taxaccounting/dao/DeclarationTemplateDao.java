@@ -2,11 +2,19 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 
+import java.util.List;
+
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
  * @author dsultanbekov
  */
 public interface DeclarationTemplateDao {
+
+	/**
+	 * Получить полный список всех деклараций
+	 * @return список всех DeclarationTemplate
+	 */
+	List<DeclarationTemplate> listAll();
 	/**
 	 * Получить шаблон декларации
 	 * @param declarationTemplateId идентификатор шаблона декларации
