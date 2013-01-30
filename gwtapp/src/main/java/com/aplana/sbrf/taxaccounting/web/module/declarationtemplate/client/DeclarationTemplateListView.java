@@ -34,11 +34,11 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 	public DeclarationTemplateListView(Binder binder) {
 		widget = binder.createAndBindUi(this);
 
-		// колонка с название типа декларации
+		// колонка с название декларации
 		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
 			@Override
 			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getTaxType().getName();
+				return declarationTemplate.getId().toString();
 			}
 		});
 

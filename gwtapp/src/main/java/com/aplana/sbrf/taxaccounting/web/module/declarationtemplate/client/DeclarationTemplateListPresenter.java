@@ -16,6 +16,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,9 +67,26 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 		dispatcher.execute(new DeclarationListAction(), new AbstractCallback<DeclarationListResult>() {
 			@Override
 			public void onReqSuccess(DeclarationListResult result) {
+				List<DeclarationTemplate> templates = new ArrayList<DeclarationTemplate>();
+				DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
+				declarationTemplate1.setId(1);
+				templates.add(declarationTemplate1);
+				DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
+				declarationTemplate2.setId(2);
+				templates.add(declarationTemplate2);
+				DeclarationTemplate declarationTemplate3 = new DeclarationTemplate();
+				declarationTemplate3.setId(3);
+				templates.add(declarationTemplate3);
+				DeclarationTemplate declarationTemplate4 = new DeclarationTemplate();
+				declarationTemplate4.setId(4);
+				templates.add(declarationTemplate4);
+
+
+				getView().setDeclarationTemplateRows(templates);
+				/*
 				if (result.getDeclarations() != null && !result.getDeclarations().isEmpty()) {
 					getView().setDeclarationTemplateRows(result.getDeclarations());
-				}
+				}*/
 			}
 		});
 	}
