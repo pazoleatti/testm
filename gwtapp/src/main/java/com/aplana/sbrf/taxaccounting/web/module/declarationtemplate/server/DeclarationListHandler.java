@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class DeclarationListHandler	extends AbstractActionHandler<DeclarationListAction, DeclarationListResult> {
-	//@Autowired
-	//private DeclarationTemplateService declarationTemplateService;
+	@Autowired
+	private DeclarationTemplateService declarationTemplateService;
 
 	public DeclarationListHandler() {
 		super(DeclarationListAction.class);
@@ -23,7 +23,7 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	@Override
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
-		//result.setDeclarations(declarationTemplateService.listAll());
+		result.setDeclarations(declarationTemplateService.listAll());
 		return result;
 	}
 

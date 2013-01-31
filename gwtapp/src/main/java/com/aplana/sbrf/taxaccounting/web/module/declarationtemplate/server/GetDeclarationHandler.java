@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationAction, GetDeclarationResult> {
-    //@Autowired
-	//private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+	private DeclarationTemplateService declarationTemplateService;
 
     public GetDeclarationHandler() {
         super(GetDeclarationAction.class);
@@ -24,8 +24,8 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
     @Override
     public GetDeclarationResult execute(GetDeclarationAction action, ExecutionContext context) throws ActionException {
 		GetDeclarationResult result = new GetDeclarationResult();
-		//DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
-		//result.setDeclarationTemplate(declarationTemplate);
+		DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
+		result.setDeclarationTemplate(declarationTemplate);
         return result;
     }
 

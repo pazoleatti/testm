@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclarationAction, UpdateDeclarationResult> {
-	//@Autowired
-	//private DeclarationTemplateService declarationTemplateService;
+	@Autowired
+	private DeclarationTemplateService declarationTemplateService;
 
     public UpdateDeclarationHandler() {
         super(UpdateDeclarationAction.class);
@@ -24,7 +24,7 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
     public UpdateDeclarationResult execute(UpdateDeclarationAction action, ExecutionContext context) {
 		UpdateDeclarationResult result = new UpdateDeclarationResult();
 
-		//declarationTemplateService.save(action.getDeclarationTemplate());
+		declarationTemplateService.save(action.getDeclarationTemplate());
 		return result;
     }
 

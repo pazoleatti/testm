@@ -8,11 +8,13 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -32,6 +34,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	private final Widget widget;
 	private final MyDriver driver = GWT.create(MyDriver.class);
+
+	@UiField
+	@Editor.Ignore
+	FormPanel form;
 
 	@UiField
 	@Editor.Ignore
@@ -79,6 +85,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 		widget = uiBinder.createAndBindUi(this);
 		driver.initialize(this);
+		addFileUploader();
 	}
 
 	@Override
@@ -88,6 +95,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 			public void execute() {
 				titleLabel.setText(declaration.getId().toString());
 				driver.edit(declaration);
+				form.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());
 			}
 		});
 	}
@@ -99,10 +107,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event){
-		if(getUiHandlers()!=null){
-			driver.flush();
-			getUiHandlers().save();
-		}
+		driver.flush();
+		form.submit();
+		getUiHandlers().save();
 	}
 
 	@UiHandler("resetButton")
@@ -116,4 +123,43 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	public void onCancel(ClickEvent event){
 		getUiHandlers().close();
 	}
+
+	private void addFileUploader() {
+		// Because we're going to add a FileUpload widget, we'll need to set the
+		// form to use the POST method, and multipart MIME encoding.
+		form.setEncoding(FormPanel.ENCODING_MULTIPART);
+		form.setMethod(FormPanel.METHOD_POST);
+
+		// Create a panel to hold all of the form widgets.
+		VerticalPanel panel = new VerticalPanel();
+		form.setWidget(panel);
+
+		// Create a FileUpload widget.
+		FileUpload upload = new FileUpload();
+		upload.setName("uploadJrxmlFile");
+		panel.add(upload);
+
+		// Add a 'submit' button.
+		// Add an event handler to the form.
+		form.addSubmitHandler(new FormPanel.SubmitHandler() {
+			@Override
+			public void onSubmit(FormPanel.SubmitEvent event) {
+				// This event is fired just before the form is submitted. We can take
+				// this opportunity to perform validation.
+				Window.alert("onSubmit");
+			}
+		});
+
+		form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+			@Override
+			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+				// When the form submission is successfully completed, this event is
+				// fired. Assuming the service returned a response of type text/html,
+				// we can get the result text here (see the FormPanel documentation for
+				// further explanation).
+				Window.alert(event.getResults());
+			}
+		});
+	}
+
 }
