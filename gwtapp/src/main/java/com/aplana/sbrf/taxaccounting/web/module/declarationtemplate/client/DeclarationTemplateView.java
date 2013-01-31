@@ -8,13 +8,11 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -34,6 +32,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	private final Widget widget;
 	private final MyDriver driver = GWT.create(MyDriver.class);
+	private static final String FORM_RESPONSE_OK = "<pre></pre>";
 
 	@UiField
 	@Editor.Ignore
@@ -109,7 +108,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	public void onSave(ClickEvent event){
 		driver.flush();
 		form.submit();
-		getUiHandlers().save();
 	}
 
 	@UiHandler("resetButton")
@@ -125,8 +123,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	}
 
 	private void addFileUploader() {
-		// Because we're going to add a FileUpload widget, we'll need to set the
-		// form to use the POST method, and multipart MIME encoding.
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
@@ -139,27 +135,13 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		upload.setName("uploadJrxmlFile");
 		panel.add(upload);
 
-		// Add a 'submit' button.
-		// Add an event handler to the form.
-		form.addSubmitHandler(new FormPanel.SubmitHandler() {
-			@Override
-			public void onSubmit(FormPanel.SubmitEvent event) {
-				// This event is fired just before the form is submitted. We can take
-				// this opportunity to perform validation.
-				Window.alert("onSubmit");
-			}
-		});
-
 		form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				// When the form submission is successfully completed, this event is
-				// fired. Assuming the service returned a response of type text/html,
-				// we can get the result text here (see the FormPanel documentation for
-				// further explanation).
-				Window.alert(event.getResults());
+				if (event.getResults().lastIndexOf(FORM_RESPONSE_OK) == 0) {
+					getUiHandlers().save();
+				}
 			}
 		});
 	}
-
 }
