@@ -123,7 +123,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	}
 
 	/**
-	 * Возвращает спринг-бины доятупные для использования в скрипте.
+	 * Возвращает спринг-бины доcтупные для использования в скрипте.
 	 *
 	 * @param taxType тип налога
 	 * @param event событие

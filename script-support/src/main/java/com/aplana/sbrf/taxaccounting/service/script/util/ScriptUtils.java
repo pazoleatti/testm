@@ -5,8 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 
 import java.math.BigDecimal;
@@ -24,31 +23,26 @@ public class ScriptUtils {
 	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
 
-	private static final String WRONG_ROW_RANGE = "Указанный диапазон строк %d - %d выходит за границы таблицы. " +
-			"В таблице количество строк = %d";
-
-	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
-
 	/**
-	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0
+	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0.
+	 * Является аналогом Excel функции "СУММ" в нотации "СУММ(диапазон)"
+	 * @see <a href="http://office.microsoft.com/ru-ru/excel-help/HP010342931.aspx?CTT=1">СУММ(число1,[число2],...])</a>
 	 *
 	 * @param formData таблица значений
 	 * @param range диапазон ячеек для суммирования
 	 * @return сумма диапазона
 	 */
 	public static double summ(FormData formData, Range range) {
-		checks(formData, range);
+		checkNumericColumns(formData, range);
 
 		double sum = 0;
 		List<DataRow> rows = formData.getDataRows();
 		List<Column> cols = formData.getFormColumns();
-		int colFrom = getColumnIndex(formData, range.getColFromAlias());
-		int colTo = getColumnIndex(formData, range.getColToAlias());
-		for (int i = range.getRowFrom(); i <= range.getRowTo(); i++) {
-			DataRow row = rows.get(i);
-			for (int j = colFrom; j <= colTo; j++) {
+		Rect rect = range.getRangeRect(formData);
+		for (int i = rect.y1; i <= rect.y2; i++) {
+			for (int j = rect.x1; j <= rect.x2; j++) {
 				Column col = cols.get(j);
-				BigDecimal value = (BigDecimal) row.get(col.getAlias());
+				BigDecimal value = (BigDecimal) rows.get(i).get(col.getAlias());
 				if (value != null) {
 					sum += value.doubleValue();
 				}
@@ -70,40 +64,6 @@ public class ScriptUtils {
 	}
 
 	/**
-	 * Осуществляет проверки допустимости указанного диапазона по отношению к текущей таблице данных
-	 *
-	 * @param formData таблица значений
-	 * @param range проверяемый диапазон ячеек
-	 */
-	private static void checks(FormData formData, Range range) {
-		checkRange(formData, range);
-		checkNumericColumns(formData, range);
-	}
-
-	/**
-	 * Проверяет допустимые границы диапазона для таблицы
-	 *
-	 * @param formData таблица значений
-	 * @param range проверяемый диапазон ячеек
-	 * @throws IndexOutOfBoundsException если указанный дипазон выходит за границы таблицы
-	 */
-	static void checkRange(FormData formData, Range range) {
-		int colFrom = getColumnIndex(formData, range.getColFromAlias());
-		int colTo = getColumnIndex(formData, range.getColToAlias());
-		if (colFrom > colTo) {
-			// переставляем в диапазоне столбцы местами
-			String from = range.getColFromAlias();
-			String to = range.getColToAlias();
-			range.setColFromAlias(to);
-			range.setColToAlias(from);
-		}
-		if (range.getRowTo() > formData.getDataRows().size() || range.getRowFrom() < 0) {
-			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, range.getRowFrom(), range.getRowTo(),
-					formData.getDataRows().size()));
-		}
-	}
-
-	/**
 	 * Проверяет, что в указанном диапазоне только числовые столбцы
 	 *
 	 * @param formData таблица значений
@@ -112,34 +72,64 @@ public class ScriptUtils {
 	 */
 	static void checkNumericColumns(FormData formData, Range range) {
 		List<Column> cols = formData.getFormColumns();
-		int colFrom = getColumnIndex(formData, range.getColFromAlias());
-		int colTo = getColumnIndex(formData, range.getColToAlias());
-		for (int j = colFrom; j <= colTo; j++) {
+		Rect rect = range.getRangeRect(formData);
+		for (int j = rect.x1; j <= rect.x2; j++) {
 			Column col = cols.get(j);
 			if (!(col instanceof NumericColumn))
 				throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
-						cols.get(colFrom).getName(),
-						cols.get(colTo).getName(),
+						cols.get(rect.x1).getName(),
+						cols.get(rect.x2).getName(),
 						col.getName()));
 		}
 	}
 
 	/**
-	 * Возвращает по алиасу индекс столбца
+	 * Суммирует ячейки второго диапазона только для тех строк, для которых выполняется условие фильтрации. В данном
+	 * случае под условием фильтрации подразумевается равенство значений строк первого диапазона заранее заданному
+	 * значению. Является аналогом Excel функции "СУММЕСЛИ" в нотации "СУММЕСЛИ(диапазон, критерий, диапазон_суммирования)"
+	 * @see <a href="http://office.microsoft.com/ru-ru/excel-help/HP010342932.aspx?CTT=1">СУММЕСЛИ(диапазон, критерий, [диапазон_суммирования])</a>
 	 *
-	 * @param formData таблица значений
-	 * @param colAlias псевдоним столбца
-	 * @return индекс столбца
-	 * @throws IllegalArgumentException если такого псевдонима столбца не существует в объекте FormData
+	 * @param formData таблица данных
+	 * @param conditionRange диапазон по которому осуществляется отбор строк (фильтрация)
+	 * @param filterValue значение фильтра
+	 * @param summRange диапазон суммирования
+	 * @return сумма ячеек
 	 */
-	static int getColumnIndex(FormData formData, String colAlias) {
-		List<Column> cols = formData.getFormColumns();
-		for (int i = 0; i < cols.size(); i++) {
-			if (cols.get(i).getAlias().equals(colAlias)) {
-				return i;
+	public double summIfEquals(FormData formData, Range conditionRange, Object filterValue, Range summRange) {
+		Rect summRect = summRange.getRangeRect(formData);
+		Rect condRange = conditionRange.getRangeRect(formData);
+		if (!summRect.isSameSize(condRange))
+			throw new IllegalArgumentException("Диапазоны указаны неверно");
+
+		double sum = 0;
+		List<DataRow> summRows = formData.getDataRows();
+		List<Column> summCols = formData.getFormColumns();
+		List<DataRow> condRows = formData.getDataRows();
+		List<Column> condCols = formData.getFormColumns();
+		for (int i = 0; i < condRange.getHeight(); i++) {
+			for (int j = 0; j < condRange.getWidth(); j++) {
+				BigDecimal condValue = (BigDecimal) condRows.get(condRange.y1 + i).get(condCols.get(condRange.x1 + j).getAlias());
+				if (condValue != null && condValue.equals(filterValue)) {
+					BigDecimal summValue = (BigDecimal) summRows.get(summRect.y1 + i).get(summCols.get(summRect.y1 + j).getAlias());
+					if (summValue != null) {
+						sum += summValue.doubleValue();
+					}
+				}
 			}
 		}
-		throw new IllegalArgumentException("Wrong column alias requested: " + colAlias);
+		return sum;
+	}
+
+	public static double summ(BigDecimal A, BigDecimal B) {
+		double a = A == null ? 0 : A.doubleValue();
+		double b = B == null ? 0 : B.doubleValue();
+		return a + b;
+	}
+
+	public static double substract(BigDecimal A, BigDecimal B) {
+		double a = A == null ? 0 : A.doubleValue();
+		double b = B == null ? 0 : B.doubleValue();
+		return a - b;
 	}
 
 }

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -79,7 +80,6 @@ public class ScriptUtilsTest {
 		FormData fd = getTestFormData();
 		logger.info(fd);
 		double r = ScriptUtils.summ(fd, new ColumnRange(NUMBER_ALIAS, 0, 1));
-		logger.info("summ = " + r);
 		Assert.assertTrue(Math.abs(r) > Constants.EPS);
 	}
 
@@ -94,16 +94,6 @@ public class ScriptUtilsTest {
 	}
 
 	@Test
-	public void getColumnIndexTest1() {
-		Assert.assertEquals(ScriptUtils.getColumnIndex(getTestFormData(), DATE_ALIAS), 2);
-	}
-
-	@Test
-	public void getColumnIndexTest2() {
-		Assert.assertEquals(ScriptUtils.getColumnIndex(getTestFormData(), STRING_ALIAS), 0);
-	}
-
-	@Test
 	public void checkNumericColumnsTest1() {
 		ScriptUtils.checkNumericColumns(getTestFormData(), new Range(NUMBER_ALIAS, 0, NUMBER_ALIAS, 2));
 	}
@@ -114,25 +104,46 @@ public class ScriptUtilsTest {
 	}
 
 	@Test
-	public void checkRangeTest1() {
-		Range range = new Range(STRING_ALIAS, 0, NUMBER_ALIAS, 2);
-		ScriptUtils.checkRange(getTestFormData(), range);
+	public void summBDTest() {
+		BigDecimal A = new BigDecimal(2);
+		BigDecimal B = null;
+		Assert.assertEquals(ScriptUtils.summ(A, B), 2, Constants.EPS);
 	}
 
 	@Test
-	public void checkRangeTest2() {
-		Range range = new Range(DATE_ALIAS, 0, STRING_ALIAS, 2);
-		ScriptUtils.checkRange(getTestFormData(), range);
-		String colFrom = range.getColFromAlias();
-		Assert.assertEquals(colFrom, STRING_ALIAS);
-		String colTo = range.getColToAlias();
-		Assert.assertEquals(colTo, DATE_ALIAS);
+	public void summBDTest2() {
+		BigDecimal A = BigDecimal.valueOf(2);
+		BigDecimal B = BigDecimal.valueOf(-3);
+		Assert.assertEquals(ScriptUtils.summ(A, B), -1, Constants.EPS);
+	}
+
+	@Test
+	public void substractBD() {
+		BigDecimal A = BigDecimal.valueOf(2);
+		BigDecimal B = BigDecimal.valueOf(-3);
+		Assert.assertEquals(ScriptUtils.substract(A, B), 5, Constants.EPS);
+	}
+
+	//TODO перенести методы в RangeTest
+
+	@Test
+	public void getColumnIndexTest1() {
+		Assert.assertEquals(Range.getColumnIndex(getTestFormData(), DATE_ALIAS), 2);
+	}
+
+	@Test
+	public void getColumnIndexTest2() {
+		Assert.assertEquals(Range.getColumnIndex(getTestFormData(), STRING_ALIAS), 0);
+	}
+
+	@Test
+	public void checkRangeTest1() {
+		new Range(STRING_ALIAS, 0, NUMBER_ALIAS, 2).getRangeRect(getTestFormData());
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
-	public void checkRangeTest3() {
-		Range range = new Range(DATE_ALIAS, 0, STRING_ALIAS, 6);
-		ScriptUtils.checkRange(getTestFormData(), range);
+	public void checkRangeTest2() {
+		new Range(DATE_ALIAS, 0, STRING_ALIAS, 6).getRangeRect(getTestFormData());
 	}
 
 }
