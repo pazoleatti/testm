@@ -6,4 +6,5 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void save();
 	void reset();
 	void close();
+	void formSubmitFail(String fileName, String error);
 }

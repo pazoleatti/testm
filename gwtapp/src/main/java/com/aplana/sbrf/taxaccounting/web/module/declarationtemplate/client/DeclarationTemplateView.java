@@ -131,15 +131,19 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		form.setWidget(panel);
 
 		// Create a FileUpload widget.
-		FileUpload upload = new FileUpload();
+		final FileUpload upload = new FileUpload();
 		upload.setName("uploadJrxmlFile");
 		panel.add(upload);
 
 		form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (event.getResults().lastIndexOf(FORM_RESPONSE_OK) == 0) {
+				System.out.println("event.getResults() " + event.getResults());
+				if (!event.getResults().toLowerCase().contains("error")) {
 					getUiHandlers().save();
+				}
+				else {
+					getUiHandlers().formSubmitFail(upload.getFilename(), event.getResults());
 				}
 			}
 		});

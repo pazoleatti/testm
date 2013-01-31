@@ -27,21 +27,16 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processDownload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		// process only multipart requests
-		if (ServletFileUpload.isMultipartContent(req)) {
-			FileItemFactory factory = new DiskFileItemFactory();
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			try {
-				List<FileItem> items = upload.parseRequest(req);
-				declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString());
-			}
-			catch (Exception e) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"An error occurred while creating the file : " + e.getMessage());
-			}
+
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		try {
+			List<FileItem> items = upload.parseRequest(req);
+			declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString());
 		}
-		else {
-			resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Request contents type is not supported by the servlet.");
+		catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+					"An error occurred while creating the file : " + e.getMessage());
 		}
 	}
 }

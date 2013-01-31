@@ -99,6 +99,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		placeManager.revealPlace(new PlaceRequest(DeclarationTemplateTokens.declarationTemplateList));
 	}
 
+	@Override
+	public void formSubmitFail(String fileName, String error) {
+		MessageEvent.fire(this, "Не удалось загрузить файл " + fileName + ". Ошибка: " + error);
+	}
+
 	private void setDeclarationTemplate() {
 		int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 
