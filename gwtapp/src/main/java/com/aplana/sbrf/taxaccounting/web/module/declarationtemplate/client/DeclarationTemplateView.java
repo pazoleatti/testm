@@ -32,7 +32,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	private final Widget widget;
 	private final MyDriver driver = GWT.create(MyDriver.class);
-	private static final String FORM_RESPONSE_OK = "<pre></pre>";
+	private final FileUpload upload = new FileUpload();
 
 	@UiField
 	@Editor.Ignore
@@ -107,7 +107,12 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event){
 		driver.flush();
-		form.submit();
+		if (upload.getFilename().isEmpty()) {
+			getUiHandlers().save();
+		}
+		else {
+			form.submit();
+		}
 	}
 
 	@UiHandler("resetButton")
@@ -131,14 +136,13 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		form.setWidget(panel);
 
 		// Create a FileUpload widget.
-		final FileUpload upload = new FileUpload();
+
 		upload.setName("uploadJrxmlFile");
 		panel.add(upload);
 
 		form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				System.out.println("event.getResults() " + event.getResults());
 				if (!event.getResults().toLowerCase().contains("error")) {
 					getUiHandlers().save();
 				}
