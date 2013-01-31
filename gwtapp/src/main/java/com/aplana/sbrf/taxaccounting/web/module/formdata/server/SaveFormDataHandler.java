@@ -13,9 +13,11 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
+@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataAction, FormDataResult> {
     private final Log logger = LogFactory.getLog(getClass());
 
