@@ -18,6 +18,7 @@ import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "FormDataDaoTest.xml" })
+@Transactional
 public class FormDataDaoTest {
 	@Autowired
 	FormTemplateDao formTemplateDao;

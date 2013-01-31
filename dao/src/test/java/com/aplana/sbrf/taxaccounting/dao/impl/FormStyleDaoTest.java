@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"FormTemplateDaoTest.xml"})
+@ContextConfiguration({"FormStyleDaoTest.xml"})
 public class FormStyleDaoTest {
 
 	@Autowired

@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
@@ -16,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
+@Transactional
 public class TAUserDaoTest {
 	@Autowired
 	private TAUserDao userDao;
