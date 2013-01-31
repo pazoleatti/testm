@@ -112,15 +112,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	@Override
 	public void setJrxmlAndJasper(int declarationTemplateId, String jrxml, byte[] jasper) {
 		int count = getJdbcTemplate().update(
-				"update declaration_template set jrxml = ?, jasper= ? where id = ?",
+				"update declaration_template set jrxml = ?, jasper = ? where id = ?",
 				new Object[] {
 						jrxml,
 						jasper,
 						declarationTemplateId
 				},
 				new int[] {
-						Types.CLOB,
-						Types.BLOB,
+						Types.VARCHAR,
+						Types.BINARY,
 						Types.NUMERIC
 				}
 		);
