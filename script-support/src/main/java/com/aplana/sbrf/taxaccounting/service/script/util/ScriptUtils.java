@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -120,16 +121,16 @@ public class ScriptUtils {
 		return sum;
 	}
 
-	public static double summ(BigDecimal A, BigDecimal B) {
-		double a = A == null ? 0 : A.doubleValue();
-		double b = B == null ? 0 : B.doubleValue();
-		return a + b;
+	public static double summ(Cell A, Cell B) {
+		double a = A.getNumericValue() == null ? 0 : A.getNumericValue().doubleValue();
+		double b = B.getNumericValue() == null ? 0 : B.getNumericValue().doubleValue();
+		return a+b;
 	}
 
-	public static double substract(BigDecimal A, BigDecimal B) {
-		double a = A == null ? 0 : A.doubleValue();
-		double b = B == null ? 0 : B.doubleValue();
-		return a - b;
+	public static double substract(Cell A, Cell B) {
+		double a = A.getValue() == null ? 0.0 : A.getNumericValue().doubleValue();
+		double b = B.getValue() == null ? 0.0 : B.getNumericValue().doubleValue();
+		return a-b;
 	}
 
 }

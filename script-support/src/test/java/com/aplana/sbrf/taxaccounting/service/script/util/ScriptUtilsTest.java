@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
@@ -59,11 +60,13 @@ public class ScriptUtilsTest {
 		FormData fd = new FormData(temp);
 
 		DataRow row1 = fd.appendDataRow();
+		row1.setAlias("book");
 		row1.getCell(STRING_ALIAS).setValue("книга");
 		row1.getCell(NUMBER_ALIAS).setValue(1.04);
 		row1.getCell(DATE_ALIAS).setValue(new Date());
 
 		DataRow row2 = fd.appendDataRow();
+		row2.setAlias("pencil");
 		row2.getCell(STRING_ALIAS).setValue("карандаш");
 		row2.getCell(NUMBER_ALIAS).setValue(2.1);
 
@@ -105,23 +108,20 @@ public class ScriptUtilsTest {
 
 	@Test
 	public void summBDTest() {
-		BigDecimal A = new BigDecimal(2);
-		BigDecimal B = null;
-		Assert.assertEquals(ScriptUtils.summ(A, B), 2, Constants.EPS);
+		FormData fd = getTestFormData();
+		Cell A = fd.getDataRow("pencil").getCell(NUMBER_ALIAS);
+		Cell B = fd.getDataRow("book").getCell(NUMBER_ALIAS);
+		Assert.assertEquals(ScriptUtils.summ(A, B), 3.14, Constants.EPS);
 	}
 
-	@Test
-	public void summBDTest2() {
-		BigDecimal A = BigDecimal.valueOf(2);
-		BigDecimal B = BigDecimal.valueOf(-3);
-		Assert.assertEquals(ScriptUtils.summ(A, B), -1, Constants.EPS);
-	}
+	
 
 	@Test
 	public void substractBD() {
-		BigDecimal A = BigDecimal.valueOf(2);
-		BigDecimal B = BigDecimal.valueOf(-3);
-		Assert.assertEquals(ScriptUtils.substract(A, B), 5, Constants.EPS);
+		FormData fd = getTestFormData();
+		Cell A = fd.getDataRow("pencil").getCell(NUMBER_ALIAS);
+		Cell B = fd.getDataRow("book").getCell(NUMBER_ALIAS);
+		Assert.assertEquals(ScriptUtils.substract(A, B), 1.06, Constants.EPS);
 	}
 
 	//TODO перенести методы в RangeTest
