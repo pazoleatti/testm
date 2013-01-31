@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
@@ -46,7 +47,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 			jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes()));
 			JasperCompileManager.compileReportToStream(jasperDesign, xlsReport);
 		} catch (JRException e) {
-			e.printStackTrace();
+			throw new ServiceException("Некорректный файл шаблона");
 		}
 
 		declarationTemplateDao.setJrxmlAndJasper(declarationTemplateId, jrxml, xlsReport.toByteArray());
