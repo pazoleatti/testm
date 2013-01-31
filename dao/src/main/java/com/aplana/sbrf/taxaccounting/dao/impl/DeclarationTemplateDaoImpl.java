@@ -75,11 +75,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getCreateScript()
 					},
 					new int[] {
-							Types.INTEGER,
-							Types.CHAR,
+							Types.NUMERIC,
 							Types.VARCHAR,
-							Types.BOOLEAN,
-							Types.CLOB
+							Types.VARCHAR,
+							Types.NUMERIC,
+							Types.VARCHAR
 					}
 			);
 
@@ -94,17 +94,17 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getId()
 					},
 					new int[] {
-							Types.CHAR,
 							Types.VARCHAR,
-							Types.BOOLEAN,
-							Types.CLOB,
-							Types.INTEGER
+							Types.VARCHAR,
+							Types.NUMERIC,
+							Types.VARCHAR,
+							Types.NUMERIC
 					}
 			);
 		}
 
 		if (count == 0) {
-			throw new DaoException("Не удалось сохранить данные с id = %d, так как она не существует.");
+			throw new DaoException("Не удалось сохранить данные");
 		}
 		return count;
 	}
