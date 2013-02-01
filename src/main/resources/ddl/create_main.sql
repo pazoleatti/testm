@@ -345,9 +345,25 @@ alter table department_form_type add constraint dept_form_type_pk primary key (i
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id);
 
 comment on table department_form_type is 'Связь подразделения банка с формой';
+comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
+
+create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
+create table form_data_source
+(
+department_form_type_id number(9) not null,
+src_department_form_type_id number(9) not null
+);
+
+alter table form_data_source add constraint form_data_source_pk primary key (department_form_type_id, src_department_form_type_id);
+alter table form_data_source add constraint form_data_source_fk_dep_id foreign key (department_form_type_id) references department_form_type(id);
+alter table form_data_source add constraint form_data_source_fk_src_dep_id foreign key (src_department_form_type_id) references department_form_type(id);
+comment on table form_data_source is 'информация об источниках данных для формирования консолидированных и сводных налоговоых форм';
+comment on column form_data_source.department_form_type_id is 'идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
+comment on column form_data_source.src_department_form_type_id is ' идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table event_script( 
   event_code number(9) not null, 
   script_id number(9) not null, 
