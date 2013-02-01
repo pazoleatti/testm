@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationTemplateDaoTest.xml"})
@@ -18,7 +20,12 @@ import static org.junit.Assert.*;
 public class DeclarationTemplateDaoTest {
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
-	
+
+	@Test
+	public void testListAll() {
+		assertEquals(5, declarationTemplateDao.listAll().size());
+	}
+
 	@Test
 	public void testGet() {
 		DeclarationTemplate d1 = declarationTemplateDao.get(1);
@@ -40,8 +47,67 @@ public class DeclarationTemplateDaoTest {
 	}
 
 	@Test
-	public void testListAll() {
-		assertEquals(5, declarationTemplateDao.listAll().size());
+	public void testSaveNew() {
+		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+		declarationTemplate.setActive(true);
+		declarationTemplate.setVersion("0.01");
+		declarationTemplate.setCreateScript("MyScript");
+		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+
+		int id = declarationTemplateDao.save(declarationTemplate);
+
+		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
+		assertEquals(id, savedDeclarationTemplate.getId().intValue());
+		assertEquals("0.01", savedDeclarationTemplate.getVersion());
+		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertEquals(TaxType.TRANSPORT, savedDeclarationTemplate.getTaxType());
+		assertTrue(savedDeclarationTemplate.isActive());
+
 	}
 
+	@Test
+	public void testSaveExist() {
+		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+		declarationTemplate.setId(1);
+		declarationTemplate.setActive(true);
+		declarationTemplate.setVersion("0.01");
+		declarationTemplate.setCreateScript("MyScript");
+		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+
+		declarationTemplateDao.save(declarationTemplate);
+
+		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
+		assertEquals(1, savedDeclarationTemplate.getId().intValue());
+		assertEquals("0.01", savedDeclarationTemplate.getVersion());
+		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
+		assertEquals(TaxType.TRANSPORT, savedDeclarationTemplate.getTaxType());
+		assertTrue(savedDeclarationTemplate.isActive());
+	}
+
+	@Test
+	public void testSetJrxmlAndJasper() {
+		declarationTemplateDao.setJrxmlAndJasper(1, "Template", new byte[]{00,01,02});
+		assertEquals("Template", declarationTemplateDao.getJrxml(1));
+		assertNotNull(declarationTemplateDao.getJasper(1));
+	}
+
+	@Test(expected = DaoException.class)
+	public void testSetJrxmlAndJasperNotExisted() {
+		declarationTemplateDao.setJrxmlAndJasper(1000, "Template", new byte[]{00,01,02});
+	}
+
+	@Test
+	public void testGetJrxml() {
+		assertEquals("test-jrxml", declarationTemplateDao.getJrxml(1));
+	}
+
+	@Test(expected = DaoException.class)
+	public void testGetJrxmlNotExisted() {
+		declarationTemplateDao.getJrxml(1000);
+	}
+
+	@Test(expected = DaoException.class)
+	public void testGetJasperNotExisted() {
+		declarationTemplateDao.getJasper(1000);
+	}
 }
