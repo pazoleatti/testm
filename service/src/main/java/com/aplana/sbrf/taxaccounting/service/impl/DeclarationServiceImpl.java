@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -67,10 +67,6 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 	@Override
 	public String getXmlData(long declarationId, int userId) {
-		if (!formDataAccessService.canRead(userId, declarationId)) {
-			throw new AccessDeniedException(ACCESS_DENIED_MSG);
-		}
-
 		String xmlData = declarationDao.getXmlData(declarationId);
 		return xmlData;
 	}
@@ -84,10 +80,8 @@ public class DeclarationServiceImpl implements DeclarationService {
 		try {
 			JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));
 			print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap(), dataSource);
-
-
 		} catch (JRException e) {
-			e.printStackTrace();
+			throw new ServiceException("Невозможно заполнить отчет");
 		}
 		JRXlsExporter exporter = new JRXlsExporter();
 		ByteArrayOutputStream xls = new ByteArrayOutputStream();
@@ -100,7 +94,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 		try {
 			exporter.exportReport();
 		} catch (JRException e) {
-			e.printStackTrace();
+			throw new ServiceException("Невозможно экспортировать отчет");
 		}
 		return xls.toByteArray();
 	}
