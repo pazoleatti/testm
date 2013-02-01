@@ -56,7 +56,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiField
 	@Editor.Ignore
-	Button showDeclarationTemplateButton;
+	Button downloadJrxmlButton;
 
 	@UiField(provided = true)
 	ValueListBox<TaxType> taxType;
@@ -131,9 +131,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		getUiHandlers().close();
 	}
 
-	@UiHandler("showDeclarationTemplateButton")
-	public void onShowDeclarationTemplateButton(ClickEvent event){
-		getUiHandlers().showDeclarationTemplate();
+	@UiHandler("downloadJrxmlButton")
+	public void onDownloadJrxmlButton(ClickEvent event){
+		getUiHandlers().downloadJrxml();
 	}
 
 	private void addFileUploader() {

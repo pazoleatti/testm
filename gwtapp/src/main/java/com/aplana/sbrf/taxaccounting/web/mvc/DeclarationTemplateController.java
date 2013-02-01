@@ -26,16 +26,15 @@ public class DeclarationTemplateController {
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
 
-	@RequestMapping(value = "/downloadJasper/{declarationTemplateId}",method = RequestMethod.GET)
+	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		if (declarationTemplateService.getJasper(declarationTemplateId) != null) {
+		if (declarationTemplateService.getJrxml(declarationTemplateId) != null) {
 			OutputStream respOut = resp.getOutputStream();
-			String fileName = "DeclarationTemplate_" + declarationTemplateId + ".xlsx";
+			String fileName = "DeclarationTemplate_" + declarationTemplateId + ".jrxml";
 			resp.setContentType("application/octet-stream");
-			resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-			resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
-			respOut.write(declarationTemplateService.getJasper(declarationTemplateId));
+			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+			respOut.write(declarationTemplateService.getJrxml(declarationTemplateId).getBytes());
 			respOut.close();
 		}
 		else {

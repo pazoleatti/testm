@@ -44,7 +44,7 @@
         <g:FormPanel ui:field="form"/>
     </g:HorizontalPanel>
 
-    <g:Button ui:field="showDeclarationTemplateButton">Просмотреть шаблон декларации</g:Button>
+    <g:Button ui:field="downloadJrxmlButton">Скачать jrxml файл</g:Button>
     <g:HTML height="15px"/>
 
     <g:Label width="150px">Создать скрипт</g:Label>

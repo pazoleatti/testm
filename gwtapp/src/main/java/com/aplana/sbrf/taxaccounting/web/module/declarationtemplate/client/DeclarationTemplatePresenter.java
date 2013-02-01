@@ -102,8 +102,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	@Override
-	public void showDeclarationTemplate() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadJasper/" + declarationTemplate.getId(), null, null);
+	public void downloadJrxml() {
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
 
 	@Override
