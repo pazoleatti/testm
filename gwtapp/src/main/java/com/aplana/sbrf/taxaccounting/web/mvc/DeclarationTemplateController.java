@@ -29,14 +29,18 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "/downloadJasper/{declarationTemplateId}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		OutputStream respOut = resp.getOutputStream();
-		String fileName = "TaxReport_" + declarationTemplateId + ".xlsx";
-
-		resp.setContentType("application/octet-stream");
-		resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-		resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
- 		respOut.write(declarationTemplateService.getJasper(declarationTemplateId));
-		respOut.close();
+		if (declarationTemplateService.getJasper(declarationTemplateId) != null) {
+			OutputStream respOut = resp.getOutputStream();
+			String fileName = "DeclarationTemplate_" + declarationTemplateId + ".xlsx";
+			resp.setContentType("application/octet-stream");
+			resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+			resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+			respOut.write(declarationTemplateService.getJasper(declarationTemplateId));
+			respOut.close();
+		}
+		else {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
 	}
 
 	@RequestMapping(value = "/uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)

@@ -56,7 +56,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiField
 	@Editor.Ignore
-	Button showJasperButton;
+	Button showDeclarationTemplateButton;
 
 	@UiField(provided = true)
 	ValueListBox<TaxType> taxType;
@@ -131,20 +131,17 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		getUiHandlers().close();
 	}
 
-	@UiHandler("showJasperButton")
-	public void onShowJasperButton(ClickEvent event){
-		getUiHandlers().showJasperReport();
+	@UiHandler("showDeclarationTemplateButton")
+	public void onShowDeclarationTemplateButton(ClickEvent event){
+		getUiHandlers().showDeclarationTemplate();
 	}
 
 	private void addFileUploader() {
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setMethod(FormPanel.METHOD_POST);
 
-		// Create a panel to hold all of the form widgets.
 		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
-
-		// Create a FileUpload widget.
 
 		upload.setName("uploadJrxmlFile");
 		panel.add(upload);
