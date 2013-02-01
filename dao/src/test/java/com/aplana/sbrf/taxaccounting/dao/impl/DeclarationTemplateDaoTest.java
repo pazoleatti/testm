@@ -69,6 +69,7 @@ public class DeclarationTemplateDaoTest {
 	public void testSaveExist() {
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
 		declarationTemplate.setId(1);
+		declarationTemplate.setEdition(1);
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
@@ -82,6 +83,20 @@ public class DeclarationTemplateDaoTest {
 		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
 		assertEquals(TaxType.TRANSPORT, savedDeclarationTemplate.getTaxType());
 		assertTrue(savedDeclarationTemplate.isActive());
+	}
+
+	@Test(expected = DaoException.class)
+	public void testSaveExistWithBadEdition() {
+		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+		declarationTemplate.setId(1);
+		declarationTemplate.setEdition(1000);
+		declarationTemplate.setActive(true);
+		declarationTemplate.setVersion("0.01");
+		declarationTemplate.setCreateScript("MyScript");
+		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+
+		declarationTemplateDao.save(declarationTemplate);
+
 	}
 
 	@Test

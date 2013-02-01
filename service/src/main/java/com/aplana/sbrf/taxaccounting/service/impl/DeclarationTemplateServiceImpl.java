@@ -10,6 +10,7 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
  * @author Eugene Stetsenko
  */
 @Service
+@Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
 	@Autowired

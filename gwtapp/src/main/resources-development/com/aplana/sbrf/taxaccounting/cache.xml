@@ -17,7 +17,8 @@
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="FormType"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="FormTemplate"/>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="Department"/>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="User"/>				
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="User"/>
+                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="DeclarationTemplate"/>
 			</set>
 		</property>
 	</bean>

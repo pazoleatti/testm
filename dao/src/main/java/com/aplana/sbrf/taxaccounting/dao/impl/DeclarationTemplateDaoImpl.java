@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -20,7 +22,7 @@ import java.util.List;
  * @author Eugene Stetsenko
  */
 @Repository
-@Transactional
+@Transactional(readOnly = true)
 public class DeclarationTemplateDaoImpl extends AbstractDao implements DeclarationTemplateDao {
 
 	private static final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
@@ -31,6 +33,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setActive(rs.getBoolean("is_active"));
 			d.setCreateScript(rs.getString("create_script"));
 			d.setVersion(rs.getString("version"));
+			d.setEdition(rs.getInt("edition"));
 			d.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			return d;
 		}
@@ -49,6 +52,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
+	@Cacheable("DeclarationTemplate")
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -62,6 +66,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
+	@Transactional(readOnly = false)
+	@CacheEvict(value = "DeclarationTemplate", key = "#declarationTemplate.id", beforeInvocation = true)
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
 		int declarationTemplateId;
@@ -89,10 +95,17 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 		} else {
 			declarationTemplateId = declarationTemplate.getId();
+			int storedEdition = getJdbcTemplate()
+					.queryForInt("select edition from declaration_template where id = ? for update", declarationTemplateId);
+			if (storedEdition != declarationTemplate.getEdition()) {
+				throw new DaoException("Сохранение описания декларации невозможно, так как её состояние в БД" +
+						" было изменено после того, как данные по ней были считаны");
+			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set tax_type = ?, version = ?, is_active = ?, create_script = ? where id = ?",
+					"update declaration_template set tax_type = ?, edition = ?, version = ?, is_active = ?, create_script = ? where id = ?",
 					new Object[] {
 							declarationTemplate.getTaxType().getCode(),
+							storedEdition + 1,
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
@@ -100,6 +113,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					},
 					new int[] {
 							Types.VARCHAR,
+							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
 							Types.VARCHAR,
