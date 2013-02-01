@@ -333,6 +333,7 @@ comment on column date_value.value is 'Значение';
 ---------------------------------------------------------------------------------------------------
 create table department_form_type
 (
+id            number(9) not null,
 department_id number(9) not null,
 form_type_id number(9) not null
 );
@@ -340,7 +341,8 @@ form_type_id number(9) not null
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 
-alter table department_form_type add constraint dept_form_type_pk primary key (department_id, form_type_id);
+alter table department_form_type add constraint dept_form_type_pk primary key (id);
+alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id);
 
 comment on table department_form_type is 'Связь подразделения банка с формой';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
