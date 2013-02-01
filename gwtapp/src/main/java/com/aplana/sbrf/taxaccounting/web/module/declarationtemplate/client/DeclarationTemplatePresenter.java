@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -97,6 +99,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void close() {
 		placeManager.revealPlace(new PlaceRequest(DeclarationTemplateTokens.declarationTemplateList));
+	}
+
+	@Override
+	public void showJasperReport() {
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadJasper/" + declarationTemplate.getId(), null, null);
 	}
 
 	@Override

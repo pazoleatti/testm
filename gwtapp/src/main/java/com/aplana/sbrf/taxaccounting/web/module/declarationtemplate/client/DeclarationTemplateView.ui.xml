@@ -34,13 +34,16 @@
         <g:TextBox width="300px" ui:field="version"/>
     </g:HorizontalPanel>
 
-    <g:HorizontalPanel height="30px">
+    <g:HorizontalPanel height="25px">
         <g:Label width="150px">Активный</g:Label>
         <g:CheckBox ui:field="active"/>
     </g:HorizontalPanel>
 
+    <g:Button ui:field="showJasperButton">Просмотреть Jasper Report</g:Button>
+    <g:HTML height="15px"/>
+
     <g:HorizontalPanel height="30px">
-        <g:Label width="150px">Загузить JRXML файл</g:Label>
+        <g:Label width="150px">Загузить jrxml файл</g:Label>
         <g:FormPanel ui:field="form"/>
     </g:HorizontalPanel>
 

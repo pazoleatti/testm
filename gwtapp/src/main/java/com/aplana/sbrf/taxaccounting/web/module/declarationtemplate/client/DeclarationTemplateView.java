@@ -54,6 +54,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@Editor.Ignore
 	Button cancelButton;
 
+	@UiField
+	@Editor.Ignore
+	Button showJasperButton;
+
 	@UiField(provided = true)
 	ValueListBox<TaxType> taxType;
 
@@ -125,6 +129,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
 		getUiHandlers().close();
+	}
+
+	@UiHandler("showJasperButton")
+	public void onShowJasperButton(ClickEvent event){
+		getUiHandlers().showJasperReport();
 	}
 
 	private void addFileUploader() {
