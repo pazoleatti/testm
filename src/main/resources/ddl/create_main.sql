@@ -335,7 +335,8 @@ create table department_form_type
 (
 id            number(9) not null,
 department_id number(9) not null,
-form_type_id number(9) not null
+form_type_id  number(9) not null,
+kind          number(9) not null
 );
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
@@ -343,11 +344,13 @@ alter table department_form_type add constraint dept_form_type_fk_type_id foreig
 
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id);
+alter table department_form_type add constraint dept_form_type_chk_kind check (kind in (1,2,3,4,5));
 
 comment on table department_form_type is 'Связь подразделения банка с формой';
 comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
+comment on column department_form_type.kind is 'тип налоговой формы';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
