@@ -6,6 +6,12 @@
         .marginLeft {
             margin-left: 50px;
         }
+        .marginLeftBar {
+            margin-left: 6%;
+        }
+        .marginLeftList {
+            margin-left: 2%;
+        }
     </ui:style>
 
     <g:HTMLPanel width="100%" height="100%">
@@ -14,9 +20,16 @@
                 <g:VerticalPanel width="100%" height="100%">
                     <g:Label text="Столбцы"/>
                     <g:cell height="92%">
-                        <g:ListBox width="100%" height="100%" visibleItemCount="25" ui:field="columnListBox"/>
+                        <g:HorizontalPanel addStyleNames="{style.marginLeftList}" width="100%" height="100%">
+                            <g:cell height="100%" width="5%">
+                                <g:VerticalPanel ui:field="columnNumberPanel"/>
+                            </g:cell>
+                            <g:cell height="100%" width="95%">
+                                <g:ListBox width="100%" height="100%" visibleItemCount="30" ui:field="columnListBox"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
                     </g:cell>
-                    <t:Bar>
+                    <t:Bar addStyleNames="{style.marginLeftBar}">
                         <t:LeftBar>
                             <g:Button text="Вверх" ui:field="upColumn"/>
                             <g:Button text="Вниз" ui:field="downColumn"/>

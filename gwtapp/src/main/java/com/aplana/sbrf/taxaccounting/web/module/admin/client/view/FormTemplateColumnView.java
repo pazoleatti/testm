@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -56,6 +57,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiField
 	ListBox columnListBox;
+
+	@UiField
+	VerticalPanel columnNumberPanel;
 
 	@UiField
 	Button upColumn;
@@ -190,6 +194,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		if (column != null) {
 			if (ind > 0) {
 				Column exchange = columns.get(ind - 1);
+				exchange.setOrder(ind + 1);
 				column.setOrder(ind);
 				columns.set(ind - 1, column);
 				columns.set(ind, exchange);
@@ -208,6 +213,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		if (column != null) {
 			if (ind < columns.size() - 1) {
 				Column exchange = columns.get(ind + 1);
+				exchange.setOrder(ind + 1);
 				column.setOrder(ind + 2);
 				columns.set(ind + 1, column);
 				columns.set(ind, exchange);
@@ -250,6 +256,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		int index = columnListBox.getSelectedIndex();
 		getUiHandlers().removeColumn(columns.get(index));
 		columns.remove(index);
+
+		for (int i = index; i < columns.size(); i++) {
+			columns.get(i).setOrder(columns.get(i).getOrder() - 1);
+		}
+
 		if (index > 0) {
 			setupColumns(index-1);
 		}
@@ -345,9 +356,15 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private void setColumnList() {
 		if (columns != null) {
+			columnNumberPanel.clear();
 			columnListBox.clear();
 			for (Column column : columns) {
 				columnListBox.addItem(column.getName(), String.valueOf(columns.indexOf(column)));
+
+				Label label = new Label();
+				label.setAutoHorizontalAlignment(HasAutoHorizontalAlignment.ALIGN_CENTER);
+				label.setText("" + column.getOrder());
+				columnNumberPanel.add(label);
 			}
 		}
 	}
