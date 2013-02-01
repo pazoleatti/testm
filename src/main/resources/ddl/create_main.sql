@@ -343,7 +343,7 @@ alter table department_form_type add constraint dept_form_type_fk_dep_id foreign
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
-alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id);
+alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);
 alter table department_form_type add constraint dept_form_type_chk_kind check (kind in (1,2,3,4,5));
 
 comment on table department_form_type is 'Связь подразделения банка с формой';
