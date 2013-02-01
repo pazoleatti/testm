@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -22,12 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Каноничный пример антипаттерна "Волшебный хандлер".
- * TODO: Разделить класс на 3: показ, создание формы, изменение статуса формы. Result можно оставить общий.
- *       Непонятно. При изменении статуса и переходе по воркфлоу нужно получать форму обратно. Логика одинаковая, 
- *       только добавляется переход. 
- */
+
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult>{
@@ -105,7 +101,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 		} else{
-			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
+			formData = formDataService.getFormData(userId, action.getFormDataId(), logger, !action.isReadOnly());
 		}
 		result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 		result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
@@ -164,29 +160,35 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	 * @param result
 	 * @throws WrongInputDataServiceException
 	 */
-	private void fillLockData(GetFormData action, int userId, Logger logger, GetFormDataResult result) throws WrongInputDataServiceException{
-		if(action.isLockFormData() && action.getFormDataId() != Long.MAX_VALUE){
-			// Если пользователь открывает НФ для редактирования, и это не новая форма, то пытаемся блокировать её
-			if (!formDataService.lock(action.getFormDataId(), userId)){
-				throw new WrongInputDataServiceException("форма уже редактируется другим пользователем");
-			}
-		}
-
+	private void fillLockData(GetFormData action, int userId, Logger logger, GetFormDataResult result) throws WrongInputDataServiceException{		
+		FormMode formMode = FormMode.READ_LOCKED;
+		
 		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action.getFormDataId());
 		if(lockInformation != null){
 			//Если данная форма уже заблокирована другим пользотелем
-			result.setFormDataLocked(true);
+
 			result.setLockedByUser(securityService.getUserById(lockInformation.getUserId()).getName());
 			result.setLockDate(getFormedDate(lockInformation.getLockTime()));
 			if(lockInformation.getUserId() == userId){
-				result.setLockedByCurrentUser(true);
-			} else {
-				result.setLockedByCurrentUser(false);
-			}
+				if (action.isReadOnly()){
+					formMode = FormMode.READ_UNLOCKED;
+				} else {
+					formMode = FormMode.EDIT;
+				}
+			} 
 		} else {
 			//Если данная форма никем не заблокирована или это новая форма
-			result.setFormDataLocked(false);
+			 if  (action.getFormDataId() == Long.MAX_VALUE){
+				 formMode = FormMode.EDIT;
+			 } else {
+				 if (action.isReadOnly()){
+					 formMode = FormMode.READ_UNLOCKED;
+				 } else {
+					 formMode = FormMode.EDIT; 
+				 }
+			 }
 		}
+		result.setFormMode(formMode);
 	}
 
 	private static String getFormedDate(Date dateToForm){

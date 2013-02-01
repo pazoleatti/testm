@@ -179,6 +179,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
 	 *          если у пользователя нет прав редактировать налоговую форму с такими параметрами
+	 *          или форма заблокирована другим пользователем
 	 */
 	@Override
 	@Transactional
@@ -192,7 +193,12 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 		
 		if (canDo) {
-			return formDataDao.save(formData);
+			boolean needLock = formData.getId() == null;
+			long id = formDataDao.save(formData);
+			if (needLock){
+				lock(id, userId);
+			}
+			return id;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для изменения налоговой формы");
 		}
@@ -203,14 +209,19 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param userId     идентификатор пользователя, выполняющего операцию
 	 * @param formDataId идентификатор записи, которую необходимо считать
+	 * @param tryLock выполнить попытку блокировки
 	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
 	 *          если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(int userId, long formDataId, Logger logger) {
+	public FormData getFormData(int userId, long formDataId, Logger logger, boolean tryLock) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
+			if (tryLock){
+				lock(formDataId, userId);
+			}
+			
 			FormData formData = formDataDao.get(formDataId);
 
 			formDataScriptingService.executeScripts(userDao.getUser(userId), formData, FormDataEvent.AFTER_LOAD, logger);
@@ -318,8 +329,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 	}
 
-	@Override
-	public boolean lock(long formDataId, int userId){
+
+	private boolean lock(long formDataId, int userId){
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if(objectLock != null && objectLock.getUserId() != userId){
 			return false;

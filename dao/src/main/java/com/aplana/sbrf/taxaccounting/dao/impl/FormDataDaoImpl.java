@@ -247,9 +247,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						cell.setStyleAlias(ModelUtils.findByProperties(
 								formTemplate.getStyles(),
 								rs.getInt("style_id"),
-								new ModelUtils.GetPropertiesFunc<FormStyle>() {
+								new ModelUtils.GetPropertiesFunc<FormStyle, Integer>() {
 									@Override
-									public Object getProperties(FormStyle object) {
+									public Integer getProperties(FormStyle object) {
 										return object.getId();
 									}
 								}).getAlias());

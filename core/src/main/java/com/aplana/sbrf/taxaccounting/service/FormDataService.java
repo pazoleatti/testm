@@ -46,6 +46,8 @@ public interface FormDataService {
 
 	/**
 	 * Сохранить данные по налоговой форме
+	 * Если форма новая то блокирует её после сохранения.
+	 * 
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formData объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
@@ -60,7 +62,7 @@ public interface FormDataService {
 	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
-	FormData getFormData(int userId, long formDataId, Logger logger);
+	FormData getFormData(int userId, long formDataId, Logger logger, boolean lock);
 
 	/**
 	 * Удалить данные по налоговой форме
@@ -91,14 +93,6 @@ public interface FormDataService {
 	 * @param formData данные формы
 	 */
 	void addRow(Logger logger, int userId, FormData formData);
-
-	/**
-    *  Установить блокировку с FormData.
-	 * @param formDataId - идентификатор налоговой формы
-	 * @param userId - идентификатор пользователя
-	 * @return true - если удалось заблокировать налоговую форму, иначе - false
-	 */
-	boolean lock(long formDataId, int userId);
 
 	/**
 	 * Снять блокировку с FormData.

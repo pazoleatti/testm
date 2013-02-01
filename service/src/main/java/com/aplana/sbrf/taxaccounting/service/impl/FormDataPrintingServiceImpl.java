@@ -21,7 +21,7 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 	@Override
 	public String generateExcel(int userId, long formDataId) {
 		// TODO: заменить логгер или вообще использовать дао класс
-		FormData formData = formDataService.getFormData(userId, formDataId, new Logger());
+		FormData formData = formDataService.getFormData(userId, formDataId, new Logger(), false);
 		try {
 			FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(formData);
 			return builder.createReport();

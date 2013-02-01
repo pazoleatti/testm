@@ -1,33 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.List;
-
 public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
+	
 	private Long formDataId;
-	
-	private List<LogEntry> logEntries;
-	
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
-
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
-	}
 
 	private WorkflowMove workFlowMove;
 
 	private Long formDataTypeId;
-	
+
 	private Integer departmentId;
 
-    private Long formDataKind;
+	private Long formDataKind;
 
-	private boolean lockFormData;
+	private boolean readOnly;
 
 	public Long getFormDataId() {
 		return formDataId;
@@ -61,7 +49,6 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 		this.formDataTypeId = formDataTypeId;
 	}
 
-
 	public WorkflowMove getWorkFlowMove() {
 		return workFlowMove;
 	}
@@ -70,12 +57,13 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 		this.workFlowMove = workFlowMove;
 	}
 
-	public boolean isLockFormData() {
-		return lockFormData;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
-	public void setLockFormData(boolean lockFormData) {
-		this.lockFormData = lockFormData;
+	public void setReadOnly(boolean lockFormData) {
+		this.readOnly = lockFormData;
 	}
+
 
 }

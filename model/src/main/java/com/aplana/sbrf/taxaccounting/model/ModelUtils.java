@@ -14,8 +14,8 @@ public class ModelUtils {
 
 	private ModelUtils() {}
 	
-	public static interface GetPropertiesFunc<T>{
-		Object getProperties(T object);
+	public static interface GetPropertiesFunc<T, V>{
+		V getProperties(T object);
 	}
 	
 	/**
@@ -25,7 +25,7 @@ public class ModelUtils {
 	 * @param func
 	 * @return
 	 */
-	public static <T> T findByProperties(Collection<T> collection, Object value, GetPropertiesFunc<T> func){
+	public static <T, V> T findByProperties(Collection<T> collection, V value, GetPropertiesFunc<T, V> func){
 		for (T object : collection) {
 			if (value.equals(func.getProperties(object))){
 				return object;

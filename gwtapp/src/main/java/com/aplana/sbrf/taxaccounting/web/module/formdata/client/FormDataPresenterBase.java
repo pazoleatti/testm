@@ -96,10 +96,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final PlaceManager placeManager;
 
 	protected FormData formData;
-	protected FormDataAccessParams accessParams;
+
 	protected boolean readOnlyMode;
-	protected boolean isFormDataLocked;
-	protected boolean isLockedByCurrentUser;
+
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher) {
@@ -114,10 +113,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		closeFormDataHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
 			@Override
 			public void onWindowClosing(Window.ClosingEvent event) {
-				setFormDataLockedMode(false, null, null);
-				if (isFormDataLocked && isLockedByCurrentUser) {
-					unlockForm(formData.getId());
-				}
+				unlockForm(formData.getId());
 				closeFormDataHandlerRegistration.removeHandler();
 			}
 		});
@@ -138,28 +134,45 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected void onHide() {
 		super.onHide();
 		closeFormDataHandlerRegistration.removeHandler();
-		if(isFormDataLocked && isLockedByCurrentUser){
-			unlockForm(formData.getId());
-		}
-		setFormDataLockedMode(false, null, null);
+		unlockForm(formData.getId());
 	}
-
-	protected void showReadOnlyModeButtons(boolean isLockedModeEnabled) {
+	
+	protected void setReadLockedMode(String lockedBy, String lockDate){
+		readOnlyMode = true;
+		
 		MyView view = getView();
-
 		view.showSaveButton(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
-
 		view.showPrintButton(true);
+		view.showManualInputButton(false);
+		view.showDeleteFormButton(false);
+		view.showWorkflowButton(false);
+		view.setLockInformation(true, lockDate, lockedBy);
 
-		view.showManualInputButton(accessParams.isCanEdit() && !isLockedModeEnabled);
-		view.showDeleteFormButton(accessParams.isCanDelete() && !isLockedModeEnabled);
 	}
 
-	protected void showEditModeButtons() {
+	protected void setReadUnlockedMode() {
+		readOnlyMode = true;
+		
+		MyView view = getView();
+		view.showSaveButton(false);
+		view.showRemoveRowButton(false);
+		view.showRecalculateButton(false);
+		view.showAddRowButton(false);
+		view.showOriginalVersionButton(false);
+		view.showPrintButton(true);
+		view.showManualInputButton(true);
+		view.showDeleteFormButton(true);
+		view.showWorkflowButton(true);
+		view.setLockInformation(false, null, null);
+	}
+
+	protected void setEditMode() {
+		readOnlyMode = false;
+		
 		MyView view = getView();
 		// сводная форма уровня Банка.
 		if ((formData.getDepartmentId() == 1)
@@ -177,22 +190,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showPrintButton(false);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
+		view.setLockInformation(false, null, null);
 	}
 
-	protected void setFormDataLockedMode(boolean isLocked, String lockedBy, String lockDate){
-		MyView view = getView();
-		if(isLocked){
-			view.showManualInputButton(false);
-			view.showDeleteFormButton(false);
-			view.showWorkflowButton(false);
-			view.setLockInformation(true, lockDate, lockedBy);
-		} else {
-			view.showManualInputButton(true);
-			view.showDeleteFormButton(true);
-			view.showWorkflowButton(true);
-			view.setLockInformation(false, null, null);
-		}
-	}
+
 	
 	protected void revealForm(Boolean readOnly) {
 		placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
@@ -210,18 +211,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 
 	protected void unlockForm(long formId){
-		UnlockFormData action = new UnlockFormData();
-		action.setFormId(formId);
-		dispatcher.execute(action,
-				new AbstractCallback<UnlockFormDataResult>() {
-					@Override
-					public void onReqSuccess(UnlockFormDataResult result) {
-						if(result.isUnlockedSuccessfully()){
-							isFormDataLocked = false;
-							isLockedByCurrentUser = false;
-							getView().setLockInformation(false, null, null);
-						}
-					}
-				});
+		if (!readOnlyMode){
+			UnlockFormData action = new UnlockFormData();
+			action.setFormId(formId);
+			dispatcher.execute(action,
+					new AbstractCallback<UnlockFormDataResult>() {
+					});
+		}
 	}
 }

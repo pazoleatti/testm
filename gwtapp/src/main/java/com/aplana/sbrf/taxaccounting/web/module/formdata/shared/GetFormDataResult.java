@@ -15,6 +15,13 @@ import java.util.List;
  * 
  */
 public class GetFormDataResult implements Result {
+	
+	public static enum FormMode {
+		READ_UNLOCKED, // Открыта для чтения
+		READ_LOCKED, // Открыта для чтения и заблокирована другим пользователем
+		EDIT // Открыта для редактирования
+	}
+	
 	private FormData formData;
 	
 	private List<LogEntry> logEntries;
@@ -29,16 +36,13 @@ public class GetFormDataResult implements Result {
 
 	private List<FormStyle> allStyles;
 
-	private boolean isFormDataLocked;
-
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
 	таком формате строку*/
 	private String lockDate;
-
 	private String lockedByUser;
 
-	private boolean lockedByCurrentUser;
+	private FormMode formMode;
 
 	public FormData getFormData() {
 		return formData;
@@ -96,14 +100,6 @@ public class GetFormDataResult implements Result {
 		this.allStyles = allStyles;
 	}
 
-	public boolean isFormDataLocked() {
-		return isFormDataLocked;
-	}
-
-	public void setFormDataLocked(boolean formDataLocked) {
-		isFormDataLocked = formDataLocked;
-	}
-
 	public String getLockDate() {
 		return lockDate;
 	}
@@ -120,11 +116,12 @@ public class GetFormDataResult implements Result {
 		this.lockedByUser = lockedByUser;
 	}
 
-	public boolean isLockedByCurrentUser() {
-		return lockedByCurrentUser;
+	public FormMode getFormMode() {
+		return formMode;
 	}
 
-	public void setLockedByCurrentUser(boolean lockedByCurrentUser) {
-		this.lockedByCurrentUser = lockedByCurrentUser;
+	public void setFormMode(FormMode formMode) {
+		this.formMode = formMode;
 	}
+
 }

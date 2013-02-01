@@ -100,7 +100,7 @@ public class FormDataPrintingServiceTestMock {
 		FormDataService formDataService = mock(FormDataService.class);
 
 		// TODO: заменить логгер или вообще использовать дао класс
-		when(formDataService.getFormData(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID, new Logger())).thenReturn(formData);
+		when(formDataService.getFormData(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID, new Logger(), false)).thenReturn(formData);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataService", formDataService);
 	}
 	

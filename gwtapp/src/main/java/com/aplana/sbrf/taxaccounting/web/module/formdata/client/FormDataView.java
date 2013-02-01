@@ -193,7 +193,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@UiHandler("removeRowButton")
 	void onRemoveRowButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
