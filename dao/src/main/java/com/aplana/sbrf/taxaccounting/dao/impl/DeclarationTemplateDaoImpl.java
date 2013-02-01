@@ -64,17 +64,21 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	@Override
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
+		int declarationTemplateId;
 		if (declarationTemplate.getId() == null) {
+			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, tax_type, version, is_active, create_script) values (?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, tax_type, version, is_active, create_script) values (?, ?, ?, ?, ?, ?)",
 					new Object[] {
-							generateId("seq_declaration_template", Integer.class),
+							declarationTemplateId,
+							1,
 							declarationTemplate.getTaxType().getCode(),
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript()
 					},
 					new int[] {
+							Types.NUMERIC,
 							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.VARCHAR,
@@ -84,6 +88,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			);
 
 		} else {
+			declarationTemplateId = declarationTemplate.getId();
 			count = getJdbcTemplate().update(
 					"update declaration_template set tax_type = ?, version = ?, is_active = ?, create_script = ? where id = ?",
 					new Object[] {
@@ -91,7 +96,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
-							declarationTemplate.getId()
+							declarationTemplateId
 					},
 					new int[] {
 							Types.VARCHAR,
@@ -106,7 +111,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (count == 0) {
 			throw new DaoException("Не удалось сохранить данные");
 		}
-		return count;
+		return declarationTemplateId;
 	}
 
 	@Override
