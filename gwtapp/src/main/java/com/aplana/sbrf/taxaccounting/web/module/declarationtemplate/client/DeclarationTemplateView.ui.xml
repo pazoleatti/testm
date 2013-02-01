@@ -39,7 +39,7 @@
         <g:CheckBox ui:field="active"/>
     </g:HorizontalPanel>
 
-    <g:Button ui:field="showJasperButton">Просмотреть Jasper Report</g:Button>
+    <g:Button ui:field="showJasperButton">Просмотреть налоговый отчет</g:Button>
     <g:HTML height="15px"/>
 
     <g:HorizontalPanel height="30px">
