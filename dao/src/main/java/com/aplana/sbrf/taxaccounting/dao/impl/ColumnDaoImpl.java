@@ -46,6 +46,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setMandatory(rs.getBoolean("mandatory"));
 			result.setOrder(rs.getInt("ord"));
 			result.setGroupName(rs.getString("group_name"));
+			result.setChecking(rs.getBoolean("checking"));
 			return result;
 		}
 	}
@@ -112,8 +113,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name, max_length) " +
-			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, editable, mandatory, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
+			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -149,6 +150,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 					ps.setInt(9, col.getOrder());
 					ps.setString(10, col.getGroupName());
+					ps.setBoolean(12, col.isChecking());
 				}
 
 				@Override
@@ -160,7 +162,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
-					"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ? " +
+					"update form_column set name = ?, alias = ?, type = ?, editable = ?, mandatory = ?, width = ?, " +
+							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?" +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
@@ -192,7 +195,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 							ps.setInt(9, col.getOrder());
 							ps.setString(10, col.getGroupName());
-							ps.setInt(12, col.getId());
+							ps.setBoolean(12, col.isChecking());
+							ps.setInt(13, col.getId());
 						}
 
 						@Override

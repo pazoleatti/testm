@@ -23,7 +23,7 @@ public class ColumnDaoTest {
 
 	private static final int FORM_ID_FOR_TEST = 1;
 	private static final int NUMBER_OF_COLUMNS = 3;
-	private static final int FIST_COLUMN  = 0;
+	private static final int FIRST_COLUMN  = 0;
 	private static final int SECOND_COLUMN = 1;
 	private static final int THIRD_COLUMN  = 2;
 
@@ -38,21 +38,26 @@ public class ColumnDaoTest {
 		//Then
 		Assert.assertEquals(NUMBER_OF_COLUMNS, listOfColumnsInDb.size());
 
-		Assert.assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIST_COLUMN).getId());
-		Assert.assertEquals("Строковый столбец", listOfColumnsInDb.get(FIST_COLUMN).getName());
-		Assert.assertEquals(1, listOfColumnsInDb.get(FIST_COLUMN).getOrder());
-		Assert.assertEquals("stringColumn", listOfColumnsInDb.get(FIST_COLUMN).getAlias());
-		Assert.assertEquals(500, ((StringColumn)listOfColumnsInDb.get(FIST_COLUMN)).getMaxLength());
+		Assert.assertEquals(Integer.valueOf(1), listOfColumnsInDb.get(FIRST_COLUMN).getId());
+		Assert.assertEquals("Строковый столбец", listOfColumnsInDb.get(FIRST_COLUMN).getName());
+		Assert.assertEquals(1, listOfColumnsInDb.get(FIRST_COLUMN).getOrder());
+		Assert.assertEquals("stringColumn", listOfColumnsInDb.get(FIRST_COLUMN).getAlias());
+		Assert.assertEquals(500, ((StringColumn)listOfColumnsInDb.get(FIRST_COLUMN)).getMaxLength());
+		Assert.assertEquals(true, listOfColumnsInDb.get(FIRST_COLUMN).isChecking());
 
 		Assert.assertEquals(Integer.valueOf(2), listOfColumnsInDb.get(SECOND_COLUMN).getId());
 		Assert.assertEquals("Числовой столбец", listOfColumnsInDb.get(SECOND_COLUMN).getName());
 		Assert.assertEquals(2, listOfColumnsInDb.get(SECOND_COLUMN).getOrder());
 		Assert.assertEquals("numericColumn", listOfColumnsInDb.get(SECOND_COLUMN).getAlias());
+		Assert.assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
+
 
 		Assert.assertEquals(Integer.valueOf(3), listOfColumnsInDb.get(THIRD_COLUMN).getId());
 		Assert.assertEquals("Дата-столбец", listOfColumnsInDb.get(THIRD_COLUMN).getName());
 		Assert.assertEquals(3, listOfColumnsInDb.get(THIRD_COLUMN).getOrder());
 		Assert.assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
+		Assert.assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
+
 	}
 
 	@Test
@@ -66,6 +71,7 @@ public class ColumnDaoTest {
 		newColumn.setName("Новый столбец");
 		newColumn.setOrder(4);
 		newColumn.setMaxLength(100);
+		newColumn.setChecking(false);
 		columnList.add(newColumn);
 
 		FormTemplate formTemplate = new FormTemplate();
@@ -85,5 +91,6 @@ public class ColumnDaoTest {
 		Assert.assertEquals("Новый столбец", newColumn.getName());
 		Assert.assertEquals(4, newColumn.getOrder());
 		Assert.assertEquals(100, newColumn.getMaxLength());
+		Assert.assertEquals(false, newColumn.isChecking());
 	}
 }
