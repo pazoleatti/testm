@@ -41,7 +41,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private final SingleSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
 	private final Widget widget;
-	private static final String GWT_CELL_ATTR = "__gwt_cell";
 	private List<DataRow> rows;
 	private List<Column> columns;
 	private List<FormStyle> styles;
@@ -86,12 +85,22 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
                 if (!Element.is(eventTarget)) {
 					return;
 				}
-                com.google.gwt.user.client.Element target = eventTarget.cast();
-                if (target == null || target.getAttribute(GWT_CELL_ATTR).isEmpty()) {
+
+				com.google.gwt.user.client.Element target = eventTarget.cast();
+
+                if (target == null) {
 					return;
 				}
 
-				Element td = DOM.getParent(target);
+				Element td;
+
+				if (!target.getAttribute(CustomTableBuilder.TD_ATTRIBUTE).isEmpty()) {
+					td = target;
+				}
+				else {
+					td = DOM.getParent(target);
+				}
+
 				int tdAttr = Integer.valueOf(td.getAttribute(CustomTableBuilder.TD_ATTRIBUTE));
 
 				if (tdAttr > 0) {
