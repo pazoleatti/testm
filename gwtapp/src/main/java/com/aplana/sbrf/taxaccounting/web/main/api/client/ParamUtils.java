@@ -2,11 +2,24 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
+/**
+ * Утилиты для парсинга и преобразования параметров PlaceRequest
+ * 
+ * @author sgoryachkin
+ *
+ */
 public class ParamUtils {
 	
 	private ParamUtils() {
 	}
 
+	/**
+	 * Извлечение параметра типа Long из PlaceRequest
+	 * 
+	 * @param request
+	 * @param key
+	 * @return
+	 */
 	public static Long getLong(PlaceRequest request, String key) {
 		Long value = null;
 		try {
@@ -17,12 +30,27 @@ public class ParamUtils {
 		return value;
 	}
 
+	/**
+	 * Извлечение параметра типа Long из PlaceRequest
+	 * 
+	 * @param request
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
 	public static Long getLong(PlaceRequest request, String key,
 			Long defaultValue) {
 		Long value = getLong(request, key);
 		return value != null ? value : defaultValue;
 	}
 
+	/**
+	 * Извлечение параметра типа Integer из PlaceRequest
+	 * 
+	 * @param request
+	 * @param key
+	 * @return
+	 */
 	public static Integer getInteger(PlaceRequest request, String key) {
 		Integer value = null;
 		try {
@@ -33,6 +61,14 @@ public class ParamUtils {
 		return value;
 	}
 
+	/**
+	 * Извлечение параметра типа Integer из PlaceRequest
+	 * 
+	 * @param request
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
 	public static Integer getInteger(PlaceRequest request, String key,
 			Integer defaultValue) {
 		Integer value = getInteger(request, key);
