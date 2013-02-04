@@ -146,9 +146,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public void setLogMessages(List<LogEntry> entries) {
 		dockPanel.setWidgetHidden(logPanel, (entries == null || entries.isEmpty()));
 		if (entries != null && !entries.isEmpty()) {
-			for (LogEntry entry : entries) {
-				System.out.println(entry.getMessage());
-			}
 			logPanel.setVisible(true);
 			loggerList.setVisible(true);
 			loggerList.setRowData(entries);

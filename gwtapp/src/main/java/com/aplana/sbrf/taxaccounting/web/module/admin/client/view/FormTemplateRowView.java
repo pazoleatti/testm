@@ -26,6 +26,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -34,7 +35,8 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 
-public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers> implements FormTemplateRowPresenter.MyView{
+public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers>
+		implements FormTemplateRowPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
 	private final StyleCellPopup styleCellPopup;
@@ -113,11 +115,13 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 					Element body = DOM.getParent(tr);
 			 		currentRowIndex = DOM.getChildIndex(body, tr);
 
-			 		int popupLeft = target.getAbsoluteLeft() + (target.getAbsoluteRight() - target.getAbsoluteLeft())/2 - 100;
 			 		DataRow currentRow = rows.get(currentRowIndex);
 			 		Cell cell = currentRow.getCell(columns.get(currentColumnIndex).getAlias());
 					styleCellPopup.setValue(cell);
-					styleCellPopup.show(popupLeft, target.getAbsoluteTop());
+
+					int maxPopupX = Window.getClientWidth() - 200;
+					styleCellPopup.show(maxPopupX > event.getNativeEvent().getClientX() ? event.getNativeEvent().getClientX()
+							: maxPopupX, event.getNativeEvent().getClientY());
 				}
 			}
 		}, ContextMenuEvent.getType());

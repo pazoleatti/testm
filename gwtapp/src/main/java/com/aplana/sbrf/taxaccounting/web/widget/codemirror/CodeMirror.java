@@ -33,6 +33,7 @@ public class CodeMirror extends Composite implements LeafValueEditor<String>, Ta
 				else {
 					wrapper.setValue("");
 				}
+				wrapper.clearHistory();
 			}
 		});
 	}

@@ -10,21 +10,21 @@ import com.google.gwt.dom.client.Element;
  */
 public final class CodeMirrorWrapper extends JavaScriptObject {
 
-  protected CodeMirrorWrapper() { }
+	protected CodeMirrorWrapper() { }
 
   /**
    * Get the current editor content.
    */
-  public native String getValue() /*-{
-    return this.getValue();
-  }-*/;
+	public native String getValue() /*-{
+		return this.getValue();
+	}-*/;
 
   /**
    * Set the editor content.
    */
-  public native void setValue(String code) /*-{
-    this.setValue(code);
-  }-*/;
+	public native void setValue(String code) /*-{
+		this.setValue(code);
+	}-*/;
   /**
    * Creates a new CodeMirror instance attached to a DOM element.
    *
@@ -32,10 +32,17 @@ public final class CodeMirrorWrapper extends JavaScriptObject {
    *
    * @return An overlay type representing a codemirror2 object.
    */
-  public static final native CodeMirrorWrapper createEditor(
-      Element hostElement,
-      com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirrorConfig config) /*-{
-    return $wnd.CodeMirror(hostElement, config);
-  }-*/;
+  	public static final native CodeMirrorWrapper createEditor(
+      	Element hostElement,
+      	com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirrorConfig config) /*-{
+    	return $wnd.CodeMirror(hostElement, config);
+  	}-*/;
+
+	/**
+	 * Clears the undo/redo history.
+	 */
+	public native void clearHistory() /*-{
+        this.clearHistory();
+    }-*/;
 
 }
