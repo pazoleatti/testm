@@ -23,6 +23,7 @@ public abstract class Column implements Ordered, Serializable {
 	private int width;
 	private boolean editable;
 	private boolean mandatory;
+	private boolean checking;
 	private int order;
 	private String groupName;
 	
@@ -164,5 +165,21 @@ public abstract class Column implements Ordered, Serializable {
 	 */
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
+	}
+
+	/**
+	 * Возвращает признак проверочного столбца
+	 * @return true - столбец является проверочным, false - иначе
+	 */
+	public boolean isChecking() {
+		return checking;
+	}
+
+	/**
+	 * Задать признак проверочного столбца
+	 * @param checking значение признака проверочного столбца 
+	 */
+	public void setChecking(boolean checking) {
+		this.checking = checking;
 	}
 }
