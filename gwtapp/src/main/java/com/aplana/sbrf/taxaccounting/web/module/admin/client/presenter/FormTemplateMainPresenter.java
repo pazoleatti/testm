@@ -9,12 +9,11 @@ import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateMainUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.GetFormResult;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.admin.shared.UpdateFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.admin.shared.*;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,6 +39,9 @@ import java.util.List;
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
 		implements FormTemplateMainUiHandlers {
+
+	private HandlerRegistration closeFormTemplateHandlerRegistration;
+	private int formId;
 
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
@@ -83,6 +85,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		setFormTemplate();
 	}
 
+	@Override
+	public void onHide() {
+		super.onHide();
+		unlockForm(formId);
+		closeFormTemplateHandlerRegistration.removeHandler();
+	}
+
 	/**
 	 * Сохраняет шаблон формы. Отправляет его на сервер.
 	 *
@@ -107,10 +116,20 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	}
 
 	private void setFormTemplate() {
-		int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
+		final int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
 		if (formId != 0) {
+			this.formId = formId;
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);
+
+			closeFormTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+				@Override
+				public void onWindowClosing(Window.ClosingEvent event) {
+					unlockForm(formId);
+					closeFormTemplateHandlerRegistration.removeHandler();
+				}
+			});
+
 			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
 				@Override
 				public void onReqSuccess(GetFormResult result) {
@@ -123,6 +142,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				}
 			});
 		}
+	}
+
+	private void unlockForm(int formId){
+		UnlockFormAction action = new UnlockFormAction();
+		action.setFormId(formId);
+		dispatcher.execute(action, new AbstractCallback<UnlockFormResult>() {});
 	}
 
 	private void saveAfterFlush() {

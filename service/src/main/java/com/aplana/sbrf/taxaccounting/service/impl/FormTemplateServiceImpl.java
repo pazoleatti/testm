@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
+	@Autowired
+	private ObjectLockDao lockDao;
+
 	@Override
 	public List<FormTemplate> listAll() {
 		return formTemplateDao.listAll();
@@ -58,6 +63,38 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public int getActiveFormTemplateId(int formTypeId) {
 		return formTemplateDao.getActiveFormTemplateId(formTypeId);
+	}
+
+	@Override
+	public void checkLockedByAnotherUser(Integer formTemplateId, int userId){
+		if (formTemplateId!=null){
+			ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
+			if(objectLock != null && objectLock.getUserId() != userId){
+				throw new AccessDeniedException("Шаблон формы заблокирован другим пользователем");
+			}
+		}
+	}
+
+	@Override
+	public boolean lock(int formTemplateId, int userId){
+		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
+		if(objectLock != null && objectLock.getUserId() != userId){
+			return false;
+		} else {
+			lockDao.lockObject(formTemplateId, FormTemplate.class ,userId);
+			return true;
+		}
+	}
+
+	@Override
+	public boolean unlock(int formTemplateId, int userId){
+		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
+		if(objectLock != null && objectLock.getUserId() != userId){
+			return false;
+		} else {
+			lockDao.unlockObject(formTemplateId, FormTemplate.class, userId);
+			return true;
+		}
 	}
 
 	@Override

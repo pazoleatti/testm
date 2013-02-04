@@ -5,6 +5,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 
 /**
  * Сервис для работы с шаблонами налоговых форм. В первую очередь предназначен для использования в админке
@@ -46,4 +47,27 @@ public interface FormTemplateService {
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
 	 */
 	int getActiveFormTemplateId(int formTypeId);
+
+	/**
+	 * Снять блокировку с formTemplate.
+	 * @param formTemplateId - идентификатор шаблона налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return true - если удалось разблокировать налоговую форму, иначе - false
+	 * */
+	boolean unlock(int formTemplateId, int userId);
+
+	/**
+	 * Блокировка formTemplate.
+	 * @param formTemplateId - идентификатор налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return информацию о блокировке объекта
+	 */
+	boolean lock(int formTemplateId, int userId);
+
+	/**
+	 * Проверяет, не заблокирован ли шаблон формы другим пользователем
+	 * @param formTemplateId
+	 * @param userId
+	 */
+	void checkLockedByAnotherUser(Integer formTemplateId, int userId);
 }
