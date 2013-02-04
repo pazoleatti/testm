@@ -73,5 +73,12 @@ public class DepartmentFormType {
 	 */
 	public void setKind(FormDataKind kind) {
 		this.kind = kind;
+	}
+
+	@Override
+	public String toString() {
+		return "DepartmentFormType [id=" + id + ", departmentId="
+				+ departmentId + ", formTypeId=" + formTypeId + ", kind="
+				+ kind + "]";
 	}	
 }

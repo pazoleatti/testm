@@ -49,7 +49,7 @@ public class DepartmentDaoTest {
 		Assert.assertEquals(DepartmentType.TERBANK, d.getType());
 		Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
 		Assert.assertEquals("ТБ2", d.getName());
-		Assert.assertEquals(0, d.getFormTypeIds().size());
+		Assert.assertEquals(2, d.getFormTypeIds().size());
 	}
 	
 	@Test(expected=DaoException.class)
