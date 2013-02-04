@@ -24,6 +24,7 @@ public class ScriptUtils {
 	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
 
+	private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
 	/**
 	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0.
 	 * Является аналогом Excel функции "СУММ" в нотации "СУММ(диапазон)"
@@ -42,8 +43,7 @@ public class ScriptUtils {
 		Rect rect = range.getRangeRect(formData);
 		for (int i = rect.y1; i <= rect.y2; i++) {
 			for (int j = rect.x1; j <= rect.x2; j++) {
-				Column col = cols.get(j);
-				BigDecimal value = (BigDecimal) rows.get(i).get(col.getAlias());
+				BigDecimal value = (BigDecimal) rows.get(i).get(cols.get(j).getAlias());
 				if (value != null) {
 					sum += value.doubleValue();
 				}
@@ -95,12 +95,13 @@ public class ScriptUtils {
 	 * @param filterValue значение фильтра
 	 * @param summRange диапазон суммирования
 	 * @return сумма ячеек
+	 * @throws IllegalArgumentException диапазоны имеют разную размерность
 	 */
-	public double summIfEquals(FormData formData, Range conditionRange, Object filterValue, Range summRange) {
+	public static double summIfEquals(FormData formData, Range conditionRange, Object filterValue, Range summRange) {
 		Rect summRect = summRange.getRangeRect(formData);
 		Rect condRange = conditionRange.getRangeRect(formData);
 		if (!summRect.isSameSize(condRange))
-			throw new IllegalArgumentException("Диапазоны указаны неверно");
+			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
 		double sum = 0;
 		List<DataRow> summRows = formData.getDataRows();
@@ -109,9 +110,9 @@ public class ScriptUtils {
 		List<Column> condCols = formData.getFormColumns();
 		for (int i = 0; i < condRange.getHeight(); i++) {
 			for (int j = 0; j < condRange.getWidth(); j++) {
-				BigDecimal condValue = (BigDecimal) condRows.get(condRange.y1 + i).get(condCols.get(condRange.x1 + j).getAlias());
+				Object condValue = condRows.get(condRange.y1 + i).get(condCols.get(condRange.x1 + j).getAlias());
 				if (condValue != null && condValue.equals(filterValue)) {
-					BigDecimal summValue = (BigDecimal) summRows.get(summRect.y1 + i).get(summCols.get(summRect.y1 + j).getAlias());
+					BigDecimal summValue = (BigDecimal) summRows.get(summRect.y1 + i).get(summCols.get(summRect.x1 + j).getAlias());
 					if (summValue != null) {
 						sum += summValue.doubleValue();
 					}
@@ -121,12 +122,26 @@ public class ScriptUtils {
 		return sum;
 	}
 
+	/**
+	 * Вычисляет сумму значений двух ячеек
+	 *
+	 * @param A первая ячейка
+	 * @param B вторая ячейка
+	 * @return сумма значений
+	 */
 	public static double summ(Cell A, Cell B) {
 		double a = A.getNumericValue() == null ? 0 : A.getNumericValue().doubleValue();
 		double b = B.getNumericValue() == null ? 0 : B.getNumericValue().doubleValue();
 		return a+b;
 	}
 
+	/**
+	 * Вычисляет разность между значениями двух ячеек
+	 *
+	 * @param A первая ячейка
+	 * @param B вторая ячейка
+	 * @return разность
+	 */
 	public static double substract(Cell A, Cell B) {
 		double a = A.getValue() == null ? 0.0 : A.getNumericValue().doubleValue();
 		double b = B.getValue() == null ? 0.0 : B.getNumericValue().doubleValue();

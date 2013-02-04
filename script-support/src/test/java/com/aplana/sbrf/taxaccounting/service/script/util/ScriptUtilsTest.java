@@ -35,7 +35,11 @@ public class ScriptUtilsTest {
 	private static final String NUMBER_ALIAS = "number";
 	private static final String DATE_NAME = "Дата";
 	private static final String DATE_ALIAS = "date";
-	private static final String ROW_ALIAS = "sampleRowAlias";
+	private static final String ROW1_ALIAS = "book";
+	private static final String ROW2_ALIAS = "pencil";
+	private static final String ROW3_ALIAS = "sampleRowAlias";
+	private static final Date DATE_CONST = new Date();
+
 
 	/**
 	 * Возвращает таблицу с тестовыми данными
@@ -60,20 +64,20 @@ public class ScriptUtilsTest {
 		FormData fd = new FormData(temp);
 
 		DataRow row1 = fd.appendDataRow();
-		row1.setAlias("book");
+		row1.setAlias(ROW1_ALIAS);
 		row1.getCell(STRING_ALIAS).setValue("книга");
 		row1.getCell(NUMBER_ALIAS).setValue(1.04);
-		row1.getCell(DATE_ALIAS).setValue(new Date());
+		row1.getCell(DATE_ALIAS).setValue(DATE_CONST);
 
 		DataRow row2 = fd.appendDataRow();
-		row2.setAlias("pencil");
+		row2.setAlias(ROW2_ALIAS);
 		row2.getCell(STRING_ALIAS).setValue("карандаш");
 		row2.getCell(NUMBER_ALIAS).setValue(2.1);
 
 		DataRow row3 = fd.appendDataRow();
-		row3.setAlias(ROW_ALIAS);
+		row3.setAlias(ROW3_ALIAS);
 		row3.getCell(STRING_ALIAS).setValue("блокнот");
-		row3.getCell(DATE_ALIAS).setValue(new Date());
+		row3.getCell(DATE_ALIAS).setValue(DATE_CONST);
 
 		return fd;
 	}
@@ -109,19 +113,30 @@ public class ScriptUtilsTest {
 	@Test
 	public void summBDTest() {
 		FormData fd = getTestFormData();
-		Cell A = fd.getDataRow("pencil").getCell(NUMBER_ALIAS);
-		Cell B = fd.getDataRow("book").getCell(NUMBER_ALIAS);
+		Cell A = fd.getDataRow(ROW2_ALIAS).getCell(NUMBER_ALIAS);
+		Cell B = fd.getDataRow(ROW1_ALIAS).getCell(NUMBER_ALIAS);
 		Assert.assertEquals(ScriptUtils.summ(A, B), 3.14, Constants.EPS);
 	}
-
-	
 
 	@Test
 	public void substractBD() {
 		FormData fd = getTestFormData();
-		Cell A = fd.getDataRow("pencil").getCell(NUMBER_ALIAS);
-		Cell B = fd.getDataRow("book").getCell(NUMBER_ALIAS);
+		Cell A = fd.getDataRow(ROW2_ALIAS).getCell(NUMBER_ALIAS);
+		Cell B = fd.getDataRow(ROW1_ALIAS).getCell(NUMBER_ALIAS);
 		Assert.assertEquals(ScriptUtils.substract(A, B), 1.06, Constants.EPS);
+	}
+
+	@Test
+	public void summIfEqualsTest() {
+		FormData fd = getTestFormData();
+		double r = ScriptUtils.summIfEquals(fd, new ColumnRange(DATE_ALIAS, 0, 2), DATE_CONST, new ColumnRange(NUMBER_ALIAS, 0, 2));
+		Assert.assertEquals(r, 1.04, Constants.EPS);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void summIfEqualsTest2() {
+		FormData fd = getTestFormData();
+		ScriptUtils.summIfEquals(fd, new ColumnRange(DATE_ALIAS, 0, 2), DATE_CONST, new ColumnRange(NUMBER_ALIAS, 0, 0));
 	}
 
 	//TODO перенести методы в RangeTest
