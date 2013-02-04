@@ -116,7 +116,8 @@ create table form_column (
 	precision number(9),
 	dictionary_code varchar2(30),
 	group_name varchar(255),
-	max_length number(4)
+	max_length number(4),
+	checking   number(1) default 0 not null
 );
 alter table form_column add constraint form_column_pk primary key (id);
 create sequence seq_form_column start with 10000;
@@ -128,6 +129,7 @@ alter table form_column add constraint form_column_chk_editable check(editable i
 alter table form_column add constraint form_column_chk_mandatory check(mandatory in (0, 1));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 5) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
+alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -142,6 +144,7 @@ comment on column form_column.ord is 'Порядковый номер';
 comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
 comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
 comment on column form_column.width is 'Ширина (в символах)';
+comment on column form_column.checking is 'признак проверочного столбца';
 
 ---------------------------------------------------------------------------------------------------
 create table form_script (
