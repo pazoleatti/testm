@@ -10,9 +10,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,7 +46,6 @@ public class TreePicker extends Composite{
 	private final List<Department> sourceList = new ArrayList<Department>();
 	private final Map<String, Integer> allTreeItems = new HashMap<String, Integer>();
 	private final Map<String, Integer> selectedItems = new HashMap<String, Integer>();
-	private final Map<String, Integer> clickNumber = new HashMap<String, Integer>();
 	private final Map<Integer,  Pair<Integer, TreeItem>> nodes = new HashMap<Integer, Pair<Integer, TreeItem>>();
 
 	private final Label popupPanelLabel = new Label();
@@ -62,13 +59,7 @@ public class TreePicker extends Composite{
 	@UiConstructor
 	public TreePicker(String popupPanelCaption) {
 		initWidget(uiBinder.createAndBindUi(this));
-		handlerManager = new HandlerManager(this);
 		setupUI(popupPanelCaption);
-	}
-
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		handlerManager.fireEvent(event);
 	}
 
 	public void setTreeValues(List<Department> source){
@@ -102,14 +93,11 @@ public class TreePicker extends Composite{
 		//подразделение и нажал "ОК", т.к. элементом дерева у нас является RadioButton, которая может хранить только
 		//имя подразделения.
 		for(final Department department : sourceList){
-			ExtendedCheckBox treeElement = new ExtendedCheckBox(department.getName());
-			treeElement.setParentId(department.getParentId());
-			addNodeSelectedEventHandler(treeElement);
+			CheckBox treeElement = new CheckBox(department.getName());
 			Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
 					new TreeItem(treeElement));
 			nodes.put(department.getId(), treeItemPair);
 			allTreeItems.put(department.getName(), department.getId());
-			clickNumber.put(department.getName(), 0);
 		}
 
 		//После того, как мы имеем сфомрированную структуру, нам нужно пробежаться по ней (по всем значениям Map'ки)
@@ -182,37 +170,10 @@ public class TreePicker extends Composite{
 			public void onSelection(SelectionEvent event) {
 				TreeItem selectedItem = (TreeItem)event.getSelectedItem();
 				Integer selectedItemId = allTreeItems.get(selectedItem.getText());
-
-				Integer click = clickNumber.get(selectedItem.getText()) + 1;
-				switch (click){
-					case 1:
-						clickNumber.put(selectedItem.getText(), click);
-						selectedItems.put(selectedItem.getText(), selectedItemId);
-						for(Map.Entry<Integer, Pair<Integer, TreeItem>> node : nodes.entrySet()){
-							if(selectedItemId.equals(node.getValue().getA())){
-								selectedItems.put(node.getValue().getB().getText(), node.getKey());
-							}
-						}
-						fireEvent(new NodeSelectedEvent(selectedItemId, true));
-						break;
-					case 2:
-						selectedItems.remove(selectedItem.getText());
-						clickNumber.put(selectedItem.getText(), click);
-						break;
-					case 3:
-						selectedItems.put(selectedItem.getText(), selectedItemId);
-						clickNumber.put(selectedItem.getText(), click);
-						for(Map.Entry<Integer, Pair<Integer, TreeItem>> node : nodes.entrySet()){
-							if(selectedItemId.equals(node.getValue().getA())){
-								selectedItems.remove(node.getValue().getB().getText());
-							}
-						}
-						fireEvent(new NodeSelectedEvent(selectedItemId, false));
-						break;
-					case 4:
-						clickNumber.put(selectedItem.getText(), 0);
-						selectedItems.remove(selectedItem.getText());
-						break;
+				if(!selectedItems.containsKey(selectedItem.getText())){
+					selectedItems.put(selectedItem.getText(), selectedItemId);
+				} else {
+					selectedItems.remove(selectedItem.getText());
 				}
 			}
 		});
@@ -224,11 +185,6 @@ public class TreePicker extends Composite{
 			result.append(selectedItem.getKey()).append(";");
 		}
 		selected.setText(result.toString());
-	}
-
-	private HandlerRegistration addNodeSelectedEventHandler(
-			NodeSelectedEvent.NodeSelectedEventHandler handler) {
-		return handlerManager.addHandler(NodeSelectedEvent.TYPE, handler);
 	}
 
 	private final class Pair<A, B> {
