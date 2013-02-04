@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +32,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
-		if(formDataFilter.getDepartmentId() == null){
-			List<Department> departmentList = listAllDepartmentsByParentDepartmentId(user.getDepartmentId());
-			List<Integer> departmentIntegerList = new ArrayList<Integer>();
-			for(Department department : departmentList){
-				departmentIntegerList.add(department.getId());
-			}
-			formDataDaoFilter.setDepartmentIds(departmentIntegerList);
-		} else {
-			formDataDaoFilter.setDepartmentIds(Arrays.asList(formDataFilter.getDepartmentId()));
-		}
+		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
 
 		if(formDataFilter.getReportPeriodId() == null){
 			List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(formDataFilter.getTaxType());

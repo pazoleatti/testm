@@ -16,4 +16,5 @@
     <source path="codemirror"/>
     <source path="pager"/>
     <source path="datarow"/>
+    <source path="treepicker"/>
 </module>

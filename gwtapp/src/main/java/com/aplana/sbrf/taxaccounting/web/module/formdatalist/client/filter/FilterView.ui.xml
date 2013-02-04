@@ -1,22 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:sel="urn:import:com.aplana.sbrf.taxaccounting.web.widget.treepicker"
         >
 	<ui:style>
 		.important {
 			font-weight: bold;
 		}
-
-        .departmentTextBox{
-            font-weight: bold;
-            background-color: #ffffff;
-        }
-
-        .departmentSelectionButton{
-            text-align: center;
-            font-weight: bold;
-        }
-
 	</ui:style>
 
 	<g:HorizontalPanel width="50%">
@@ -24,11 +14,8 @@
             <g:Label width="200px" text="Отчетный период" />
 		    <g:ValueListBox width="200px" ui:field="reportPeriodId" />
 
-	        <g:Label width="200px" text="Подразделение" />
-            <g:HorizontalPanel >
-                <g:TextBox  enabled="false" ui:field="selectedDepartmentTextBox" width="170px" addStyleNames="{style.departmentTextBox}"/>
-                <g:Button ui:field="selectDepartmentButton" text="..." addStyleNames="{style.departmentSelectionButton}"/>
-            </g:HorizontalPanel>
+            <g:Label width="200px" text="Подразделение" />
+            <sel:TreePicker popupPanelCaption="Выберите подразделение" ui:field="departmentSelectionTree"/>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">

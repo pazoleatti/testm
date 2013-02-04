@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author sgoryachkin
@@ -11,7 +12,7 @@ public class FormDataFilter implements Serializable{
 
 	private Integer reportPeriodId;
 
-	private Integer departmentId;
+	private List<Integer> departmentId;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
 	private Integer formTypeId;
@@ -42,11 +43,11 @@ public class FormDataFilter implements Serializable{
 		this.reportPeriodId = reportPeriodId;
 	}
 
-	public Integer getDepartmentId() {
+	public List<Integer> getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(Integer departmentId) {
+	public void setDepartmentId(List<Integer> departmentId) {
 		this.departmentId = departmentId;
 	}
 
