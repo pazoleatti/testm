@@ -37,8 +37,6 @@
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/drop_income.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/drop_transport.sql" encoding="UTF-8"/>
-        <jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
-        <jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_transport.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_income.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
