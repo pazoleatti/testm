@@ -210,8 +210,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 						formData.getId().toString()));
 	}
 
-	protected void unlockForm(long formId){
-		if (!readOnlyMode){
+	protected void unlockForm(Long formId){
+		if (!readOnlyMode && formData.getId()!=null){
 			UnlockFormData action = new UnlockFormData();
 			action.setFormId(formId);
 			dispatcher.execute(action,
