@@ -126,6 +126,7 @@ public class FormDataListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
+		final int FIRST_DEPARTMENT_IN_SELECTED_LIST = 0;
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
 		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
 				.with(FormDataPresenter.READ_ONLY, "false")
@@ -134,7 +135,8 @@ public class FormDataListPresenter extends
 				.with(FormDataPresenter.FORM_DATA_KIND_ID,
 						String.valueOf(filterFormData.getFormDataKind()!=null ? filterFormData.getFormDataKind().getId() : null))
 				.with(FormDataPresenter.DEPARTMENT_ID,
-						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId() : null))
+						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId()
+								.get(FIRST_DEPARTMENT_IN_SELECTED_LIST) : null))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
 						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
 	}
