@@ -2,28 +2,33 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:HTMLPanel>
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Псевдоним:</g:Label>
+            <g:Label width="150px">Псевдоним</g:Label>
             <g:TextBox width="300px" ui:field="alias"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Имя группы:</g:Label>
+            <g:Label width="150px">Имя группы</g:Label>
             <g:TextBox width="300px" ui:field="groupName"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Ширина:</g:Label>
+            <g:Label width="150px">Ширина</g:Label>
             <g:IntegerBox width="100px" ui:field="width"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Изменяемое:</g:Label>
+            <g:Label width="150px">Изменяемое</g:Label>
             <g:CheckBox ui:field="editable"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Обязательное:</g:Label>
+            <g:Label width="150px">Обязательное</g:Label>
             <g:CheckBox ui:field="mandatory"/>
+        </g:HorizontalPanel>
+
+        <g:HorizontalPanel height="30px">
+            <g:Label width="150px">Контрольное поле</g:Label>
+            <g:CheckBox ui:field="checking"/>
         </g:HorizontalPanel>
     </g:HTMLPanel>
 </ui:UiBinder>

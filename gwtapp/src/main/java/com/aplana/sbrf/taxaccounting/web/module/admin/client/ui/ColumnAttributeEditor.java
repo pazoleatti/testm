@@ -38,6 +38,9 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	@UiField
 	CheckBox mandatory;
 
+	@UiField
+	CheckBox checking;
+
 	public ColumnAttributeEditor() {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
