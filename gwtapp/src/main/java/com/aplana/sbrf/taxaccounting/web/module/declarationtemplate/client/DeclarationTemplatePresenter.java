@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -30,6 +31,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 	private DeclarationTemplate declarationTemplate;
+	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
 
 	@Inject
 	public DeclarationTemplatePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -63,6 +65,13 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void reset() {
 		setDeclarationTemplate();
+	}
+
+	@Override
+	public void onHide() {
+		super.onHide();
+		unlockForm(declarationTemplate.getId());
+		closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
 
 	/**
@@ -112,9 +121,17 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	private void setDeclarationTemplate() {
-		int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
-
+		final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
+			closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+				@Override
+				public void onWindowClosing(Window.ClosingEvent event) {
+					unlockForm(declarationId);
+					closeDeclarationTemplateHandlerRegistration.removeHandler();
+				}
+			});
+
+
 			GetDeclarationAction action = new GetDeclarationAction();
 			action.setId(declarationId);
 			dispatcher.execute(action, new AbstractCallback<GetDeclarationResult>() {
@@ -126,5 +143,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 				}
 			});
 		}
+	}
+
+	private void unlockForm(int declarationId){
+		UnlockDeclarationAction action = new UnlockDeclarationAction();
+		action.setDeclarationId(declarationId);
+		dispatcher.execute(action, new AbstractCallback<UnlockDeclarationResult>() {});
 	}
 }

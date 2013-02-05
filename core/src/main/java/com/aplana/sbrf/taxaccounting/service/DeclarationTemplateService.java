@@ -51,5 +51,28 @@ public interface DeclarationTemplateService {
 	 * @param declarationTemplateId
 	 * @return jasper-файл в виде байтового массива
 	 */
-	byte[] getJasper(int declarationTemplateId);	
+	byte[] getJasper(int declarationTemplateId);
+
+	/**
+	 * Снять блокировку с declarationTemplate.
+	 * @param declarationTemplateId - идентификатор шаблона налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return true - если удалось разблокировать форму декларации, иначе - false
+	 * */
+	boolean unlock(int declarationTemplateId, int userId);
+
+	/**
+	 * Блокировка declarationTemplate.
+	 * @param declarationTemplateId - идентификатор налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return информацию о блокировке объекта
+	 */
+	boolean lock(int declarationTemplateId, int userId);
+
+	/**
+	 * Проверяет, не заблокирован ли шаблон декларации другим пользователем
+	 * @param declarationTemplateId
+	 * @param userId
+	 */
+	void checkLockedByAnotherUser(Integer declarationTemplateId, int userId);
 }

@@ -41,7 +41,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		implements FormTemplateMainUiHandlers {
 
 	private HandlerRegistration closeFormTemplateHandlerRegistration;
-	private int formId;
+	private final DispatchAsync dispatcher;
+	private final PlaceManager placeManager;
+	private FormTemplate formTemplate;
 
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
@@ -62,10 +64,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@ContentSlot
 	public static final Type<RevealContentHandler<?>> TYPE_SetTabContent = new Type<RevealContentHandler<?>>();
-
-	private final DispatchAsync dispatcher;
-	private final PlaceManager placeManager;
-	private FormTemplate formTemplate;
 
 	@Inject
 	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -88,7 +86,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void onHide() {
 		super.onHide();
-		unlockForm(formId);
+		unlockForm(formTemplate.getId());
 		closeFormTemplateHandlerRegistration.removeHandler();
 	}
 
@@ -118,7 +116,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	private void setFormTemplate() {
 		final int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
 		if (formId != 0) {
-			this.formId = formId;
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);
 
