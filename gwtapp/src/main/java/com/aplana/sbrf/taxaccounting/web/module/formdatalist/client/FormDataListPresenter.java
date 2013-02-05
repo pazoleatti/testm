@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
@@ -126,8 +127,11 @@ public class FormDataListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-		final int FIRST_DEPARTMENT_IN_SELECTED_LIST = 0;
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
+		if(filterFormData.getDepartmentId().size() > 1){
+			MessageEvent.fire(FormDataListPresenter.this, "Для создания налоговой формы необходимо" +
+					" указать только одно подразделение");
+		} else {
 		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
 				.with(FormDataPresenter.READ_ONLY, "false")
 				.with(FormDataPresenter.FORM_DATA_ID,
@@ -136,9 +140,10 @@ public class FormDataListPresenter extends
 						String.valueOf(filterFormData.getFormDataKind()!=null ? filterFormData.getFormDataKind().getId() : null))
 				.with(FormDataPresenter.DEPARTMENT_ID,
 						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId()
-								.get(FIRST_DEPARTMENT_IN_SELECTED_LIST) : null))
+								.iterator().next() : null))
 				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
 						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
+		}
 	}
 
 	@Override
