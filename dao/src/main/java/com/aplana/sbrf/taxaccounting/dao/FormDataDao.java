@@ -63,12 +63,14 @@ public interface FormDataDao {
 
 	/**
 	 * Ищет налоговую форму по заданным параметрам.
-	 *
+	 * Предполагается, что для большинства налоговых форм такое условие будет определять не более одной формы.
+	 * Единственное возможное исключение - налог на имущество (для него использовать данный метод нельзя). 
 	 * @param formTypeId   идентификатор {@link com.aplana.sbrf.taxaccounting.model.FormType вида формы}.
 	 * @param kind         тип формы
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param periodId     идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return форма или null, если не найдена
+	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 * @return форма или null, если такой формы не найдено
+	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
-	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int periodId);
+	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 }

@@ -1,25 +1,48 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.*;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ModelUtils;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+
+/**
+ * Реализация DAO для работы с данными налоговых форм
+ * @author dsultanbekov
+ */
 @Repository("formDataDao")
 @Transactional(readOnly = true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
@@ -58,10 +81,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			return columnId;
 		}
 
-		public void setColumnId(int columnId) {
-			this.columnId = columnId;
-		}
-
 		public Long getRowId() {
 			return rowId;
 		}
@@ -73,11 +92,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		public Integer getId() {
 			return id;
 		}
-
-		public void setId(Integer id) {
-			this.id = id;
-		}
-
 	}
 
 	/**
@@ -103,24 +117,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			return colSpan;
 		}
 
-		public void setColSpan(int colSpan) {
-			this.colSpan = colSpan;
-		}
-
 		public int getRowSpan() {
 			return rowSpan;
 		}
 
-		public void setRowSpan(int rowSpan) {
-			this.rowSpan = rowSpan;
-		}
-
 		public int getColumnId() {
 			return columnId;
-		}
-
-		public void setColumnId(int columnId) {
-			this.columnId = columnId;
 		}
 
 		public Long getRowId() {
@@ -586,51 +588,36 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		jt.update("delete from form_data where id = ?", params, types);
 	}
 
-	/**
-	 * Ищет налоговую форму по заданным параметрам.
-	 * 
-	 * @param formTypeId
-	 *            идентификатор
-	 *            {@link com.aplana.sbrf.taxaccounting.model.FormType вида
-	 *            формы}.
-	 * @param kind
-	 *            тип формы
-	 * @param departmentId
-	 *            идентификатор
-	 *            {@link com.aplana.sbrf.taxaccounting.model.Department
-	 *            подразделения}
-	 * @param periodId
-	 *            идентификатор
-	 *            {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod
-	 *            отчетного периода}
-	 * @return форма или null, если не найдена
-	 */
 	@Override
-	public FormData find(int formTypeId, FormDataKind kind, int departmentId,
-			int periodId) {
-		Long formDataId = getJdbcTemplate()
-				.query("select fd.id from form_data fd join form f on fd.form_id=f.id "
-						+ "where f.type_id=? and fd.kind=? and fd.department_id=? and fd.report_period_id=?",
-						new Object[] { formTypeId, kind.getId(), departmentId,
-								periodId },
-						new int[] { Types.NUMERIC, Types.NUMERIC,
-								Types.NUMERIC, Types.NUMERIC },
-						new ResultSetExtractor<Long>() {
-							@Override
-							public Long extractData(ResultSet rs)
-									throws SQLException, DataAccessException {
-								if (rs.next()) {
-									return rs.getLong("id");
-								} else {
-									return null;
-								}
-							}
-						});
-
-		if (formDataId != null) {
+	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
+		try {
+			Long formDataId = getJdbcTemplate().queryForLong(
+				"select fd.id from form_data fd where exists (select 1 from form f where fd.form_id=f.id and f.type_id = ?)"
+				+ " and fd.kind=? and fd.department_id=? and fd.report_period_id=?",
+				new Object[] {
+					formTypeId,
+					kind.getId(),
+					departmentId,
+					reportPeriodId
+				},
+				new int[] {
+					Types.NUMERIC,
+					Types.NUMERIC,
+					Types.NUMERIC,
+					Types.NUMERIC
+				}
+			);
 			return get(formDataId);
-		} else {
+		} catch (EmptyResultDataAccessException e) {
 			return null;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException(
+				"Для заданного сочетания параметров найдено несколько налоговых форм: formTypeId = %d, formDataKind = '%s', departmentId = %d, reportPeriodId = %d",
+				formTypeId,
+				kind.name(),
+				departmentId,
+				reportPeriodId
+			);
 		}
 	}
 

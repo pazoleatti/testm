@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +12,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "FormDataDaoTest.xml" })
@@ -311,5 +317,22 @@ public class FormDataDaoTest {
 		FormData formData = fillFormData();
 		DataRow dr = formData.getDataRow("newAlias");
 		dr.getCell("numericColumn").setRowSpan(-1);
+	}
+	
+	@Test
+	public void testFind() {
+		FormData fd = formDataDao.find(1, FormDataKind.SUMMARY, 1, 11);
+		Assert.assertEquals(11l, fd.getId().longValue());
+	}
+
+	@Test(expected=DaoException.class)
+	public void testFindTooManyResult() {
+		formDataDao.find(1, FormDataKind.SUMMARY, 1, 12);
+	}
+	
+	@Test
+	public void testFindEmptyResult() {
+		FormData fd = formDataDao.find(1, FormDataKind.SUMMARY, 1, 13);
+		Assert.assertNull(fd);
 	}
 }
