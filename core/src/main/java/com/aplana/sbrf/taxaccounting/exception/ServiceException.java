@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.exception;
+package com.aplana.sbrf.taxaccounting.exception;
 
 /**
  * Класс-исключение, используется, когда при выполнении операции сервисного слоя произошла ошибка. 

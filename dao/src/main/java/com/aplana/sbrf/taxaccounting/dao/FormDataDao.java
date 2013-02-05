@@ -16,7 +16,7 @@ public interface FormDataDao {
 	 *
 	 * @param formDataId идентификатор заполненной налоговой формы
 	 * @return данные по налоговой форме
-	 * @throws com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException,
+	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData get(long formDataId);
@@ -31,7 +31,7 @@ public interface FormDataDao {
 	 * -состояние налоговой формы
 	 * @param formDataId идентификатор  налоговой формы
 	 * @return FormData, которая содержит только информацию по налоговой форме и не содержит данных налоговой формы.
-	 * @throws com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException,
+	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
 	FormData getWithoutRows(long formDataId);

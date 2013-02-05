@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.exсeption;
+package com.aplana.sbrf.taxaccounting.exception;
 
 /**
  * Исключение возникающее, если попытка заблокировать или разблокировать объект не удалась.

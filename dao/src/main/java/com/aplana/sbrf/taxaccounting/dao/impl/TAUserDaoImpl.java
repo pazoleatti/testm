@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.mapper.TAUserMapper;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 

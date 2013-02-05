@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryManager;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**

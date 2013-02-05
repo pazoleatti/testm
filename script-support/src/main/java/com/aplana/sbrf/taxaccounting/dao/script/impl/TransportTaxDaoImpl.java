@@ -2,8 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.script.TransportTaxDao;
 import com.aplana.sbrf.taxaccounting.dao.script.mapper.TransportTaxMapper;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

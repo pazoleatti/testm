@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.exсeption;
+package com.aplana.sbrf.taxaccounting.exception;
 
 /**
  * Класс-исключение, используется, когда при выполнении операции по работе с БД

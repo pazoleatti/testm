@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;

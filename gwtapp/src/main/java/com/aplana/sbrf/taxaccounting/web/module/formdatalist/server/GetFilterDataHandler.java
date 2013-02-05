@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.exсeption.DaoException;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;

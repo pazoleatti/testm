@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 
 import java.util.List;
 

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -8,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,9 +58,9 @@ public class FormDataServiceImpl implements FormDataService {
 	 *                       налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
 	 *                       - в виде первичной и консолидированной)
 	 * @return созданный и проинициализированный объект данных.
-	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException
 	 *          если у пользователя нет прав создавать налоговую форму с такими параметрами
-	 * @throws com.aplana.sbrf.taxaccounting.service.exception.ServiceException
+	 * @throws com.aplana.sbrf.taxaccounting.exception.ServiceException
 	 *          если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *          обязательных параметров
 	 */
@@ -177,7 +177,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 * @param userId   идентификатор пользователя, выполняющего операцию
 	 * @param formData объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
-	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException
 	 *          если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 *          или форма заблокирована другим пользователем
 	 */
@@ -211,7 +211,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 * @param formDataId идентификатор записи, которую необходимо считать
 	 * @param tryLock выполнить попытку блокировки
 	 * @return объект с данными по налоговой форме
-	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException
 	 *          если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	@Override
@@ -239,7 +239,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param userId     идентификатор пользователя, выполняющего операцию
 	 * @param formDataId идентификатор записи, котрую нужно удалить
-	 * @throws com.aplana.sbrf.taxaccounting.service.exception.AccessDeniedException
+	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException
 	 *          если у пользователя недостаточно прав для удаления записи
 	 */
 	@Override
