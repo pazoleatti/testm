@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * @author Vitalii Samolovskikh
  */
-@Service
+@Service(value = "unlockFormData")
 public class FormDataServiceImpl implements FormDataService {
 
 	@Autowired
@@ -349,6 +349,14 @@ public class FormDataServiceImpl implements FormDataService {
 			lockDao.unlockObject(formDataId, FormData.class, userId);
 			return true;
 		}
+
+	}
+
+	@Override
+	public boolean unlockAllByUserId(int userId) {
+		System.out.println("Unlock all");
+		lockDao.unlockAllObjectByUserId(userId);
+		return true;//TODO обработать возможные ошибки
 	}
 
 	@Override

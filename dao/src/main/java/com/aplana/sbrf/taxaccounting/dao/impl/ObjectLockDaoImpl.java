@@ -84,6 +84,14 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 	}
 
 	@Override
+	public void unlockAllObjectByUserId(int userId) {
+		getJdbcTemplate().update(
+				"delete from object_lock where user_id = ?",
+				userId
+		);
+	}
+
+	@Override
 	public <IdType extends Number> void lockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
 		ObjectLock<IdType> lock = getObjectLock(id, clazz, true);
 		String className = clazz.getName();

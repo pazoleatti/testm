@@ -22,6 +22,7 @@ public interface ObjectLockDao {
 	 * В случае, если объект блокировался, но время блокировки истекло, всё равно будет возвращён непустой объект 
 	 */
 	<IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id, Class<? extends IdentityObject<IdType>> clazz);
+
 	/**
 	 * Установить блокировку на объект
 	 * @param id идентификатор объекта
@@ -30,6 +31,7 @@ public interface ObjectLockDao {
 	 * @throws LockException если объект заблокирован другим пользователем и время блокировки еще не истекло. 
 	 */
 	<IdType extends Number> void lockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
+
 	/**
 	 * Снять блокировку с объекта
 	 * @param id идентификатор объекта
@@ -39,6 +41,12 @@ public interface ObjectLockDao {
 	 * текущим пользователем снимаются без выбрасывания исключения
 	 */	
 	<IdType extends Number> void unlockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
+
+	/**
+	 * Разблокировать все формы, заблокированые пользователем
+	 * @param userId ид пользователя
+	 */
+	public void unlockAllObjectByUserId(int userId);
 
 	/**
 	 * Обновляет блокировку на объекте системы (чтобы предотвратить "просрочку" блокировки

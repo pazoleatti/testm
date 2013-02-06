@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.servlet;
 
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +26,11 @@ public class LogoutServlet extends HttpServlet {
 		} else {
 			HttpSession session = request.getSession();
 			if (session != null) {
+				WebApplicationContext springContext =
+						WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+				FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
+				SecurityService securityService = (SecurityService)springContext.getBean("securityService");
+				unlockFormData.unlockAllByUserId(securityService.currentUser().getId());
 				session.invalidate();
 			}
 			response.sendRedirect(contextPath + "/login");

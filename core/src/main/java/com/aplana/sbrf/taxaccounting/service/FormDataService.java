@@ -103,6 +103,13 @@ public interface FormDataService {
 	boolean unlock(long formDataId, int userId);
 
 	/**
+	 * Снять все блокировки с FormData для пользователя
+	 * @param userId идентификатор пользователя
+	 * @return true - если удалось разблокировать, иначе - false
+	 */
+	boolean unlockAllByUserId(int userId);
+
+	/**
 	 * Получить информацию о состоянии блокировки налоговой формы.
 	 * @param formDataId - идентификатор налоговой формы
 	 * @return информацию о блокировке объекта
