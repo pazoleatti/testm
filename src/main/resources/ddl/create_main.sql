@@ -25,7 +25,7 @@ create table tax_period (
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
 
-comment on table tax_period is 'Типы налоговых форм (названия)';
+comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
 comment on column tax_period.start_date is 'дата начала (включительно)';
