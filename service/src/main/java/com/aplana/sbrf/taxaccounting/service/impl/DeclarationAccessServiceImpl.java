@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 
@@ -7,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
  * Реализация сервиса для проверки прав на доступ к декларациям
  * @author dsultanbekov
  */
+@Service
 public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	@Override
 	public boolean canRead(int userId, long declarationId) {
