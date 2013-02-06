@@ -20,6 +20,8 @@ public class ReportPeriod implements Serializable {
 	private TaxType taxType;
 	// Признак активности периода (активный - значит открыт в настоящий момент)
 	private boolean active;
+	// Количество месяцев в периоде
+	private int months;
 
 	/**
 	 * Получить идентификатор отчётного периода
@@ -72,5 +74,21 @@ public class ReportPeriod implements Serializable {
 	 */
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	/**
+	 * Получить количество месяцев в пероде
+	 * @return количество месяцев в периоде
+	 */
+	public int getMonths() {
+		return months;
+	}
+	
+	/**
+	 * Задать количество месяцев в периоде
+	 * @param months количество месяцев
+	 */
+	public void setMonths(int months) {
+		this.months = months;
 	}
 }
