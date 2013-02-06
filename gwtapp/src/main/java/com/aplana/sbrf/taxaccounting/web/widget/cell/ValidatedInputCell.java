@@ -5,6 +5,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 
 public class ValidatedInputCell extends KeyPressableTextInputCell {
 	public interface ValidationStrategy {
@@ -34,11 +35,19 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 		super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		addPasteHandler(getInputElement(parent));
 		if ("keypress".equals(event.getType())) {
-
-			String keystroke = String.valueOf((char) event.getCharCode());
-			String ourString = (new StringBuffer(getInputElement(parent).getValue())).insert(getPos(getInputElement(parent)), keystroke).toString();
-			handleInvalidKeystroke(keystroke, event);
-			handleInvalidOverallForm(ourString, event);
+			if (event.getKeyCode() != KeyCodes.KEY_BACKSPACE
+					&& (event.getKeyCode() != KeyCodes.KEY_DELETE || (char)event.getCharCode() == '.')
+					&& event.getKeyCode() != KeyCodes.KEY_UP
+					&& event.getKeyCode() != KeyCodes.KEY_DOWN
+					&& event.getKeyCode() != KeyCodes.KEY_LEFT
+					&& event.getKeyCode() != KeyCodes.KEY_RIGHT
+					&& event.getKeyCode() != KeyCodes.KEY_HOME
+					&& event.getKeyCode() != KeyCodes.KEY_END) {
+				String keystroke = String.valueOf((char) event.getCharCode());
+				String ourString = (new StringBuffer(getInputElement(parent).getValue())).insert(getPos(getInputElement(parent)), keystroke).toString();
+				handleInvalidKeystroke(keystroke, event);
+				handleInvalidOverallForm(ourString, event);
+			}
 		}
 	}
 	protected void handleInvalidOverallForm(String valueOfEntireField, NativeEvent event) {
