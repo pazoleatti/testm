@@ -16,6 +16,21 @@ comment on column form_type.tax_type is 'Вид налога (I-на прибы�
 comment on column form_type.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 
 ---------------------------------------------------------------------------------------------------
+create table tax_period (
+  id number(9) not null,
+  tax_type char(1) not null,
+  start_date date not null,
+  end_date date not null
+);
+alter table tax_period add constraint tax_period_pk primary key (id);
+alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+
+comment on table tax_period is 'Типы налоговых форм (названия)';
+comment on column tax_period.id is 'Идентификатор (первичный ключ)';
+comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column tax_period.start_date is 'дата начала (включительно)';
+comment on column tax_period.end_date is 'дата окончания (включительно)';
+---------------------------------------------------------------------------------------------------
 create table report_period
 (
 id number(9) not null,

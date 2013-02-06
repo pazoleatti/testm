@@ -1,7 +1,7 @@
 drop table string_value;
 drop table numeric_value;
 drop table date_value;
-
+drop table tax_period;
 drop table cell_span_info;
 drop table form_column;
 drop sequence seq_form_column;
