@@ -21,7 +21,8 @@ create table report_period
 id number(9) not null,
 name varchar2(50) not null,
 tax_type char(1) not null,
-is_active number(1) default 1 not null
+is_active number(1) default 1 not null,
+months    number(2) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
@@ -33,6 +34,7 @@ comment on column report_period.id is 'Первичный ключ';
 comment on column report_period.name is 'Наименование периода';
 comment on column report_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
 comment on column report_period.is_active is 'Признак активности';
+comment on column report_period.months is 'Количество месяцев в периоде';
 
 create sequence seq_report_period start with 100;
 
