@@ -16,11 +16,12 @@ public interface DeclarationService {
 	 * @param taxType вид налога
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
 	 * @param userId идентификатор пользователя, выполняющего действие
+	 * @param reportPeriodId идентификатор отчетного периода
 	 * @return идентификатор созданной декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long createDeclaration(Logger logger, TaxType taxType, int departmentId, int userId);
+	long createDeclaration(Logger logger, TaxType taxType, int departmentId, int userId, int reportPeriodId);
 	/**
 	 * Получить декларацию
 	 * @param declarationId
