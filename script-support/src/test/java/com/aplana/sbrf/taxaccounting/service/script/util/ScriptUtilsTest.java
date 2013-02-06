@@ -39,6 +39,7 @@ public class ScriptUtilsTest {
 	private static final String ROW2_ALIAS = "pencil";
 	private static final String ROW3_ALIAS = "sampleRowAlias";
 	private static final Date DATE_CONST = new Date();
+	private static final String UNKNOWN_ALIAS = "unknown alias";
 
 
 	/**
@@ -137,6 +138,34 @@ public class ScriptUtilsTest {
 	public void summIfEqualsTest2() {
 		FormData fd = getTestFormData();
 		ScriptUtils.summIfEquals(fd, new ColumnRange(DATE_ALIAS, 0, 2), DATE_CONST, new ColumnRange(NUMBER_ALIAS, 0, 0));
+	}
+
+	@Test
+	public void getCell1() {
+		FormData fd = getTestFormData();
+		Cell c = ScriptUtils.getCell(fd, ROW2_ALIAS, NUMBER_ALIAS);
+		Assert.assertEquals(c.getNumericValue().doubleValue(), 2.1, Constants.EPS);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getCell2() {
+		FormData fd = getTestFormData();
+		ScriptUtils.getCell(fd, ROW2_ALIAS, UNKNOWN_ALIAS);
+	}
+
+	@Test
+	public void copyCellValuesTest() {
+		double value = 999.0;
+		FormData fdFrom = getTestFormData();
+		Cell cellFrom = ScriptUtils.getCell(fdFrom, ROW1_ALIAS, NUMBER_ALIAS);
+		cellFrom.setValue(value);
+
+		Range range = new Range(STRING_ALIAS, fdFrom.getDataRowIndex(ROW1_ALIAS), NUMBER_ALIAS, fdFrom.getDataRowIndex(ROW2_ALIAS));
+
+		FormData fdTo = getTestFormData();
+		ScriptUtils.copyCellValues(fdFrom, fdTo, range, range);
+		Cell cellTo = ScriptUtils.getCell(fdFrom, ROW1_ALIAS, NUMBER_ALIAS);
+		Assert.assertEquals(cellTo.getNumericValue().doubleValue(), value, Constants.EPS);
 	}
 
 	//TODO перенести методы в RangeTest

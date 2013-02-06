@@ -25,6 +25,9 @@ public class ScriptUtils {
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
 
 	private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
+
+	private static final String CELL_NOT_FOUND = "Ячейка (\"%s\"; \"%s\") не найдена";
+
 	/**
 	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0.
 	 * Является аналогом Excel функции "СУММ" в нотации "СУММ(диапазон)"
@@ -99,8 +102,8 @@ public class ScriptUtils {
 	 */
 	public static double summIfEquals(FormData formData, Range conditionRange, Object filterValue, Range summRange) {
 		Rect summRect = summRange.getRangeRect(formData);
-		Rect condRange = conditionRange.getRangeRect(formData);
-		if (!summRect.isSameSize(condRange))
+		Rect condRect = conditionRange.getRangeRect(formData);
+		if (!summRect.isSameSize(condRect))
 			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
 		double sum = 0;
@@ -108,9 +111,9 @@ public class ScriptUtils {
 		List<Column> summCols = formData.getFormColumns();
 		List<DataRow> condRows = formData.getDataRows();
 		List<Column> condCols = formData.getFormColumns();
-		for (int i = 0; i < condRange.getHeight(); i++) {
-			for (int j = 0; j < condRange.getWidth(); j++) {
-				Object condValue = condRows.get(condRange.y1 + i).get(condCols.get(condRange.x1 + j).getAlias());
+		for (int i = 0; i < condRect.getHeight(); i++) {
+			for (int j = 0; j < condRect.getWidth(); j++) {
+				Object condValue = condRows.get(condRect.y1 + i).get(condCols.get(condRect.x1 + j).getAlias());
 				if (condValue != null && condValue.equals(filterValue)) {
 					BigDecimal summValue = (BigDecimal) summRows.get(summRect.y1 + i).get(summCols.get(summRect.x1 + j).getAlias());
 					if (summValue != null) {
@@ -146,6 +149,54 @@ public class ScriptUtils {
 		double a = A.getValue() == null ? 0.0 : A.getNumericValue().doubleValue();
 		double b = B.getValue() == null ? 0.0 : B.getNumericValue().doubleValue();
 		return a-b;
+	}
+
+	/**
+	 * Поиск ячейки таблицы по алиасам строки и столбца
+	 *
+	 * @param formData таблица данных
+	 * @param rowAlias алиас строки
+	 * @param columnAlias алиас столбца
+	 * @return найденная ячейка
+	 * @throws IllegalArgumentException указаны неправильные алиасы
+	 *
+	 */
+	public static Cell getCell(FormData formData, String rowAlias, String columnAlias) {
+		DataRow row = formData.getDataRow(rowAlias);
+		if (row != null) {
+			Cell cell = row.getCell(columnAlias);
+			if (cell != null) {
+				return cell;
+			}
+		}
+		throw new IllegalArgumentException(String.format(CELL_NOT_FOUND, rowAlias, columnAlias));
+	}
+
+	/**
+	 *	Функция копирует данные из одной таблицы в другую
+	 *	@param fromFrom таблица - источник
+	 *	@param toForm таблица - приемник
+	 *	@param fromRange диапазон для копирования из источника
+	 *	@param toRange диапазон для
+	 *  @throws IllegalArgumentException указаны неправильные диапазоны ячеек
+	 */
+	public static void copyCellValues(FormData fromFrom, FormData toForm, Range fromRange, Range toRange){
+		Rect fromRect = fromRange.getRangeRect(fromFrom);
+		Rect toRect = toRange.getRangeRect(toForm);
+		if (!fromRect.isSameSize(toRect))
+			throw new IllegalArgumentException(NOT_SAME_RANGES);
+
+		List<DataRow> fromRows = fromFrom.getDataRows();
+		List<Column> fromCols = fromFrom.getFormColumns();
+		List<DataRow> toRows = toForm.getDataRows();
+		List<Column> toCols = toForm.getFormColumns();
+		for (int i = 0; i < fromRect.getHeight(); i++) {
+			for (int j = 0; j < fromRect.getWidth(); j++) {
+				Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
+				Cell cell = toRows.get(toRect.y1 + i).getCell(toCols.get(toRect.x1 + j).getAlias());
+				cell.setValue(value);
+			}
+		}
 	}
 
 }
