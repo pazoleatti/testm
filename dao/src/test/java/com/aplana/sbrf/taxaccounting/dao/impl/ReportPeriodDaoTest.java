@@ -30,6 +30,7 @@ public class ReportPeriodDaoTest {
 		ReportPeriod reportPeriod = reportPeriodDao.get(1);
 		assertEquals("Transport report period 1", reportPeriod.getName());
 		assertTrue(reportPeriod.isActive());
+		assertEquals(3, reportPeriod.getMonths());
 		assertEquals(TaxType.TRANSPORT, reportPeriod.getTaxType());
 	}
 

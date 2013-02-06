@@ -12,9 +12,9 @@ insert into form (id, type_id, data_rows, version, is_active, edition, numbered_
 insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (3, 3, null, '0.1', 1, 1, 1);
 insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (4, 4, null, '0.1', 1, 1, 1);
 
-insert into report_period (id, name, tax_type, is_active) values (1, '1 - период', 'T', 1)
-insert into report_period (id, name, tax_type, is_active) values (2, '2 - период', 'T', 1)
-insert into report_period (id, name, tax_type, is_active) values (3, '3 - период', 'T', 1)
+insert into report_period (id, name, tax_type, is_active, months) values (1, '1 - период', 'T', 1, 3)
+insert into report_period (id, name, tax_type, is_active, months) values (2, '2 - период', 'T', 1, 3)
+insert into report_period (id, name, tax_type, is_active, months) values (3, '3 - период', 'T', 1, 3)
 
 insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (1,  4, 1, 1, 2, 1);
 insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (2,  3, 2, 2, 3, 2);

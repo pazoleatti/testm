@@ -1,2 +1,2 @@
-insert into report_period (id, name, tax_type, is_active) values (10, 'VAT report period 2', 'V', 1)
-insert into report_period (id, name, tax_type, is_active) values (11, 'VAT report period 3', 'V', 1)
+insert into report_period (id, name, tax_type, is_active, months) values (10, 'VAT report period 2', 'V', 1, 3)
+insert into report_period (id, name, tax_type, is_active, months) values (11, 'VAT report period 3', 'V', 1, 3)
