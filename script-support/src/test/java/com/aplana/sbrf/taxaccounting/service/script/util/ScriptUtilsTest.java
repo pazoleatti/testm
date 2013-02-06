@@ -143,28 +143,28 @@ public class ScriptUtilsTest {
 	@Test
 	public void getCell1() {
 		FormData fd = getTestFormData();
-		Cell c = ScriptUtils.getCell(fd, ROW2_ALIAS, NUMBER_ALIAS);
+		Cell c = ScriptUtils.getCell(fd, NUMBER_ALIAS, ROW2_ALIAS);
 		Assert.assertEquals(c.getNumericValue().doubleValue(), 2.1, Constants.EPS);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void getCell2() {
 		FormData fd = getTestFormData();
-		ScriptUtils.getCell(fd, ROW2_ALIAS, UNKNOWN_ALIAS);
+		ScriptUtils.getCell(fd, UNKNOWN_ALIAS, ROW2_ALIAS);
 	}
 
 	@Test
 	public void copyCellValuesTest() {
 		double value = 999.0;
 		FormData fdFrom = getTestFormData();
-		Cell cellFrom = ScriptUtils.getCell(fdFrom, ROW1_ALIAS, NUMBER_ALIAS);
+		Cell cellFrom = ScriptUtils.getCell(fdFrom, NUMBER_ALIAS, ROW1_ALIAS);
 		cellFrom.setValue(value);
 
 		Range range = new Range(STRING_ALIAS, fdFrom.getDataRowIndex(ROW1_ALIAS), NUMBER_ALIAS, fdFrom.getDataRowIndex(ROW2_ALIAS));
 
 		FormData fdTo = getTestFormData();
 		ScriptUtils.copyCellValues(fdFrom, fdTo, range, range);
-		Cell cellTo = ScriptUtils.getCell(fdFrom, ROW1_ALIAS, NUMBER_ALIAS);
+		Cell cellTo = ScriptUtils.getCell(fdFrom, NUMBER_ALIAS, ROW1_ALIAS);
 		Assert.assertEquals(cellTo.getNumericValue().doubleValue(), value, Constants.EPS);
 	}
 

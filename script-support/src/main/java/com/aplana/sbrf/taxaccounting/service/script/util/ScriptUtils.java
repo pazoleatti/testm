@@ -155,13 +155,13 @@ public class ScriptUtils {
 	 * Поиск ячейки таблицы по алиасам строки и столбца
 	 *
 	 * @param formData таблица данных
-	 * @param rowAlias алиас строки
 	 * @param columnAlias алиас столбца
+	 * @param rowAlias алиас строки
 	 * @return найденная ячейка
 	 * @throws IllegalArgumentException указаны неправильные алиасы
 	 *
 	 */
-	public static Cell getCell(FormData formData, String rowAlias, String columnAlias) {
+	public static Cell getCell(FormData formData, String columnAlias, String rowAlias) {
 		DataRow row = formData.getDataRow(rowAlias);
 		if (row != null) {
 			Cell cell = row.getCell(columnAlias);
