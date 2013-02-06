@@ -12,11 +12,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 public interface ReportPeriodDao {
 	/**
 	 * Получить объект отчётного периода по идентификатору периода
-	 * @param periodId идентификатор отчётного периода
+	 * @param reportPeriodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
 	 * @throws DAOException если периода с заданным идентификатором не существует 
 	 */
-	ReportPeriod get(int periodId);
+	ReportPeriod get(int reportPeriodId);
 	/**
 	 * Получить объект текущего отчётного периода по виду налога
 	 * @param taxType вид налога
