@@ -2,26 +2,23 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
+
 /**
  * Отчётный период.
  * В нормальной ситуации может быть только один активный отчётный период по каждому виду налога
  * исключения возможны в случае использования корректирующих периодов.
- * TODO: это класс-заглушка, необходимая для реализации прототипа, в будущем будет расширен и дополнен
  * @author dsultanbekov
  */
 public class ReportPeriod implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	// Первичный ключ
 	private int id;
-	// Название периода
 	private String name;
-	// Вид налога
 	private TaxType taxType;
-	// Признак активности периода (активный - значит открыт в настоящий момент)
 	private boolean active;
-	// Количество месяцев в периоде
 	private int months;
+	private int order;
+	private int taxPeriodId;
 
 	/**
 	 * Получить идентификатор отчётного периода
@@ -49,7 +46,8 @@ public class ReportPeriod implements Serializable {
 		this.name = name;
 	}
 	/**
-	 * Получить вид налога, по которому ведётся отчётный период 
+	 * Получить вид налога, по которому ведётся отчётный период
+	 * @deprecated Вид налога нужно определять по налоговому периоду
 	 */
 	public TaxType getTaxType() {
 		return taxType;
@@ -57,8 +55,9 @@ public class ReportPeriod implements Serializable {
 	/**
 	 * Задать вид налога, по которому ведётся отчётный период
 	 * @param taxType вид налога
+	 * @deprecated Вид налога нужно определять по налоговому периоду
 	 */
-	public void setTaxType(TaxType taxType) {
+		public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
 	/**
@@ -90,5 +89,37 @@ public class ReportPeriod implements Serializable {
 	 */
 	public void setMonths(int months) {
 		this.months = months;
+	}
+	
+	/**
+	 * Получить порядковый номер отчётного периода в налоговом (начиная с 1)
+	 * @return порядковый номер отчётного периода в налоговом
+	 */
+	public int getOrder() {
+		return order;
+	}
+	
+	/**
+	 * Задать порядковый номер отчётного периода в налоговом (начиная с 1)
+	 * @param order порядковый номер отчётного периода в налоговом
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+	
+	/**
+	 * Возвращает идентификатор налогового периода к которому относится данный отчётный
+	 * @return идентфикатор налогового периода
+	 */
+	public int getTaxPeriodId() {
+		return taxPeriodId;
+	}
+	
+	/**
+	 * Задаёт идентфикатор налогвого периода к которому относится данный отчётный
+	 * @param taxPeriodId идентификатор налогового периода
+	 */
+	public void setTaxPeriodId(int taxPeriodId) {
+		this.taxPeriodId = taxPeriodId;
 	}
 }
