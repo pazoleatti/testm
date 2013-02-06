@@ -29,6 +29,15 @@ public interface ReportPeriodDao {
 	 * Получить полный список отчётных периодов по виду налога 
 	 * @param taxType вид налога
 	 * @return список всех отчётных периодов
+	 * @deprecated Теперь вид налога задаётся на уровне налоговых периодов
 	 */
 	List<ReportPeriod> listAllPeriodsByTaxType(TaxType taxType);
+	
+	/**
+	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
+	 * Список отсортирован по {@link ReportPeriod#getOrder() порядковым номерам} отчётных периодов
+	 * @param taxPeriodId
+	 * @return список отчётных периодов, входящий в данный налоговый период, отсортированный по порядковому номеру
+	 */
+	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 }

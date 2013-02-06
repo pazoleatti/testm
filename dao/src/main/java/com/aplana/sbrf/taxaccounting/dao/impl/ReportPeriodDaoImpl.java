@@ -52,4 +52,10 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 	public List<ReportPeriod> listAllPeriodsByTaxType(TaxType taxType) {
 		return reportPeriodMapper.listAllPeriodsByTaxType(taxType.getCode());
 	}
+
+	@Override
+	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
+		// TODO: реализовать метод
+		throw new UnsupportedOperationException("not implemented");
+	}
 }
