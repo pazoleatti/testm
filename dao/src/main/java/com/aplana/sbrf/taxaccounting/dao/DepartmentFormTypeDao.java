@@ -37,4 +37,12 @@ public interface DepartmentFormTypeDao {
 	 * @return информация о формах-потребителях в виде списка {@link DepartmentFormType}
 	 */
 	List<DepartmentFormType> getDestanations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+	
+	/**
+	 * Получить информацию о видах и типах налоговых форм с которыми можно работать в подразделении
+	 * @param departmentId идентификатор подразделения
+	 * @return список записей {@link DepartmentFormType}, представляющий информацию в типах и видах налоговых форм, с которыми можно работать
+	 * 	в подразделении
+	 */
+	List<DepartmentFormType> getDepartmentFormTypes(int departmentId);
 }

@@ -70,4 +70,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 				new Object[] { sourceDepartmentId, sourceFormTypeId,
 						sourceKind.getId() }, DEPARTMENTFORMTYPE_MAPPER);
 	}
+
+	@Override
+	public List<DepartmentFormType> getDepartmentFormTypes(int departmentId) {
+		throw new UnsupportedOperationException("not implemented");
+	}
 }
