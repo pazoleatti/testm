@@ -1,0 +1,1 @@
+insert into declaration_type (id, name, tax_type) values (1, 'Вид декларации (тест)', 'T');
