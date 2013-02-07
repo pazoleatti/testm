@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
@@ -27,7 +29,7 @@ public class FormDataPrintingServiceTestMock {
 	
 	private static final long TB2_CREATED_FORMDATA_ID = 4;
 	private static final long TB2_APPROVED_FORMDATA_ID = 5;
-	private static final long TB2_ACCEPTED_FORMDATA_ID = 6;
+	private static final int TB2_ACCEPTED_FORMTEMPLATE_ID = 6;
 	
 	static FormDataPrintingService formDataPrintingService = new FormDataPrintingServiceImpl();
 	
@@ -96,17 +98,23 @@ public class FormDataPrintingServiceTestMock {
 		
 		when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
 		when(formData.getDepartmentId()).thenReturn(1);
+		when(formData.getFormTemplateId()).thenReturn(TB2_ACCEPTED_FORMTEMPLATE_ID);
 		
-		FormDataService formDataService = mock(FormDataService.class);
+		FormDataDao formDataDao = mock(FormDataDao.class);
+		FormTemplateService formTemplateService = mock(FormTemplateService.class);
 
 		// TODO: заменить логгер или вообще использовать дао класс
-		when(formDataService.getFormData(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID, new Logger(), false)).thenReturn(formData);
-		ReflectionTestUtils.setField(formDataPrintingService, "formDataService", formDataService);
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.setNumberedColumns(true);
+		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(formData);
+		when(formTemplateService.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
+		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
+		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateService", formTemplateService);
 	}
 	
 	@Test
 	public void testReportPrintService(){
-		formDataPrintingService.generateExcel(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID);
+		formDataPrintingService.generateExcel(TB2_APPROVED_FORMDATA_ID);
 	}
 
 }

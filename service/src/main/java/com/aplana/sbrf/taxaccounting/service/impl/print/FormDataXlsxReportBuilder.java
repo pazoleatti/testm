@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl.print;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -19,51 +18,150 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 
+
+/**
+ * 
+ * @author avanteev
+ */
 public class FormDataXlsxReportBuilder {
-	
-	/*private static String TEMPLATE = ClassUtils
-			.classPackageAsResourcePath(FormDataPrintingService.class)
-			+ "/acctax.xlsx";*/
+
 	private static final int cellWidth = 10;
 	
 	private int rowNumber = 6;
 	private int cellNumber = 0;
 	
 	private String dateFormater = "dd.MM.yyyy";
-	private InputStream templeteInputStream;
 	
 	private Workbook workBook;
 	private Sheet sheet;
-	private CellStyle cellStyle;
+	
+	private CellStyleBuilder cellStyleBuilder;
+	
+	private enum CellType{
+		DATE,
+		DATE_TABLE,
+		STRING,
+		BIGDECIMAL,
+		EMPTY,
+		DEFAULT
+	}
 	
 	private FormData data;
+	private FormTemplate formTemplate;
 	
 	private Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
 	
+	private class CellStyleBuilder{
+		public CellStyle cellStyle;
+		
+		private CellStyleBuilder(){
+			cellStyle = workBook.createCellStyle();
+			cellStyle.setFillForegroundColor(IndexedColors.GREEN.index);
+			cellStyle.setFillBackgroundColor(IndexedColors.GREEN.index);
+			cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+			cellStyle.setWrapText(true);
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+		}
+		
+		public CellStyle createCellStyle(CellType value){
+			CellStyle cellStyle = workBook.createCellStyle();
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+			
+			switch (value) {
+			case STRING:
+				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+				cellStyle.setWrapText(true);
+				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				break;
+			case DATE: 
+				cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
+				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				
+			case DATE_TABLE:
+				cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
+				
+				
+				break;
+			case BIGDECIMAL:
+				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+				cellStyle.setWrapText(true);
+				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				break;
+				
+			case EMPTY:
+				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				break;
+
+			default:
+			
+				break;
+			}
+			
+			return cellStyle;
+		}
+		
+		public CellStyle createCellStyle(CellType value,FormStyle style){
+			CellStyle cellStyle = createCellStyle(value);
+			if(style != null){
+				((XSSFCellStyle)cellStyle).setFillForegroundColor(new XSSFColor(new java.awt.Color(
+						style.getBackColor().getRed(),
+						style.getBackColor().getGreen(),
+						style.getBackColor().getBlue()))
+				);
+				
+				((XSSFCellStyle)cellStyle).setFillBackgroundColor(
+						new XSSFColor(new java.awt.Color(
+								style.getFontColor().getRed(),
+								style.getFontColor().getGreen(),
+								style.getFontColor().getBlue()))
+						);
+				cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			}
+			
+			return cellStyle;
+		}
+	}
 	
 	public FormDataXlsxReportBuilder() {
 		/*templeteInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(TEMPLATE);
 		workBook = new SXSSFWorkbook(new XSSFWorkbook(templeteInputStream));*/
+		
 		workBook = new SXSSFWorkbook();
 		sheet = workBook.createSheet("Учет налогов");
 		
-		cellStyle = workBook.createCellStyle();
-		cellStyle.setFillForegroundColor(IndexedColors.GREEN.index);
-		cellStyle.setFillBackgroundColor(IndexedColors.GREEN.index);
-		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		cellStyle.setWrapText(true);
-		cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-		cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-		cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-		cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+		cellStyleBuilder = new CellStyleBuilder();
+		
 		sheet.addMergedRegion(new CellRangeAddress(	0,0,0,5));
 		
 		sheet.setColumnWidth(0, 20 * 256);
@@ -74,23 +172,20 @@ public class FormDataXlsxReportBuilder {
 		sheet.getRow(3).createCell(0).setCellValue("Подразделение");
 		sheet.getRow(4).createCell(0).setCellValue("Дата формирования");
 		
-		CellStyle cellStyle = workBook.createCellStyle();
-		cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
 		Cell cell = sheet.getRow(4).createCell(1);
-		cell.setCellStyle(cellStyle);
+		cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE_TABLE));
 		cell.setCellValue(new Date(System.currentTimeMillis()));
 		
 	}
 	
-	public FormDataXlsxReportBuilder(FormData data) {
+	public FormDataXlsxReportBuilder(FormData data,FormTemplate formTemplate) {
 		this();
 		this.data = data;
+		this.formTemplate = formTemplate;
 		
 		Cell cell = sheet.createRow(0).createCell(0);
 		cell.setCellValue(data.getFormType().getName());
-		CellStyle cellStyle = workBook.createCellStyle();
-		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		cell.setCellStyle(cellStyle);
+		cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT));
 		sheet.getRow(2).createCell(1).setCellValue(data.getKind().getName());
 		sheet.getRow(3).createCell(1).setCellValue(data.getDepartmentId());
 	}
@@ -109,13 +204,7 @@ public class FormDataXlsxReportBuilder {
 		OutputStream out = new FileOutputStream(file);
 		workBook.setPrintArea(0, 0, aliasMap.size(), 0, data.getDataRows().size());
 		workBook.write(out);
-		try {
-			if (templeteInputStream != null) {
-				templeteInputStream.close();
-			}
-		} catch (Exception e) {
-			// nothing
-		}
+
 		return file.getAbsolutePath();
 	}
 	
@@ -130,6 +219,9 @@ public class FormDataXlsxReportBuilder {
 			}
 		}
 
+		/*
+		 * If we have two line for headers
+		 */
 		if(isSecondTable){
 			Row row2 = sheet.createRow(rowNumber + 1);
 			for(int i = 0;i<data.getFormColumns().size();i++){
@@ -138,7 +230,7 @@ public class FormDataXlsxReportBuilder {
 					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
 					fillWidth(i,data.getFormColumns().get(i).getWidth());
 					Cell cell = row.createCell(i);
-					cell.setCellStyle(cellStyle);
+					cell.setCellStyle(cellStyleBuilder.cellStyle);
 					cell.setCellValue(data.getFormColumns().get(i).getName());
 					tableBorders(i,i, rowNumber, rowNumber + 1);
 					
@@ -161,10 +253,23 @@ public class FormDataXlsxReportBuilder {
 			for (Column el : data.getFormColumns()) {
 				aliasMap.put(cellNumber, el.getAlias());
 				Cell cell = row.createCell(cellNumber++);
-				cell.setCellStyle(cellStyle);
+				cell.setCellStyle(cellStyleBuilder.cellStyle);
 				cell.setCellValue(el.getName());
 			}
 		}
+		
+		/*
+		 * If we want to display number of rows
+		 */
+		if(formTemplate.isNumberedColumns()){
+			Row row3 = sheet.createRow(rowNumber + 2);
+			for(int i = 1;i<data.getFormColumns().size() + 1;i++){
+				Cell cell = row3.createCell(i - 1);
+				cell.setCellValue(i);
+				cell.setCellStyle(cellStyleBuilder.cellStyle);
+			}
+		}
+		
 		
 		cellNumber = 0;
 		rowNumber = sheet.getLastRowNum() + 1;
@@ -173,7 +278,7 @@ public class FormDataXlsxReportBuilder {
 	private void groupCells(int startCell,int endCell,Row row1,Row row2){
 		tableBorders(startCell,endCell,rowNumber, rowNumber);
 		Cell cell = row1.createCell(startCell);
-		cell.setCellStyle(cellStyle);
+		cell.setCellStyle(cellStyleBuilder.cellStyle);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
 		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
 		
@@ -181,7 +286,7 @@ public class FormDataXlsxReportBuilder {
 			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
 			//fillWidth(i,data.getFormColumns().get(i).getName().length());
 			cell = row2.createCell(i);
-			cell.setCellStyle(cellStyle);
+			cell.setCellStyle(cellStyleBuilder.cellStyle);
 			cell.setCellValue(data.getFormColumns().get(i).getName());
 		}
 	}
@@ -210,57 +315,29 @@ public class FormDataXlsxReportBuilder {
 			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
+				Cell cell = mergedDataCells(dataRow.getCell(alias.getValue()), row, alias.getKey());
+				
 				if(obj instanceof String){
 					String str = (String)obj;
-					Cell cell = row.createCell(alias.getKey());
-					CellStyle cellStyle = workBook.createCellStyle();
-					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-					cellStyle.setWrapText(true);
-					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
-					cell.setCellStyle(cellStyle);
+					
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(alias.getValue()).getStyle()));
 					cell.setCellValue(str);
 					//fillWidth(alias.getKey(),str.length());
 				}
 				else if(obj instanceof Date){
 					Date date = (Date)obj;
-					Cell cell = row.createCell(alias.getKey());
-					CellStyle cellStyle = workBook.createCellStyle();
-					cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
-					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
-					cell.setCellStyle(cellStyle);
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE,dataRow.getCell(alias.getValue()).getStyle()));
 					cell.setCellValue(date);
 					//fillWidth(alias.getKey(),String.valueOf(date).length());
 				}
 				else if(obj instanceof BigDecimal){
 					BigDecimal bd = (BigDecimal)obj;
-					//System.out.println("BigDecimal" + bd.doubleValue());
-					Cell cell = row.createCell(alias.getKey());
-					CellStyle cellStyle = workBook.createCellStyle();
-					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-					cellStyle.setWrapText(true);
-					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
-					cell.setCellStyle(cellStyle);
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(alias.getValue()).getStyle()));
 					cell.setCellValue(bd.doubleValue());
 					//fillWidth(alias.getKey(),String.valueOf(bd.doubleValue()).length());
 				}
 				else if(obj == null){
-					Cell cell = row.createCell(alias.getKey());
-					CellStyle cellStyle = workBook.createCellStyle();
-					cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-					cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-					cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-					cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-					cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
-					cell.setCellStyle(cellStyle);
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY,dataRow.getCell(alias.getValue()).getStyle()));
 					cell.setCellValue("");
 				}
 			}
@@ -282,6 +359,34 @@ public class FormDataXlsxReportBuilder {
 			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 )
 				widthCellsMap.put(cellNumber, length);
 		}
+	}
+	
+	/*
+	 * Merge rows with data. Depend on fields from com.aplana.sbrf.taxaccounting.model.Cell rowSpan and colSpan.
+	 */
+	private Cell mergedDataCells(com.aplana.sbrf.taxaccounting.model.Cell cell,Row currRow,int currColumn){
+		Cell currCell = currRow.createCell(currColumn);
+		if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
+			CellRangeAddress region = null;
+			if(currColumn + cell.getColSpan() > data.getFormColumns().size()){
+				region = new CellRangeAddress(
+						currRow.getRowNum(), 
+						currRow.getRowNum() + cell.getRowSpan() - 1, 
+						currColumn, 
+						data.getFormColumns().size());
+			}else{
+				region = new CellRangeAddress(
+						currRow.getRowNum(), 
+						currRow.getRowNum() + cell.getRowSpan() - 1, 
+						currColumn, 
+						currColumn + cell.getColSpan() - 1);
+			}
+			
+			sheet.addMergedRegion(region);
+		}
+		
+		
+		return currCell;
 	}
 
 }

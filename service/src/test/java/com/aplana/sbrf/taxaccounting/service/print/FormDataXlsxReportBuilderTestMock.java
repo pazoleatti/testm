@@ -7,9 +7,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
@@ -27,6 +32,7 @@ public class FormDataXlsxReportBuilderTestMock {
 	
 	private List<Column> columns = new ArrayList<Column>();
 	private FormData formData;
+	private FormTemplate formTemplate;
 	
 	@Before
 	public void init(){
@@ -82,20 +88,42 @@ public class FormDataXlsxReportBuilderTestMock {
 		columns.add(colNum1);
 		columns.add(colNum2);
 		
+		DataRow dataRow = mock(DataRow.class);
+		Cell cell = mock(Cell.class);
+		FormStyle formStyle = mock(FormStyle.class);
+		when(formStyle.getBackColor()).thenReturn(Color.BLUE);
+		when(formStyle.getFontColor()).thenReturn(Color.GREEN);
+		when(dataRow.getCell("Number")).thenReturn(cell);
+		when(dataRow.getCell("Number1")).thenReturn(cell);
+		when(dataRow.getCell("Number2")).thenReturn(cell);
+		when(dataRow.getCell("String")).thenReturn(cell);
+		when(dataRow.getCell("String1")).thenReturn(cell);
+		when(dataRow.getCell("String2")).thenReturn(cell);
+		when(dataRow.getCell("Date")).thenReturn(cell);
+		when(dataRow.getCell("Date1")).thenReturn(cell);
+		when(dataRow.getCell("Date2")).thenReturn(cell);
+		when(cell.getStyle()).thenReturn(formStyle);
+		when(dataRow.get("Number")).thenReturn("777");
+		
 		formData = mock(FormData.class);
+		formTemplate = mock(FormTemplate.class);
 		when(formData.getFormColumns()).thenReturn(columns);
+		when(formTemplate.isNumberedColumns()).thenReturn(true);
 		
 		FormType formType = new FormType();
 		formType.setName("Fkfd");
 		when(formData.getFormType()).thenReturn(formType);
 		
+		List<DataRow> dataRows = new ArrayList<DataRow>();
+		dataRows.add(dataRow);
+		when(formData.getDataRows()).thenReturn(dataRows);
 		when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
 		when(formData.getDepartmentId()).thenReturn(1);
 	}
 	
 	@Test
 	public void testReport(){
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(formData);
+		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(formData,formTemplate);
 		try {
 			builder.createReport();
 		} catch (IOException e) {
