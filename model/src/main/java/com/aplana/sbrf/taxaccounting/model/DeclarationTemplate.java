@@ -6,8 +6,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class DeclarationTemplate extends IdentityObject<Integer> {
 	private static final long serialVersionUID = 1L;
-	
-	private TaxType taxType;
+
+	private DeclarationType type;
 	private String version;
 	private boolean active;
 	private Integer edition;
@@ -15,19 +15,19 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private String createScript;
 
 	/**
-	 * Получить вид налога
-	 * @return вид налога
+	 * Получить вид декларации
+	 * @return вид декларации
 	 */
-	public TaxType getTaxType() {
-		return taxType;
+	public DeclarationType getDeclarationType() {
+		return type;
 	}
 
 	/**
-	 * Задать вид налога
-	 * @param taxType вид налога
+	 * Задать вид декларации
+	 * @param type вид декларации
 	 */	
-	public void setTaxType(TaxType taxType) {
-		this.taxType = taxType;
+	public void setDeclarationType(DeclarationType type) {
+		this.type = type;
 	}
 
 	/**

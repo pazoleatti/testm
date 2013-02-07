@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -25,7 +25,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class DeclarationTemplateDaoImpl extends AbstractDao implements DeclarationTemplateDao {
 
-	private static final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
+	@Autowired
+	private DeclarationTypeDao declarationTypeDao;
+
+	private final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
 		@Override
 		public DeclarationTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationTemplate d = new DeclarationTemplate();
@@ -34,7 +37,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setCreateScript(rs.getString("create_script"));
 			d.setVersion(rs.getString("version"));
 			d.setEdition(rs.getInt("edition"));
-			d.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+			d.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
 			return d;
 		}
 	}
@@ -74,14 +77,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, tax_type, version, is_active, create_script) values (?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, tax_type, version, is_active, create_script, declaration_type_id) values (?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							1,
-							declarationTemplate.getTaxType().getCode(),
+							declarationTemplate.getDeclarationType().getTaxType().getCode(), //TODO убрать tax_type после выпила из базы
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
-							declarationTemplate.getCreateScript()
+							declarationTemplate.getCreateScript(),
+							declarationTemplate.getDeclarationType().getId()
 					},
 					new int[] {
 							Types.NUMERIC,
@@ -89,7 +93,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.VARCHAR,
 							Types.VARCHAR,
 							Types.NUMERIC,
-							Types.VARCHAR
+							Types.VARCHAR,
+							Types.NUMERIC
 					}
 			);
 
@@ -102,13 +107,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set tax_type = ?, edition = ?, version = ?, is_active = ?, create_script = ? where id = ?",
+					"update declaration_template set tax_type = ?, edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ? where id = ?",
 					new Object[] {
-							declarationTemplate.getTaxType().getCode(),
+							declarationTemplate.getDeclarationType().getTaxType().getCode(), //TODO убрать tax_type после выпила из базы
 							storedEdition + 1,
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
+							declarationTemplate.getDeclarationType().getId(),
 							declarationTemplateId
 					},
 					new int[] {
@@ -117,6 +123,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.VARCHAR,
 							Types.NUMERIC,
 							Types.VARCHAR,
+							Types.NUMERIC,
 							Types.NUMERIC
 					}
 			);

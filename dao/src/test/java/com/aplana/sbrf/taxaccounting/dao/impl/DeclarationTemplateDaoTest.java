@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +23,9 @@ public class DeclarationTemplateDaoTest {
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
 
+	@Autowired
+	private DeclarationTypeDao declarationTypeDao;
+
 	@Test
 	public void testListAll() {
 		assertEquals(5, declarationTemplateDao.listAll().size());
@@ -30,13 +35,13 @@ public class DeclarationTemplateDaoTest {
 	public void testGet() {
 		DeclarationTemplate d1 = declarationTemplateDao.get(1);
 		assertEquals(1, d1.getId().longValue());
-		assertEquals('T', d1.getTaxType().getCode());
+		assertEquals('T', d1.getDeclarationType().getTaxType().getCode());
 		assertEquals("0.01", d1.getVersion());
 		assertTrue(d1.isActive());
 
 		DeclarationTemplate d2 = declarationTemplateDao.get(2);
 		assertEquals(2, d2.getId().longValue());
-		assertEquals('T', d2.getTaxType().getCode());
+		assertEquals('T', d2.getDeclarationType().getTaxType().getCode());
 		assertEquals("0.01", d2.getVersion());
 		assertTrue(d2.isActive());
 	}
@@ -52,7 +57,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
-		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+		DeclarationType declarationType = declarationTypeDao.get(1);
+		declarationTemplate.setDeclarationType(declarationType);
 
 		int id = declarationTemplateDao.save(declarationTemplate);
 
@@ -60,7 +66,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
 		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
-		assertEquals(TaxType.TRANSPORT, savedDeclarationTemplate.getTaxType());
+		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
 
 	}
@@ -73,7 +79,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
-		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+		DeclarationType declarationType = declarationTypeDao.get(1);
+		declarationTemplate.setDeclarationType(declarationType);
 
 		declarationTemplateDao.save(declarationTemplate);
 
@@ -81,7 +88,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(1, savedDeclarationTemplate.getId().intValue());
 		assertEquals("0.01", savedDeclarationTemplate.getVersion());
 		assertEquals("MyScript", savedDeclarationTemplate.getCreateScript());
-		assertEquals(TaxType.TRANSPORT, savedDeclarationTemplate.getTaxType());
+		assertEquals(declarationType.getId(), savedDeclarationTemplate.getDeclarationType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
 	}
 
@@ -93,7 +100,8 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setActive(true);
 		declarationTemplate.setVersion("0.01");
 		declarationTemplate.setCreateScript("MyScript");
-		declarationTemplate.setTaxType(TaxType.TRANSPORT);
+		DeclarationType declarationType = declarationTypeDao.get(1);
+		declarationTemplate.setDeclarationType(declarationType);
 
 		declarationTemplateDao.save(declarationTemplate);
 

@@ -58,9 +58,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@Editor.Ignore
 	Button downloadJrxmlButton;
 
-	@UiField(provided = true)
-	ValueListBox<TaxType> taxType;
-
 	@UiField
 	TextBox version;
 
@@ -73,19 +70,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
-		List<TaxType> taxTypes = new ArrayList<TaxType>();
-		Collections.addAll(taxTypes, TaxType.values());
-		taxType = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
-			@Override
-			public String render(TaxType type) {
-				if (type == null) {
-					return "";
-				}
-				return type.getName();
-			}
-		});
-		taxType.setAcceptableValues(taxTypes);
-
 		widget = uiBinder.createAndBindUi(this);
 		driver.initialize(this);
 		addFileUploader();

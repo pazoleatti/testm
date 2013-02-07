@@ -1,4 +1,4 @@
-insert into declaration_template(id, edition, tax_type, version, is_active) values (1, 1, 'T', '0.01', 1);
+insert into declaration_template(id, edition, tax_type, version, is_active, declaration_type_id) values (1, 1, 'T', '0.01', 1, 1);
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
 
 insert into tax_period(id, tax_type, start_date, end_date) values (1, 'T', date '2013-01-01', date '2013-12-31');

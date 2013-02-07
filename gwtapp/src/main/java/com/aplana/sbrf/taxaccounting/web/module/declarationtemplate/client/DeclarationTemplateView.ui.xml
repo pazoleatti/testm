@@ -25,11 +25,6 @@
     <g:Label height="30px" text="Список атрибутов:"/>
 
     <g:HorizontalPanel height="30px">
-        <g:Label width="150px">Тип налога</g:Label>
-        <g:ValueListBox width="200px" ui:field="taxType"/>
-    </g:HorizontalPanel>
-
-    <g:HorizontalPanel height="30px">
         <g:Label width="150px">Версия</g:Label>
         <g:TextBox width="300px" ui:field="version"/>
     </g:HorizontalPanel>
