@@ -77,11 +77,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, tax_type, version, is_active, create_script, declaration_type_id) values (?, ?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id) values (?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							1,
-							declarationTemplate.getDeclarationType().getTaxType().getCode(), //TODO убрать tax_type после выпила из базы
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
@@ -90,7 +89,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					new int[] {
 							Types.NUMERIC,
 							Types.NUMERIC,
-							Types.VARCHAR,
 							Types.VARCHAR,
 							Types.NUMERIC,
 							Types.VARCHAR,
@@ -107,9 +105,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}
 			count = getJdbcTemplate().update(
-					"update declaration_template set tax_type = ?, edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ? where id = ?",
+					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ? where id = ?",
 					new Object[] {
-							declarationTemplate.getDeclarationType().getTaxType().getCode(), //TODO убрать tax_type после выпила из базы
 							storedEdition + 1,
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
@@ -118,7 +115,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							declarationTemplateId
 					},
 					new int[] {
-							Types.VARCHAR,
 							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
