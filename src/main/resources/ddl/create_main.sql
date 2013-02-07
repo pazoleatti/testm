@@ -211,6 +211,20 @@ alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id =
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
 
 ---------------------------------------------------------------------------------------------------
+create table declaration_type
+(
+  id             number(9) not null,
+  tax_type       char(1) not null,
+  name           varchar(80) not null
+);
+alter table declaration_type add constraint declaration_type_pk primary key (id);
+alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
+
+comment on table declaration_type is ' Виды деклараций';
+comment on column declaration_type.id is 'идентификатор (первичный ключ)';
+comment on column declaration_type.tax_type is 'тип налога';
+comment on column declaration_type.name is 'наименование';
+-----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_template
 (
   id             number(9) not null,
@@ -220,11 +234,13 @@ create table declaration_template
   is_active      number(1) not null,
   create_script  CLOB,
   jrxml          CLOB,
-  jasper         BLOB
+  jasper         BLOB,
+  declaration_type_id number(9) not null
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_t_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
+alter table declaration_template add constraint declaration_template_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'идентификатор (первичный ключ)';
@@ -235,22 +251,10 @@ comment on column declaration_template.is_active is 'признак активн
 comment on column declaration_template.create_script is 'скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.jasper is 'скомпилированный макет JasperReports для формирования печатного представления формы';
+comment on column declaration_template.declaration_type_id  is 'вид деклараций';
 
 create sequence seq_declaration_template start with 10000;
------------------------------------------------------------------------------------------------------------------------------------
-create table declaration_type
-(
-  id             number(9) not null,
-  tax_type       char(1) not null,
-  name           varchar(40) not null
-);
-alter table declaration_type add constraint declaration_type_pk primary key (id);
-alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
 
-comment on table declaration_type is ' Виды деклараций';
-comment on column declaration_type.id is 'идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'тип налога';
-comment on column declaration_type.name is 'наименование';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration
 (
