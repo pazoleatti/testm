@@ -43,7 +43,7 @@
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="53">
+		<g:north size="58">
 			<g:HTMLPanel ui:field="titlePanel" styleName="{style.panelTitle}">
 				<h2>
 					<g:Label text="Название презентора" ui:field="title" />
@@ -51,7 +51,7 @@
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="45">
+		<g:north size="48">
 			<g:HTMLPanel ui:field="descPanel" styleName="{style.panelTitle}">
 				<h3>
 					<g:Label text="Длинный комментарий для этого презентора"
