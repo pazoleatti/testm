@@ -7,5 +7,7 @@
         <result property="taxType" column="tax_type"/>
         <result property="active" column="is_active"/>
         <result property="months"/>
+        <result property="taxPeriodId" column="tax_period_id"/>
+        <result property="order" column="ord"/>
     </resultMap>
 </mapper>

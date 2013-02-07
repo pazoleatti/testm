@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aplana.sbrf.taxaccounting.dao.mapper.TaxPeriodMapper">
+    <resultMap type="com.aplana.sbrf.taxaccounting.model.TaxPeriod" id="taxPeriodMap">
+        <result property="id"/>
+        <result property="taxType" column="tax_type"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+    </resultMap>
+</mapper>

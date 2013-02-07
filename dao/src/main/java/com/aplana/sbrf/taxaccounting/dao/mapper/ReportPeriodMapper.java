@@ -37,4 +37,13 @@ public interface ReportPeriodMapper {
 	@Select("select * from report_period where tax_type = #{taxTypeCode} ")
 	@ResultMap("reportPeriodMap")
 	List<ReportPeriod> listAllPeriodsByTaxType(@Param("taxTypeCode")char taxTypeCode);
+
+	/**
+	 * Возвращает список отчётных периодов, входящий в данный налоговый период
+	 * @param taxPeriodId идентификатор отчётного периода
+	 * @return список всех отчётных периодов
+	 */
+	@Select("select * from report_period where tax_period_id = #{taxPeriodId} order by ord")
+	@ResultMap("reportPeriodMap")
+	List<ReportPeriod> listByTaxPeriod(@Param("taxPeriodId")int taxPeriodId);
 }

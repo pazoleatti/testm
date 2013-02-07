@@ -47,7 +47,7 @@
 
                     <g:HorizontalPanel height="30px">
                         <g:Label width="150px">Имя</g:Label>
-                        <g:TextBox width="300px" ui:field="nameBox"/>
+                        <g:TextBox width="400%" ui:field="nameBox"/>
                     </g:HorizontalPanel>
 
                     <u:ColumnAttributeEditor ui:field="columnAttributeEditor"/>

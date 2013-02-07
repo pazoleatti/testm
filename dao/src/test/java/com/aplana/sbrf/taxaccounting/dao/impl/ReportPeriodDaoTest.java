@@ -35,7 +35,7 @@ public class ReportPeriodDaoTest {
 	}
 
 	@Test(expected = DaoException.class)
-	public void getNotExistantTest() {
+	public void getNotExistentTest() {
 		reportPeriodDao.get(-1);
 	}
 
@@ -72,5 +72,26 @@ public class ReportPeriodDaoTest {
 		
 		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.PROPERTY);
 		assertEquals(0, reportPeriodList.size());		
+	}
+
+	@Test
+	public void listByTaxPeriodSuccessfulTest() {
+		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(1);
+		assertEquals(2, reportPeriodList.size());
+		assertEquals(1, reportPeriodList.get(0).getOrder());
+		assertEquals(2, reportPeriodList.get(1).getOrder());
+
+		reportPeriodList = reportPeriodDao.listByTaxPeriod(21);
+		assertEquals(3, reportPeriodList.size());
+		assertEquals(1, reportPeriodList.get(0).getOrder());
+		assertEquals(2, reportPeriodList.get(1).getOrder());
+		assertEquals(3, reportPeriodList.get(2).getOrder());
+
+		reportPeriodList = reportPeriodDao.listByTaxPeriod(31);
+		assertEquals(1, reportPeriodList.size());
+		assertEquals(1, reportPeriodList.get(0).getOrder());
+
+		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
+		assertEquals(0, reportPeriodList.size());
 	}
 }

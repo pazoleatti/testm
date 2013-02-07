@@ -55,7 +55,6 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
-		// TODO: реализовать метод
-		throw new UnsupportedOperationException("not implemented");
+		return reportPeriodMapper.listByTaxPeriod(taxPeriodId);
 	}
 }

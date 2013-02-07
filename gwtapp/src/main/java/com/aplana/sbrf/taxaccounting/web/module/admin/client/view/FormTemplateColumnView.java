@@ -235,7 +235,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		int index = columnListBox.getSelectedIndex();
 		Column column = columns.get(index);
 		column.setName(nameBox.getValue());
-		setupColumns(index);
+		setColumnList();
+		columnListBox.setSelectedIndex(index);
 	}
 
 	@UiHandler("addColumn")

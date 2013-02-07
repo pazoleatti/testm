@@ -22,7 +22,7 @@
     <g:VerticalSplitPanel height="100%" width="100%">
         <g:HTMLPanel width="100%">
             <g:Label text="Название"/>
-            <g:TextBox width="50%" ui:field="name"/>
+            <g:TextBox width="80%" ui:field="name"/>
             <g:Label text="Условие"/>
             <c:CodeMirror ui:field="condition"/>
         </g:HTMLPanel>
