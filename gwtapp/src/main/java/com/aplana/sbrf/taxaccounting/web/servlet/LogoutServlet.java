@@ -21,16 +21,16 @@ import java.util.regex.Pattern;
 public class LogoutServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String contextPath = request.getContextPath();
+		WebApplicationContext springContext =
+				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
+		SecurityService securityService = (SecurityService)springContext.getBean("securityService");
+		unlockFormData.unlockAllByUserId(securityService.currentUser().getId());
 		if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
 			response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");
 		} else {
 			HttpSession session = request.getSession();
 			if (session != null) {
-				WebApplicationContext springContext =
-						WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-				FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
-				SecurityService securityService = (SecurityService)springContext.getBean("securityService");
-				unlockFormData.unlockAllByUserId(securityService.currentUser().getId());
 				session.invalidate();
 			}
 			response.sendRedirect(contextPath + "/login");
