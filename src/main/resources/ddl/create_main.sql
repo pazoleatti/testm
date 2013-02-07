@@ -238,6 +238,20 @@ comment on column declaration_template.jasper is 'скомпилированны
 
 create sequence seq_declaration_template start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
+create table declaration_type
+(
+  id             number(9) not null,
+  tax_type       char(1) not null,
+  name           varchar(40) not null
+);
+alter table declaration_type add constraint declaration_type_pk primary key (id);
+alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
+
+comment on table declaration_type is ' Виды деклараций';
+comment on column declaration_type.id is 'идентификатор (первичный ключ)';
+comment on column declaration_type.tax_type is 'тип налога';
+comment on column declaration_type.name is 'наименование';
+-----------------------------------------------------------------------------------------------------------------------------------
 create table declaration
 (
   id                      number(18) not null,
