@@ -127,7 +127,7 @@ comment on column cell_style.style_id is 'идентификатор стиля'
 ----------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
-	name varchar(200) not null,
+	name varchar(1000) not null,
 	form_id number(9) not null,
 	ord number(9) not null,
 	alias varchar(100) not null,
@@ -137,7 +137,7 @@ create table form_column (
 	width number(9) not null,
 	precision number(9),
 	dictionary_code varchar2(30),
-	group_name varchar(255),
+	group_name varchar(1000),
 	max_length number(4),
 	checking   number(1) default 0 not null
 );
