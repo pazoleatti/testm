@@ -18,7 +18,8 @@
 				<entry key="FormTemplate" value="java:comp/env/services/cache/aplana/taxaccounting/FormTemplate"/>
 				<entry key="Department" value="java:comp/env/services/cache/aplana/taxaccounting/Department"/>
 				<entry key="User" value="java:comp/env/services/cache/aplana/taxaccounting/User"/>
-                <entry key="DeclarationTemplate" value="java:comp/env/services/cache/aplana/taxaccounting/DeclarationTemplate"/>
+				<entry key="DeclarationType" value="java:comp/env/services/cache/aplana/taxaccounting/DeclarationType"/>
+                <entry key="DeclarationTemplate" value="java:comp/env/services/cache/aplana/taxaccounting/DeclarationTemplate"/>                
 			</map>
 		</property>
 	</bean>
