@@ -229,7 +229,6 @@ create table declaration_template
 (
   id             number(9) not null,
   edition        number(9) not null,
-  tax_type       char(1) not null,
   version        varchar2(20) not null,
   is_active      number(1) not null,
   create_script  CLOB,
@@ -239,13 +238,11 @@ create table declaration_template
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
-alter table declaration_template add constraint declaration_t_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
 alter table declaration_template add constraint declaration_template_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'идентификатор (первичный ключ)';
 comment on column declaration_template.edition is 'номер редакции';
-comment on column declaration_template.tax_type is 'тип налога';
 comment on column declaration_template.version is 'версия';
 comment on column declaration_template.is_active is 'признак активности';
 comment on column declaration_template.create_script is 'скрипт формирования декларации';
