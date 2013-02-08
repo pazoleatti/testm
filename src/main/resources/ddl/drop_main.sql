@@ -22,6 +22,7 @@ drop table sec_role;
 drop table object_lock;
 drop table sec_user;
 drop table form_data_source;
+drop table declaration_source;
 drop sequence seq_department_form_type;
 drop table department_form_type;
 

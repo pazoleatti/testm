@@ -411,6 +411,20 @@ comment on column department_form_type.kind is 'тип налоговой фор
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
+create table declaration_source
+(
+  department_declaration_type_id  number(9) not null,
+  src_department_form_type_id     number(9) not null
+);
+alter table declaration_source add constraint declaration_source_pk primary key (department_declaration_type_id,src_department_form_type_id );
+alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type (id);
+alter table declaration_source add constraint decl_source_fk_dept_formtype foreign key (src_department_form_type_id) references department_form_type (id);
+
+comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
+comment on column declaration_source.department_declaration_type_id is 'иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
+comment on column declaration_source.src_department_form_type_id is 'идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
+
+----------------------------------------------------------------------------------------------------
 create table form_data_source
 (
 department_form_type_id number(9) not null,
