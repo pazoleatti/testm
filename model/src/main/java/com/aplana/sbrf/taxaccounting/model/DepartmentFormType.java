@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 /**
  * Модельный класс, представляющий собой запись о назначении возможности работать с налоговой формой в конкретном департаменте.
  * Указывается: подразделение банка, вид налоговой формы, тип налоговой формы
  * @author dsultanbekov
  */
-public class DepartmentFormType {
+public class DepartmentFormType implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private Long id;
 	private int departmentId;
 	private int formTypeId;
