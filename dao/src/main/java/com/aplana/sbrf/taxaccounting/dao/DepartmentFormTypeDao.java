@@ -30,6 +30,14 @@ public interface DepartmentFormTypeDao {
 	List<DepartmentFormType> getSources(int departmentId, int formTypeId, FormDataKind kind);
 	
 	/**
+	 * Возвращает информацию о формах-источниках, которые должны использоваться при формировании декларации
+	 * @param departmentId идентификатор декларации
+	 * @param declarationTypeId идентификатор вида декларации
+	 * @return информация о формах-источниках в виде списка {@link DepartmentFormType}
+	 */
+	List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
+	
+	/**
 	 * Возвращает информацию о формах-потребителях, которые должны использовать информацию из данной налоговой формы в качестве источника
 	 * @param sourceDepartmentId идентификатор подразделения формы-источника
 	 * @param sourceFormTypeId вид налоговой формы-источника

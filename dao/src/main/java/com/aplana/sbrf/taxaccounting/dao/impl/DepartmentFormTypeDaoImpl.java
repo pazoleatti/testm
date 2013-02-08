@@ -75,4 +75,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	public List<DepartmentFormType> getDepartmentFormTypes(int departmentId) {
 		throw new UnsupportedOperationException("not implemented");
 	}
+
+	@Override
+	public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId) {
+		// TODO: добавить реализацию
+		throw new UnsupportedOperationException("not implemented");
+	}
 }
