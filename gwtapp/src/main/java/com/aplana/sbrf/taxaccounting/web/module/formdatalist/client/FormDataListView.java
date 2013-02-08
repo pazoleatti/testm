@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
@@ -12,15 +14,15 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.List;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -40,9 +42,9 @@ public class FormDataListView extends
 
 	@UiField
 	CellTable<FormDataSearchResultItem> formDataTable;
-
+	
 	@UiField
-	VerticalPanel verticalPanelWithTable;
+	FlexiblePager pager;
 
 	@Inject
 	public FormDataListView(final MyBinder binder) {
@@ -106,9 +108,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
 		formDataTable.addColumn(stateColumn, getHeader("Статус формы"));
 
-		FlexiblePager pager = createFlexiblePager();
 		pager.setDisplay(formDataTable);
-		verticalPanelWithTable.add(pager);
 
 	}
 
@@ -168,18 +168,6 @@ public class FormDataListView extends
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCreateClicked();
 		}
-	}
-
-	private static FlexiblePager createFlexiblePager(){
-		final boolean showFastForwardButton = false;
-		final int fastForwardRows = 0;
-		final boolean showLastPageButton = true;
-		FlexiblePager pager =  new FlexiblePager(SimplePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
-				showLastPageButton);
-		pager.setRangeLimited(true);
-		pager.getElement().getStyle().setProperty("marginLeft", "auto");
-		pager.getElement().getStyle().setProperty("marginRight", "auto");
-		return pager;
 	}
 
 	private Header<String> getHeader(final String columnName){
