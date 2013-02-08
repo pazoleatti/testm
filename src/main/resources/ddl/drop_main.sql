@@ -36,6 +36,7 @@ drop sequence seq_declaration;
 drop table declaration;
 drop sequence seq_declaration_template;
 drop table declaration_template;
+drop sequence seq_dept_declaration_type;
 drop table department_declaration_type;
 drop table declaration_type;
 drop table department;
