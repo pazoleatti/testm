@@ -225,6 +225,23 @@ comment on column declaration_type.id is 'идентификатор (перви
 comment on column declaration_type.tax_type is 'тип налога';
 comment on column declaration_type.name is 'наименование';
 -----------------------------------------------------------------------------------------------------------------------------------
+create table department_declaration_type
+(
+  id                  number(9) not null,
+  department_id       number(9) not null,
+  declaration_type_id number(9) not null
+);
+alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
+alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
+alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+
+comment on table department_declaration_type is 'Сведения о декларациях, с которыми можно работать в подразделении';
+comment on column department_declaration_type.id is 'идентификатор (первичный ключ)';
+comment on column department_declaration_type.department_id is 'идентификатор подразделения';
+comment on column department_declaration_type.declaration_type_id is 'вид декларации';
+
+create sequence seq_dept_declaration_type start with 10000;
+-----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_template
 (
   id             number(9) not null,
