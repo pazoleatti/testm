@@ -29,6 +29,6 @@ public interface DepartmentFormTypeService {
 	 * @param sourceKind тип налоговой формы-источника
 	 * @return информация о формах-потребителях в виде списка {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getDestination(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+	List<DepartmentFormType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 	
 }

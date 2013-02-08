@@ -49,7 +49,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 	}
 
 	@Override
-	public List<DepartmentFormType> getDestination(int sourceDepartmentId,
+	public List<DepartmentFormType> getDestinations(int sourceDepartmentId,
 			int sourceFormTypeId, FormDataKind sourceKind) {
 		return getJdbcTemplate().query(
 				GET_DESTANATIONS,
