@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclar
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationResult;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -90,12 +92,12 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void downloadExcel() {
-		//Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declaration.getId(), null, null);
 	}
 
 	@Override
 	public void downloadAsLegislator() {
-		//Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
 	}
 
 	private void setDeclaration() {
@@ -111,7 +113,6 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 					getProxy().manualReveal(DeclarationDataPresenter.this);
 				}
 			});
-
 		}
 	}
 }
