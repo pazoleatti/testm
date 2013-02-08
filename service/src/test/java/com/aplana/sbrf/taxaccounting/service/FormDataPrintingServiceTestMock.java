@@ -95,26 +95,28 @@ public class FormDataPrintingServiceTestMock {
 		FormType formType = new FormType();
 		formType.setName("Fkfd");
 		when(formData.getFormType()).thenReturn(formType);
-		
+		when(formData.getFormTemplateId()).thenReturn(TB2_ACCEPTED_FORMTEMPLATE_ID);
 		when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
 		when(formData.getDepartmentId()).thenReturn(1);
-		when(formData.getFormTemplateId()).thenReturn(TB2_ACCEPTED_FORMTEMPLATE_ID);
 		
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormTemplateService formTemplateService = mock(FormTemplateService.class);
+		FormDataAccessService formDataAccessService = mock(FormDataAccessService.class);
 
 		// TODO: заменить логгер или вообще использовать дао класс
-		FormTemplate formTemplate = new FormTemplate();
-		formTemplate.setNumberedColumns(true);
 		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(formData);
+		FormTemplate formTemplate = mock(FormTemplate.class);
+		when(formTemplate.isNumberedColumns()).thenReturn(true);
 		when(formTemplateService.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
+		when(formDataAccessService.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateService", formTemplateService);
+		ReflectionTestUtils.setField(formDataPrintingService, "formDataAccessService", formDataAccessService);
 	}
 	
 	@Test
 	public void testReportPrintService(){
-		formDataPrintingService.generateExcel(TB2_APPROVED_FORMDATA_ID);
+		formDataPrintingService.generateExcel(TB1_CONTROL_USER_ID,TB2_APPROVED_FORMDATA_ID);
 	}
 
 }

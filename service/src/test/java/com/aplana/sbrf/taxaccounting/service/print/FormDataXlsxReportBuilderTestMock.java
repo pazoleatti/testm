@@ -108,7 +108,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		formData = mock(FormData.class);
 		formTemplate = mock(FormTemplate.class);
 		when(formData.getFormColumns()).thenReturn(columns);
-		when(formTemplate.isNumberedColumns()).thenReturn(true);
+		when(formTemplate.isNumberedColumns()).thenReturn(false);
 		
 		FormType formType = new FormType();
 		formType.setName("Fkfd");

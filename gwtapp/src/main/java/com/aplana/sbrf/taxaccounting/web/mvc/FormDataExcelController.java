@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 
 
 @Controller
@@ -29,10 +30,13 @@ public class FormDataExcelController {
 	@Autowired
 	FormDataPrintingService formDataPrintingService;
 	
+	@Autowired
+	private SecurityService securityService;
+	
 	@RequestMapping(value = "/{formDataId}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable int formDataId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String filePath = formDataPrintingService.generateExcel(formDataId);
+		String filePath = formDataPrintingService.generateExcel(securityService.currentUser().getId(), formDataId);
 		File file = new File(filePath);
 		OutputStream respOut = resp.getOutputStream();
 		int length   = 0;

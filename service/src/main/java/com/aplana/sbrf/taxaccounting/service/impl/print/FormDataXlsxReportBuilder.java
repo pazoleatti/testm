@@ -262,7 +262,7 @@ public class FormDataXlsxReportBuilder {
 		 * If we want to display number of rows
 		 */
 		if(formTemplate.isNumberedColumns()){
-			Row row3 = sheet.createRow(rowNumber + 2);
+			Row row3 = sheet.createRow(rowNumber + 3);
 			for(int i = 1;i<data.getFormColumns().size() + 1;i++){
 				Cell cell = row3.createCell(i - 1);
 				cell.setCellValue(i);
