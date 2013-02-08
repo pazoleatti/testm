@@ -35,7 +35,7 @@ create table report_period
 (
 id number(9) not null,
 name varchar2(50) not null,
-tax_type char(1) not null,
+tax_type char(1),
 is_active number(1) default 1 not null,
 months    number(2) not null,
 tax_period_id number(9) not null,
