@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.gin.AdminGinjector;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataGinjector;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateGinjector;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorGinjector;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataGinjector;
@@ -19,6 +20,7 @@ public interface ClientGinjector extends ClientGinjectorBase,
 		MainMenuClientGinjector,
 		AdminGinjector,
 		DeclarationTemplateGinjector,
+		DeclarationDataGinjector,
 		ErrorGinjector
 {
 

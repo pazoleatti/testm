@@ -1,0 +1,41 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+
+<g:HTMLPanel height="100%" width="100%">
+    <g:Label text="Декларация" ui:field="titleLabel"/>
+
+    <t:LeftBar height="50px">
+        <g:Button text="Принять" ui:field="acceptButton"/>
+        <g:Button text="Отменить принятие" ui:field="cancelButton"/>
+    </t:LeftBar>
+
+    <g:Label height="30px" text="Основные реквизиты:"/>
+
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">вид налога</g:Label>
+        <g:TextBox enabled="false" text="не реализовано"/>
+    </g:HorizontalPanel>
+
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">отчётный период</g:Label>
+        <g:IntegerBox enabled="false" ui:field="reportPeriodId"/>
+    </g:HorizontalPanel>
+
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">подразделение</g:Label>
+        <g:IntegerBox enabled="false" ui:field="departmentId"/>
+    </g:HorizontalPanel>
+
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">принята</g:Label>
+        <g:CheckBox enabled="false" ui:field="accepted"/>
+    </g:HorizontalPanel>
+
+    <t:LeftBar>
+        <g:Button text="Скачать в виде Excel" ui:field="downloadExcelButton"/>
+        <g:Button text="Скачать в формате законодателя" ui:field="downloadAsLegislatorButton"/>
+    </t:LeftBar>
+
+</g:HTMLPanel>
+</ui:UiBinder>
