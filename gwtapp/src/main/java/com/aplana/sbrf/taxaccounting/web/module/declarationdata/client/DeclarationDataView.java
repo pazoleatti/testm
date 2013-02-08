@@ -75,12 +75,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("acceptButton")
 	public void onAccept(ClickEvent event){
-		getUiHandlers().accept();
+		getUiHandlers().setAccepted(true);
 	}
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().cancel();
+		getUiHandlers().setAccepted(false);
 	}
 
 	@UiHandler("downloadExcelButton")

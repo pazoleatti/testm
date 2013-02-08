@@ -4,10 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -64,24 +64,10 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	@Override
-	public void accept() {
-
-	}
-
-	@Override
-	public void cancel() {
-
-	}
-
-	/**
-	 * Сохраняет шаблон формы. Отправляет его на сервер.
-	 *
-	 */
-	/*
-	@Override
-	public void save() {
+	public void setAccepted(boolean accepted) {
 		UpdateDeclarationAction action = new UpdateDeclarationAction();
-		action.setDeclarationTemplate(declarationTemplate);
+		declaration.setAccepted(accepted);
+		action.setDeclaration(declaration);
 		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
 			@Override
 			public void onReqSuccess(UpdateDeclarationResult result) {
@@ -101,7 +87,6 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 			}
 		});
 	}
-    */
 
 	@Override
 	public void downloadExcel() {
@@ -110,33 +95,23 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void downloadAsLegislator() {
-		//To change body of implemented methods use File | Settings | File Templates.
+		//Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
 
 	private void setDeclaration() {
 		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationDataId, "0"));
 		if (declarationId != 0) {
-
-			Declaration dec = new Declaration();
-			dec.setId(declarationId);
-			dec.setAccepted(true);
-			dec.setDeclarationTemplateId(1);
-			dec.setDepartmentId(1);
-			dec.setReportPeriodId(2);
-			getView().setDeclarationData(dec);
-			getProxy().manualReveal(DeclarationDataPresenter.this);
-			/*
 			GetDeclarationAction action = new GetDeclarationAction();
 			action.setId(declarationId);
 			dispatcher.execute(action, new AbstractCallback<GetDeclarationResult>() {
 				@Override
 				public void onReqSuccess(GetDeclarationResult result) {
-					declaration = result.getDeclarationData();
+					declaration = result.getDeclaration();
 					getView().setDeclarationData(declaration);
 					getProxy().manualReveal(DeclarationDataPresenter.this);
 				}
 			});
-			*/
+
 		}
 	}
 }
