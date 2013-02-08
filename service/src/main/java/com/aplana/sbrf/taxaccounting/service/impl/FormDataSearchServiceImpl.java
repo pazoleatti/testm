@@ -34,16 +34,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
 
-		if(formDataFilter.getReportPeriodId() == null){
-			List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(formDataFilter.getTaxType());
-			List<Integer> reportPeriodIntegerList = new ArrayList<Integer>();
-			for (ReportPeriod reportPeriod : reportPeriodList){
-				reportPeriodIntegerList.add(reportPeriod.getId());
-			}
-			formDataDaoFilter.setReportPeriodIds(reportPeriodIntegerList);
-		} else {
-			formDataDaoFilter.setReportPeriodIds(Arrays.asList(formDataFilter.getReportPeriodId()));
-		}
+		formDataDaoFilter.setReportPeriodIds(
+				formDataFilter.getReportPeriodId() == null ? null : Arrays.asList(formDataFilter.getReportPeriodId())
+		);
 
 		if(formDataFilter.getFormDataKind() == null){
 			FormDataKind[] formDataKinds = FormDataKind.values();
@@ -104,6 +97,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	@Override
+	@Deprecated
 	public List<ReportPeriod> listReportPeriodsByTaxType(TaxType taxType) {
 		return reportPeriodDao.listAllPeriodsByTaxType(taxType);
 	}

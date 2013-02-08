@@ -14,7 +14,6 @@ public class ReportPeriod implements Serializable {
 	
 	private int id;
 	private String name;
-	private TaxType taxType;
 	private boolean active;
 	private int months;
 	private int order;
@@ -45,21 +44,7 @@ public class ReportPeriod implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	/**
-	 * Получить вид налога, по которому ведётся отчётный период
-	 * @deprecated Вид налога нужно определять по налоговому периоду
-	 */
-	public TaxType getTaxType() {
-		return taxType;
-	}
-	/**
-	 * Задать вид налога, по которому ведётся отчётный период
-	 * @param taxType вид налога
-	 * @deprecated Вид налога нужно определять по налоговому периоду
-	 */
-		public void setTaxType(TaxType taxType) {
-		this.taxType = taxType;
-	}
+
 	/**
 	 * Возвращает значение признака активности отчётного перида
 	 * @return true - если период активен, false - в противном случае

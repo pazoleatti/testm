@@ -4,7 +4,6 @@
     <resultMap type="com.aplana.sbrf.taxaccounting.model.ReportPeriod" id="reportPeriodMap">
         <result property="id"/>
         <result property="name"/>
-        <result property="taxType" column="tax_type"/>
         <result property="active" column="is_active"/>
         <result property="months"/>
         <result property="taxPeriodId" column="tax_period_id"/>
