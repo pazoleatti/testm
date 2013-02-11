@@ -9,25 +9,8 @@ import java.io.Serializable;
  */
 public class FormDataPerformer implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private long formDataId;
 	private String name;
 	private String phone;
-	
-	/**
-	 * Получить идентфикатор налоговой формы
-	 * @return идентфикатор налоговой формы
-	 */
-	public long getFormDataId() {
-		return formDataId;
-	}
-	
-	/**
-	 * Задать идентификатор налоговой формы
-	 * @param formDataId идентификатор налоговой формы
-	 */
-	public void setFormDataId(long formDataId) {
-		this.formDataId = formDataId;
-	}
 	
 	/**
 	 * Получить ФИО исполнителя
