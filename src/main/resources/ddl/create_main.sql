@@ -322,6 +322,26 @@ comment on column form_data.report_period_id is 'Идентификатор от
 create sequence seq_form_data start with 10000;
 
 ---------------------------------------------------------------------------------------------------
+create table form_data_signer
+(id           number(18) not null,
+ form_data_id number(18) not null,
+ name         varchar2(100) not null,
+ position     varchar2(200) not null,
+ ord          number(3) not null);
+
+alter table form_data_signer add constraint form_data_signer_pk primary key (id);
+alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id);  
+
+comment on table form_data_signer is 'подписанты налоговых форм';
+comment on column form_data_signer.id is 'идентфикатор записи (первичный ключ)';
+comment on column form_data_signer.form_data_id is 'идентификатор налоговой формы';
+comment on column form_data_signer.name is 'ФИО';
+comment on column form_data_signer.position is 'должность';
+comment on column form_data_signer.ord is 'номер подписанта по порядку';
+
+
+create sequence seq_form_data_signer start with 10000;
+---------------------------------------------------------------------------------------------------
 create table form_data_performer
 (form_data_id number(18) not null,
 name varchar2(100) not null,
