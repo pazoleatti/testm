@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
@@ -16,19 +14,15 @@ import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
 
-@Repository("departmentDao")
+@Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl implements DepartmentDao {
 	private final Log logger = LogFactory.getLog(getClass());
 	
-	@Autowired
-	private BeanFactory beanFactory;
-	
 	@Autowired 
 	private DepartmentMapper departmentMapper;
 	
-	@Override
-	@Cacheable("Department")	
+	@Override	
 	public Department getDepartment(int id) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
@@ -37,10 +31,6 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		if (result == null) {
 			throw new DaoException("Не удалось найти подразделение банка с id = " + id);
 		}
-		
-		Set<Integer> formTypes = departmentMapper.getDepartmentFormTypes(id);
-		result.setFormTypeIds(formTypes);
-		
 		return result;
 	}
 

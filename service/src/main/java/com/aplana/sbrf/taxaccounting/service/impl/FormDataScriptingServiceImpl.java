@@ -1,19 +1,17 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import groovy.lang.GroovyClassLoader;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
@@ -24,14 +22,19 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -56,7 +59,7 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
 
 	private ApplicationContext applicationContext;
 	
@@ -99,9 +102,9 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 		b.put("formData", formData);
 		if (user != null) {
 			b.put("user", user);
-			b.put("userDepartment", departmentDao.getDepartment(user.getDepartmentId()));
+			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));
 		}
-		b.put("formDataDepartment", departmentDao.getDepartment(formData.getDepartmentId()));
+		b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
 
 		try {
 			// execute scripts

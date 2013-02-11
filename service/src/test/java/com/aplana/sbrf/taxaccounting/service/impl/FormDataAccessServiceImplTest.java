@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -127,7 +129,7 @@ public class FormDataAccessServiceImplTest {
 		when(userDao.getUser(GOSBANK_CONTROL_USER_ID)).thenReturn(user);
 		ReflectionTestUtils.setField(service, "userDao", userDao);
 		
-		DepartmentDao departmentDao = mock(DepartmentDao.class);
+	/*	DepartmentDao departmentDao = mock(DepartmentDao.class);
 		Department d;
 		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
 		when(departmentDao.getDepartment(TB1_ID)).thenReturn(d);
@@ -139,6 +141,22 @@ public class FormDataAccessServiceImplTest {
 		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
 		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+		*/
+		
+		
+		DepartmentService departmentService = mock(DepartmentService.class);
+		Department d;
+		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
+		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
+		d = mockDepartment(GOSB_TB1_ID, TB1_ID, DepartmentType.GOSB);
+		when(departmentService.getDepartment(GOSB_TB1_ID)).thenReturn(d);
+		d = mockDepartment(Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
+		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
+
+		ReflectionTestUtils.setField(service, "departmentService", departmentService);
+		
 
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		ReportPeriod rp;

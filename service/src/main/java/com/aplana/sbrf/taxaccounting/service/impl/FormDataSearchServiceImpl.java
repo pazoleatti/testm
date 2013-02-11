@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	private FormDataSearchDao formDataSearchDao;
 
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
 
 	@Autowired
 	private FormTypeDao formTypeDao;
@@ -81,8 +82,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	@Override
 	public List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId) {
 		List<Department> departmentList = new ArrayList<Department>();
-		departmentList.add(departmentDao.getDepartment(parentDepartmentId));
-		departmentList.addAll(departmentDao.getChildren(parentDepartmentId));
+		departmentList.add(departmentService.getDepartment(parentDepartmentId));
+		departmentList.addAll(departmentService.getChildrensDepartment(parentDepartmentId));
 		return departmentList;
 	}
 

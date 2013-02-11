@@ -1,18 +1,28 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 
 @Service
 // TODO: добавить учёт ролей пользователя, но для прототипа достаточно только привязки к депаратаментам
@@ -24,7 +34,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 	
@@ -32,8 +42,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canRead(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
+		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		return canRead(user, userDepartment, formData, formDataDepartment);
 	}
 
@@ -108,8 +118,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canEdit(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
+		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		return canEdit(user, userDepartment, formData, formDataDepartment, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
@@ -207,7 +217,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Override
 	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId) {
 		TAUser user = userDao.getUser(userId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
 		return canCreate(user, userDepartment, formTemplateId, kind, departmentId);
 	}
 	
@@ -222,8 +232,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canDelete(int userId, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		TAUser user = userDao.getUser(userId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
+		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		return canDelete(user, userDepartment, formData, formDataDepartment);
 	}
 	
@@ -236,9 +246,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	@Override
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);		
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		return getAvailableMoves(user, userDepartment, formData, formDataDepartment,
                 reportPeriodDao.get(formData.getReportPeriodId()));
 	}
@@ -332,8 +342,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public FormDataAccessParams getFormDataAccessParams(int userId,	long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentDao.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentDao.getDepartment(formData.getDepartmentId());
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
+		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
 		FormDataAccessParams result = new FormDataAccessParams();

@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 /**
  * DAO для работы с информацией по подразделениям банка 
  */
-@ScriptExposed
 public interface DepartmentDao {
 	/**
 	 * Получить подразделение по коду

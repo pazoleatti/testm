@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.signin.server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
@@ -16,7 +16,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Component
 public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoAction, GetUserInfoResult>{
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
 
 	@Autowired
 	private SecurityService securityService;
@@ -28,7 +28,7 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 	@Override
 	public GetUserInfoResult execute(GetUserInfoAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
-		Department department = departmentDao.getDepartment(user.getDepartmentId());
+		Department department = departmentService.getDepartment(user.getDepartmentId());
 		StringBuilder name = new StringBuilder(user.getLogin());
 		name.append(" (").append(user.getName());
 		if (department != null) {

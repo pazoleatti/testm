@@ -1,27 +1,32 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 
 
 @Service
@@ -41,7 +46,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	private ReportPeriodDao reportPeriodDao;
 	
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
 	
 	@Autowired
 	FormTemplateService formTemplateService;
@@ -104,7 +109,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formData = formDataService.getFormData(userId, action.getFormDataId(), logger, !action.isReadOnly());
 		}
 		result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
-		result.setDepartmenName(departmentDao.getDepartment(formData.getDepartmentId()).getName());
+		result.setDepartmenName(departmentService.getDepartment(formData.getDepartmentId()).getName());
 		result.setNumberedHeader(formTemplateService.get(formData.getFormTemplateId()).isNumberedColumns());
 		result.setAllStyles(formTemplateService.get(formData.getFormTemplateId()).getStyles());
 		result.setFormData(formData);
