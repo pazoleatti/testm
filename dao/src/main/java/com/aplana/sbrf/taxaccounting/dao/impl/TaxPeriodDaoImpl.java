@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.mapper.TaxPeriodMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -16,22 +18,43 @@ import java.util.List;
  */
 @Repository
 @Transactional(readOnly = true)
-public class TaxPeriodDaoImpl implements TaxPeriodDao {
+public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 
-	@Autowired
-	TaxPeriodMapper taxPeriodMapper;
+	private static final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
+		@Override
+		public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
+			TaxPeriod t = new TaxPeriod();
+			t.setId(rs.getInt("id"));
+			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+			t.setStartDate(rs.getDate("start_date"));
+			t.setEndDate(rs.getDate("end_date"));
+			return t;
+		}
+	}
 
 	@Override
 	public TaxPeriod get(int taxPeriodId) {
-		TaxPeriod result = taxPeriodMapper.get(taxPeriodId);
-		if (result == null) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select * from tax_period where id = ?",
+					new Object[] { taxPeriodId },
+					new TaxPeriodRowMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Не удалось найти налоговый период с id = " + taxPeriodId);
 		}
-		return result;
 	}
 
 	@Override
 	public List<TaxPeriod> listByTaxType(TaxType taxType) {
-		return taxPeriodMapper.listByTaxType(taxType.getCode());
+		try {
+			return getJdbcTemplate().query(
+					"select * from tax_period where tax_type = ?",
+					new Object[]{taxType.getCode()},
+					new TaxPeriodRowMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Не удалось получить список налоговых периодов с типом = " + taxType.getCode());
+		}
 	}
 }

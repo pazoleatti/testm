@@ -27,6 +27,7 @@ public class TaxPeriodDaoTest {
 	@Test
 	public void getSuccessfulTest() {
 		TaxPeriod taxPeriod = taxPeriodDao.get(1);
+		assertEquals(1, taxPeriod.getId().intValue());
 		assertEquals(TaxType.TRANSPORT, taxPeriod.getTaxType());
 		assertEquals(getDate(2013, 0, 1), taxPeriod.getStartDate());
 		assertEquals(getDate(2013, 11, 31), taxPeriod.getEndDate());
