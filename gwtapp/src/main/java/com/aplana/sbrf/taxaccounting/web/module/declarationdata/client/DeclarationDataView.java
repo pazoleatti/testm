@@ -66,6 +66,25 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	public void setDeclarationData(Declaration declaration) {
 		titleLabel.setText(declaration.getId().toString());
 		driver.edit(declaration);
+
+		if (declaration.isAccepted()) {
+			acceptButton.setVisible(false);
+			cancelButton.setVisible(true);
+		}
+		else {
+			acceptButton.setVisible(true);
+			cancelButton.setVisible(false);
+		}
+	}
+
+	@Override
+	public void setCannotAccept() {
+		acceptButton.setVisible(false);
+	}
+
+	@Override
+	public void setCannotReject() {
+		cancelButton.setVisible(false);
 	}
 
 	@Override

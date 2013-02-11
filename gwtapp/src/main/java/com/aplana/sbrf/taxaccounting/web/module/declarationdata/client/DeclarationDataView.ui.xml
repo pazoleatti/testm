@@ -28,7 +28,7 @@
     </g:HorizontalPanel>
 
     <g:HorizontalPanel height="30px">
-        <g:Label width="150px">принята</g:Label>
+        <g:Label width="150px">декларация принята</g:Label>
         <g:CheckBox enabled="false" ui:field="accepted"/>
     </g:HorizontalPanel>
 

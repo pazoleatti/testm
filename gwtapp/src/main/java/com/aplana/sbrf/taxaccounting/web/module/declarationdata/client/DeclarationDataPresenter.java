@@ -30,6 +30,8 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	public interface MyView extends View, HasUiHandlers<DeclarationDataUiHandlers> {
 		void setDeclarationData(Declaration declaration);
+		void setCannotAccept();
+		void setCannotReject();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -108,9 +110,20 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 			dispatcher.execute(action, new AbstractCallback<GetDeclarationResult>() {
 				@Override
 				public void onReqSuccess(GetDeclarationResult result) {
-					declaration = result.getDeclaration();
-					getView().setDeclarationData(declaration);
-					getProxy().manualReveal(DeclarationDataPresenter.this);
+					if (result.isCanRead()) {
+						declaration = result.getDeclaration();
+						getView().setDeclarationData(declaration);
+						if (!result.isCanAccept()) {
+							getView().setCannotAccept();
+						}
+						if (!result.isCanReject()) {
+							getView().setCannotReject();
+						}
+						getProxy().manualReveal(DeclarationDataPresenter.this);
+					}
+					else {
+						MessageEvent.fire(this, "Недостаточно прав на просмотр данных декларации");
+					}
 				}
 			});
 		}

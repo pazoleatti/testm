@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
@@ -20,6 +21,9 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 	private DeclarationService declarationService;
 
 	@Autowired
+	private DeclarationAccessService declarationAccessService;
+
+	@Autowired
 	private SecurityService securityService;
 
     public GetDeclarationDataHandler() {
@@ -32,10 +36,11 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 		Integer userId = user.getId();
 
 		GetDeclarationResult result = new GetDeclarationResult();
-		//declarationService.checkLockedByAnotherUser(action.getId(), userId);
 		Declaration declaration = declarationService.get(action.getId(), userId);
-		//declarationTemplateService.lock(action.getId(), userId);
 		result.setDeclaration(declaration);
+		result.setCanRead(declarationAccessService.canRead(userId, action.getId()));
+		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));
+		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
 		return result;
     }
 

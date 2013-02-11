@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,7 +24,7 @@ public class DeclarationDataController {
 	private SecurityService securityService;
 
 	@RequestMapping(value = "/downloadExcel/{declarationId}",method = RequestMethod.GET)
-	public void processDownloadExcel(@PathVariable int declarationId, HttpServletRequest req, HttpServletResponse resp)
+	public void processDownloadExcel(@PathVariable int declarationId, HttpServletResponse resp)
 			throws IOException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
@@ -44,12 +43,12 @@ public class DeclarationDataController {
 	}
 
 	@RequestMapping(value = "/downloadXml/{declarationId}",method = RequestMethod.GET)
-	public void processDownloadXml(@PathVariable int declarationId, HttpServletRequest req, HttpServletResponse resp)
+	public void processDownloadXml(@PathVariable int declarationId, HttpServletResponse resp)
 			throws IOException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
-		if (declarationService.getXlsxData(declarationId, userId) != null) {
+		if (declarationService.getXmlData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
 			String fileName = "Declaration_" + declarationId + ".xml";
 			resp.setContentType("application/octet-stream");
