@@ -269,8 +269,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setWorkflowButtons(List<WorkflowMove> moves) {
 		workflowButtons.clear();
 
-		dockPanel.setWidgetHidden(workflowBar, (moves == null || moves.isEmpty()));
-
 		if (moves != null) {
 			for (final WorkflowMove workflowMove : moves) {
 				Button button = new Button(workflowMove.getName(),
@@ -312,6 +310,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showWorkflowButton(boolean show){
+		dockPanel.setWidgetHidden(workflowBar, !show);
 		workflowButtons.setVisible(show);
 	}
 

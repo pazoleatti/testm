@@ -190,6 +190,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showPrintButton(false);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
+		view.showWorkflowButton(false);
 		view.setLockInformation(false, null, null);
 	}
 
