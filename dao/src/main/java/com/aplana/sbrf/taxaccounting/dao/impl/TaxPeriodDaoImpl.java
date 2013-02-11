@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			return getJdbcTemplate().queryForObject(
 					"select * from tax_period where id = ?",
 					new Object[] { taxPeriodId },
+					new int[] { Types.NUMERIC },
 					new TaxPeriodRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
@@ -51,6 +53,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			return getJdbcTemplate().query(
 					"select * from tax_period where tax_type = ?",
 					new Object[]{taxType.getCode()},
+					new int[] { Types.VARCHAR },
 					new TaxPeriodRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
