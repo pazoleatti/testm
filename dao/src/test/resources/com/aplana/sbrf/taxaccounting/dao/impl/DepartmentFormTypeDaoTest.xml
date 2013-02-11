@@ -6,9 +6,6 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd">
     <import resource="classpath:testDaoContext.xml"/>
     <jdbc:initialize-database>
-    	<jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
-    	<jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/DepartmentFormType.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormDataSource.sql" encoding="UTF-8"/>   
+        <jdbc:script location="classpath:data/DepartmentFormTypeDaoTest.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

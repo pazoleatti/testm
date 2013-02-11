@@ -2,9 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +23,44 @@ public class DepartmentFormTypeDaoTest {
 	DepartmentFormTypeDao departmentFormTypeDao;
 	
 	@Test
-	public void getSources(){
-		assertEquals(5, departmentFormTypeDao.getSources(2, 1, FormDataKind.fromId(3)).size());
+	public void getByDep(){
+		assertEquals(4, departmentFormTypeDao.get(1).size());
 	}
 	
 	@Test
-	public void getDestanations(){
-		assertEquals(2, departmentFormTypeDao.getDestanations(1, 1, FormDataKind.fromId(3)).size());
+	public void getByDepAndTaxType(){
+		assertEquals(1, departmentFormTypeDao.get(1, TaxType.fromCode('T')).size());
+	}
+
+	@Test
+	public void getFormSources1(){
+		assertEquals(6, departmentFormTypeDao.getFormSources(2).size());
 	}
 	
 	@Test
-	public void getSourceDepartmentIds(){
-		assertEquals(new HashSet<Integer>(Arrays.asList(new Integer[]{3, 1})), new HashSet<Integer>(departmentFormTypeDao.getSourceDepartmentIds(2, TaxType.fromCode('T'))));
+	public void getFormSources2(){
+		assertEquals(5, departmentFormTypeDao.getFormSources(2, TaxType.fromCode('T')).size());
+	}
+	
+	@Test
+	public void getFormSources3(){
+		assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3)).size());
+	}
+	
+	@Test
+	public void getDeclarationSources(){
+		assertEquals(2, departmentFormTypeDao.getDeclarationSources(2, 1).size());
+	}
+	
+	@Test
+	public void getFormDestanations(){
+		assertEquals(2, departmentFormTypeDao.getFormDestanations(1, 1, FormDataKind.fromId(3)).size());
+	}
+	
+	@Test
+	public void checkIsSources(){
+		assertEquals(false, departmentFormTypeDao.checkIsSources(0, 0));
+		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
 	}
 
 }
