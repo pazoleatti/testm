@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
@@ -47,6 +48,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button downloadAsLegislatorButton;
 
 	@UiField
+	@Ignore
+	TextBox taxType;
+
+	@UiField
 	IntegerBox reportPeriodId;
 
 	@UiField
@@ -85,6 +90,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setCannotReject() {
 		cancelButton.setVisible(false);
+	}
+
+	@Override
+	public void setTaxType(TaxType taxType) {
+		this.taxType.setValue(taxType.getName());
 	}
 
 	@Override

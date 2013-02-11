@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -32,11 +33,13 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setDeclarationData(Declaration declaration);
 		void setCannotAccept();
 		void setCannotReject();
+		void setTaxType(TaxType taxType);
 	}
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 	private Declaration declaration;
+	private TaxType taxType;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -54,6 +57,9 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+		if (!request.getParameter(DeclarationDataTokens.nType, "").isEmpty()) {
+			taxType = TaxType.valueOf(request.getParameter(DeclarationDataTokens.nType, ""));
+		}
 		setDeclaration();
 	}
 
@@ -103,7 +109,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	private void setDeclaration() {
-		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationDataId, "0"));
+		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationId, "0"));
 		if (declarationId != 0) {
 			GetDeclarationAction action = new GetDeclarationAction();
 			action.setId(declarationId);
@@ -113,6 +119,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 					if (result.isCanRead()) {
 						declaration = result.getDeclaration();
 						getView().setDeclarationData(declaration);
+						getView().setTaxType(taxType);
 						if (!result.isCanAccept()) {
 							getView().setCannotAccept();
 						}

@@ -6,5 +6,6 @@ public final class DeclarationDataTokens {
 	 * Имена страниц
 	 */
 	public static final String declarationData = "!declarationData";
-	public static final String declarationDataId = "declarationDataId";
+	public static final String declarationId = "declarationId";
+	public static final String nType = "nType";
 }

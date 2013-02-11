@@ -14,7 +14,7 @@
 
     <g:HorizontalPanel height="30px">
         <g:Label width="150px">вид налога</g:Label>
-        <g:TextBox enabled="false" text="не реализовано"/>
+        <g:TextBox enabled="false" ui:field="taxType"/>
     </g:HorizontalPanel>
 
     <g:HorizontalPanel height="30px">
