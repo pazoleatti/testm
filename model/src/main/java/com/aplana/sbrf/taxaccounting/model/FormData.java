@@ -20,20 +20,23 @@ public class FormData extends IdentityObject<Long> {
 	private List<Column> formColumns;
 	private List<FormStyle> formStyles;
 	
-	public List<FormStyle> getFormStyles() {
-		return formStyles;
-	}
-
 	private List<DataRow> dataRows;
 	private FormType formType;
+	
+	private FormDataPerformer performer;
+	private List<FormDataSigner> signers;
 
 	public FormData() {
 	}
-
+	
 	public FormData(FormTemplate form) {
 		initFormTemplateParams(form);
 	}
 
+	public List<FormStyle> getFormStyles() {
+		return formStyles;
+	}
+	
 	public WorkflowState getState() {
 		return state;
 	}
@@ -225,6 +228,38 @@ public class FormData extends IdentityObject<Long> {
 		}
 		sb.append('-');
 		return sb.toString();
+	}
+
+	/**
+	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой формы}
+	 * @return информация об исполнителе налоговой формы
+	 */
+	public FormDataPerformer getPerformer() {
+		return performer;
+	}
+
+	/**
+	 * Задать информацию об {@link FormDataPerformer исполнителе налоговой формы}
+	 * @param performer информация об исполнителе налоговой формы
+	 */
+	public void setPerformer(FormDataPerformer performer) {
+		this.performer = performer;
+	}
+
+	/**
+	 * Получить список подписантов налоговой формы
+	 * @return список {@link FormDataSigner подписантов} налоговой формы
+	 */
+	public List<FormDataSigner> getSigners() {
+		return signers;
+	}
+
+	/**
+	 * Задать список подписантов налоговой формы
+	 * @param signers список {@link FormDataSigner подписантов} налоговой формы
+	 */
+	public void setSigners(List<FormDataSigner> signers) {
+		this.signers = signers;
 	}
 	
 }
