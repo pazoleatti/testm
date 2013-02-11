@@ -322,6 +322,20 @@ comment on column form_data.report_period_id is 'Идентификатор от
 create sequence seq_form_data start with 10000;
 
 ---------------------------------------------------------------------------------------------------
+create table form_data_performer
+(form_data_id number(18) not null,
+name varchar2(100) not null,
+phone varchar2(20));
+
+alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
+alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id);  
+
+comment on table form_data_performer is 'исполнитель налоговой формы';
+comment on column form_data_performer.form_data_id is 'Первичный ключ';
+comment on column form_data_performer.name is 'ФИО исполнителя';
+comment on column form_data_performer.phone is 'телефон';
+
+---------------------------------------------------------------------------------------------------
 
 create table data_row (
 	id number(18) not null,
