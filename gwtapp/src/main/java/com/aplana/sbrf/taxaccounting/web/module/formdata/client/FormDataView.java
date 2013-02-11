@@ -18,10 +18,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -88,6 +85,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Label stateLabel;
 
+	@UiField
+	CheckBox showCheckedColumns;
+
 	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
 
@@ -126,10 +126,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		factory.setReadOnly(readOnly);
 
 		for (Column col : columnsData) {
-			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
-					.createTableColumn(col, formDataTable);
-			formDataTable.addColumn(tableCol, col.getName());
-			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+			if (showCheckedColumns.getValue() || !col.isChecking()) {
+				com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
+						.createTableColumn(col, formDataTable);
+				formDataTable.addColumn(tableCol, col.getName());
+				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+			}
 		}
 
 	}
@@ -244,6 +246,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	void onDeleteFormButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onDeleteFormClicked();
+		}
+	}
+
+	@UiHandler("showCheckedColumns")
+	void onShowCheckedColumnsClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onShowCheckedColumns();
 		}
 	}
 

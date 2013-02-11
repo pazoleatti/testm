@@ -180,6 +180,11 @@ public class FormDataPresenter extends
 		manageDeleteRowButtonEnabled();
 	}
 
+	@Override
+	public void onShowCheckedColumns() {
+		getView().setColumnsData(formData.getFormColumns(), readOnlyMode);
+	}
+
 	private void manageDeleteRowButtonEnabled() {
 		if (!readOnlyMode) {
 			MyView view = getView();

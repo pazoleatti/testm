@@ -28,4 +28,6 @@ public interface FormDataUiHandlers extends UiHandlers{
 	public void onWorkflowMove(WorkflowMove wfMove);
 
 	public void onSelectRow();
+
+	public void onShowCheckedColumns();
 }

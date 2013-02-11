@@ -68,8 +68,10 @@
         <g:north size="30">
             <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}"/>
         </g:north>
-
-		<g:center>
+        <g:north size="20">
+            <g:CheckBox ui:field="showCheckedColumns" value="true" text="Показывать контрольные поля"/>
+        </g:north>
+        <g:center>
 			<style:GenericDataGrid ui:field="formDataTable" />
 		</g:center>
 
