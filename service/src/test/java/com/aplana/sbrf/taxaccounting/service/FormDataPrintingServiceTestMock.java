@@ -41,6 +41,7 @@ public class FormDataPrintingServiceTestMock {
 		Column colNum = new NumericColumn();
 		Column colNum1 = new NumericColumn();
 		Column colNum2 = new NumericColumn();
+		Column colNum3 = new NumericColumn();
 		
 		Column colStr = new StringColumn();
 		Column colStr1 = new StringColumn();
@@ -53,6 +54,7 @@ public class FormDataPrintingServiceTestMock {
 		colNum.setGroupName("Нумерованные");
 		colNum1.setGroupName("Нумерованные");
 		colNum2.setGroupName("Нумерованные");
+		colNum3.setGroupName(null);
 		colStr.setGroupName("Строковые");
 		colStr1.setGroupName("Строковые");
 		colStr2.setGroupName("Строковые");
@@ -63,7 +65,9 @@ public class FormDataPrintingServiceTestMock {
 		colNum.setAlias("Number");
 		colNum1.setName("Номер");
 		colNum2.setAlias("Number1");
+		colNum3.setAlias("Number3");
 		colNum.setName("Номер");
+		colNum3.setName("Номер 3");
 		colNum1.setAlias("Number2");
 		colNum2.setName("Номер");
 		colStr.setAlias("String");
@@ -88,6 +92,7 @@ public class FormDataPrintingServiceTestMock {
 		columns.add(colNum);
 		columns.add(colNum1);
 		columns.add(colNum2);
+		columns.add(colNum3);
 		
 		formData = mock(FormData.class);
 		when(formData.getFormColumns()).thenReturn(columns);
@@ -105,8 +110,9 @@ public class FormDataPrintingServiceTestMock {
 
 		// TODO: заменить логгер или вообще использовать дао класс
 		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(formData);
-		FormTemplate formTemplate = mock(FormTemplate.class);
-		when(formTemplate.isNumberedColumns()).thenReturn(true);
+		FormTemplate formTemplate = new FormTemplate();
+		formTemplate.setNumberedColumns(true);
+		//when(formTemplate.isNumberedColumns()).thenReturn(true);
 		when(formTemplateService.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
 		when(formDataAccessService.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
@@ -116,7 +122,7 @@ public class FormDataPrintingServiceTestMock {
 	
 	@Test
 	public void testReportPrintService(){
-		formDataPrintingService.generateExcel(TB1_CONTROL_USER_ID,TB2_APPROVED_FORMDATA_ID);
+		formDataPrintingService.generateExcel(TB1_CONTROL_USER_ID,TB2_APPROVED_FORMDATA_ID, true);
 	}
 
 }

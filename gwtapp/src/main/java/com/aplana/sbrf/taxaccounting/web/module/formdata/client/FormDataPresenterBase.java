@@ -73,6 +73,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		DataRow getSelectedRow();
 
 		void enableRemoveRowButton(boolean enable);
+		
+		boolean getCheckedColumnsClicked();
 	}
 
 	public static final String NAME_TOKEN = "!formData";

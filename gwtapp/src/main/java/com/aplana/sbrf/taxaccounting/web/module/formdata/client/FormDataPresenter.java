@@ -207,7 +207,7 @@ public class FormDataPresenter extends
 	@Override
 	public void onPrintClicked() {
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadController/"
-				+ formData.getId(), "", "");
+				+ formData.getId() + "/" + getView().getCheckedColumnsClicked(), "", "");
 	}
 
 	@Override

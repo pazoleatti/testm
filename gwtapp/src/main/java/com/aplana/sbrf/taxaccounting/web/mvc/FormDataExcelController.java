@@ -33,10 +33,10 @@ public class FormDataExcelController {
 	@Autowired
 	private SecurityService securityService;
 	
-	@RequestMapping(value = "/{formDataId}",method = RequestMethod.GET)
-	public void processDownload(@PathVariable int formDataId, HttpServletRequest req, HttpServletResponse resp)
+	@RequestMapping(value = "/{formDataId}/{isShowChecked}",method = RequestMethod.GET)
+	public void processDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String filePath = formDataPrintingService.generateExcel(securityService.currentUser().getId(), formDataId);
+		String filePath = formDataPrintingService.generateExcel(securityService.currentUser().getId(), formDataId, isShowChecked);
 		File file = new File(filePath);
 		OutputStream respOut = resp.getOutputStream();
 		int length   = 0;

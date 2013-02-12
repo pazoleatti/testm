@@ -357,4 +357,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+	@Override
+	public boolean getCheckedColumnsClicked() {
+		return showCheckedColumns.getValue();
+	}
+
 }

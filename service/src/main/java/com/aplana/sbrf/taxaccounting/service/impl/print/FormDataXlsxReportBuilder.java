@@ -38,6 +38,7 @@ public class FormDataXlsxReportBuilder {
 	
 	private int rowNumber = 6;
 	private int cellNumber = 0;
+	private boolean isShowChecked;
 	
 	private String dateFormater = "dd.MM.yyyy";
 	
@@ -60,6 +61,8 @@ public class FormDataXlsxReportBuilder {
 	
 	private Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
+
+	private int skip = 0;
 	
 	private class CellStyleBuilder{
 		public CellStyle cellStyle;
@@ -178,10 +181,11 @@ public class FormDataXlsxReportBuilder {
 		
 	}
 	
-	public FormDataXlsxReportBuilder(FormData data,FormTemplate formTemplate) {
+	public FormDataXlsxReportBuilder(FormData data,FormTemplate formTemplate, boolean isShowChecked) {
 		this();
 		this.data = data;
 		this.formTemplate = formTemplate;
+		this.isShowChecked = isShowChecked;
 		
 		Cell cell = sheet.createRow(0).createCell(0);
 		cell.setCellValue(data.getFormType().getName());
@@ -226,14 +230,17 @@ public class FormDataXlsxReportBuilder {
 			Row row2 = sheet.createRow(rowNumber + 1);
 			for(int i = 0;i<data.getFormColumns().size();i++){
 				if(data.getFormColumns().get(i).getGroupName()==null){
-					
-					aliasMap.put(i, data.getFormColumns().get(i).getAlias());
-					fillWidth(i,data.getFormColumns().get(i).getWidth());
-					Cell cell = row.createCell(i);
+					if(!isShowChecked && data.getFormColumns().get(i).isChecking()){
+						skip++;
+						continue;
+					}
+					aliasMap.put(cellNumber, data.getFormColumns().get(i).getAlias());
+					fillWidth(cellNumber,data.getFormColumns().get(i).getWidth());
+					Cell cell = row.createCell(cellNumber);
 					cell.setCellStyle(cellStyleBuilder.cellStyle);
 					cell.setCellValue(data.getFormColumns().get(i).getName());
-					tableBorders(i,i, rowNumber, rowNumber + 1);
-					
+					tableBorders(i - skip,i - skip, rowNumber, rowNumber + 1);
+					cellNumber++;
 				}
 				else{
 					int j;
@@ -243,7 +250,7 @@ public class FormDataXlsxReportBuilder {
 							break;
 						}
 					}
-					groupCells(i,j - 1,row,row2);
+					groupCells(i - skip,j - skip - 1,row,row2,i);
 					i+=(j-i)-1;
 				}
 				
@@ -251,6 +258,10 @@ public class FormDataXlsxReportBuilder {
 		}
 		else{
 			for (Column el : data.getFormColumns()) {
+				if(!isShowChecked && el.isChecking()){
+					skip++;
+					continue;
+				}
 				aliasMap.put(cellNumber, el.getAlias());
 				Cell cell = row.createCell(cellNumber++);
 				cell.setCellStyle(cellStyleBuilder.cellStyle);
@@ -263,9 +274,15 @@ public class FormDataXlsxReportBuilder {
 		 */
 		if(formTemplate.isNumberedColumns()){
 			Row row3 = sheet.createRow(rowNumber + 3);
+			int k = 0;
 			for(int i = 1;i<data.getFormColumns().size() + 1;i++){
-				Cell cell = row3.createCell(i - 1);
-				cell.setCellValue(i);
+				if(!isShowChecked && data.getFormColumns().get(i - 1).isChecking()){
+					++k;
+					continue;
+				}
+					
+				Cell cell = row3.createCell(i - k - 1);
+				cell.setCellValue(i - k);
 				cell.setCellStyle(cellStyleBuilder.cellStyle);
 			}
 		}
@@ -275,20 +292,58 @@ public class FormDataXlsxReportBuilder {
 		rowNumber = sheet.getLastRowNum() + 1;
 	}
 	
+	/*
+	 * realNumber - the real number that we iterate over list of columns
+	 * startCell - the cell in workbook to be filled
+	 */
+	private void groupCells(int startCell,int endCell,Row row1,Row row2, int realCell){
+		if(!isShowChecked){
+			int k = 0;
+			for(int i = startCell;i<=endCell;i++){
+				if(!data.getFormColumns().get((i - startCell) + realCell).isChecking()){
+					//Because first checking is first cell for group name
+					if(i == startCell){
+						Cell cell = row1.createCell(startCell);
+						cell.setCellStyle(cellStyleBuilder.cellStyle);
+						cell.setCellValue(data.getFormColumns().get(realCell).getGroupName());
+						fillWidth(startCell,data.getFormColumns().get(realCell).getWidth());
+					}
+					aliasMap.put(cellNumber, data.getFormColumns().get((i - startCell) + realCell).getAlias());
+					//fillWidth(i,data.getFormColumns().get(i).getName().length());
+					Cell cell1 = row2.createCell(cellNumber);
+					cell1.setCellStyle(cellStyleBuilder.cellStyle);
+					cell1.setCellValue(data.getFormColumns().get((i - startCell) + realCell).getName());
+					cellNumber++;
+				}
+				else
+					++k; // again to check whether the second part of the header field to be skipped 
+				
+			}
+			if(startCell < endCell -k)
+				tableBorders(startCell,endCell - k,rowNumber, rowNumber);
+			//headerCellNumber = endCell - skip;
+			skip  += k;
+		}else{
+			groupCells(startCell, endCell, row1, row2);
+		}
+		
+		
+	}
+	
 	private void groupCells(int startCell,int endCell,Row row1,Row row2){
-		tableBorders(startCell,endCell,rowNumber, rowNumber);
 		Cell cell = row1.createCell(startCell);
 		cell.setCellStyle(cellStyleBuilder.cellStyle);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
 		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
-		
 		for(int i = startCell;i<=endCell;i++){
-			aliasMap.put(i, data.getFormColumns().get(i).getAlias());
+			aliasMap.put(cellNumber, data.getFormColumns().get(i).getAlias());
 			//fillWidth(i,data.getFormColumns().get(i).getName().length());
-			cell = row2.createCell(i);
-			cell.setCellStyle(cellStyleBuilder.cellStyle);
-			cell.setCellValue(data.getFormColumns().get(i).getName());
+			Cell cell1 = row2.createCell(cellNumber);
+			cell1.setCellStyle(cellStyleBuilder.cellStyle);
+			cell1.setCellValue(data.getFormColumns().get(i).getName());
+			cellNumber++;
 		}
+		tableBorders(startCell,endCell,rowNumber, rowNumber);
 	}
 	
 	private void tableBorders(int startCell,int endCell, int startRow, int endRow){
@@ -374,7 +429,14 @@ public class FormDataXlsxReportBuilder {
 						currRow.getRowNum() + cell.getRowSpan() - 1, 
 						currColumn, 
 						data.getFormColumns().size());
-			}else{
+			}else if(currColumn + cell.getColSpan() > data.getFormColumns().size() - skip - 1){
+				region = new CellRangeAddress(
+						currRow.getRowNum(), 
+						currRow.getRowNum() + cell.getRowSpan() - 1, 
+						currColumn, 
+						data.getFormColumns().size() - skip - 1);
+			}
+			else{
 				region = new CellRangeAddress(
 						currRow.getRowNum(), 
 						currRow.getRowNum() + cell.getRowSpan() - 1, 
