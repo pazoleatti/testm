@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -105,7 +106,7 @@ public class FormDataPrintingServiceTestMock {
 		when(formData.getDepartmentId()).thenReturn(1);
 		
 		FormDataDao formDataDao = mock(FormDataDao.class);
-		FormTemplateService formTemplateService = mock(FormTemplateService.class);
+		FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
 		FormDataAccessService formDataAccessService = mock(FormDataAccessService.class);
 
 		// TODO: заменить логгер или вообще использовать дао класс
@@ -113,10 +114,10 @@ public class FormDataPrintingServiceTestMock {
 		FormTemplate formTemplate = new FormTemplate();
 		formTemplate.setNumberedColumns(true);
 		//when(formTemplate.isNumberedColumns()).thenReturn(true);
-		when(formTemplateService.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
+		when(formTemplateDao.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
 		when(formDataAccessService.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
-		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateService", formTemplateService);
+		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateDao", formTemplateDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataAccessService", formDataAccessService);
 	}
 	
