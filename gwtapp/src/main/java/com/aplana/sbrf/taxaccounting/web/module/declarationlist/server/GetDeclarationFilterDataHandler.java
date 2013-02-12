@@ -33,11 +33,11 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
 		if (securityService.currentUser().hasRole("ROLE_CONTROL")){
-			//TODO: НЕ ДОДЕЛАНО! ПРОКОНСУЛЬТИРОВАТЬСЯ!
+			//TODO: создана отдельная задача SBRFACCTAX-1260
 			res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
 					.getDepartmentId()));
 		} else if (securityService.currentUser().hasRole("ROLE_CONTROL_UNP")){
-			//TODO: НЕ ДОДЕЛАНО! ПРОКОНСУЛЬТИРОВАТЬСЯ!
+			//TODO: создана отдельная задача SBRFACCTAX-1260
 			res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
 					.getDepartmentId()));
 		}
