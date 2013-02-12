@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
@@ -21,7 +24,16 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 	private DeclarationService declarationService;
 
 	@Autowired
+	private DepartmentService departmentService;
+
+	@Autowired
 	private DeclarationAccessService declarationAccessService;
+
+	@Autowired
+	private DeclarationTemplateService declarationTemplateService;
+
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
 	private SecurityService securityService;
@@ -41,6 +53,10 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 		result.setCanRead(declarationAccessService.canRead(userId, action.getId()));
 		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));
 		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
+		result.setTaxType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getName());
+		result.setDepartment(departmentService.getDepartment(declaration.getDepartmentId()).getName());
+		result.setReportPeriod(reportPeriodDao.get(declaration.getReportPeriodId()).getName());
+
 		return result;
     }
 

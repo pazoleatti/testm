@@ -7,5 +7,4 @@ public final class DeclarationDataTokens {
 	 */
 	public static final String declarationData = "!declarationData";
 	public static final String declarationId = "declarationId";
-	public static final String nType = "nType";
 }

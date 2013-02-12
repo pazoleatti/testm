@@ -5,6 +5,9 @@ import com.gwtplatform.dispatch.shared.Result;
 
 public class GetDeclarationResult implements Result {
     private Declaration declaration;
+	private String taxType;
+	private String department;
+	private String reportPeriod;
 
 	private boolean canRead;
 	private boolean canAccept;
@@ -40,5 +43,29 @@ public class GetDeclarationResult implements Result {
 
 	public void setCanReject(boolean canReject) {
 		this.canReject = canReject;
+	}
+
+	public String getTaxType() {
+		return taxType;
+	}
+
+	public void setTaxType(String taxType) {
+		this.taxType = taxType;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+
+	public String getReportPeriod() {
+		return reportPeriod;
+	}
+
+	public void setReportPeriod(String reportPeriod) {
+		this.reportPeriod = reportPeriod;
 	}
 }

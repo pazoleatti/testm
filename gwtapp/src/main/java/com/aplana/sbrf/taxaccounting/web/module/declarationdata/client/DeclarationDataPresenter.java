@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationAction;
@@ -33,13 +34,14 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setDeclarationData(Declaration declaration);
 		void setCannotAccept();
 		void setCannotReject();
-		void setTaxType(TaxType taxType);
+		void setTaxType(String taxType);
+		void setDepartment(String department);
+		void setReportPeriod(String reportPeriod);
 	}
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 	private Declaration declaration;
-	private TaxType taxType;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -57,9 +59,6 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		if (!request.getParameter(DeclarationDataTokens.nType, "").isEmpty()) {
-			taxType = TaxType.valueOf(request.getParameter(DeclarationDataTokens.nType, ""));
-		}
 		setDeclaration();
 	}
 
@@ -119,7 +118,11 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 					if (result.isCanRead()) {
 						declaration = result.getDeclaration();
 						getView().setDeclarationData(declaration);
-						getView().setTaxType(taxType);
+						getView().setTaxType(result.getTaxType());
+						updateTitle(result.getTaxType());
+						getView().setReportPeriod(result.getReportPeriod());
+						getView().setDepartment(result.getDepartment());
+
 						if (!result.isCanAccept()) {
 							getView().setCannotAccept();
 						}
@@ -134,5 +137,9 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 				}
 			});
 		}
+	}
+
+	private void updateTitle(String taxType){
+		TitleUpdateEvent.fire(this, "Декларация", taxType);
 	}
 }

@@ -12,6 +12,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdata.FormData"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationdata.DeclarationData"/>
 
     <source path="client"/>
     <source path="shared"/>

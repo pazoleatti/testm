@@ -3,39 +3,34 @@
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
 
 <g:HTMLPanel height="100%" width="100%">
-    <g:Label text="Декларация" ui:field="titleLabel"/>
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">Тип налога:</g:Label>
+        <g:Label ui:field="taxType"/>
+    </g:HorizontalPanel>
 
-    <t:LeftBar height="50px">
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">Отчётный период:</g:Label>
+        <g:Label ui:field="reportPeriod"/>
+    </g:HorizontalPanel>
+
+    <g:HorizontalPanel height="30px">
+        <g:Label width="150px">Подразделение:</g:Label>
+        <g:Label ui:field="department"/>
+    </g:HorizontalPanel>
+
+    <g:HorizontalPanel>
+        <g:Label width="150px">Декларация принята:</g:Label>
+        <g:CheckBox enabled="false" ui:field="accepted"/>
+    </g:HorizontalPanel>
+
+    <t:LeftBar height="30px">
         <g:Button text="Принять" ui:field="acceptButton"/>
         <g:Button text="Отменить принятие" ui:field="cancelButton"/>
     </t:LeftBar>
-
-    <g:Label height="30px" text="Основные реквизиты:"/>
-
-    <g:HorizontalPanel height="30px">
-        <g:Label width="150px">вид налога</g:Label>
-        <g:TextBox enabled="false" ui:field="taxType"/>
-    </g:HorizontalPanel>
-
-    <g:HorizontalPanel height="30px">
-        <g:Label width="150px">отчётный период</g:Label>
-        <g:IntegerBox enabled="false" ui:field="reportPeriodId"/>
-    </g:HorizontalPanel>
-
-    <g:HorizontalPanel height="30px">
-        <g:Label width="150px">подразделение</g:Label>
-        <g:IntegerBox enabled="false" ui:field="departmentId"/>
-    </g:HorizontalPanel>
-
-    <g:HorizontalPanel height="30px">
-        <g:Label width="150px">декларация принята</g:Label>
-        <g:CheckBox enabled="false" ui:field="accepted"/>
-    </g:HorizontalPanel>
 
     <t:LeftBar>
         <g:Button text="Скачать в виде Excel" ui:field="downloadExcelButton"/>
         <g:Button text="Скачать в формате законодателя" ui:field="downloadAsLegislatorButton"/>
     </t:LeftBar>
-
 </g:HTMLPanel>
 </ui:UiBinder>

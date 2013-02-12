@@ -17,45 +17,32 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 
 public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHandlers>
-		implements DeclarationDataPresenter.MyView, Editor<Declaration> {
+		implements DeclarationDataPresenter.MyView{
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-	interface MyDriver extends SimpleBeanEditorDriver<Declaration, DeclarationDataView> {
-	}
-
 	private final Widget widget;
-	private final MyDriver driver = GWT.create(MyDriver.class);
 
 	@UiField
-	@Ignore
-	Label titleLabel;
-
-	@UiField
-	@Ignore
 	Button acceptButton;
 
 	@UiField
-	@Ignore
 	Button cancelButton;
 
 	@UiField
-	@Ignore
 	Button downloadExcelButton;
 
 	@UiField
-	@Ignore
 	Button downloadAsLegislatorButton;
 
 	@UiField
-	@Ignore
-	TextBox taxType;
+	Label taxType;
 
 	@UiField
-	IntegerBox reportPeriodId;
+	Label reportPeriod;
 
 	@UiField
-	IntegerBox departmentId;
+	Label department;
 
 	@UiField
 	CheckBox accepted;
@@ -64,14 +51,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
-		driver.initialize(this);
 	}
 
 	@Override
 	public void setDeclarationData(Declaration declaration) {
-		titleLabel.setText(declaration.getId().toString());
-		driver.edit(declaration);
-
 		if (declaration.isAccepted()) {
 			acceptButton.setVisible(false);
 			cancelButton.setVisible(true);
@@ -80,6 +63,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 			acceptButton.setVisible(true);
 			cancelButton.setVisible(false);
 		}
+		accepted.setValue(declaration.isAccepted());
 	}
 
 	@Override
@@ -93,8 +77,18 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setTaxType(TaxType taxType) {
-		this.taxType.setValue(taxType.getName());
+	public void setTaxType(String taxType) {
+		this.taxType.setText(taxType);
+	}
+
+	@Override
+	public void setDepartment(String department) {
+		this.department.setText(department);
+	}
+
+	@Override
+	public void setReportPeriod(String reportPeriod) {
+		this.reportPeriod.setText(reportPeriod);
 	}
 
 	@Override
