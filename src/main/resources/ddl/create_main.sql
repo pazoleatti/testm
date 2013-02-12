@@ -574,3 +574,4 @@ comment on column cell_span_info.rowspan is 'Число ячеек, которы
  create index i_form_data_form_id on form_data(form_id);
  create index i_form_data_department_id on form_data(department_id);
  create index i_form_data_kind on form_data(kind);
+ create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
