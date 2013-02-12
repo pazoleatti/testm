@@ -8,6 +8,7 @@ public class GetDeclarationResult implements Result {
 	private String taxType;
 	private String department;
 	private String reportPeriod;
+	private String declarationType;
 
 	private boolean canRead;
 	private boolean canAccept;
@@ -67,5 +68,13 @@ public class GetDeclarationResult implements Result {
 
 	public void setReportPeriod(String reportPeriod) {
 		this.reportPeriod = reportPeriod;
+	}
+
+	public String getDeclarationType() {
+		return declarationType;
+	}
+
+	public void setDeclarationType(String declarationType) {
+		this.declarationType = declarationType;
 	}
 }

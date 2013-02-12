@@ -119,9 +119,9 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						declaration = result.getDeclaration();
 						getView().setDeclarationData(declaration);
 						getView().setTaxType(result.getTaxType());
-						updateTitle(result.getTaxType());
 						getView().setReportPeriod(result.getReportPeriod());
 						getView().setDepartment(result.getDepartment());
+						updateTitle(result.getDeclarationType());
 
 						if (!result.isCanAccept()) {
 							getView().setCannotAccept();
@@ -139,7 +139,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		}
 	}
 
-	private void updateTitle(String taxType){
-		TitleUpdateEvent.fire(this, "Декларация", taxType);
+	private void updateTitle(String declarationType){
+		TitleUpdateEvent.fire(this, "Декларация", declarationType);
 	}
 }

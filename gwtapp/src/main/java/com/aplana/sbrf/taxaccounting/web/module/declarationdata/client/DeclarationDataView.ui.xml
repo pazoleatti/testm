@@ -4,7 +4,7 @@
 
 <g:HTMLPanel height="100%" width="100%">
     <g:HorizontalPanel height="30px">
-        <g:Label width="150px">Тип налога:</g:Label>
+        <g:Label width="150px">Вид налога:</g:Label>
         <g:Label ui:field="taxType"/>
     </g:HorizontalPanel>
 
