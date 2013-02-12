@@ -2,8 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Сервис для работы с {@link налоговыми декларациями Declaration}
@@ -55,4 +54,11 @@ public interface DeclarationService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	byte[] getXlsxData(long declarationId, int userId);
+
+	/**
+	 * Данный метод, вызывает FormDataDao#findPage() для выполнения запроса к базе по заданным параметрам фильтра.
+	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям
+	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
+	 */
+	PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter);
 }

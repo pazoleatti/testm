@@ -17,4 +17,5 @@
     <source path="pager"/>
     <source path="datarow"/>
     <source path="treepicker"/>
+    <source path="reportperiodpicker"/>
 </module>

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Dao-объект для работы с {@link Declaration декларациями}
@@ -55,4 +55,16 @@ public interface DeclarationDao {
 	 * @throws DaoException если такой декларации не существует
 	 */
 	void delete(long declarationId);
+
+	/**
+	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
+	 * по декларациям, соответствующие критериям поиска
+	 * @param declarationFilter - фильтр, по которому происходит поиск
+	 * @param ordering - способ сортировки
+	 * @param ascSorting - true, если сортируем по возрастанию, false - по убыванию
+	 * @param paginatedSearchParams - диапазон индексов, задающий страницу
+	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
+	 */
+	PaginatedSearchResult<DeclarationSearchResultItem> findPage(DeclarationFilter declarationFilter, DeclarationSearchOrdering ordering,
+	                                          boolean ascSorting, PaginatedSearchParams paginatedSearchParams);
 }

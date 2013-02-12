@@ -4,12 +4,10 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
 import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -123,5 +121,12 @@ public class DeclarationServiceImpl implements DeclarationService {
 		} else {
 			throw new AccessDeniedException("Невозможно получить xlsx");
 		}
+	}
+
+	@Override
+	public PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter) {
+		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
+				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
+				declarationFilter.getCountOfRecords()));
 	}
 }
