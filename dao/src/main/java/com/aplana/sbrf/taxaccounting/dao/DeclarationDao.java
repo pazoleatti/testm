@@ -67,4 +67,11 @@ public interface DeclarationDao {
 	 */
 	PaginatedSearchResult<DeclarationSearchResultItem> findPage(DeclarationFilter declarationFilter, DeclarationSearchOrdering ordering,
 	                                          boolean ascSorting, PaginatedSearchParams paginatedSearchParams);
+
+	/**
+	 * Получить количество записей, удовлетворяющих запросу
+	 * @param filter фильтр, по которому происходит поиск
+	 * @return количество записей, удовлетворяющих фильтру
+	 */
+	long getCount(DeclarationFilter filter);
 }

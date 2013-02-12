@@ -155,7 +155,8 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 		}		
 	}
 
-	private long getCount(DeclarationFilter filter) {
+	@Override
+	public long getCount(DeclarationFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*)");
 		appendFromAndWhereClause(sql, filter);
 		return getJdbcTemplate().queryForLong(sql.toString());
