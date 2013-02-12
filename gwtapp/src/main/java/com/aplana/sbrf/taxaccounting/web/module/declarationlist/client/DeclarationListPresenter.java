@@ -102,11 +102,11 @@ public class DeclarationListPresenter extends
 		if(taxType.getName().equals(TaxType.VAT.getName())){
 			description = "Деклараци по НДС";
 		}  else if (taxType.getName().equals(TaxType.PROPERTY.getName())){
-			description = "Деклараци по ИМУЩЕСТВУ";
+			description = "Деклараци по налогу на имущество";
 		}  else if (taxType.getName().equals(TaxType.TRANSPORT.getName())){
-			description = "Деклараци по ТРАНСПОРТУ";
+			description = "Деклараци по транспортному налогу";
 		}  else if (taxType.getName().equals(TaxType.INCOME.getName())){
-			description = "Деклараци по ПРИБЫЛИ";
+			description = "Деклараци по налогу на прибыль";
 		}
 		TitleUpdateEvent.fire(this, "Список деклараций", description);
 	}
