@@ -6,6 +6,7 @@
 <ui:style>
     @external .CodeMirror-scroll;
     .CodeMirror-scroll {
+        height: 350px;
         border-top: 1px solid #92C1F0;
     }
      @external .CodeMirror-gutter;
