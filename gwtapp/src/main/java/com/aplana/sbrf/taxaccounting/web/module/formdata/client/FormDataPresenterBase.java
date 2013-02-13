@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormDataResult;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -62,6 +63,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showPrintButton(boolean show);
 
+		void showSignersButton(boolean show);
+
 		void showManualInputButton(boolean show);
 
 		void showDeleteFormButton(boolean show);
@@ -96,6 +99,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;
+	protected final SignersPresenter signersPresenter;
 
 	protected FormData formData;
 
@@ -103,10 +107,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher) {
+			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
+		this.signersPresenter = signersPresenter;
 	}
 
 	@Override
@@ -149,6 +154,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintButton(true);
+		view.showSignersButton(true);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
 		view.showWorkflowButton(false);
@@ -166,6 +172,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintButton(true);
+		view.showSignersButton(true);
 		view.showManualInputButton(true);
 		view.showDeleteFormButton(true);
 		view.showWorkflowButton(true);
@@ -190,6 +197,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRemoveRowButton(!formData.getFormType().isFixedRows());
 
 		view.showPrintButton(false);
+		view.showSignersButton(false);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
 		view.showWorkflowButton(false);

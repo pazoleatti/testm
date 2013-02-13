@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
@@ -47,8 +48,8 @@ public class FormDataPresenter extends
 
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher) {
-		super(eventBus, view, proxy, placeManager, dispatcher);
+			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter);
 		getView().setUiHandlers(this);
 	}
 
@@ -100,7 +101,7 @@ public class FormDataPresenter extends
 							}
 							
 							formData = result.getFormData();
-							
+
 							switch (result.getFormMode()) {
 							case READ_UNLOCKED:
 								setReadUnlockedMode();
@@ -211,6 +212,13 @@ public class FormDataPresenter extends
 	}
 
 	@Override
+	public void onSignersClicked() {
+		signersPresenter.setPerformer(formData.getPerformer());
+		signersPresenter.setSigners(formData.getSigners());
+		addToPopupSlot(signersPresenter);
+	}
+
+	@Override
 	public void onCancelClicked() {
 		if (readOnlyMode || (formData.getId() == null)) {
 			goToFormDataList();
@@ -318,5 +326,4 @@ public class FormDataPresenter extends
 				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
 				String.valueOf(formData.getFormType().getTaxType())));
 	}
-
 }

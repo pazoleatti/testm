@@ -22,6 +22,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 	public void onCheckClicked();
 	
 	public void onPrintClicked();
+
+	public void onSignersClicked();
 	
 	public void onDeleteFormClicked();
 	

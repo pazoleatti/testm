@@ -43,6 +43,7 @@
 					    <g:Button ui:field="recalculateButton">Пересчитать</g:Button>
                         <g:Button ui:field="checkButton">Проверить</g:Button>
 					    <g:Button ui:field="printButton">Печать</g:Button>
+                        <g:Button ui:field="signersButton">Исполнитель и подписанты</g:Button>
 				    </style:LeftBar>
 				    <style:RightBar>
 					    <g:Button ui:field="manualInputButton">Ручной ввод</g:Button>

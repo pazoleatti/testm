@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        @external .gwt-DialogBox .Caption;
+        .gwt-DialogBox .Caption {
+            font-weight: bold;
+            text-align: left;
+            color: white;
+            background: url("img/top_grad.gif") repeat-x scroll center bottom #F1F1F1;
+        }
+    </ui:style>
+
+	<g:DialogBox text="Исполнитель и подписанты" ui:field="dialogBox" modal="true">
+
+	</g:DialogBox>
+
+</ui:UiBinder> 

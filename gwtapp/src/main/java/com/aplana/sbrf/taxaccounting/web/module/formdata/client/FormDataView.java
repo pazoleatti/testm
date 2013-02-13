@@ -65,6 +65,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button printButton;
 	@UiField
+	Button signersButton;
+	@UiField
 	Button deleteFormButton;
 
 	@UiField
@@ -242,6 +244,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+	@UiHandler("signersButton")
+	void onSignersButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onSignersClicked();
+		}
+	}
+
 	@UiHandler("deleteFormButton")
 	void onDeleteFormButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -336,6 +345,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showPrintButton(boolean show) {
 		printButton.setVisible(show);
+	}
+
+	@Override
+	public void showSignersButton(boolean show) {
+		signersButton.setVisible(show);
 	}
 
 	@Override
