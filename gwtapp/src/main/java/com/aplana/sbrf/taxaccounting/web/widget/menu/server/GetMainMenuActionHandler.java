@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
@@ -36,9 +37,9 @@ public class GetMainMenuActionHandler extends
 
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
-		if (securityService.currentUser().hasRole("ROLE_OPER")
-				|| securityService.currentUser().hasRole("ROLE_CONTROL")
-				|| securityService.currentUser().hasRole("ROLE_CONTROL_UNP")) {
+		if (securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)
+				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL)
+				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 
 			for (TaxType taxType : TaxType.values()) {
 				menuItems.add(new MenuItem(taxType.getName(), taxType.name()));
@@ -46,12 +47,12 @@ public class GetMainMenuActionHandler extends
 
 			for (MenuItem menu : menuItems) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", FormDataListNameTokens.FORM_DATA_LIST));
-				if (!securityService.currentUser().hasRole("ROLE_OPER")) {
+				if (!securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)) {
 					menu.getSubMenu().add(new MenuItem("Декларации", DeclarationListNameTokens.DECLARATION_LIST));
 				}
 			}
 		}
-		if (securityService.currentUser().hasRole("ROLE_CONF")) {
+		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
 	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
 			menuItems.add(new MenuItem("Шаблоны деклараций", DeclarationTemplateTokens.declarationTemplateList));
 		}
