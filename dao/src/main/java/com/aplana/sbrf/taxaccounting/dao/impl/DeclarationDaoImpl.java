@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformTaxTypeToSqlInStatement;
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
@@ -167,8 +166,8 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id");
 
-		if (filter.getTaxTypes() != null && !filter.getTaxTypes().isEmpty()) {
-			sql.append(" AND dectype.tax_type in ").append(transformTaxTypeToSqlInStatement(filter.getTaxTypes()));
+		if (filter.getTaxType() != null) {
+			sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {

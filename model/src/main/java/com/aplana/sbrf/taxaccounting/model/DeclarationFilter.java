@@ -7,7 +7,7 @@ public class DeclarationFilter implements Serializable {
 
 	private static final long serialVersionUID = -4400641153082281834L;
 
-	private List<TaxType> taxTypes;
+	private TaxType taxType;
 
 	private List<Integer> reportPeriodIds;
 
@@ -24,12 +24,12 @@ public class DeclarationFilter implements Serializable {
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
-	public List<TaxType> getTaxTypes() {
-		return taxTypes;
+	public TaxType getTaxType() {
+		return taxType;
 	}
 
-	public void setTaxTypes(List<TaxType> taxTypes) {
-		this.taxTypes = taxTypes;
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
 	}
 
 	public List<Integer> getReportPeriodIds() {

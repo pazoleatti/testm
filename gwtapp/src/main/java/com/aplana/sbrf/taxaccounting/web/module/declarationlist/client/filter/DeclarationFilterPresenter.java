@@ -47,12 +47,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 	public DeclarationFilter getFilterData() {
 		DeclarationFilter declarationFilter = new DeclarationFilter();
-		List<TaxType> taxTypes = new ArrayList<TaxType>();
-		taxTypes.add(this.taxType);
 
 		declarationFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
 		declarationFilter.setDepartmentIds(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
-		declarationFilter.setTaxTypes(taxTypes);
+		declarationFilter.setTaxType(this.taxType);
 		return declarationFilter;
 	}
 
