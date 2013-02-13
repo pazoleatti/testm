@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -18,7 +19,6 @@ import com.gwtplatform.mvp.client.proxy.*;
 public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
 		implements DeclarationTemplateUiHandlers {
 
-	@Title("Шаблоны деклараций")
 	@ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplate)
 	public interface MyProxy extends ProxyPlace<DeclarationTemplatePresenter>, Place {
@@ -139,6 +139,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 				public void onReqSuccess(GetDeclarationResult result) {
 					declarationTemplate = result.getDeclarationTemplate();
 					getView().setDeclarationTemplate(declarationTemplate);
+					TitleUpdateEvent.fire(this, "Шаблон декларации", "Шаблон декларации " + declarationTemplate.getId());
 					getProxy().manualReveal(DeclarationTemplatePresenter.this);
 				}
 			});

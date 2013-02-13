@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
@@ -51,7 +52,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	}
 
 	public interface MyView extends TabView, HasUiHandlers<FormTemplateMainUiHandlers> {
-		void setTitle(String title);
 		void setFormId(int formId);
 		void setLogMessages(List<LogEntry> entries);
 	}
@@ -132,8 +132,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				public void onReqSuccess(GetFormResult result) {
 					formTemplate = result.getForm();
 					getView().setLogMessages(null);
-					getView().setTitle(formTemplate.getType().getName());
 					getView().setFormId(formTemplate.getId());
+					TitleUpdateEvent.fire(this, "Шаблон налоговой формы", formTemplate.getType().getName());
 					RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
 					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
 				}

@@ -15,7 +15,6 @@
 </ui:style>
 
 <g:HTMLPanel height="100%" width="100%">
-    <g:Label text="Шаблон декларации" ui:field="titleLabel"/>
     <t:LeftBar height="50px">
         <g:Button text="Сохранить" ui:field="saveButton"/>
         <g:Button text="Сбросить" ui:field="resetButton"/>

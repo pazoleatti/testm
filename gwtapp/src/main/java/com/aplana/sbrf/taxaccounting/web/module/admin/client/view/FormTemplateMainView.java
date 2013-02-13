@@ -39,9 +39,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	SimpleTabPanel tabPanel;
 
 	@UiField
-	Label titleLabel;
-
-	@UiField
 	Button saveButton;
 
 	@UiField
@@ -117,11 +114,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
 		getUiHandlers().close();
-	}
-
-	@Override
-	public void setTitle(String title) {
-		titleLabel.setText(title);
 	}
 
 	@Override

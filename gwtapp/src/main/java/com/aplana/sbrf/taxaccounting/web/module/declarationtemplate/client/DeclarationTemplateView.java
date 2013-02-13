@@ -40,10 +40,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiField
 	@Editor.Ignore
-	Label titleLabel;
-
-	@UiField
-	@Editor.Ignore
 	Button saveButton;
 
 	@UiField
@@ -80,7 +76,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				titleLabel.setText(declaration.getId().toString());
 				driver.edit(declaration);
 				form.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());
 			}
