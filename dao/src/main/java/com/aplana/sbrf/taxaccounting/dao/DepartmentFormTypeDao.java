@@ -20,7 +20,17 @@ public interface DepartmentFormTypeDao {
 	 * @param formId
 	 * @return
 	 */
-	boolean checkIsSources(int departamentId, int formId);
+	boolean checkFormDataIsSourcesForDepartment(int departmentId, long formDataId);
+	
+	
+	/**
+	 * Проверяет, принадлежит ли форма заданному департаменту
+	 * 
+	 * @param departamentId
+	 * @param formId
+	 * @return
+	 */
+	boolean checkFormDataIsRirectForDepartment(int departmentId, long formDataId);
 	
 	/**
 	 * Возвращает информацию о формах по подразделению
@@ -97,7 +107,7 @@ public interface DepartmentFormTypeDao {
 	 * @return информация о формах-потребителях в виде списка
 	 *         {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getFormDestanations(int sourceDepartmentId,
+	List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
 			int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**

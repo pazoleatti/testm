@@ -53,13 +53,19 @@ public class DepartmentFormTypeDaoTest {
 	}
 	
 	@Test
-	public void getFormDestanations(){
-		assertEquals(2, departmentFormTypeDao.getFormDestanations(1, 1, FormDataKind.fromId(3)).size());
+	public void getFormDestinations(){
+		assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
 	}
 	
 	@Test
-	public void checkIsSources(){
-		assertEquals(false, departmentFormTypeDao.checkIsSources(0, 0));
+	public void checkFormDataIsSourcesForDepartment(){
+		assertEquals(false, departmentFormTypeDao.checkFormDataIsSourcesForDepartment(0, 0));
+		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
+	}
+	
+	@Test
+	public void checkFormDataIsRirectForDepartment(){
+		assertEquals(false, departmentFormTypeDao.checkFormDataIsRirectForDepartment(0, 0));
 		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
 	}
 

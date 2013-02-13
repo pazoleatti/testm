@@ -73,24 +73,14 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	public static final String GET_2 = String.format(GET_DFT_TEMPLATE_FT,
 			PARAM_1);
 
-	/**
-	 * Запрос для проверки на принадлежность формы к источникам для форм
-	 * департамента
-	 */
-	public static final String CHECK_SOURCES_FORM = "select 1 from department_form_type src_dft, form_type src_ft, form src_f, form_data src_fd where src_fd.id=? and src_fd.form_id=src_f.id and src_f.type_id=ft.id and exists "
-			+ "(select 1 from department_form_type dft, form_data_source fds where "
-			+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id "
-			+ "and dft.department_id=?)";
+
 	/**
 	 * Запрос для проверки на принадлежность формы к источникам для деклараций
 	 * департамента
 	 */
-	public static final String CHECK_SOURCES_DECL = "select 1 from department_form_type src_dft, form_type src_ft, form src_f, form_data src_fd where src_fd.id=? and src_fd.form_id=src_f.id and src_f.type_id=src_ft.id and exists "
-			+ "(select 1 from department_declaration_type ddt, declaration_source dds where "
-			+ "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id "
-			+ "and ddt.department_id=?)";
-
-	public static final String CHECK_IS_SOURCES = "select 1 from department_form_type src_dft, form_type src_ft, form src_f, form_data src_fd where src_fd.id=? and src_fd.form_id=src_f.id and src_f.type_id=src_ft.id and (exists "
+	public static final String CHECK_FORM_SOURCES = "select 1 from department_form_type src_dft, form_type src_ft, form src_f, form_data src_fd " +
+			"where src_fd.id=? and src_fd.form_id=src_f.id " +
+			"and src_f.type_id=src_dft.form_type_id and src_fd.department_id=src_dft.department_id and src_fd.kind=src_dft.kind and (exists "
 			+ "(select 1 from department_form_type dft, form_data_source fds where "
 			+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id "
 			+ "and dft.department_id=?) "
@@ -98,6 +88,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 			+ "(select 1 from department_declaration_type ddt, declaration_source dds where "
 			+ "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id "
 			+ "and ddt.department_id=?))";
+	
+	public static final String CHECK_FORM = "select 1 from department_form_type dft, form f, form_data fd where " +
+			"fd.id=? and fd.form_id=f.id " +
+			"and f.type_id=dft.form_type_id and fd.department_id=dft.department_id and fd.kind=dft.kind and dft.department_id=?";
+
 
 	public static final RowMapper<DepartmentFormType> DFT_MAPPER = new RowMapper<DepartmentFormType>() {
 
@@ -136,7 +131,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	}
 
 	@Override
-	public List<DepartmentFormType> getFormDestanations(int sourceDepartmentId,
+	public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
 			int sourceFormTypeId, FormDataKind sourceKind) {
 		return getJdbcTemplate().query(
 				GET_FORM_DESTANATIONS,
@@ -164,9 +159,16 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	}
 
 	@Override
-	public boolean checkIsSources(int departmentId, int formDataId) {
-		return getJdbcTemplate().queryForList(CHECK_IS_SOURCES,
+	public boolean checkFormDataIsSourcesForDepartment(int departmentId, long formDataId) {
+		return getJdbcTemplate().queryForList(CHECK_FORM_SOURCES,
 				new Object[] { formDataId, departmentId, departmentId },
+				Long.class).size() > 0;
+	}
+
+	@Override
+	public boolean checkFormDataIsRirectForDepartment(int departmentId, long formDataId) {
+		return getJdbcTemplate().queryForList(CHECK_FORM,
+				new Object[] { formDataId, departmentId },
 				Long.class).size() > 0;
 	}
 
