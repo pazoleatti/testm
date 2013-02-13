@@ -382,7 +382,7 @@ create sequence seq_data_row start with 10000;
 create table numeric_value (
 	row_id number(18) not null,
 	column_id number(9) not null,
-	value decimal(25, 4)
+	value decimal(25, 8)
 );
 alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
 alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
