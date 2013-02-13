@@ -64,8 +64,8 @@ public class DepartmentFormTypeDaoTest {
 	}
 	
 	@Test
-	public void checkFormDataIsRirectForDepartment(){
-		assertEquals(false, departmentFormTypeDao.checkFormDataIsRirectForDepartment(0, 0));
+	public void checkFormDataIsDirectForDepartment(){
+		assertEquals(false, departmentFormTypeDao.checkFormDataIsDirectForDepartment(0, 0));
 		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
 	}
 

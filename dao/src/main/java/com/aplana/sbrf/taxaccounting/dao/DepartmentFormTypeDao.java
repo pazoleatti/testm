@@ -30,7 +30,7 @@ public interface DepartmentFormTypeDao {
 	 * @param formId
 	 * @return
 	 */
-	boolean checkFormDataIsRirectForDepartment(int departmentId, long formDataId);
+	boolean checkFormDataIsDirectForDepartment(int departmentId, long formDataId);
 	
 	/**
 	 * Возвращает информацию о формах по подразделению

@@ -166,7 +166,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	}
 
 	@Override
-	public boolean checkFormDataIsRirectForDepartment(int departmentId, long formDataId) {
+	public boolean checkFormDataIsDirectForDepartment(int departmentId, long formDataId) {
 		return getJdbcTemplate().queryForList(CHECK_FORM,
 				new Object[] { formDataId, departmentId },
 				Long.class).size() > 0;
