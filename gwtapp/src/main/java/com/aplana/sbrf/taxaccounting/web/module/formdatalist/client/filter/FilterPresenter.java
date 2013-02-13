@@ -2,19 +2,22 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
 import java.util.*;
 
-public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
+public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> implements FilterUIHandlers {
 
-	public interface MyView extends View {
+	public interface MyView extends View, HasUiHandlers<FilterUIHandlers> {
 		void setDataFilter(FormDataFilter formDataFilter);
 
 		FormDataFilter getDataFilter();
@@ -25,14 +28,17 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 
 		void setFormTypesMap(Map<Integer, String> formTypesMap);
 
-		void setReportPeriodMaps(Map<Integer, String> reportPeriodMaps);
-
 		void setDepartmentsList(List<Department> list);
 
 		void setSelectedDepartments(Map<String, Integer> values);
 
 		Map<String, Integer> getSelectedDepartments();
 
+		void setTaxPeriods(List<TaxPeriod> taxPeriods);
+
+		void setReportPeriods(List<ReportPeriod> reportPeriods);
+
+		List<Integer> getSelectedReportPeriods();
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -47,11 +53,13 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 			DispatchAsync dispatchAsync) {
 		super(eventBus, view);
 		this.dispatchAsync = dispatchAsync;
+		getView().setUiHandlers(this);
         initSavedFilterDataMap();
 	}
 
 	public FormDataFilter getFilterData() {
 		FormDataFilter formDataFilter = getView().getDataFilter();
+		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
 		formDataFilter.setDepartmentId(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
 		formDataFilter.setTaxType(this.taxType);
 		return formDataFilter;
@@ -74,7 +82,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
                     public void onReqSuccess(GetFilterDataResult result) {
 
                         getView().setFormTypesMap(fillFormTypesMap(result));
-                        getView().setReportPeriodMaps(fillReportPeriodsMap(result));
+	                    getView().setTaxPeriods(result.getTaxPeriods());
                         getView().setKindList(fillFormKindList());
                         getView().setFormStateList(fillFormStateList());
 	                    getView().setDepartmentsList(result.getDepartments());
@@ -91,10 +99,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
 	                        defaultSelectedDepartment.put(departmentName, departmentId);
 	                        getView().setSelectedDepartments(defaultSelectedDepartment);
                             formDataFilter.setDepartmentId(defaultDepartment);
-                            if (result.getCurrentReportPeriodId() != null) {
-                                formDataFilter.setReportPeriodId(result.getCurrentReportPeriodId());
-                            }
-
                         } else {
 	                        //В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,
                             formDataFilter = savedFilterData.get(taxType);
@@ -107,12 +111,17 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> {
                 });
 	}
 
-	private Map<Integer, String> fillReportPeriodsMap(GetFilterDataResult source){
-		Map<Integer, String> reportPeriodsMap = new HashMap<Integer, String>();
-		for(ReportPeriod reportPeriod : source.getPeriods()){
-			reportPeriodsMap.put(reportPeriod.getId(), reportPeriod.getName());
-		}
-		return reportPeriodsMap;
+	@Override
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+		GetReportPeriods action = new GetReportPeriods();
+		action.setTaxPeriod(taxPeriod);
+		dispatchAsync.execute(action,
+				new AbstractCallback<GetReportPeriodsResult>() {
+					@Override
+					public void onReqSuccess(GetReportPeriodsResult result) {
+						getView().setReportPeriods(result.getReportPeriods());
+					}
+				});
 	}
 
 	private Map<Integer, String> fillFormTypesMap(GetFilterDataResult source){

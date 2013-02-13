@@ -2,18 +2,17 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
 public class GetFilterDataResult implements Result {
 
-	private Integer currentReportPeriodId;
     private List<Department> departments;
     private List<FormType> types;
-	private List<ReportPeriod> periods;
-	
+	private List<TaxPeriod> taxPeriods;
+
     public GetFilterDataResult(){
 
     }
@@ -34,19 +33,11 @@ public class GetFilterDataResult implements Result {
         this.types = kinds;
     }
 
-	public List<ReportPeriod> getPeriods() {
-		return periods;
+	public List<TaxPeriod> getTaxPeriods() {
+		return taxPeriods;
 	}
 
-	public void setPeriods(List<ReportPeriod> periods) {
-		this.periods = periods;
-	}
-
-	public Integer getCurrentReportPeriodId() {
-		return currentReportPeriodId;
-	}
-
-	public void setCurrentReportPeriodId(Integer currentReportPeriodId) {
-		this.currentReportPeriodId = currentReportPeriodId;
+	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
+		this.taxPeriods = taxPeriods;
 	}
 }

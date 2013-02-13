@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -12,14 +11,17 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewImpl;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FilterView extends ViewImpl implements FilterPresenter.MyView, Editor<FormDataFilter>{
+public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements FilterPresenter.MyView,
+		Editor<FormDataFilter>, ReportPeriodDataProvider {
 
     interface MyBinder extends UiBinder<Widget, FilterView> {
     }
@@ -30,9 +32,6 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
     private final Widget widget;
 
     private final MyDriver driver;
-
-    @UiField(provided = true)
-	ValueListBox<Integer> reportPeriodId;
 
     @UiField(provided = true)
 	ValueListBox<Integer> formTypeId;
@@ -46,8 +45,12 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	@UiField
 	TreePicker departmentSelectionTree;
 
+	@UiField
+	VerticalPanel reportPeriodPanel;
+
+	private final ReportPeriodPicker reportPeriodPicker;
+
 	private Map<Integer, String> formTypesMap;
-	private Map<Integer, String> reportPeriodMaps;
 
     @Inject
 	@UiConstructor
@@ -82,19 +85,12 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 			}
 		});
 
-		reportPeriodId = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return reportPeriodMaps.get(object);
-			}
-		});
-
         widget = binder.createAndBindUi(this);
         this.driver = driver;
         this.driver.initialize(this);
+
+	    reportPeriodPicker = new ReportPeriodPicker(this);
+	    reportPeriodPanel.add(reportPeriodPicker);
     }
 
 
@@ -126,6 +122,25 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 	}
 
 	@Override
+	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
+		reportPeriodPicker.setTaxPeriods(taxPeriods);
+	}
+
+	@Override
+	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+		reportPeriodPicker.setReportPeriods(reportPeriods);
+	}
+
+	@Override
+	public List<Integer> getSelectedReportPeriods(){
+		List<Integer> selectedReportPeriodIds = new ArrayList<Integer>();
+		for(Map.Entry<Integer, String> reportPeriod : reportPeriodPicker.getSelectedReportPeriods().entrySet()){
+			selectedReportPeriodIds.add(reportPeriod.getKey());
+		}
+		return selectedReportPeriodIds;
+	}
+
+	@Override
 	public void setFormTypesMap(Map<Integer, String> formTypesMap){
 		formTypesMap.put(null, "");
 		this.formTypesMap = formTypesMap;
@@ -133,16 +148,6 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
 		formTypeId.setValue(null);
 		formTypeId.setAcceptableValues(formTypesMap.keySet());
-	}
-
-	@Override
-	public void setReportPeriodMaps(Map<Integer, String> reportPeriodMaps) {
-		reportPeriodMaps.put(null, "");
-		this.reportPeriodMaps = reportPeriodMaps;
-		/** .setValue(null) see
-		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-		reportPeriodId.setValue(null);
-		reportPeriodId.setAcceptableValues(reportPeriodMaps.keySet());
 	}
 
 	@Override
@@ -160,4 +165,10 @@ public class FilterView extends ViewImpl implements FilterPresenter.MyView, Edit
 		return departmentSelectionTree.getSelectedItems();
 	}
 
+	@Override
+	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
+		if(getUiHandlers() != null){
+			getUiHandlers().onTaxPeriodSelected(taxPeriod);
+		}
+	}
 }

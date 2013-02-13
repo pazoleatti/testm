@@ -10,7 +10,7 @@ import java.util.List;
 public class FormDataFilter implements Serializable{
 	private static final long serialVersionUID = -4400641241082281834L;
 
-	private Integer reportPeriodId;
+	private List<Integer> reportPeriodIds;
 
 	private List<Integer> departmentId;
 
@@ -35,12 +35,12 @@ public class FormDataFilter implements Serializable{
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
+	public List<Integer> getReportPeriodIds() {
+		return reportPeriodIds;
 	}
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
+	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+		this.reportPeriodIds = reportPeriodIds;
 	}
 
 	public List<Integer> getDepartmentId() {

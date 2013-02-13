@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -34,10 +37,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
-
-		formDataDaoFilter.setReportPeriodIds(
-				formDataFilter.getReportPeriodId() == null ? null : Arrays.asList(formDataFilter.getReportPeriodId())
-		);
+		formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
 
 		if(formDataFilter.getFormDataKind() == null){
 			FormDataKind[] formDataKinds = FormDataKind.values();

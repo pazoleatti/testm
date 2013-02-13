@@ -81,7 +81,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
 					public void onReqSuccess(GetReportPeriodsResult result) {
-						System.out.println("onReqSuccess");
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				});
