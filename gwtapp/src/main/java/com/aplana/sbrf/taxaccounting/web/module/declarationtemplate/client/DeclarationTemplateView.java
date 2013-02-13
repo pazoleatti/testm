@@ -32,7 +32,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	private final Widget widget;
 	private final MyDriver driver = GWT.create(MyDriver.class);
-	private final FileUpload upload = new FileUpload();
+	private FileUpload upload;
 
 	@UiField
 	@Editor.Ignore
@@ -68,7 +68,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	public DeclarationTemplateView(final Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
 		driver.initialize(this);
-		addFileUploader();
 	}
 
 	@Override
@@ -77,6 +76,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 			@Override
 			public void execute() {
 				driver.edit(declaration);
+				addFileUploader();
 				form.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());
 			}
 		});
@@ -122,6 +122,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		VerticalPanel panel = new VerticalPanel();
 		form.setWidget(panel);
 
+		upload = new FileUpload();
 		upload.setName("uploadJrxmlFile");
 		panel.add(upload);
 
