@@ -1,23 +1,44 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
+import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
+import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
+import static com.aplana.sbrf.taxaccounting.test.FormTemplateMockUtils.mockFormTemplate;
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
-import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
-import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
@@ -46,17 +67,16 @@ public class FormDataAccessServiceImplTest {
 
 	private static final long GOSB_TB1_CREATED_FORMDATA_ID = 13;
 
-
-
 	private static final long INACTIVE_FORMDATA_ID = 10;
 
 	private static final int TB1_CONTROL_USER_ID = 1;
 	private static final int TB1_OPERATOR_USER_ID = 7;
-	private static final int TB1_CONTROL_UNP_USER_ID = 8;
+	
 	private static final int BANK_CONTROL_USER_ID = 3;
 	private static final int BANK_OPERATOR_USER_ID = 4;
 	private static final int BANK_CONTROL_UNP_USER_ID = 5;
-	private static final int GOSBANK_CONTROL_USER_ID = 6;
+	
+	private static final int GOSB_CONTROL_USER_ID = 6;
 
 	private static final int REPORT_PERIOD_ACTIVE_ID = 1;
 	private static final int REPORT_PERIOD_INACTIVE_ID = 2;
@@ -65,6 +85,52 @@ public class FormDataAccessServiceImplTest {
 
 	@BeforeClass
 	public static void tearUp() {
+		FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
+		FormTemplate formTemplate1 = mockFormTemplate(1, 1, TaxType.INCOME, "Тип формы 1");
+		when(formTemplateDao.get(1)).thenReturn(formTemplate1);
+		FormTemplate formTemplate2 = mockFormTemplate(2, 2, TaxType.INCOME, "Тип формы 2");
+		when(formTemplateDao.get(2)).thenReturn(formTemplate2);
+		FormTemplate formTemplate3 = mockFormTemplate(3, 3, TaxType.INCOME, "Тип формы 3");
+		when(formTemplateDao.get(3)).thenReturn(formTemplate3);		
+		
+		ReflectionTestUtils.setField(service, "formTemplateDao", formTemplateDao);
+
+		
+		DepartmentDao departmentDao = mock(DepartmentDao.class);
+		Department d;
+
+		// В тербанках есть формы 1 (консолидированная и сводная) и 3 (выходная)
+		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(TB1_ID, 1, FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB1_ID, 1, FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB1_ID, 3, FormDataKind.ADDITIONAL));
+		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
+		when(departmentDao.getDepartment(TB1_ID)).thenReturn(d);
+		
+		dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB2_ID, 3, FormDataKind.ADDITIONAL));
+		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
+		when(departmentDao.getDepartment(TB2_ID)).thenReturn(d);
+
+		// В банке есть форма 1 (сводная), 2 (сводная) и 3 (выходная)
+		dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 1, FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 2, FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 3, FormDataKind.ADDITIONAL));
+		d = mockDepartment(Department.ROOT_BANK_ID, null, DepartmentType.ROOT_BANK, dfts);		
+		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
+
+		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+		
+		// Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
+		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+		dfts = new ArrayList<DepartmentFormType>();
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 1, FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 2, FormDataKind.SUMMARY));
+		when(departmentFormTypeDao.getFormDestinations(TB1_ID, 1, FormDataKind.SUMMARY)).thenReturn(dfts);
+		
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData fd;
 		
@@ -117,47 +183,16 @@ public class FormDataAccessServiceImplTest {
 		when(userDao.getUser(TB1_CONTROL_USER_ID)).thenReturn(user);
 		user = mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR);
 		when(userDao.getUser(TB1_OPERATOR_USER_ID)).thenReturn(user);
-		user = mockUser(TB1_CONTROL_UNP_USER_ID, TB1_ID, TARole.ROLE_CONTROL_UNP);
-		when(userDao.getUser(TB1_CONTROL_UNP_USER_ID)).thenReturn(user);
 		user = mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL);
 		when(userDao.getUser(BANK_CONTROL_USER_ID)).thenReturn(user);
 		user = mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR);
 		when(userDao.getUser(BANK_OPERATOR_USER_ID)).thenReturn(user);
 		user = mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP);
 		when(userDao.getUser(BANK_CONTROL_UNP_USER_ID)).thenReturn(user);
-		user = mockUser(GOSBANK_CONTROL_USER_ID, GOSB_TB1_ID, TARole.ROLE_CONTROL);
-		when(userDao.getUser(GOSBANK_CONTROL_USER_ID)).thenReturn(user);
+		user = mockUser(GOSB_CONTROL_USER_ID, GOSB_TB1_ID, TARole.ROLE_CONTROL);
+		when(userDao.getUser(GOSB_CONTROL_USER_ID)).thenReturn(user);
 		ReflectionTestUtils.setField(service, "userDao", userDao);
 		
-	/*	DepartmentDao departmentDao = mock(DepartmentDao.class);
-		Department d;
-		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		when(departmentDao.getDepartment(TB1_ID)).thenReturn(d);
-		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		when(departmentDao.getDepartment(TB2_ID)).thenReturn(d);
-		d = mockDepartment(GOSB_TB1_ID, TB1_ID, DepartmentType.GOSB);
-		when(departmentDao.getDepartment(GOSB_TB1_ID)).thenReturn(d);
-		d = mockDepartment(Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
-		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
-
-		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
-		*/
-		
-		
-		DepartmentService departmentService = mock(DepartmentService.class);
-		Department d;
-		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
-		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
-		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
-		d = mockDepartment(GOSB_TB1_ID, TB1_ID, DepartmentType.GOSB);
-		when(departmentService.getDepartment(GOSB_TB1_ID)).thenReturn(d);
-		d = mockDepartment(Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
-		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
-
-		ReflectionTestUtils.setField(service, "departmentService", departmentService);
-		
-
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		ReportPeriod rp;
 		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE);
@@ -211,9 +246,9 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertTrue(service.canRead(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 
 		//Оператор не имеет прав на чтение НФ данного жизненного цикла
 		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
@@ -263,7 +298,7 @@ public class FormDataAccessServiceImplTest {
 
 		//Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
 		assertTrue(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
 
 		//Оператор не может редактировать НФ данного жизненного цикла в состоянии "Создана"
 		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
@@ -273,8 +308,8 @@ public class FormDataAccessServiceImplTest {
 		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
 		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
 	}
@@ -287,21 +322,58 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
 		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canDelete(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canDelete(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
 	}
 	
 	@Test 
-	public void testCanCreate() {
-		// Контролёр уровня банка может создавать формы в своём тербанке
-		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
-		assertFalse(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
-		assertFalse(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+	public void testCanCreateOperator() {
+		// Оператор может создавать первичные и выходные в своём подразделении
+		assertTrue(service.canCreate(BANK_OPERATOR_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		
+		// Оператор не может создавать консолидированные и выходные формы даже в своём
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		
+		// Оператор не может создавать в чужом подразделении 
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
 
-		// Контролёр уровня банка может создавать формы в банке и тербанках
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		// Оператор не может создавать в своём подразделении, если в подразделении не разрешена работа с такой формой
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
 	}
+	
+	@Test 
+	public void testCanCreateControl() {		
+		// Контролёр может создавать сводные и консолидированные в своём подразделении
+		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
+		
+		// Контролёр не может создавать формы, если они не разрешены в подразедении 
+		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		
+		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
+		
+		// TODO: случай, когда форма в чужом подразделении является источником для другой формы в этом же подразделении, а уже эта вторая форма
+		// является источником для одной из форм подразделения, к которому относится контролёр
+		
+		// Во всех остальных случаях контролёр не сможет создавать формы в чужих подразделениях 
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
+	}
+	
+	@Test 
+	public void testCanCreateControlUnp() {
+		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
+		// В том числе в чужих
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
+		// В том числе и без учёта отношений источник/приёмник
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
+		
+		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
+		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+	}	
 
 	@Test
 	public void testGetAvailableMovesForFirstLifeCycle(){
@@ -362,14 +434,14 @@ public class FormDataAccessServiceImplTest {
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
-				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Утверждена" в "Создана" и из "Утверждена" в "Принята" контролер вышестоящего уровня или контролер УНП.
 		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
-				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
 				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
@@ -377,7 +449,7 @@ public class FormDataAccessServiceImplTest {
 
 		//Перевести из состояния "Принята" в "Утверждена" контролер вышестоящего уровня или контролер УНП.
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
-				service.getAvailableMoves(TB1_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
 				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
