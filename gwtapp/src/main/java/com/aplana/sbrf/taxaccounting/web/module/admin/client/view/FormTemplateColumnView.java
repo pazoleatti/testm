@@ -357,10 +357,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			columnListBox.clear();
 			for (Column column : columns) {
 				if (column.getOrder() < 10) {
-					columnListBox.addItem("0" + column.getOrder() + " " + column.getName(), String.valueOf(columns.indexOf(column)));
+					columnListBox.addItem("0" + column.getOrder() + " " + column.getName());
 				}
 				else {
-					columnListBox.addItem(column.getOrder() + " " + column.getName(), String.valueOf(columns.indexOf(column)));
+					columnListBox.addItem(column.getOrder() + " " + column.getName());
 				}
 			}
 		}
