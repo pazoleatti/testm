@@ -149,7 +149,7 @@ alter table form_column add constraint form_column_uniq_alias unique(form_id, al
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_editable check(editable in (0, 1));
 alter table form_column add constraint form_column_chk_mandatory check(mandatory in (0, 1));
-alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 5) or (type <> 'N' and precision is null));
+alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
