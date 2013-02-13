@@ -252,8 +252,64 @@ public class KeyPressableTextInputCell extends
 	protected void edit(Context context, Element parent, String value) {
 		setValue(context, parent, value);
 		InputElement input = getInputElement(parent);
+		addInputHandler(input);
 		input.focus();
 		input.select();
+
+	}
+
+	private native void addInputHandler(Element input)
+	/*-{
+        var that = this;
+        var oldVal = input.value;
+        var count = 0;
+        var change = true;
+
+        if (input.addEventListener) {    // all browsers except IE before version 9
+            input.addEventListener ("input", OnInput, true);
+        } else {
+            var changeWatcher = {
+                timeout: null,
+                currentValue: input.value,
+                watchForChange: function( el ) {
+                    if( el.value != this.currentValue ) {
+                        this.changed( el );
+                    }
+                    this.timeout = setTimeout( function() {
+                        changeWatcher.watchForChange(el)
+                    }, 20 );
+                },
+                cancelWatchForChange: function() {
+                    clearTimeout( this.timeout );
+                    this.timeout = null;
+                },
+                changed: function( el ) {
+                    var res = that.@com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell::checkInputtedValue(Ljava/lang/String;)(input.value);
+                    if (!res ) {
+                        input.value = this.currentValue
+                    } else {
+                        this.currentValue = el.value;
+                    }
+                }
+            }
+            changeWatcher.watchForChange(input);
+        }
+
+		function OnInput (event) {
+		    res = that.@com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell::checkInputtedValue(Ljava/lang/String;)( event.target.value);
+		    if (!res && (input.value !== oldVal)) {
+		        input.value = oldVal;
+		    } else {
+		        oldVal = event.target.value;
+		    }
+		}
+
+
+    }-*/;
+
+	protected boolean checkInputtedValue(String value) {
+
+		return false;
 	}
 
 	/**

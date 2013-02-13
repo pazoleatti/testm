@@ -7,6 +7,11 @@ public class NumberValidationStrategy implements ValidatedInputCell.ValidationSt
 	}
 	@Override
 	public boolean matches(String valueToCheck) {
+		if (valueToCheck.contains("d")
+				|| valueToCheck.contains("f")
+				|| valueToCheck.contains(" ")) {
+			return false;
+		}
 		if (valueToCheck.isEmpty()) {
 			return true;
 		} else if ((precision == 0) && valueToCheck.contains(".")) {
