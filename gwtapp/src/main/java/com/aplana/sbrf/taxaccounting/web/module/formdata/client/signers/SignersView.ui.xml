@@ -12,7 +12,7 @@
         }
     </ui:style>
 
-	<g:DialogBox height="100%" glassEnabled="true" text="Исполнитель и подписанты" modal="false">
+	<g:DialogBox height="100%" glassEnabled="true" text="Исполнитель и подписанты">
         <g:VerticalPanel height="100%">
             <g:HorizontalPanel height="30px">
                 <g:Label width="150px">Исполнитель:</g:Label>
