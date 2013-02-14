@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.KeyPressableTextInputCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
@@ -69,9 +72,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 				return "" + (signers.indexOf(object) + 1);
 			}
 		};
+		idColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		signersTable.addColumn(idColumn, "№ пп");
+		signersTable.setColumnWidth(idColumn, 40, Style.Unit.PX);
 
-		TextColumn<FormDataSigner> nameColumn = new TextColumn<FormDataSigner>() {
+		KeyPressableTextInputCell nameCell = new KeyPressableTextInputCell();
+		Column<FormDataSigner, String> nameColumn = new Column<FormDataSigner, String>(nameCell) {
 			@Override
 			public String getValue(FormDataSigner object) {
 				return object.getName();
@@ -79,14 +85,15 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		};
 		signersTable.addColumn(nameColumn, "ФИО подписанта");
 
-		TextColumn<FormDataSigner> positionColumn = new TextColumn<FormDataSigner>() {
+		KeyPressableTextInputCell positionCell = new KeyPressableTextInputCell();
+		Column<FormDataSigner, String> positionColumn = new Column<FormDataSigner, String>(positionCell) {
 			@Override
 			public String getValue(FormDataSigner object) {
 				return object.getPosition();
 			}
 		};
-
 		signersTable.addColumn(positionColumn, "Должность");
+
 	}
 
 	@Override
