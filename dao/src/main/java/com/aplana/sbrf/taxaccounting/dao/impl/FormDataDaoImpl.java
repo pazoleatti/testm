@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -21,9 +22,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
@@ -50,6 +48,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormStyleDao formStyleDao;
+	@Autowired
+	private FormDataSignerDao formDataSignerDao;
+	@Autowired
+	private FormPerformerDao formPerformerDao;
 
 	private static class ValueRecord<T> {
 		private T value;
@@ -155,6 +157,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
+			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
+			fd.setPerformer(formPerformerDao.get(fd.getId()));
 
 			result.formData = fd;
 			result.formTemplate = formTemplate;
@@ -370,7 +374,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			jt.update("delete from data_row where form_data_id = ?",
 					new Object[] { formDataId }, new int[] { Types.NUMERIC });
 		}
-
+		if (formData.getPerformer() != null) {
+			formPerformerDao.save(formDataId, formData.getPerformer());
+		}
+		if (formData.getSigners() != null) {
+			formDataSignerDao.saveSigners(formDataId, formData.getSigners());
+		}
 		insertRows(formData);
 		return formDataId;
 	}

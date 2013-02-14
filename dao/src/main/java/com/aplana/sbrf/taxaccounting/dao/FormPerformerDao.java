@@ -10,7 +10,7 @@ public interface FormPerformerDao {
 	/**
 	 * Сохранить информацию об исполнителе налоговой формы.
 	 * @param formDataId идентификатор налоговой формы
-	 * @param performer информация об исполнетеле налоговой формы. Значение поля {@link FormDataPerformer#getFormDataId()} обязательно должно быть
+	 * @param performer информация об исполнетеле налоговой формы. Значение поля formDataId обязательно должно быть
 	 * заполнено непустым значением, и данная карточка данных должна существовать в БД 
 	 */
 	void save(long formDataId, FormDataPerformer performer);

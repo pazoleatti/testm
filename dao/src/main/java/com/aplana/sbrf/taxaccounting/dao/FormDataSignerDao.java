@@ -15,14 +15,15 @@ public interface FormDataSignerDao {
 	 * @param formDataId идентификатор налоговой формы
 	 * @return список подписантов, порядок соответствует порядку следования в налоговой форме
 	 */
-	List<FormDataSigner> fillSigners(long formDataId);
+	List<FormDataSigner> getSigners(long formDataId);
 	
 	/**
 	 * Сохранить информацию о подписантах налоговой формы.
 	 * При сохранении если у очередной записи {@link FormDataSigner} оказывается пустой {@link FormDataSigner#getId() идентификатор},
 	 * создаётся новая запись и объекту присовится новое значение идентификатора.
 	 * Если идентификатор уже был непуст, то производится попытка обновить существующую запись в БД.
-	 * @param formData карточка налоговой формы
+	 * @param formDataId идентификатор карточки налоговой формы.
+	 * @param formDataSigners список подписантов для сохранения
 	 */
-	void saveSigners(FormData formData);
+	void saveSigners(long formDataId, List<FormDataSigner> formDataSigners);
 }
