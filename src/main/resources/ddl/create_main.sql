@@ -35,7 +35,6 @@ create table report_period
 (
 id number(9) not null,
 name varchar2(50) not null,
-tax_type char(1),
 is_active number(1) default 1 not null,
 months    number(2) not null,
 tax_period_id number(9) not null,
@@ -45,12 +44,10 @@ ord           number(2) not null
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
 alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
-alter table report_period add constraint report_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
 
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
 comment on column report_period.name is 'Наименование периода';
-comment on column report_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
 comment on column report_period.is_active is 'Признак активности';
 comment on column report_period.months is 'Количество месяцев в периоде';
 comment on column report_period.tax_period_id is 'Налоговый период';
