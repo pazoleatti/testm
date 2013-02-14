@@ -3,7 +3,7 @@ insert into tax_period(id, tax_type, start_date, end_date) values (1, 'T', date 
 insert into department (id, name, parent_id, type) values (1, 'А - департамент', null, 1);
 insert into form_type (id, name, tax_type, fixed_rows) values (1, 'А - тип', 'T', 1);
 insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (1, 1, null, '0.1', 1, 1, 1);
-insert into report_period (id, name, tax_type, is_active, months, tax_period_id, ord) values (1, '1 - период', 'T', 1, 3, 1, 1)
+insert into report_period (id, name, is_active, months, tax_period_id, ord) values (1, '1 - период', 1, 3, 1, 1)
 
 insert into sec_user (id, name, login, department_id) values (1, 'user1', 'user1', 1);
 insert into sec_user (id, name, login, department_id) values (2, 'user2', 'user2', 1);
