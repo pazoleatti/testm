@@ -39,6 +39,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 public class FormDataAccessServiceImplTest {
 	private static FormDataAccessServiceImpl service = new FormDataAccessServiceImpl();
@@ -96,7 +97,7 @@ public class FormDataAccessServiceImplTest {
 		ReflectionTestUtils.setField(service, "formTemplateDao", formTemplateDao);
 
 		
-		DepartmentDao departmentDao = mock(DepartmentDao.class);
+		DepartmentService departmentService = mock(DepartmentService.class);
 		Department d;
 
 		// В тербанках есть формы 1 (консолидированная и сводная) и 3 (выходная)
@@ -105,14 +106,14 @@ public class FormDataAccessServiceImplTest {
 		dfts.add(mockDepartmentFormType(TB1_ID, 1, FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB1_ID, 3, FormDataKind.ADDITIONAL));
 		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
-		when(departmentDao.getDepartment(TB1_ID)).thenReturn(d);
+		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB2_ID, 3, FormDataKind.ADDITIONAL));
 		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
-		when(departmentDao.getDepartment(TB2_ID)).thenReturn(d);
+		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
 
 		// В банке есть форма 1 (сводная), 2 (сводная) и 3 (выходная)
 		dfts = new ArrayList<DepartmentFormType>();
@@ -120,9 +121,9 @@ public class FormDataAccessServiceImplTest {
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 2, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 3, FormDataKind.ADDITIONAL));
 		d = mockDepartment(Department.ROOT_BANK_ID, null, DepartmentType.ROOT_BANK, dfts);		
-		when(departmentDao.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
+		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
-		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+		ReflectionTestUtils.setField(service, "departmentService", departmentService);
 		
 		// Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
