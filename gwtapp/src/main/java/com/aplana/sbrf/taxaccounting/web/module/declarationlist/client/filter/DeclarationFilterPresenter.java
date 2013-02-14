@@ -26,6 +26,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		List<Integer> getSelectedReportPeriods();
 
+		void updateReportPeriodPicker();
+
 		Map<String, Integer> getSelectedDepartments();
 
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
@@ -54,13 +56,11 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return declarationFilter;
 	}
 
-	public TaxType getCurrentTaxType(){
-		return this.taxType;
-	}
-
 	public void initFilter(final TaxType taxType) {
         this.taxType = taxType;
-        GetDeclarationFilterData action = new GetDeclarationFilterData();
+		getView().updateReportPeriodPicker();
+
+		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);
         dispatchAsync.execute(action,
                 new AbstractCallback<GetDeclarationFilterDataResult>() {
@@ -84,6 +84,11 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				});
+	}
+
+	@Override
+	public TaxType getCurrentTaxType(){
+		return this.taxType;
 	}
 
 }

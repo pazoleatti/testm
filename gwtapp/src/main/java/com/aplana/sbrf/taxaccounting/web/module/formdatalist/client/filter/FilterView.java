@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,8 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	@UiField
 	VerticalPanel reportPeriodPanel;
 
-	private final ReportPeriodPicker reportPeriodPicker;
+	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
+	private ReportPeriodPicker currentReportPeriod;
 
 	private Map<Integer, String> formTypesMap;
 
@@ -89,8 +91,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
         this.driver = driver;
         this.driver.initialize(this);
 
-	    reportPeriodPicker = new ReportPeriodPicker(this);
-	    reportPeriodPanel.add(reportPeriodPicker);
+	    for (TaxType taxType : TaxType.values()){
+		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
+	    }
     }
 
 
@@ -111,6 +114,17 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
         return driver.flush();
     }
 
+	@Override
+	public void updateReportPeriodPicker(){
+		if(currentReportPeriod != null){
+			reportPeriodPanel.remove(currentReportPeriod);
+		}
+		currentReportPeriod = taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType());
+		if(getUiHandlers() != null){
+			reportPeriodPanel.add(currentReportPeriod);
+		}
+	}
+
     @Override
     public void setKindList(List<FormDataKind> list) {
 		formDataKind.setAcceptableValues(list);
@@ -123,19 +137,26 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	@Override
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
-		reportPeriodPicker.setTaxPeriods(taxPeriods);
+		if(getUiHandlers() != null){
+			taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setTaxPeriods(taxPeriods);
+		}
 	}
 
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-		reportPeriodPicker.setReportPeriods(reportPeriods);
+		if(getUiHandlers() != null){
+			taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setReportPeriods(reportPeriods);
+		}
 	}
 
 	@Override
 	public List<Integer> getSelectedReportPeriods(){
 		List<Integer> selectedReportPeriodIds = new ArrayList<Integer>();
-		for(Map.Entry<Integer, String> reportPeriod : reportPeriodPicker.getSelectedReportPeriods().entrySet()){
-			selectedReportPeriodIds.add(reportPeriod.getKey());
+		if(getUiHandlers() != null){
+			for(Map.Entry<Integer, String> reportPeriod : taxTypeReportPeriodPickerMap
+					.get(getUiHandlers().getCurrentTaxType()).getSelectedReportPeriods().entrySet()){
+				selectedReportPeriodIds.add(reportPeriod.getKey());
+			}
 		}
 		return selectedReportPeriodIds;
 	}

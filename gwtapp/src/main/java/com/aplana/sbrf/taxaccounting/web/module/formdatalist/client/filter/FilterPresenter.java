@@ -22,6 +22,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		FormDataFilter getDataFilter();
 
+		void updateReportPeriodPicker();
+
 		void setKindList(List<FormDataKind> list);
 
 		void setFormStateList(List<WorkflowState> list);
@@ -74,7 +76,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 	public void initFilter(final TaxType taxType) {
         this.taxType = taxType;
-        GetFilterData action = new GetFilterData();
+		getView().updateReportPeriodPicker();
+
+		GetFilterData action = new GetFilterData();
         action.setTaxType(taxType);
         dispatchAsync.execute(action,
                 new AbstractCallback<GetFilterDataResult>() {
@@ -122,6 +126,11 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				});
+	}
+
+	@Override
+	public TaxType getCurrentTaxType(){
+		return this.taxType;
 	}
 
 	private Map<Integer, String> fillFormTypesMap(GetFilterDataResult source){
