@@ -15,13 +15,13 @@
 	<g:DialogBox height="100%" glassEnabled="true" text="Исполнитель и подписанты">
         <g:VerticalPanel height="100%">
             <g:HorizontalPanel height="30px">
-                <g:Label width="150px">Исполнитель:</g:Label>
-                <g:TextBox ui:field="performer"/>
+                <g:Label width="100px">Исполнитель:</g:Label>
+                <g:TextBox width="300px" ui:field="performer"/>
             </g:HorizontalPanel>
 
             <g:HorizontalPanel height="30px">
-                <g:Label width="150px">Телефон:</g:Label>
-                <g:TextBox ui:field="phone"/>
+                <g:Label width="100px">Телефон:</g:Label>
+                <g:TextBox width="300px" ui:field="phone"/>
             </g:HorizontalPanel>
 
             <t:GenericDataGrid ui:field="signersTable" height="250px"/>
