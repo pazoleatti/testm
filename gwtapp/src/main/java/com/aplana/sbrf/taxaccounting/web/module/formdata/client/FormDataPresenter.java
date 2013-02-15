@@ -101,6 +101,7 @@ public class FormDataPresenter extends
 							}
 							
 							formData = result.getFormData();
+							formDataAccessParams = result.getFormDataAccessParams();
 
 							switch (result.getFormMode()) {
 							case READ_UNLOCKED:
@@ -113,9 +114,7 @@ public class FormDataPresenter extends
 								setEditMode();
 								break;
 							}
-
-							getView().setWorkflowButtons(result.getFormDataAccessParams().getAvailableWorkflowMoves());
-							getView().showCheckButton(result.getFormDataAccessParams().isCanRead());
+							
 							
 							manageDeleteRowButtonEnabled();
 

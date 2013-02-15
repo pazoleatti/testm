@@ -69,8 +69,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 
-		void showWorkflowButton(boolean show);
-
 		DataRow getSelectedRow();
 
 		void enableRemoveRowButton(boolean enable);
@@ -100,6 +98,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final SignersPresenter signersPresenter;
 
 	protected FormData formData;
+	
+	protected FormDataAccessParams formDataAccessParams;
+	
 
 	protected boolean readOnlyMode;
 
@@ -154,8 +155,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showPrintButton(true);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
-		view.showWorkflowButton(false);
 		view.setLockInformation(true, lockDate, lockedBy);
+		
+		view.setWorkflowButtons(null);
+		view.showCheckButton(formDataAccessParams.isCanRead());
 
 	}
 
@@ -169,10 +172,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintButton(true);
-		view.showManualInputButton(true);
-		view.showDeleteFormButton(true);
-		view.showWorkflowButton(true);
+		view.showManualInputButton(formDataAccessParams.isCanEdit());
+		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
 		view.setLockInformation(false, null, null);
+		
+		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
+		view.showCheckButton(formDataAccessParams.isCanRead());
 	}
 
 	protected void setEditMode() {
@@ -195,8 +200,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showPrintButton(false);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
-		view.showWorkflowButton(false);
 		view.setLockInformation(false, null, null);
+		
+		view.setWorkflowButtons(null);
+		view.showCheckButton(formDataAccessParams.isCanRead());
 	}
 
 

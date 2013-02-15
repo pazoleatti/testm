@@ -284,10 +284,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	 * кнопки.
 	 */
 	@Override
-	public void setWorkflowButtons(List<WorkflowMove> moves) {
+	public void setWorkflowButtons(List<WorkflowMove> moves) {		
+		boolean show = false;
 		workflowButtons.clear();
 
-		if (moves != null) {
+		if (moves != null && !moves.isEmpty()) {
 			for (final WorkflowMove workflowMove : moves) {
 				Button button = new Button(workflowMove.getName(),
 						new ClickHandler() {
@@ -298,7 +299,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 						});
 				workflowButtons.add(button);
 			}
+			show = true;
 		}
+		dockPanel.setWidgetHidden(workflowBar, !show);
+		workflowButtons.setVisible(show);
 	}
 
 	@Override
@@ -324,12 +328,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showAddRowButton(boolean show) {
 		addRowButton.setVisible(show);
-	}
-
-	@Override
-	public void showWorkflowButton(boolean show){
-		dockPanel.setWidgetHidden(workflowBar, !show);
-		workflowButtons.setVisible(show);
 	}
 
 	@Override
