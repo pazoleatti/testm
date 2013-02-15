@@ -181,10 +181,13 @@ public class TreePicker extends Composite{
 
 	private void processSelectedElements(){
 		StringBuilder result = new StringBuilder();
+		StringBuilder tooltipTitle = new StringBuilder();
 		for(Map.Entry<String, Integer> selectedItem : selectedItems.entrySet()){
 			result.append(selectedItem.getKey()).append(";");
+			tooltipTitle.append(selectedItem.getKey()).append("\n");
 		}
 		selected.setText(result.toString());
+		selected.setTitle(tooltipTitle.toString());
 	}
 
 	private final class Pair<A, B> {

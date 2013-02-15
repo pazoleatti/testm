@@ -62,10 +62,13 @@ public class ReportPeriodPicker extends Composite{
 			@Override
 			public void onClick(ClickEvent event) {
 				StringBuilder result = new StringBuilder();
+				StringBuilder tooltipTitle = new StringBuilder();
 				for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
 					result.append(item.getValue()).append(";");
+					tooltipTitle.append(item.getValue()).append("\n");
 				}
 				selected.setText(result.toString());
+				selected.setTitle(tooltipTitle.toString());
 				popup.hide();
 			}
 		});
