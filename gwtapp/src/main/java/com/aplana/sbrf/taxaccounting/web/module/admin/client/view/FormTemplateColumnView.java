@@ -411,7 +411,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		to.setGroupName(from.getGroupName());
 		to.setWidth(from.getWidth());
 		to.setEditable(from.isEditable());
-		to.setMandatory(from.isMandatory());
 		to.setOrder(from.getOrder());
 	}
 

@@ -1,22 +1,35 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -80,8 +93,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 		result.setState(WorkflowState.CREATED);
 		result.setDepartmentId(departmentId);
-		// TODO: сюда хорошо бы добавить проверку, что данный тип формы соответствует
-		// виду формы (FormType) и уровню подразделения (например сводные нельзя делать на уровне ниже ТБ)
 		result.setKind(kind);
 		result.setReportPeriodId(reportPeriodDao.getCurrentPeriod(form.getType().getTaxType()).getId());
 
@@ -150,8 +161,6 @@ public class FormDataServiceImpl implements FormDataService {
 		if (canDo) {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
-			// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
-			checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для выполенения расчёта по налоговой форме");
 		}
@@ -161,8 +170,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCheck(Logger logger, int userId, FormData formData) {
 		TAUser user = userDao.getUser(userId);
 		formDataScriptingService.executeScripts(user, formData, FormDataEvent.CHECK, logger);
-		// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
-		checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			logger.error("Проверка завершена, обнаружены ошибки");
@@ -253,37 +260,6 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 	}
 
-	@Override
-	// TODO: Проверку обязательных столбцов стоит переделать, возможно вынести в скрипты
-	public void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger) {
-		List<Column> columns = formTemplate.getColumns();
-		RowScriptMessageDecorator messageDecorator = new RowScriptMessageDecorator();
-		messageDecorator.setScriptName("Проверка обязательных полей");
-		logger.setMessageDecorator(messageDecorator);
-		int rowIndex = 0;
-		for (DataRow row : formData.getDataRows()) {
-			++rowIndex; // Для пользователя нумерация строк должна начинаться с 1
-
-			// Проверка не осуществляется для строк, генерируемых скриптом
-			if (!row.isManagedByScripts()) {
-				messageDecorator.setRowIndex(rowIndex);
-				List<String> columnNames = new ArrayList<String>();
-				for (Column col : columns) {
-					if (col.isMandatory()) {
-						Object value = row.get(col.getAlias());
-						if (value == null || (value instanceof String && ((String) value).isEmpty())) {
-							columnNames.add(col.getName());
-						}
-					}
-				}
-				if (!columnNames.isEmpty()) {
-					logger.error("Не заполнены столбцы %s", columnNames.toString());
-				}
-			}
-		}
-		logger.setMessageDecorator(null);
-	}
-
 	/**
 	 * Перемещает форму из одного состояния в другое.
 	 *
@@ -301,7 +277,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 		FormData formData = formDataDao.get(formDataId);
 		formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getEvent(), logger);
-		checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
 

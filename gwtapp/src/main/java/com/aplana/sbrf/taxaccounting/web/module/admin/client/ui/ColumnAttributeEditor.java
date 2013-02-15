@@ -36,9 +36,6 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	CheckBox editable;
 
 	@UiField
-	CheckBox mandatory;
-
-	@UiField
 	CheckBox checking;
 
 	public ColumnAttributeEditor() {

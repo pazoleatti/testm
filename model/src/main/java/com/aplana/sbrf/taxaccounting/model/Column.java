@@ -22,7 +22,6 @@ public abstract class Column implements Ordered, Serializable {
 	private String alias;
 	private int width;
 	private boolean editable;
-	private boolean mandatory;
 	private boolean checking;
 	private int order;
 	private String groupName;
@@ -111,24 +110,6 @@ public abstract class Column implements Ordered, Serializable {
 	public void setEditable(boolean editable) {
 		this.editable = editable;
 	}
-	
-	/**
-	 * Признак обязательности столбца
-	 * Если он установлен в true, то при выполнении пересчёта будут генерироваться ошибки, для каждой строки, где значение
-	 * этой колонки равно null
-	 * @return значение признака обязательности столбца
-	 */
-	public boolean isMandatory() {
-		return mandatory;
-	}
-	
-	/**
-	 * Задать признак обязательности столбца
-	 * @param mandatory желаемое значение признака
-	 */
-	public void setMandatory(boolean mandatory) {
-		this.mandatory = mandatory;
-	}
 
 	/**
 	 * Возвращает порядковый номер столбца в форме
@@ -150,7 +131,6 @@ public abstract class Column implements Ordered, Serializable {
 
 	/**
 	 * Возвращает имя группы столбцов, к которой относится данный столбец
-	 * TODO: этот функционал пока не реализован
 	 * Если в списке столбцов у нескольких столбцов стоящих рядом задано одинаковое значение названия группы столбцов, то эти
 	 * столбцы будут объекдинены в таблице под общей шапкой верхнего уровня. 
 	 * @return имя группы столбцов

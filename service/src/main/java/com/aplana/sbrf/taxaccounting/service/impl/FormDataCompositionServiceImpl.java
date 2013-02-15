@@ -84,7 +84,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
 			formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger);
 			formDataScriptingService.executeScripts(null, formData, FormDataEvent.CALCULATE, logger);
-			formDataService.checkMandatoryColumns(formData, formTemplateDao.get(formData.getFormTemplateId()), logger);
 			formDataDao.save(formData);
 		} else {
 			logger.error("Невозможно принять форму. Сводная форма вышестоящего уровня уже принята.");

@@ -81,9 +81,17 @@ public interface FormDataService {
 	 */
 	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 
+	/**
+	 * Создаёт налоговую форму без проверок прав доступа
+	 * Метод предназначен для использования при реализации механизма консолидации, когда требуется создавать формы в чужих подразделениях
+	 * @param logger объект журнала
+	 * @param user пользователь, выполняющий операцию
+	 * @param formTemplateId идентификатор шаблона формы
+	 * @param departmentId идентификатор подразделения
+	 * @param kind тип налоговой формы
+	 * @return созданный объект FormData (еще не сохранённый в БД)
+	 */
 	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind);
-
-	void checkMandatoryColumns(FormData formData, FormTemplate formTemplate, Logger logger);
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.
