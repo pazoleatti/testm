@@ -173,18 +173,23 @@ public class Cell implements Serializable {
 		}
 		this.rowSpan = rowSpan;
 	}
+	
 
 	/**
-	 * Получить {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
-	 * Если значение алиаса стиля равно null, то нужно использовать стиль
-	 * по-умолчанию.
-	 * 
-	 * @return {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой
+	 * Признак того, что ячейка допускает ввод значения пользователем
+	 * @return что ячейка допускает ввод значения пользователем
 	 */
-	// public String getStyleAlias() {
-	// return style.getAlias();
-	// }
+	public boolean isEditable() {
+		// TODO: как временная мера - выдаём значение флага "редактируемый" из Column,
+		// чтобы поддержать старое поведение системы 
+		return column.isEditable();
+	}
 
+	/**
+	 * Получить {@link FormStyle стиль}, связанный с ячейкой.
+	 * Если значение стиля равно null, то нужно использовать стиль по-умолчанию.
+	 * @return стиль, связанный с ячейкой
+	 */
 	public FormStyle getStyle() {
 		if (!ModelUtils.containsLink(formStyleList, style)){
 			// Обнуляем отсутствующий стиль
