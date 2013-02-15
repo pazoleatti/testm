@@ -56,7 +56,8 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 		if (!newSigners.isEmpty()) {
 			getJdbcTemplate().batchUpdate(
 					"insert into form_data_signer (id, form_data_id, name, position, ord) " +
-							"values (?, ?, ?, ?, (select max(ord) from form_data_signer)+1)",
+							"values (?, ?, ?, ?, (select case when max(ord) is null then 0 else max(ord) end from " +
+							"(select * from form_data_signer where form_data_id = ?))+1)",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -65,6 +66,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 							ps.setLong(2, formDataId);
 							ps.setString(3, signer.getName());
 							ps.setString(4, signer.getPosition());
+							ps.setLong(5, formDataId);
 						}
 
 						@Override
