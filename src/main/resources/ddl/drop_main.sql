@@ -3,6 +3,7 @@ drop table numeric_value;
 drop table date_value;
 
 drop table cell_span_info;
+drop table cell_editable;
 drop table form_column;
 drop sequence seq_form_column;
 

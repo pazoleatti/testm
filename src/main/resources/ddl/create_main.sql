@@ -372,6 +372,18 @@ comment on column data_row.managed_by_scripts is 'Признак того, чт�
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
+create table cell_editable(
+row_id number(18) not null,
+column_id number(9) not null
+);
+alter table cell_editable add constraint cell_editable_pk primary key (row_id, column_id);
+alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row (id);
+alter table cell_editable add constraint cell_editable_fk_form_column foreign key (column_id) references form_column (id);
+
+comment on table cell_editable is 'информация о редактируемых ячейках налоговой формы';
+comment on column cell_editable.row_id is 'идентификатор строки налоговой формы';
+comment on column cell_editable.column_id is 'идентификатор столбца налоговой формы';
+---------------------------------------------------------------------------------------------------
 
 create table numeric_value (
 	row_id number(18) not null,
