@@ -2,6 +2,32 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-	<g:FlowPanel ui:field="panel" />
-	
+    <ui:style>
+        @external .gwt-MenuBar-horizontal;
+        .gwt-MenuBar-horizontal {
+            background: none;
+            border: none;
+        }
+        @external .gwt-MenuBar-horizontal .gwt-MenuItem;
+        .gwt-MenuBar-horizontal .gwt-MenuItem {
+            color: white;
+        }
+        @external .gwt-MenuBar .gwt-MenuItem-selected;
+        .gwt-MenuBar .gwt-MenuItem-selected {
+            background: none;
+        }
+        @external .gwt-MenuBarPopup ;
+        .gwt-MenuBarPopup {
+            background: none;
+        }
+
+        @external .gwt-MenuBar-vertical .gwt-MenuItem;
+        .gwt-MenuBar-vertical .gwt-MenuItem {
+            background: repeat-x scroll center bottom #76BD43;
+        }
+
+    </ui:style>
+
+	<g:FlowPanel ui:field="panel"/>
+
 </ui:UiBinder> 

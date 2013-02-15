@@ -37,8 +37,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	public void setMenuItems(final List<MenuItem> menuItems) {
 		panel.clear();
 		MenuBar menu = new MenuBar();
-		menu.setFocusOnHoverEnabled(true);
 		menu.setAnimationEnabled(true);
+		menu.setAutoOpen(true);
 
 		for (final MenuItem menuItem : menuItems) {
 			if (!menuItem.getSubMenu().isEmpty()) {
@@ -49,7 +49,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 					sb.appendHtmlConstant("<a href=\"#"
 							+ subMenu.getLink() + ";"
 							+ "nType="
-							+ menuItem.getLink() + "\">"
+							+ menuItem.getLink()
+							+ "\" style=\"color:white; margin-left: 10px; text-decoration:none; cursor:hand\">"
 							+ subMenu.getName() + "</a>");
 					subMenuBar.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
 				}

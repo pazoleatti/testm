@@ -99,7 +99,13 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	@Override
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
-		clonedSigners = new ArrayList<FormDataSigner>();
+
+		if (clonedSigners == null) {
+			clonedSigners = new ArrayList<FormDataSigner>();
+		}
+		else {
+			clonedSigners.clear();
+		}
 
 		if (signers != null) {
 			copySigners(signers, clonedSigners);
@@ -126,19 +132,18 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
 	private void setSigners() {
 		signersTable.setRowData(clonedSigners);
+		signersTable.redraw();
 	}
 
 	private void copySigners(List<FormDataSigner> from, List<FormDataSigner> to) {
-		if (to.size() > 0) {
-			to.clear();
-		}
-
 		for (FormDataSigner signer : from) {
-			FormDataSigner clonedSigner = new FormDataSigner();
-			clonedSigner.setId(signer.getId());
-			clonedSigner.setName(signer.getName());
-			clonedSigner.setPosition(signer.getPosition());
-			to.add(clonedSigner);
+			if (!signer.getName().isEmpty() || !signer.getPosition().isEmpty()) {
+				FormDataSigner clonedSigner = new FormDataSigner();
+				clonedSigner.setId(signer.getId());
+				clonedSigner.setName(signer.getName());
+				clonedSigner.setPosition(signer.getPosition());
+				to.add(clonedSigner);
+			}
 		}
 	}
 
@@ -177,8 +182,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	@UiHandler("addColumn")
 	public void onAddColumn(ClickEvent event){
 		FormDataSigner signer = new FormDataSigner();
-		signer.setName("Новый подписант");
-		signer.setPosition("должность");
+		signer.setName("");
+		signer.setPosition("");
 		clonedSigners.add(signer);
 		setSigners();
 	}
@@ -199,10 +204,20 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		if (performer == null && !name.getText().isEmpty()) {
 			performer = new FormDataPerformer();
 		}
-		performer.setName(name.getText());
-		performer.setPhone(phone.getText());
+		if (performer != null) {
+			performer.setName(name.getText());
+			performer.setPhone(phone.getText());
+		}
 
-		getUiHandlers().onSave(performer, clonedSigners);
+		if (clonedSigners.size() > 0) {
+			if (signers == null) {
+				signers = new ArrayList<FormDataSigner>();
+			}
+			signers.clear();
+			copySigners(clonedSigners, signers);
+		}
+
+		getUiHandlers().onSave(performer, signers);
 	}
 
 	@UiHandler("cancelButton")
