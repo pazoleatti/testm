@@ -41,16 +41,15 @@ public class DeclarationServiceImpl implements DeclarationService {
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
 
-
-	// TODO Добавить declarationTemplateId
 	@Override
-	public long createDeclaration(Logger logger, TaxType taxType, int departmentId, int userId, int reportPeriodId) {
-		if (declarationAccessService.canCreate(taxType, departmentId, reportPeriodId)) {
+	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
+		DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+		if (declarationAccessService.canCreate(declarationTemplate, departmentId, reportPeriodId)) {
 			Declaration newDeclaration = new Declaration();
 			newDeclaration.setDepartmentId(departmentId);
-			newDeclaration.setDeclarationTemplateId(1);
 			newDeclaration.setReportPeriodId(reportPeriodId);
 			newDeclaration.setAccepted(false);
+			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 			return declarationDao.saveNew(newDeclaration);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для создания декларации с указанными параметрами");

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +67,25 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
+		}
+	}
+
+	@Override
+	public int getActiveDeclarationTemplateId(int declarationTypeId) {
+		JdbcTemplate jt = getJdbcTemplate();
+		DeclarationTemplate declarationTemplate;
+		try {
+			declarationTemplate = jt.queryForObject(
+					"select * from declaration_template where declaration_type_id = ? and is_active = ?",
+					new Object[]{declarationTypeId, 1},
+					new int[]{Types.NUMERIC,Types.NUMERIC},
+					new DeclarationTemplateRowMapper()
+			);
+			return declarationTemplate.getId();
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Для данного вида декларации %d не найдено активного шаблона декларации.", declarationTypeId);
+		}catch(IncorrectResultSizeDataAccessException e){
+			throw new DaoException("Для даного вида декларации %d найдено несколько активных шаблонов деклараций.", declarationTypeId);
 		}
 	}
 

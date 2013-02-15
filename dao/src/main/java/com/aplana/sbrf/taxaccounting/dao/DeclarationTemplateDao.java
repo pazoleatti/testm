@@ -23,6 +23,15 @@ public interface DeclarationTemplateDao {
 	 */
 	DeclarationTemplate get(int declarationTemplateId);
 	/**
+	 * Возвращает идентификатор действующего {@link com.aplana.sbrf.taxaccounting.model.DeclarationTemplate описания декларации} по виду декларации
+	 * Такое описание для каждого вида декларации в любой момент времени может быть только одно
+	 * @param declarationTypeId идентификатор вида декларации
+	 * @return идентификатор описания декларации
+	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
+	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
+	 */
+	int getActiveDeclarationTemplateId(int declarationTypeId);
+	/**
 	 * Сохранить шаблон декларации.
 	 * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
 	 * @param declarationTemplate объект шаблона декларации

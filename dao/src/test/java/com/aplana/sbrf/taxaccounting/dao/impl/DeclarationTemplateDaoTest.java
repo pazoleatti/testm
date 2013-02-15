@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class DeclarationTemplateDaoTest {
 
 	@Test
 	public void testListAll() {
-		assertEquals(5, declarationTemplateDao.listAll().size());
+		assertEquals(6, declarationTemplateDao.listAll().size());
 	}
 
 	@Test
@@ -37,7 +36,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(1, d1.getId().longValue());
 		assertEquals('T', d1.getDeclarationType().getTaxType().getCode());
 		assertEquals("0.01", d1.getVersion());
-		assertTrue(d1.isActive());
+		assertFalse(d1.isActive());
 
 		DeclarationTemplate d2 = declarationTemplateDao.get(2);
 		assertEquals(2, d2.getId().longValue());
@@ -132,5 +131,20 @@ public class DeclarationTemplateDaoTest {
 	@Test(expected = DaoException.class)
 	public void testGetJasperNotExisted() {
 		declarationTemplateDao.getJasper(1000);
+	}
+
+	@Test
+	public void getActiveDeclarationTemplateIdTest() {
+		assertEquals(2, declarationTemplateDao.getActiveDeclarationTemplateId(1));
+	}
+
+	@Test(expected = DaoException.class)
+	public void getActiveDeclarationTemplateIdMoreThanOneTest() {
+		declarationTemplateDao.getActiveDeclarationTemplateId(2);
+	}
+
+	@Test(expected = DaoException.class)
+	public void getActiveDeclarationTemplateIdEmptyTest() {
+		declarationTemplateDao.getActiveDeclarationTemplateId(3);
 	}
 }

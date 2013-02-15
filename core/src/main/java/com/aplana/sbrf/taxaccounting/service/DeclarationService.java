@@ -12,7 +12,7 @@ public interface DeclarationService {
 	/**
 	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
 	 * @param logger - объект журнала
-	 * @param taxType вид налога
+	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
 	 * @param userId идентификатор пользователя, выполняющего действие
 	 * @param reportPeriodId идентификатор отчетного периода
@@ -20,7 +20,7 @@ public interface DeclarationService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long createDeclaration(Logger logger, TaxType taxType, int departmentId, int userId, int reportPeriodId);
+	long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId);
 	/**
 	 * Получить декларацию
 	 * @param declarationId

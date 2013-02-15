@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 
 /**
@@ -18,7 +18,7 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canCreate(TaxType taxType, int departmentId, int reportPeriodId) {
+	public boolean canCreate(DeclarationTemplate declarationTemplate, int departmentId, int reportPeriodId) {
 		// TODO: добавить реализацию
 		return true;
 	}
