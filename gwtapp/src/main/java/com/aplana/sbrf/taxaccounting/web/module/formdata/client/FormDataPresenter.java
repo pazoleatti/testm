@@ -189,8 +189,7 @@ public class FormDataPresenter extends
 		if (!readOnlyMode) {
 			MyView view = getView();
 			DataRow dataRow = view.getSelectedRow();
-			view.enableRemoveRowButton(dataRow != null
-					&& !dataRow.isManagedByScripts());
+			view.enableRemoveRowButton(dataRow != null);
 		}
 	}
 
@@ -267,7 +266,9 @@ public class FormDataPresenter extends
 	@Override
 	public void onRemoveRowClicked() {
 		DataRow dataRow = getView().getSelectedRow();
-		if (dataRow != null && !dataRow.isManagedByScripts()) {
+		if (dataRow != null) {
+			// TODO: сделать проверку, что строку можно удалять
+			// возможно сделать отдельное событие и проверять скриптом
 			formData.getDataRows().remove(dataRow);
 			getView().setRowsData(formData.getDataRows());
 		}

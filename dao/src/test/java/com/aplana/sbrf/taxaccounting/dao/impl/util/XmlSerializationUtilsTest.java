@@ -116,7 +116,6 @@ public class XmlSerializationUtilsTest {
 		row.setAlias("alias");
 		row.setOrder(1001);
 		rows.add(row);
-		row.setManagedByScripts(true);
 
 		row = new DataRow("withColumns", columns, styles);
 		row.put("stringColumn", "test тест");
@@ -197,10 +196,6 @@ public class XmlSerializationUtilsTest {
 		}
 
 		if (row1.getOrder() != row2.getOrder()) {
-			return false;
-		}
-
-		if (row1.isManagedByScripts() != row2.isManagedByScripts()) {
 			return false;
 		}
 

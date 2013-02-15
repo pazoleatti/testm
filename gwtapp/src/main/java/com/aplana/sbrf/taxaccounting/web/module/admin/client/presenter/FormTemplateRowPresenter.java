@@ -69,7 +69,7 @@ public class FormTemplateRowPresenter extends Presenter<FormTemplateRowPresenter
 
 	@Override
 	public void onRemoveButton(DataRow row) {
-		if (row != null && !row.isManagedByScripts()) {
+		if (row != null) {
 			formTemplate.getRows().remove(row);
 			getView().setRowsData(formTemplate.getRows());
 		}

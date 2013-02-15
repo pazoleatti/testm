@@ -52,7 +52,6 @@ public final class XmlSerializationUtils {
 	private static final String ENCODING = "utf-8";
 
 	private static final XmlSerializationUtils instance = new XmlSerializationUtils();
-	private static final String ATTR_MANAGED_BY_SCRIPTS = "managedByScripts";
 
 	/**
 	 * @return экземпляр класса
@@ -123,11 +122,6 @@ public final class XmlSerializationUtils {
 			row.setAttribute(ATTR_ALIAS, dataRow.getAlias());
 		}
 		row.setAttribute(ATTR_ORDER, String.valueOf(dataRow.getOrder()));
-
-		if (dataRow.isManagedByScripts()) {
-			row.setAttribute(ATTR_MANAGED_BY_SCRIPTS,
-					String.valueOf(dataRow.isManagedByScripts()));
-		}
 
 		for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 			String alias = entry.getKey();
@@ -250,11 +244,6 @@ public final class XmlSerializationUtils {
 		// Order
 		dataRow.setOrder(Integer.valueOf(element.getAttributes()
 				.getNamedItem(ATTR_ORDER).getNodeValue()));
-
-		// Managed by scripts
-		String scriptManaged = element.getAttribute(ATTR_MANAGED_BY_SCRIPTS);
-		dataRow.setManagedByScripts(scriptManaged != null
-				&& !scriptManaged.isEmpty() && Boolean.valueOf(scriptManaged));
 
 		// Value
 		NodeList cells = element.getElementsByTagName(TAG_CELL);

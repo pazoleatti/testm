@@ -41,7 +41,6 @@ public class FormDataDaoTest {
 		DataRow dr = formData.getDataRows().get(0);
 		Assert.assertEquals("testAlias", dr.getAlias());
 		Assert.assertEquals("Строка 1", (String) dr.get("stringColumn"));
-		Assert.assertTrue(dr.isManagedByScripts());
 
 		BigDecimal numericValue1 = getNumericValue(1.01, 2);
 		Assert.assertEquals(numericValue1, (BigDecimal) dr.get("numericColumn"));
@@ -50,7 +49,6 @@ public class FormDataDaoTest {
 		dr = formData.getDataRows().get(1);
 		Assert.assertNull(dr.getAlias());
 		Assert.assertEquals("Строка 2", (String) dr.get("stringColumn"));
-		Assert.assertFalse(dr.isManagedByScripts());
 		BigDecimal numericValue2 = getNumericValue(2.02, 2);
 		Assert.assertEquals(numericValue2, (BigDecimal) dr.get("numericColumn"));
 		Assert.assertEquals(getDate(2013, 0, 1), (Date) dr.get("dateColumn"));
@@ -100,14 +98,12 @@ public class FormDataDaoTest {
 		FormData formData = new FormData(formTemplate);
 
 		DataRow dr = formData.appendDataRow();
-		dr.setManagedByScripts(false);
 		dr.put("stringColumn", "Строка 1");
 		dr.put("numericColumn", 1.01);
 		Date date1 = getDate(2012, 11, 31);
 		dr.put("dateColumn", date1);
 
 		dr = formData.appendDataRow("newAlias");
-		dr.setManagedByScripts(true);
 		dr.put("stringColumn", "Строка 2");
 		dr.put("numericColumn", 2.02);
 		Date date2 = getDate(2013, 0, 1);
@@ -126,7 +122,6 @@ public class FormDataDaoTest {
 		dr = formData.getDataRows().get(0);
 		Assert.assertNull(dr.getAlias());
 		Assert.assertEquals("Строка 1", (String) dr.get("stringColumn"));
-		Assert.assertFalse(dr.isManagedByScripts());
 		Assert.assertEquals(getNumericValue(1.01, 2),
 				(BigDecimal) dr.get("numericColumn"));
 		Assert.assertEquals(date1, (Date) dr.get("dateColumn"));
@@ -134,7 +129,6 @@ public class FormDataDaoTest {
 		dr = formData.getDataRows().get(1);
 		Assert.assertEquals("newAlias", dr.getAlias());
 		Assert.assertEquals("Строка 2", (String) dr.get("stringColumn"));
-		Assert.assertTrue(dr.isManagedByScripts());
 		Assert.assertEquals(getNumericValue(2.02, 2),
 				(BigDecimal) dr.get("numericColumn"));
 		Assert.assertEquals(date2, (Date) dr.get("dateColumn"));
@@ -204,7 +198,6 @@ public class FormDataDaoTest {
 		FormData formData = new FormData(formTemplate);
 
 		DataRow dr = formData.appendDataRow();
-		dr.setManagedByScripts(false);
 		dr.put("stringColumn", "Строка 1");
 		dr.getCell("stringColumn").setStyleAlias("alias1");
 		dr.put("numericColumn", 1.01);
@@ -213,7 +206,6 @@ public class FormDataDaoTest {
 		dr.put("dateColumn", date1);
 
 		dr = formData.appendDataRow("newAlias");
-		dr.setManagedByScripts(true);
 		dr.put("stringColumn", "Строка 2");
 		dr.getCell("stringColumn").setStyleAlias("alias1");
 		dr.put("numericColumn", 2.02);

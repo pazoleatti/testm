@@ -208,7 +208,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						DataRow row = formData.appendDataRow(alias);
 						rowIdToAlias.put(rowId, row);
 						row.setOrder(rs.getInt("ord"));
-						row.setManagedByScripts(rs.getInt("managed_by_scripts") == 1);
 					}
 				});
 
@@ -419,7 +418,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				int rowOrder = dr.getOrder();
 				ps.setString(1, rowAlias);
 				ps.setInt(2, rowOrder);
-				ps.setInt(3, dr.isManagedByScripts() ? 1 : 0);
 
 				for (Column col : formData.getFormColumns()) {
 					Object val = dr.get(col.getAlias());
@@ -461,8 +459,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 
 		jt.batchUpdate(
-				"insert into data_row (id, form_data_id, alias, ord, managed_by_scripts) values (seq_data_row.nextval, "
-						+ formDataId + ", ?, ?, ?)", bpss);
+				"insert into data_row (id, form_data_id, alias, ord) values (seq_data_row.nextval, "
+						+ formDataId + ", ?, ?)", bpss);
 
 		// Получаем массив идентификаторов строк, индекс записи в массиве
 		// соответствует порядковому номеру строки (меньше на единицу)

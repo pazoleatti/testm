@@ -45,7 +45,6 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private String alias;
 	private List<FormStyle> formStyleList;
 	private int order;
-	private boolean managedByScripts;
 
 	/**
 	 * Конструктор нужен для сериализации
@@ -239,30 +238,6 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	/**
-	 * Возвращает признак того, что содержимое строки контролируется скриптами В
-	 * частности, если у строки этот флаг установлен в true, то при проверке
-	 * обязательности заполнения столбцов в налоговой форме, для данной строки
-	 * такие проверки выполняться не будут
-	 * 
-	 * @return признак того, что содержимое строки контролируется скриптами
-	 */
-	public boolean isManagedByScripts() {
-		return managedByScripts;
-	}
-
-	/**
-	 * Установливает признак того, что содержимое строки контролируется
-	 * скриптами
-	 * 
-	 * @see {@link #isManagedByScripts()}
-	 * @param managedByScripts
-	 *            значение признака
-	 */
-	public void setManagedByScripts(boolean managedByScripts) {
-		this.managedByScripts = managedByScripts;
 	}
 
 	@Override
