@@ -50,7 +50,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 							+ subMenu.getLink() + ";"
 							+ "nType="
 							+ menuItem.getLink()
-							+ "\" style=\"color:white; margin-left: 10px; text-decoration:none; cursor:hand\">"
+							+ "\" style=\"color:white; margin-left: 10px; text-decoration:none;\">"
 							+ subMenu.getName() + "</a>");
 					subMenuBar.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
 				}
