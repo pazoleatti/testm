@@ -15,10 +15,9 @@
         @external .gwt-MenuBar .gwt-MenuItem-selected;
         .gwt-MenuBar .gwt-MenuItem-selected {
             background: none;
-        }
-        @external .gwt-MenuBarPopup ;
-        .gwt-MenuBarPopup {
-            background: none;
+            border-bottom: 1px dotted #6A8EA4;
+            color: #3964C2 !important;
+            cursor: pointer;
         }
 
         @external .gwt-MenuBar-vertical .gwt-MenuItem;
