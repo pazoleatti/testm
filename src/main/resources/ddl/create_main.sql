@@ -356,7 +356,7 @@ create table data_row (
 	form_data_id number(18) not null,
 	alias varchar(20),
 	ord number(9) not null,
-	MANAGED_BY_SCRIPTS number(1) default 0 not null
+	MANAGED_BY_SCRIPTS number(1) default 0
 );
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id);
