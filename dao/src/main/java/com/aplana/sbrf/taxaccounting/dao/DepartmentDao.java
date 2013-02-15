@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * DAO для работы с информацией по подразделениям банка 

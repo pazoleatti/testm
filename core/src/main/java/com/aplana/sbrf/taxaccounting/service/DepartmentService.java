@@ -30,7 +30,7 @@ public interface DepartmentService {
 	 * @param parentDepartmentId
 	 * @return
 	 */
-	List<Department> getChildrensDepartment(int parentDepartmentId);
+	List<Department> getChildren(int parentDepartmentId);
 	
 	
 

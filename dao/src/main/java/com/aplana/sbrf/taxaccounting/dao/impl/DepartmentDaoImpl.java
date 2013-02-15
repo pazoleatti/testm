@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -22,7 +24,14 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	@Autowired 
 	private DepartmentMapper departmentMapper;
 	
-	@Override	
+	@Autowired
+	DepartmentFormTypeDao departmentFormTypeDao;
+	
+	@Autowired
+	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+	
+	@Override
+	@Cacheable("Department")
 	public Department getDepartment(int id) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
@@ -31,6 +40,8 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		if (result == null) {
 			throw new DaoException("Не удалось найти подразделение банка с id = " + id);
 		}
+		result.setDepartmentFormTypes(departmentFormTypeDao.get(id));
+		result.setDepartmentDeclarationTypes(departmentDeclarationTypeDao.getDepartmentDeclarationTypes(id));
 		return result;
 	}
 

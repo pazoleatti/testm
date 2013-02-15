@@ -83,7 +83,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	public List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId) {
 		List<Department> departmentList = new ArrayList<Department>();
 		departmentList.add(departmentService.getDepartment(parentDepartmentId));
-		departmentList.addAll(departmentService.getChildrensDepartment(parentDepartmentId));
+		departmentList.addAll(departmentService.getChildren(parentDepartmentId));
 		return departmentList;
 	}
 
