@@ -135,6 +135,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
 		for (FormDataSigner signer : from) {
 			FormDataSigner clonedSigner = new FormDataSigner();
+			clonedSigner.setId(signer.getId());
 			clonedSigner.setName(signer.getName());
 			clonedSigner.setPosition(signer.getPosition());
 			to.add(clonedSigner);
