@@ -17,5 +17,5 @@ insert into form_data (id, form_id, department_id, state, kind, report_period_id
 
 insert into form_data_signer (id, form_data_id, name, position, ord) values (1, 1, 'name1', 'position1', 1);
 insert into form_data_signer (id, form_data_id, name, position, ord) values (2, 1, 'name2', 'position2', 2);
-insert into form_data_signer (id, form_data_id, name, position, ord) values (3, 2, 'name3', 'position3', 3);
-insert into form_data_signer (id, form_data_id, name, position, ord) values (4, 2, 'name4', 'position4', 4);
+insert into form_data_signer (id, form_data_id, name, position, ord) values (3, 2, 'name3', 'position3', 1);
+insert into form_data_signer (id, form_data_id, name, position, ord) values (4, 2, 'name4', 'position4', 2);

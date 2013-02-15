@@ -10,8 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Реализация DAO для работы с информацией о {@link FormDataSigner подписантах} налоговых форм
@@ -44,12 +43,39 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 	public void saveSigners(final long formDataId, List<FormDataSigner> signers) {
 		final List<FormDataSigner> newSigners = new LinkedList<FormDataSigner>();
 		final List<FormDataSigner> oldSigners = new LinkedList<FormDataSigner>();
+		final Set<Long> removedSigners = new HashSet<Long>(getJdbcTemplate().queryForList(
+				"select id from form_data_signer where form_data_id = ?",
+				new Object[]{formDataId},
+				new int[]{Types.NUMERIC},
+				Long.class
+		));
 		for (FormDataSigner signer : signers) {
 			if (signer.getId() == 0) {
 				newSigners.add(signer);
 			} else {
 				oldSigners.add(signer);
+				removedSigners.remove(signer.getId());
 			}
+		}
+
+		if(!removedSigners.isEmpty()){
+			getJdbcTemplate().batchUpdate(
+					"delete from form_data_signer where id = ?",
+					new BatchPreparedStatementSetter() {
+
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							ps.setLong(1, iterator.next());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return removedSigners.size();
+						}
+
+						private Iterator<Long> iterator = removedSigners.iterator();
+					}
+			);
 		}
 
 		// create new

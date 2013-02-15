@@ -41,13 +41,13 @@ public class FormDataSignerDaoTest {
 	public void saveSignersTest() {
 		FormData formData = formDataDao.get(2);
 		List<FormDataSigner> formSigners = formData.getSigners();
+		assertEquals(2, formSigners.size());
 		for(int i=0; i<2; i++) {
 			FormDataSigner newSigner = new FormDataSigner();
 			newSigner.setPosition("newPosition"+i);
 			newSigner.setName("newName"+i);
 			formSigners.add(newSigner);
 		}
-//		formData.setSigners(formSigners);
 		formDataSignerDao.saveSigners(2, formSigners);
 		formSigners = formDataSignerDao.getSigners(2);
 		assertEquals(4, formSigners.size());

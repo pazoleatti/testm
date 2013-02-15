@@ -59,15 +59,6 @@ public class FormPerformerDaoTest {
 
 	}
 
-	@Test(expected = DaoException.class)
-	public void saveFailTest() {
-		FormDataPerformer performer = new FormDataPerformer();
-		performer.setName("MyName");
-		performer.setPhone("MyPhone");
-		formPerformerDao.save(100,performer);
-
-	}
-
 	@Test
 	public void clearTest() {
 		assertNotNull(formPerformerDao.get(1));
@@ -75,8 +66,4 @@ public class FormPerformerDaoTest {
 		assertNull(formPerformerDao.get(1));
 	}
 
-	@Test(expected = DaoException.class)
-	public void clearFailTest() {
-		formPerformerDao.clear(100);
-	}
 }

@@ -374,8 +374,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			jt.update("delete from data_row where form_data_id = ?",
 					new Object[] { formDataId }, new int[] { Types.NUMERIC });
 		}
-		if (formData.getPerformer() != null) {
+		if (formData.getPerformer() != null &&
+				(!formData.getPerformer().getName().isEmpty() || !formData.getPerformer().getPhone().isEmpty())
+			) {
 			formPerformerDao.save(formDataId, formData.getPerformer());
+		} else {
+			formPerformerDao.clear(formDataId);
 		}
 		if (formData.getSigners() != null) {
 			formDataSignerDao.saveSigners(formDataId, formData.getSigners());

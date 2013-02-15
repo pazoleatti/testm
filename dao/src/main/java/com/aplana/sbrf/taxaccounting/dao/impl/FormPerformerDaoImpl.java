@@ -58,8 +58,6 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 						performer.getPhone()
 				);
 			}
-		} else {
-			throw new DaoException("Форма с id = %d не найдена", formDataId);
 		}
 	}
 
@@ -81,12 +79,9 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 
 	@Override
 	public void clear(long formDataId) {
-		int count = getJdbcTemplate().update(
+		getJdbcTemplate().update(
 				"delete from form_data_performer where form_data_id = ?",
 				formDataId
 		);
-		if (count == 0) {
-			throw new DaoException("Не удалось удалить исполнителя для формы с id = %d, так как она не существует", formDataId);
-		}
 	}
 }
