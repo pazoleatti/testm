@@ -286,7 +286,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 					return false;
 				}
 			}
-		} else if (clonedSigners.size() == 0) {
+		} else if (clonedSigners.size() != 0) {
 			return false;
 		}
 		return true;
