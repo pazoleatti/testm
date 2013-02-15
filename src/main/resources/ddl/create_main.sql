@@ -130,7 +130,7 @@ create table form_column (
 	alias varchar(100) not null,
 	type char(1) not null,
 	editable number(9) default 1 not null,
-	mandatory number(9)  default 1 not null,
+	mandatory number(9)  default 1,
 	width number(9) not null,
 	precision number(9),
 	dictionary_code varchar2(30),
