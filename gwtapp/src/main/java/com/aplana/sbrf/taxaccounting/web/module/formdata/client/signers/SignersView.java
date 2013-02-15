@@ -3,7 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.KeyPressableTextInputCell;
+import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,7 +34,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	}
 
 	@UiField
-	TextBox performer;
+	TextBox name;
 
 	@UiField
 	TextBox phone;
@@ -57,10 +60,14 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	@UiField
 	Button cancelButton;
 
+	@UiField
+	Bar columnActionsBar;
+
 	private final PopupPanel widget;
 	private List<FormDataSigner> signers;
 	private List<FormDataSigner> clonedSigners;
-	private FormDataPerformer clonedPerformer;
+	private FormDataPerformer performer;
+	private boolean readOnlyMode;
 	private final SingleSelectionModel<FormDataSigner> selectionModel = new SingleSelectionModel<FormDataSigner>();
 
 	@Inject
@@ -68,7 +75,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
 		widget.setAnimationEnabled(true);
-		initTable();
 	}
 
 	@Override
@@ -78,41 +84,73 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
 	@Override
 	public void setPerformer(FormDataPerformer performer) {
-		clonedPerformer = new FormDataPerformer();
-		clonedPerformer.setName(performer.getName());
-		clonedPerformer.setPhone(performer.getPhone());
+		this.performer = performer;
 
-		this.performer.setText(performer.getName());
-		this.phone.setText(performer.getPhone());
+		if (performer != null) {
+			name.setText(performer.getName());
+			phone.setText(performer.getPhone());
+		}
+		else {
+			name.setText("");
+			phone.setText("");
+		}
 	}
 
 	@Override
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
 		clonedSigners = new ArrayList<FormDataSigner>();
-		for (FormDataSigner signer : signers) {
-			FormDataSigner clonedSigner = new FormDataSigner();
-			clonedSigner.setName(signer.getName());
-			clonedSigner.setPosition(signer.getPosition());
-			clonedSigners.add(clonedSigner);
+
+		if (signers != null) {
+			copySigners(signers, clonedSigners);
 		}
+
 		setSigners();
 	}
 
+	@Override
+	public void setReadOnlyMode(boolean readOnlyMode) {
+		this.readOnlyMode = readOnlyMode;
+		name.setEnabled(!readOnlyMode);
+		phone.setEnabled(!readOnlyMode);
+		columnActionsBar.setVisible(!readOnlyMode);
+		if (readOnlyMode) {
+			cancelButton.setText("Ок");
+		}
+		else {
+			cancelButton.setText("Отмена");
+		}
+		saveButton.setVisible(!readOnlyMode);
+		initTable(readOnlyMode);
+	}
+
 	private void setSigners() {
-		signersTable.setRowData(signers);
+		signersTable.setRowData(clonedSigners);
+	}
+
+	private void copySigners(List<FormDataSigner> from, List<FormDataSigner> to) {
+		if (to.size() > 0) {
+			to.clear();
+		}
+
+		for (FormDataSigner signer : from) {
+			FormDataSigner clonedSigner = new FormDataSigner();
+			clonedSigner.setName(signer.getName());
+			clonedSigner.setPosition(signer.getPosition());
+			to.add(clonedSigner);
+		}
 	}
 
 	@UiHandler("upColumn")
 	public void onUpColumn(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
-		int ind = signers.indexOf(signer);
+		int ind = clonedSigners.indexOf(signer);
 
 		if (signer != null) {
 			if (ind > 0) {
-				FormDataSigner exchange = signers.get(ind - 1);
-				signers.set(ind - 1, signer);
-				signers.set(ind, exchange);
+				FormDataSigner exchange = clonedSigners.get(ind - 1);
+				clonedSigners.set(ind - 1, signer);
+				clonedSigners.set(ind, exchange);
 				setSigners();
 				selectionModel.setSelected(signer, true);
 			}
@@ -122,13 +160,13 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	@UiHandler("downColumn")
 	public void onDownColumn(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
-		int ind = signers.indexOf(signer);
+		int ind = clonedSigners.indexOf(signer);
 
 		if (signer != null) {
-			if (ind < signers.size() - 1) {
-				FormDataSigner exchange = signers.get(ind + 1);
-				signers.set(ind + 1, signer);
-				signers.set(ind, exchange);
+			if (ind < clonedSigners.size() - 1) {
+				FormDataSigner exchange = clonedSigners.get(ind + 1);
+				clonedSigners.set(ind + 1, signer);
+				clonedSigners.set(ind, exchange);
 				setSigners();
 				selectionModel.setSelected(signer, true);
 			}
@@ -140,50 +178,73 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		FormDataSigner signer = new FormDataSigner();
 		signer.setName("Новый подписант");
 		signer.setPosition("должность");
-		signers.add(signer);
+		clonedSigners.add(signer);
 		setSigners();
 	}
 
 	@UiHandler("removeColumn")
 	public void onRemoveColumn(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
-		final int ind = signers.indexOf(signer);
-		signers.remove(ind);
+		clonedSigners.remove(clonedSigners.indexOf(signer));
 		setSigners();
 	}
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event){
-		getUiHandlers().onSave();
+		onSave();
+	}
+
+	private void onSave() {
+		if (performer == null && !name.getText().isEmpty()) {
+			performer = new FormDataPerformer();
+		}
+		performer.setName(name.getText());
+		performer.setPhone(phone.getText());
+
+		getUiHandlers().onSave(performer, clonedSigners);
 	}
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		if (isEqualClonedAndCurrentSignersAndReporter()) {
-			getUiHandlers().onCancel();
-		}
-		else {
-			if (Window.confirm("Данные изменились, хотите сохранить изменения?")) {
-				getUiHandlers().onSave();
+		if (!readOnlyMode && !isEqualClonedAndCurrentSignersAndReporter()) {
+			if (Window.confirm("Первоначальные данные изменились, хотите применить изменения?")) {
+				onSave();
 			} else {
-				getUiHandlers().onCancel();
+				hide();
 			}
+		} else {
+			hide();
 		}
 	}
 
-	private void initTable() {
+	private void initTable(boolean readOnlyMode) {
 		signersTable.setSelectionModel(selectionModel);
+		// Clean columns
+		while (signersTable.getColumnCount() > 0) {
+			signersTable.removeColumn(0);
+		}
+
 		TextColumn<FormDataSigner> idColumn = new TextColumn<FormDataSigner>() {
 			@Override
 			public String getValue(FormDataSigner object) {
-				return "" + (signers.indexOf(object) + 1);
+				return "" + (clonedSigners.indexOf(object) + 1);
 			}
 		};
 		idColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		signersTable.addColumn(idColumn, "№ пп");
 		signersTable.setColumnWidth(idColumn, 40, Style.Unit.PX);
 
-		KeyPressableTextInputCell nameCell = new KeyPressableTextInputCell();
+		AbstractCell nameCell;
+		AbstractCell positionCell;
+		if (readOnlyMode) {
+			nameCell = new TextCell();
+			positionCell = new TextCell();
+		}
+		else {
+			nameCell = new KeyPressableTextInputCell();
+			positionCell = new KeyPressableTextInputCell();
+		}
+
 		Column<FormDataSigner, String> nameColumn = new Column<FormDataSigner, String>(nameCell) {
 			@Override
 			public String getValue(FormDataSigner object) {
@@ -198,7 +259,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		});
 		signersTable.addColumn(nameColumn, "ФИО подписанта");
 
-		KeyPressableTextInputCell positionCell = new KeyPressableTextInputCell();
 		Column<FormDataSigner, String> positionColumn = new Column<FormDataSigner, String>(positionCell) {
 			@Override
 			public String getValue(FormDataSigner object) {
@@ -215,18 +275,18 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	}
 
 	private boolean isEqualClonedAndCurrentSignersAndReporter() {
-		if (performer.getText().compareTo(clonedPerformer.getName()) != 0 ||
-				phone.getText().compareTo(clonedPerformer.getPhone()) != 0) {
+		if (performer != null && (name.getText().compareTo(performer.getName()) != 0 ||
+				phone.getText().compareTo(performer.getPhone()) != 0)) {
 			return false;
 		}
-		if (clonedSigners.size() == signers.size()) {
+		if (signers != null && signers.size() == clonedSigners.size()) {
 			for (int i = 0; i < signers.size(); i++) {
 				if (signers.get(i).getName().compareTo(clonedSigners.get(i).getName()) != 0 ||
 						signers.get(i).getPosition().compareTo(clonedSigners.get(i).getPosition()) != 0) {
 					return false;
 				}
 			}
-		} else {
+		} else if (clonedSigners.size() == 0) {
 			return false;
 		}
 		return true;

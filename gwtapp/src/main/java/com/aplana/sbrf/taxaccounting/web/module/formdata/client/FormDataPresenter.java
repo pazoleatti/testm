@@ -213,8 +213,8 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onSignersClicked() {
-		signersPresenter.setPerformer(formData.getPerformer());
-		signersPresenter.setSigners(formData.getSigners());
+		signersPresenter.setFormData(formData);
+		signersPresenter.setReadOnlyMode(readOnlyMode);
 		addToPopupSlot(signersPresenter);
 	}
 

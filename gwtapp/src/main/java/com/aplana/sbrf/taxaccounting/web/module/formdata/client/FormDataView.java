@@ -348,11 +348,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void showSignersButton(boolean show) {
-		signersButton.setVisible(show);
-	}
-
-	@Override
 	public void showManualInputButton(boolean show) {
 		manualInputButton.setVisible(show);
 	}

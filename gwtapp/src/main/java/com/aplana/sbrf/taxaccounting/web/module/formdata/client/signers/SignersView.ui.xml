@@ -16,7 +16,7 @@
         <g:VerticalPanel height="100%">
             <g:HorizontalPanel height="30px">
                 <g:Label width="100px">Исполнитель:</g:Label>
-                <g:TextBox width="300px" ui:field="performer"/>
+                <g:TextBox width="300px" ui:field="name"/>
             </g:HorizontalPanel>
 
             <g:HorizontalPanel height="30px">
@@ -25,7 +25,7 @@
             </g:HorizontalPanel>
 
             <t:GenericDataGrid ui:field="signersTable" height="250px"/>
-            <t:Bar>
+            <t:Bar ui:field="columnActionsBar">
                 <t:LeftBar>
                     <g:Button text="Вверх" ui:field="upColumn"/>
                     <g:Button text="Вниз" ui:field="downColumn"/>
@@ -36,7 +36,7 @@
 
             <t:Bar>
                 <t:LeftBar>
-                    <g:Button text="Сохранить" ui:field="saveButton"/>
+                    <g:Button text="Применить" ui:field="saveButton"/>
                     <g:Button text="Отмена" ui:field="cancelButton"/>
                 </t:LeftBar>
             </t:Bar>

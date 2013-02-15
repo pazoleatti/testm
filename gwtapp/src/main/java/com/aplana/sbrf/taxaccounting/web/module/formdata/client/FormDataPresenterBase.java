@@ -63,8 +63,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showPrintButton(boolean show);
 
-		void showSignersButton(boolean show);
-
 		void showManualInputButton(boolean show);
 
 		void showDeleteFormButton(boolean show);
@@ -154,7 +152,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintButton(true);
-		view.showSignersButton(true);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
 		view.showWorkflowButton(false);
@@ -172,7 +169,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintButton(true);
-		view.showSignersButton(true);
 		view.showManualInputButton(true);
 		view.showDeleteFormButton(true);
 		view.showWorkflowButton(true);
@@ -197,7 +193,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRemoveRowButton(!formData.getFormType().isFixedRows());
 
 		view.showPrintButton(false);
-		view.showSignersButton(false);
 		view.showManualInputButton(false);
 		view.showDeleteFormButton(false);
 		view.showWorkflowButton(false);
