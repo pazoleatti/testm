@@ -130,7 +130,6 @@ create table form_column (
 	alias varchar(100) not null,
 	type char(1) not null,
 	editable number(9) default 1 not null,
-	mandatory number(9)  default 1,
 	width number(9) not null,
 	precision number(9),
 	dictionary_code varchar2(30),
@@ -145,7 +144,6 @@ alter table form_column add constraint form_column_fk_form_id foreign key (form_
 alter table form_column add constraint form_column_uniq_alias unique(form_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_editable check(editable in (0, 1));
-alter table form_column add constraint form_column_chk_mandatory check(mandatory in (0, 1));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
@@ -157,7 +155,6 @@ comment on column form_column.editable is 'Признак возможности
 comment on column form_column.form_id is 'Идентификатор налоговой формы';
 comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
-comment on column form_column.mandatory is 'Признак обязательности';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';
 comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
