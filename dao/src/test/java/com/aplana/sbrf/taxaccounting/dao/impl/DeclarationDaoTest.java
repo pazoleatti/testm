@@ -170,6 +170,18 @@ public class DeclarationDaoTest {
 
 	}
 
+	@Test
+	public void findTest() {
+		Declaration declaration = declarationDao.find(1, 2, 1);
+		assertEquals(1, declaration.getId().longValue());
+	}
+
+	@Test
+	public void findEmptyResultTest() {
+		Declaration declaration = declarationDao.find(222, 222, 222);
+		assertNull(declaration);
+	}
+
 	private void assertIdsEquals(long[] expected, List<DeclarationSearchResultItem> items) {
 		if (expected.length != items.size()) {
 			fail("List size mismatch: " + expected.length + " expected but " + items.size() + " received");

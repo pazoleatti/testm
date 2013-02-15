@@ -69,6 +69,16 @@ public interface DeclarationDao {
 	                                          boolean ascSorting, PaginatedSearchParams paginatedSearchParams);
 
 	/**
+	 * Ищет декларацию по заданным параметрам.
+	 * @param declarationTypeId идентификатор типа декларации
+	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
+	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
+	 * @return декларацию или null, если такой декларации не найдено
+	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 */
+	Declaration find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+	/**
 	 * Получить количество записей, удовлетворяющих запросу
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру

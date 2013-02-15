@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationSearchResultItemMa
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -90,6 +91,36 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 		);
 		if (count == 0) {
 			throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", declarationId);
+		}
+	}
+
+	@Override
+	public Declaration find(int declarationTypeId, int departmentId, int reportPeriodId){
+		try {
+			Long declarationId = getJdbcTemplate().queryForLong(
+					"select dec.id from declaration dec where exists (select 1 from declaration_template dt where dec.declaration_template_id=dt.id and dt.declaration_type_id = ?)"
+							+ " and dec.department_id = ? and dec.report_period_id = ?",
+					new Object[] {
+							declarationTypeId,
+							departmentId,
+							reportPeriodId
+					},
+					new int[] {
+							Types.NUMERIC,
+							Types.NUMERIC,
+							Types.NUMERIC
+					}
+			);
+			return get(declarationId);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException(
+					"Для заданного сочетания параметров найдено несколько деклараций: declarationTypeId = %d, departmentId = %d, reportPeriodId = %d",
+					declarationTypeId,
+					departmentId,
+					reportPeriodId
+			);
 		}
 	}
 
