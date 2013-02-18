@@ -572,8 +572,7 @@ comment on column cell_span_info.rowspan is 'Число ячеек, которы
 
 ----------------------------------------------------------------------------------------------------
 create table department_param 
-( id number(9) not null,
-name varchar2(2000) not null, 
+( department_id number(9) not null,
 dict_region_id varchar2(2) not null, 
 okato varchar2(11) not null, 
 inn varchar2(10) not null, 
@@ -587,6 +586,7 @@ reorg_kpp varchar2(9)
 );
 alter table department_param add constraint department_param_pk primary key (id);
 alter table department_param add constraint dept_param_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
+alter table department_param add constraint dept_param_fk_dept_id foreign key (department_id) references department(id);
 
 comment on table department_param is 'общие сведения';
 comment on column department_param.id is 'идентификатор (первичный ключ)';
@@ -602,8 +602,8 @@ comment on column department_param.reorg_form_code is 'Код формы рео�
 comment on column department_param.reorg_inn is 'ИНН реорганизованного обособленного подразделения';
 comment on column department_param.reorg_kpp is 'КПП реорганизованного обособленного подразделения';
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-create table department_income_param 
-( id                  number(9) not null,
+create table department_param_income 
+( department_id                  number(9) not null,
   signatory_id        number(1) not null, 
   signatory_surname   varchar2(120) not null, 
   signatory_firstname varchar2(120), 
@@ -616,25 +616,26 @@ create table department_income_param
   sum_difference      number(15),
   correction_sum      number(15)
 );
-alter table department_income_param add constraint department_income_param_pk primary key (id);
-alter table department_income_param add constraint dept_income_param_chk_taxplace check (tax_place_type_code in ('213','214','215','216','218','220','223','225','226','231'));
+alter table department_param_income add constraint department_param_income_pk primary key (department_id);
+alter table department_param_income add constraint dept_param_income_chk_taxplace check (tax_place_type_code in ('213','214','215','216','218','220','223','225','226','231'));
+alter table department_param_income add constraint dept_param_income_fk_dept_id foreign key (department_id) references department(id);
 
-comment on table department_income_param is 'параметры подразделения по налогу на прибыль';
-comment on column department_income_param.id is 'идентификатор (первичный ключ)';
-comment on column department_income_param.signatory_id is 'Признак лица подписавшего документ';
-comment on column department_income_param.signatory_surname is 'Фамилия подписанта';
-comment on column department_income_param.signatory_firstname is 'Имя подписанта';
-comment on column department_income_param.signatory_lastname is 'Отчество подписанта';
-comment on column department_income_param.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
-comment on column department_income_param.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-comment on column department_income_param.tax_place_type_code is 'Код места, по которому представляется документ';
-comment on column department_income_param.tax_rate is 'Ставка налога (региональная часть)';
-comment on column department_income_param.external_tax_sum is 'Сумма налога, выплаченная за пределами Российской Федерации и засчитываемая в уплату налога согласно порядку, установленному ст. 311 НК ';
-comment on column department_income_param.sum_difference is 'Суммы отклонения от максимальной (расчетной) цены ';
-comment on column department_income_param.correction_sum is 'Внереализационные доходы в виде сумм корректировки прибыли вследствие применения методов определения для целей налогообложения соответствия цен, примененных в сделках, рыночным ценам (рентабельности), предусмотренным статьями 105.12 и 105.13 НК ';
+comment on table department_param_income is 'параметры подразделения по налогу на прибыль';
+comment on column department_param_income.id is 'идентификатор (первичный ключ)';
+comment on column department_param_income.signatory_id is 'Признак лица подписавшего документ';
+comment on column department_param_income.signatory_surname is 'Фамилия подписанта';
+comment on column department_param_income.signatory_firstname is 'Имя подписанта';
+comment on column department_param_income.signatory_lastname is 'Отчество подписанта';
+comment on column department_param_income.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
+comment on column department_param_income.approve_org_name is 'Наименование организации-представителя налогоплательщика';
+comment on column department_param_income.tax_place_type_code is 'Код места, по которому представляется документ';
+comment on column department_param_income.tax_rate is 'Ставка налога (региональная часть)';
+comment on column department_param_income.external_tax_sum is 'Сумма налога, выплаченная за пределами Российской Федерации и засчитываемая в уплату налога согласно порядку, установленному ст. 311 НК ';
+comment on column department_param_income.sum_difference is 'Суммы отклонения от максимальной (расчетной) цены ';
+comment on column department_param_income.correction_sum is 'Внереализационные доходы в виде сумм корректировки прибыли вследствие применения методов определения для целей налогообложения соответствия цен, примененных в сделках, рыночным ценам (рентабельности), предусмотренным статьями 105.12 и 105.13 НК ';
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-create table department_transport_param 
-( id                  number(9) not null,
+create table department_param_transport 
+( department_id       number(9) not null,
   signatory_id        number(1) not null, 
   signatory_surname   varchar2(120) not null, 
   signatory_firstname varchar2(120), 
@@ -643,17 +644,18 @@ create table department_transport_param
   approve_org_name    varchar2(240), 
   tax_place_type_code varchar2(3) not null
 );
-alter table department_transport_param add constraint department_transport_param_pk primary key (id);
+alter table department_param_transport add constraint department_param_transport_pk primary key (department_id);
+alter table department_param_transport add constraint dept_param_transport_fk_deptid foreign key (department_id) references department(id);
 
-comment on table department_transport_param is 'параметры подразделения по транспортному налогу';
-comment on column department_transport_param.id is 'идентификатор (первичный ключ)';
-comment on column department_transport_param.signatory_id is 'Признак лица подписавшего документ';
-comment on column department_transport_param.signatory_surname is 'Фамилия подписанта';
-comment on column department_transport_param.signatory_firstname is 'Имя подписанта';
-comment on column department_transport_param.signatory_lastname is 'Отчество подписанта';
-comment on column department_transport_param.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
-comment on column department_transport_param.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-comment on column department_transport_param.tax_place_type_code is 'Код места, по которому представляется документ';
+comment on table department_param_transport is 'параметры подразделения по транспортному налогу';
+comment on column department_param_transport.department_id is 'идентификатор (первичный ключ)';
+comment on column department_param_transport.signatory_id is 'Признак лица подписавшего документ';
+comment on column department_param_transport.signatory_surname is 'Фамилия подписанта';
+comment on column department_param_transport.signatory_firstname is 'Имя подписанта';
+comment on column department_param_transport.signatory_lastname is 'Отчество подписанта';
+comment on column department_param_transport.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
+comment on column department_param_transport.approve_org_name is 'Наименование организации-представителя налогоплательщика';
+comment on column department_param_transport.tax_place_type_code is 'Код места, по которому представляется документ';
 ----------------------------------------------------------------------------------------------------
  create index i_department_parent_id on department(parent_id);
  create index i_data_row_form_data_id on data_row(form_data_id);
