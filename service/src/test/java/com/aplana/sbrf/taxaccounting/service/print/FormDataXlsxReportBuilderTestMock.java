@@ -12,12 +12,19 @@ import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import com.aplana.sbrf.taxaccounting.model.FormDataReport;
+import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 
@@ -31,8 +38,8 @@ import static org.mockito.Mockito.when;
 public class FormDataXlsxReportBuilderTestMock {
 	
 	private List<Column> columns = new ArrayList<Column>();
-	private FormData formData;
-	private FormTemplate formTemplate;
+	private FormDataReport data = new FormDataReport();
+	
 	
 	@Before
 	public void init(){
@@ -176,15 +183,38 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(dataRow.get("Number1")).thenReturn("777");
 		when(dataRow.get("Number2")).thenReturn("777");
 		
+		FormData formData;
+		FormTemplate formTemplate;
+		Department department;
+		ReportPeriod reportPeriod;
+		FormDataPerformer formDataperformer = new FormDataPerformer();
+		List<FormDataSigner> formDataSigners = new ArrayList<FormDataSigner>();
+		FormDataSigner formDataSigner1 = new FormDataSigner();
+		FormDataSigner formDataSigner2 = new FormDataSigner();
+		
 		formData = mock(FormData.class);
 		formTemplate = new FormTemplate();
+		reportPeriod = new ReportPeriod();
+		reportPeriod.setName("1 квартал");
 		formTemplate.setNumberedColumns(true);
 		when(formData.getFormColumns()).thenReturn(columns);
 		
+		department = new Department();
+		department.setName("Тестовое");
+		
 		FormType formType = new FormType();
 		formType.setName("Fkfd");
+		formType.setTaxType(TaxType.TRANSPORT);
 		when(formData.getFormType()).thenReturn(formType);
 		
+		formDataperformer.setName("performer");
+		formDataperformer.setPhone("777");
+		formDataSigner1.setName("Карл Петрович");
+		formDataSigner1.setPosition("Топ");
+		formDataSigner2.setPosition("Гл. бухгалтер");
+		formDataSigner2.setName("Нина Васильевна");
+		formDataSigners.add(formDataSigner1);
+		formDataSigners.add(formDataSigner2);
 		List<DataRow> dataRows = new ArrayList<DataRow>();
 		dataRows.add(dataRow);
 		dataRows.add(dataRow);
@@ -192,11 +222,19 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(formData.getDataRows()).thenReturn(dataRows);
 		when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
 		when(formData.getDepartmentId()).thenReturn(1);
+		when(formData.getState()).thenReturn(WorkflowState.ACCEPTED);
+		when(formData.getPerformer()).thenReturn(formDataperformer);
+		when(formData.getSigners()).thenReturn(formDataSigners);
+		
+		data.setData(formData);
+		data.setDepartment(department);
+		data.setReportPeriod(reportPeriod);
+		data.setFormTemplate(formTemplate);
 	}
 	
 	@Test
-	public void testReport(){
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(formData,formTemplate,false);
+	public void testReport() throws IOException{
+		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,false);
 		try {
 			builder.createReport();
 		} catch (IOException e) {

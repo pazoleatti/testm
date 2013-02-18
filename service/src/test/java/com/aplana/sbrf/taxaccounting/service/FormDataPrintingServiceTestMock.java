@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
@@ -107,6 +108,7 @@ public class FormDataPrintingServiceTestMock {
 		
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
+		DepartmentDao departmentDao = mock(DepartmentDao.class);
 		FormDataAccessService formDataAccessService = mock(FormDataAccessService.class);
 
 		// TODO: заменить логгер или вообще использовать дао класс
@@ -119,6 +121,7 @@ public class FormDataPrintingServiceTestMock {
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateDao", formTemplateDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataAccessService", formDataAccessService);
+		ReflectionTestUtils.setField(formDataPrintingService, "departmentDao", departmentDao);
 	}
 	
 	@Test
