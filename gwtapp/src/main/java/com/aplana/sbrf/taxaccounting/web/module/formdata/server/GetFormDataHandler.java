@@ -106,7 +106,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			formData = formDataService.createFormData(logger, userId, formTemplateService.getActiveFormTemplateId(action.getFormDataTypeId().intValue()), action.getDepartmentId(),
 					FormDataKind.fromId(action.getFormDataKind().intValue()));
 		} else{
-			formData = formDataService.getFormData(userId, action.getFormDataId(), logger, !action.isReadOnly());
+			if (!action.isReadOnly()){
+				formDataService.lock(action.getFormDataId(), userId);
+			}
+			formData = formDataService.getFormData(userId, action.getFormDataId(), logger);
 		}
 		result.setReportPeriod(reportPeriodDao.get(formData.getReportPeriodId()).getName());
 		result.setDepartmenName(departmentService.getDepartment(formData.getDepartmentId()).getName());

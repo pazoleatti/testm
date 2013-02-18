@@ -223,11 +223,8 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(int userId, long formDataId, Logger logger, boolean tryLock) {
+	public FormData getFormData(int userId, long formDataId, Logger logger) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
-			if (tryLock){
-				lock(formDataId, userId);
-			}
 			
 			FormData formData = formDataDao.get(formDataId);
 
@@ -305,7 +302,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 
-	private boolean lock(long formDataId, int userId){
+	public boolean lock(long formDataId, int userId){
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if(objectLock != null && objectLock.getUserId() != userId){
 			return false;

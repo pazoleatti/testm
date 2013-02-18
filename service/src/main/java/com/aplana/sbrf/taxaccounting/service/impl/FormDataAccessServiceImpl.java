@@ -415,6 +415,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		result.setCanEdit(canEdit(user, userDepartment, formData, formDataDepartment, reportPeriod));
 		result.setCanDelete(canDelete(user, userDepartment, formData, formDataDepartment));
 		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment, reportPeriod));
+		System.out.println(result.isCanEdit());
+		System.out.println(result.isCanRead());
+		System.out.println(result.isCanDelete());
 		return result;
 	}
 }
