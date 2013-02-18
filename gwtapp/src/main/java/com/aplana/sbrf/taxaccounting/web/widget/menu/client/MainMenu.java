@@ -43,7 +43,6 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		for (final MenuItem menuItem : menuItems) {
 			if (!menuItem.getSubMenu().isEmpty()) {
 				MenuBar subMenuBar = new MenuBar(true);
-
 				for (MenuItem subMenu : menuItem.getSubMenu()) {
 					SafeHtmlBuilder sb = new SafeHtmlBuilder();
 					sb.appendHtmlConstant("<style>a:hover {color: #3964C2 !important}</style>");
@@ -51,8 +50,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 							+ subMenu.getLink() + ";"
 							+ "nType="
 							+ menuItem.getLink()
-							+ "\" style=\"color:white; margin-left: 10px; text-decoration:none;\">"
-							+ subMenu.getName() + "</a>");
+							+ "\" style=\"color:white; text-decoration:none;\"><div>"
+							+ subMenu.getName() + "</div></a>");
 					subMenuBar.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
 				}
 				menu.addItem(menuItem.getName(), subMenuBar);
