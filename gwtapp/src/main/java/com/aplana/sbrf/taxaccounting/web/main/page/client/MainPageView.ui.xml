@@ -4,7 +4,7 @@
 
 	<ui:style>
 		.panelTitle {
-			padding: 10px;
+			padding-left: 10px;
 		}
 		
 		.panelContent {
@@ -43,19 +43,10 @@
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="58">
+		<g:north size="40">
 			<g:HTMLPanel ui:field="titlePanel" styleName="{style.panelTitle}">
-				<h2>
-					<g:Label text="Название презентора" ui:field="title" />
-				</h2>
-			</g:HTMLPanel>
-		</g:north>
-
-		<g:north size="48">
-			<g:HTMLPanel ui:field="descPanel" styleName="{style.panelTitle}">
 				<h3>
-					<g:Label text="Длинный комментарий для этого презентора"
-						ui:field="desc" />
+					<g:Label text="Название презентора" ui:field="title" />
 				</h3>
 			</g:HTMLPanel>
 		</g:north>

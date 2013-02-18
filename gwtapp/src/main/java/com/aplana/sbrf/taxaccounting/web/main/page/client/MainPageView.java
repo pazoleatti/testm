@@ -44,14 +44,6 @@ public class MainPageView extends ViewImpl implements MyView {
 	@UiField
 	HasText title;
 
-	@UiField
-	Widget descPanel;
-
-	@UiField
-	HasText desc;
-	
-	
-
 	@Inject
 	public MainPageView(Binder binder) {
 		widget = binder.createAndBindUi(this);
@@ -104,15 +96,11 @@ public class MainPageView extends ViewImpl implements MyView {
 	}
 
 	@Override
-	public void setTitle(String text) {
-		dockPanel.setWidgetHidden(titlePanel, text == null);
-		title.setText(text);
-	}
-
-	@Override
-	public void setDesc(String text) {
-		dockPanel.setWidgetHidden(descPanel, text == null);
-		desc.setText(text);
+	public void updateTitle(String title, String desc) {
+		dockPanel.setWidgetHidden(titlePanel, title == null && desc == null);
+		StringBuilder text = new StringBuilder(title != null ? title : "");
+		text.append(desc != null ? " / " + desc : "");
+		this.title.setText(text.toString());
 	}
 
 	@Override
