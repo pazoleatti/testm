@@ -584,13 +584,12 @@ reorg_form_code varchar2(1),
 reorg_inn varchar2(10),
 reorg_kpp varchar2(9)
 );
-alter table department_param add constraint department_param_pk primary key (id);
+alter table department_param add constraint department_param_pk primary key (department_id);
 alter table department_param add constraint dept_param_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
 alter table department_param add constraint dept_param_fk_dept_id foreign key (department_id) references department(id);
 
 comment on table department_param is 'общие сведения';
-comment on column department_param.id is 'идентификатор (первичный ключ)';
-comment on column department_param.name is 'Наименование обособленного подразделения';
+comment on column department_param.department_id is 'идентификатор (первичный ключ)';
 comment on column department_param.dict_region_id is 'Субъект Российской Федерации (код)';
 comment on column department_param.okato is 'Код по ОКАТО';
 comment on column department_param.inn is 'ИНН';
@@ -621,7 +620,7 @@ alter table department_param_income add constraint dept_param_income_chk_taxplac
 alter table department_param_income add constraint dept_param_income_fk_dept_id foreign key (department_id) references department(id);
 
 comment on table department_param_income is 'параметры подразделения по налогу на прибыль';
-comment on column department_param_income.id is 'идентификатор (первичный ключ)';
+comment on column department_param_income.department_id is 'идентификатор (первичный ключ)';
 comment on column department_param_income.signatory_id is 'Признак лица подписавшего документ';
 comment on column department_param_income.signatory_surname is 'Фамилия подписанта';
 comment on column department_param_income.signatory_firstname is 'Имя подписанта';
