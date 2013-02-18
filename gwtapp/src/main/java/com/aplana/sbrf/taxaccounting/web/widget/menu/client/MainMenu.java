@@ -46,6 +46,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
 				for (MenuItem subMenu : menuItem.getSubMenu()) {
 					SafeHtmlBuilder sb = new SafeHtmlBuilder();
+					sb.appendHtmlConstant("<style>a:hover {color: #3964C2 !important}</style>");
 					sb.appendHtmlConstant("<a href=\"#"
 							+ subMenu.getLink() + ";"
 							+ "nType="
