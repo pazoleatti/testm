@@ -62,7 +62,7 @@ public interface FormDataService {
 	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
-	FormData getFormData(int userId, long formDataId, Logger logger, boolean lock);
+	FormData getFormData(int userId, long formDataId, Logger logger);
 
 	/**
 	 * Удалить данные по налоговой форме
@@ -102,6 +102,15 @@ public interface FormDataService {
 	 */
 	void addRow(Logger logger, int userId, FormData formData);
 
+	
+	/**
+	 * Заблокировать FormData.
+	 * @param formDataId - идентификатор налоговой формы
+	 * @param userId - идентификатор пользователя
+	 * @return true - если удалось заблокировать налоговую форму, иначе - false
+	 * */
+	boolean lock(long formDataId, int userId);
+	
 	/**
 	 * Снять блокировку с FormData.
 	 * @param formDataId - идентификатор налоговой формы
