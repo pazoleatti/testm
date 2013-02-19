@@ -18,6 +18,7 @@ public class Cell implements Serializable {
 	private Date dateValue;
 	private BigDecimal numericValue;
 	private Column column;
+	private boolean editable;
 
 	private List<FormStyle> formStyleList;
 	private FormStyle style;
@@ -180,10 +181,18 @@ public class Cell implements Serializable {
 	 * @return что ячейка допускает ввод значения пользователем
 	 */
 	public boolean isEditable() {
-		// TODO: как временная мера - выдаём значение флага "редактируемый" из Column,
-		// чтобы поддержать старое поведение системы 
-		return column.isEditable();
+		return editable;
 	}
+	
+
+	/**
+	 * Задаёт признак того, что ячейка допускает ввод значения пользователем
+	 * @param editable true - пользователь может вводить значения, false - пользователь не может вводить значения
+	 */
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+	
 
 	/**
 	 * Получить {@link FormStyle стиль}, связанный с ячейкой.
@@ -235,5 +244,4 @@ public class Cell implements Serializable {
 				+ column + ", colSpan=" + colSpan + ", rowSpan=" + rowSpan
 				+ "]";
 	}
-
 }

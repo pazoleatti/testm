@@ -130,6 +130,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		Cell oldValue = data.get(col.getAlias());
 		if (oldValue == null) {
 			Cell cellValue = new Cell(col, formStyleList);
+			// --------------------------------------------
+			// TODO: удалить, когда будет сделана установка флага для каждой ячейки на основе таблицы CELL_EDITABLE
+			cellValue.setEditable(col.isEditable());
+			// --------------------------------------------
 			data.put(col.getAlias(), cellValue);
 		} else {
 			throw new IllegalArgumentException("Алиас столбца + '"
