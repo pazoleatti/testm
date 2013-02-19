@@ -1,27 +1,35 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
-import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
+import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 
 /**
  * Сервис для работы с декларациями
@@ -33,24 +41,34 @@ public class DeclarationServiceImpl implements DeclarationService {
 	private Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
-	DeclarationDao declarationDao;
+	private DeclarationDao declarationDao;
 
 	@Autowired
-	DeclarationAccessService declarationAccessService ;
+	private DeclarationAccessService declarationAccessService ;
+	
+	@Autowired
+	private DeclarationScriptingService declarationScriptingService;
 
 	@Autowired
-	DeclarationTemplateService declarationTemplateService;
+	private DeclarationTemplateService declarationTemplateService;
 
 	@Override
 	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
 		DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+		
 		if (declarationAccessService.canCreate(declarationTemplate, departmentId, reportPeriodId)) {
 			Declaration newDeclaration = new Declaration();
 			newDeclaration.setDepartmentId(departmentId);
 			newDeclaration.setReportPeriodId(reportPeriodId);
 			newDeclaration.setAccepted(false);
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-			return declarationDao.saveNew(newDeclaration);
+			
+			long declarationId = declarationDao.saveNew(newDeclaration);
+			
+			this.logger.debug("New declaration saved, id = " + declarationId);
+			String xml = declarationScriptingService.create(logger, departmentId, declarationTemplateId, reportPeriodId);
+			declarationDao.setXmlData(declarationId, xml);
+			return declarationId;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для создания декларации с указанными параметрами");
 		}
@@ -127,5 +145,10 @@ public class DeclarationServiceImpl implements DeclarationService {
 		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
 				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
 				declarationFilter.getCountOfRecords()));
+	}
+
+	@Override
+	public void refreshDeclaration(Logger logger, long declarationId, int userId) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 }

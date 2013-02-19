@@ -21,6 +21,15 @@ public interface DeclarationService {
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
 	long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId);
+	
+	/**
+	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
+	 * @param logger - объект журнала
+	 * @param declarationId - идентификатор декларации
+	 * @param userId - идентификатор пользователя, выполняющего операцию
+	 */
+	void refreshDeclaration(Logger logger, long declarationId, int userId);
+	
 	/**
 	 * Получить декларацию
 	 * @param declarationId

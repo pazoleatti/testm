@@ -1,23 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import groovy.lang.GroovyClassLoader;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
 import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
@@ -40,46 +31,13 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * Реализация сервиса для выполнения скриптов над формой.
  */
 @Service
-public class FormDataScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
-	/**
-	 * Предопределенные пакеты для импорта в скрипты. Здесь только пакеты.
-	 */
-	private static final String[] PREDEFINED_IMPORTS = new String[]{
-			"com.aplana.sbrf.taxaccounting.model",
-			"com.aplana.sbrf.taxaccounting.model.dictionary",
-			"com.aplana.sbrf.taxaccounting.model.log",
-			"com.aplana.sbrf.taxaccounting.model.script.range",
-			"com.aplana.sbrf.taxaccounting.dao.exсeption"
-	};
-
-	private static final String[] PREDEFINED_STATIC_IMPORTS = new String[]{
-			"com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
-	};
-
+public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentService departmentService;
 
-	private ApplicationContext applicationContext;
-	
-	private ScriptEngine scriptEngine;
-
 	public FormDataScriptingServiceImpl() {
-		ScriptEngineManager factory = new ScriptEngineManager();
-		this.scriptEngine = factory.getEngineByName("groovy");
-
-		// Predefined imports
-		CompilerConfiguration config = new CompilerConfiguration();
-		ImportCustomizer ic = new ImportCustomizer();
-		ic.addStarImports(PREDEFINED_IMPORTS);
-		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
-		config.addCompilationCustomizers(ic);
-
-		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) this.scriptEngine;
-		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
-		classLoader = new GroovyClassLoader(classLoader, config, false);
-		groovyScriptEngine.setClassLoader(classLoader);
 	}
 	
 	/**
@@ -282,10 +240,5 @@ public class FormDataScriptingServiceImpl implements ApplicationContextAware, Fo
 			logger.error(e);
 			return false;
 		}
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		this.applicationContext = context;
 	}
 }
