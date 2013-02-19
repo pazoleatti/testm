@@ -126,6 +126,7 @@ public class XmlSerializationUtilsTest {
 		row.getCell("stringColumn").setColSpan(2);
 		row.getCell("stringColumn").setRowSpan(3);
 		row.getCell("stringColumn").setStyleAlias("sa");
+		row.getCell("stringColumn").setEditable(true);
 
 		return rows;
 	}
@@ -176,7 +177,10 @@ public class XmlSerializationUtilsTest {
 				return false;
 		} else if (!cell1.getStyle().getAlias().equals(other.getStyle().getAlias()))
 			return false;
-
+		if (cell1.isEditable()!=cell2.isEditable()){
+			return false;
+		}
+		
 		return true;
 
 	}

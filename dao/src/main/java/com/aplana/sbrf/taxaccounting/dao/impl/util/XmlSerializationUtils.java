@@ -48,6 +48,7 @@ public final class XmlSerializationUtils {
 	private static final String ATTR_ROWSPAN = "rowSpan";
 	private static final String ATTR_COLSPAN = "colSpan";
 	private static final String ATTR_STYLE_ALIAS = "styleAlias";
+	private static final String ATTR_CELL_EDITABLE = "editable";
 
 	private static final String ENCODING = "utf-8";
 
@@ -169,6 +170,10 @@ public final class XmlSerializationUtils {
 		if (cell.getStyle() != null) {
 			element.setAttribute(ATTR_STYLE_ALIAS,
 					String.valueOf(cell.getStyle().getAlias()));
+		}
+		if (cell.isEditable()){
+			element.setAttribute(ATTR_CELL_EDITABLE,
+					String.valueOf(true));
 		}
 		return element;
 	}
@@ -300,6 +305,12 @@ public final class XmlSerializationUtils {
 			if (valueNode != null) {
 				dataRow.getCell(columnAlias).setStyleAlias(
 						valueNode.getNodeValue());
+			}
+			valueNode = attributes.getNamedItem(ATTR_CELL_EDITABLE);
+			if (valueNode != null) {
+				dataRow.getCell(columnAlias).setEditable(Boolean.valueOf(valueNode.getNodeValue()));
+			} else {
+				dataRow.getCell(columnAlias).setEditable(false);
 			}
 
 		}
