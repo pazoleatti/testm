@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.StyleCellPopup;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -143,7 +144,10 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 		//Create alias column
 		StringColumn aliasColumn = new StringColumn();
-		EditTextColumn editTextAliasColumn = new EditTextColumn(aliasColumn) {
+		ColumnContext columnContext = new ColumnContext();
+		columnContext.setColumn(aliasColumn);
+		columnContext.setMode(ColumnContext.Mode.EDIT_MODE);
+		EditTextColumn editTextAliasColumn = new EditTextColumn(aliasColumn, columnContext) {
 			@Override
 			public String getValue(DataRow aliasRow) {
 				return aliasRow.getAlias();

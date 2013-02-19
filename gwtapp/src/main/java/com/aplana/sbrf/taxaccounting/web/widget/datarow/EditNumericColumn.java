@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.NumberValidationStrategy;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.RegularExpressionValidationStrategy;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -22,10 +22,8 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	
 	private NumberFormat numberFormat;
 
-	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable) {
-		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision()),
-				new RegularExpressionValidationStrategy("[0-9.-]")), column);
-//		final Cell cell = getCell();
+	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable, ColumnContext columnContext) {
+		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision()), columnContext), column);
 
 		StringBuffer mask = new StringBuffer("#");
 		int precision = column.getPrecision();
@@ -45,7 +43,6 @@ public class EditNumericColumn extends DataRowColumn<String> {
 					logger.log(Level.WARNING, "Failed to convert inputed value '" + s + "' to number. Reseting value of cell to null");
 					dataRow.put(getAlias(), null);
 				}
-//				cell.clearViewData(dataRow);
 				cellTable.redraw();
 			}
 		});

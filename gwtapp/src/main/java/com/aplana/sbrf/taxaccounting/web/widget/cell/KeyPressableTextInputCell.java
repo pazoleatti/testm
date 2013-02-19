@@ -262,8 +262,6 @@ public class KeyPressableTextInputCell extends
 	/*-{
         var that = this;
         var oldVal = input.value;
-        var count = 0;
-        var change = true;
 
         if (input.addEventListener) {    // all browsers except IE before version 9
             input.addEventListener ("input", OnInput, true);

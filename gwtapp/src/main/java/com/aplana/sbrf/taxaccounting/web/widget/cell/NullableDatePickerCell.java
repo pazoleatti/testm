@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -52,8 +53,11 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private int lastColumn;
 	private Date lastValue;
 
-	public NullableDatePickerCell(DateTimeFormat format) {
+	ColumnContext columnContext;
+
+	public NullableDatePickerCell(DateTimeFormat format, ColumnContext columnContext) {
 		this(format, SimpleSafeHtmlRenderer.getInstance());
+		this.columnContext = columnContext;
 	}
 
 	public NullableDatePickerCell(DateTimeFormat format, SafeHtmlRenderer<String> renderer) {
@@ -156,9 +160,14 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	@Override
 	public void onBrowserEvent(Context context, Element parent, Date value,
 							   NativeEvent event, ValueUpdater<Date> valueUpdater) {
-		super.onBrowserEvent(context, parent, value, event, valueUpdater);
-		if (CLICK.equals(event.getType())) {
-			onEnterKeyDown(context, parent, value, event, valueUpdater);
+		DataRow dataRow = (DataRow)context.getKey();
+		if ((columnContext.getMode() == ColumnContext.Mode.EDIT_MODE)
+				|| ((columnContext.getMode() != ColumnContext.Mode.READONLY_MODE)
+				&& dataRow.getCell(columnContext.getColumn().getAlias()).isEditable())) {
+			super.onBrowserEvent(context, parent, value, event, valueUpdater);
+			if (CLICK.equals(event.getType())) {
+				onEnterKeyDown(context, parent, value, event, valueUpdater);
+			}
 		}
 	}
 
