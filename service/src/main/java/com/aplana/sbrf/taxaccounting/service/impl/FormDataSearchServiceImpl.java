@@ -114,4 +114,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	public List<FormType> getAvailableFormTypes(int userId, TaxType taxType){
 		return formTypeDao.listAllByDepartmentIdAndTaxType(taUserDao.getUser(userId).getDepartmentId(), taxType);
 	}
+
+	@Override
+	public List<Department> getAvailableDepartments(int userId, TaxType taxType) {
+		throw new UnsupportedOperationException("not implemented");
+	}
 }
