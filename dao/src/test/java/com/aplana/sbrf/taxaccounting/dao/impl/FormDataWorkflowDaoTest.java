@@ -66,7 +66,7 @@ public class FormDataWorkflowDaoTest {
 		Calendar cal1 = Calendar.getInstance();
 		cal1.setTime(date);
 		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(fd.getAcceptedDate());
+		cal2.setTime(fd.getAcceptanceDate());
 		Assert.assertEquals("Дата принятия Установлена не верно (день)!", cal1.get(Calendar.DATE), cal2.get(Calendar.DATE));
 		Assert.assertEquals("Дата принятия Установлена не верно (месяц)!", cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
 		Assert.assertEquals("Дата принятия Установлена не верно (год)!", cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));

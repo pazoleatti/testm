@@ -17,7 +17,7 @@ public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
 
 	private WorkflowState state;
-	private Date acceptedDate;
+	private Date acceptanceDate;
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
@@ -245,16 +245,16 @@ public class FormData extends IdentityObject<Long> {
 	 * Получить дату прехода в состояние ACCEPTED
 	 * @return
 	 */
-	public Date getAcceptedDate() {
-		return acceptedDate;
+	public Date getAcceptanceDate() {
+		return acceptanceDate;
 	}
 
 	/**
 	 * Установить дату перехода в состояние ACCEPTED
 	 * @param acceptedDate
 	 */
-	public void setAcceptedDate(Date acceptedDate) {
-		this.acceptedDate = acceptedDate;
+	public void setAcceptanceDate(Date acceptanceDate) {
+		this.acceptanceDate = acceptanceDate;
 	}
 
 
@@ -263,8 +263,8 @@ public class FormData extends IdentityObject<Long> {
 		StringBuilder builder = new StringBuilder();
 		builder.append("FormData [state=");
 		builder.append(state);
-		builder.append(", acceptedDate=");
-		builder.append(acceptedDate);
+		builder.append(", acceptanceDate=");
+		builder.append(acceptanceDate);
 		builder.append(", kind=");
 		builder.append(kind);
 		builder.append(", departmentId=");
