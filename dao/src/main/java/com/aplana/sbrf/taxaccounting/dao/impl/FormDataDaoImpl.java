@@ -219,10 +219,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		return formData;
 	}
 
-	private boolean checkValueType(Object value,
-			Class<? extends Column> columnType) {
-		// TODO: в будущем возможны спец-ячейки, тип которых отличается от типа
-		// столбца
+	private boolean checkValueType(Object value, Class<? extends Column> columnType) {
 		if (value == null) {
 			return true;
 		} else {
