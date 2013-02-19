@@ -38,7 +38,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
 			@Override
 			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getId().toString();
+				return declarationTemplate.getDeclarationType().getName();
 			}
 		});
 

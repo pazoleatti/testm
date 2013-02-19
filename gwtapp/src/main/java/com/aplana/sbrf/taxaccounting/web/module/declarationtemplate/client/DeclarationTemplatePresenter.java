@@ -139,7 +139,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 				public void onReqSuccess(GetDeclarationResult result) {
 					declarationTemplate = result.getDeclarationTemplate();
 					getView().setDeclarationTemplate(declarationTemplate);
-					TitleUpdateEvent.fire(this, "Шаблон декларации", "Шаблон декларации " + declarationTemplate.getId());
+					TitleUpdateEvent.fire(this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
 					getProxy().manualReveal(DeclarationTemplatePresenter.this);
 				}
 			});
