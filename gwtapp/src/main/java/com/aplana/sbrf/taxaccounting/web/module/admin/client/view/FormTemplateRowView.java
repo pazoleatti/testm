@@ -119,7 +119,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			 		Cell cell = currentRow.getCell(columns.get(currentColumnIndex).getAlias());
 					styleCellPopup.setValue(cell);
 
-					int maxPopupX = Window.getClientWidth() - 200;
+					int maxPopupX = Window.getClientWidth() - 250;
 					styleCellPopup.show(maxPopupX > event.getNativeEvent().getClientX() ? event.getNativeEvent().getClientX()
 							: maxPopupX, event.getNativeEvent().getClientY());
 				}

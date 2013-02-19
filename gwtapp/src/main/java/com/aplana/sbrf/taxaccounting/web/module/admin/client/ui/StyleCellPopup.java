@@ -46,6 +46,9 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 	@UiField
 	Button saveButton;
 
+	@UiField
+	CheckBox editable;
+
 	@UiConstructor
 	public StyleCellPopup(FormTemplateRowView parent) {
 		super();

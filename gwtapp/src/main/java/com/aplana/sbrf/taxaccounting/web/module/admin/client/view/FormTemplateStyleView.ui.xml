@@ -29,7 +29,7 @@
                     <g:Label height="50px" text="Список атрибутов"/>
 
                     <g:HorizontalPanel height="30px">
-                        <g:Label width="150px">Имя:</g:Label>
+                        <g:Label width="150px">Имя</g:Label>
                         <g:TextBox width="300px" ui:field="alias"/>
                     </g:HorizontalPanel>
 
