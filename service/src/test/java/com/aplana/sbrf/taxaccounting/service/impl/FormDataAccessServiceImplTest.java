@@ -16,6 +16,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -85,12 +87,16 @@ public class FormDataAccessServiceImplTest {
 
 	@BeforeClass
 	public static void tearUp() {
+		FormType summaryFormType1 = FormTypeMockUtils.mockFormType(1, TaxType.INCOME, "summary 1");
+		FormType summaryFormType2 = FormTypeMockUtils.mockFormType(2, TaxType.INCOME, "summary 2");
+		FormType additionalFormType = FormTypeMockUtils.mockFormType(3, TaxType.INCOME, "additional");
+
 		FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
-		FormTemplate formTemplate1 = mockFormTemplate(1, 1, TaxType.INCOME, "Тип формы 1");
+		FormTemplate formTemplate1 = mockFormTemplate(1, summaryFormType1.getId(), TaxType.INCOME, "Тип формы 1");
 		when(formTemplateDao.get(1)).thenReturn(formTemplate1);
-		FormTemplate formTemplate2 = mockFormTemplate(2, 2, TaxType.INCOME, "Тип формы 2");
+		FormTemplate formTemplate2 = mockFormTemplate(2, summaryFormType2.getId(), TaxType.INCOME, "Тип формы 2");
 		when(formTemplateDao.get(2)).thenReturn(formTemplate2);
-		FormTemplate formTemplate3 = mockFormTemplate(3, 3, TaxType.INCOME, "Тип формы 3");
+		FormTemplate formTemplate3 = mockFormTemplate(3, additionalFormType.getId(), TaxType.INCOME, "Тип формы 3");
 		when(formTemplateDao.get(3)).thenReturn(formTemplate3);		
 		
 		ReflectionTestUtils.setField(service, "formTemplateDao", formTemplateDao);
@@ -101,24 +107,24 @@ public class FormDataAccessServiceImplTest {
 
 		// В тербанках есть формы 1 (консолидированная и сводная) и 3 (выходная)
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(TB1_ID, 1, FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(TB1_ID, 1, FormDataKind.CONSOLIDATED));
-		dfts.add(mockDepartmentFormType(TB1_ID, 3, FormDataKind.ADDITIONAL));
+		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
 		d = mockDepartment(TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
 		when(departmentService.getDepartment(TB1_ID)).thenReturn(d);
 		
 		dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(TB2_ID, 1, FormDataKind.CONSOLIDATED));
-		dfts.add(mockDepartmentFormType(TB2_ID, 3, FormDataKind.ADDITIONAL));
+		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
+		dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
 		d = mockDepartment(TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK, dfts);
 		when(departmentService.getDepartment(TB2_ID)).thenReturn(d);
 
 		// В банке есть форма 1 (сводная), 2 (сводная) и 3 (выходная)
 		dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 1, FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 2, FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 3, FormDataKind.ADDITIONAL));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
 		d = mockDepartment(Department.ROOT_BANK_ID, null, DepartmentType.ROOT_BANK, dfts);		
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
@@ -127,52 +133,54 @@ public class FormDataAccessServiceImplTest {
 		// Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 		dfts = new ArrayList<DepartmentFormType>();
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 1, FormDataKind.SUMMARY));
-		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, 2, FormDataKind.SUMMARY));
-		when(departmentFormTypeDao.getFormDestinations(TB1_ID, 1, FormDataKind.SUMMARY)).thenReturn(dfts);
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
+		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
+		when(departmentFormTypeDao.getFormDestinations(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY)).thenReturn(dfts);
+
+		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
 		
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData fd;
 		
-		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_APPROVED_FORMDATA_ID, TB1_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB1_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB1_ACCEPTED_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB1_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_CREATED_FORMDATA_ID, TB2_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB2_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_APPROVED_FORMDATA_ID, TB2_ID, WorkflowState.APPROVED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB2_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(TB2_ACCEPTED_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB2_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, TB2_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_INACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 
-		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_CREATED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_ACCEPTED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_ACCEPTED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_PREPARED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_PREPARED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_PREPARED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_APPROVED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.APPROVED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_APPROVED_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.APPROVED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_APPROVED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_CREATED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_CREATED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(BANK_CREATED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_ACCEPTED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_ACCEPTED_SUMMARY_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(BANK_ACCEPTED_SUMMARY_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_CREATED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_CREATED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_CREATED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_PREPARED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_PREPARED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.PREPARED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_PREPARED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(GOSB_TB1_CREATED_FORMDATA_ID, GOSB_TB1_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID);
+		fd = mockFormData(GOSB_TB1_CREATED_FORMDATA_ID, GOSB_TB1_ID, WorkflowState.CREATED, FormDataKind.ADDITIONAL, REPORT_PERIOD_ACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(GOSB_TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
-		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_INACTIVE_ID);
+		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_INACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(INACTIVE_FORMDATA_ID)).thenReturn(fd);
 		ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
 		
@@ -233,8 +241,6 @@ public class FormDataAccessServiceImplTest {
 		//Оператор не имеет прав на чтение НФ данного жизненного цикла
 		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
-
-
 	}
 
 	@Test
@@ -342,12 +348,16 @@ public class FormDataAccessServiceImplTest {
 	
 	@Test 
 	public void testCanCreateControl() {		
-		// Контролёр может создавать сводные и консолидированные в своём подразделении
+		// Контролёр может создавать выходные формы
 		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
-		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
+
+		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
+		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+
+		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
+		assertFalse(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
 		
-		// Контролёр не может создавать формы, если они не разрешены в подразедении 
+		// Контролёр не может создавать формы, если они не разрешены в подразделении
 		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
 		
 		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
@@ -364,13 +374,16 @@ public class FormDataAccessServiceImplTest {
 	public void testCanCreateControlUnp() {
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
 		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
-		// В том числе в чужих
+
+		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
+		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+
+		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
+		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
+		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
+		// Контролёр УНП может создавать консолидированные и сводные, передающиеся в вышестоящее подразделение
 		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
-		// В том числе и без учёта отношений источник/приёмник
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
-		
+
 		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
 		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
 	}	

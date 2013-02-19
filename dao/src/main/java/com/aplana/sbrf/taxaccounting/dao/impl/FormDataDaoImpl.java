@@ -47,11 +47,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
-	private FormStyleDao formStyleDao;
-	@Autowired
 	private FormDataSignerDao formDataSignerDao;
 	@Autowired
 	private FormPerformerDao formPerformerDao;
+	@Autowired
+	private FormTypeDao formTypeDao;
 
 	private static class ValueRecord<T> {
 		private T value;
@@ -178,6 +178,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			result.setReportPeriodId(rs.getInt("report_period_id"));
+			result.setFormType(formTypeDao.getType(rs.getInt("type_id")));
 			return result;
 		}
 
@@ -636,8 +637,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT id, department_id, state, kind, report_period_id" +
-							" FROM form_data WHERE id = ?",
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, " +
+					"(SELECT type_id FROM form WHERE id = fd.form_id) type_id " +
+							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { formDataId }, new int[] { Types.NUMERIC },
 					new FormDataWithOutRowRowMapper());
 		} catch (EmptyResultDataAccessException e) {

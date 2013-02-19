@@ -15,12 +15,10 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -30,7 +28,6 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 
 @Service
-// TODO: добавить учёт ролей пользователя, но для прототипа достаточно только привязки к депаратаментам
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private Log logger = LogFactory.getLog(getClass());	
 	
@@ -52,20 +49,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canRead(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
-		return canRead(user, userDepartment, formData, formDataDepartment);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canRead(formDataAccess, formData);
 	}
 
-	private boolean canRead(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
-		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
-				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
-				&& (userDepartment.getId() == formDataDepartment.getParentId());
-		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
-		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
-
-		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
+		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
 			 Логика, согласно Бизнес-требованиям:
@@ -82,7 +72,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|--------------------------------------------------
 			 */
 			return true;
-		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
 			 			 Логика, согласно Бизнес-требованиям:
@@ -96,11 +86,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   -    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			 */
-
-			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
-				return true;
-			}
-		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+					formDataAccess.isControllerOfUNP();
+		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
             Логика, согласно Бизнес-требованиям:
@@ -116,11 +104,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   -    |     +      |      +      |      +      |
              ---------------|--------------------------------------------------
 			*/
-			if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
-				return true;
-			}
+			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+					formDataAccess.isControllerOfUNP();
 		}
-
 		return false;
 	}
 
@@ -128,27 +114,19 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canEdit(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
-		return canEdit(user, userDepartment, formData, formDataDepartment, reportPeriodDao.get(formData.getReportPeriodId()));
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
-	private boolean canEdit(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment,
-	                        ReportPeriod formDataReportPeriod) {
+	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
 		WorkflowState state = formData.getState();
-		if(!formDataReportPeriod.isActive() || state == WorkflowState.ACCEPTED){
-			//Нельзя редактировать НФ для неактивного налогового периода или если НФ находится в состоянии "Принята"
+		if(!formDataReportPeriod.isActive()){
+			//Нельзя редактировать НФ для неактивного налогового периода
 			return false;
 		}
 
-		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
-				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
-				&& (userDepartment.getId() == formDataDepartment.getParentId());
-		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
-		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
-
-		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
              Логика, согласно Бизнес-требованиям:
@@ -170,14 +148,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case CREATED:
 					return true;
 				case PREPARED:
-					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
-						return true;
-					}
+					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP();
+				case ACCEPTED:
+					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:
 					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
 							+ state.getName() +" state!");
 			}
-		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
 			 Логика, согласно Бизнес-требованиям:
@@ -191,8 +170,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
 			 */
-			return false;
-		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+			switch (state){
+				case CREATED:
+					return false;
+				case ACCEPTED:
+					return false; //Нельзя редактировать НФ в состоянии "Принята"
+				default:
+					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
+							+ state.getName() +" state!");
+			}
+		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
 			 Логика, согласно Бизнес-требованиям:
@@ -210,35 +197,33 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			*/
 			switch (state){
 				case CREATED:
-					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
-						return true;
-					}
-					break;
+					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP();
 				case APPROVED:
 					return false;
+				case ACCEPTED:
+					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:
 					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
 							+ state.getName() +" state!");
 			}
 		}
+		// TODO: (mfayzullin) возможно имеет смысл выкидывать исключительные ситуации, если обнаружился непредусмотренный вариант
+		// как в данной ветке, так и в case выше. В canRead, canCreate сделать аналогично
 		return false;
 	}
 
 	@Override
 	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId) {
 		TAUser user = userDao.getUser(userId);
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
 		Department formDataDepartment = departmentService.getDepartment(departmentId);
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-		return canCreate(user, userDepartment, formTemplate, kind, formDataDepartment);
+		int formTypeId = formTemplate.getType().getId();
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formDataDepartment.getId(), formTypeId, kind);
+		return canCreate(formDataAccess, formTypeId, kind, formDataDepartment);
 	}
 	
-	private boolean canCreate(TAUser user, Department userDepartment, FormTemplate formTemplate, FormDataKind kind, Department formDataDepartment) {
-		int formDataDepartmentId = formDataDepartment.getId();
-		FormType formType = formTemplate.getType();
-		int formTypeId = formType.getId();
-		int userDepartmentId = user.getDepartmentId();
-		
+	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment) {
 		// Проверяем, что в подразделении вообще можно работать с формами такого вида и типа
 		boolean found = false;
 		for (DepartmentFormType dft: formDataDepartment.getDepartmentFormTypes()) {
@@ -250,44 +235,23 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		if (!found) {
 			return false;
 		}
-		
-		// Контролёр УНП может создать любую форму в любом подразделении
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
-			return true;
-		}
-		
-		// Оператор может создать форму, только в своём подразделении
-		// Причём только первичные и выходные
-		if (user.hasRole(TARole.ROLE_OPERATOR) && userDepartmentId == formDataDepartmentId && (kind == FormDataKind.PRIMARY || kind == FormDataKind.ADDITIONAL)) {
-			return true;
-		}
-		
-		// Контролёр может создавать любую налоговую форму в своём подразделении
-		// контролёр может создавать налоговые формы в "чужих" подразделениях, при условии, 
-		// что созданные им там формы будут источником данных для форм подразделения, к которому 
-		// относится контролёр
-		if (user.hasRole(TARole.ROLE_CONTROL)) {
-			if (userDepartmentId == formDataDepartmentId) {
-				return true;
-			} else {
-				// TODO: если будут проблемы с производительностью,
-				// то можно вместо этого цикла сделать отдельный Dao-метод со 
-				// специализированным запросом
-				List<DepartmentFormType> destanations = departmentFormTypeDao.getFormDestinations(
-					formDataDepartmentId, 
-					formTypeId, 
-					kind
-				);
-				for (DepartmentFormType dft: destanations) {
-					if (dft.getDepartmentId() == userDepartmentId) {
-						return true;
-					}
-				}
-				
-				// TODO: обсуждался случай, когда форма в чужом подразделении является источником для 
-				// другой формы в этом же подразделении, а уже эта вторая форма
-				// является источником для одной из форм подразделения, к которому относится контролёр				
-			}
+
+		if(kind == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и не передаваемых на вышестоящий уровень */
+			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+				formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+
+		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && !formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых автоматически
+			 и не передаваемых на вышестоящий уровень (уровень Банка) */
+			return false;
+		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень (уровень ТБ) */
+			return formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+			//return false; //TODO: (mfayzullin) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
 		}
 		return false;
 	}
@@ -296,45 +260,35 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public boolean canDelete(int userId, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		TAUser user = userDao.getUser(userId);
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
-		return canDelete(user, userDepartment, formData, formDataDepartment);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 	
-	private boolean canDelete(TAUser user, Department userDepartment, FormData formData, Department formDataDepartment) {
-        return formData.getState() == WorkflowState.CREATED && canEdit(user, userDepartment, formData, formDataDepartment,
-                reportPeriodDao.get(formData.getReportPeriodId()));
+	private boolean canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
+        return formData.getState() == WorkflowState.CREATED && canEdit(formDataAccess, formData, formDataReportPeriod);
     }
-	
-	
+
 	@Override
 	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);		
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
-		return getAvailableMoves(user, userDepartment, formData, formDataDepartment,
-                reportPeriodDao.get(formData.getReportPeriodId()));
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return getAvailableMoves(formDataAccess,  formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
-	private List<WorkflowMove> getAvailableMoves(TAUser user, Department userDepartment, FormData formData,
-	                                             Department formDataDepartment, ReportPeriod formDataReportPeriod) {
+	private List<WorkflowMove> getAvailableMoves(FormDataAccessRoles formDataAccess, FormData formData,
+			ReportPeriod formDataReportPeriod) {
 		List<WorkflowMove> result = new ArrayList<WorkflowMove>();
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
-		if (!canRead(user, userDepartment, formData, formDataDepartment) || !formDataReportPeriod.isActive()) {
+		if (!canRead(formDataAccess, formData) || !formDataReportPeriod.isActive()) {
 			return result;
 		}
 		WorkflowState state = formData.getState();
 
-		final boolean isBankLevelFormData = formDataDepartment.getType() == DepartmentType.ROOT_BANK;
-		final boolean isControllerOfCurrentLevel = user.hasRole(TARole.ROLE_CONTROL)
-				&& (user.getDepartmentId() == formDataDepartment.getId());
-		final boolean isControllerOfUpLevel = formDataDepartment.getParentId() != null && user.hasRole(TARole.ROLE_CONTROL)
-				&& (userDepartment.getId() == formDataDepartment.getParentId());
-		final boolean isControllerOfUNP = user.hasRole(TARole.ROLE_CONTROL_UNP);
-
-		if(isBankLevelFormData && formData.getKind() == FormDataKind.ADDITIONAL){
+		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
 			switch (state){
@@ -342,13 +296,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					result.add(WorkflowMove.CREATED_TO_PREPARED);
 					break;
 				case PREPARED:
-					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+					if (formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
+							|| formDataAccess.isControllerOfUNP()) {
 						result.add(WorkflowMove.PREPARED_TO_CREATED);
 						result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
 					}
 					break;
 				case ACCEPTED:
-					if(isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
 					}
 					break;
@@ -356,17 +311,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
 							+ state.getName() +" state!");
 			}
-		} else if (isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
 			switch (state){
 				case CREATED:
-					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
+							|| formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.CREATED_TO_ACCEPTED);
 					}
 					break;
 				case ACCEPTED:
-					if(isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.ACCEPTED_TO_CREATED);
 					}
 					break;
@@ -374,23 +330,24 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
 							+ state.getName() +" state!");
 			}
-		} else if (!isBankLevelFormData && formData.getKind() == FormDataKind.SUMMARY){
+		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 			switch (state){
 				case CREATED:
-					if(isControllerOfCurrentLevel || isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
+							|| formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.CREATED_TO_APPROVED);
 					}
 					break;
 				case APPROVED:
-					if(isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
 						result.add(WorkflowMove.APPROVED_TO_CREATED);
 					}
 					break;
 				case ACCEPTED:
-					if(isControllerOfUpLevel || isControllerOfUNP){
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
 					}
 					break;
@@ -406,15 +363,145 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	public FormDataAccessParams getFormDataAccessParams(int userId,	long formDataId) {
 		TAUser user = userDao.getUser(userId);
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
-		Department formDataDepartment = departmentService.getDepartment(formData.getDepartmentId());
 		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+			formData.getFormType().getId(), formData.getKind());
+
 		FormDataAccessParams result = new FormDataAccessParams();
-		result.setCanRead(canRead(user, userDepartment, formData, formDataDepartment));
-		result.setCanEdit(canEdit(user, userDepartment, formData, formDataDepartment, reportPeriod));
-		result.setCanDelete(canDelete(user, userDepartment, formData, formDataDepartment));
-		result.setAvailableWorkflowMoves(getAvailableMoves(user, userDepartment, formData, formDataDepartment, reportPeriod));
+		result.setCanRead(canRead(formDataAccess, formData));
+		result.setCanEdit(canEdit(formDataAccess, formData, reportPeriod));
+		result.setCanDelete(canDelete(formDataAccess, formData, reportPeriod));
+		result.setAvailableWorkflowMoves(getAvailableMoves(formDataAccess, formData, reportPeriod));
 		return result;
+	}
+
+	/**
+	 * Возвращает описание прав доступа текущего пользователя по отношению в НФ
+	 * @param user текущий пользователь
+	 * @param formDataDepartmentId код подразделения НФ
+	 * @param formDataTypeId вид НФ
+	 * @param formDataKind тип НФ
+	 * @return описание прав доступа
+	 */
+	private FormDataAccessRoles getFormDataUserAccess(TAUser user, int formDataDepartmentId, int formDataTypeId, FormDataKind formDataKind) {
+		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
+		FormDataAccessRoles formDataAccessRoles = new FormDataAccessRoles();
+
+		// оператор
+		formDataAccessRoles.setOperatorOfCurrentLevel(user.hasRole(TARole.ROLE_OPERATOR) && user.getDepartmentId() == formDataDepartmentId);
+
+		// контроллер текущего уровня: имеет роль контроллера и текущая форма относится к его подразделению
+		formDataAccessRoles.setControllerOfCurrentLevel(
+			user.hasRole(TARole.ROLE_CONTROL) && user.getDepartmentId() == formDataDepartmentId);
+
+		// контроллер вышестоящего уровня: имеет роль контроллера и текущая форма является источником для
+		// одной или нескольких форм текущего подразделения
+		List<DepartmentFormType> destinations =
+				departmentFormTypeDao.getFormDestinations(formDataDepartmentId, formDataTypeId, formDataKind);
+		boolean isCurrentDepartmentIsDestination = false;
+		// TODO: если будут проблемы с производительностью,
+		// то можно вместо этого цикла сделать отдельный Dao-метод со
+		// специализированным запросом
+		for (DepartmentFormType destination : destinations) {
+			if (userDepartment.getId() == destination.getDepartmentId()) {
+				isCurrentDepartmentIsDestination = true;
+				break;
+			}
+		}
+		// TODO: обсуждался случай, когда форма в чужом подразделении является источником для
+		// другой формы в этом же подразделении, а уже эта вторая форма
+		// является источником для одной из форм подразделения, к которому относится контролёр
+		formDataAccessRoles.setControllerOfUpLevel(user.hasRole(TARole.ROLE_CONTROL) && isCurrentDepartmentIsDestination);
+
+		// контроллер УНП: имеет роль контроллера УНП
+		formDataAccessRoles.setControllerOfUNP(user.hasRole(TARole.ROLE_CONTROL_UNP));
+
+		// передается ли форма на вышестоящий уровень
+		boolean sendToNextLevel = false;
+		for (DepartmentFormType destination : destinations) {
+			if (formDataDepartmentId != destination.getDepartmentId()) {
+				sendToNextLevel = true;
+				break;
+			}
+		}
+		// TODO: (mfayzullin) добавить проверку на приемник-декларацию
+		formDataAccessRoles.setFormDataHasDestinations(sendToNextLevel);
+		return formDataAccessRoles;
+	}
+
+	/**
+	 * Описывает роль пользователя по отношению к НФ: <ul>
+	 *     <li>оператор</li>
+	 *     <li>контроллер ТУ</li>
+	 *     <li>контроллер ВСУ</li>
+	 *     <li>контроллер УНП</li>
+	 * </ul>
+	 * Для НФ указывает передается ли она на вышестоящий уровень. <br />
+	 * Используется для проверки матрицы ролей и прав доступа.
+	 *
+	 * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
+	 * @since 12.02.13 16:00
+	 * @see <a href="http://conf.aplana.com/pages/viewpage.action?pageId=8784305">Роли и права доступа</a>
+	 */
+	private class FormDataAccessRoles {
+
+		private boolean operatorOfCurrentLevel;
+		private boolean controllerOfCurrentLevel;
+		private boolean controllerOfUpLevel;
+		private boolean controllerOfUNP;
+		/** передается ли форма на вышестоящий уровень? */
+		private boolean formDataHasDestinations;
+
+		public boolean isOperatorOfCurrentLevel() {
+			return operatorOfCurrentLevel;
+		}
+
+		public void setOperatorOfCurrentLevel(boolean operatorOfCurrentLevel) {
+			this.operatorOfCurrentLevel = operatorOfCurrentLevel;
+		}
+
+		public boolean isFormDataHasDestinations() {
+			return formDataHasDestinations;
+		}
+
+		public void setFormDataHasDestinations(boolean formDataHasDestinations) {
+			this.formDataHasDestinations = formDataHasDestinations;
+		}
+
+		public boolean isControllerOfCurrentLevel() {
+			return controllerOfCurrentLevel;
+		}
+
+		public void setControllerOfCurrentLevel(boolean controllerOfCurrentLevel) {
+			this.controllerOfCurrentLevel = controllerOfCurrentLevel;
+		}
+
+		public boolean isControllerOfUpLevel() {
+			return controllerOfUpLevel;
+		}
+
+		public void setControllerOfUpLevel(boolean controllerOfUpLevel) {
+			this.controllerOfUpLevel = controllerOfUpLevel;
+		}
+
+		public boolean isControllerOfUNP() {
+			return controllerOfUNP;
+		}
+
+		public void setControllerOfUNP(boolean controllerOfUNP) {
+			this.controllerOfUNP = controllerOfUNP;
+		}
+
+		@Override
+		public String toString() {
+			return "FormDataAccessRoles{" +
+					"operatorOfCurrentLevel=" + operatorOfCurrentLevel +
+					", controllerOfCurrentLevel=" + controllerOfCurrentLevel +
+					", controllerOfUpLevel=" + controllerOfUpLevel +
+					", controllerOfUNP=" + controllerOfUNP +
+					", formDataHasDestinations=" + formDataHasDestinations +
+					'}';
+		}
 	}
 }

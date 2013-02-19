@@ -136,6 +136,10 @@ public class FormData extends IdentityObject<Long> {
 		this.formStyles = formTemplate.getStyles();
 	}
 
+	public void setFormType(FormType formType) {
+		this.formType = formType;
+	}
+
 	public int getFormTemplateId() {
 		return formTemplateId;
 	}
