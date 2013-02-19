@@ -111,11 +111,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 
 	@Override
-	public List<FormType> listFormTypes() {
-		return formTypeDao.listFormTypes();
-	}
-
-	@Override
 	public List<FormType> getAvailableFormTypes(int userId, TaxType taxType){
 		return formTypeDao.listAllByDepartmentIdAndTaxType(taUserDao.getUser(userId).getDepartmentId(), taxType);
 	}

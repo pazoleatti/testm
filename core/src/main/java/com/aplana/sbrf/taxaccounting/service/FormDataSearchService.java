@@ -35,12 +35,6 @@ public interface FormDataSearchService {
 	List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId);
 
 	/**
-	 * Получить список всех видов налоговых форм
-	 * @return список всех налоговых форм
-	 */
-	List<FormType> listFormTypes();
-
-	/**
 	 * Получить список видов налоговых форм с определенным видом налога и для определенного пользователя.
      * С каждым подразделением связывается список видов налоговых форм, с которыми можно работать сотрудникам данного подразделения.
 	 * @param taxType вид налога
