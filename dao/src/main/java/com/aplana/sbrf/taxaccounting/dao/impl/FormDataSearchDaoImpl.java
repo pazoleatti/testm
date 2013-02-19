@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,24 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
 		if (filter.getStates() != null && !filter.getStates().isEmpty()) {
 			sql.append(" AND fd.state in ").append(transformFormStatesToSqlInStatement(filter.getStates()));
+		}
+		
+		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
+		// Эта реализация должна быть согласована с реализацией в FormDataAccessServiceImpl
+		if (filter.getAccessFilterType() == null) {
+			throw new IllegalArgumentException("AccessFilterType cannot be null");
+		}
+		
+		if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT) {
+			sql.append(" and fd.department_id = ").append(filter.getUserDepartmentId());
+		} else if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT_AND_SOURCES) {
+			sql.append(" and (fd.department_id = ").append(filter.getUserDepartmentId())
+				.append(" or exists (")
+				.append("select 1 from form_data_source fds, department_form_type dftSrc, department_form_type dftDest where")
+				.append(" fds.department_form_type_id = dftDest.id and fds.src_department_form_type_id = dftSrc.id")
+				.append(" and dftSrc.form_type_id = ft.id and dftSrc.kind = fd.kind and dftSrc.department_id = fd.department_id")
+				.append(" and dftDest.department_id = ").append(filter.getUserDepartmentId())
+				.append("))");
 		}
 	}
 	

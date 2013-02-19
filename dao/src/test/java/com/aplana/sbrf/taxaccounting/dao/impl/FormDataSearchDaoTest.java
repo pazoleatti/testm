@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +14,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormDataSearchDaoTest.xml"})
@@ -26,6 +36,9 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void testFindByFilter() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.ALL);
+		
 		final long TOTAL_RECORDS_COUNT = formDataSearchDao.findByFilter(filter).size();
 		List<FormDataSearchResultItem> res;
 
@@ -78,8 +91,32 @@ public class FormDataSearchDaoTest {
 	}
 	
 	@Test
+	public void testFindForCurrentDepartment() {
+		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
+		List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
+		
+		assertIdsEquals(new long[] {1, 4, 7, 10, 13, 16}, res);
+	}
+	
+	@Test
+	public void testFindForCurrentDepartmentAndSources() {
+		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
+		List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
+		
+		assertIdsEquals(new long[] {1, 2, 4, 7, 9, 10, 13, 14, 16}, res);
+	}
+	
+	
+	@Test
 	public void testFindPage() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.ALL);
+		
 		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 0);
 		PaginatedSearchResult<FormDataSearchResultItem> res;
 		final long TOTAL_RECORDS_COUNT = formDataSearchDao.getCount(filter);
@@ -100,6 +137,9 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void testFindPageSorting() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.ALL);
+		
 		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 5);
 		
 		PaginatedSearchResult<FormDataSearchResultItem> res;
@@ -138,6 +178,9 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void testGetCount() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
+		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
+		filter.setAccessFilterType(AccessFilterType.ALL);
+		
 		assertEquals(18, formDataSearchDao.getCount(filter));
 		
 		filter.setDepartmentIds(Collections.singletonList(1));
@@ -166,7 +209,7 @@ public class FormDataSearchDaoTest {
 		}
 		
 		if (failed) {
-			fail("Wrong list of ids: " + expected + " expected but " + received + " received");
+			fail("Wrong list of ids: " + expected.toString() + " expected but " + received.toString() + " received");
 		}
 	}
 }

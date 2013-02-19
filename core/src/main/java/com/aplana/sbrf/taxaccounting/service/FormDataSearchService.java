@@ -1,8 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-
 import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Интерфейс, позволяющий пользователю получать данные из базы по запросу
@@ -41,11 +48,4 @@ public interface FormDataSearchService {
 	 * @return список налоговых форм с определенным видом налога
 	 */
 	List<FormType> getAvailableFormTypes(int userId, TaxType taxType);
-
-	/**
-	 * Получить список отчетных периодов с определенным видом налога
-	 * @param taxType вид налога
-	 * @return список отчетных периодов определенным видом налога
-	 */
-	List<ReportPeriod> listReportPeriodsByTaxType(TaxType taxType);
 }
