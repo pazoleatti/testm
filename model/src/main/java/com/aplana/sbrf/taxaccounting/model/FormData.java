@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -8,13 +9,19 @@ import java.util.List;
  * 
  * @author dsultanbekov
  */
+/**
+ * @author sgoryachkin
+ *
+ */
 public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
 
 	private WorkflowState state;
+	private Date acceptedDate;
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
+
 
 	private int formTemplateId;
 	private List<Column> formColumns;
@@ -202,34 +209,6 @@ public class FormData extends IdentityObject<Long> {
 	}
 	
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("\nColumns:\n\t");
-		for (Column col : getFormColumns()) {
-			sb.append(col.getName());
-			sb.append(" | ");
-		}
-		sb.append("\n\t");
-		for (Column col : getFormColumns()) {
-			sb.append(col.getAlias());
-			sb.append(" | ");
-		}
-		sb.append("\nRows:\n\t");
-		for (DataRow row : getDataRows()) {
-			sb.append(row.getAlias());
-			sb.append(" | ");
-			for (Column col : getFormColumns()) {
-				Object value = row.getCell(col.getAlias()).getValue();
-				sb.append(value == null ? "null" : value.toString());
-				sb.append(" | ");
-			}
-			sb.append("\n\t");
-		}
-		sb.append('-');
-		return sb.toString();
-	}
-
 	/**
 	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой формы}
 	 * @return информация об исполнителе налоговой формы
@@ -260,6 +239,54 @@ public class FormData extends IdentityObject<Long> {
 	 */
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
+	}
+
+	/**
+	 * Получить дату прехода в состояние ACCEPTED
+	 * @return
+	 */
+	public Date getAcceptedDate() {
+		return acceptedDate;
+	}
+
+	/**
+	 * Установить дату перехода в состояние ACCEPTED
+	 * @param acceptedDate
+	 */
+	public void setAcceptedDate(Date acceptedDate) {
+		this.acceptedDate = acceptedDate;
+	}
+
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("FormData [state=");
+		builder.append(state);
+		builder.append(", acceptedDate=");
+		builder.append(acceptedDate);
+		builder.append(", kind=");
+		builder.append(kind);
+		builder.append(", departmentId=");
+		builder.append(departmentId);
+		builder.append(", reportPeriodId=");
+		builder.append(reportPeriodId);
+		builder.append(", formTemplateId=");
+		builder.append(formTemplateId);
+		builder.append(", formColumns=");
+		builder.append(formColumns);
+		builder.append(", formStyles=");
+		builder.append(formStyles);
+		builder.append(", dataRows=");
+		builder.append(dataRows);
+		builder.append(", formType=");
+		builder.append(formType);
+		builder.append(", performer=");
+		builder.append(performer);
+		builder.append(", signers=");
+		builder.append(signers);
+		builder.append("]");
+		return builder.toString();
 	}
 	
 }
