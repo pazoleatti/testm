@@ -423,8 +423,16 @@ public class FormDataXlsxReportBuilder {
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
-		if(data.getState() == WorkflowState.ACCEPTED)
-			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "17", "апрель", "00"));
+		
+		if(data.getState() == WorkflowState.ACCEPTED && data.getAcceptanceDate()!=null){
+			//Просто склонение
+			char[] arr = XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().toCharArray();
+			arr[arr.length - 1] = 'я';
+			
+			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(data.getAcceptanceDate()),
+					new String(arr), 
+					XlsxReportMetadata.sdf_y.format(data.getAcceptanceDate())));
+		}
 		else
 			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "__", "_______", "__"));
 		c.setCellValue(sb.toString());

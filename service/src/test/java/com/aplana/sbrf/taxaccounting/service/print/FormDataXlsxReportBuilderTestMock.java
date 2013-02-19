@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.print;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -225,6 +226,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(formData.getState()).thenReturn(WorkflowState.ACCEPTED);
 		when(formData.getPerformer()).thenReturn(formDataperformer);
 		when(formData.getSigners()).thenReturn(formDataSigners);
+		when(formData.getAcceptanceDate()).thenReturn(new Date());
 		
 		data.setData(formData);
 		data.setDepartment(department);
