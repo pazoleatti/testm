@@ -17,11 +17,6 @@
         </g:HorizontalPanel>
 
         <g:HorizontalPanel height="30px">
-            <g:Label width="150px">Изменяемое</g:Label>
-            <g:CheckBox ui:field="editable"/>
-        </g:HorizontalPanel>
-
-        <g:HorizontalPanel height="30px">
             <g:Label width="150px">Контрольное поле</g:Label>
             <g:CheckBox ui:field="checking"/>
         </g:HorizontalPanel>

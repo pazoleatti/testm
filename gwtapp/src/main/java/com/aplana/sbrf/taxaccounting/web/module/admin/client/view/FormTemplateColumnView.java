@@ -242,7 +242,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		newColumn.setName("Новый столбец");
 		newColumn.setAlias("псевдоним");
 		newColumn.setWidth(5);
-		newColumn.setEditable(true);
 		newColumn.setOrder(columns.size() + 1);
 		columns.add(newColumn);
 		setupColumns(columns.size() - 1);
@@ -410,7 +409,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		to.setAlias(from.getAlias());
 		to.setGroupName(from.getGroupName());
 		to.setWidth(from.getWidth());
-		to.setEditable(from.isEditable());
 		to.setOrder(from.getOrder());
 	}
 

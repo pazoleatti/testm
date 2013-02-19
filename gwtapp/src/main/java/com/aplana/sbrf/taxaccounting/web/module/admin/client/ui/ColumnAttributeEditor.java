@@ -33,9 +33,6 @@ public class ColumnAttributeEditor extends Composite implements Editor<Column>, 
 	IntegerBox width;
 
 	@UiField
-	CheckBox editable;
-
-	@UiField
 	CheckBox checking;
 
 	public ColumnAttributeEditor() {

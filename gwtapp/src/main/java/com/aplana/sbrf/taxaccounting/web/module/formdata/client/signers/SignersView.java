@@ -43,16 +43,16 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	DataGrid<FormDataSigner> signersTable;
 
 	@UiField
-	Button upColumn;
+	Button upSigner;
 
 	@UiField
-	Button downColumn;
+	Button downSigner;
 
 	@UiField
-	Button addColumn;
+	Button addSigner;
 
 	@UiField
-	Button removeColumn;
+	Button removeSigner;
 
 	@UiField
 	Button saveButton;
@@ -147,8 +147,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		}
 	}
 
-	@UiHandler("upColumn")
-	public void onUpColumn(ClickEvent event){
+	@UiHandler("upSigner")
+	public void onUpSigner(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
 		int ind = clonedSigners.indexOf(signer);
 
@@ -163,8 +163,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		}
 	}
 
-	@UiHandler("downColumn")
-	public void onDownColumn(ClickEvent event){
+	@UiHandler("downSigner")
+	public void onDownSigner(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
 		int ind = clonedSigners.indexOf(signer);
 
@@ -179,8 +179,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		}
 	}
 
-	@UiHandler("addColumn")
-	public void onAddColumn(ClickEvent event){
+	@UiHandler("addSigner")
+	public void onAddSigner(ClickEvent event){
 		FormDataSigner signer = new FormDataSigner();
 		signer.setName("");
 		signer.setPosition("");
@@ -188,8 +188,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		setSigners();
 	}
 
-	@UiHandler("removeColumn")
-	public void onRemoveColumn(ClickEvent event){
+	@UiHandler("removeSigner")
+	public void onRemoveSigner(ClickEvent event){
 		FormDataSigner signer = selectionModel.getSelectedObject();
 		clonedSigners.remove(clonedSigners.indexOf(signer));
 		setSigners();

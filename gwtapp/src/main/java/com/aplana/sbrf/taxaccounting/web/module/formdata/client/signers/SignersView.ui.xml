@@ -27,10 +27,10 @@
             <t:GenericDataGrid ui:field="signersTable" height="250px"/>
             <t:Bar ui:field="columnActionsBar">
                 <t:LeftBar>
-                    <g:Button text="Вверх" ui:field="upColumn"/>
-                    <g:Button text="Вниз" ui:field="downColumn"/>
-                    <g:Button text="Добавить" ui:field="addColumn"/>
-                    <g:Button text="Удалить" ui:field="removeColumn"/>
+                    <g:Button text="Вверх" ui:field="upSigner"/>
+                    <g:Button text="Вниз" ui:field="downSigner"/>
+                    <g:Button text="Добавить" ui:field="addSigner"/>
+                    <g:Button text="Удалить" ui:field="removeSigner"/>
                 </t:LeftBar>
             </t:Bar>
 
