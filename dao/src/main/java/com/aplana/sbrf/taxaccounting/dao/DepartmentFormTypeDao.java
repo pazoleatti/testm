@@ -12,26 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
  * @author dsultanbekov, sgoryachkin
  */
 public interface DepartmentFormTypeDao {
-	
-	/**
-	 * Проверяет, является ли форма источником для форм или деклараций заданного департамента
-	 * 
-	 * @param departamentId
-	 * @param formId
-	 * @return
-	 */
-	boolean checkFormDataIsSourcesForDepartment(int departmentId, long formDataId);
-	
-	
-	/**
-	 * Проверяет, принадлежит ли форма заданному департаменту
-	 * 
-	 * @param departamentId
-	 * @param formId
-	 * @return
-	 */
-	boolean checkFormDataIsDirectForDepartment(int departmentId, long formDataId);
-	
 	/**
 	 * Возвращает информацию о формах по подразделению
 	 * 

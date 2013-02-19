@@ -56,17 +56,4 @@ public class DepartmentFormTypeDaoTest {
 	public void getFormDestinations(){
 		assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
 	}
-	
-	@Test
-	public void checkFormDataIsSourcesForDepartment(){
-		assertEquals(false, departmentFormTypeDao.checkFormDataIsSourcesForDepartment(0, 0));
-		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
-	}
-	
-	@Test
-	public void checkFormDataIsDirectForDepartment(){
-		assertEquals(false, departmentFormTypeDao.checkFormDataIsDirectForDepartment(0, 0));
-		// TODO: Нужно сделать нормальный тест. Пока валидируется только запрос.
-	}
-
 }
