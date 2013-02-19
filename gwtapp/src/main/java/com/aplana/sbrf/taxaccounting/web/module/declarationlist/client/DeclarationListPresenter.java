@@ -5,9 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclaration;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -79,6 +83,28 @@ public class DeclarationListPresenter extends
 		loadDeclarationsList();
 	}
 
+	@Override
+	public void onCreateClicked() {
+		DeclarationFilter filter = filterPresenter.getFilterData();
+		if(isFilterDataCorrect(filter)){
+			CreateDeclaration command = new CreateDeclaration();
+			command.setDeclarationTypeId(filter.getDeclarationTypeId());
+			command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+			command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+			dispatcher.execute(command, new AbstractCallback<CreateDeclarationResult>() {
+				@Override
+				public void onReqSuccess(CreateDeclarationResult result) {
+					placeManager
+							.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+							.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
+							);
+
+				}
+			});
+		}
+
+	}
+
 
 	@ProxyEvent
 	@Override
@@ -95,6 +121,22 @@ public class DeclarationListPresenter extends
 	@Override
 	public void onSortingChanged(){
 		refreshTable();
+	}
+
+	private boolean isFilterDataCorrect(DeclarationFilter filter){
+		if(filter.getDeclarationTypeId() == null){
+			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать вид декларации");
+			return false;
+		}
+		if(filter.getReportPeriodIds().isEmpty() || filter.getReportPeriodIds().size() > 1){
+			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать один отчетный период");
+			return false;
+		}
+		if(filter.getDepartmentIds().isEmpty() || filter.getDepartmentIds().size() > 1){
+			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать одно подразделение");
+			return false;
+		}
+		return true;
 	}
 
 	private void updateTitle(TaxType taxType){
@@ -146,6 +188,7 @@ public class DeclarationListPresenter extends
 				filter.setStartIndex(range.getStart());
 				filter.setAscSorting(getView().isAscSorting());
 				filter.setSearchOrdering(getView().getSearchOrdering());
+
 				GetDeclarationList request = new GetDeclarationList();
 				request.setDeclarationFilter(filter);
 				return request;

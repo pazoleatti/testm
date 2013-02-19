@@ -32,6 +32,8 @@ public class DeclarationSearchResultItem implements Serializable {
 	private Integer reportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
+	// Идентификатор вида декларации
+	private String declarationType;
 
 	public Long getDeclarationId() {
 		return declarationId;
@@ -103,5 +105,13 @@ public class DeclarationSearchResultItem implements Serializable {
 
 	public void setAccepted(boolean accepted) {
 		isAccepted = accepted;
+	}
+
+	public String getDeclarationType() {
+		return declarationType;
+	}
+
+	public void setDeclarationType(String declarationType) {
+		this.declarationType = declarationType;
 	}
 }

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -46,5 +47,10 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Не удалось найти вид декларации с id = %d", declarationTypeId);
 		}
+	}
+
+	@Override
+	public List<DeclarationType> listAll(){
+		return getJdbcTemplate().query("SELECT * FROM declaration_type", new DeclarationTypeRowMapper());
 	}
 }

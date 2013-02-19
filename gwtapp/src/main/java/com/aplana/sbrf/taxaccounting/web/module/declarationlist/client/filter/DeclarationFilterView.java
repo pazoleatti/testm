@@ -7,9 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -34,16 +36,31 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@UiField
 	TreePicker departmentSelectionTree;
 
+	@UiField(provided = true)
+	ValueListBox<Integer> declarationType;
+
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
 	private ReportPeriodPicker currentReportPeriod;
+	private Map<Integer, String> declarationTypeMap;
 
     @Inject
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder) {
-	    widget = binder.createAndBindUi(this);
 	    for (TaxType taxType : TaxType.values()){
 		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
 	    }
+
+	    declarationType = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
+		    @Override
+		    public String render(Integer object) {
+			    if (object == null) {
+				    return "";
+			    }
+			    return declarationTypeMap.get(object);
+		    }
+	    });
+
+	    widget = binder.createAndBindUi(this);
     }
 
 	@Override
@@ -91,6 +108,21 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@Override
 	public Map<String, Integer> getSelectedDepartments(){
 		return departmentSelectionTree.getSelectedItems();
+	}
+
+	@Override
+	public Integer getSelectedDeclarationTypeId(){
+		return declarationType.getValue();
+	}
+
+	@Override
+	public void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap){
+		declarationTypeMap.put(null, "");
+		this.declarationTypeMap = declarationTypeMap;
+		/** .setValue(null) see
+		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
+		declarationType.setValue(null);
+		declarationType.setAcceptableValues(declarationTypeMap.keySet());
 	}
 
 	@Override

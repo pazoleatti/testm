@@ -14,6 +14,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		void updateReportPeriodPicker();
 
 		Map<String, Integer> getSelectedDepartments();
+
+		Integer getSelectedDeclarationTypeId();
+
+		void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap);
 
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
 
@@ -53,6 +58,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		declarationFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
 		declarationFilter.setDepartmentIds(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
 		declarationFilter.setTaxType(this.taxType);
+		declarationFilter.setDeclarationTypeId(getView().getSelectedDeclarationTypeId());
 		return declarationFilter;
 	}
 
@@ -68,6 +74,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                     public void onReqSuccess(GetDeclarationFilterDataResult result) {
 	                    getView().setDepartmentsList(result.getDepartments());
 	                    getView().setTaxPeriods(result.getTaxPeriods());
+	                    getView().setDeclarationTypeMap(fillDeclarationTypesMap(result));
                         DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
                     }
                 });
@@ -89,6 +96,14 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	@Override
 	public TaxType getCurrentTaxType(){
 		return this.taxType;
+	}
+
+	private Map<Integer, String> fillDeclarationTypesMap(GetDeclarationFilterDataResult source){
+		Map<Integer, String> declarationTypeMap = new HashMap<Integer, String>();
+		for(DeclarationType declarationType : source.getDeclarationTypes()){
+			declarationTypeMap.put(declarationType.getId(), declarationType.getName());
+		}
+		return declarationTypeMap;
 	}
 
 }

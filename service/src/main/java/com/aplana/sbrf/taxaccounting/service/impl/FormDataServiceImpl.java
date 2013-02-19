@@ -326,7 +326,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public boolean unlockAllByUserId(int userId) {
-		System.out.println("Unlock all");
 		lockDao.unlockAllObjectByUserId(userId);
 		return true;//TODO обработать возможные ошибки
 	}

@@ -13,6 +13,8 @@ public class DeclarationFilter implements Serializable {
 
 	private List<Integer> departmentIds;
 
+	private Integer declarationTypeId;
+
 	/*Стартовый индекс списка записей */
 	private int startIndex;
 
@@ -80,4 +82,11 @@ public class DeclarationFilter implements Serializable {
 		this.ascSorting = ascSorting;
 	}
 
+	public Integer getDeclarationTypeId() {
+		return declarationTypeId;
+	}
+
+	public void setDeclarationTypeId(Integer declarationTypeId) {
+		this.declarationTypeId = declarationTypeId;
+	}
 }

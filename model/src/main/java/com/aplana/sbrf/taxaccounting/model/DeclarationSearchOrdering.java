@@ -16,5 +16,9 @@ public enum DeclarationSearchOrdering {
 	/**
 	 * По наименованию отчётного периода
 	 */
-	REPORT_PERIOD_NAME
+	REPORT_PERIOD_NAME,
+	/**
+	 * По наименованию типа декларации
+	 */
+	DECLARATION_TYPE_NAME
 }

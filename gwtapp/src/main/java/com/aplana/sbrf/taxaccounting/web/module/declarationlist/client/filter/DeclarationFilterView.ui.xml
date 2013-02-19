@@ -19,6 +19,11 @@
             <sel:TreePicker popupPanelCaption="Выберите подразделение" ui:field="departmentSelectionTree"/>
         </g:VerticalPanel>
 
+        <g:VerticalPanel spacing="5" width="100%">
+            <g:Label width="200px" text="Вид декларации" />
+            <g:ValueListBox width="200px" ui:field="declarationType" />
+        </g:VerticalPanel>
+
     </g:HorizontalPanel>
 
 </ui:UiBinder> 

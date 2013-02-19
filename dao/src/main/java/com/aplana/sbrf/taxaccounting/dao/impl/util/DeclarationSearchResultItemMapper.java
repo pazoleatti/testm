@@ -22,6 +22,7 @@ public class DeclarationSearchResultItemMapper implements RowMapper<DeclarationS
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 		result.setAccepted(rs.getBoolean("is_accepted"));
+		result.setDeclarationType(rs.getString("declaration_type_name"));
 
 		return result;
 	}

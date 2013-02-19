@@ -208,6 +208,10 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			sql.append(" AND dec.department_id in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
 		}
+
+		if (filter.getDeclarationTypeId() != null) {
+			sql.append(" AND dectype.id = ").append(filter.getDeclarationTypeId());
+		}
 	}
 
 	private void appendSelectClause(StringBuilder sql) {
@@ -230,6 +234,9 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 				break;
 			case REPORT_PERIOD_NAME:
 				column = "rp.name";
+				break;
+			case DECLARATION_TYPE_NAME:
+				column = "dectype.name";
 				break;
 		}
 

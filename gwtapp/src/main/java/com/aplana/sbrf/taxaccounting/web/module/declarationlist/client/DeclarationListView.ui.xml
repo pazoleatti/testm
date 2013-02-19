@@ -14,6 +14,7 @@
 
                 <style:Bar>
                     <style:LeftBar>
+                        <g:Button ui:field="create">Создать</g:Button>
                         <g:Button ui:field="apply">Применить</g:Button>
                     </style:LeftBar>
                 </style:Bar>

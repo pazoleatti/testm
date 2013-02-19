@@ -64,6 +64,13 @@ public class DeclarationListView extends
 			}
 		};
 
+		TextColumn<DeclarationSearchResultItem> declarationTypeColumn = new TextColumn<DeclarationSearchResultItem>() {
+			@Override
+			public String getValue(DeclarationSearchResultItem object) {
+				return object.getDeclarationType();
+			}
+		};
+
 		TextColumn<DeclarationSearchResultItem> stateColumn = new TextColumn<DeclarationSearchResultItem>() {
 			@Override
 			public String getValue(DeclarationSearchResultItem object) {
@@ -97,6 +104,7 @@ public class DeclarationListView extends
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение"));
 		declarationTable.addColumn(linkColumn, getHeader("Вид налога"));
 		declarationTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
+		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Статус декларации"));
 
 		FlexiblePager pager = createFlexiblePager();
@@ -155,6 +163,13 @@ public class DeclarationListView extends
 		}
 	}
 
+	@UiHandler("create")
+	void onCreateButtonClicked(ClickEvent event){
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCreateClicked();
+		}
+	}
+
 	private static FlexiblePager createFlexiblePager(){
 		final boolean showFastForwardButton = false;
 		final int fastForwardRows = 0;
@@ -193,6 +208,8 @@ public class DeclarationListView extends
 			this.sortByColumn = DeclarationSearchOrdering.DEPARTMENT_NAME;
 		} else if ("Отчетный период".equals(sortByColumn)){
 			this.sortByColumn = DeclarationSearchOrdering.REPORT_PERIOD_NAME;
+		} else if("Вид декларации".equals(sortByColumn)){
+			this.sortByColumn = DeclarationSearchOrdering.DECLARATION_TYPE_NAME;
 		} else {
 			this.sortByColumn = DeclarationSearchOrdering.ID;
 		}

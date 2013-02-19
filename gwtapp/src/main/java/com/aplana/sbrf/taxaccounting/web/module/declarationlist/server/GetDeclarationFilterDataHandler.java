@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -29,6 +30,9 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
 
+	@Autowired
+	DeclarationTypeDao declarationTypeDao;
+
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
@@ -41,7 +45,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 			res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
 					.getDepartmentId()));
 		}
-
+		res.setDeclarationTypes(declarationTypeDao.listAll());
 		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 		return res;
 	}

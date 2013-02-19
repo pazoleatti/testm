@@ -27,6 +27,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		DeclarationSearchOrdering getSearchOrdering();
 
 		boolean isAscSorting();
+
 	}
 
 	protected final DispatchAsync dispatcher;

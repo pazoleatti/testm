@@ -7,6 +7,8 @@ public interface DeclarationListUiHandlers extends UiHandlers {
 
 	void onApplyFilter();
 
+	void onCreateClicked();
+
 	void onSortingChanged();
 
 }
