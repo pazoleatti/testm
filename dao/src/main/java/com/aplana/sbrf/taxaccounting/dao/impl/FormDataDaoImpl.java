@@ -154,7 +154,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
-			fd.setAcceptedDate(rs.getDate("accepted_date"));
+			Date sqlDate = rs.getDate("accepted_date");
+			fd.setAcceptedDate(sqlDate!=null ? new Date(sqlDate.getTime()) : null);
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
