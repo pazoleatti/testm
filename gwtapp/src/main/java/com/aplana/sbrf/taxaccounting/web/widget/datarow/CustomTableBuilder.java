@@ -132,6 +132,10 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
+				if (currentCell != null && !currentCell.isEditable()) {
+					td.style().trustedBackgroundImage("url(img/stripe.ico)");
+				}
+
 				if (currentCell != null) {
 					FormStyle currentCellStyle = currentCell.getStyle();
 					if (currentCellStyle != null) {
