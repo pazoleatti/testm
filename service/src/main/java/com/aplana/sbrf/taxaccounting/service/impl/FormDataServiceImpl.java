@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -275,7 +276,7 @@ public class FormDataServiceImpl implements FormDataService {
 		FormData formData = formDataDao.get(formDataId);
 		formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getEvent(), logger);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
-			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState());
+			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState(), workflowMove.getToState().equals(WorkflowState.ACCEPTED) ? new Date() : null);
 
 			if(workflowMove.getAfterEvent()!=null){
 				formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getAfterEvent(), logger);

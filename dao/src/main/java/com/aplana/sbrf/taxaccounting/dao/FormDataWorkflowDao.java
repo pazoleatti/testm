@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import java.util.Date;
+
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 
@@ -18,5 +20,5 @@ public interface FormDataWorkflowDao {
 	 * @param formDataId - идентификатор данных
 	 * @param workflowState - состояние, в которое нужно перевести налоговую форму
 	 */
-	void changeFormDataState(long formDataId, WorkflowState workflowState);
+	void changeFormDataState(long formDataId, WorkflowState workflowState, Date acceptedDate);
 }

@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,10 +50,27 @@ public class FormDataWorkflowDaoTest {
 	
 	@Test
 	public void testChangeState() {
-		formDataWorkflowDao.changeFormDataState(formDataId, WorkflowState.APPROVED);
+		formDataWorkflowDao.changeFormDataState(formDataId, WorkflowState.APPROVED, null);
 		
 		FormData fd = formDataDao.get(formDataId);
 		Assert.assertEquals("Состояние изменилось неверно!", WorkflowState.APPROVED, fd.getState());
+	}
+	
+	@Test
+	public void testChangeStateAccept() {
+		Date date = new Date();
+		formDataWorkflowDao.changeFormDataState(formDataId, WorkflowState.ACCEPTED, date);
+		
+		FormData fd = formDataDao.get(formDataId);
+		Assert.assertEquals("Состояние изменилось неверно!", WorkflowState.ACCEPTED, fd.getState());
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date);
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(fd.getAcceptedDate());
+		Assert.assertEquals("Дата принятия Установлена не верно (день)!", cal1.get(Calendar.DATE), cal2.get(Calendar.DATE));
+		Assert.assertEquals("Дата принятия Установлена не верно (месяц)!", cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
+		Assert.assertEquals("Дата принятия Установлена не верно (год)!", cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));
+		
 	}
 	
 	@After
