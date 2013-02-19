@@ -296,7 +296,8 @@ create table form_data (
 	department_id number(9) not null,
 	state number(9) not null,
 	kind number(9) not null,
-	report_period_id number(9) not null
+	report_period_id number(9) not null,
+	accepted_date    date
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_id foreign key (form_id) references form(id);
