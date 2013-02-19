@@ -70,3 +70,11 @@ insert into form_data_source(department_form_type_id, src_department_form_type_i
 insert into form_data_source(department_form_type_id, src_department_form_type_id) values (11, 26);
 insert into form_data_source(department_form_type_id, src_department_form_type_id) values (14, 37);
 insert into form_data_source(department_form_type_id, src_department_form_type_id) values (14, 38);
+
+-- Для деклараций подразделения 1  источником будет являться форма 1 из подразделений 2 и 3
+insert into declaration_type(id, name, tax_type) values (1, 'Декларация', 'T'); 
+insert into department_declaration_type(id, department_id, declaration_type_id) values (1, 1, 1);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 21);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 22);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 31);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 32);

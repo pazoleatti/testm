@@ -107,7 +107,7 @@ public class FormDataSearchDaoTest {
 		filter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
 		List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
 		
-		assertIdsEquals(new long[] {1, 2, 4, 7, 9, 10, 13, 14, 16}, res);
+		assertIdsEquals(new long[] {1, 2, 4, 7, 8, 9, 10, 12, 13, 14, 16}, res);
 	}
 	
 	
