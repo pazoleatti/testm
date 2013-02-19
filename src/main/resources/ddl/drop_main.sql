@@ -50,3 +50,5 @@ drop table department;
 drop sequence seq_report_period;
 drop table report_period;
 drop table tax_period;
+drop table dict_region;
+drop table dict_tax_period;
