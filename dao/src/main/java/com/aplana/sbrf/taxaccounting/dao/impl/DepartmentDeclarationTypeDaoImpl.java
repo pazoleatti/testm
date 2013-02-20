@@ -3,13 +3,16 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -53,5 +56,18 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 				new Object[] { sourceDepartmentId, sourceFormTypeId, sourceKind.getId()},
 				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
 				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
+	}
+
+	@Override
+	public Set<Integer> getDepartmentIdsByTaxType(TaxType taxType) {
+		Set<Integer> departmentIds = new HashSet<Integer>();
+		departmentIds.addAll(getJdbcTemplate().queryForList(
+				"select department_id from department_declaration_type ddt where exists " +
+						"(select 1 from declaration_type dtype where ddt.declaration_type_id = dtype.id and dtype.tax_type = ?)",
+				new Object[]{taxType.getCode()},
+				new int[]{Types.VARCHAR},
+				Integer.class
+		));
+		return departmentIds;
 	}
 }

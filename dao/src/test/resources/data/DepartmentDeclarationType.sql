@@ -7,8 +7,8 @@ insert into department (id, name, parent_id, type) values (5, 'testName5', 1, 2)
 
 -- DECLARATION_TYPE
 insert into declaration_type (id, tax_type, name) values (1, 'T', 'testName1');
-insert into declaration_type (id, tax_type, name) values (2, 'T', 'testName2');
-insert into declaration_type (id, tax_type, name) values (3, 'V', 'testName3');
+insert into declaration_type (id, tax_type, name) values (2, 'I', 'testName2');
+insert into declaration_type (id, tax_type, name) values (3, 'P', 'testName3');
 insert into declaration_type (id, tax_type, name) values (4, 'V', 'testName4');
 
 -- DEPARTMENT_DECLARATION_TYPE

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DepartmentDeclarationTypeDaoTest.xml" })
@@ -35,6 +38,17 @@ public class DepartmentDeclarationTypeDaoTest {
 		assertEquals(2, ddt.size());
 		ddt = departmentDeclarationTypeDao.getDestanations(1, 2, FormDataKind.CONSOLIDATED);
 		assertEquals(3, ddt.size());
+	}
+
+	@Test
+	public void testGetDepartmentIdsByTaxType() {
+		Set<Integer> departmentIds = departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.fromCode('T'));
+		assertEquals(2, departmentIds.size());
+		assertTrue(departmentIds.contains(1));
+		assertTrue(departmentIds.contains(2));
+		departmentIds = departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.fromCode('I'));
+		assertEquals(1, departmentIds.size());
+		assertTrue(departmentIds.contains(1));
 	}
 
 }
