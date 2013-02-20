@@ -15,9 +15,17 @@ public interface DepartmentFormTypeDao {
 	/**
 	 * Возвращает информацию о формах по подразделению
 	 * @param departamentId
-	 * @return
+	 * @return список назначенных подразделению форм (с учётом вида и типа)
 	 */
 	List<DepartmentFormType> get(int departamentId);
+	
+	/**
+	 * Возвращает информацию он назначенных подразделению формах по заданному виду налога
+	 * @param departmentId идентификатор подразделения
+	 * @param taxType вид налога
+	 * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+	 */
+	List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType);	
 
 	/**
 	 * Возвращает информацию об источниках, которые должны использоваться при
@@ -48,7 +56,7 @@ public interface DepartmentFormTypeDao {
 	 *            вид налога
 	 * @return список идентфикатор подразделений
 	 */
-	List<DepartmentFormType> getAllSources(int departmentId, TaxType taxType);
+	List<DepartmentFormType> getAllDepartmentSources(int departmentId, TaxType taxType);
 
 	/**
 	 * Возвращает информацию о формах-потребителях, которые должны использовать

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -23,21 +24,31 @@ public class DepartmentFormTypeDaoTest {
 	
 	@Test
 	public void getByDep(){
-		assertEquals(4, departmentFormTypeDao.get(1).size());
+		assertEquals(7, departmentFormTypeDao.get(1).size());
 	}
 	
 	@Test
-	public void getFormSources3(){
+	public void getByDepAndTaxType(){
+		assertEquals(3, departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT).size());
+	}	
+	
+	@Test
+	public void getFormSources(){
 		assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3)).size());
 	}
 	
 	@Test
 	public void getDeclarationSources(){
-		assertEquals(2, departmentFormTypeDao.getDeclarationSources(2, 1).size());
+		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1).size());
 	}
 	
 	@Test
 	public void getFormDestinations(){
 		assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
+	}
+	
+	@Test
+	public void testGetAllSources() {
+		assertEquals(5, departmentFormTypeDao.getAllDepartmentSources(2, TaxType.TRANSPORT).size());
 	}
 }
