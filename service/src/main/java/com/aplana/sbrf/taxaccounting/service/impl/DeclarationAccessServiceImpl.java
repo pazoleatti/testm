@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 
 /**
@@ -11,6 +14,9 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
  */
 @Service
 public class DeclarationAccessServiceImpl implements DeclarationAccessService {
+	@Autowired
+	TAUserDao userDao;
+	
 	@Override
 	public boolean canRead(int userId, long declarationId) {
 		// TODO: добавить реализацию
@@ -18,8 +24,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canCreate(DeclarationTemplate declarationTemplate, int departmentId, int reportPeriodId) {
-		// TODO: добавить реализацию
+	public boolean canCreate(int userId, int declarationTemplateId, int departmentId, int reportPeriodId) {
+		TAUser user = userDao.getUser(userId);
 		return true;
 	}
 

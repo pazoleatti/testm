@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 
 /**
  * Интерфейс для проверки прав пользователя на работу с {@link Declaration декларациями}
@@ -20,12 +19,13 @@ public interface DeclarationAccessService {
 	 * Проверяет права пользователя для операции создания декларации.
 	 * Данная проверка проверяет только полномочия пользователя, бизнес-проверок 
 	 * (например, что декларация уже сформирована, или что не хватает каких-то данных не выполняется)
-	 * @param declarationTemplate шаблон декларации
+	 * @param userId идентификатор пользователя, выполняющего операцию
+	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param departmentId идентификатор подразделения, в котором формируется декларация
 	 * @param reportPeriodId идентфикатор отчётного периода, в котором формируется декларация
 	 * @return true, если у пользователя есть права на создание декларации с указанными параметрами, false - в противном случае
 	 */
-	boolean canCreate(DeclarationTemplate declarationTemplate, int departmentId, int reportPeriodId);
+	boolean canCreate(int userId, int declarationTemplateId, int departmentId, int reportPeriodId);
 	
 	/**
 	 * Проверяет, может ли пользователь принять декларацию

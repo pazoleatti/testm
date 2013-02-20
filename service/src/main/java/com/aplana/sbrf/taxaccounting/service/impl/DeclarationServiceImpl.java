@@ -23,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
@@ -54,9 +53,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 	@Override
 	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
-		DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-		
-		if (declarationAccessService.canCreate(declarationTemplate, departmentId, reportPeriodId)) {
+		if (declarationAccessService.canCreate(userId, declarationTemplateId, departmentId, reportPeriodId)) {
 			Declaration newDeclaration = new Declaration();
 			newDeclaration.setDepartmentId(departmentId);
 			newDeclaration.setReportPeriodId(reportPeriodId);
