@@ -14,20 +14,10 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 public interface DepartmentFormTypeDao {
 	/**
 	 * Возвращает информацию о формах по подразделению
-	 * 
 	 * @param departamentId
 	 * @return
 	 */
 	List<DepartmentFormType> get(int departamentId);
-	
-	/**
-	 * Возвращает информацию о формах по подразделению и типу налога
-	 * 
-	 * @param departmentId
-	 * @param taxType
-	 * @return
-	 */
-	List<DepartmentFormType> get(int departmentId, TaxType taxType);
 
 	/**
 	 * Возвращает информацию об источниках, которые должны использоваться при
@@ -44,27 +34,13 @@ public interface DepartmentFormTypeDao {
 	 * @return информация о формах-источниках в виде списка
 	 *         {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getFormSources(int departmentId, int formTypeId,
-			FormDataKind kind);
+	List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
 	/**
-	 * Возвращает информацию об источниках, которые должны использоваться при
-	 * формировании налоговых форм назначения заданного подразеления.
-	 * Предпологается что метод будет использоваться для проверки прав.
-	 * 
-	 * @param departmentId
-	 *            идентификатор подразделения формируемой налоговой формы
-	 *            назначения
-	 * @return
-	 */
-	List<DepartmentFormType> getFormSources(int departmentId);
-
-	/**
-	 * Возвращает информацию об источниках, которые должны использоваться при
-	 * формировании налоговых форм назначения заданного подразеления по
-	 * заданному виду налога. Предпологается что метод будет использоваться для
-	 * заполнения фильтра, списком доступных для выбора департаментов, типоф НФ,
-	 * и видов НФ (kind)
+	 * Возвращает информацию о всех налоговых формах, которые являются источниками
+	 * для налоговых форм или деклараций в заданном подразделении
+	 * Предполагается что метод будет использоваться для заполнения фильтра,
+	 * списком доступных для выбора департаментов, типов НФ, и видов НФ (kind)
 	 * 
 	 * @param departmentId
 	 *            идентификатор подразделения
@@ -72,7 +48,7 @@ public interface DepartmentFormTypeDao {
 	 *            вид налога
 	 * @return список идентфикатор подразделений
 	 */
-	List<DepartmentFormType> getFormSources(int departmentId, TaxType taxType);
+	List<DepartmentFormType> getAllSources(int departmentId, TaxType taxType);
 
 	/**
 	 * Возвращает информацию о формах-потребителях, которые должны использовать
@@ -87,8 +63,7 @@ public interface DepartmentFormTypeDao {
 	 * @return информация о формах-потребителях в виде списка
 	 *         {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
-			int sourceFormTypeId, FormDataKind sourceKind);
+	List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**
 	 * Возвращает информацию о формах-источниках, которые должны использоваться
@@ -101,8 +76,5 @@ public interface DepartmentFormTypeDao {
 	 * @return информация о формах-источниках в виде списка
 	 *         {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getDeclarationSources(int departmentId,
-			int declarationTypeId);
-
-
+	List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
 }

@@ -28,16 +28,6 @@ public class DepartmentFormTypeDaoTest {
 	}
 	
 	@Test
-	public void getByDepAndTaxType(){
-		assertEquals(1, departmentFormTypeDao.get(1, TaxType.fromCode('T')).size());
-	}
-
-	@Test
-	public void getFormSources1(){
-		assertEquals(6, departmentFormTypeDao.getFormSources(2).size());
-	}
-	
-	@Test
 	public void getFormSources2(){
 		assertEquals(5, departmentFormTypeDao.getFormSources(2, TaxType.fromCode('T')).size());
 	}

@@ -15,12 +15,9 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @Repository
 @Transactional(readOnly = true)
-public class DepartmentFormTypeDaoImpl extends AbstractDao implements
-		DepartmentFormTypeDao {
+public class DepartmentFormTypeDaoImpl extends AbstractDao implements DepartmentFormTypeDao {
 
 	private static final String GET_1 = "select * from department_form_type where department_id=?";
-
-	private static final String GET_DFT_TEMPLATE_FT = "select * from department_form_type dft join form_type ft on ft.id=dft.form_type_id where %s";
 
 	/**
 	 * Запрос для получения источников форм
@@ -58,20 +55,15 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	private static final String PARAM_1 = "dft.department_id=? and ft.tax_type=?";
 	private static final String PARAM_2 = "dft.department_id=? and dft.form_type_id=? and dft.kind=?";
 	private static final String PARAM_3 = "ddt.department_id=? and ddt.declaration_type_id=?";
-	private static final String PARAM_4 = "dft.department_id=?";
 
 	private static final String GET_FORM_SOURCE_1 = String.format(
 			GET_SRCDFT_TEMPLATE_DFT$FDS$FT, PARAM_1);
 	private static final String GET_FORM_SOURCE_2 = String.format(
 			GET_SRCDFT_TEMPLATE_DFT$FDS, PARAM_2);
-	private static final String GET_FORM_SOURCE_3 = String.format(
-			GET_SRCDFT_TEMPLATE_DFT$FDS, PARAM_4);
 	private static final String GET_FORM_DESTANATIONS = String.format(
 			GET_DESTDFT_TEMPLATE_DFT$FDS, PARAM_2);
 	private static final String GET_DECL_SOURCES = String.format(
 			GET_SRCDFT_TEMPLATE_DDT$DDS, PARAM_3);
-	private static final String GET_2 = String.format(GET_DFT_TEMPLATE_FT,
-			PARAM_1);
 
 	public static final RowMapper<DepartmentFormType> DFT_MAPPER = new RowMapper<DepartmentFormType>() {
 
@@ -104,12 +96,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	}
 
 	@Override
-	public List<DepartmentFormType> getFormSources(int departmentId) {
-		return getJdbcTemplate().query(GET_FORM_SOURCE_3,
-				new Object[] { departmentId }, DFT_MAPPER);
-	}
-
-	@Override
 	public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
 			int sourceFormTypeId, FormDataKind sourceKind) {
 		return getJdbcTemplate().query(
@@ -129,11 +115,5 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements
 	public List<DepartmentFormType> get(int departmentId) {
 		return getJdbcTemplate().query(GET_1, new Object[] { departmentId },
 				DFT_MAPPER);
-	}
-
-	@Override
-	public List<DepartmentFormType> get(int departmentId, TaxType taxType) {
-		return getJdbcTemplate().query(GET_2,
-				new Object[] { departmentId, taxType.getCode() }, DFT_MAPPER);
 	}
 }
