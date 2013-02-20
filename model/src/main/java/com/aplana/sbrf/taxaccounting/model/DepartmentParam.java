@@ -67,6 +67,10 @@ public class DepartmentParam implements Serializable {
 		return taxOrganCode;
 	}
 
+	/**
+	 * Задать код налоговой
+	 * @param taxOrganCode
+	 */
 	public void setTaxOrganCode(String taxOrganCode) {
 		this.taxOrganCode = taxOrganCode;
 	}
@@ -109,5 +113,15 @@ public class DepartmentParam implements Serializable {
 
 	public void setReorgKpp(String reorgKpp) {
 		this.reorgKpp = reorgKpp;
+	}
+
+	@Override
+	public String toString() {
+		return "DepartmentParam [departmentId=" + departmentId
+				+ ", dictRegionId=" + dictRegionId + ", okato=" + okato
+				+ ", inn=" + inn + ", kpp=" + kpp + ", taxOrganCode="
+				+ taxOrganCode + ", okvedCode=" + okvedCode + ", phone="
+				+ phone + ", reorgFormCode=" + reorgFormCode + ", reorgInn="
+				+ reorgInn + ", reorgKpp=" + reorgKpp + "]";
 	}
 }

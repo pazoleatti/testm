@@ -26,7 +26,7 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 			public DepartmentParam mapRow(ResultSet rs, int rowNum)
 					throws SQLException {
 				DepartmentParam departmentParam = new DepartmentParam();
-				departmentParam.setDepartmentId(rs.getInt("department_id"));
+				departmentParam.setDepartmentId(Integer.valueOf(rs.getInt("department_id")));
 				departmentParam.setDictRegionId(rs.getString("dict_region_id"));
 				departmentParam.setOkato(rs.getString("okato"));
 				departmentParam.setInn(rs.getString("inn"));
@@ -45,13 +45,13 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 	public DepartmentParam getDepartmentParam(int departmentId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select * from declaration_param where id = ?",
+					"select * from department_param where department_id = ?",
 					new Object[] { departmentId },
 					new int[] { Types.NUMERIC },
 					DEPARTMENT_PARAM_ROW_MAPPER
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось найти подразделение с id = %d", departmentId);
+			throw new DaoException("Не удалось найти подразделение с department_id = %d", departmentId);
 		}
 	}
 
