@@ -8,6 +8,7 @@
     <jdbc:initialize-database>
     	<jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>    	
-    	<jdbc:script location="classpath:data/DepartmentFormType.sql" encoding="UTF-8"/>    	
+    	<jdbc:script location="classpath:data/DepartmentFormType.sql" encoding="UTF-8"/>   
+    	<jdbc:script location="classpath:data/DepartmentParam.sql" encoding="UTF-8"/> 	
     </jdbc:initialize-database>
 </beans>

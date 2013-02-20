@@ -45,7 +45,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 	@Override
 	public List<Department> listIsolatedDepartments() {
-		return departmentParamDao.listIsolatedDepartments();
+		return departmentDao.listIsolatedDepartments();
 	}
 
 	@Override

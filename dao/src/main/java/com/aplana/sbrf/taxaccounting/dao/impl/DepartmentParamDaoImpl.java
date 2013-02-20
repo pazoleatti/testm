@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -53,10 +55,5 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Не удалось найти подразделение с department_id = %d", departmentId);
 		}
-	}
-
-	@Override
-	public List<Department> listIsolatedDepartments() {
-		return null;
 	}
 }

@@ -50,6 +50,7 @@ public class DepartmentDaoTest {
 		Assert.assertEquals(new Integer(Department.ROOT_BANK_ID), d.getParentId());
 		Assert.assertEquals("ТБ2", d.getName());
 		//Assert.assertEquals(2, d.getFormTypeIds().size());
+		
 	}
 	
 	@Test(expected=DaoException.class)
@@ -60,5 +61,6 @@ public class DepartmentDaoTest {
 	@Test
 	public void testGetAll() {
 		departmentDao.listDepartments();
+		Assert.assertEquals(3, departmentDao.listIsolatedDepartments().size());
 	}
 }
