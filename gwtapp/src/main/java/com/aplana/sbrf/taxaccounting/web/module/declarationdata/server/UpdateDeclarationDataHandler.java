@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -29,10 +30,12 @@ public class UpdateDeclarationDataHandler extends AbstractActionHandler<UpdateDe
     public UpdateDeclarationResult execute(UpdateDeclarationAction action, ExecutionContext context) {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-
-		UpdateDeclarationResult result = new UpdateDeclarationResult();
-		declarationService.setAccepted(action.getDeclaration().getId(), action.getDeclaration().isAccepted(), userId);
-		return result;
+		if(action.isRefresh()){
+			declarationService.refreshDeclaration(new Logger(), action.getDeclaration().getId(), userId);
+		} else {
+			declarationService.setAccepted(action.getDeclaration().getId(), action.getDeclaration().isAccepted(), userId);
+		}
+	    return new UpdateDeclarationResult();
     }
 
     @Override

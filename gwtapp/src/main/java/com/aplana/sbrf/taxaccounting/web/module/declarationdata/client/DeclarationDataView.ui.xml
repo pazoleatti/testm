@@ -24,6 +24,7 @@
     </g:HorizontalPanel>
 
     <t:LeftBar height="30px">
+        <g:Button text="Обновить" ui:field="refreshButton"/>
         <g:Button text="Принять" ui:field="acceptButton"/>
         <g:Button text="Отменить принятие" ui:field="cancelButton"/>
     </t:LeftBar>

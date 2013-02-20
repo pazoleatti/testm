@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -22,6 +17,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
 	private final Widget widget;
+
+	@UiField
+	Button refreshButton;
 
 	@UiField
 	Button acceptButton;
@@ -94,6 +92,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public Widget asWidget() {
 		return widget;
+	}
+
+
+	@UiHandler("refreshButton")
+	public void onRefresh(ClickEvent event){
+		if(getUiHandlers() != null){
+			getUiHandlers().refreshDeclaration();
+		}
 	}
 
 	@UiHandler("acceptButton")

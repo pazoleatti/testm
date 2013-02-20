@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarationResult> {
     private Declaration declaration;
+	private boolean isRefresh;
 
     public Declaration getDeclaration() {
         return declaration;
@@ -14,4 +14,12 @@ public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarati
     public void setDeclaration(Declaration declaration) {
         this.declaration = declaration;
     }
+
+	public boolean isRefresh() {
+		return isRefresh;
+	}
+
+	public void setRefresh(boolean refresh) {
+		isRefresh = refresh;
+	}
 }

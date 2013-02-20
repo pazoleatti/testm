@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -70,6 +69,31 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	@Override
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
+	}
+
+	@Override
+	public void refreshDeclaration(){
+		UpdateDeclarationAction action = new UpdateDeclarationAction();
+		action.setRefresh(true);
+		action.setDeclaration(declaration);
+		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
+			@Override
+			public void onReqSuccess(UpdateDeclarationResult result) {
+				MessageEvent.fire(this, "Декларация обновлена");
+				setDeclaration();
+			}
+
+			@Override
+			protected boolean needErrorOnFailure() {
+				return false;
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				MessageEvent.fire(this, "Запрос не выполнен", throwable);
+				setDeclaration();
+			}
+		});
 	}
 
 	@Override
