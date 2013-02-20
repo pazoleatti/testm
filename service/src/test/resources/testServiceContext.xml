@@ -31,6 +31,9 @@
 	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DepartmentDao"/>
 	</bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao"/>
+    </bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataDao"/>
 	</bean>
