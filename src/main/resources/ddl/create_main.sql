@@ -9,14 +9,18 @@ comment on column dict_tax_period.code is 'код';
 comment on column dict_tax_period.name is 'наименование';
 ---------------------------------------------------------------------------------------------
 create table dict_region(
-code varchar2(2) not null,
-name varchar2(510) not null
+code number(2) not null,
+name varchar2(510) not null,
+okato varchar2(11),
+okato_definition varchar2(11)
 );
 alter table dict_region add constraint dict_region_pk primary key (code);
 
 comment on table dict_region is 'Коды субъектов Российской Федерации';
 comment on column dict_region.code is 'код';
 comment on column dict_region.name is 'наименование';
+comment on column dict_region.okato is 'код ОКАТО';
+comment on column dict_region.okato_definition is 'определяющая часть кода ОКАТО';
 -----------------------------------------------------------------------------------------------------------
 create table form_type (
 	id number(9) not null,
@@ -594,7 +598,7 @@ comment on column cell_span_info.rowspan is 'Число ячеек, которы
 ----------------------------------------------------------------------------------------------------
 create table department_param 
 ( department_id number(9) not null,
-dict_region_id varchar2(2) not null, 
+dict_region_id number(2) not null, 
 okato varchar2(11) not null, 
 inn varchar2(10) not null, 
 kpp varchar2(9) not null, 
