@@ -117,7 +117,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 			JasperPrint print = null;
 			try {
 				JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));
-				print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap(), dataSource);
+				print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
 			} catch (JRException e) {
 				throw new ServiceException("Невозможно заполнить отчет");
 			}
