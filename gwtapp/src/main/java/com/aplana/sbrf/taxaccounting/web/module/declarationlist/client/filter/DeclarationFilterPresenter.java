@@ -29,6 +29,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void updateReportPeriodPicker();
 
+		void updateDepartmentPicker();
+
 		Map<String, Integer> getSelectedDepartments();
 
 		Integer getSelectedDeclarationTypeId();
@@ -65,6 +67,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	public void initFilter(final TaxType taxType) {
         this.taxType = taxType;
 		getView().updateReportPeriodPicker();
+		getView().updateDepartmentPicker();
 
 		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);

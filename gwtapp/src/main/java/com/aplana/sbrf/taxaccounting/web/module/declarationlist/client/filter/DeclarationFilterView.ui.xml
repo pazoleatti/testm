@@ -14,9 +14,8 @@
             <g:Label width="200px" text="Отчетный период" />
         </g:VerticalPanel>
 
-        <g:VerticalPanel spacing="5" width="100%">
+        <g:VerticalPanel ui:field="departmentSelectionTreePanel"  spacing="5" width="100%">
             <g:Label width="200px" text="Подразделение" />
-            <sel:TreePicker popupPanelCaption="Выберите подразделение" ui:field="departmentSelectionTree"/>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">

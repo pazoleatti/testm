@@ -34,13 +34,15 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	VerticalPanel reportPeriodPanel;
 
 	@UiField
-	TreePicker departmentSelectionTree;
+	VerticalPanel departmentSelectionTreePanel;
 
 	@UiField(provided = true)
 	ValueListBox<Integer> declarationType;
 
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
+	private final Map<TaxType, TreePicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, TreePicker>();
 	private ReportPeriodPicker currentReportPeriod;
+	private TreePicker currentDepartment;
 	private Map<Integer, String> declarationTypeMap;
 
     @Inject
@@ -48,6 +50,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     public DeclarationFilterView(final MyBinder binder) {
 	    for (TaxType taxType : TaxType.values()){
 		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
+		    taxTypeDepartmentSelectionTree.put(taxType, new TreePicker("Выберите подразделение"));
 	    }
 
 	    declarationType = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
@@ -69,12 +72,20 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 			reportPeriodPanel.remove(currentReportPeriod);
 		}
 		currentReportPeriod = taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType());
-		if(getUiHandlers() != null){
-			reportPeriodPanel.add(currentReportPeriod);
-		}
+		reportPeriodPanel.add(currentReportPeriod);
 	}
 
-    @Override
+	@Override
+	public void updateDepartmentPicker(){
+		if(currentDepartment != null){
+			departmentSelectionTreePanel.remove(currentDepartment);
+		}
+		currentDepartment = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
+		departmentSelectionTreePanel.add(currentDepartment);
+	}
+
+
+	@Override
     public Widget asWidget() {
         return widget;
     }
@@ -102,12 +113,17 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void setDepartmentsList(List<Department> list){
-		departmentSelectionTree.setTreeValues(list);
+		if(getUiHandlers() != null){
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list);
+		}
 	}
 
 	@Override
 	public Map<String, Integer> getSelectedDepartments(){
-		return departmentSelectionTree.getSelectedItems();
+		if(getUiHandlers() != null){
+			return taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).getSelectedItems();
+		}
+		return null;
 	}
 
 	@Override

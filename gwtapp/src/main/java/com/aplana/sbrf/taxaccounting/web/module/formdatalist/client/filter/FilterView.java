@@ -44,13 +44,15 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	ValueListBox<WorkflowState> formState;
 
 	@UiField
-	TreePicker departmentSelectionTree;
+	VerticalPanel departmentSelectionTreePanel;
 
 	@UiField
 	VerticalPanel reportPeriodPanel;
 
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
+	private final Map<TaxType, TreePicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, TreePicker>();
 	private ReportPeriodPicker currentReportPeriod;
+	private TreePicker currentDepartment;
 
 	private Map<Integer, String> formTypesMap;
 
@@ -93,6 +95,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	    for (TaxType taxType : TaxType.values()){
 		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
+		    taxTypeDepartmentSelectionTree.put(taxType, new TreePicker("Выберите подразделение"));
 	    }
     }
 
@@ -120,9 +123,16 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 			reportPeriodPanel.remove(currentReportPeriod);
 		}
 		currentReportPeriod = taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType());
-		if(getUiHandlers() != null){
-			reportPeriodPanel.add(currentReportPeriod);
+		reportPeriodPanel.add(currentReportPeriod);
+	}
+
+	@Override
+	public void updateDepartmentPicker(){
+		if(currentDepartment != null){
+			departmentSelectionTreePanel.remove(currentDepartment);
 		}
+		currentDepartment = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
+		departmentSelectionTreePanel.add(currentDepartment);
 	}
 
     @Override
@@ -173,17 +183,24 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	@Override
 	public void setDepartmentsList(List<Department> list){
-		departmentSelectionTree.setTreeValues(list);
+		if(getUiHandlers() != null){
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list);
+		}
 	}
 
 	@Override
 	public void setSelectedDepartments(Map<String, Integer> values){
-		departmentSelectionTree.setSelectedItems(values);
+		if(getUiHandlers() != null){
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setSelectedItems(values);
+		}
 	}
 
 	@Override
 	public Map<String, Integer> getSelectedDepartments(){
-		return departmentSelectionTree.getSelectedItems();
+		if(getUiHandlers() != null){
+			return taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).getSelectedItems();
+		}
+		return null;
 	}
 
 	@Override

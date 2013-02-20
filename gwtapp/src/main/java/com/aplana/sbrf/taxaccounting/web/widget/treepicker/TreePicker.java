@@ -6,10 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -42,6 +39,7 @@ public class TreePicker extends Composite{
 	private static final String PANEL_WITH_TREE_WIDTH   = "250px";
 	private static final String PANEL_WITH_TREE_HEIGHT  = "250px";
 	private static final String APPLY_BUTTON_WIDTH      = "50px";
+	private boolean isCreated = false;
 
 	private final List<Department> sourceList = new ArrayList<Department>();
 	private final Map<String, Integer> allTreeItems = new HashMap<String, Integer>();
@@ -94,6 +92,7 @@ public class TreePicker extends Composite{
 		//имя подразделения.
 		for(final Department department : sourceList){
 			CheckBox treeElement = new CheckBox(department.getName());
+			addValueChangeHandler(treeElement);
 			Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
 					new TreeItem(treeElement));
 			nodes.put(department.getId(), treeItemPair);
@@ -113,11 +112,8 @@ public class TreePicker extends Composite{
 		}
 
 		tree.addItem(rootNode);
-		return true;
-	}
-
-	private void clearTree(){
-		tree.clear();
+		isCreated = true;
+		return isCreated;
 	}
 
 	private void setupUI(String popupPanelLabelText){
@@ -157,18 +153,23 @@ public class TreePicker extends Composite{
 		selectButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				clearTree();
-				if(createTree()){
-					selectedItems.clear();
+				if(!isCreated){
+					if(createTree()){
+						selectedItems.clear();
+						popup.show();
+					}
+				} else {
 					popup.show();
 				}
 			}
 		});
+	}
 
-		tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
+	private void addValueChangeHandler(CheckBox checkBox){
+		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
-			public void onSelection(SelectionEvent event) {
-				TreeItem selectedItem = (TreeItem)event.getSelectedItem();
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				CheckBox selectedItem = (CheckBox)event.getSource();
 				Integer selectedItemId = allTreeItems.get(selectedItem.getText());
 				if(!selectedItems.containsKey(selectedItem.getText())){
 					selectedItems.put(selectedItem.getText(), selectedItemId);

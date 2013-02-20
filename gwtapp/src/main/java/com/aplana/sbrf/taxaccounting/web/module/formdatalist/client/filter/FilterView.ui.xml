@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:sel="urn:import:com.aplana.sbrf.taxaccounting.web.widget.treepicker"
         >
 	<ui:style>
 		.important {
@@ -15,8 +14,9 @@
                 <g:Label width="200px" text="Отчетный период" />
             </g:VerticalPanel>
 
-            <g:Label width="200px" text="Подразделение" />
-            <sel:TreePicker popupPanelCaption="Выберите подразделение" ui:field="departmentSelectionTree"/>
+            <g:VerticalPanel ui:field="departmentSelectionTreePanel">
+                <g:Label width="200px" text="Подразделение" />
+            </g:VerticalPanel>
         </g:VerticalPanel>
 
         <g:VerticalPanel spacing="5" width="100%">

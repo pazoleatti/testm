@@ -24,6 +24,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		void updateReportPeriodPicker();
 
+		void updateDepartmentPicker();
+
 		void setKindList(List<FormDataKind> list);
 
 		void setFormStateList(List<WorkflowState> list);
@@ -77,6 +79,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	public void initFilter(final TaxType taxType) {
         this.taxType = taxType;
 		getView().updateReportPeriodPicker();
+		getView().updateDepartmentPicker();
 
 		GetFilterData action = new GetFilterData();
         action.setTaxType(taxType);
