@@ -28,15 +28,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 			+ "and %s)";
 
 	/**
-	 * Запрос для получения источников форм с возможностью отбирать и по типу
-	 * налога
-	 */
-	private static final String GET_SRCDFT_TEMPLATE_DFT$FDS$FT = "select * from department_form_type src_dft where exists "
-			+ "(select 1 from department_form_type dft, form_data_source fds, form_type ft where "
-			+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and dft.form_type_id=ft.id "
-			+ "and %s)";
-
-	/**
 	 * Запрос для получения источников деклараций
 	 */
 	private static final String GET_SRCDFT_TEMPLATE_DDT$DDS = "select * from department_form_type src_dft where exists "
@@ -52,12 +43,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 			+ "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
 			+ "and %s)";
 
-	private static final String PARAM_1 = "dft.department_id=? and ft.tax_type=?";
 	private static final String PARAM_2 = "dft.department_id=? and dft.form_type_id=? and dft.kind=?";
 	private static final String PARAM_3 = "ddt.department_id=? and ddt.declaration_type_id=?";
 
-	private static final String GET_FORM_SOURCE_1 = String.format(
-			GET_SRCDFT_TEMPLATE_DFT$FDS$FT, PARAM_1);
 	private static final String GET_FORM_SOURCE_2 = String.format(
 			GET_SRCDFT_TEMPLATE_DFT$FDS, PARAM_2);
 	private static final String GET_FORM_DESTANATIONS = String.format(
@@ -79,13 +67,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 		}
 
 	};
-
-	@Override
-	public List<DepartmentFormType> getFormSources(int departmentId,
-			TaxType taxType) {
-		return getJdbcTemplate().query(GET_FORM_SOURCE_1,
-				new Object[] { departmentId, taxType.getCode() }, DFT_MAPPER);
-	}
 
 	@Override
 	public List<DepartmentFormType> getFormSources(int departmentId,
@@ -115,5 +96,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	public List<DepartmentFormType> get(int departmentId) {
 		return getJdbcTemplate().query(GET_1, new Object[] { departmentId },
 				DFT_MAPPER);
+	}
+
+	@Override
+	public List<DepartmentFormType> getAllSources(int departmentId,	TaxType taxType) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 }
