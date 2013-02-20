@@ -28,6 +28,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	private final String firstColumnStyle;
 	private final String lastColumnStyle;
 	private final String selectedCellStyle;
+	private final boolean isStriped;
 
 	private Map<Integer, Collection<Integer>> globalSpans = new HashMap<Integer, Collection<Integer>>();
 
@@ -36,8 +37,9 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	 *
 	 * @param cellTable the table this builder will build rows for
 	 */
-	public CustomTableBuilder(AbstractCellTable<T> cellTable, List<FormStyle> allStyles) {
+	public CustomTableBuilder(AbstractCellTable<T> cellTable, List<FormStyle> allStyles, boolean isStriped) {
 		super(cellTable);
+		this.isStriped = isStriped;
 
 		AbstractCellTable.Style style = cellTable.getResources().style();
 		evenRowStyle = style.evenRow();
@@ -132,7 +134,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
-				if (currentCell != null && !currentCell.isEditable()) {
+				if (isStriped && currentCell != null && currentCell.isEditable()) {
 					td.style().trustedBackgroundImage("url(img/stripe.ico)");
 				}
 

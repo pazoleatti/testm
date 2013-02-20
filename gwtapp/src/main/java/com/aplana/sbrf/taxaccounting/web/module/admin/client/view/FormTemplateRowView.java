@@ -199,7 +199,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		rows = rowsData;
 		if (rowsData.size() != 0) {
 			formDataTable.setRowData(rowsData);
-			CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, styles);
+			CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, styles, true);
 			formDataTable.setTableBuilder(builder);
 		} else {
 			formDataTable.setRowCount(0);

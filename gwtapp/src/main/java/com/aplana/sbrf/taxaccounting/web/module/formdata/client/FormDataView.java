@@ -159,7 +159,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	// После вызова этого метода таблица получает возможность объединять ячейки и применять стили
 	@Override
 	public void addCustomTableStyles(List<FormStyle> allStyles) {
-		CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, allStyles);
+		CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, allStyles, false);
 		formDataTable.setTableBuilder(builder);
 	}
 
