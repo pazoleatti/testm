@@ -19,5 +19,5 @@ public interface CellEditableDao {
 	 * Сохранить список редактируемых ячеек для заданной формы
 	 * @param cellEditableList значения из таблицы cell_editable для конкретной формы
 	 */
-	void saveFormEditableCells(final List<CellEditable> cellEditableList, final List<Integer> orders, final List<Long> rowIds);
+	void saveFormEditableCells(final List<CellEditable> cellEditableList);
 }

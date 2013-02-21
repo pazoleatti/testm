@@ -37,7 +37,7 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao{
 
 	@Transactional(readOnly=false)
 	@Override
-	public void saveFormEditableCells(final List<CellEditable> cellEditableList, final List<Integer> orders, final List<Long> rowIds) {
+	public void saveFormEditableCells(final List<CellEditable> cellEditableList) {
 		if (!cellEditableList.isEmpty()) {
 			getJdbcTemplate()
 					.batchUpdate(
@@ -47,8 +47,6 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao{
 													  int index) throws SQLException {
 
 									CellEditable rec = cellEditableList.get(index);
-									rec.setRowId(rowIds.get(orders.get(index) - 1));
-
 									ps.setLong(1, rec.getRowId());
 									ps.setInt(2, rec.getColumnId());
 								}

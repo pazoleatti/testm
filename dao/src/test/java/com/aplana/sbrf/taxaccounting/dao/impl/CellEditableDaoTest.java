@@ -48,14 +48,28 @@ public class CellEditableDaoTest {
 	@Test
 	@Transactional
 	public void saveEditableCells(){
-		FormData formData = formDataDao.get(1);
-		formData.getDataRow("testAlias").getCell("dateColumn").setEditable(true);
-		formDataDao.save(formData);
+		List<CellEditable> edits =new ArrayList<CellEditable>();
+		edits.add(new CellEditable(1l, 2));
+		edits.add(new CellEditable(2l, 3));
+
+		cellEditableDao.saveFormEditableCells(edits);
 		List<CellEditable> records = cellEditableDao.getFormCellEditable(Long.valueOf(1));
 
-		Assert.assertEquals(4, records.size());
-		Assert.assertEquals(true, formData.getDataRow("testAlias").getCell("stringColumn").isEditable());
-		Assert.assertEquals(false, formData.getDataRow("testAlias").getCell("numericColumn").isEditable());
-		Assert.assertEquals(true, formData.getDataRow("testAlias").getCell("dateColumn").isEditable());
+		Assert.assertEquals(5, records.size());
+
+		Assert.assertEquals(Long.valueOf(1), records.get(0).getRowId());
+		Assert.assertEquals(Integer.valueOf(1), records.get(0).getColumnId());
+
+		Assert.assertEquals(Long.valueOf(1), records.get(1).getRowId());
+		Assert.assertEquals(Integer.valueOf(2), records.get(1).getColumnId());
+
+		Assert.assertEquals(Long.valueOf(2), records.get(2).getRowId());
+		Assert.assertEquals(Integer.valueOf(1), records.get(2).getColumnId());
+
+		Assert.assertEquals(Long.valueOf(2), records.get(3).getRowId());
+		Assert.assertEquals(Integer.valueOf(2), records.get(3).getColumnId());
+
+		Assert.assertEquals(Long.valueOf(2), records.get(4).getRowId());
+		Assert.assertEquals(Integer.valueOf(3), records.get(4).getColumnId());
 	}
 }

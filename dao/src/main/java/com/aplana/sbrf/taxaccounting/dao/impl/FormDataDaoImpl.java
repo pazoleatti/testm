@@ -479,7 +479,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		insertStyles(styleValues, styleOrders, rowIds);
 		insertSpans(spanValues, spanOrders, rowIds);
-		cellEditableDao.saveFormEditableCells(cellEditableValues, cellEditableOrders, rowIds);
+		insertEdits(cellEditableValues, cellEditableOrders, rowIds);
 	}
 
 	private <T> void insertValues(String tableName,
@@ -543,6 +543,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								}
 							});
 		}
+	}
+
+	private void insertEdits(List<CellEditable> cellEditableValues, List<Integer> orders, List<Long> rowIds) {
+		for (int i = 0; i < cellEditableValues.size(); i++) {
+			cellEditableValues.get(i).setRowId(rowIds.get(orders.get(i) - 1));
+		}
+		cellEditableDao.saveFormEditableCells(cellEditableValues);
 	}
 
 	private <T> void insertSpans(final List<SpanRecord> values,
