@@ -55,7 +55,7 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
 		result.setCanDownload(declarationAccessService.canDownloadXml(userId, action.getId()));
 		result.setCanDelete(declarationAccessService.canDelete(userId, action.getId()));
-		result.setTaxType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getTaxType().getName());
+		result.setTaxType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getTaxType());
 		result.setDeclarationType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getName());
 		result.setDepartment(departmentService.getDepartment(declaration.getDepartmentId()).getName());
 		result.setReportPeriod(reportPeriodDao.get(declaration.getReportPeriodId()).getName());

@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
 
 public class GetDeclarationResult implements Result {
     private Declaration declaration;
-	private String taxType;
+	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
 	private String declarationType;
@@ -48,11 +49,11 @@ public class GetDeclarationResult implements Result {
 		this.canReject = canReject;
 	}
 
-	public String getTaxType() {
+	public TaxType getTaxType() {
 		return taxType;
 	}
 
-	public void setTaxType(String taxType) {
+	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
 

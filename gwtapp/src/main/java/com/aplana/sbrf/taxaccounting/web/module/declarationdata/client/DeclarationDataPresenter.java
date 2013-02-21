@@ -45,6 +45,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 	private Declaration declaration;
+	private String taxName;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
@@ -135,8 +136,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 			public void onReqSuccess(UpdateDeclarationResult result) {
 				MessageEvent.fire(this, "Декларация удалена");
 				placeManager
-						.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST)
-						.with("nType", placeManager.getCurrentPlaceRequest().getParameter("nType", TaxType.INCOME.name())));
+						.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
 			}
 
 			@Override
@@ -172,8 +172,9 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 				public void onReqSuccess(GetDeclarationResult result) {
 					if (result.isCanRead()) {
 						declaration = result.getDeclaration();
+						taxName = result.getTaxType().name();
 						getView().setDeclarationData(declaration);
-						getView().setTaxType(result.getTaxType());
+						getView().setTaxType(result.getTaxType().getName());
 						getView().setReportPeriod(result.getReportPeriod());
 						getView().setDepartment(result.getDepartment());
 						updateTitle(result.getDeclarationType());
