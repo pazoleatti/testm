@@ -131,20 +131,6 @@ comment on column form_style.italic is 'признак использовани�
 comment on column form_style.bold is 'признак жирного шрифта';
 
 create sequence seq_form_style start with 10000;
----------------------------------------------------------------------------------------------------
-create table cell_style
-(
-  row_id    number(18) not null,
-  column_id number(9) not null,
-  style_id  number(9) not null
- );
-alter table cell_style add constraint CELL_STYLE_PK primary key (row_id, column_id);
-alter table cell_style add constraint CELL_STYLE_FK_STYLE_ID foreign key (style_id) references FORM_STYLE (ID);
-
-comment on table cell_style is 'Привязка стилей к ячейкам налоговой формы';
-comment on column cell_style.row_id is 'Идентификатор строки';
-comment on column cell_style.column_id is 'идентификатор столбца';
-comment on column cell_style.style_id is 'идентификатор стиля';
 ----------------------------------------------------------------------------------------------------
 create table form_column (
 	id number(9) not null,
@@ -394,12 +380,28 @@ comment on column data_row.ord is 'Номер строки в форме';
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
+create table cell_style
+(
+  row_id    number(18) not null,
+  column_id number(9) not null,
+  style_id  number(9) not null
+ );
+alter table cell_style add constraint cell_style_pk primary key (row_id, column_id);
+alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column (id);
+alter table cell_style add constraint cell_style_fk_data_row foreign key (row_id) references data_row (id) on delete cascade;
+alter table cell_style add constraint cell_style_fk_style_id foreign key (style_id) references form_style (id);
+
+comment on table cell_style is 'Привязка стилей к ячейкам налоговой формы';
+comment on column cell_style.row_id is 'Идентификатор строки';
+comment on column cell_style.column_id is 'идентификатор столбца';
+comment on column cell_style.style_id is 'идентификатор стиля';
+---------------------------------------------------------------------------------------------------
 create table cell_editable(
 row_id number(18) not null,
 column_id number(9) not null
 );
 alter table cell_editable add constraint cell_editable_pk primary key (row_id, column_id);
-alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row (id);
+alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row (id) on delete cascade;
 alter table cell_editable add constraint cell_editable_fk_form_column foreign key (column_id) references form_column (id);
 
 comment on table cell_editable is 'информация о редактируемых ячейках налоговой формы';

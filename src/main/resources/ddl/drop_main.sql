@@ -4,6 +4,7 @@ drop table date_value;
 
 drop table cell_span_info;
 drop table cell_editable;
+drop table cell_style;
 drop table form_column;
 drop sequence seq_form_column;
 
@@ -29,8 +30,6 @@ drop table form_data_source;
 drop table declaration_source;
 drop sequence seq_department_form_type;
 drop table department_form_type;
-
-drop table cell_style;
 
 drop sequence seq_form_style;
 drop table form_style;
