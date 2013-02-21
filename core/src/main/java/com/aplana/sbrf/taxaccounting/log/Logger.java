@@ -52,8 +52,8 @@ public class Logger {
 	 * @param e исключение
 	 */
 	public void error(Exception e) {
-		log(LogLevel.ERROR, "Ошибка: %s", e.getMessage());
-		logger.error("Unexpected exception: " + e.getMessage(), e);
+		log(LogLevel.ERROR, "Необработанная ошибка: %s", e.getMessage());
+		logger.error("Unhandled exception: " + e.getMessage(), e);
 	}
 
 	private void log(LogLevel level, String message, Object...args) {

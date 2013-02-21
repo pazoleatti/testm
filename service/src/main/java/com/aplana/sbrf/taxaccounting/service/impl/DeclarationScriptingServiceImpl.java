@@ -107,6 +107,8 @@ public class DeclarationScriptingServiceImpl extends TAAbstractScriptingServiceI
 		try {
 			scriptEngine.eval(declarationTemplate.getCreateScript(), b);
 		} catch (ScriptException e) {
+			logScriptException(e, logger);
+		} catch (Exception e) {
 			logger.error(e);
 		}
 		

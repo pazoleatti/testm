@@ -229,12 +229,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
 			return true;
 		} catch (ScriptException e) {
-			Throwable cause = e.getCause();
-			if (cause != null && cause instanceof Exception) {
-				logger.error((Exception) cause);
-			} else {
-				logger.error(e);
-			}
+			logScriptException(e, logger);
 			return false;
 		} catch (Exception e) {
 			logger.error(e);
