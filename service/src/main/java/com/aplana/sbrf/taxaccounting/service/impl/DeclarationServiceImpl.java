@@ -97,7 +97,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 	@Override
 	public String getXmlData(long declarationId, int userId) {
-		if (declarationAccessService.canRead(userId, declarationId)) {
+		if (declarationAccessService.canDownloadXml(userId, declarationId)) {
 			String xmlData = declarationDao.getXmlData(declarationId);
 			return xmlData;
 		} else {
@@ -133,7 +133,7 @@ public class DeclarationServiceImpl implements DeclarationService {
 			}
 			return xls.toByteArray();
 		} else {
-			throw new AccessDeniedException("Невозможно получить xlsx");
+			throw new AccessDeniedException("Невозможно получить xlsx, так как у пользователя нет прав на просмотр декларации");
 		}
 	}
 
