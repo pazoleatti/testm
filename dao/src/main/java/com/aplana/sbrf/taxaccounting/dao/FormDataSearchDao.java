@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author srybakov
  *
  */
-@ScriptExposed
 public interface FormDataSearchDao {
 
 	/**

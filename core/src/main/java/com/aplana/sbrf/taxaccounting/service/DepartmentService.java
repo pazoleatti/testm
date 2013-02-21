@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author sgoryachkin
  *
  */
-@ScriptExposed
 public interface DepartmentService {
 	
 

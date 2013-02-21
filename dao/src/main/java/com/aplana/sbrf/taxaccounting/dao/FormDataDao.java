@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * DAO для работы с данными по налоговым формам
  */
-@ScriptExposed
 public interface FormDataDao {
 	/**
 	 * Получить данные по налоговой формы
