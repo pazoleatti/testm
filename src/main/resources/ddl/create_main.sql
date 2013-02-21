@@ -140,7 +140,6 @@ create table form_column (
 	ord number(9) not null,
 	alias varchar(100) not null,
 	type char(1) not null,
-	editable number(9) default 1,
 	width number(9) not null,
 	precision number(9),
 	dictionary_code varchar2(30),
@@ -154,7 +153,6 @@ create sequence seq_form_column start with 10000;
 alter table form_column add constraint form_column_fk_form_id foreign key (form_id) references form(id);
 alter table form_column add constraint form_column_uniq_alias unique(form_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
-alter table form_column add constraint form_column_chk_editable check(editable in (0, 1));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
@@ -162,7 +160,6 @@ alter table form_column add constraint form_column_chk_checking check (checking 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
 comment on column form_column.dictionary_code is 'Код справочника (для строковых и числовых столбцов)';
-comment on column form_column.editable is 'Признак возможности редактирования пользователем';
 comment on column form_column.form_id is 'Идентификатор налоговой формы';
 comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
