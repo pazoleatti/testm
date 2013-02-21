@@ -200,16 +200,20 @@ public class FormDataDaoTest {
 		DataRow dr = formData.appendDataRow();
 		dr.put("stringColumn", "Строка 1");
 		dr.getCell("stringColumn").setStyleAlias("alias1");
+		dr.getCell("stringColumn").setEditable(true);
 		dr.put("numericColumn", 1.01);
 		dr.getCell("numericColumn").setStyleAlias("alias1");
+		dr.getCell("numericColumn").setEditable(false);
 		Date date1 = getDate(2012, 11, 31);
 		dr.put("dateColumn", date1);
 
 		dr = formData.appendDataRow("newAlias");
 		dr.put("stringColumn", "Строка 2");
 		dr.getCell("stringColumn").setStyleAlias("alias1");
+		dr.getCell("stringColumn").setEditable(false);
 		dr.put("numericColumn", 2.02);
 		dr.getCell("numericColumn").setStyleAlias("alias1");
+		dr.getCell("numericColumn").setEditable(true);
 		Date date2 = getDate(2013, 0, 1);
 		dr.put("dateColumn", date2);
 
@@ -287,6 +291,22 @@ public class FormDataDaoTest {
 		Assert.assertEquals("alias1", dr.getCell("stringColumn").getStyle()
 				.getAlias());
 
+	}
+
+	@Test
+	public void editsSaveGetSuccess() {
+		FormData formData = fillFormData();
+		long formDataId = formDataDao.save(formData);
+		formData = formDataDao.get(formDataId);
+
+		DataRow dr = formData.getDataRows().get(0);
+		Assert.assertEquals(true, dr.getCell("stringColumn").isEditable());
+		Assert.assertEquals(false, dr.getCell("numericColumn").isEditable());
+
+		dr = formData.getDataRows().get(1);
+		Assert.assertEquals(false, dr.getCell("stringColumn").isEditable());
+		Assert.assertEquals(true, dr.getCell("numericColumn").isEditable());
+		Assert.assertEquals(false, dr.getCell("dateColumn").isEditable());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
