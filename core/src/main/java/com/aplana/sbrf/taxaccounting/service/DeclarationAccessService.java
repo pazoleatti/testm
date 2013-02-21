@@ -50,6 +50,14 @@ public interface DeclarationAccessService {
 	 * @return true - если у пользователя есть права на удаление декларации, false - в противном случае
 	 */
 	boolean canDelete(int userId, long declarationId);
+
+	/**
+	 * Проверяет, имеет ли пользователь права на обновление декларации
+	 * @param userId идентификатор пользователя
+	 * @param declarationId идентификатор декларации
+	 * @return true если пользователь имеет права на обновление декларации, false - в противном случае
+	 */
+	boolean canRefresh(int userId, long declarationId);
 	
 	/**
 	 * Проверяет, может ли пользователь скачать файл в формате законодателя (XML)

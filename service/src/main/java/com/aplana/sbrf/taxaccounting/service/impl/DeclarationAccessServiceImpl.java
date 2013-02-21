@@ -86,6 +86,12 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
+	public boolean canRefresh(int userId, long declarationId) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
 	public boolean canDownloadXml(int userId, long declarationId) {
 		// TODO Auto-generated method stub
 		return true;
