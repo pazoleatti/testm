@@ -607,7 +607,8 @@ okved_code varchar2(8) not null,
 phone varchar2(20), 
 reorg_form_code varchar2(1), 
 reorg_inn varchar2(10),
-reorg_kpp varchar2(9)
+reorg_kpp varchar2(9),
+name  varchar2(2000)
 );
 alter table department_param add constraint department_param_pk primary key (department_id);
 alter table department_param add constraint dept_param_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
@@ -625,6 +626,7 @@ comment on column department_param.phone is 'Номер контактного �
 comment on column department_param.reorg_form_code is 'Код формы реорганизации и ликвидации';
 comment on column department_param.reorg_inn is 'ИНН реорганизованного обособленного подразделения';
 comment on column department_param.reorg_kpp is 'КПП реорганизованного обособленного подразделения';
+comment on column department_param.name is 'Наименование обособленного подразделения';
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 create table department_param_income 
 ( department_id                  number(9) not null,
