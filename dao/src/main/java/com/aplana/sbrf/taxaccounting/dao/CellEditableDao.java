@@ -14,10 +14,10 @@ public interface CellEditableDao {
 	 * @param formDataId идентификатор формы
 	 * @return список столбцов формы
 	 */
-	List<CellEditable> getFormCellEditable(Long formDataId);
+	List<CellEditable> getEditableCells(Long formDataId);
 	/**
 	 * Сохранить список редактируемых ячеек для заданной формы
 	 * @param cellEditableList значения из таблицы cell_editable для конкретной формы
 	 */
-	void saveFormEditableCells(final List<CellEditable> cellEditableList);
+	void saveEditableCells(final List<CellEditable> cellEditableList);
 }

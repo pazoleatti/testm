@@ -18,7 +18,7 @@ import java.util.*;
 @Transactional(readOnly=true)
 public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao{
 
-	public List<CellEditable> getFormCellEditable(Long formDataId) {
+	public List<CellEditable> getEditableCells(Long formDataId) {
 
 		String sqlQuery = "SELECT row_id, column_id FROM cell_editable ce "
 				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = ce.row_id and r.form_data_id = ?)";
@@ -37,7 +37,7 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao{
 
 	@Transactional(readOnly=false)
 	@Override
-	public void saveFormEditableCells(final List<CellEditable> cellEditableList) {
+	public void saveEditableCells(final List<CellEditable> cellEditableList) {
 		if (!cellEditableList.isEmpty()) {
 			getJdbcTemplate()
 					.batchUpdate(

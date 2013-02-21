@@ -226,7 +226,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	private void readEditable(final FormTemplate formTemplate,
 							  final Map<Long, DataRow> rowMap, Long formDataId) {
-		List<CellEditable> edits = cellEditableDao.getFormCellEditable(formDataId);
+		List<CellEditable> edits = cellEditableDao.getEditableCells(formDataId);
 		for (CellEditable cellEditable : edits) {
 			rowMap.get(cellEditable.getRowId()).
 					getCell(formTemplate.getColumn(cellEditable.getColumnId()).getAlias()).setEditable(true);
@@ -549,7 +549,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		for (int i = 0; i < cellEditableValues.size(); i++) {
 			cellEditableValues.get(i).setRowId(rowIds.get(orders.get(i) - 1));
 		}
-		cellEditableDao.saveFormEditableCells(cellEditableValues);
+		cellEditableDao.saveEditableCells(cellEditableValues);
 	}
 
 	private <T> void insertSpans(final List<SpanRecord> values,

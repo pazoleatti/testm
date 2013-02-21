@@ -27,7 +27,7 @@ public class CellEditableDaoTest {
 	@Test
 	@Transactional
 	public void getCellEditableTest(){
-		List<CellEditable> records = cellEditableDao.getFormCellEditable(Long.valueOf(1));
+		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(1));
 
 		Assert.assertEquals(3, records.size());
 		Assert.assertEquals(Long.valueOf(1), records.get(0).getRowId());
@@ -41,7 +41,7 @@ public class CellEditableDaoTest {
 	@Test
 	@Transactional
 	public void getNotExistedFormCellEditableTest(){
-		List<CellEditable> records = cellEditableDao.getFormCellEditable(Long.valueOf(-1));
+		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(-1));
 		Assert.assertEquals(0, records.size());
 	}
 
@@ -52,8 +52,8 @@ public class CellEditableDaoTest {
 		edits.add(new CellEditable(1l, 2));
 		edits.add(new CellEditable(2l, 3));
 
-		cellEditableDao.saveFormEditableCells(edits);
-		List<CellEditable> records = cellEditableDao.getFormCellEditable(Long.valueOf(1));
+		cellEditableDao.saveEditableCells(edits);
+		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(1));
 
 		Assert.assertEquals(5, records.size());
 
