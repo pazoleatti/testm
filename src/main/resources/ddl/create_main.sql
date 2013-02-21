@@ -15,6 +15,7 @@ okato varchar2(11),
 okato_definition varchar2(11)
 );
 alter table dict_region add constraint dict_region_pk primary key (code);
+alter table dict_region add constraint dict_region_uniq_okato_def unique (okato_definition);
 
 comment on table dict_region is 'Коды субъектов Российской Федерации';
 comment on column dict_region.code is 'код';
