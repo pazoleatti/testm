@@ -21,7 +21,6 @@ public abstract class Column implements Ordered, Serializable {
 	private String name;
 	private String alias;
 	private int width;
-	private boolean editable;
 	private boolean checking;
 	private int order;
 	private String groupName;
@@ -91,24 +90,6 @@ public abstract class Column implements Ordered, Serializable {
 	 */
 	public void setWidth(int width) {
 		this.width = width;
-	}
-	
-	/**
-	 * Признак того, что поле может редактироваться пользователем напрямую
-	 * Обращаю внимание, что этот флаг отвечает только за то, будет ли у пользователя возможность вводить значение непосредственно
-	 * в это поле через интерфейс пользователя. Через скрипты возможность изменить значение поля будет всегда.
-	 * @return флаг возможности редактирования столбца через UI
-	 */
-	public boolean isEditable() {
-		return editable;
-	}
-	
-	/**
-	 * Задать признак возможность редактирования значения столбца напрямую
-	 * @param editable желаемое значение признака
-	 */
-	public void setEditable(boolean editable) {
-		this.editable = editable;
 	}
 
 	/**

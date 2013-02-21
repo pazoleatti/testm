@@ -42,7 +42,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setAlias(rs.getString("alias"));
 			result.setName(rs.getString("name"));
 			result.setWidth(rs.getInt("width"));
-			result.setEditable(rs.getBoolean("editable"));
 			result.setOrder(rs.getInt("ord"));
 			result.setGroupName(rs.getString("group_name"));
 			result.setChecking(rs.getBoolean("checking"));
@@ -112,8 +111,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, editable, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
-			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"insert into form_column (id, name, form_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
+			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -121,34 +120,33 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					ps.setString(1, col.getName());
 					ps.setString(2, col.getAlias());
 					ps.setString(3, getTypeFromCode(col));
-					ps.setInt(4, col.isEditable() ? 1 : 0);
-					ps.setInt(5, col.getWidth());
+					ps.setInt(4, col.getWidth());
 
 					if (col instanceof NumericColumn) {
-						ps.setInt(6, ((NumericColumn)col).getPrecision());
+						ps.setInt(5, ((NumericColumn)col).getPrecision());
 					} else {
-						ps.setNull(6, Types.NUMERIC);
+						ps.setNull(5, Types.NUMERIC);
 					}
 
 					if (col instanceof StringColumn) {
-						ps.setString(7, ((StringColumn) col).getDictionaryCode());
+						ps.setString(6, ((StringColumn) col).getDictionaryCode());
 						//TODO: Продумать данный момент. Сейчас, если максимальное значение превышается, то мы
 						// "пропускаем" значение в базу и просто выводим предупреждение.
 						if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
 							log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
 						}
-						ps.setInt(10, ((StringColumn) col).getMaxLength());
+						ps.setInt(9, ((StringColumn) col).getMaxLength());
 					} else if (col instanceof NumericColumn) {
-						ps.setString(7, ((NumericColumn) col).getDictionaryCode());
-						ps.setNull(10, Types.INTEGER);
+						ps.setString(6, ((NumericColumn) col).getDictionaryCode());
+						ps.setNull(9, Types.INTEGER);
 					} else {
-						ps.setNull(7, Types.VARCHAR);
-						ps.setNull(10, Types.INTEGER);
+						ps.setNull(6, Types.VARCHAR);
+						ps.setNull(9, Types.INTEGER);
 					}
 
-					ps.setInt(8, col.getOrder());
-					ps.setString(9, col.getGroupName());
-					ps.setBoolean(11, col.isChecking());
+					ps.setInt(7, col.getOrder());
+					ps.setString(8, col.getGroupName());
+					ps.setBoolean(10, col.isChecking());
 				}
 
 				@Override
@@ -160,7 +158,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
-					"update form_column set name = ?, alias = ?, type = ?, editable = ?, width = ?, " +
+					"update form_column set name = ?, alias = ?, type = ?, width = ?, " +
 							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?" +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
@@ -170,30 +168,29 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							ps.setString(1, col.getName());
 							ps.setString(2, col.getAlias());
 							ps.setString(3, getTypeFromCode(col));
-							ps.setInt(4, col.isEditable() ? 1 : 0);
-							ps.setInt(5, col.getWidth());
+							ps.setInt(4, col.getWidth());
 
 							if (col instanceof NumericColumn) {
-								ps.setInt(6, ((NumericColumn)col).getPrecision());
+								ps.setInt(5, ((NumericColumn)col).getPrecision());
 							} else {
-								ps.setNull(6, Types.NUMERIC);
+								ps.setNull(5, Types.NUMERIC);
 							}
 
 							if (col instanceof StringColumn) {
-								ps.setString(7, ((StringColumn)col).getDictionaryCode());
-								ps.setInt(10, ((StringColumn) col).getMaxLength());
+								ps.setString(6, ((StringColumn)col).getDictionaryCode());
+								ps.setInt(9, ((StringColumn) col).getMaxLength());
 							} else if(col instanceof NumericColumn){
-								ps.setString(7, ((NumericColumn)col).getDictionaryCode());
-								ps.setNull(10, Types.INTEGER);
+								ps.setString(6, ((NumericColumn)col).getDictionaryCode());
+								ps.setNull(9, Types.INTEGER);
 							} else {
-								ps.setNull(7, Types.VARCHAR);
-								ps.setNull(10, Types.INTEGER);
+								ps.setNull(6, Types.VARCHAR);
+								ps.setNull(9, Types.INTEGER);
 							}
 
-							ps.setInt(8, col.getOrder());
-							ps.setString(9, col.getGroupName());
-							ps.setBoolean(11, col.isChecking());
-							ps.setInt(12, col.getId());
+							ps.setInt(7, col.getOrder());
+							ps.setString(8, col.getGroupName());
+							ps.setBoolean(10, col.isChecking());
+							ps.setInt(11, col.getId());
 						}
 
 						@Override
