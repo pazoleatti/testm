@@ -17,9 +17,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 import java.util.Date;
@@ -32,7 +30,12 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 	private static final int ESCAPE = 27;
 	private static final String CLEAR_IMAGE_SOURCE = "img/cancel_image.png";
 	private static final String CLEAR_IMAGE_WIDTH = "20px";
-	private static final String CLEAR_IMAGE_HEIGHT = "19px";
+	private static final String CLEAR_IMAGE_HEIGHT = "20px";
+	private static final String CLEAR_IMAGE_BACKGROUND = "#FFFBB1";
+	private static final String CLEAR_IMAGE_TITLE = "Очистить значение";
+	private static final String ROOT_POPUP_PANEL_HEIGHT = "188px";
+	private static final String ROOT_POPUP_PANEL_COLOR = "green";
+	private static final String DATE_BOX_WIDTH = "121px";
 
 	private PopupPanel rootPopupPanel;
 	private final HorizontalPanel datePickerAndImageComposite;
@@ -74,6 +77,7 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 		DatePickerWithYearSelector pickerForDateBox = new DatePickerWithYearSelector();
 		this.dateBox = new DateBox(pickerForDateBox, null, new DateBox.DefaultFormat(format));
+		dateBox.setWidth(DATE_BOX_WIDTH);
 		this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
 				// Запомнить значения перед тем как скрыть Popup панель
@@ -106,12 +110,14 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 				if (Event.ONKEYUP == event.getTypeInt()) {
 					if (event.getNativeEvent().getKeyCode() == ESCAPE) {
 						// Dismiss when escape is pressed
+						dateBox.hideDatePicker();
 						rootPopupPanel.hide();
 					}
 				}
 			}
 		};
-		rootPopupPanel.getElement().getStyle().setBorderStyle(Style.BorderStyle.HIDDEN);
+
+		rootPopupPanel.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 		rootPopupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {
 				lastKey = null;
@@ -131,24 +137,25 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 		clearDateImage.setUrl(CLEAR_IMAGE_SOURCE);
 		clearDateImage.setWidth(CLEAR_IMAGE_WIDTH);
 		clearDateImage.setHeight(CLEAR_IMAGE_HEIGHT);
+		clearDateImage.setTitle(CLEAR_IMAGE_TITLE);
 		clearDateImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-		clearDateImage.setTitle("Очистить значение");
 
 		clearDateImage.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				ValueChangeEvent.fire(dateBox, null);
+
 			}
 		});
+		clearDateImage.getElement().getStyle().setBackgroundColor(CLEAR_IMAGE_BACKGROUND);
 
 		datePickerAndImageComposite = new HorizontalPanel();
-		datePickerAndImageComposite.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		datePickerAndImageComposite.getElement().getStyle().setTop(0, Style.Unit.PX);
-		datePickerAndImageComposite.getElement().getStyle().setLeft(0, Style.Unit.PX);
-		clearDateImage.getElement().getStyle().setBackgroundColor("#FFFBB1");
 		datePickerAndImageComposite.add(dateBox);
 		datePickerAndImageComposite.add(clearDateImage);
-
+		datePickerAndImageComposite.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		rootPopupPanel.setWidth(datePickerAndImageComposite.getElement().getStyle().getWidth());
+		rootPopupPanel.setHeight(ROOT_POPUP_PANEL_HEIGHT);
+		rootPopupPanel.getElement().getStyle().setBackgroundColor(ROOT_POPUP_PANEL_COLOR);
 		rootPopupPanel.add(datePickerAndImageComposite);
 	}
 
@@ -229,15 +236,12 @@ public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 		rootPopupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 			public void setPosition(int offsetWidth, int offsetHeight) {
-				dateBox.getElement().getStyle().setWidth((lastParent.getClientWidth()) - clearDateImage.getElement()
-						.getClientWidth(), Style.Unit.PX);
-				dateBox.getElement().getStyle().setHeight(lastParent.getClientHeight(), Style.Unit.PX);
-
-				datePickerAndImageComposite.getElement().getStyle().setWidth(lastParent.getClientWidth(), Style.Unit.PX);
-				datePickerAndImageComposite.getElement().getStyle().setHeight(lastParent.getClientHeight() , Style.Unit.PX);
 				rootPopupPanel.setPopupPosition(lastParent.getAbsoluteLeft() - 3,
 						lastParent.getAbsoluteTop() - 3);
+				rootPopupPanel.show();
+				dateBox.showDatePicker();
 			}
+
 		});
 	}
 
