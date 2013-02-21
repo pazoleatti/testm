@@ -9,7 +9,14 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
 
-    <!--<import resource="classpath:testDaoContext.xml"/>-->
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
+	</bean>
+	
+	<bean class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataScriptingService"/>
+	</bean>
+	
     <import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>
 
     <!-- NamedJdbcTemplate, используемый в jdbc-Dao (в частности - в наследниках AbstractDao) -->

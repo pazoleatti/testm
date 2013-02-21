@@ -23,11 +23,6 @@ public class ContextTest implements ApplicationContextAware {
 		Assert.assertNotNull(applicationContext);
 	}
 
-	@Test
-	public void testScriptExposed(){
-		Assert.assertTrue(applicationContext.getBeansWithAnnotation(ScriptExposed.class).containsKey("formDataCompositionService"));
-	}
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;

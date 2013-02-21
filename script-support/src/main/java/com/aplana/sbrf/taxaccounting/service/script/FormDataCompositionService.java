@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service;
+package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
