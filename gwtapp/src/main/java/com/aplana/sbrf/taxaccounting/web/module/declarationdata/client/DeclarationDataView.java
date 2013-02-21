@@ -34,6 +34,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button downloadAsLegislatorButton;
 
 	@UiField
+	Button deleteButton;
+
+	@UiField
 	Label taxType;
 
 	@UiField
@@ -75,6 +78,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
+	public void setCannotDownloadXml() {
+		downloadAsLegislatorButton.setVisible(false);
+	}
+
+	@Override
+	public void setCannotDelete() {
+		deleteButton.setVisible(false);
+	}
+
+	@Override
 	public void setTaxType(String taxType) {
 		this.taxType.setText(taxType);
 	}
@@ -110,6 +123,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
 		getUiHandlers().setAccepted(false);
+	}
+
+	@UiHandler("deleteButton")
+	public void onDelete(ClickEvent event){
+		getUiHandlers().delete();
 	}
 
 	@UiHandler("downloadExcelButton")

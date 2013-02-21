@@ -30,7 +30,10 @@ public class UpdateDeclarationDataHandler extends AbstractActionHandler<UpdateDe
     public UpdateDeclarationResult execute(UpdateDeclarationAction action, ExecutionContext context) {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		if(action.isRefresh()){
+		if(action.isDelete()) {
+			declarationService.delete(action.getDeclaration().getId(), userId);
+		}
+		else if(action.isRefresh()) {
 			declarationService.refreshDeclaration(new Logger(), action.getDeclaration().getId(), userId);
 		} else {
 			declarationService.setAccepted(action.getDeclaration().getId(), action.getDeclaration().isAccepted(), userId);

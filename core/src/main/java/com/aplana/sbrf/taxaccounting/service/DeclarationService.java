@@ -38,6 +38,16 @@ public interface DeclarationService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	Declaration get(long declarationId, int userId);
+
+	/**
+	 * Удалить декларацию
+	 * @param declarationId идентификатор декларации
+	 * @param userId идентификатор пользователя, выполняющего действие
+	 * @throws DaoException если такой декларации не существует
+	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+	 */
+	void delete(long declarationId, int userId);
+
 	/**
 	 * Установить в декларации флаг принятия
 	 * @param declarationId идентификатор декларации

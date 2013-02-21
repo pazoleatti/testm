@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -9,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclar
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -33,6 +35,8 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setDeclarationData(Declaration declaration);
 		void setCannotAccept();
 		void setCannotReject();
+		void setCannotDownloadXml();
+		void setCannotDelete();
 		void setTaxType(String taxType);
 		void setDepartment(String department);
 		void setReportPeriod(String reportPeriod);
@@ -122,6 +126,33 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	@Override
+	public void delete() {
+		UpdateDeclarationAction action = new UpdateDeclarationAction();
+		action.setDelete(true);
+		action.setDeclaration(declaration);
+		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
+			@Override
+			public void onReqSuccess(UpdateDeclarationResult result) {
+				MessageEvent.fire(this, "Декларация удалена");
+				placeManager
+						.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST)
+						.with("nType", placeManager.getCurrentPlaceRequest().getParameter("nType", TaxType.INCOME.name())));
+			}
+
+			@Override
+			protected boolean needErrorOnFailure() {
+				return false;
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				MessageEvent.fire(this, "Запрос не выполнен", throwable);
+				setDeclaration();
+			}
+		});
+	}
+
+	@Override
 	public void downloadExcel() {
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declaration.getId(), null, null);
 	}
@@ -153,6 +184,13 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						if (!result.isCanReject()) {
 							getView().setCannotReject();
 						}
+						if (!result.isCanDownload()) {
+							getView().setCannotDownloadXml();
+						}
+						if (!result.isCanDelete()) {
+							getView().setCannotDelete();
+						}
+
 						getProxy().manualReveal(DeclarationDataPresenter.this);
 					}
 					else {

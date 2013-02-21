@@ -5,13 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -23,18 +20,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ModelUtils;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
 
 /**
@@ -52,6 +37,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private FormPerformerDao formPerformerDao;
 	@Autowired
 	private FormTypeDao formTypeDao;
+	@Autowired
+	private CellEditableDao cellEditableDao;
 
 	private static class ValueRecord<T> {
 		private T value;
@@ -216,9 +203,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		readStyle(formTemplate, rowIdToAlias, formData.getId());
 		readSpan(formTemplate, rowIdToAlias, formData.getId());
+		readEditable(formTemplate, rowIdToAlias, formData.getId());
 		readValues("numeric_value", formTemplate, rowIdToAlias, formData);
 		readValues("string_value", formTemplate, rowIdToAlias, formData);
 		readValues("date_value", formTemplate, rowIdToAlias, formData);
+
 		return formData;
 	}
 
@@ -232,6 +221,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					&& StringColumn.class.equals(columnType)
 					|| value instanceof Date
 					&& DateColumn.class.equals(columnType);
+		}
+	}
+
+	private void readEditable(final FormTemplate formTemplate,
+							  final Map<Long, DataRow> rowMap, Long formDataId) {
+		List<CellEditable> edits = cellEditableDao.getFormCellEditable(formDataId);
+		for (CellEditable cellEditable : edits) {
+			rowMap.get(cellEditable.getRowId()).
+					getCell(formTemplate.getColumn(cellEditable.getColumnId()).getAlias()).setEditable(true);
 		}
 	}
 
@@ -404,8 +402,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		final List<SpanRecord> spanValues = new ArrayList<SpanRecord>();
 		final List<StyleRecord> styleValues = new ArrayList<StyleRecord>();
+		final List<CellEditable> cellEditableValues = new ArrayList<CellEditable>();
 		final List<Integer> spanOrders = new ArrayList<Integer>();
 		final List<Integer> styleOrders = new ArrayList<Integer>();
+		final List<Integer> cellEditableOrders = new ArrayList<Integer>();
 		// final Map<String, FormStyle> styleAliasToId =
 		// formStyleDao.getAliasToFormStyleMap(formData.getFormTemplateId());
 
@@ -442,6 +442,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								cellValue.getRowSpan(), col.getId(), null));
 						spanOrders.add(rowOrder);
 					}
+					if (cellValue.isEditable()) {
+						cellEditableValues.add(new CellEditable(null, col.getId()));
+						cellEditableOrders.add(rowOrder);
+					}
 					if (cellValue.getStyle() != null) {
 						styleValues.add(new StyleRecord(col.getId(), null,
 								cellValue.getStyle().getId()));
@@ -475,6 +479,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		insertStyles(styleValues, styleOrders, rowIds);
 		insertSpans(spanValues, spanOrders, rowIds);
+		cellEditableDao.saveFormEditableCells(cellEditableValues, cellEditableOrders, rowIds);
 	}
 
 	private <T> void insertValues(String tableName,

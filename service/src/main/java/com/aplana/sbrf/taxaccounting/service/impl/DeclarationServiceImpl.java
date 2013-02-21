@@ -29,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Сервис для работы с декларациями
@@ -78,6 +79,16 @@ public class DeclarationServiceImpl implements DeclarationService {
 			return declaration;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав на просмотр данных декларации");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void delete(long declarationId, int userId) {
+		if (declarationAccessService.canDelete(userId, declarationId)) {
+			declarationDao.delete(declarationId);
+		} else {
+			throw new AccessDeniedException("Недостаточно прав на удаление декларации");
 		}
 	}
 

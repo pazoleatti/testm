@@ -13,6 +13,8 @@ public class GetDeclarationResult implements Result {
 	private boolean canRead;
 	private boolean canAccept;
 	private boolean canReject;
+	private boolean canDownload;
+	private boolean canDelete;
 
     public Declaration getDeclaration() {
         return declaration;
@@ -76,5 +78,21 @@ public class GetDeclarationResult implements Result {
 
 	public void setDeclarationType(String declarationType) {
 		this.declarationType = declarationType;
+	}
+
+	public boolean isCanDownload() {
+		return canDownload;
+	}
+
+	public void setCanDownload(boolean canDownload) {
+		this.canDownload = canDownload;
+	}
+
+	public boolean isCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(boolean canDelete) {
+		this.canDelete = canDelete;
 	}
 }

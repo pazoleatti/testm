@@ -6,6 +6,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarationResult> {
     private Declaration declaration;
 	private boolean isRefresh;
+	private boolean isDelete;
 
     public Declaration getDeclaration() {
         return declaration;
@@ -21,5 +22,13 @@ public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarati
 
 	public void setRefresh(boolean refresh) {
 		isRefresh = refresh;
+	}
+
+	public boolean isDelete() {
+		return isDelete;
+	}
+
+	public void setDelete(boolean delete) {
+		isDelete = delete;
 	}
 }
