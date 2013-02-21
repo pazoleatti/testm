@@ -42,4 +42,20 @@ public interface DeclarationAccessService {
 	 * @return true - если у пользователя есть права на отмену принятия декларации, false - в противном случае
 	 */
 	boolean canReject(int userId, long declarationId);
+	
+	/**
+	 * Проверяет, может ли пользователь удалить декларацию
+	 * @param userId идентификатор пользователя
+	 * @param declarationId идентификатор декларации
+	 * @return true - если у пользователя есть права на удаление декларации, false - в противном случае
+	 */
+	boolean canDelete(int userId, long declarationId);
+	
+	/**
+	 * Проверяет, может ли пользователь скачать файл в формате законодателя (XML)
+	 * @param userId идентификатор пользователя
+	 * @param declarationId идентификатор декларации
+	 * @return true - если у пользователя есть права на скачиваение XML декларации, false - в противном случае
+	 */
+	boolean canDownloadXml(int userId, long declarationId);
 }
