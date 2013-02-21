@@ -56,7 +56,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
     }
 
 	@Override
-	public List<Department> listIsolatedDepartments() {
-		return departmentMapper.listIsolatedDepartments();
+	public List<Department> getIsolatedDepartments() {
+		return departmentMapper.getIsolatedDepartments();
 	}
 }

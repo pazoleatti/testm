@@ -40,5 +40,5 @@ public interface DepartmentMapper {
     Set<Integer> getDepartmentFormTypes(@Param("departmentId") int departmentId);
     
     @Select("select id,name,parent_id,type from department inner join department_param on department.id = department_param.department_id")
-    List<Department> listIsolatedDepartments();
+    List<Department> getIsolatedDepartments();
 }

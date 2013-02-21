@@ -9,17 +9,17 @@ public class DepartmentParamIncome implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private int departmentId;
-	private char signatoryId;
+	private int signatoryId;
 	private String signatorySurname;
 	private String signatoryFirstName;
 	private String signatoryLastName;
 	private String approveDocName;
 	private String approveOrgName;
 	private String taxPlaceTypeCode;
-	private float taxRate;
-	private long externalTaxSum;
-	private long sumDifference;
-	private long correctionSum;
+	private Long taxRate;
+	private Long externalTaxSum;
+	private Long sumDifference;
+	private Long correctionSum;
 
 	public DepartmentParamIncome() {
 	}
@@ -32,11 +32,11 @@ public class DepartmentParamIncome implements Serializable {
 		this.departmentId = departmentId;
 	}
 
-	public char getSignatoryId() {
+	public int getSignatoryId() {
 		return signatoryId;
 	}
 
-	public void setSignatoryId(char signatoryId) {
+	public void setSignatoryId(int signatoryId) {
 		this.signatoryId = signatoryId;
 	}
 
@@ -88,35 +88,35 @@ public class DepartmentParamIncome implements Serializable {
 		this.taxPlaceTypeCode = taxPlaceTypeCode;
 	}
 
-	public float getTaxRate() {
+	public Long getTaxRate() {
 		return taxRate;
 	}
 
-	public void setTaxRate(float taxRate) {
+	public void setTaxRate(Long taxRate) {
 		this.taxRate = taxRate;
 	}
 
-	public long getExternalTaxSum() {
+	public Long getExternalTaxSum() {
 		return externalTaxSum;
 	}
 
-	public void setExternalTaxSum(long externalTaxSum) {
+	public void setExternalTaxSum(Long externalTaxSum) {
 		this.externalTaxSum = externalTaxSum;
 	}
 
-	public long getSumDifference() {
+	public Long getSumDifference() {
 		return sumDifference;
 	}
 
-	public void setSumDifference(long sumDifference) {
+	public void setSumDifference(Long sumDifference) {
 		this.sumDifference = sumDifference;
 	}
 
-	public long getCorrectionSum() {
+	public Long getCorrectionSum() {
 		return correctionSum;
 	}
 
-	public void setCorrectionSum(long correctionSum) {
+	public void setCorrectionSum(Long correctionSum) {
 		this.correctionSum = correctionSum;
 	}
 }

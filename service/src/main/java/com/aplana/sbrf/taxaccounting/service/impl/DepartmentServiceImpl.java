@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamIncomeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 	@Autowired
 	DepartmentParamDao departmentParamDao;
 
-	//@Autowired
-	//DepartmentParamIncomeDao departmentParamIncomeDao;
-
 	@Override
 	public Department getDepartment(int departmentId) {
 		Department department = departmentDao.getDepartment(departmentId);
@@ -45,7 +41,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 	@Override
 	public List<Department> listIsolatedDepartments() {
-		return departmentDao.listIsolatedDepartments();
+		return departmentDao.getIsolatedDepartments();
 	}
 
 	@Override

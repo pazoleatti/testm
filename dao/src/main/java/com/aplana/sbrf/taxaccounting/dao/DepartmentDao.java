@@ -37,5 +37,5 @@ public interface DepartmentDao {
      * Внимание: объекты, возвращаемые данным методом инициализируются не полностью (в частности в них не заполняется 
      * @return
      */
-    List<Department> listIsolatedDepartments();
+    List<Department> getIsolatedDepartments();
 }

@@ -61,6 +61,6 @@ public class DepartmentDaoTest {
 	@Test
 	public void testGetAll() {
 		departmentDao.listDepartments();
-		Assert.assertEquals(3, departmentDao.listIsolatedDepartments().size());
+		Assert.assertEquals(3, departmentDao.getIsolatedDepartments().size());
 	}
 }

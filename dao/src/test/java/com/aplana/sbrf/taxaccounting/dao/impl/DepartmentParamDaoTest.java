@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
+import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
+import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentParamDaoTest.xml"})
@@ -24,6 +26,10 @@ public class DepartmentParamDaoTest {
 	public void test(){
 		DepartmentParam departmentParam =  departmentParamDao.getDepartmentParam(DEPARTMENT_ID_FOR_TEST);
 		Assert.assertEquals(DEPARTMENT_ID_FOR_TEST, departmentParam.getDepartmentId());
+		DepartmentParamIncome departmentParamIncome = departmentParamDao.getDepartmentParamIncome(DEPARTMENT_ID_FOR_TEST);
+		Assert.assertEquals(DEPARTMENT_ID_FOR_TEST, departmentParamIncome.getDepartmentId());
+		DepartmentParamTransport departmentParamTransport = departmentParamDao.getDepartmentParamTransport(DEPARTMENT_ID_FOR_TEST);
+		Assert.assertEquals(DEPARTMENT_ID_FOR_TEST, departmentParamTransport.getDepartmentId());
 	}
 
 }
