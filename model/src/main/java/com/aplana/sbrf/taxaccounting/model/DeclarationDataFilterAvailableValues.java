@@ -13,7 +13,7 @@ public class DeclarationDataFilterAvailableValues {
 	
 	private List<Integer> departmentIds;
 	
-	private List<DepartmentType> declarationTypes;
+	private List<DeclarationType> declarationTypes;
 
 	/**
 	 * @return the departmentIds
@@ -32,14 +32,14 @@ public class DeclarationDataFilterAvailableValues {
 	/**
 	 * @return the declarationTypes
 	 */
-	public List<DepartmentType> getDeclarationTypes() {
+	public List<DeclarationType> getDeclarationTypes() {
 		return declarationTypes;
 	}
 
 	/**
 	 * @param declarationTypes the declarationTypes to set
 	 */
-	public void setDeclarationTypes(List<DepartmentType> declarationTypes) {
+	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
 		this.declarationTypes = declarationTypes;
 	}
 

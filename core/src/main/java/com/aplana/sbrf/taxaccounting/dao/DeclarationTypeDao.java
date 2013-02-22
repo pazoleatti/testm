@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.util.List;
 
@@ -24,4 +25,10 @@ public interface DeclarationTypeDao {
 	 * @throws DaoException если в БД нет такой записи
 	 */
 	List<DeclarationType> listAll();
+
+	/**
+	 * Получить список всех видов деклараций по типу налога
+	 * @return список видов деклараций
+	 */
+	public List<DeclarationType> listAllByTaxType(TaxType taxType);
 }

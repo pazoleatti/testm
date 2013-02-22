@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -21,14 +21,14 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 	}
 
 	@Autowired
-	private DeclarationService declarationService;
+	private DeclarationDataSearchService declarationDataSearchService;
 
 	@Override
 	public GetDeclarationListResult execute(GetDeclarationList action, ExecutionContext executionContext) throws ActionException {
 		if(action == null || action.getDeclarationFilter() == null){
 			return null;
 		}
-		PaginatedSearchResult<DeclarationSearchResultItem> page = declarationService.search(action.getDeclarationFilter());
+		PaginatedSearchResult<DeclarationSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
 		GetDeclarationListResult result = new GetDeclarationListResult();
 		result.setRecords(page.getRecords());
 		result.setTotalCountOfRecords(page.getTotalRecordCount());

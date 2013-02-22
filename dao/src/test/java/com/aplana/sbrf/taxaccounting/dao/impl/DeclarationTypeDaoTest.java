@@ -34,4 +34,9 @@ public class DeclarationTypeDaoTest {
 		declarationTypeDao.get(1000);
 	}
 
+	@Test
+	public void testListAllByTaxType() {
+		assertEquals(4, declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT).size());
+	}
+
 }

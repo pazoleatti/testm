@@ -53,4 +53,14 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	public List<DeclarationType> listAll(){
 		return getJdbcTemplate().query("SELECT * FROM declaration_type", new DeclarationTypeRowMapper());
 	}
+
+	@Override
+	public List<DeclarationType> listAllByTaxType(TaxType taxType){
+		return getJdbcTemplate().query(
+				"select * from declaration_type dt where dt.tax_type = ?",
+				new Object[]{String.valueOf(taxType.getCode())},
+				new int[]{Types.VARCHAR},
+				new DeclarationTypeRowMapper()
+		);
+	}
 }

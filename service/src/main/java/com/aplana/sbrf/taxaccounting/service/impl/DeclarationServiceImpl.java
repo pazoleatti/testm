@@ -149,13 +149,6 @@ public class DeclarationServiceImpl implements DeclarationService {
 	}
 
 	@Override
-	public PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter) {
-		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
-				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
-				declarationFilter.getCountOfRecords()));
-	}
-
-	@Override
 	public void refreshDeclaration(Logger logger, long declarationId, int userId) {
 		throw new UnsupportedOperationException("not implemented");
 	}
