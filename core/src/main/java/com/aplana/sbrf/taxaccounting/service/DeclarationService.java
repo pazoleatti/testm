@@ -73,4 +73,13 @@ public interface DeclarationService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	byte[] getXlsxData(long declarationId, int userId);
+	
+	/**
+	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога
+	 * @param userId идентификатор пользователя
+	 * @param taxType вид налога
+	 * @return объект, содержащий информацию о допустимых значениях фильтров для поиска по декларациям
+	 * @throws AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
+	 */
+	DeclarationFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType);
 }

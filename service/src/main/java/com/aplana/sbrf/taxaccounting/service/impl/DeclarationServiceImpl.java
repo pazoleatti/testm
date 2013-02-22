@@ -2,7 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -15,25 +20,37 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Сервис для работы с декларациями
  * @author Eugene Stetsenko
+ * @author dsultanbekov
  */
 @Service
 public class DeclarationServiceImpl implements DeclarationService {
@@ -51,6 +68,18 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
+	
+	@Autowired
+	private DeclarationTypeDao declarationTypeDao;
+	
+	@Autowired
+	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+	
+	@Autowired
+	private DepartmentDao departmentDao;
+	
+	@Autowired
+	private TAUserDao userDao;
 
 	@Override
 	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
@@ -151,5 +180,38 @@ public class DeclarationServiceImpl implements DeclarationService {
 	@Override
 	public void refreshDeclaration(Logger logger, long declarationId, int userId) {
 		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public DeclarationFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType) {
+		DeclarationFilterAvailableValues result = new DeclarationFilterAvailableValues();
+		TAUser user = userDao.getUser(userId);
+		
+		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+			// Контролёр УНП видит все виды деклараций
+			result.setDeclarationTypes(declarationTypeDao.listAllByTaxType(taxType));
+			// во всех подразделениях, где они есть
+			result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
+		} else if (user.hasRole(TARole.ROLE_CONTROL)) {
+			int userDepartmentId = user.getDepartmentId();
+			// Контролёр видит виды деклараций, привязанные к его подразделению
+			Department userDepartment = departmentDao.getDepartment(userDepartmentId);			
+			List<DepartmentDeclarationType> ddts = userDepartment.getDepartmentDeclarationTypes();
+			Map<Integer, DeclarationType> dtMap = new HashMap<Integer, DeclarationType>();
+			for (DepartmentDeclarationType ddt: ddts) {
+				int declarationTypeId = ddt.getDeclarationTypeId();
+				if (!dtMap.containsKey(declarationTypeId)) {
+					dtMap.put(declarationTypeId, declarationTypeDao.get(declarationTypeId));
+				}
+			}
+			result.setDeclarationTypes(new ArrayList<DeclarationType>(dtMap.values()));
+			// Контролёр видит декларации только по своему подразделению
+			Set<Integer> departmentIds = new HashSet<Integer>(1);
+			departmentIds.add(userDepartmentId);
+			result.setDepartmentIds(departmentIds);
+		} else {
+			throw new AccessDeniedException("Недостаточно прав для просмотра деклараций");
+		}
+		return result;
 	}
 }
