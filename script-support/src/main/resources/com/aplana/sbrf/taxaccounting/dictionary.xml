@@ -45,6 +45,12 @@
                           p:sqlQuery="select code as value, name from transport_eco_class order by code"
                             />
                 </entry>
+                <entry key="dictionaryRegionCode">
+                    <bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
+                          p:dictionaryName="Коды субъектов Российской Федерации"
+                          p:sqlQuery="select code as value, name from dict_region order by code"
+                            />
+                </entry>
             </map>
         </property>
     </bean>

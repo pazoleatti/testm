@@ -49,6 +49,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
 		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
+        numericDictionaryCodeMap.put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
 
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
 			precisionList.add(i);
