@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository("declarationService")
+@Repository("dictionaryRegionService")
 public class DictionaryRegionServiceImpl implements DictionaryRegionService {
     @Autowired
     DictionaryRegionDao dictionaryRegionDao;
