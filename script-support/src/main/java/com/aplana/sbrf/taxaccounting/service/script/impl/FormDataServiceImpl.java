@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.script.impl;
+package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -6,9 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 
 /*
  * Реализация FormDataService

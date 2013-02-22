@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.script;
+package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
