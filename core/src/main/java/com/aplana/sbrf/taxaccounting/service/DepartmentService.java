@@ -5,6 +5,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
+import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
@@ -46,7 +47,7 @@ public interface DepartmentService {
 	 * Подразделение считается обособленным, если у него есть настройки в таблице department_param
 	 * @return список всех обособленных подразделений.
 	 */
-	List<Department> listIsolatedDepartments();
+	List<Department> getIsolatedDepartments();
 
 	/**
 	 * Получить по id подразделения его параметры по налогу на прибыль
@@ -55,4 +56,12 @@ public interface DepartmentService {
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если подразделение с таким идентификатором не существует
 	 */
 	DepartmentParamIncome getDepartmentParamIncome(int departmentId);
+	
+	/**
+	 * Получить по id подразделения его параметры по транспортному налогу
+	 * @param departmentId идентфикатор подразделения
+	 * @return параметры подразделения по налогу на прибыль
+	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если подразделение с таким идентификатором не существует
+	 */
+	DepartmentParamTransport getDepartmentParamTransport(int departmentId);
 }
