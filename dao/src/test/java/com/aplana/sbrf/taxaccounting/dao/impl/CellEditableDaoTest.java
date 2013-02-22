@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -11,8 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"CellEditableDaoTest.xml"})
@@ -21,55 +19,32 @@ public class CellEditableDaoTest {
 	@Autowired
 	private CellEditableDao cellEditableDao;
 
-	@Autowired
-	private FormDataDao formDataDao;
-
 	@Test
 	@Transactional
 	public void getCellEditableTest(){
-		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(1));
+		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
 
-		Assert.assertEquals(3, records.size());
-		Assert.assertEquals(Long.valueOf(1), records.get(0).getRowId());
-		Assert.assertEquals(Integer.valueOf(1), records.get(0).getColumnId());
-		Assert.assertEquals(Long.valueOf(2), records.get(2).getRowId());
-		Assert.assertEquals(Integer.valueOf(1), records.get(1).getColumnId());
-		Assert.assertEquals(Long.valueOf(2), records.get(2).getRowId());
-		Assert.assertEquals(Integer.valueOf(2), records.get(2).getColumnId());
-	}
+		List<Column> columns = new ArrayList<Column>();
+		for (int i = 1; i < 3; i++) {
+			Column column = new StringColumn();
+			column.setId(i);
+			column.setAlias("alias " + i);
+			columns.add(column);
+			for (long l = 1; l < 3; l ++) {
+				DataRow row = new DataRow("" + l ,columns, null);
+				rowIdMap.put(l, row);
+			}
+		}
 
-	@Test
-	@Transactional
-	public void getNotExistedFormCellEditableTest(){
-		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(-1));
-		Assert.assertEquals(0, records.size());
-	}
+		cellEditableDao.fillCellEditable(1l, rowIdMap);
 
-	@Test
-	@Transactional
-	public void saveEditableCells(){
-		List<CellEditable> edits =new ArrayList<CellEditable>();
-		edits.add(new CellEditable(1l, 2));
-		edits.add(new CellEditable(2l, 3));
+		Assert.assertEquals(true, rowIdMap.get(1l).getCell("alias " + 1).isEditable());
+		Assert.assertEquals(false, rowIdMap.get(1l).getCell("alias " + 2).isEditable());
+		Assert.assertEquals(true, rowIdMap.get(2l).getCell("alias " + 1).isEditable());
+		Assert.assertEquals(true, rowIdMap.get(2l).getCell("alias " + 2).isEditable());
 
-		cellEditableDao.saveEditableCells(edits);
-		List<CellEditable> records = cellEditableDao.getEditableCells(Long.valueOf(1));
-
-		Assert.assertEquals(5, records.size());
-
-		Assert.assertEquals(Long.valueOf(1), records.get(0).getRowId());
-		Assert.assertEquals(Integer.valueOf(1), records.get(0).getColumnId());
-
-		Assert.assertEquals(Long.valueOf(1), records.get(1).getRowId());
-		Assert.assertEquals(Integer.valueOf(2), records.get(1).getColumnId());
-
-		Assert.assertEquals(Long.valueOf(2), records.get(2).getRowId());
-		Assert.assertEquals(Integer.valueOf(1), records.get(2).getColumnId());
-
-		Assert.assertEquals(Long.valueOf(2), records.get(3).getRowId());
-		Assert.assertEquals(Integer.valueOf(2), records.get(3).getColumnId());
-
-		Assert.assertEquals(Long.valueOf(2), records.get(4).getRowId());
-		Assert.assertEquals(Integer.valueOf(3), records.get(4).getColumnId());
+		rowIdMap.get(1l).getCell("alias " + 1).setEditable(false);
+		rowIdMap.get(1l).getCell("alias " + 2).setEditable(true);
+		rowIdMap.get(2l).getCell("alias " + 1).setEditable(false);
 	}
 }

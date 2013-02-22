@@ -203,7 +203,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		readStyle(formTemplate, rowIdToAlias, formData.getId());
 		readSpan(formTemplate, rowIdToAlias, formData.getId());
-		readEditable(formTemplate, rowIdToAlias, formData.getId());
+		cellEditableDao.fillCellEditable(formDataId, rowIdToAlias);
 		readValues("numeric_value", formTemplate, rowIdToAlias, formData);
 		readValues("string_value", formTemplate, rowIdToAlias, formData);
 		readValues("date_value", formTemplate, rowIdToAlias, formData);
@@ -221,15 +221,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					&& StringColumn.class.equals(columnType)
 					|| value instanceof Date
 					&& DateColumn.class.equals(columnType);
-		}
-	}
-
-	private void readEditable(final FormTemplate formTemplate,
-							  final Map<Long, DataRow> rowMap, Long formDataId) {
-		List<CellEditable> edits = cellEditableDao.getEditableCells(formDataId);
-		for (CellEditable cellEditable : edits) {
-			rowMap.get(cellEditable.getRowId()).
-					getCell(formTemplate.getColumn(cellEditable.getColumnId()).getAlias()).setEditable(true);
 		}
 	}
 
@@ -402,10 +393,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		final List<SpanRecord> spanValues = new ArrayList<SpanRecord>();
 		final List<StyleRecord> styleValues = new ArrayList<StyleRecord>();
-		final List<CellEditable> cellEditableValues = new ArrayList<CellEditable>();
 		final List<Integer> spanOrders = new ArrayList<Integer>();
 		final List<Integer> styleOrders = new ArrayList<Integer>();
-		final List<Integer> cellEditableOrders = new ArrayList<Integer>();
 		// final Map<String, FormStyle> styleAliasToId =
 		// formStyleDao.getAliasToFormStyleMap(formData.getFormTemplateId());
 
@@ -442,10 +431,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								cellValue.getRowSpan(), col.getId(), null));
 						spanOrders.add(rowOrder);
 					}
-					if (cellValue.isEditable()) {
-						cellEditableValues.add(new CellEditable(null, col.getId()));
-						cellEditableOrders.add(rowOrder);
-					}
 					if (cellValue.getStyle() != null) {
 						styleValues.add(new StyleRecord(col.getId(), null,
 								cellValue.getStyle().getId()));
@@ -479,7 +464,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		insertStyles(styleValues, styleOrders, rowIds);
 		insertSpans(spanValues, spanOrders, rowIds);
-		insertEdits(cellEditableValues, cellEditableOrders, rowIds);
+
+
+		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		for (int i = 0; i < rowIds.size(); i ++) {
+			rowIdMap.put(rowIds.get(i), dataRows.get(i));
+		}
+
+		cellEditableDao.saveCellEditable(rowIdMap);
 	}
 
 	private <T> void insertValues(String tableName,
@@ -543,13 +535,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 								}
 							});
 		}
-	}
-
-	private void insertEdits(List<CellEditable> cellEditableValues, List<Integer> orders, List<Long> rowIds) {
-		for (int i = 0; i < cellEditableValues.size(); i++) {
-			cellEditableValues.get(i).setRowId(rowIds.get(orders.get(i) - 1));
-		}
-		cellEditableDao.saveEditableCells(cellEditableValues);
 	}
 
 	private <T> void insertSpans(final List<SpanRecord> values,

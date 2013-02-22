@@ -294,6 +294,7 @@ public class FormDataDaoTest {
 	}
 
 	@Test
+	@Transactional
 	public void editsSaveGetSuccess() {
 		FormData formData = fillFormData();
 		long formDataId = formDataDao.save(formData);
