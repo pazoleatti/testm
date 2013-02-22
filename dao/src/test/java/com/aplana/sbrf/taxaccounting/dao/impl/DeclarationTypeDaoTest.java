@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ public class DeclarationTypeDaoTest {
 	public void testGet() {
 		DeclarationType dt = declarationTypeDao.get(1);
 		assertEquals(1, dt.getId());
-		assertEquals("Вид декларации (тест)", dt.getName());
+		assertEquals("Вид декларации 1", dt.getName());
 		assertEquals(TaxType.TRANSPORT, dt.getTaxType());
 	}
 	
@@ -33,10 +35,20 @@ public class DeclarationTypeDaoTest {
 	public void testGetIncorrectId() {
 		declarationTypeDao.get(1000);
 	}
-
+	
 	@Test
-	public void testListAllByTaxType() {
-		assertEquals(4, declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT).size());
+	public void testListAll() {
+		List<DeclarationType> list = declarationTypeDao.listAll();
+		assertEquals(4, list.size());
 	}
 
+	@Test
+	public void testListByTaxType() {
+		List<DeclarationType> list = declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT);
+		assertEquals(2, list.size());
+		
+		for (DeclarationType dt: list) {
+			assertEquals(TaxType.TRANSPORT, dt.getTaxType());
+		}
+	}	
 }
