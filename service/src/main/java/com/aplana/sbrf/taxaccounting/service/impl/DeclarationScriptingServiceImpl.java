@@ -101,6 +101,8 @@ public class DeclarationScriptingServiceImpl extends TAAbstractScriptingServiceI
 		b.putAll(getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType()));
 		b.put("formDataCollection", formDataCollection);
 		
+		b.put("departmentId", departmentId);
+				
 		StringWriter writer = new StringWriter();
 		MarkupBuilder xml = new MarkupBuilder(writer);
 		b.put("xml", xml);
