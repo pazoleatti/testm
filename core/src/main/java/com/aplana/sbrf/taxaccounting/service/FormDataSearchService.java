@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -38,16 +37,6 @@ public interface FormDataSearchService {
 	 */
 	@Deprecated
 	List<Department> listAllDepartmentsByParentDepartmentId(int parentDepartmentId);
-
-	/**
-	 * Получить список видов налоговых форм к которым имеет доступ пользователь по заданному виду налога.
-	 * @param taxType вид налога
-     * @param userId идентификатор пользователя
-	 * @return список налоговых форм с определенным видом налога
-	 * @deprecated - нужно использовать {@link #getAvailableFilterValues(int, TaxType)}
-	 */
-	@Deprecated
-	List<FormType> getAvailableFormTypes(int userId, TaxType taxType);
 	
 	/**
 	 * Получить списки значений, которые должны быть доступны пользователю 

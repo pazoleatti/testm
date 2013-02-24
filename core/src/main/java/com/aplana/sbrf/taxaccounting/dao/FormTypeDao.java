@@ -5,7 +5,6 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 
 /**
  * Интерфейс DAO для работы с видами налоговых форм
@@ -32,15 +31,5 @@ public interface FormTypeDao {
      * @return список всех существующих видов налоговых форм по виду налога
      */
 	List<FormType> listAllByTaxType(TaxType taxType);
-	
-    /**
-     * Получить список видов налоговых форм для определенного департамента и с определенным типом налога
-     * @param departmentId идентификатор департамента
-     * @param taxType тип налога
-     * @return Список видов налоговых форм для определенного департамента и с определенным типом налога
-     * @deprecated этот метод нужно удалить после того, как будет удалён {@link FormDataSearchService#getAvailableFormTypes(int, TaxType)}
-     */
-	@Deprecated
-    List<FormType> listAllByDepartmentIdAndTaxType(int departmentId, TaxType taxType);
 	
 }

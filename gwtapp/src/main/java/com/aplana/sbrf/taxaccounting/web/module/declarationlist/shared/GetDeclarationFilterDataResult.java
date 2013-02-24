@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.gwtplatform.dispatch.shared.Result;
 
@@ -13,6 +14,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private List<Department> departments;
 	private List<TaxPeriod> taxPeriods;
 	private List<DeclarationType> declarationTypes;
+	private FormDataFilterAvailableValues filterValues;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -36,5 +38,13 @@ public class GetDeclarationFilterDataResult implements Result {
 
 	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
 		this.declarationTypes = declarationTypes;
+	}
+
+	public FormDataFilterAvailableValues getFilterValues() {
+		return filterValues;
+	}
+
+	public void setFilterValues(FormDataFilterAvailableValues filterValues) {
+		this.filterValues = filterValues;
 	}
 }

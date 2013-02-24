@@ -11,12 +11,10 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class TreePicker extends Composite{
@@ -42,6 +40,7 @@ public class TreePicker extends Composite{
 	private boolean isCreated = false;
 
 	private final List<Department> sourceList = new ArrayList<Department>();
+	private final List<Integer> availableForUserDepartmentIds = new ArrayList<Integer>();
 	private final Map<String, Integer> allTreeItems = new HashMap<String, Integer>();
 	private final Map<String, Integer> selectedItems = new HashMap<String, Integer>();
 	private final Map<Integer,  Pair<Integer, TreeItem>> nodes = new HashMap<Integer, Pair<Integer, TreeItem>>();
@@ -60,8 +59,11 @@ public class TreePicker extends Composite{
 		setupUI(popupPanelCaption);
 	}
 
-	public void setTreeValues(List<Department> source){
+	public void setTreeValues(List<Department> source, Set<Integer> availableDepartments){
 		sourceList.clear();
+		availableForUserDepartmentIds.clear();
+
+		availableForUserDepartmentIds.addAll(availableDepartments);
 		sourceList.addAll(source);
 	}
 
@@ -91,11 +93,18 @@ public class TreePicker extends Composite{
 		//подразделение и нажал "ОК", т.к. элементом дерева у нас является RadioButton, которая может хранить только
 		//имя подразделения.
 		for(final Department department : sourceList){
-			CheckBox treeElement = new CheckBox(department.getName());
-			addValueChangeHandler(treeElement);
-			Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
-					new TreeItem(treeElement));
-			nodes.put(department.getId(), treeItemPair);
+			if(availableForUserDepartmentIds.contains(department.getId())){
+				CheckBox treeElement = new CheckBox(department.getName());
+				addValueChangeHandler(treeElement);
+				Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
+						new TreeItem(treeElement));
+				nodes.put(department.getId(), treeItemPair);
+			} else {
+				Label treeElement = new Label(department.getName());
+				Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
+						new TreeItem(treeElement));
+				nodes.put(department.getId(), treeItemPair);
+			}
 			allTreeItems.put(department.getName(), department.getId());
 		}
 
@@ -157,6 +166,8 @@ public class TreePicker extends Composite{
 					if(createTree()){
 						selectedItems.clear();
 						popup.show();
+					} else {
+						Window.alert("Нету доступных подразделений");
 					}
 				} else {
 					popup.show();

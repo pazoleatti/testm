@@ -16,10 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements FilterPresenter.MyView,
 		Editor<FormDataFilter>, ReportPeriodDataProvider {
@@ -182,9 +179,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	}
 
 	@Override
-	public void setDepartmentsList(List<Department> list){
+	public void setDepartmentsList(List<Department> list, Set<Integer> availableValues){
 		if(getUiHandlers() != null){
-			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list);
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list, availableValues);
 		}
 	}
 

@@ -13,17 +13,14 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilterPresenter.MyView>
 		implements DeclarationFilterUIHandlers {
 
 	public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
 
-		void setDepartmentsList(List<Department> list);
+		void setDepartmentsList(List<Department> list, Set<Integer> availableDepartments);
 
 		List<Integer> getSelectedReportPeriods();
 
@@ -75,7 +72,13 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                 new AbstractCallback<GetDeclarationFilterDataResult>() {
                     @Override
                     public void onReqSuccess(GetDeclarationFilterDataResult result) {
-	                    getView().setDepartmentsList(result.getDepartments());
+	                    FormDataFilterAvailableValues filterValues = result.getFilterValues();
+	                    if(filterValues.getDepartmentIds() == null){
+		                    //Контролер УНП
+		                    getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
+	                    } else {
+		                    getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
+	                    }
 	                    getView().setTaxPeriods(result.getTaxPeriods());
 	                    getView().setDeclarationTypeMap(fillDeclarationTypesMap(result));
                         DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
@@ -99,6 +102,14 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	@Override
 	public TaxType getCurrentTaxType(){
 		return this.taxType;
+	}
+
+	private Set<Integer> convertDepartmentsToIds(List<Department> source){
+		Set<Integer> result = new HashSet<Integer>();
+		for(Department department : source){
+			result.add(department.getId());
+		}
+		return result;
 	}
 
 	private Map<Integer, String> fillDeclarationTypesMap(GetDeclarationFilterDataResult source){

@@ -1,11 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +24,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 
 @Repository
 @Transactional(readOnly = true)
-public class DepartmentDaoImpl implements DepartmentDao {
+public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	private final Log logger = LogFactory.getLog(getClass());
 	
 	@Autowired 
@@ -50,6 +56,20 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		return departmentMapper.getChildren(parentDepartmentId);
 	}
 
+	@Override
+	public Department getParent(int departmentId){
+		Department department = getDepartment(departmentId);
+		try {
+			return getJdbcTemplate().queryForObject(
+					"SELECT * FROM department dp WHERE dp.id = ?",
+					new Object[]{department.getParentId()},
+					new DepartmentJdbcMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
     @Override
     public List<Department> listDepartments(){
         return departmentMapper.getAll();
@@ -58,5 +78,23 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	@Override
 	public List<Department> getIsolatedDepartments() {
 		return departmentMapper.getIsolatedDepartments();
+	}
+
+	protected class DepartmentJdbcMapper implements RowMapper<Department> {
+		@Override
+		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Department department = new Department();
+			department.setId(rs.getInt("id"));
+			department.setName(rs.getString("name"));
+			Integer parent_id = rs.getInt("parent_id");
+			if(parent_id == 0){
+				department.setParentId(null);
+			} else {
+				department.setParentId(parent_id);
+			}
+			department.setType(DepartmentType.fromCode(rs.getInt("type")));
+			return department;
+		}
+
 	}
 }

@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Сервис содержит действия и проверки связанные с департаментом
@@ -24,8 +24,13 @@ public interface DepartmentService {
 	 * @return
 	 */
 	Department getDepartment(int departmentId);
-	
-	
+
+	/**
+	 * Получить список всех департамент
+	 * @return список всех департаментов
+	 */
+	public List<Department> listAll();
+
 	/**
 	 * Получить дочерние подразделения (не полная инициализация)
 	 * 
@@ -33,6 +38,15 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<Department> getChildren(int parentDepartmentId);
+
+
+	/**
+	 * Получить родительское подразделения для департамента
+	 *
+	 * @param departmentId
+	 * @return
+	 */
+	Department getParent(int departmentId);
 
 	/**
 	 * Получить по id подразделения его основные параметры
@@ -64,4 +78,15 @@ public interface DepartmentService {
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если подразделение с таким идентификатором не существует
 	 */
 	DepartmentParamTransport getDepartmentParamTransport(int departmentId);
+
+
+	/**
+	 * Данная функция в качестве аргумента принимает список идентификаторов доступных пользователю департаментов, а возвращает
+	 * список департаментов, "размотанный" вверх по иерархии от каждого доступного пользователю департамента. Таким образом,
+	 * эта функция возвращает список департаментов, который необходим для построения полноценного дерева.
+	 * @param availableDepartments список доступных пользователю департаментов. Данный список получаем при вызове
+	 *                             FormDataSearchService.getAvailableFilterValues().getDepartmentIds()
+	 * @return список департаментов, необходимый для построения дерева
+	 */
+	Set<Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
 }

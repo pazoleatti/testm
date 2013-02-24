@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -10,8 +8,8 @@ import java.util.List;
 public class GetFilterDataResult implements Result {
 
     private List<Department> departments;
-    private List<FormType> types;
 	private List<TaxPeriod> taxPeriods;
+	private FormDataFilterAvailableValues filterValues;
 
     public GetFilterDataResult(){
 
@@ -25,14 +23,6 @@ public class GetFilterDataResult implements Result {
         this.departments = departments;
     }
 
-    public List<FormType> getFormTypes() {
-        return types;
-    }
-
-    public void setFormTypes(List<FormType> kinds) {
-        this.types = kinds;
-    }
-
 	public List<TaxPeriod> getTaxPeriods() {
 		return taxPeriods;
 	}
@@ -40,4 +30,13 @@ public class GetFilterDataResult implements Result {
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
 		this.taxPeriods = taxPeriods;
 	}
+
+	public FormDataFilterAvailableValues getFilterValues() {
+		return filterValues;
+	}
+
+	public void setFilterValues(FormDataFilterAvailableValues filterValues) {
+		this.filterValues = filterValues;
+	}
+
 }

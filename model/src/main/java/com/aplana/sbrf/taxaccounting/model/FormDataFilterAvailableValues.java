@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +14,10 @@ import java.util.Set;
  * 3) какие настройки есть у источников для налоговых форм и деклараций подразделения пользователя
  * @author dsultanbekov
  */
-public class FormDataFilterAvailableValues {
+public class FormDataFilterAvailableValues implements Serializable {
+
+	private static final long serialVersionUID = -2957561111604546546L;
+
 	private Set<Integer> departmentIds;
 	private List<FormType> formTypes;
 	private List<FormDataKind> kinds;

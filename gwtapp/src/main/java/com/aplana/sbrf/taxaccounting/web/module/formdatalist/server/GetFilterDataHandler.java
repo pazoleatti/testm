@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, GetFilterDataResult> {
@@ -26,9 +30,9 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
 	@Autowired
 	private SecurityService securityService;
-	
+
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+	private DepartmentService departmentService;
 
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
@@ -39,12 +43,19 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
-        GetFilterDataResult res = new GetFilterDataResult();
-        res.setDepartments(formDataSearchService.listAllDepartmentsByParentDepartmentId(securityService.currentUser()
-				.getDepartmentId()));
-        res.setFormTypes(formDataSearchService.getAvailableFormTypes(securityService.currentUser().getId(),
-                action.getTaxType()));
-		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
+	    GetFilterDataResult res = new GetFilterDataResult();
+	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
+			    .currentUser().getId(), action.getTaxType());
+
+	    if(filterValues.getDepartmentIds() == null) {
+		    //Контролер УНП
+		    res.setDepartments(departmentService.listAll());
+	    } else {
+		    //Контролер или Оператор
+		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds())));
+	    }
+	    res.setFilterValues(filterValues);
+	    res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 
         return res;
     }
