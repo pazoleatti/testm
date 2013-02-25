@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.cell.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -20,9 +20,9 @@ import java.util.Map;
 
 @Repository
 @Transactional(readOnly=true)
-public class CellSpanDaoImpl extends AbstractDao implements CellSpanDao {
+public class CellSpanInfoDaoImpl extends AbstractDao implements CellSpanInfoDao {
 	@Override
-	public void fillCellSpan(Long formDataId, final Map<Long, DataRow> rowIdMap) {
+	public void fillCellSpanInfo(Long formDataId, final Map<Long, DataRow> rowIdMap) {
 		String sqlQuery = "select column_id, row_id, colspan, rowspan from cell_span_info v where exists" +
 				" (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)";
 
@@ -46,7 +46,7 @@ public class CellSpanDaoImpl extends AbstractDao implements CellSpanDao {
 
 	@Override
 	@Transactional(readOnly=false)
-	public void saveCellSpan(Map<Long, DataRow> rowIdMap) {
+	public void saveCellSpanInfo(Map<Long, DataRow> rowIdMap) {
 		final List<SpanRecord> records = new ArrayList<SpanRecord>();
 		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
 			for (String alias : rowId.getValue().keySet()) {

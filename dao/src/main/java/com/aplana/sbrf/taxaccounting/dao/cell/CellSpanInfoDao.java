@@ -9,17 +9,17 @@ import java.util.Map;
  * Служит чтобы считывать и сохранять информацию rowspan и colspan для ячеек
  * Предназначен для использования в {@link com.aplana.sbrf.taxaccounting.dao.FormDataDao}
  */
-public interface CellSpanDao {
+public interface CellSpanInfoDao {
 	/**
 	 * заполнить список rowspan и colspan для данной формы в список полученных DataRow
 	 * @param formDataId идентификатор налоговой формы
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 * @return список столбцов формы
 	 */
-	void fillCellSpan(Long formDataId, Map<Long, DataRow> rowIdMap);
+	void fillCellSpanInfo(Long formDataId, Map<Long, DataRow> rowIdMap);
 	/**
 	 * Сохранить список редактируемых ячеек для заданной формы
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 */
-	void saveCellSpan(Map<Long, DataRow> rowIdMap);
+	void saveCellSpanInfo(Map<Long, DataRow> rowIdMap);
 }

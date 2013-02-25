@@ -8,7 +8,7 @@ import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -47,7 +47,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	@Autowired
 	private CellStyleDao cellStyleDao;
 	@Autowired
-	private CellSpanDao cellSpanDao;
+	private CellSpanInfoDao cellSpanInfoDao;
 	
 	private static class RowMapperResult {
 		FormData formData;
@@ -126,7 +126,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				});
 
 		cellStyleDao.fillCellStyle(formDataId, rowIdToAlias, formTemplate.getStyles());
-		cellSpanDao.fillCellSpan(formDataId, rowIdToAlias);
+		cellSpanInfoDao.fillCellSpanInfo(formDataId, rowIdToAlias);
 		cellEditableDao.fillCellEditable(formDataId, rowIdToAlias);
 		cellValueDao.fillCellValue(formDataId, rowIdToAlias);
 		return formData;
@@ -232,7 +232,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		cellValueDao.saveCellValue(rowIdMap);
 		cellStyleDao.saveCellStyle(rowIdMap);
-		cellSpanDao.saveCellSpan(rowIdMap);
+		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
 		cellEditableDao.saveCellEditable(rowIdMap);
 	}
 

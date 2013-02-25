@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -16,15 +16,15 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"CellSpanDaoTest.xml"})
-public class CellSpanDaoTest {
+@ContextConfiguration({"CellSpanInfoDaoTest.xml"})
+public class CellSpanInfoDaoTest {
 
 	@Autowired
-	private CellSpanDao cellSpanDao;
+	private CellSpanInfoDao cellSpanInfoDao;
 
 	@Test
 	@Transactional
-	public void getCellSpanTest(){
+	public void getCellSpanInfoTest(){
 		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
 
 		List<Column> columns = new ArrayList<Column>();
@@ -37,7 +37,7 @@ public class CellSpanDaoTest {
 
 		rowIdMap.put(1l, new DataRow(null ,columns, null));
 		rowIdMap.put(2l, new DataRow(null ,columns, null));
-		cellSpanDao.fillCellSpan(1l, rowIdMap);
+		cellSpanInfoDao.fillCellSpanInfo(1l, rowIdMap);
 
 		Assert.assertEquals(2, rowIdMap.get(1l).getCell("alias 1").getColSpan());
 		Assert.assertEquals(3, rowIdMap.get(1l).getCell("alias 1").getRowSpan());
@@ -49,7 +49,7 @@ public class CellSpanDaoTest {
 
 	@Test
 	@Transactional
-	public void saveAndGetCellSpanTest(){
+	public void saveAndGetCellSpanInfoTest(){
 		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
 
 		List<Column> columns = new ArrayList<Column>();
@@ -69,9 +69,9 @@ public class CellSpanDaoTest {
 		rowIdMap.put(3l, editCellRow);
 		rowIdMap.put(4l, new DataRow("alias 4" ,columns, null));
 
-		cellSpanDao.saveCellSpan(rowIdMap);
+		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
 
-		cellSpanDao.fillCellSpan(1l, rowIdMap);
+		cellSpanInfoDao.fillCellSpanInfo(1l, rowIdMap);
 
 		Assert.assertEquals(3, rowIdMap.get(3l).getCell("alias 3").getColSpan());
 		Assert.assertEquals(1, rowIdMap.get(3l).getCell("alias 3").getRowSpan());
