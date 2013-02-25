@@ -5,10 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentParamService;
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
 
-@Repository("departmentParamService")
-public class DepartmentParamServiceImpl implements DepartmentParamService {
+
+@Repository("departmentService")
+public class DepartmentServiceImpl implements DepartmentService {
 
 	@Autowired
 	DepartmentParamDao dao;
@@ -17,5 +18,4 @@ public class DepartmentParamServiceImpl implements DepartmentParamService {
 	public DepartmentParam getDepartmentParam(int departmentId) {
 		return dao.getDepartmentParam(departmentId);
 	}
-
 }

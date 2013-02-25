@@ -102,6 +102,7 @@ public class DeclarationScriptingServiceImpl extends TAAbstractScriptingServiceI
 		b.put("formDataCollection", formDataCollection);
 		
 		b.put("departmentId", departmentId);
+		b.put("reportPeriodId", reportPeriodId);
 				
 		StringWriter writer = new StringWriter();
 		MarkupBuilder xml = new MarkupBuilder(writer);

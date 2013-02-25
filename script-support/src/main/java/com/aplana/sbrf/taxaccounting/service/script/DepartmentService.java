@@ -3,13 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
-/*
- * Сервис для получения информации по основным параметрам подразделения банка
- *
- * @author auldanov
- */
 @ScriptExposed
-public interface DepartmentParamService {
+public interface DepartmentService {
 	
 	/**
 	 * Получить по id подразделения его основные параметры
