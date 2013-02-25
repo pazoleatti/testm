@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersionResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.notification.client.NotificationPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
@@ -53,6 +54,7 @@ public class MainPagePresenter extends
 
 	static final Object TYPE_SignInContent = new Object();
 	static final Object TYPE_MainMenuContent = new Object();
+	static final Object TYPE_NotificationContent = new Object();
 
 	static {
 		RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
@@ -60,6 +62,7 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
+	private final NotificationPresenter notificationPresenter;
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
@@ -77,12 +80,13 @@ public class MainPagePresenter extends
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
-			MessageDialogPresenter messageDialogPresenter, DispatchAsync dispatchAsync) {
+			MessageDialogPresenter messageDialogPresenter, NotificationPresenter notificationPresenter, DispatchAsync dispatchAsync) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
 		this.placeManager = placeManager;
 		this.messageDialogPresenter = messageDialogPresenter;
+		this.notificationPresenter = notificationPresenter;
 		this.dispatchAsync = dispatchAsync;
 	}
 
@@ -96,6 +100,7 @@ public class MainPagePresenter extends
 		super.onReveal();
 		setInSlot(TYPE_SignInContent, signInPresenter);
 		setInSlot(TYPE_MainMenuContent, mainMenuPresenter);
+		setInSlot(TYPE_NotificationContent, notificationPresenter);
 		this.dispatchAsync.execute(new GetProjectVersion(),
 				new AbstractCallback<GetProjectVersionResult>() {
 					@Override
@@ -110,6 +115,7 @@ public class MainPagePresenter extends
 		super.onHide();
 		clearSlot(TYPE_SignInContent);
 		clearSlot(TYPE_MainMenuContent);
+		clearSlot(TYPE_NotificationContent);
 	}
 
 	@Override

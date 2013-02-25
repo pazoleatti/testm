@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.main.api.client.event;
+package com.aplana.sbrf.taxaccounting.web.widget.notification.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;

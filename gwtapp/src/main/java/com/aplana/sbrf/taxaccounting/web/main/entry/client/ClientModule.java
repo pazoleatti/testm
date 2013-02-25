@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
+import com.aplana.sbrf.taxaccounting.web.widget.notification.client.NotificationClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -24,41 +25,43 @@ import com.gwtplatform.mvp.client.proxy.ParameterTokenFormatter;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.TokenFormatter;
 
-
 public class ClientModule extends AbstractPresenterModule {
-  @Override
-  protected void configure() {
-	  
-    // Default implementation of standard resources
-    //install(new DefaultModule(PlaceManager.class));
-    
-    bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
-    bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);
-    bind(TaRootPresenter.class).asEagerSingleton();
-    //bind(GoogleAnalytics.class).to(GoogleAnalyticsImpl.class).in(Singleton.class);
-    bind(PlaceManager.class).to(TaPlaceManager.class).in(Singleton.class);
-    
-	install(new DispatchAsyncModule());
-	
-	requestStaticInjection(EventBus.class);
+	@Override
+	protected void configure() {
 
-	bindConstant().annotatedWith(DefaultPlace.class).to(HomeNameTokens.homePage);
-	
-    bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
-            MainPageView.class, MainPagePresenter.MyProxy.class);
-    
-	bindSingletonPresenterWidget(MessageDialogPresenter.class, 
-			MessageDialogPresenter.MyView.class, MessageDialogView.class);
-    
-    install(new HomeModule());
-    install(new FormDataListClientModule());
-    install(new FormDataModule());
-    install(new SignInClientModule());
-    install(new MainMenuClientModule());
-    install(new AdminModule());
-	install(new DeclarationTemplateModule());
-	install(new DeclarationDataModule());
-    install(new ErrorModule());
-	install(new DeclarationListModule());
-  }
+		// Default implementation of standard resources
+		// install(new DefaultModule(PlaceManager.class));
+
+		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
+		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(
+				Singleton.class);
+		bind(TaRootPresenter.class).asEagerSingleton();
+		// bind(GoogleAnalytics.class).to(GoogleAnalyticsImpl.class).in(Singleton.class);
+		bind(PlaceManager.class).to(TaPlaceManager.class).in(Singleton.class);
+
+		install(new DispatchAsyncModule());
+
+		requestStaticInjection(EventBus.class);
+
+		bindConstant().annotatedWith(DefaultPlace.class).to(
+				HomeNameTokens.homePage);
+
+		bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
+				MainPageView.class, MainPagePresenter.MyProxy.class);
+
+		bindSingletonPresenterWidget(MessageDialogPresenter.class,
+				MessageDialogPresenter.MyView.class, MessageDialogView.class);
+
+		install(new HomeModule());
+		install(new FormDataListClientModule());
+		install(new FormDataModule());
+		install(new SignInClientModule());
+		install(new MainMenuClientModule());
+		install(new AdminModule());
+		install(new DeclarationTemplateModule());
+		install(new DeclarationDataModule());
+		install(new ErrorModule());
+		install(new DeclarationListModule());
+		install(new NotificationClientModule());
+	}
 }

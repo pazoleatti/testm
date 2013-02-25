@@ -57,9 +57,7 @@
 					<g:FlowPanel ui:field="mainContentPanel" />
 				</g:center>
 				<g:south size="0">
-					<g:HTMLPanel>
-						<p>Область уведомлений (не реализовано)</p>
-					</g:HTMLPanel>
+					<g:FlowPanel ui:field="notificationPanel" />
 				</g:south>
 			</g:SplitLayoutPanel>
 		</g:center>

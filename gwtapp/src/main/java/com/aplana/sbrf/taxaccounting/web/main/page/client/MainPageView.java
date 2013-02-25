@@ -28,6 +28,9 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	Panel mainContentPanel;
+	
+	@UiField
+	Panel notificationPanel;
 
 	@UiField
 	AbsolutePanel footerPanel;
@@ -63,6 +66,8 @@ public class MainPageView extends ViewImpl implements MyView {
 			setSignInContent(content);
 		} else if (slot == MainPagePresenter.TYPE_MainMenuContent) {
 			setMainMenuContent(content);
+		} else if (slot == MainPagePresenter.TYPE_NotificationContent){
+			setNotificationContent(content);
 		} else {
 			super.setInSlot(slot, content);
 		}
@@ -86,6 +91,13 @@ public class MainPageView extends ViewImpl implements MyView {
 		mainMenuContentPanel.clear();
 		if (content != null) {
 			mainMenuContentPanel.add(content);
+		}
+	}
+	
+	private void setNotificationContent(Widget content) {
+		notificationPanel.clear();
+		if (content != null) {
+			notificationPanel.add(content);
 		}
 	}
 
