@@ -107,6 +107,7 @@ public class FormDataServiceImpl implements FormDataService {
 				cell.setColSpan(predefinedCell.getColSpan());
 				cell.setRowSpan(predefinedCell.getRowSpan());
 				cell.setStyleAlias(predefinedCell.getStyleAlias());
+				cell.setEditable(predefinedCell.isEditable());
 			}
 		}
 
