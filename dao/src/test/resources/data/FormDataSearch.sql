@@ -7,10 +7,10 @@ insert into form_type (id, name, tax_type, fixed_rows) values (2, 'Б - тип',
 insert into form_type (id, name, tax_type, fixed_rows) values (3, 'В - тип', 'T', 1);
 insert into form_type (id, name, tax_type, fixed_rows) values (4, 'Г - тип', 'T', 1);
 
-insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (1, 1, null, '0.1', 1, 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (2, 2, null, '0.1', 1, 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (3, 3, null, '0.1', 1, 1, 1);
-insert into form (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (4, 4, null, '0.1', 1, 1, 1);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (1, 1, null, '0.1', 1, 1, 1);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (2, 2, null, '0.1', 1, 1, 1);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (3, 3, null, '0.1', 1, 1, 1);
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns) values (4, 4, null, '0.1', 1, 1, 1);
 
 insert into tax_period(id, tax_type, start_date, end_date) values (1, 'T', date '2013-01-01', date '2013-12-31');
 
@@ -18,24 +18,24 @@ insert into report_period (id, name, is_active, months, tax_period_id, ord) valu
 insert into report_period (id, name, is_active, months, tax_period_id, ord) values (2, '2 - период', 1, 3, 1, 2);
 insert into report_period (id, name, is_active, months, tax_period_id, ord) values (3, '3 - период', 1, 3, 1, 3);
 
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (1,  4, 1, 1, 2, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (2,  3, 2, 2, 3, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (3,  2, 3, 3, 2, 3);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (4,  1, 1, 4, 3, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (5,  4, 2, 1, 2, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (6,  3, 3, 2, 3, 3);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (7,  2, 1, 3, 2, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (8,  1, 2, 4, 3, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (9,  4, 3, 1, 2, 3);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (10, 3, 1, 2, 3, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (11, 2, 2, 3, 2, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (12, 1, 3, 4, 3, 3);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (13, 4, 1, 1, 2, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (14, 3, 2, 2, 3, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (15, 2, 3, 3, 2, 3);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (16, 1, 1, 4, 3, 1);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (17, 4, 2, 1, 2, 2);
-insert into form_data (id, form_id, department_id, state, kind, report_period_id) values (18, 3, 3, 2, 3, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (1,  4, 1, 1, 2, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (2,  3, 2, 2, 3, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (3,  2, 3, 3, 2, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (4,  1, 1, 4, 3, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (5,  4, 2, 1, 2, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (6,  3, 3, 2, 3, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (7,  2, 1, 3, 2, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (8,  1, 2, 4, 3, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (9,  4, 3, 1, 2, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (10, 3, 1, 2, 3, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (11, 2, 2, 3, 2, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (12, 1, 3, 4, 3, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (13, 4, 1, 1, 2, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (14, 3, 2, 2, 3, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (15, 2, 3, 3, 2, 3);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (16, 1, 1, 4, 3, 1);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (17, 4, 2, 1, 2, 2);
+insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (18, 3, 3, 2, 3, 3);
 
 -- Каждая из четырёх форм может быть в каждом из трёх департаментов с Kind = 2 и 3
 insert into department_form_type(id, department_id, form_type_id, kind) values (11, 1, 1, 2);

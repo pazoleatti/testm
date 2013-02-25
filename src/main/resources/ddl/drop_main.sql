@@ -33,7 +33,7 @@ drop table department_form_type;
 
 drop sequence seq_form_style;
 drop table form_style;
-drop table form;
+drop table form_template;
 drop table form_type;
 drop sequence seq_declaration;
 drop table declaration;

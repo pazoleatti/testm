@@ -51,7 +51,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	
 	public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
-			"select * from form_column where form_id = ? order by ord",
+			"select * from form_column where form_template_id = ? order by ord",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			new ColumnMapper()
@@ -68,7 +68,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		JdbcTemplate jt = getJdbcTemplate();
 
 		final Set<Integer> removedColumns = new HashSet<Integer>(jt.queryForList(
-			"select id from form_column where form_id = ?",
+			"select id from form_column where form_template_id = ?",
 			new Object[] { formId },
 			new int[] { Types.NUMERIC },
 			Integer.class
@@ -111,7 +111,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
 		jt.batchUpdate(
-			"insert into form_column (id, name, form_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
+			"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
 			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			new BatchPreparedStatementSetter() {
 				@Override
@@ -202,7 +202,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
 		jt.query(
-			"select id, alias from form_column where form_id = " + formId,
+			"select id, alias from form_column where form_template_id = " + formId,
 			new RowCallbackHandler() {
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {

@@ -134,7 +134,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				throws SQLException {
 			RowMapperResult result = new RowMapperResult();
 
-			int formTemplateId = rs.getInt("form_id");
+			int formTemplateId = rs.getInt("form_template_id");
 			FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
 			FormData fd = new FormData();
@@ -227,7 +227,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private void readStyle(final FormTemplate formTemplate,
 			final Map<Long, DataRow> rowMap, Long formDataId) {
 
-		String sqlQuery = "SELECT row_id, column_id, style_id FROM cell_style cs "
+		String sqlQuery = "SELECT * FROM cell_style cs "
 				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = cs.row_id and r.form_data_id = ?)";
 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
@@ -261,7 +261,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private void readSpan(final FormTemplate formTemplate,
 			final Map<Long, DataRow> rowMap, Long formDataId) {
 		getJdbcTemplate()
-				.query("select column_id, row_id, colspan, rowspan from cell_span_info v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
+				.query("select * from cell_span_info v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)",
 						new Object[] { formDataId },
 						new int[] { Types.NUMERIC }, new RowCallbackHandler() {
 							public void processRow(ResultSet rs)
@@ -352,7 +352,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_id, department_id, kind, state, report_period_id, acceptance_date) values (?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, acceptance_date) values (?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
 					formData.getDepartmentId(), formData.getKind().getId(),
 					formData.getState().getId(), formData.getReportPeriodId(), formData.getAcceptanceDate());
@@ -567,7 +567,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	public List<Long> listFormDataIdByType(int typeId) {
 		return getJdbcTemplate()
 				.queryForList(
-						"select id from form_data fd where exists (select 1 from form f where f.id = fd.form_id and f.type_id = ?)",
+						"select id from form_data fd where exists (select 1 from form_template ft where ft.id = fd.form_template_id and ft.type_id = ?)",
 						new Object[] { typeId }, new int[] { Types.NUMERIC },
 						Long.class);
 	}
@@ -600,8 +600,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
 		try {
 			Long formDataId = getJdbcTemplate().queryForLong(
-				"select fd.id from form_data fd where exists (select 1 from form f where fd.form_id=f.id and f.type_id = ?)"
-				+ " and fd.kind=? and fd.department_id=? and fd.report_period_id=?",
+				"select fd.id from form_data fd where exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?)"
+				+ " and fd.kind = ? and fd.department_id = ? and fd.report_period_id = ?",
 				new Object[] {
 					formTypeId,
 					kind.getId(),
@@ -635,7 +635,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		try{
 			return jt.queryForObject(
 					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, " +
-					"(SELECT type_id FROM form WHERE id = fd.form_id) type_id " +
+					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { formDataId }, new int[] { Types.NUMERIC },
 					new FormDataWithOutRowRowMapper());

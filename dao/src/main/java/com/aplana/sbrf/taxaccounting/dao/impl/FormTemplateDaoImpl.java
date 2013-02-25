@@ -40,6 +40,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			this.deepFetch = deepFetch;
 		}
 
+		@Override
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
@@ -62,6 +63,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
 	@Cacheable("FormTemplate")
+	@Override
 	public FormTemplate get(int formId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching FormTemplate with id = " + formId);	
@@ -69,7 +71,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select * from form where id = ?",
+					"select * from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
 					new FormTemplateMapper(true)
@@ -106,9 +108,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			dataRowsXml = xmlSerializationUtils.serialize(rows);
 		}
 		
-		// TODO: создание новых версий формы потребует инсертов в form
+		// TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form set data_rows = ?, edition = ?, numbered_columns = ? where id = ?",
+			"update form_template set data_rows = ?, edition = ?, numbered_columns = ? where id = ?",
 			dataRowsXml, 
 			storedEdition + 1,
 			formTemplate.isNumberedColumns(),
@@ -121,7 +123,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select * from form", new FormTemplateMapper(false));
+		return getJdbcTemplate().query("select * from form_template", new FormTemplateMapper(false));
 	}
 
 	@Override
@@ -130,7 +132,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		FormTemplate form;
 		try {
 			form =jt.queryForObject(
-					"select * from form where type_id = ? and is_active = ?",
+					"select * from form_template where type_id = ? and is_active = ?",
 					new Object[]{formTypeId,1},
 					new int[]{Types.NUMERIC,Types.NUMERIC}, 
 					new FormTemplateMapper(false)

@@ -21,21 +21,21 @@ public interface FormStyleDao {
 
 	/**
 	 * Получить мапку, где ключ - id стиля, значение - стиль
-	 * @param formId идентификатор формы
+	 * @param formTemplateId идентификатор формы
 	 * @return мапка
 	 */
-	Map<Integer, FormStyle> getIdToFormStyleMap(int formId);
+	Map<Integer, FormStyle> getIdToFormStyleMap(int formTemplateId);
 
 	/**
 	 * Получить мапку, где ключ - alias стиля, значение - стиль
-	 * @param formId идентификатор формы
+	 * @param formTemplateId идентификатор формы
 	 * @return мапка
 	 */
-	Map<String, FormStyle> getAliasToFormStyleMap(int formId);
+	Map<String, FormStyle> getAliasToFormStyleMap(int formTemplateId);
 
 	/**
 	 * Сохранить список стилей формы
-	 * @param form форма
+	 * @param formTemplate форма
 	 */
-	void saveFormStyles(FormTemplate form);
+	void saveFormStyles(FormTemplate formTemplate);
 }

@@ -38,7 +38,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		formTemplate.clearScripts();
 
 		getJdbcTemplate().query(
-				"select * from form_script where form_id = ? order by ord",
+				"select * from form_script where form_template_id = ? order by ord",
 				new Object[]{formTemplate.getId()},
 				new int[]{Types.NUMERIC},
 				new RowCallbackHandler() {
@@ -57,7 +57,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 		);
 
 		getJdbcTemplate().query(
-				"select es.event_code, es.script_id from event_script es join form_script fs on es.script_id=fs.id where fs.form_id = ? order by es.event_code, es.ord",
+				"select es.event_code, es.script_id from event_script es join form_script fs on es.script_id=fs.id where fs.form_template_id = ? order by es.event_code, es.ord",
 				new Object[]{formTemplate.getId()}, new int[]{Types.NUMERIC},
 				new RowCallbackHandler() {
 					@Override

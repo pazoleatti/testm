@@ -35,19 +35,19 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 	}
 
 	@Override
-	public List<FormStyle> getFormStyles(int formId) {
+	public List<FormStyle> getFormStyles(int formTemplateId) {
 		return getJdbcTemplate().query(
-				"select * from form_style where form_id = ?",
-				new Object[] { formId },
+				"select * from form_style where form_template_id = ?",
+				new Object[] { formTemplateId },
 				new int[] { Types.NUMERIC },
 				new FormStyleMapper()
 		);
 	}
 
 	@Override
-	public Map<Integer, FormStyle> getIdToFormStyleMap(int formId){
+	public Map<Integer, FormStyle> getIdToFormStyleMap(int formTemplateId){
 		Map<Integer, FormStyle> result = new HashMap<Integer, FormStyle>();
-		List<FormStyle> formStyleList = getFormStyles(formId);
+		List<FormStyle> formStyleList = getFormStyles(formTemplateId);
 		for(FormStyle formStyle : formStyleList){
 			result.put(formStyle.getId(), formStyle);
 		}
@@ -55,9 +55,9 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 	}
 
 	@Override
-	public Map<String, FormStyle> getAliasToFormStyleMap(int formId){
+	public Map<String, FormStyle> getAliasToFormStyleMap(int formTemplateId){
 		Map<String, FormStyle> result = new HashMap<String, FormStyle>();
-		List<FormStyle> formStyleList = getFormStyles(formId);
+		List<FormStyle> formStyleList = getFormStyles(formTemplateId);
 		for(FormStyle formStyle : formStyleList){
 			result.put(formStyle.getAlias(), formStyle);
 		}
@@ -66,14 +66,14 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 
 	@Transactional(readOnly = false)
 	@Override
-	public void saveFormStyles(final FormTemplate form) {
-		int formId = form.getId();
+	public void saveFormStyles(final FormTemplate formTemplate) {
+		int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
 
 		final Set<Integer> removedStyles = new HashSet<Integer>(jt.queryForList(
-				"select id from form_style where form_id = ?",
-				new Object[] { formId },
+				"select id from form_style where form_template_id = ?",
+				new Object[] { formTemplateId },
 				new int[] { Types.NUMERIC },
 				Integer.class
 		));
@@ -81,7 +81,7 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 		final List<FormStyle> newStyles = new ArrayList<FormStyle>();
 		final List<FormStyle> oldStyles = new ArrayList<FormStyle>();
 
-		List<FormStyle> styles = form.getStyles();
+		List<FormStyle> styles = formTemplate.getStyles();
 
 		for (FormStyle style: styles) {
 			if (style.getId() == null) {
@@ -113,8 +113,8 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 		}
 
 		jt.batchUpdate(
-				"insert into form_style (id, alias, form_id, font_color, back_color, italic, bold) " +
-						"values (seq_form_style.nextval, ?, " + formId + ", ?, ?, ?, ?)",
+				"insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) " +
+						"values (seq_form_style.nextval, ?, " + formTemplateId + ", ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -157,13 +157,13 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 			);
 		}
 		jt.query(
-				"select id, alias from form_style where form_id = " + formId,
+				"select id, alias from form_style where form_template_id = " + formTemplateId,
 				new RowCallbackHandler() {
 					@Override
 					public void processRow(ResultSet rs) throws SQLException {
 						String alias = rs.getString("alias");
 						int columnId = rs.getInt("id");
-						form.getStyle(alias).setId(columnId);
+						formTemplate.getStyle(alias).setId(columnId);
 					}
 				}
 		);

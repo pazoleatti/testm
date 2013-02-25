@@ -81,51 +81,53 @@ comment on column report_period.ord is 'Номер отчетного перио
 create sequence seq_report_period start with 100;
 
 ---------------------------------------------------------------------------------------------------
-create table form (
+create table form_template (
 	id number(9) not null,
 	type_id number(9) not null,
 	data_rows clob,
 	version varchar2(20) not null,
 	is_active number(9) default 1 not null,
 	edition number(9) not null,
-    numbered_columns NUMBER(1) not null
+	numbered_columns NUMBER(1) not null
 );
-alter table form add constraint form_pk primary key (id);
-alter table form add constraint form_fk_type_id foreign key (type_id) references form_type(id);
-alter table form add constraint form_uniq_version unique(type_id, version);
-alter table form add constraint form_check_active check (is_active in (0, 1));
-alter table form add constraint form_chk_numbered_columns check (numbered_columns in (0, 1));
-comment on table form is 'Описания налоговых форм';
-comment on column form.data_rows is 'Предопределённые строки формы в формате JSON';
-comment on column form.id is 'Первичный ключ';
-comment on column form.is_active is 'Признак активности';
-comment on column form.type_id is 'Идентификатор вида налоговой формы';
-comment on column form.version is 'Версия формы (уникально в рамках типа)';
-comment on column form.edition is 'Номер редакции записи';
-comment on column form.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
+alter table form_template add constraint form_template_pk primary key (id);
+alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
+alter table form_template add constraint form_template_uniq_version unique(type_id, version);
+alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
+alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
+
+comment on table form_template is 'Описания налоговых форм';
+comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
+comment on column form_template.id is 'Первичный ключ';
+comment on column form_template.is_active is 'Признак активности';
+comment on column form_template.type_id is 'Идентификатор вида налоговой формы';
+comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
+comment on column form_template.edition is 'Номер редакции записи';
+comment on column form_template.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
 ---------------------------------------------------------------------------------------------------
 create table form_style
 (
-  id          number(9) not null,
-  alias       varchar(20) not null,
-  form_id     number(9) not null,
-  font_color  number(3) null,
-  back_color  number(3) null,
-  italic      number(1) not null, 
-  bold        number(1) not null
+	id					number(9) not null,
+	alias				varchar(20) not null,
+	form_template_id	number(9) not null,
+	font_color			number(3) null,
+	back_color			number(3) null,
+	italic				number(1) not null, 
+	bold				number(1) not null
 );
+
 alter table form_style add constraint FORM_STYLE_PK primary key (ID);
-alter table form_style add constraint FORM_STYLE_FK_FORM_ID foreign key (FORM_ID) references FORM (ID);
+alter table form_style add constraint FORM_STYLE_FK_FORM_TEMPLATE_ID foreign key (FORM_TEMPLATE_ID) references FORM_TEMPLATE (ID);
 alter table form_style add constraint FORM_STYLE_CHK_FONT_COLOR check (font_color in (0,1,2,3,4));
 alter table form_style add constraint FORM_STYLE_CHK_BACK_COLOR check (back_color in (0,1,2,3,4));
 alter table form_style add constraint FORM_STYLE_CHK_ITALIC check (italic in (0,1));
 alter table form_style add constraint FORM_STYLE_CHK_BOLD check (bold in (0,1));
-alter table form_style add constraint FORM_STYLE_UNIQ_ALIAS unique (form_id, alias);
+alter table form_style add constraint FORM_STYLE_UNIQ_ALIAS unique (form_template_id, alias);
 
 comment on table form_style is 'Стили ячеек в налоговой форме';
 comment on column form_style.id is 'Первичный ключ';
 comment on column form_style.alias is 'Алиас стиля';
-comment on column form_style.form_id is 'идентификатор налоговой формы';
+comment on column form_style.form_template_id is 'идентификатор шаблона налоговой формы';
 comment on column form_style.font_color is 'код цвета шрифта';
 comment on column form_style.back_color is 'код цвета фона';
 comment on column form_style.italic is 'признак использования курсива';
@@ -136,7 +138,7 @@ create sequence seq_form_style start with 10000;
 create table form_column (
 	id number(9) not null,
 	name varchar(1000) not null,
-	form_id number(9) not null,
+	form_template_id number(9) not null,
 	ord number(9) not null,
 	alias varchar(100) not null,
 	type char(1) not null,
@@ -150,8 +152,8 @@ create table form_column (
 alter table form_column add constraint form_column_pk primary key (id);
 create sequence seq_form_column start with 10000;
 
-alter table form_column add constraint form_column_fk_form_id foreign key (form_id) references form(id);
-alter table form_column add constraint form_column_uniq_alias unique(form_id, alias);
+alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id);
+alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
@@ -160,7 +162,7 @@ alter table form_column add constraint form_column_chk_checking check (checking 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
 comment on column form_column.dictionary_code is 'Код справочника (для строковых и числовых столбцов)';
-comment on column form_column.form_id is 'Идентификатор налоговой формы';
+comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
@@ -173,7 +175,7 @@ comment on column form_column.checking is 'признак проверочног
 ---------------------------------------------------------------------------------------------------
 create table form_script (
 	id number(9) not null,
-	form_id number(9) not null,
+	form_template_id number(9) not null,
 	name varchar(255),
 	ord number(9) not null,
 	body clob,
@@ -181,14 +183,14 @@ create table form_script (
 	per_row number(1) not null
 );
 alter table form_script add constraint form_script_pk primary key (id);
-alter table form_script add constraint form_script_fk_form_id foreign key (form_id) references form(id);
+alter table form_script add constraint form_script_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_script add constraint form_script_chk_per_row check (per_row in (0,1));
 create sequence seq_form_script start with 10000;
 
 comment on table form_script is 'Скрипты';
 comment on column form_script.body is 'Тело скрипта';
 comment on column form_script.condition is 'Условие выполнения скрипта';
-comment on column form_script.form_id is 'Идентификатор формы';
+comment on column form_script.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_script.id is 'Первичный ключ';
 comment on column form_script.name is 'Наименование скрипта';
 comment on column form_script.ord is 'Порядок исполнения';
@@ -300,7 +302,7 @@ create sequence seq_declaration start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
 	id number(18) not null,
-	form_id number(9) not null,
+	form_template_id number(9) not null,
 	department_id number(9) not null,
 	state number(9) not null,
 	kind number(9) not null,
@@ -308,7 +310,7 @@ create table form_data (
 	acceptance_date    date
 );
 alter table form_data add constraint form_data_pk primary key (id);
-alter table form_data add constraint form_data_fk_form_id foreign key (form_id) references form(id);
+alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_id foreign key (department_id) references department(id);
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
@@ -316,7 +318,7 @@ alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4
 
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
-comment on column form_data.form_id is 'Идентификатор формы';
+comment on column form_data.form_template_id is 'Èäåíòèôèêàòîð øàáëîíà ôîðìû';
 comment on column form_data.department_id is 'Идентификатор подраздения';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы';
@@ -683,10 +685,10 @@ comment on column department_param_transport.approve_doc_name is 'Наимено
 comment on column department_param_transport.approve_org_name is 'Наименование организации-представителя налогоплательщика';
 comment on column department_param_transport.tax_place_type_code is 'Код места, по которому представляется документ';
 ----------------------------------------------------------------------------------------------------
- create index i_department_parent_id on department(parent_id);
- create index i_data_row_form_data_id on data_row(form_data_id);
- create index i_form_data_report_period_id on form_data(report_period_id);
- create index i_form_data_form_id on form_data(form_id);
- create index i_form_data_department_id on form_data(department_id);
- create index i_form_data_kind on form_data(kind);
- create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
+create index i_department_parent_id on department(parent_id);
+create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_form_data_report_period_id on form_data(report_period_id);
+create index i_form_data_form_template_id on form_data(form_template_id);
+create index i_form_data_department_id on form_data(department_id);
+create index i_form_data_kind on form_data(kind);
+create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
