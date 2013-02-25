@@ -109,52 +109,53 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					}
 			);
 		}
+		if (!newColumns.isEmpty()) {
+			jt.batchUpdate(
+				"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
+				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				new BatchPreparedStatementSetter() {
+					@Override
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						Column col = newColumns.get(index);
+						ps.setString(1, col.getName());
+						ps.setString(2, col.getAlias());
+						ps.setString(3, getTypeFromCode(col));
+						ps.setInt(4, col.getWidth());
 
-		jt.batchUpdate(
-			"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
-			"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			new BatchPreparedStatementSetter() {
-				@Override
-				public void setValues(PreparedStatement ps, int index) throws SQLException {
-					Column col = newColumns.get(index);
-					ps.setString(1, col.getName());
-					ps.setString(2, col.getAlias());
-					ps.setString(3, getTypeFromCode(col));
-					ps.setInt(4, col.getWidth());
-
-					if (col instanceof NumericColumn) {
-						ps.setInt(5, ((NumericColumn)col).getPrecision());
-					} else {
-						ps.setNull(5, Types.NUMERIC);
-					}
-
-					if (col instanceof StringColumn) {
-						ps.setString(6, ((StringColumn) col).getDictionaryCode());
-						//TODO: Продумать данный момент. Сейчас, если максимальное значение превышается, то мы
-						// "пропускаем" значение в базу и просто выводим предупреждение.
-						if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
-							log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
+						if (col instanceof NumericColumn) {
+							ps.setInt(5, ((NumericColumn)col).getPrecision());
+						} else {
+							ps.setNull(5, Types.NUMERIC);
 						}
-						ps.setInt(9, ((StringColumn) col).getMaxLength());
-					} else if (col instanceof NumericColumn) {
-						ps.setString(6, ((NumericColumn) col).getDictionaryCode());
-						ps.setNull(9, Types.INTEGER);
-					} else {
-						ps.setNull(6, Types.VARCHAR);
-						ps.setNull(9, Types.INTEGER);
+
+						if (col instanceof StringColumn) {
+							ps.setString(6, ((StringColumn) col).getDictionaryCode());
+							//TODO: Продумать данный момент. Сейчас, если максимальное значение превышается, то мы
+							// "пропускаем" значение в базу и просто выводим предупреждение.
+							if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
+								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
+							}
+							ps.setInt(9, ((StringColumn) col).getMaxLength());
+						} else if (col instanceof NumericColumn) {
+							ps.setString(6, ((NumericColumn) col).getDictionaryCode());
+							ps.setNull(9, Types.INTEGER);
+						} else {
+							ps.setNull(6, Types.VARCHAR);
+							ps.setNull(9, Types.INTEGER);
+						}
+
+						ps.setInt(7, col.getOrder());
+						ps.setString(8, col.getGroupName());
+						ps.setBoolean(10, col.isChecking());
 					}
 
-					ps.setInt(7, col.getOrder());
-					ps.setString(8, col.getGroupName());
-					ps.setBoolean(10, col.isChecking());
+					@Override
+					public int getBatchSize() {
+						return newColumns.size();
+					}
 				}
-
-				@Override
-				public int getBatchSize() {
-					return newColumns.size();
-				}
-			}
-		);
+			);
+		}
 
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(

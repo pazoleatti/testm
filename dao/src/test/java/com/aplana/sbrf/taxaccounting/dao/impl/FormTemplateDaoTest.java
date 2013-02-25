@@ -37,4 +37,16 @@ public class FormTemplateDaoTest {
 		formTemplateDao.get(-1000);
 	}
 
+	@Test
+	@Transactional
+	public void testSave() {
+		FormTemplate formTemplate = formTemplateDao.get(1);
+		formTemplate.setNumberedColumns(true);
+		formTemplate.setVersion("321");
+		formTemplateDao.save(formTemplate);
+		formTemplate = formTemplateDao.get(1);
+		Assert.assertTrue(formTemplate.isNumberedColumns());
+		Assert.assertEquals("321", formTemplate.getVersion());
+	}
+
 }

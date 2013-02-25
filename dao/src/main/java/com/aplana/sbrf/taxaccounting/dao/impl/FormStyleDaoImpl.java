@@ -111,27 +111,28 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 					}
 			);
 		}
+		if (!newStyles.isEmpty()) {
+			jt.batchUpdate(
+					"insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) " +
+							"values (seq_form_style.nextval, ?, " + formTemplateId + ", ?, ?, ?, ?)",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							FormStyle formStyle = newStyles.get(index);
+							ps.setString(1, formStyle.getAlias());
+							ps.setInt(2, formStyle.getFontColor().getId());
+							ps.setInt(3, formStyle.getBackColor().getId());
+							ps.setInt(4, formStyle.isItalic() ? 1 : 0);
+							ps.setInt(5, formStyle.isBold() ? 1 : 0);
+						}
 
-		jt.batchUpdate(
-				"insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) " +
-						"values (seq_form_style.nextval, ?, " + formTemplateId + ", ?, ?, ?, ?)",
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int index) throws SQLException {
-						FormStyle formStyle = newStyles.get(index);
-						ps.setString(1, formStyle.getAlias());
-						ps.setInt(2, formStyle.getFontColor().getId());
-						ps.setInt(3, formStyle.getBackColor().getId());
-						ps.setInt(4, formStyle.isItalic() ? 1 : 0);
-						ps.setInt(5, formStyle.isBold() ? 1 : 0);
+						@Override
+						public int getBatchSize() {
+							return newStyles.size();
+						}
 					}
-
-					@Override
-					public int getBatchSize() {
-						return newStyles.size();
-					}
-				}
-		);
+			);
+		}
 
 		if(!oldStyles.isEmpty()){
 			jt.batchUpdate(

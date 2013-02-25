@@ -110,10 +110,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		
 		// TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, edition = ?, numbered_columns = ? where id = ?",
+			"update form_template set data_rows = ?, edition = ?, numbered_columns = ?, version = ? where id = ?",
 			dataRowsXml, 
 			storedEdition + 1,
 			formTemplate.isNumberedColumns(),
+			formTemplate.getVersion(),
 			formTemplateId
 		);
 		formStyleDao.saveFormStyles(formTemplate);
