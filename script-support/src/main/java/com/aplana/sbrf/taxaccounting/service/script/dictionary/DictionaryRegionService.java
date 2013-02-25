@@ -15,8 +15,8 @@ public interface DictionaryRegionService {
 
     /**
      * Получает регион по  полному коду ОКАТО органищации
-     * @param okado код окато организации полностью
+     * @param okato код окато организации полностью
      * @return
      */
-    public DictionaryRegion getRegionByOkadoOrg(String okado);
+    public DictionaryRegion getRegionByOkatoOrg(String okato);
 }

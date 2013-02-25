@@ -22,7 +22,8 @@ import static org.mockito.Mockito.when;
 public class DictionaryRegionServiceTest {
     private static DictionaryRegionService service = new DictionaryRegionServiceImpl();
     private static DictionaryRegion regionTulsk = new DictionaryRegion(72, "Тюменская область", "71000000000", "71");
-    private static DictionaryRegion regionHant = new DictionaryRegion(86, "Ханты-Мансийский автономный округ - Югра", "71100000000", "71100");
+    private static DictionaryRegion regionHant = new DictionaryRegion(86, "Ханты-Мансийский автономный округ - Югра", "71000000000", "71100");
+    private static DictionaryRegion regionDefault = new DictionaryRegion(99, "Иные территории, включая город и космодром Байконур", null, null);
 
     @BeforeClass
     public static void tearUp() {
@@ -30,6 +31,7 @@ public class DictionaryRegionServiceTest {
         List<DictionaryRegion> values = new ArrayList<DictionaryRegion>();
         values.add(regionTulsk);
         values.add(regionHant);
+        values.add(regionDefault);
         when(dictionaryRegionDao.getListRegions()).thenReturn(values);
 
         ReflectionTestUtils.setField(service, "dictionaryRegionDao", dictionaryRegionDao);
@@ -37,9 +39,10 @@ public class DictionaryRegionServiceTest {
 
     @Test
     public void testRegionByOkadoOrg() {
-        assertNull("Должен не найти не одного региона", service.getRegionByOkadoOrg("88100001234"));
-        assertEquals(regionHant, service.getRegionByOkadoOrg("71100001234"));
-        assertEquals(regionTulsk, service.getRegionByOkadoOrg("71600001234"));
+        assertNull("Должен не найти не одного региона", service.getRegionByOkatoOrg("88100001234"));
+        assertEquals(regionHant, service.getRegionByOkatoOrg("71100001234"));
+        assertEquals(regionTulsk, service.getRegionByOkatoOrg("71600001234"));
+        assertEquals(regionDefault.getCode(), service.getRegionByOkatoOrg(null).getCode());
     }
 
     @Test

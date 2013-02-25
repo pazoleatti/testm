@@ -26,14 +26,21 @@ public class DictionaryRegionServiceImpl implements DictionaryRegionService {
     }
 
     @Override
-    public DictionaryRegion getRegionByOkadoOrg(String okado) {
+    public DictionaryRegion getRegionByOkatoOrg(String okato) {
         List<DictionaryRegion> regions = dictionaryRegionDao.getListRegions();
         DictionaryRegion result = null;
         for (DictionaryRegion region : regions) {
-            if (okado.substring(0, region.getOkatoDefinition().length()).equals(region.getOkatoDefinition())
-                    && (result == null || result.getOkatoDefinition().length() < region.getOkatoDefinition().length())) {
-                result = region;
+            String okatoDefinition = region.getOkatoDefinition();
+            if (okatoDefinition == null && okato == null) {
+                return region;
             }
+            if (okatoDefinition != null && okato != null) {
+                if (okatoDefinition.equals(okato.substring(0, okatoDefinition.length()))
+                        && (result == null || result.getOkatoDefinition().length() < okatoDefinition.length())) {
+                    result = region;
+                }
+            }
+            System.out.print(okatoDefinition + "\n");
         }
         return result;
     }
