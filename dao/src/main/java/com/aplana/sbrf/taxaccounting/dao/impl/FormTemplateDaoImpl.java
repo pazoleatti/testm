@@ -95,7 +95,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 		
 		JdbcTemplate jt = getJdbcTemplate();
-		int storedEdition = jt.queryForInt("select edition from form where id = ? for update", formTemplateId);
+		int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
 		
 		if (storedEdition != formTemplate.getEdition()) {
 			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +

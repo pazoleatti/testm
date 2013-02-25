@@ -151,7 +151,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 	 */
 	private void deleteEventJoins(FormTemplate formTemplate) {
 		getJdbcTemplate().update(
-				"delete from event_script where script_id in (select id from form_script where form_id=?)",
+				"delete from event_script where script_id in (select id from form_script where form_template_id=?)",
 				formTemplate.getId()
 		);
 	}
@@ -167,7 +167,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 
 		Set<Integer> removedScriptIds = new HashSet<Integer>();
 		removedScriptIds.addAll(jt.queryForList(
-				"select id from form_script where form_id = ?",
+				"select id from form_script where form_template_id = ?",
 				new Object[]{formId},
 				new int[]{Types.NUMERIC},
 				Integer.class
@@ -188,7 +188,7 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 			}
 
 			getJdbcTemplate().batchUpdate(
-					"insert into form_script (id, form_id, name, ord, body, condition, per_row) values (?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_script (id, form_template_id, name, ord, body, condition, per_row) values (?, ?, ?, ?, ?, ?, ?)",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int i) throws SQLException {
