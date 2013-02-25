@@ -40,7 +40,6 @@ public class DictionaryRegionServiceImpl implements DictionaryRegionService {
                     result = region;
                 }
             }
-            System.out.print(okatoDefinition + "\n");
         }
         return result;
     }
