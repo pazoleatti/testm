@@ -14,11 +14,11 @@
 			border-width: 2px;
 			border-color: #76bd43;
 		}
-
-        .footerStyle{
-            font-style: italic;
-            font-size: x-small;
-        }
+		
+		.footerStyle {
+			font-style: italic;
+			font-size: x-small;
+		}
 	</ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
@@ -52,18 +52,24 @@
 		</g:north>
 
 		<g:center>
-			<g:HTMLPanel styleName="{style.panelContent}">
-				<g:FlowPanel ui:field="mainContentPanel" height="100%" />
-			</g:HTMLPanel>
+			<g:SplitLayoutPanel styleName="{style.panelContent}">
+				<g:center>
+					<g:FlowPanel ui:field="mainContentPanel" />
+				</g:center>
+				<g:south size="0">
+					<g:HTMLPanel>
+						<p>Область уведомлений (не реализовано)</p>
+					</g:HTMLPanel>
+				</g:south>
+			</g:SplitLayoutPanel>
 		</g:center>
 
-
 		<!-- <g:south size='20'> <g:HTML>FOOTER</g:HTML> </g:south> -->
-        <g:south size="20">
-            <g:AbsolutePanel ui:field="footerPanel">
-                <g:Label ui:field="projectVersion" styleName="{style.footerStyle}"/>
-            </g:AbsolutePanel>
-        </g:south>
+		<g:south size="20">
+			<g:AbsolutePanel ui:field="footerPanel">
+				<g:Label ui:field="projectVersion" styleName="{style.footerStyle}" />
+			</g:AbsolutePanel>
+		</g:south>
 	</g:DockLayoutPanel>
 
 </ui:UiBinder> 
