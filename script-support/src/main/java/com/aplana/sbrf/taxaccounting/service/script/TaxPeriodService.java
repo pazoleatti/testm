@@ -4,11 +4,13 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
  * Сервис для работы с налоговыми периодами
  * @author auldanov
  */
+@ScriptExposed
 public interface TaxPeriodService {
 	/**
 	 * Получить объект налогового периода по идентификатору периода
