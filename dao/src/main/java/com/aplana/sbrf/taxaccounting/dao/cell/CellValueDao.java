@@ -1,23 +1,24 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.dao.cell;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 
 import java.util.Map;
 
 /**
- * интерфейс Dao для работы с редактируемыми ячейками формы. Служит чтобы считывать и сохранять информацию о редактируемых ячейках
- * Предназначен для использования в {@link FormDataDao}
+ * интерфейс Dao для работы со значениям ячеек формы. Служит чтобы считывать и сохранять информацию о значениях в ячейках
+ * Предназначен для использования в {@link com.aplana.sbrf.taxaccounting.dao.FormDataDao}
  */
-public interface CellEditableDao {
+public interface CellValueDao {
 	/**
 	 * заполнить список редактируемых ячеек для данной формы в список полученных DataRow
+	 * @param formDataId идентификатор налоговой формы
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 * @return список столбцов формы
 	 */
-	void fillCellEditable(Long formDataId, Map<Long, DataRow> rowIdMap);
+	void fillCellValue(Long formDataId, Map<Long, DataRow> rowIdMap);
 	/**
 	 * Сохранить список редактируемых ячеек для заданной формы
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 */
-	void saveCellEditable(Map<Long, DataRow> rowIdMap);
+	void saveCellValue(Map<Long, DataRow> rowIdMap);
 }

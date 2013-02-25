@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.CellEditableDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import junit.framework.Assert;
 import org.junit.Test;

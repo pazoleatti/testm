@@ -1,6 +1,7 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.cell.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.CellEditableDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -23,41 +24,34 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao 
 		String sqlQuery = "SELECT row_id, column_id FROM cell_editable ce "
 				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = ce.row_id and r.form_data_id = ?)";
 
-		final List<CellEditable> records = new ArrayList<CellEditable>();
-
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				records.add(new CellEditable(rs.getLong("row_id"), rs.getInt("column_id")));
-			}
-		});
-
-		for (CellEditable cellEditable : records) {
-			for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
-				if (cellEditable.getRowId().equals(rowId.getKey())) {
-					for (Map.Entry<String, Object> cellAlias : rowId.getValue().entrySet()) {
-						if (rowId.getValue().getCell(cellAlias.getKey()).getColumn().getId()
-								.equals(cellEditable.getColumnId())) {
-							rowId.getValue().getCell(cellAlias.getKey()).setEditable(true);
+				for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+					if (rowId.getKey() == rs.getLong("row_id")) {
+						for (String alias : rowId.getValue().keySet()) {
+							if (rowId.getValue().getCell(alias).getColumn().getId() == rs.getInt("column_id")) {
+								rowId.getValue().getCell(alias).setEditable(true);
+							}
 						}
 					}
 				}
 			}
-		}
+		});
 	}
 
 	@Override
 	@Transactional(readOnly=false)
 	public void saveCellEditable(Map<Long, DataRow> rowIdMap) {
-		final List<CellEditable> cellEditableList = new ArrayList<CellEditable>();
+		final List<CellEditable> records = new ArrayList<CellEditable>();
 		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
-				for (String alias : rowId.getValue().keySet()) {
-					if (rowId.getValue().getCell(alias).isEditable()) {
-						cellEditableList.add(new CellEditable(rowId.getKey(), rowId.getValue().getCell(alias).getColumn().getId()));
-					}
+			for (String alias : rowId.getValue().keySet()) {
+				if (rowId.getValue().getCell(alias).isEditable()) {
+					records.add(new CellEditable(rowId.getKey(), rowId.getValue().getCell(alias).getColumn().getId()));
 				}
+			}
 		}
 
-		if (cellEditableList.isEmpty()) {
+		if (records.isEmpty()) {
 			return;
 		}
 
@@ -66,13 +60,13 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao 
 						"insert into cell_editable (row_id, column_id) values (?, ?)",
 						new BatchPreparedStatementSetter() {
 							public void setValues(PreparedStatement ps, int index) throws SQLException {
-								CellEditable rec = cellEditableList.get(index);
+								CellEditable rec = records.get(index);
 								ps.setLong(1, rec.getRowId());
 								ps.setInt(2, rec.getColumnId());
 							}
 
 							public int getBatchSize() {
-								return cellEditableList.size();
+								return records.size();
 							}
 						});
 	}
