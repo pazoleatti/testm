@@ -24,8 +24,8 @@ import java.util.Map;
 public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 	@Override
 	public void fillCellValue(Long formDataId, final Map<Long, DataRow> rowIdMap) {
-		for (int i = 0; i < CELL_VALUE_TYPES.length; i++) {
-			String sqlQuery ="select * from " + CELL_VALUE_TYPES[i] +
+		for (int i = 0; i < CELL_VALUE_TABLES.length; i++) {
+			String sqlQuery ="select * from " + CELL_VALUE_TABLES[i] +
 					" v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)";
 
 			getJdbcTemplate().query(sqlQuery, new Object[] { formDataId }, new int[] { Types.NUMERIC }, new RowCallbackHandler() {
@@ -39,7 +39,6 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 									Column col = rowId.getValue().getCell(alias).getColumn();
 									if (col.getId() == rs.getInt("column_id")) {
 										// TODO: думаю, стоит зарефакторить
-
 										if (value instanceof java.sql.Date) {
 											value = new java.util.Date(
 													((java.sql.Date) value)
@@ -95,9 +94,9 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 			}
 		}
 
-		insertValues(CELL_VALUE_TYPES[0], numericValues);
-		insertValues(CELL_VALUE_TYPES[1], stringValues);
-		insertValues(CELL_VALUE_TYPES[2], dateValues);
+		insertValues(CELL_VALUE_TABLES[0], numericValues);
+		insertValues(CELL_VALUE_TABLES[1], stringValues);
+		insertValues(CELL_VALUE_TABLES[2], dateValues);
 	}
 
 	private <T> void insertValues(String tableName,
@@ -154,7 +153,7 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 	/**
 	 * Список таблиц для значений ячеек
 	 */
-	private static final String[] CELL_VALUE_TYPES = {"numeric_value", "string_value", "date_value"};
+	private static final String[] CELL_VALUE_TABLES = {"numeric_value", "string_value", "date_value"};
 
 	/**
 	 * Запись в таблице cell_editable

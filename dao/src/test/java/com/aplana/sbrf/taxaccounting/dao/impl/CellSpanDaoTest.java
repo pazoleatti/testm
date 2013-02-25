@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -11,18 +10,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"CellEditableDaoTest.xml"})
-public class CellEditableDaoTest {
+@ContextConfiguration({"CellSpanDaoTest.xml"})
+public class CellSpanDaoTest {
 
 	@Autowired
-	private CellEditableDao cellEditableDao;
+	private CellSpanDao cellSpanDao;
 
 	@Test
 	@Transactional
-	public void getCellEditableTest(){
+	public void getCellSpanTest(){
 		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
 
 		List<Column> columns = new ArrayList<Column>();
@@ -35,18 +37,19 @@ public class CellEditableDaoTest {
 
 		rowIdMap.put(1l, new DataRow(null ,columns, null));
 		rowIdMap.put(2l, new DataRow(null ,columns, null));
+		cellSpanDao.fillCellSpan(1l, rowIdMap);
 
-		cellEditableDao.fillCellEditable(1l, rowIdMap);
+		Assert.assertEquals(2, rowIdMap.get(1l).getCell("alias 1").getColSpan());
+		Assert.assertEquals(3, rowIdMap.get(1l).getCell("alias 1").getRowSpan());
+		Assert.assertEquals(1, rowIdMap.get(1l).getCell("alias 2").getRowSpan());
 
-		Assert.assertEquals(true, rowIdMap.get(1l).getCell("alias 1").isEditable());
-		Assert.assertEquals(false, rowIdMap.get(1l).getCell("alias 2").isEditable());
-		Assert.assertEquals(true, rowIdMap.get(2l).getCell("alias 1").isEditable());
-		Assert.assertEquals(true, rowIdMap.get(2l).getCell("alias 2").isEditable());
+		Assert.assertEquals(3, rowIdMap.get(2l).getCell("alias 1").getColSpan());
+		Assert.assertEquals(2, rowIdMap.get(2l).getCell("alias 1").getRowSpan());
 	}
 
 	@Test
 	@Transactional
-	public void saveAndGetCellEditableTest(){
+	public void saveAndGetCellSpanTest(){
 		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
 
 		List<Column> columns = new ArrayList<Column>();
@@ -60,19 +63,19 @@ public class CellEditableDaoTest {
 		columns.add(stringColumn);
 
 		DataRow editCellRow = new DataRow("alias 3" ,columns, null);
-		editCellRow.getCell("alias 3").setEditable(true);
-		editCellRow.getCell("alias 4").setEditable(true);
+		editCellRow.getCell("alias 3").setColSpan(3);
+		editCellRow.getCell("alias 4").setRowSpan(2);
 
 		rowIdMap.put(3l, editCellRow);
 		rowIdMap.put(4l, new DataRow("alias 4" ,columns, null));
 
-		cellEditableDao.saveCellEditable(rowIdMap);
+		cellSpanDao.saveCellSpan(rowIdMap);
 
-		cellEditableDao.fillCellEditable(1l, rowIdMap);
+		cellSpanDao.fillCellSpan(1l, rowIdMap);
 
-		Assert.assertEquals(true, rowIdMap.get(3l).getCell("alias " + 3).isEditable());
-		Assert.assertEquals(true, rowIdMap.get(3l).getCell("alias " + 4).isEditable());
-		Assert.assertEquals(false, rowIdMap.get(4l).getCell("alias " + 3).isEditable());
-		Assert.assertEquals(false, rowIdMap.get(4l).getCell("alias " + 4).isEditable());
+		Assert.assertEquals(3, rowIdMap.get(3l).getCell("alias 3").getColSpan());
+		Assert.assertEquals(1, rowIdMap.get(3l).getCell("alias 3").getRowSpan());
+		Assert.assertEquals(2, rowIdMap.get(3l).getCell("alias 4").getRowSpan());
+		Assert.assertEquals(1, rowIdMap.get(4l).getCell("alias 4").getRowSpan());
 	}
 }
