@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.widget.notification.client;
 
-import com.google.gwt.event.dom.client.ClickEvent;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
@@ -24,24 +24,22 @@ public class NotificationView extends ViewImpl implements
 	}
 
 	@UiField
-	Button button;
-
-	@UiHandler("button")
-	void onClick(ClickEvent e) {
-		Window.alert("Hello!");
-	}
-
-	public void setText(String text) {
-		button.setText(text);
-	}
-
-	public String getText() {
-		return button.getText();
-	}
+	LogEntriesView logEntries;
 
 	@Override
 	public Widget asWidget() {
 		return widget;
+	}
+
+	@Override
+	public void setLogEntries(List<LogEntry> entries) {
+		logEntries.setLogEntries(entries);
+	}
+
+	@Override
+	public void setLogSize(int size) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

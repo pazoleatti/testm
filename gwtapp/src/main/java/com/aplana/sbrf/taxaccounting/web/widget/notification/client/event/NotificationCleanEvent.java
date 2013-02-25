@@ -7,14 +7,14 @@ import com.google.gwt.event.shared.HasHandlers;
 /**
  * Очищает панель уведомлений
  */
-public class NotificationsCleanEvent extends
-		GwtEvent<NotificationsCleanEvent.MyHandler> {
+public class NotificationCleanEvent extends
+		GwtEvent<NotificationCleanEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
-		void onNotificationsAdd(NotificationsCleanEvent event);
+		void onNotificationsClean(NotificationCleanEvent event);
 	}
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -24,16 +24,16 @@ public class NotificationsCleanEvent extends
 	}
 
 	public static void fire(HasHandlers source) {
-		NotificationsCleanEvent event = new NotificationsCleanEvent();
+		NotificationCleanEvent event = new NotificationCleanEvent();
 		source.fireEvent(event);
 	}
 
-	public NotificationsCleanEvent() {
+	public NotificationCleanEvent() {
 	}
 
 	@Override
 	protected void dispatch(MyHandler handler) {
-		handler.onNotificationsAdd(this);
+		handler.onNotificationsClean(this);
 	}
 
 	@Override

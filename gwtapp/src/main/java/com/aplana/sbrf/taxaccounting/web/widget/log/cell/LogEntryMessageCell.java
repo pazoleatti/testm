@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.cell;
+package com.aplana.sbrf.taxaccounting.web.widget.log.cell;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,12 +14,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 /**
  * Ячейка для вывода сообщений журнала выполнения скрипта в списке
  */
-public class LogEntryCell extends AbstractCell<LogEntry> {
-	/**
-	 * The HTML templates used to render the cell.
-	 */
+public class LogEntryMessageCell extends AbstractCell<LogEntry> {
+
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<div style=\"{0}\">{1}</div>")
+		@SafeHtmlTemplates.Template("<span style=\"{0}\">{1}</span>")
 		SafeHtml cell(SafeStyles styles, SafeHtml value);
 	}    	
 

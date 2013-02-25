@@ -10,14 +10,14 @@ import com.google.gwt.event.shared.HasHandlers;
 /**
  * Добавляет сообщения в панель уведомлений
  */
-public class NotificationsAddEvent extends
-		GwtEvent<NotificationsAddEvent.MyHandler> {
+public class NotificationAddEvent extends
+		GwtEvent<NotificationAddEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
-		void onNotificationsAdd(NotificationsAddEvent event);
+		void onNotificationsAdd(NotificationAddEvent event);
 	}
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -27,14 +27,14 @@ public class NotificationsAddEvent extends
 	}
 
 	public static void fire(HasHandlers source,	List<LogEntry> logEntries) {
-		NotificationsAddEvent event = new NotificationsAddEvent();
+		NotificationAddEvent event = new NotificationAddEvent();
 		event.setLogEntries(logEntries);
 		source.fireEvent(event);
 	}
 
 	private List<LogEntry> logEntries;
 
-	public NotificationsAddEvent() {
+	public NotificationAddEvent() {
 	}
 
 	@Override

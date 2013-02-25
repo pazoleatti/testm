@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -91,7 +91,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	CheckBox showCheckedColumns;
 
 	@UiField(provided = true)
-	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
+	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	private final Widget widget;
 

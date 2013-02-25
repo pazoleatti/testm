@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.admin.client.ui.SimpleTabPanel;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.LogEntryCell;
+import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,7 +48,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	Button cancelButton;
 
 	@UiField(provided = true)
-	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryCell());
+	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	@Inject
 	public FormTemplateMainView(Binder uiBinder) {
