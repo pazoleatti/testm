@@ -150,7 +150,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		List<DepartmentFormType> dfts = departmentFormTypeDao.getByTaxType(user.getDepartmentId(), taxType);
 		// Контролёр, вдобавок, имеет доступ к формам, которые являются источниками для форм и деклараций его подразделения 
 		if (user.hasRole(TARole.ROLE_CONTROL)) {
-			dfts.addAll(departmentFormTypeDao.getAllDepartmentSources(user.getDepartmentId(), taxType));
+			dfts.addAll(departmentFormTypeDao.getDepartmentSources(user.getDepartmentId(), taxType));
 		}
 		
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -373,6 +374,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		result.setCanEdit(canEdit(formDataAccess, formData, reportPeriod));
 		result.setCanDelete(canDelete(formDataAccess, formData, reportPeriod));
 		result.setAvailableWorkflowMoves(getAvailableMoves(formDataAccess, formData, reportPeriod));
+		if (logger.isDebugEnabled()) {
+			logger.debug("FormDataAccessParams: " + result.toString());
+		}
 		return result;
 	}
 
@@ -388,7 +392,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		Department userDepartment = departmentService.getDepartment(user.getDepartmentId());
 		FormDataAccessRoles formDataAccessRoles = new FormDataAccessRoles();
 
-		// оператор
+		// оператор текущего уровня
 		formDataAccessRoles.setOperatorOfCurrentLevel(user.hasRole(TARole.ROLE_OPERATOR) && user.getDepartmentId() == formDataDepartmentId);
 
 		// контроллер текущего уровня: имеет роль контроллера и текущая форма относится к его подразделению
@@ -397,13 +401,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 		// контроллер вышестоящего уровня: имеет роль контроллера и текущая форма является источником для
 		// одной или нескольких форм текущего подразделения
-		List<DepartmentFormType> destinations =
+		List<DepartmentFormType> formDestinations =
 				departmentFormTypeDao.getFormDestinations(formDataDepartmentId, formDataTypeId, formDataKind);
 		boolean isCurrentDepartmentIsDestination = false;
-		// TODO: если будут проблемы с производительностью,
-		// то можно вместо этого цикла сделать отдельный Dao-метод со
+		// TODO: если будут проблемы с производительностью, то можно вместо этого цикла сделать отдельный Dao-метод со
 		// специализированным запросом
-		for (DepartmentFormType destination : destinations) {
+		for (DepartmentFormType destination : formDestinations) {
 			if (userDepartment.getId() == destination.getDepartmentId()) {
 				isCurrentDepartmentIsDestination = true;
 				break;
@@ -418,14 +421,26 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		formDataAccessRoles.setControllerOfUNP(user.hasRole(TARole.ROLE_CONTROL_UNP));
 
 		// передается ли форма на вышестоящий уровень
+		// вначале проверяем связи НФ->НФ
 		boolean sendToNextLevel = false;
-		for (DepartmentFormType destination : destinations) {
+		for (DepartmentFormType destination : formDestinations) {
 			if (formDataDepartmentId != destination.getDepartmentId()) {
 				sendToNextLevel = true;
 				break;
 			}
 		}
-		// TODO: (mfayzullin) добавить проверку на приемник-декларацию
+		if (!sendToNextLevel) {
+			// затем проверяем связи НФ->Декларация
+			List<DepartmentDeclarationType> declarationDestinations =
+					departmentFormTypeDao.getDeclarationDestinations(formDataDepartmentId, formDataTypeId, formDataKind);
+			for (DepartmentDeclarationType destination : declarationDestinations) {
+				if (formDataDepartmentId != destination.getDepartmentId()) {
+					sendToNextLevel = true;
+					break;
+				}
+			}
+		}
+
 		formDataAccessRoles.setFormDataHasDestinations(sendToNextLevel);
 		return formDataAccessRoles;
 	}

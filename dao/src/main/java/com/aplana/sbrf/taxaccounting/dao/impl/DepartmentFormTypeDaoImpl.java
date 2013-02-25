@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 		}
 	};
 
+	private static final RowMapper<DepartmentDeclarationType> DDT_MAPPER = new RowMapper<DepartmentDeclarationType>() {
+		@Override
+		public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum) throws SQLException {
+			DepartmentDeclarationType departmentFormType = new DepartmentDeclarationType();
+			departmentFormType.setId(rs.getInt("id"));
+			departmentFormType.setDepartmentId(rs.getInt("department_id"));
+			departmentFormType.setDeclarationTypeId(rs.getInt("declaration_type_id"));
+			return departmentFormType;
+		}
+	};
+
 	private static final String GET_FORM_SOURCES_SQL = "select * from department_form_type src_dft where exists "
 			+ "(select 1 from department_form_type dft, form_data_source fds where "
 			+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id "
@@ -47,7 +59,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 		);
 	}
 
-	private static final String GET_FORM_DESTANATIONS_SQL = "select * from department_form_type dest_dft where exists "
+	private static final String GET_FORM_DESTINATIONS_SQL = "select * from department_form_type dest_dft where exists "
 			+ "(select 1 from department_form_type dft, form_data_source fds where "
 			+ "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
 			+ "and dft.department_id=? and dft.form_type_id=? and dft.kind=?)";
@@ -56,9 +68,23 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
 			int sourceFormTypeId, FormDataKind sourceKind) {
 		return getJdbcTemplate().query(
-				GET_FORM_DESTANATIONS_SQL,
+				GET_FORM_DESTINATIONS_SQL,
 				new Object[] { sourceDepartmentId, sourceFormTypeId,
 						sourceKind.getId() }, DFT_MAPPER);
+	}
+
+	private static final String GET_DECLARATION_DESTINATIONS_SQL = "select * from department_declaration_type dest_ddt where exists "
+			+ "(select 1 from department_form_type dft, declaration_source ds where "
+			+ "ds.src_department_form_type_id=dft.id and ds.department_declaration_type_id=dest_ddt.id "
+			+ "and dft.department_id=? and dft.form_type_id=? and dft.kind=?)";
+
+	@Override
+	public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId,
+														int sourceFormTypeId, FormDataKind sourceKind) {
+		return getJdbcTemplate().query(
+				GET_DECLARATION_DESTINATIONS_SQL,
+				new Object[] { sourceDepartmentId, sourceFormTypeId,
+						sourceKind.getId() }, DDT_MAPPER);
 	}
 
 	private static final String GET_DECLARATION_SOURCES_SQL = "select * from department_form_type src_dft where exists "
@@ -86,7 +112,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 		+ "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
 		+ "and ddt.department_id=? and src_ft.tax_type = ?) "; 
 	@Override
-	public List<DepartmentFormType> getAllDepartmentSources(int departmentId,	TaxType taxType) {
+	public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType) {
 		return getJdbcTemplate().query(
 			GET_ALL_DEPARTMENT_SOURCES_SQL,
 			new Object[] {

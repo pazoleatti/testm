@@ -62,7 +62,7 @@ public class FormDataSearchServiceTest {
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(2, 3, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(3, 2, FormDataKind.SUMMARY));
-		when(departmentFormTypeDao.getAllDepartmentSources(1, TaxType.TRANSPORT)).thenReturn(dfts);
+		when(departmentFormTypeDao.getDepartmentSources(1, TaxType.TRANSPORT)).thenReturn(dfts);
 
 		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
 	}

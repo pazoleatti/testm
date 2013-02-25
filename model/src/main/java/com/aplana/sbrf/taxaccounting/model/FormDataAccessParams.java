@@ -39,4 +39,14 @@ public class FormDataAccessParams implements Serializable {
 	public void setAvailableWorkflowMoves(List<WorkflowMove> workflowMoves) {
 		this.availableWorkflowMoves = workflowMoves;
 	}
+
+	@Override
+	public String toString() {
+		return "FormDataAccessParams{" +
+				"canRead=" + canRead +
+				", canEdit=" + canEdit +
+				", canDelete=" + canDelete +
+				", availableWorkflowMoves=" + availableWorkflowMoves +
+				'}';
+	}
 }

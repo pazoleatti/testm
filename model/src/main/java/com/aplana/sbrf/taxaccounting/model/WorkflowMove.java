@@ -1,8 +1,23 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
-import static com.aplana.sbrf.taxaccounting.model.WorkflowState.*;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_APPROVED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_PREPARED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_APPROVED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_APPROVED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_APPROVED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_PREPARED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_PREPARED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_PREPARED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.WorkflowState.ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.WorkflowState.APPROVED;
+import static com.aplana.sbrf.taxaccounting.model.WorkflowState.CREATED;
+import static com.aplana.sbrf.taxaccounting.model.WorkflowState.PREPARED;
 
 /**
  * Переход между стадиями жизненного цикла
@@ -41,13 +56,16 @@ public enum WorkflowMove {
 
 	public int getId() {
 		return id;
-	}	
+	}
+
 	public String getName() {
 		return name;
 	}
+
 	public WorkflowState getFromState() {
 		return fromState;
 	}
+
 	public WorkflowState getToState() {
 		return toState;
 	}
@@ -61,11 +79,17 @@ public enum WorkflowMove {
 	}
 
 	public static WorkflowMove fromId(int id) {
-		for(WorkflowMove state: values()) {
+		for (WorkflowMove state : values()) {
 			if (state.id == id) {
 				return state;
 			}
 		}
 		throw new IllegalArgumentException("Wrong WorkflowMove id: " + id);
 	}
+
+	@Override
+	public String toString() {
+		return "WorkflowMove{" + name() + '}';
+	}
+
 }

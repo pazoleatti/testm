@@ -255,7 +255,7 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Установить дату перехода в состояние ACCEPTED
-	 * @param acceptedDate
+	 * @param acceptanceDate
 	 */
 	public void setAcceptanceDate(Date acceptanceDate) {
 		this.acceptanceDate = acceptanceDate;

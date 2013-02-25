@@ -46,9 +46,19 @@ public class DepartmentFormTypeDaoTest {
 	public void getFormDestinations(){
 		assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
 	}
+
+	@Test
+	public void getDeclarationDestinations1(){
+		assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 1, FormDataKind.fromId(3)).size());
+	}
+
+	@Test
+	public void getDeclarationDestinations2(){
+		assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1, FormDataKind.fromId(3)).size());
+	}
 	
 	@Test
 	public void testGetAllSources() {
-		assertEquals(5, departmentFormTypeDao.getAllDepartmentSources(2, TaxType.TRANSPORT).size());
+		assertEquals(5, departmentFormTypeDao.getDepartmentSources(2, TaxType.TRANSPORT).size());
 	}
 }

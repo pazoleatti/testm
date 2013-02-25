@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -29,8 +30,7 @@ public interface DepartmentFormTypeDao {
 
 	/**
 	 * Возвращает информацию об источниках, которые должны использоваться при
-	 * формировании налоговой формы назначения с заданными параметрами (эта
-	 * форма назначения по идее должна быть только одна)
+	 * формировании налоговой формы назначения с заданными параметрами
 	 * 
 	 * @param departmentId
 	 *            идентификатор подразделения формируемой налоговой формы
@@ -54,9 +54,10 @@ public interface DepartmentFormTypeDao {
 	 *            идентификатор подразделения
 	 * @param taxType
 	 *            вид налога
-	 * @return список идентфикатор подразделений
+	 * @return информация о формах-источниках в виде списка
+	 *         {@link DepartmentFormType}
 	 */
-	List<DepartmentFormType> getAllDepartmentSources(int departmentId, TaxType taxType);
+	List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType);
 
 	/**
 	 * Возвращает информацию о формах-потребителях, которые должны использовать
@@ -72,6 +73,21 @@ public interface DepartmentFormTypeDao {
 	 *         {@link DepartmentFormType}
 	 */
 	List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+
+	/**
+	 * Возвращает информацию о декларациях-потребителях, которые должны использовать
+	 * информацию из данной налоговой формы в качестве источника
+	 *
+	 * @param sourceDepartmentId
+	 *            идентификатор подразделения формы-источника
+	 * @param sourceFormTypeId
+	 *            вид налоговой формы-источника
+	 * @param sourceKind
+	 *            тип налоговой формы-источника
+	 * @return информация о декларациях-потребителях в виде списка
+	 *         {@link DepartmentDeclarationType}
+	 */
+	List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**
 	 * Возвращает информацию о формах-источниках, которые должны использоваться
