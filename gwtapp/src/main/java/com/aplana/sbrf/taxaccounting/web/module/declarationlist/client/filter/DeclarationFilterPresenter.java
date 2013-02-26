@@ -73,12 +73,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                     @Override
                     public void onReqSuccess(GetDeclarationFilterDataResult result) {
 	                    DeclarationFilterAvailableValues filterValues = result.getFilterValues();
-	                    if(filterValues.getDepartmentIds() == null){
-		                    //Контролер УНП
-		                    getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
-	                    } else {
-		                    getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
-	                    }
+
+		                getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 	                    getView().setTaxPeriods(result.getTaxPeriods());
 	                    getView().setDeclarationTypeMap(fillDeclarationTypesMap(result.getFilterValues()));
                         DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
@@ -102,14 +98,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	@Override
 	public TaxType getCurrentTaxType(){
 		return this.taxType;
-	}
-
-	private Set<Integer> convertDepartmentsToIds(List<Department> source){
-		Set<Integer> result = new HashSet<Integer>();
-		for(Department department : source){
-			result.add(department.getId());
-		}
-		return result;
 	}
 
 	private Map<Integer, String> fillDeclarationTypesMap(DeclarationFilterAvailableValues source){

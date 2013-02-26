@@ -124,7 +124,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	private FormDataFilter prepareFormDataFilter(GetFilterDataResult result){
 		FormDataFilter formDataFilter = new FormDataFilter();
 		if(savedFilterData.get(taxType) == null){
-			if(!result.getFilterValues().getDepartmentIds().isEmpty()){
+			if(result.getFilterValues().getDepartmentIds() != null && !result.getFilterValues().getDepartmentIds().isEmpty()){
 				Integer departmentId = result.getFilterValues().getDepartmentIds().iterator().next();
 				String departmentName = getDepartmentNameById(result.getDepartments(), departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
