@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
@@ -55,6 +57,8 @@ public class DeclarationListPresenter extends
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		try {
+			LogCleanEvent.fire(this);
+			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
 			filterPresenter.initFilter(TaxType.valueOf(request.getParameter(
 					"nType", "")));
