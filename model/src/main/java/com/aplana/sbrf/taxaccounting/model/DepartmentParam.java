@@ -19,6 +19,7 @@ public class DepartmentParam implements Serializable {
 	private String reorgFormCode;
 	private String reorgInn;
 	private String reorgKpp;
+	private String name;
 
 	public DepartmentParam() {
 	}
@@ -115,13 +116,44 @@ public class DepartmentParam implements Serializable {
 		this.reorgKpp = reorgKpp;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public String toString() {
-		return "DepartmentParam [departmentId=" + departmentId
-				+ ", dictRegionId=" + dictRegionId + ", okato=" + okato
-				+ ", inn=" + inn + ", kpp=" + kpp + ", taxOrganCode="
-				+ taxOrganCode + ", okvedCode=" + okvedCode + ", phone="
-				+ phone + ", reorgFormCode=" + reorgFormCode + ", reorgInn="
-				+ reorgInn + ", reorgKpp=" + reorgKpp + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("DepartmentParam [departmentId=");
+		builder.append(departmentId);
+		builder.append(", dictRegionId=");
+		builder.append(dictRegionId);
+		builder.append(", okato=");
+		builder.append(okato);
+		builder.append(", inn=");
+		builder.append(inn);
+		builder.append(", kpp=");
+		builder.append(kpp);
+		builder.append(", taxOrganCode=");
+		builder.append(taxOrganCode);
+		builder.append(", okvedCode=");
+		builder.append(okvedCode);
+		builder.append(", phone=");
+		builder.append(phone);
+		builder.append(", reorgFormCode=");
+		builder.append(reorgFormCode);
+		builder.append(", reorgInn=");
+		builder.append(reorgInn);
+		builder.append(", reorgKpp=");
+		builder.append(reorgKpp);
+		builder.append(", name=");
+		builder.append(name);
+		builder.append("]");
+		return builder.toString();
 	}
+
+
 }

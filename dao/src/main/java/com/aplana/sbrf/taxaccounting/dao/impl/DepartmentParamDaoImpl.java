@@ -38,6 +38,7 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 				departmentParam.setReorgFormCode(rs.getString("reorg_form_code"));
 				departmentParam.setReorgInn(rs.getString("reorg_inn"));
 				departmentParam.setReorgKpp(rs.getString("reorg_kpp"));
+				departmentParam.setName(rs.getString("name"));
 				return departmentParam;
 		}
 	};
