@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.notification.client;
+package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-public class NotificationView extends ViewWithUiHandlers<NotificationUiHandlers> implements
-		NotificationPresenter.MyView {
+public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implements
+		LogAreaPresenter.MyView {
 	
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<span>Список сообщений (всего: {0}, фатальных: {1}, предупреждений: {2}, информационных: {3})</span>")
@@ -26,13 +26,13 @@ public class NotificationView extends ViewWithUiHandlers<NotificationUiHandlers>
 	
 	private static Templates templates = GWT.create(Templates.class);
 
-	interface Binder extends UiBinder<Widget, NotificationView> {
+	interface Binder extends UiBinder<Widget, LogAreaView> {
 	}
 
 	private final Widget widget;
 
 	@Inject
-	public NotificationView(Binder uiBinder) {
+	public LogAreaView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
 	}
 

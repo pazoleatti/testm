@@ -10,7 +10,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.signin.SignIn" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.listeditor.ListEditor" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.DictionaryPicker" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.notification.Notification" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.logarea.LogArea" />
 	
 	<source path="cell"/>
     <source path="style"/>

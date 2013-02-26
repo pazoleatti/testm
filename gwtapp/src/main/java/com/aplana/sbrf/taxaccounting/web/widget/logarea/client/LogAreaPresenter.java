@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.notification.client;
+package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +14,12 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-public class NotificationPresenter extends
-		PresenterWidget<NotificationPresenter.MyView> implements
-		LogAddEvent.MyHandler, LogCleanEvent.MyHandler, NotificationUiHandlers {
+public class LogAreaPresenter extends
+		PresenterWidget<LogAreaPresenter.MyView> implements
+		LogAddEvent.MyHandler, LogCleanEvent.MyHandler, LogAreaUiHandlers {
 
 	
-	public static interface MyView extends View, HasUiHandlers<NotificationUiHandlers>{
+	public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers>{
 		
 		void setLogEntries(List<LogEntry> entries);
 		void setLogSize(int full, int error, int warn, int info);
@@ -29,7 +29,7 @@ public class NotificationPresenter extends
 	private List<LogEntry> logEntries = new ArrayList<LogEntry>();
 
 	@Inject
-	public NotificationPresenter(final EventBus eventBus, final MyView view) {
+	public LogAreaPresenter(final EventBus eventBus, final MyView view) {
 		super(eventBus, view);
 		getView().setUiHandlers(this);
 	}

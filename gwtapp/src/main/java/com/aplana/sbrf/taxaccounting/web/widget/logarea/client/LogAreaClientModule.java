@@ -1,20 +1,20 @@
-package com.aplana.sbrf.taxaccounting.web.widget.notification.client;
+package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
 import com.google.inject.Singleton;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
-public class NotificationClientModule extends AbstractPresenterModule {
+public class LogAreaClientModule extends AbstractPresenterModule {
 
 	@Override
 	protected void configure() {
 
 		// Биндим презентер для виджета
-		bindSingletonPresenterWidget(NotificationPresenter.class,
-				NotificationPresenter.MyView.class, NotificationView.class);
+		bindSingletonPresenterWidget(LogAreaPresenter.class,
+				LogAreaPresenter.MyView.class, LogAreaView.class);
 
 		// Удостоверяемся что Binder будет синглетоном,
 		// куда бы небыл помещен виджет
-		bind(NotificationView.Binder.class).in(Singleton.class);
+		bind(LogAreaView.Binder.class).in(Singleton.class);
 
 	}
 

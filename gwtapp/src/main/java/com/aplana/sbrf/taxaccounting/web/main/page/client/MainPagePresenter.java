@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.main.page.shared.GetProjectVersionResult;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.notification.client.NotificationPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
@@ -65,7 +65,7 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
-	private final NotificationPresenter logAreaPresenter;
+	private final LogAreaPresenter logAreaPresenter;
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
@@ -83,7 +83,7 @@ public class MainPagePresenter extends
 	public MainPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
-			MessageDialogPresenter messageDialogPresenter, NotificationPresenter notificationPresenter, DispatchAsync dispatchAsync) {
+			MessageDialogPresenter messageDialogPresenter, LogAreaPresenter notificationPresenter, DispatchAsync dispatchAsync) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
