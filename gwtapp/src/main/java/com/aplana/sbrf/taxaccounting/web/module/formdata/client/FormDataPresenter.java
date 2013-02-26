@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
@@ -233,6 +234,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onSaveClicked() {
+		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
@@ -253,6 +255,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onAddRowClicked() {
+		LogCleanEvent.fire(this);
 		AddRowAction action = new AddRowAction();
 		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
@@ -277,6 +280,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onRecalculateClicked() {
+		LogCleanEvent.fire(this);
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
 		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
@@ -290,6 +294,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCheckClicked() {
+		LogCleanEvent.fire(this);
 		CheckFormDataAction checkAction = new CheckFormDataAction();
 		checkAction.setFormData(formData);
 		dispatcher.execute(checkAction, new AbstractCallback<FormDataResult>() {
