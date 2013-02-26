@@ -6,7 +6,7 @@
 		.panelTitle {
 			padding-left: 10px;
 		}
-		
+
 		.panelContent {
 			padding: 10px;
 			margin: 10px;
@@ -57,7 +57,7 @@
 					<g:FlowPanel ui:field="mainContentPanel" />
 				</g:center>
 				<g:south size="0">
-					<g:FlowPanel ui:field="notificationPanel" />
+					<g:FlowPanel ui:field="logAreaPanel" />
 				</g:south>
 			</g:SplitLayoutPanel>
 		</g:center>

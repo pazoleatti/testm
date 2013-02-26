@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.web.widget.notification.client.event.NotificationAddEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.notification.client.event.NotificationCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -15,7 +15,7 @@ import com.gwtplatform.mvp.client.View;
 
 public class NotificationPresenter extends
 		PresenterWidget<NotificationPresenter.MyView> implements
-		NotificationAddEvent.MyHandler, NotificationCleanEvent.MyHandler, NotificationUiHandlers {
+		LogAddEvent.MyHandler, LogCleanEvent.MyHandler, NotificationUiHandlers {
 
 	
 	public static interface MyView extends View, HasUiHandlers<NotificationUiHandlers>{
@@ -36,18 +36,18 @@ public class NotificationPresenter extends
 	@Override
 	protected void onBind() {
 		super.onBind();
-		addRegisteredHandler(NotificationAddEvent.getType(), this);
-		addRegisteredHandler(NotificationCleanEvent.getType(), this);
+		addRegisteredHandler(LogAddEvent.getType(), this);
+		addRegisteredHandler(LogCleanEvent.getType(), this);
 	}
 	
 	@Override
-	public void onNotificationsAdd(NotificationAddEvent event) {
+	public void onLogAdd(LogAddEvent event) {
 		logEntries.addAll(event.getLogEntries());
 		updateView();
 	}
 
 	@Override
-	public void onNotificationsClean(NotificationCleanEvent event) {
+	public void onLogClean(LogCleanEvent event) {
 		logEntries.clear();
 		updateView();
 	}
@@ -77,7 +77,7 @@ public class NotificationPresenter extends
 
 	@Override
 	public void clean() {
-		NotificationCleanEvent.fire(this);
+		LogCleanEvent.fire(this);
 	}
 
 }

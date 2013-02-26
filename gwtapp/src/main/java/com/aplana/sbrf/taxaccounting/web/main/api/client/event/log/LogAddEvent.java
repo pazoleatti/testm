@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.notification.client.event;
+package com.aplana.sbrf.taxaccounting.web.main.api.client.event.log;
 
 import java.util.List;
 
@@ -8,16 +8,19 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
- * Добавляет сообщения в панель уведомлений
+ * Добавляет сообщения в Очищает панель с сообщениями
+ * 
+ * @author sgoryachkin
+ *
  */
-public class NotificationAddEvent extends
-		GwtEvent<NotificationAddEvent.MyHandler> {
+public class LogAddEvent extends
+		GwtEvent<LogAddEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
-		void onNotificationsAdd(NotificationAddEvent event);
+		void onLogAdd(LogAddEvent event);
 	}
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -27,19 +30,19 @@ public class NotificationAddEvent extends
 	}
 
 	public static void fire(HasHandlers source,	List<LogEntry> logEntries) {
-		NotificationAddEvent event = new NotificationAddEvent();
+		LogAddEvent event = new LogAddEvent();
 		event.setLogEntries(logEntries);
 		source.fireEvent(event);
 	}
 
 	private List<LogEntry> logEntries;
 
-	public NotificationAddEvent() {
+	public LogAddEvent() {
 	}
 
 	@Override
 	protected void dispatch(MyHandler handler) {
-		handler.onNotificationsAdd(this);
+		handler.onLogAdd(this);
 	}
 
 	@Override

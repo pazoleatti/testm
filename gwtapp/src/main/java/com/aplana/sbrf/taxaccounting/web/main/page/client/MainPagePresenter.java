@@ -54,7 +54,7 @@ public class MainPagePresenter extends
 
 	static final Object TYPE_SignInContent = new Object();
 	static final Object TYPE_MainMenuContent = new Object();
-	static final Object TYPE_NotificationContent = new Object();
+	static final Object TYPE_LogAreaContent = new Object();
 
 	static {
 		RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
@@ -62,7 +62,7 @@ public class MainPagePresenter extends
 
 	private final SignInPresenter signInPresenter;
 	private final MainMenuPresenter mainMenuPresenter;
-	private final NotificationPresenter notificationPresenter;
+	private final NotificationPresenter logAreaPresenter;
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
@@ -86,7 +86,7 @@ public class MainPagePresenter extends
 		this.mainMenuPresenter = mainMenuPresenter;
 		this.placeManager = placeManager;
 		this.messageDialogPresenter = messageDialogPresenter;
-		this.notificationPresenter = notificationPresenter;
+		this.logAreaPresenter = notificationPresenter;
 		this.dispatchAsync = dispatchAsync;
 	}
 
@@ -100,7 +100,7 @@ public class MainPagePresenter extends
 		super.onReveal();
 		setInSlot(TYPE_SignInContent, signInPresenter);
 		setInSlot(TYPE_MainMenuContent, mainMenuPresenter);
-		setInSlot(TYPE_NotificationContent, notificationPresenter);
+		setInSlot(TYPE_LogAreaContent, logAreaPresenter);
 		this.dispatchAsync.execute(new GetProjectVersion(),
 				new AbstractCallback<GetProjectVersionResult>() {
 					@Override
@@ -115,7 +115,7 @@ public class MainPagePresenter extends
 		super.onHide();
 		clearSlot(TYPE_SignInContent);
 		clearSlot(TYPE_MainMenuContent);
-		clearSlot(TYPE_NotificationContent);
+		clearSlot(TYPE_LogAreaContent);
 	}
 
 	@Override

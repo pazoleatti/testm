@@ -1,20 +1,23 @@
-package com.aplana.sbrf.taxaccounting.web.widget.notification.client.event;
+package com.aplana.sbrf.taxaccounting.web.main.api.client.event.log;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
- * Очищает панель уведомлений
+ * Очищает панель с сообщениями
+ *  
+ * @author sgoryachkin
+ *
  */
-public class NotificationCleanEvent extends
-		GwtEvent<NotificationCleanEvent.MyHandler> {
+public class LogCleanEvent extends
+		GwtEvent<LogCleanEvent.MyHandler> {
 
 	public static interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */
-		void onNotificationsClean(NotificationCleanEvent event);
+		void onLogClean(LogCleanEvent event);
 	}
 
 	private static final Type<MyHandler> TYPE = new Type<MyHandler>();
@@ -24,16 +27,16 @@ public class NotificationCleanEvent extends
 	}
 
 	public static void fire(HasHandlers source) {
-		NotificationCleanEvent event = new NotificationCleanEvent();
+		LogCleanEvent event = new LogCleanEvent();
 		source.fireEvent(event);
 	}
 
-	public NotificationCleanEvent() {
+	public LogCleanEvent() {
 	}
 
 	@Override
 	protected void dispatch(MyHandler handler) {
-		handler.onNotificationsClean(this);
+		handler.onLogClean(this);
 	}
 
 	@Override
