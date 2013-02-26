@@ -7,10 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -55,6 +52,21 @@ public class ReportPeriodPicker extends Composite{
 	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider){
 		initWidget(uiBinder.createAndBindUi(this));
 		this.dataProvider = reportPeriodDataProvider;
+
+		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
+			@Override
+			public void onClose(CloseEvent<PopupPanel> event) {
+				StringBuilder result = new StringBuilder();
+				StringBuilder tooltipTitle = new StringBuilder();
+				for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
+					result.append(item.getValue()).append(";");
+					tooltipTitle.append(item.getValue()).append("\n");
+				}
+				selected.setText(result.toString());
+				selected.setTitle(tooltipTitle.toString());
+				//TODO: использовать setSelectedReportPeriods()
+			}
+		});
 		applyButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -67,6 +79,7 @@ public class ReportPeriodPicker extends Composite{
 				selected.setText(result.toString());
 				selected.setTitle(tooltipTitle.toString());
 				popup.hide();
+				//TODO: использовать setSelectedReportPeriods()
 			}
 		});
 		tree.addOpenHandler(new OpenHandler<TreeItem>() {
@@ -96,6 +109,17 @@ public class ReportPeriodPicker extends Composite{
 
 	public Map<Integer, String> getSelectedReportPeriods(){
 		return selectedReportPeriods;
+	}
+
+	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
+		StringBuilder result = new StringBuilder();
+		StringBuilder tooltipTitle = new StringBuilder();
+		for(ReportPeriod item : reportPeriodList){
+			result.append(item.getName()).append(";");
+			tooltipTitle.append(item.getName()).append("\n");
+		}
+		selected.setText(result.toString());
+		selected.setTitle(tooltipTitle.toString());
 	}
 
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){

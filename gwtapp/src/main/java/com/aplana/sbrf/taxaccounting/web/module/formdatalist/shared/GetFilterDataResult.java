@@ -7,6 +7,7 @@ import java.util.List;
 
 public class GetFilterDataResult implements Result {
 
+	private ReportPeriod currentReportPeriod;
     private List<Department> departments;
 	private List<TaxPeriod> taxPeriods;
 	private FormDataFilterAvailableValues filterValues;
@@ -39,4 +40,11 @@ public class GetFilterDataResult implements Result {
 		this.filterValues = filterValues;
 	}
 
+	public ReportPeriod getCurrentReportPeriod() {
+		return currentReportPeriod;
+	}
+
+	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
+		this.currentReportPeriod = currentReportPeriod;
+	}
 }

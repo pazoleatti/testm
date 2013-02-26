@@ -85,6 +85,7 @@ public class DeclarationListPresenter extends
 	@Override
 	public void onApplyFilter() {
 		loadDeclarationsList();
+		filterPresenter.updateSavedFilterData(filterPresenter.getFilterData());
 	}
 
 	@Override

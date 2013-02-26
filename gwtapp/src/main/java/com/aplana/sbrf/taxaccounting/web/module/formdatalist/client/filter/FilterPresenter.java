@@ -36,6 +36,8 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		void setSelectedDepartments(Map<String, Integer> values);
 
+		void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList);
+
 		Map<String, Integer> getSelectedDepartments();
 
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
@@ -135,6 +137,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 				formDataFilter.setDepartmentId(defaultDepartment);
 			} else {
 				formDataFilter.setDepartmentId(null);
+			}
+			if (result.getCurrentReportPeriod() != null) {
+				getView().setSelectedReportPeriods(Arrays.asList(result.getCurrentReportPeriod()));
+				formDataFilter.setReportPeriodIds(Arrays.asList(result.getCurrentReportPeriod().getId()));
 			}
 		} else {
 			//В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,

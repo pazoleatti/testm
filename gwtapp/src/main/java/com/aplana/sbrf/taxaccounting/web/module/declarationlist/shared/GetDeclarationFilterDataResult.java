@@ -1,15 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
 public class GetDeclarationFilterDataResult implements Result {
 
+	private ReportPeriod currentReportPeriod;
 	private List<Department> departments;
 	private List<TaxPeriod> taxPeriods;
 	private DeclarationFilterAvailableValues filterValues;
@@ -36,5 +35,13 @@ public class GetDeclarationFilterDataResult implements Result {
 
 	public void setFilterValues(DeclarationFilterAvailableValues filterValues) {
 		this.filterValues = filterValues;
+	}
+
+	public ReportPeriod getCurrentReportPeriod() {
+		return currentReportPeriod;
+	}
+
+	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
+		this.currentReportPeriod = currentReportPeriod;
 	}
 }

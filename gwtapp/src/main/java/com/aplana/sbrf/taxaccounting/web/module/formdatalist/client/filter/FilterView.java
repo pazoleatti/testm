@@ -193,6 +193,13 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	}
 
 	@Override
+	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
+		if(getUiHandlers() != null){
+			taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setSelectedReportPeriods(reportPeriodList);
+		}
+	}
+
+	@Override
 	public Map<String, Integer> getSelectedDepartments(){
 		if(getUiHandlers() != null){
 			return taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).getSelectedItems();

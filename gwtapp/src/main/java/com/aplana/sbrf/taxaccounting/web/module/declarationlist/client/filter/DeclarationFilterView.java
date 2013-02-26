@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
@@ -73,12 +70,24 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	}
 
 	@Override
+	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
+		if(getUiHandlers() != null){
+			taxTypeReportPeriodPickerMap.get(getUiHandlers().getCurrentTaxType()).setSelectedReportPeriods(reportPeriodList);
+		}
+	}
+
+	@Override
 	public void updateDepartmentPicker(){
 		if(currentDepartment != null){
 			departmentSelectionTreePanel.remove(currentDepartment);
 		}
 		currentDepartment = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
 		departmentSelectionTreePanel.add(currentDepartment);
+	}
+
+	@Override
+	public void setDataFilter(DeclarationFilter declarationFilter, TaxType taxType) {
+		declarationType.setValue(declarationFilter.getDeclarationTypeId());
 	}
 
 
@@ -148,6 +157,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 			}
 		}
 		return selectedReportPeriodIds;
+	}
+
+	@Override
+	public void setSelectedDepartments(Map<String, Integer> values){
+		if(getUiHandlers() != null){
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setSelectedItems(values);
+		}
 	}
 
 }
