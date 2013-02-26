@@ -78,6 +78,7 @@ public class LogAreaPresenter extends
 	@Override
 	public void print() {
 		Window.alert("Не реализовано");	
+		// TODO: SBRFACCTAX-1414
 	}
 
 	@Override
