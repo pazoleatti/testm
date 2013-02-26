@@ -7,11 +7,11 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 public interface DictionaryRegionService {
     /**
      * Проверяет есть ли запись с указанным кодом и именем
+     *
      * @param code
-     * @param name
      * @return
      */
-    public Boolean isValidCodeAndName(Integer code, String name);
+    public Boolean isValidCode(Integer code);
 
     /**
      * Получает регион по  полному коду ОКАТО органищации

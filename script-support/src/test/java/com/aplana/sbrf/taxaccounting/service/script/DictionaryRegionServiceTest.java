@@ -46,9 +46,8 @@ public class DictionaryRegionServiceTest {
     }
 
     @Test
-    public void test() {
-        assertTrue(service.isValidCodeAndName(86, "Ханты-Мансийский автономный округ - Югра"));
-        assertFalse(service.isValidCodeAndName(86, "Ханты-Мансийский автономный округ - Юграsadsadasdasdasda")); // неправильное имя
-        assertFalse(service.isValidCodeAndName(87, "Ханты-Мансийский автономный округ - Югра")); // неправильный код
+    public void testIsValidCode() {
+        assertFalse(service.isValidCode(98313));
+        assertTrue(service.isValidCode(72));
     }
 }
