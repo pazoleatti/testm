@@ -286,6 +286,10 @@ public class FormTemplate extends IdentityObject<Integer> {
 		scriptList.remove(script);
 	}
 
+	/**
+	 * Удаляет колонку из шаблона формы.
+	 * @param column удаляемая колонка
+	 */
 	public void addColumn(Column column) {
 		columns.add(column);
 		for (DataRow row : rows) {
@@ -324,6 +328,10 @@ public class FormTemplate extends IdentityObject<Integer> {
 		}
 	}
 
+	/**
+	 * Добавляет колонку в шаблон формы.
+	 * @param column добавляемая колонка
+	 */
 	public void removeColumn(Column column) {
 		for (DataRow row : rows) {
 			row.removeColumn(column);
