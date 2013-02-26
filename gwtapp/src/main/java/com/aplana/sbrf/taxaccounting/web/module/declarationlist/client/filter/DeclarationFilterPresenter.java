@@ -72,7 +72,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                 new AbstractCallback<GetDeclarationFilterDataResult>() {
                     @Override
                     public void onReqSuccess(GetDeclarationFilterDataResult result) {
-	                    FormDataFilterAvailableValues filterValues = result.getFilterValues();
+	                    DeclarationFilterAvailableValues filterValues = result.getFilterValues();
 	                    if(filterValues.getDepartmentIds() == null){
 		                    //Контролер УНП
 		                    getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
@@ -80,7 +80,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		                    getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 	                    }
 	                    getView().setTaxPeriods(result.getTaxPeriods());
-	                    getView().setDeclarationTypeMap(fillDeclarationTypesMap(result));
+	                    getView().setDeclarationTypeMap(fillDeclarationTypesMap(result.getFilterValues()));
                         DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
                     }
                 });
@@ -112,7 +112,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return result;
 	}
 
-	private Map<Integer, String> fillDeclarationTypesMap(GetDeclarationFilterDataResult source){
+	private Map<Integer, String> fillDeclarationTypesMap(DeclarationFilterAvailableValues source){
 		Map<Integer, String> declarationTypeMap = new HashMap<Integer, String>();
 		for(DeclarationType declarationType : source.getDeclarationTypes()){
 			declarationTypeMap.put(declarationType.getId(), declarationType.getName());

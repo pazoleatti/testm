@@ -46,7 +46,6 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	}
 
 	private final DispatchAsync dispatchAsync;
-	private static final int DEFAULT_DEPARTMENT_ITEM = 0;
     private static Map<TaxType, FormDataFilter> savedFilterData = new HashMap<TaxType, FormDataFilter>();
 	private static Map<TaxType, Map<String, Integer>> savedDepartmentsMap = new HashMap<TaxType, Map<String, Integer>>();
 	
@@ -125,9 +124,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	private FormDataFilter prepareFormDataFilter(GetFilterDataResult result){
 		FormDataFilter formDataFilter = new FormDataFilter();
 		if(savedFilterData.get(taxType) == null){
-			if(!result.getDepartments().isEmpty()){
-				Integer departmentId = result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getId();
-				String departmentName = result.getDepartments().get(DEFAULT_DEPARTMENT_ITEM).getName();
+			if(!result.getFilterValues().getDepartmentIds().isEmpty()){
+				Integer departmentId = result.getFilterValues().getDepartmentIds().iterator().next();
+				String departmentName = getDepartmentNameById(result.getDepartments(), departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
 				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
 				Map<String, Integer> defaultSelectedDepartment = new HashMap<String, Integer>();
@@ -174,6 +173,15 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 			result.add(department.getId());
 		}
 		return result;
+	}
+
+	private String getDepartmentNameById(List<Department> departmentList, Integer id){
+		for(Department department : departmentList){
+			if (department.getId() == id){
+				return department.getName();
+			}
+		}
+		return null;
 	}
 
     private void initSavedFilterDataMap(){

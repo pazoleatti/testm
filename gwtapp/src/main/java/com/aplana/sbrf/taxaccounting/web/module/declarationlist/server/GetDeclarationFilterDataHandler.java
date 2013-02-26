@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
@@ -28,9 +28,6 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	}
 
 	@Autowired
-	private FormDataSearchService formDataSearchService;
-
-	@Autowired
 	private SecurityService securityService;
 
 	@Autowired
@@ -43,23 +40,25 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Qualifier("departmentService")
 	DepartmentService departmentService;
 
+	@Autowired
+	DeclarationService declarationService;
+
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
-		FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
+		DeclarationFilterAvailableValues declarationFilterValues = declarationService.getFilterAvailableValues(securityService
 				.currentUser().getId(), action.getTaxType());
 
-		if(filterValues.getDepartmentIds() == null) {
+		if(declarationFilterValues.getDepartmentIds() == null) {
 			//Контролер УНП
 			res.setDepartments(departmentService.listAll());
 		} else {
 			//Контролер или Оператор
-			res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds())));
+			res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues.getDepartmentIds())));
 		}
 
-		res.setDeclarationTypes(declarationTypeDao.listAll());
 		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
-		res.setFilterValues(filterValues);
+		res.setFilterValues(declarationFilterValues);
 		return res;
 	}
 
