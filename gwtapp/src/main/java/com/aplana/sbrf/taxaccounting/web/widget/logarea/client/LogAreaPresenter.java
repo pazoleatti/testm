@@ -55,8 +55,6 @@ public class LogAreaPresenter extends
 	public void onLogClean(LogCleanEvent event) {
 		logEntries.clear();
 		updateView();
-		
-		LogShowEvent.fire(this, false);
 	}
 	
 	private void updateView(){
