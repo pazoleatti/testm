@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +46,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	private ReportPeriodDao reportPeriodDao;
 	
 	@Autowired
-	@Qualifier("departmentService")
 	private DepartmentService departmentService;
 	
 	@Autowired

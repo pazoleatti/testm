@@ -14,7 +14,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,6 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	private SecurityService securityService;
 
 	@Autowired
-	@Qualifier("departmentService")
 	private DepartmentService departmentService;
 
 	@Autowired

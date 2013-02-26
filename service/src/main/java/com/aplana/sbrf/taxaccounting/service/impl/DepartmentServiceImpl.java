@@ -1,23 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
-
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-@Service("departmentService")
+@Service
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 		

@@ -13,7 +13,6 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +36,6 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	DeclarationTypeDao declarationTypeDao;
 
 	@Autowired
-	@Qualifier("departmentService")
 	DepartmentService departmentService;
 
 	@Autowired

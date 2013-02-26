@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -17,7 +16,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Component
 public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoAction, GetUserInfoResult>{
 	@Autowired
-	@Qualifier("departmentService")
 	private DepartmentService departmentService;
 
 	@Autowired

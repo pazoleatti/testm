@@ -14,9 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Service;
  * @author Vitalii Samolovskikh
  * @see com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
-@Service
+@Service("formDataCompositionService")
 public class FormDataCompositionServiceImpl implements FormDataCompositionService {
 
 	@Autowired

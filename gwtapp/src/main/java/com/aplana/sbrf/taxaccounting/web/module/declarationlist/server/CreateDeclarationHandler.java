@@ -10,7 +10,6 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,6 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	}
 
 	@Autowired
-	@Qualifier("declarationService")
 	DeclarationService declarationService;
 
 	@Autowired

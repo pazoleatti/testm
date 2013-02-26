@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  *
  * @author Vitalii Samolovskikh
  */
-@Service(value = "securityService")
+@Service("securityService")
 public class SecurityService {
 	private TAUserDao userDao;
 
