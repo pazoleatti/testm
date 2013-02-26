@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
+import org.springframework.stereotype.Service;
 
 
-@Repository("departmentService")
+@Service
 public class DepartmentServiceImpl implements DepartmentService {
 
 	@Autowired

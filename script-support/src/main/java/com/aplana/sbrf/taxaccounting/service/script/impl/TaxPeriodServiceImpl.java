@@ -9,8 +9,9 @@ import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
+import org.springframework.stereotype.Service;
 
-@Repository("taxPeriodService")
+@Service
 public class TaxPeriodServiceImpl implements TaxPeriodService {
 
 	@Autowired

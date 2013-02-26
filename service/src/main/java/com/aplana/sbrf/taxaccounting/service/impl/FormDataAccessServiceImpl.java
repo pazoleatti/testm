@@ -420,7 +420,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		// контроллер УНП: имеет роль контроллера УНП
 		formDataAccessRoles.setControllerOfUNP(user.hasRole(TARole.ROLE_CONTROL_UNP));
 
-		// передается ли форма на вышестоящий уровень
+		// передается ли форма на вышестоящий уровень:
 		// вначале проверяем связи НФ->НФ
 		boolean sendToNextLevel = false;
 		for (DepartmentFormType destination : formDestinations) {
@@ -440,8 +440,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				}
 			}
 		}
-
 		formDataAccessRoles.setFormDataHasDestinations(sendToNextLevel);
+
+		// автоматически создаваемая форма:
+		// считается, что форма создается автоматически, если есть формы-источники для данной формы
+		List<DepartmentFormType> formSources =
+				departmentFormTypeDao.getFormSources(formDataDepartmentId, formDataTypeId, formDataKind);
+		formDataAccessRoles.setAutoCreatingForm(formSources.size() > 0);
+
 		return formDataAccessRoles;
 	}
 
@@ -467,6 +473,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		private boolean controllerOfUNP;
 		/** передается ли форма на вышестоящий уровень? */
 		private boolean formDataHasDestinations;
+		/** автоматически создаваемая форма */
+		private boolean autoCreatingForm;
 
 		public boolean isOperatorOfCurrentLevel() {
 			return operatorOfCurrentLevel;
@@ -508,6 +516,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			this.controllerOfUNP = controllerOfUNP;
 		}
 
+		public boolean isAutoCreatingForm() {
+			return autoCreatingForm;
+		}
+
+		public void setAutoCreatingForm(boolean autoCreatingForm) {
+			this.autoCreatingForm = autoCreatingForm;
+		}
+
 		@Override
 		public String toString() {
 			return "FormDataAccessRoles{" +
@@ -516,6 +532,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					", controllerOfUpLevel=" + controllerOfUpLevel +
 					", controllerOfUNP=" + controllerOfUNP +
 					", formDataHasDestinations=" + formDataHasDestinations +
+					", autoCreatingForm=" + autoCreatingForm +
 					'}';
 		}
 	}

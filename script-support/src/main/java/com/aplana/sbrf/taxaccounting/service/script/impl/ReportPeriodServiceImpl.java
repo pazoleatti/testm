@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
@@ -16,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
  * Реализация ReportPeriodService
  * @author auldanov
  */
-@Repository("reportPeriodService")
+@Service
 @Transactional(readOnly = true)
 public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriodService {
 

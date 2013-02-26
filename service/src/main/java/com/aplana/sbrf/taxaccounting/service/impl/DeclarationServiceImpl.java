@@ -52,7 +52,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
  * @author Eugene Stetsenko
  * @author dsultanbekov
  */
-@Service
+@Service("declarationService")
 public class DeclarationServiceImpl implements DeclarationService {
 
 	private Log logger = LogFactory.getLog(getClass());

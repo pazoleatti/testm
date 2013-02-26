@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
@@ -13,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 
-@Repository("departmentFormTypeService")
+@Service
 @Transactional(readOnly=true)
 public class DepartmentFormTypeServiceImpl extends AbstractDao implements DepartmentFormTypeService {
 

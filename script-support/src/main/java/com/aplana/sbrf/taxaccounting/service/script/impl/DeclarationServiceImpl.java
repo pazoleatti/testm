@@ -6,13 +6,13 @@ import org.springframework.stereotype.Repository;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
 import com.aplana.sbrf.taxaccounting.model.Declaration;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
-
+import org.springframework.stereotype.Service;
 
 /*
  * author auldanov
  */
 
-@Repository("declarationService")
+@Service
 public class DeclarationServiceImpl implements DeclarationService{
 
 	@Autowired
