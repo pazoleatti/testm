@@ -17,6 +17,7 @@ public class WorkflowStateTest {
 			if (ids.contains(id)) {
 				fail("Multiple occurences of id " + id);		
 			}
+			ids.add(id);
 		}
 	}
 	

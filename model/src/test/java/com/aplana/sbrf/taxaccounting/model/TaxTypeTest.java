@@ -19,6 +19,7 @@ public class TaxTypeTest {
 			if (codes.contains(code)) {
 				fail("Multiple occurences of code '" + code + "'");		
 			}
+			codes.add(code);
 		}		
 	}
 	
