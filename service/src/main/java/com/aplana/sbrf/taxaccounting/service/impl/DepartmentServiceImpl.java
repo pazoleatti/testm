@@ -71,12 +71,12 @@ public class DepartmentServiceImpl implements DepartmentService {
  	public Set<Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){
 		Set<Department> departmentSet = new HashSet<Department>();
 		for(Integer departmentId : availableDepartments){
-			departmentSet.add(departmentDao.getDepartment(departmentId));
+			departmentSet.add(getDepartment(departmentId));
 		}
 		for(Integer departmentId : availableDepartments){
 			Integer searchFor = departmentId;
 			while (true){
-				Department department = departmentDao.getParent(searchFor);
+				Department department = getParent(searchFor);
 				if(department == null){
 					break;
 				}

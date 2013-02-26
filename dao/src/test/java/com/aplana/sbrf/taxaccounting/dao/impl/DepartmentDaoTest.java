@@ -63,4 +63,16 @@ public class DepartmentDaoTest {
 		departmentDao.listDepartments();
 		Assert.assertEquals(3, departmentDao.getIsolatedDepartments().size());
 	}
+
+	@Test
+	public void getParentTest(){
+		Department department;
+		department = departmentDao.getParent(2);
+		Assert.assertEquals(1, department.getId());
+		Assert.assertEquals("Банк", department.getName());
+
+		department = departmentDao.getParent(3);
+		Assert.assertEquals(1, department.getId());
+		Assert.assertEquals("Банк", department.getName());
+	}
 }
