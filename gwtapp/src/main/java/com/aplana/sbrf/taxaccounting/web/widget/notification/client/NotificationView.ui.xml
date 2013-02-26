@@ -13,6 +13,7 @@
 				<style:RightBar>
 					<g:Button text="Печать" width="100px" ui:field="printButton" />
 					<g:Button text="Очистить" width="100px" ui:field="cleanButton" />
+					<g:Button text="Скрыть" width="100px" ui:field="hideButton" />
 				</style:RightBar>
 			</style:Bar>
 		</g:north>

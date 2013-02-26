@@ -28,7 +28,7 @@ public class LogShowEvent extends
 
 	public static void fire(HasHandlers source,	boolean show) {
 		LogShowEvent event = new LogShowEvent();
-		event.setShow(true);
+		event.setShow(show);
 		source.fireEvent(event);
 	}
 

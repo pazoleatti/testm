@@ -52,7 +52,7 @@
 		</g:north>
 
 		<g:center>
-			<g:SplitLayoutPanel styleName="{style.panelContent}">
+			<g:SplitLayoutPanel ui:field="splitPanel" styleName="{style.panelContent}">
 				<g:center>
 					<g:FlowPanel ui:field="mainContentPanel" />
 				</g:center>

@@ -7,5 +7,7 @@ public interface NotificationUiHandlers extends UiHandlers {
 	void print();
 	
 	void clean();
+	
+	void hide();
 
 }

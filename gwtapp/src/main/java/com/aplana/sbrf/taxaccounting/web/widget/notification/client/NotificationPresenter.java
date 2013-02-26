@@ -6,6 +6,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -44,12 +45,18 @@ public class NotificationPresenter extends
 	public void onLogAdd(LogAddEvent event) {
 		logEntries.addAll(event.getLogEntries());
 		updateView();
+		
+		if (!logEntries.isEmpty()){
+			LogShowEvent.fire(this, true);
+		}
 	}
 
 	@Override
 	public void onLogClean(LogCleanEvent event) {
 		logEntries.clear();
 		updateView();
+		
+		LogShowEvent.fire(this, false);
 	}
 	
 	private void updateView(){
@@ -77,7 +84,13 @@ public class NotificationPresenter extends
 
 	@Override
 	public void clean() {
-		LogCleanEvent.fire(this);
+		logEntries.clear();
+		updateView();
+	}
+
+	@Override
+	public void hide() {
+		LogShowEvent.fire(this, false);
 	}
 
 }

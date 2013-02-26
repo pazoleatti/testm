@@ -19,6 +19,9 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	DockLayoutPanel dockPanel;
+	
+	@UiField
+	SplitLayoutPanel splitPanel;
 
 	@UiField
 	Panel mainMenuContentPanel;
@@ -118,5 +121,17 @@ public class MainPageView extends ViewImpl implements MyView {
 	@Override
 	public void setProjectVersion(String version){
 		projectVersion.setText("Версия: " + version);
+	}
+
+	@Override
+	public void setLogAreaShow(boolean show) {
+		// TODO: Проблема: Сплиттер не пропадает. Это исправлено в GWT 2.5.1
+		// https://code.google.com/p/google-web-toolkit/issues/detail?id=7715
+		splitPanel.setWidgetHidden(logAreaPanel, !show);
+		
+		if (splitPanel.getWidgetSize(logAreaPanel) <= 0){
+			splitPanel.setWidgetSize(logAreaPanel, 130);
+		}
+		
 	}
 }

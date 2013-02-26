@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
@@ -27,7 +28,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 public class MainPagePresenter extends
 		Presenter<MainPagePresenter.MyView, MainPagePresenter.MyProxy>
 		implements ScreenLockEvent.MyHandler, TitleUpdateEvent.MyHandler,
-		MessageEvent.MyHandler, NavigationHandler {
+		MessageEvent.MyHandler, NavigationHandler, LogShowEvent.MyHandler {
 	/**
 	 * {@link MainPagePresenter}'s proxy.
 	 */
@@ -44,9 +45,11 @@ public class MainPagePresenter extends
 		void updateTitle(String title, String desc);
 
 		void setProjectVersion(String version);
+	
+		void setLogAreaShow(boolean show);
 	}
 
-	/**
+	/**LogShowEvent
 	 * Use this in leaf presenters, inside their {@link #revealInParent} method.
 	 */
 	@ContentSlot
@@ -187,6 +190,12 @@ public class MainPagePresenter extends
 			ErrorEvent.fire(this, event);
 		}
 
+	}
+
+	@ProxyEvent
+	@Override
+	public void onLogShow(LogShowEvent event) {
+		getView().setLogAreaShow(event.isShow());
 	}
 
 }

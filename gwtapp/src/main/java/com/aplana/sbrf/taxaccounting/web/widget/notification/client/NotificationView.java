@@ -66,5 +66,10 @@ public class NotificationView extends ViewWithUiHandlers<NotificationUiHandlers>
 	void clean(ClickEvent event){
 		getUiHandlers().clean();
 	}
+	
+	@UiHandler("hideButton")
+	void hide(ClickEvent event){
+		getUiHandlers().hide();
+	}
 
 }
