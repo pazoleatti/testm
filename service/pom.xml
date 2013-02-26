@@ -71,12 +71,6 @@
             
 		<!-- Test -->
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${springframework.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>test-utils</artifactId>
 			<version>${project.version}</version>
