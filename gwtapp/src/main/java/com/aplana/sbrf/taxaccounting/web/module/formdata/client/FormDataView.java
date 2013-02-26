@@ -1,14 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,16 +17,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
@@ -39,9 +40,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	DockLayoutPanel dockPanel;
-
-	@UiField
-	Widget logPanel;
 
 	@UiField
 	Bar workflowBar;
@@ -89,9 +87,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	CheckBox showCheckedColumns;
-
-	@UiField(provided = true)
-	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	private final Widget widget;
 
@@ -163,18 +158,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setTableBuilder(builder);
 	}
 
-	@Override
-	public void setLogMessages(List<LogEntry> logEntries) {
-		dockPanel.setWidgetHidden(logPanel, (logEntries == null || logEntries.isEmpty()));
-		if (logEntries != null) {
-			loggerList.setRowCount(logEntries.size());
-			loggerList.setRowData(logEntries);
-		} else {
-			loggerList.setRowCount(0);
-			loggerList.setRowData(new ArrayList<LogEntry>(0));
-		}
-		loggerList.redraw();
-	}
 
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {

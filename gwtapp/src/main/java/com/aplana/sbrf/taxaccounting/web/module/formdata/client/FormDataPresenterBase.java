@@ -1,7 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -18,9 +26,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.List;
-import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
@@ -40,8 +45,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void addCustomHeader(boolean addNumberedHeader);
 
 		void addCustomTableStyles(List<FormStyle> allStyles);
-
-		void setLogMessages(List<LogEntry> logEntries);
 
 		void setAdditionalFormInfo(String formType, String taxType,
 				String formKind, String departmentId, String reportPeriod,

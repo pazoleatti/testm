@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormD
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.notification.client.event.NotificationAddEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
@@ -118,7 +119,7 @@ public class FormDataPresenter extends
 							
 							manageDeleteRowButtonEnabled();
 
-							getView().setLogMessages(result.getLogEntries());
+							NotificationAddEvent.fire(this, result.getLogEntries());
 							getView().setAdditionalFormInfo(
 									result.getFormData().getFormType()
 											.getName(),
@@ -246,7 +247,7 @@ public class FormDataPresenter extends
 
 	private void processFormDataResult(FormDataResult result) {
 		formData = result.getFormData();
-		getView().setLogMessages(result.getLogEntries());
+		NotificationAddEvent.fire(this, result.getLogEntries());
 		getView().setRowsData(formData.getDataRows());
 	}
 
@@ -294,7 +295,7 @@ public class FormDataPresenter extends
 		dispatcher.execute(checkAction, new AbstractCallback<FormDataResult>() {
 			@Override
 			protected void onReqSuccess(FormDataResult result) {
-				getView().setLogMessages(result.getLogEntries());
+				NotificationAddEvent.fire(this, result.getLogEntries());
 				super.onReqSuccess(result);
 			}
 		});

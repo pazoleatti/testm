@@ -60,12 +60,6 @@
             </style:Bar>
         </g:north>
 
-		<g:north size="80">
-			<g:ScrollPanel width="100%" ui:field="logPanel">
-				<c:CellList ui:field="loggerList" />
-			</g:ScrollPanel>
-		</g:north>
-
         <g:north size="30">
             <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}"/>
         </g:north>
