@@ -18,10 +18,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class ReportPeriodPicker extends Composite{
@@ -121,6 +118,7 @@ public class ReportPeriodPicker extends Composite{
 			popup.show();
 			return;
 		}
+		Collections.reverse(taxPeriods);
 		for(TaxPeriod taxPeriod : taxPeriods){
 			Label label = new Label(getFormattedTaxPeriodDate(taxPeriod));
 			TaxPeriodItem element = new TaxPeriodItem(label);
