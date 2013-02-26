@@ -65,7 +65,6 @@ public class FormTemplateColumnPresenter
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().flush();
-		formTemplate.findFixCorruptions();
 	}
 
 	@Override

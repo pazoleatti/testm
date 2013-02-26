@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +19,15 @@ import java.util.Set;
  * Обращаю внимание, что часть методов интерфейса не реализована, при их вызове
  * будет возникать UnsupportedOperationException.
  * <p/>
- * Фактически класс является обёрткой над обычным HashMap, но при этом содержит
- * ряд дополнительных атрибутов, содержащих информацию о строке в отчётной
- * форме, а также операции по работе с Map реализованы таким образом, чтобы
- * предотвратить заполнение строки данными неверного типа. При использовании
- * метода put проводится проверка данных на соответствие типу соответствующего
- * столбца, поддерживаются строки, даты, BigDecimal, кроме того метод put не
- * позволяет добавлять в строку данные по столбцам, которые отсутствуют в
- * определении формы Для некоторых числовых типов реализовано автоматическое
- * приведение к BigDecimal.
+ * Фактически класс является Map, в основе которой лежит List<Cell>, 
+ * но при этом содержит ряд дополнительных атрибутов, содержащих информацию о 
+ * строке в отчётной форме, а также операции по работе с Map реализованы таким 
+ * образом, чтобы предотвратить заполнение строки данными неверного типа.
+ * При использовании метода put проводится проверка данных на соответствие типу 
+ * соответствующего столбца, поддерживаются строки, даты, BigDecimal, кроме того
+ * метод put непозволяет добавлять в строку данные по столбцам, которые 
+ * отсутствуют в определении формы. Для некоторых (часто используемых) числовых
+ * типов реализовано автоматическое приведение к BigDecimal.
  * <p/>
  * Для облегчения идентификации нужной строки среди строк данных по форме, можно
  * использовать строковые алиасы. Их стоит использовать для строк, несущих
@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
-	private Map<String, Cell> data;
+	private List<Cell> data;
 	private String alias;
 	private List<FormStyle> formStyleList;
 	private int order;
@@ -55,21 +55,20 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	static class MapEntry implements Map.Entry<String, Object> {
 
-		private Map.Entry<String, Cell> sourceEntry;
+		private Cell cell;
 
-		private MapEntry(Map.Entry<String, Cell> sourceEntry) {
-			this.sourceEntry = sourceEntry;
+		private MapEntry(Cell cell) {
+			this.cell = cell;
 		}
 
 		@Override
 		public String getKey() {
-			return sourceEntry.getKey();
+			return cell.getColumn().getAlias();
 		}
 
 		@Override
 		public Object getValue() {
-			Cell value = sourceEntry.getValue();
-			return value == null ? null : value.getValue();
+			return cell.getValue();
 		}
 
 		@Override
@@ -97,40 +96,22 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	 * @param formColumns
 	 *            список столбцов
 	 */
-	public void setFormColumns(List<Column> formColumns) {
-		data = new HashMap<String, Cell>(formColumns.size());
+	public final void setFormColumns(List<Column> formColumns) {
+		data = new ArrayList<Cell>(formColumns.size());
 		for (Column col : formColumns) {
 			addColumn(col);
 		}
 	}
 
 	/**
-	 * Исправляет ошибки связанные с изменением данных столбца.
-	 */
-	void fixAliases() {
-		Map<String, Cell> fixedData = new HashMap<String, Cell>();
-		for (Map.Entry<String, Cell> entry : data.entrySet()) {
-			Cell cellValue = entry.getValue();
-			fixedData.put(cellValue.getColumn().getAlias(), cellValue);
-		}
-		if (data.size() != fixedData.size()) {
-			throw new IllegalStateException("Существувуют дубликаты алиасов");
-		}
-		data = fixedData;
-	}
-
-	/**
 	 * Добавить столбец в существующую мапу Этот метод нужен для админки
-	 * 
-	 * @param col
-	 *            столбец
+	 * @param col столбец
 	 */
 	public void addColumn(Column col) {
-
-		Cell oldValue = data.get(col.getAlias());
+		Cell oldValue = getCell(col.getAlias(), false);
 		if (oldValue == null) {
 			Cell cellValue = new Cell(col, formStyleList);
-			data.put(col.getAlias(), cellValue);
+			data.add(cellValue);
 		} else {
 			throw new IllegalArgumentException("Алиас столбца + '"
 					+ col.getAlias() + "' уже существует в шаблоне");
@@ -148,38 +129,54 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	/**
 	 * Методы, реализующие интефрейс Map<String, Object>
 	 */
+	@Override
 	public void clear() {
 		data.clear();
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
-		return data.containsKey(key);
+		return getCell((String)key) != null;
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return data.containsValue(value);
+		for (Cell cell: data) {
+			if (cell.getValue() == null && value == null) {
+				return true;
+			} else if (cell.getValue() != null && cell.getValue().equals(value)) {
+				return true;
+			}
+		}	
+		return false;
 	}
 
 	@Override
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
 		if (data != null) {
-			for (Map.Entry<String, Cell> entry : data.entrySet()) {
-				entries.add(new MapEntry(entry));
+			for (Cell cell: data) {
+				entries.add(new MapEntry(cell));
 			}
 		}
-		return entries;
+		return Collections.unmodifiableSet(entries);
 	}
 
 	public Cell getCell(String columnAlias) {
-		Cell cell = data.get(columnAlias);
-		if (cell == null) {
-			throw new IllegalArgumentException("Wrong column alias: "
-					+ columnAlias);
+		return getCell(columnAlias, true);
+	}
+	
+	private Cell getCell(String columnAlias, boolean throwIfNotFound) {
+		for (Cell cell: data) {
+			if (cell.getColumn().getAlias().equals(columnAlias)) {
+				return cell;
+			}
 		}
-		return cell;
+		if (throwIfNotFound) {
+			throw new IllegalArgumentException("Wrong column alias: " + columnAlias);		
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -195,7 +192,11 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Set<String> keySet() {
-		return data.keySet();
+		Set<String> keySet = new HashSet<String>(data.size());
+		for (Cell cell: data) {
+			keySet.add(cell.getColumn().getAlias());
+		}
+		return Collections.unmodifiableSet(keySet);
 	}
 
 	@Override
@@ -224,10 +225,10 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	@Override
 	public Collection<Object> values() {
 		List<Object> values = new ArrayList<Object>(data.size());
-		for (Map.Entry<String, Cell> entry : data.entrySet()) {
-			values.add(entry.getValue().getValue());
+		for (Cell cell : data) {
+			values.add(cell.getValue());
 		}
-		return values;
+		return Collections.unmodifiableList(values);
 	}
 
 	@Override

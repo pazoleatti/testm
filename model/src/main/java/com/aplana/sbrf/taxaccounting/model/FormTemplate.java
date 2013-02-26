@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется
 	 * <code>java.util.List</code>.
 	 */
-	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
+	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
 
 	/**
 	 * Возвращает список {@link Column столбцов}, образующих налоговую форму.
@@ -361,15 +361,5 @@ public class FormTemplate extends IdentityObject<Integer> {
 		}
 		throw new IllegalArgumentException("Wrong style alias: '" + alias
 				+ '\'');
-	}
-
-	/**
-	 * По возможножности исправляет ошибки связанные с неактуальностью начальных
-	 * данныс со столбцами и стилями шаблона.
-	 */
-	public void findFixCorruptions() {
-		for (DataRow dataRow : rows) {
-			dataRow.fixAliases();
-		}
 	}
 }
