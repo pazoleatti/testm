@@ -19,7 +19,8 @@
 		<module>dynacache-spring</module>
 		<module>test-utils</module>
         <module>script-support</module>
-    </modules>
+		<module>fonts</module>
+	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!--<maven.test.skip>false</maven.test.skip>-->
