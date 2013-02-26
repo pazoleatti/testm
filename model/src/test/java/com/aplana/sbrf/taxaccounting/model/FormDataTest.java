@@ -64,17 +64,21 @@ public class FormDataTest {
 
 	@Test
 	public void getDataRowIndexTest() {
-		Assert.assertEquals(getTestFormData().getDataRowIndex(ROW_ALIAS), 2);
+		FormData formData = getTestFormData();
+		int rowIndex = formData.getDataRowIndex(ROW_ALIAS); 
+		Assert.assertEquals(2, rowIndex);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void getDataRowIndexTest2() {
-		getTestFormData().getDataRowIndex("not_existing");
+		FormData formData = getTestFormData();
+		formData.getDataRowIndex("non_existant"); 
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void getDataRowIndexTest3() {
-		getTestFormData().getDataRowIndex(null);
+		FormData formData = getTestFormData();
+		formData.getDataRowIndex(null); 
 	}
 
 }
