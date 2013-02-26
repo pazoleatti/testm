@@ -6,21 +6,22 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.notification.client.event.NotificationAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.notification.client.event.NotificationCleanEvent;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
 public class NotificationPresenter extends
 		PresenterWidget<NotificationPresenter.MyView> implements
-		NotificationAddEvent.MyHandler, NotificationCleanEvent.MyHandler {
+		NotificationAddEvent.MyHandler, NotificationCleanEvent.MyHandler, NotificationUiHandlers {
 
 	
-	public static interface MyView extends View {
+	public static interface MyView extends View, HasUiHandlers<NotificationUiHandlers>{
 		
 		void setLogEntries(List<LogEntry> entries);
-		void setLogSize(int size);
+		void setLogSize(int full, int error, int warn, int info);
 
 	}
 	
@@ -29,6 +30,7 @@ public class NotificationPresenter extends
 	@Inject
 	public NotificationPresenter(final EventBus eventBus, final MyView view) {
 		super(eventBus, view);
+		getView().setUiHandlers(this);
 	}
 	
 	@Override
@@ -45,7 +47,6 @@ public class NotificationPresenter extends
 	}
 
 	@Override
-	@ProxyEvent
 	public void onNotificationsClean(NotificationCleanEvent event) {
 		logEntries.clear();
 		updateView();
@@ -53,7 +54,30 @@ public class NotificationPresenter extends
 	
 	private void updateView(){
 		getView().setLogEntries(logEntries);
-		getView().setLogSize(logEntries.size());
+		int error = 0, warn = 0, info = 0;
+		for (LogEntry logEntry : logEntries) {
+			switch (logEntry.getLevel()) {
+			case ERROR:
+				error++;
+				break;
+			case WARNING:
+				warn++;
+				break;
+			case INFO:
+				info++;
+			}
+		}
+		getView().setLogSize(logEntries.size(), error, warn, info);
+	}
+
+	@Override
+	public void print() {
+		Window.alert("Не реализовано");	
+	}
+
+	@Override
+	public void clean() {
+		NotificationCleanEvent.fire(this);
 	}
 
 }

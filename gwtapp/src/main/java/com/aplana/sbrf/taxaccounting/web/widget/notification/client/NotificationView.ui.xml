@@ -1,11 +1,21 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log"
+	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
 	<g:DockLayoutPanel unit="PX" height="100%" width="100%">
-		<g:west size="30">
-			<g:Button text="1"></g:Button>
-		</g:west>
+
+		<g:north size="32">
+			<style:Bar>
+				<style:LeftBar>
+					<g:HTML ui:field="title" />
+				</style:LeftBar>
+				<style:RightBar>
+					<g:Button text="Печать" width="100px" ui:field="printButton" />
+					<g:Button text="Очистить" width="100px" ui:field="cleanButton" />
+				</style:RightBar>
+			</style:Bar>
+		</g:north>
 		<g:center>
 			<g:ScrollPanel width="100%" ui:field="logPanel" height="100%">
 				<log:LogEntriesWidget ui:field="logEntries" />
@@ -13,4 +23,5 @@
 		</g:center>
 
 	</g:DockLayoutPanel>
+
 </ui:UiBinder> 
