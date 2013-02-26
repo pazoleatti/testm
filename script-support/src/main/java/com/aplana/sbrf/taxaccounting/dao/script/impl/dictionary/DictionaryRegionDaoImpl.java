@@ -10,16 +10,16 @@ import java.util.List;
 @Repository("DictionaryRegionDao")
 public class DictionaryRegionDaoImpl extends AbstractDictionaryDaoImpl implements DictionaryRegionDao {
 
-    private String from = "DICT_REGION";
+    private String baseQuery = "SELECT * FROM dict_region";
     @Override
-    public String getQueryFrom() {
-        return from;
+    public String getBaseQuery() {
+        return baseQuery;
     }
 
     @Override
     public List<DictionaryRegion> getListRegions() {
         List<DictionaryRegion> result = getJdbcTemplate().query(
-                "SELECT * FROM " + getQueryFrom(),
+                getBaseQuery(),
                 new BeanPropertyRowMapper(DictionaryRegion.class));
         return result;
     }
