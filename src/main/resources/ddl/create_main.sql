@@ -23,6 +23,33 @@ comment on column dict_region.name is 'наименование';
 comment on column dict_region.okato is 'код ОКАТО';
 comment on column dict_region.okato_definition is 'определяющая часть кода ОКАТО';
 -----------------------------------------------------------------------------------------------------------
+create table dict_tax_benefit_param
+(
+id               number(9) not null,
+dict_region_id   number(2) not null,
+tax_benefit_id   varchar2(5) not null,
+section          varchar2(4),
+item             varchar2(4),
+subitem          varchar2(4),
+percent          number(3,2),
+rate             number(15,2)
+);
+
+alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
+
+alter table dict_tax_benefit_param add constraint dict_tax_benefit_param_pk primary key (id);
+alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_chk_perc check ((percent>=0) and (percent<=100));
+
+comment on table dict_tax_benefit_param is 'Параметры налоговых льгот';
+comment on column dict_tax_benefit_param.id is 'Первичный ключ';
+comment on column dict_tax_benefit_param.dict_region_id is 'Код региона';
+comment on column dict_tax_benefit_param.tax_benefit_id is 'Код налоговой  льготы';
+comment on column dict_tax_benefit_param.section is 'Основание - статья';
+comment on column dict_tax_benefit_param.item is 'Основание - пункт';
+comment on column dict_tax_benefit_param.subitem is 'Основание - подпункт';
+comment on column dict_tax_benefit_param.percent is 'Уменьшающий процент, %';
+comment on column dict_tax_benefit_param.rate is 'Пониженная ставка';
+-------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
 	id number(9) not null,
 	name varchar(200) not null,
