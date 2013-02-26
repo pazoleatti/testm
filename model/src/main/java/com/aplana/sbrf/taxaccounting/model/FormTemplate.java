@@ -286,6 +286,13 @@ public class FormTemplate extends IdentityObject<Integer> {
 		scriptList.remove(script);
 	}
 
+	public void addColumn(Column column) {
+		columns.add(column);
+		for (DataRow row : rows) {
+			row.addColumn(column);
+		}
+	}
+
 	/**
 	 * Добавляет скрипт к шаблону формы. При это не происходит привязки скрипта
 	 * на событие.
@@ -315,6 +322,13 @@ public class FormTemplate extends IdentityObject<Integer> {
 				.entrySet()) {
 			entry.getValue().remove(script);
 		}
+	}
+
+	public void removeColumn(Column column) {
+		for (DataRow row : rows) {
+			row.removeColumn(column);
+		}
+		columns.remove(column);
 	}
 
 	/**

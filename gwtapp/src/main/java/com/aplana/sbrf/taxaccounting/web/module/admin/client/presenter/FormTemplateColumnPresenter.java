@@ -101,16 +101,12 @@ public class FormTemplateColumnPresenter
 	@Override
 	public void addColumn(Column column) {
 		fixAlias(column);
-		for (DataRow row : formTemplate.getRows()) {
-			row.addColumn(column);
-		}
+		formTemplate.addColumn(column);
 	}
 
 	@Override
 	public void removeColumn(Column column) {
-		for (DataRow row : formTemplate.getRows()) {
-			row.remove(column.getAlias());
-		}
+		formTemplate.removeColumn(column);
 	}
 
 	@Override

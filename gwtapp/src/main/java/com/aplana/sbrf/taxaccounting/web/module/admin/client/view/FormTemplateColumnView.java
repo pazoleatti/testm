@@ -244,16 +244,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		newColumn.setAlias("псевдоним");
 		newColumn.setWidth(5);
 		newColumn.setOrder(columns.size() + 1);
-		columns.add(newColumn);
-		setupColumns(columns.size() - 1);
 		getUiHandlers().addColumn(newColumn);
+		setupColumns(columns.size() - 1);
 	}
 
 	@UiHandler("removeColumn")
 	public void onRemoveColumn(ClickEvent event){
 		int index = columnListBox.getSelectedIndex();
 		getUiHandlers().removeColumn(columns.get(index));
-		columns.remove(index);
 
 		for (int i = index; i < columns.size(); i++) {
 			columns.get(i).setOrder(columns.get(i).getOrder() - 1);

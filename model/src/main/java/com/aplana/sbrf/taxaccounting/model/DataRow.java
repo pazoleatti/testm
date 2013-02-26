@@ -217,6 +217,13 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 		return data.remove(key);
 	}
 
+	public void removeColumn(Column column) {
+		Cell cell = getCell(column.getAlias(), false);
+		if (cell != null) {
+			data.remove(cell);
+		}
+	}
+
 	@Override
 	public int size() {
 		return data.size();
