@@ -22,8 +22,8 @@ public interface FormDataService {
 	 *		налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
 	 *		- в виде первичной и консолидированной) 
 	 * @return созданный и проинициализированный объект данных.
-	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException если у пользователя нет прав создавать налоговую форму с такими параметрами
-	 * @throws com.aplana.sbrf.taxaccounting.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав создавать налоговую форму с такими параметрами
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
 	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind);
@@ -51,7 +51,7 @@ public interface FormDataService {
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formData объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
-	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
 	long saveFormData(int userId, FormData formData);
 	
@@ -60,7 +60,7 @@ public interface FormDataService {
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formDataId идентификатор записи, которую необходимо считать
 	 * @return объект с данными по налоговой форме
-	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
 	FormData getFormData(int userId, long formDataId, Logger logger);
 
@@ -68,7 +68,7 @@ public interface FormDataService {
 	 * Удалить данные по налоговой форме
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formDataId идентификатор записи, котрую нужно удалить
-	 * @throws com.aplana.sbrf.taxaccounting.exception.AccessDeniedException если у пользователя недостаточно прав для удаления записи
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя недостаточно прав для удаления записи
 	 */
 	void deleteFormData(int userId, long formDataId);
 
@@ -77,7 +77,7 @@ public interface FormDataService {
 	 * @param formDataId идентификатор объекта {@link FormData}
 	 * @param userId идентификатор пользователя, от имени которого выплняется действие
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
-	 * @throws com.aplana.sbrf.taxaccounting.exception.ServiceException
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
 	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 

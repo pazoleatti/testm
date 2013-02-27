@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.exception;
 
+import com.aplana.sbrf.taxaccounting.model.exception.TAException;
+
 /**
  * Класс-исключение, используется, когда при выполнении операции по работе с БД
  * произошла ошибка, требующая отката транзакции. 

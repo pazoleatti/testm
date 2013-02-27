@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.exception;
+package com.aplana.sbrf.taxaccounting.model.exception;
 
 /**
  * Базовый класс для исключений, создаваемых в рамках проекта.
