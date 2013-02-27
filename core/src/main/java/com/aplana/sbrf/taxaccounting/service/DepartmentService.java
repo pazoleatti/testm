@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
@@ -88,5 +87,5 @@ public interface DepartmentService {
 	 *                             FormDataSearchService.getAvailableFilterValues().getDepartmentIds()
 	 * @return список департаментов, необходимый для построения дерева
 	 */
-	Set<Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
+	Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
 }

@@ -55,7 +55,8 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 		    res.setDepartments(departmentService.listAll());
 	    } else {
 		    //Контролер или Оператор
-		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds())));
+		    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(filterValues
+				    .getDepartmentIds()).values()));
 	    }
 	    res.setFilterValues(filterValues);
 	    res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));

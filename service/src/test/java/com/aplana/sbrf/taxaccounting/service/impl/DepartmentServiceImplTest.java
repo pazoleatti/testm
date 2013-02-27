@@ -104,7 +104,7 @@ public class DepartmentServiceImplTest {
 		when(departmentDao.getParent(2)).thenReturn(root);
 		when(departmentDao.getParent(3)).thenReturn(root);
 
-		Set<Department> result = departmentService.getRequiredForTreeDepartments(available);
+		Collection<Department> result = departmentService.getRequiredForTreeDepartments(available).values();
 		verify(departmentDao, times(1)).getDepartment(2);
 		verify(departmentDao, times(1)).getParent(2);
 		verify(departmentDao, times(1)).getDepartment(3);

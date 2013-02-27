@@ -56,30 +56,14 @@ public class ReportPeriodPicker extends Composite{
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
-				StringBuilder result = new StringBuilder();
-				StringBuilder tooltipTitle = new StringBuilder();
-				for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
-					result.append(item.getValue()).append(";");
-					tooltipTitle.append(item.getValue()).append("\n");
-				}
-				selected.setText(result.toString());
-				selected.setTitle(tooltipTitle.toString());
-				//TODO: использовать setSelectedReportPeriods()
+				setSelectedReportPeriods(selectedReportPeriods);
 			}
 		});
 		applyButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				StringBuilder result = new StringBuilder();
-				StringBuilder tooltipTitle = new StringBuilder();
-				for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
-					result.append(item.getValue()).append(";");
-					tooltipTitle.append(item.getValue()).append("\n");
-				}
-				selected.setText(result.toString());
-				selected.setTitle(tooltipTitle.toString());
+				setSelectedReportPeriods(selectedReportPeriods);
 				popup.hide();
-				//TODO: использовать setSelectedReportPeriods()
 			}
 		});
 		tree.addOpenHandler(new OpenHandler<TreeItem>() {
@@ -112,11 +96,19 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
+		Map<Integer, String> selectedReportPeriods = new HashMap<Integer, String>();
+		for(ReportPeriod item : reportPeriodList){
+			selectedReportPeriods.put(item.getId(), item.getName());
+		}
+		setSelectedReportPeriods(selectedReportPeriods);
+	}
+
+	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
-		for(ReportPeriod item : reportPeriodList){
-			result.append(item.getName()).append(";");
-			tooltipTitle.append(item.getName()).append("\n");
+		for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
+			result.append(item.getValue()).append(";");
+			tooltipTitle.append(item.getValue()).append("\n");
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());

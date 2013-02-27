@@ -49,7 +49,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		DeclarationFilterAvailableValues declarationFilterValues = declarationService.getFilterAvailableValues(securityService
 				.currentUser().getId(), action.getTaxType());
 
-		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues.getDepartmentIds())));
+		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues
+				.getDepartmentIds()).values()));
 		res.setTaxPeriods(taxPeriodDao.listByTaxType(action.getTaxType()));
 		res.setFilterValues(declarationFilterValues);
 		res.setCurrentReportPeriod(getCurrentReportPeriod(action.getTaxType()));

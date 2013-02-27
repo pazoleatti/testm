@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -68,10 +66,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
 	@Override
- 	public Set<Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){
-		Set<Department> departmentSet = new HashSet<Department>();
+ 	public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){
+		Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
 		for(Integer departmentId : availableDepartments){
-			departmentSet.add(getDepartment(departmentId));
+			departmentSet.put(departmentId, getDepartment(departmentId));
 		}
 		for(Integer departmentId : availableDepartments){
 			Integer searchFor = departmentId;
@@ -80,11 +78,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 				if(department == null){
 					break;
 				}
-				if(department.getParentId() == null || departmentSet.contains(department.getParentId())){
-					departmentSet.add(department);
+				if(department.getParentId() == null || departmentSet.containsKey(department.getParentId())){
+					departmentSet.put(department.getId(), department);
 					break;
 				} else {
-					departmentSet.add(department);
+					departmentSet.put(department.getId(), department);
 					searchFor = department.getParentId();
 				}
 			}
