@@ -29,38 +29,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	private DepartmentDao departmentDao;
 
 	@Override
-	public DeclarationDataFilterAvailableValues getAvailableFilterValues(int userId, TaxType taxType) {
-		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
-
-		TAUser user = taUserDao.getUser(userId);
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
-			List<Integer> listDepartments = new LinkedList<Integer>();
-			for (Department department : departmentDao.listDepartments()) {
-				listDepartments.add(department.getId());
-			}
-			result.setDepartmentIds(listDepartments);
-
-			List<DeclarationType> declarationTypeList = declarationTypeDao.listAllByTaxType(taxType);
-			Collections.sort(declarationTypeList, new DeclarationTypeAlphanumericComparator());
-			result.setDeclarationTypes(declarationTypeList);
-			return result;
-		}
-
-		if (!user.hasRole(TARole.ROLE_OPERATOR)) {
-			throw new AccessDeniedException("У пользователя нет прав на поиск по декларациям");
-		}
-
-		List<Integer> ddts = new LinkedList<Integer>();
-		ddts.addAll(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
-		result.setDepartmentIds(ddts);
-		List<DeclarationType> declarationTypeList = declarationTypeDao.listAllByTaxType(taxType);
-		Collections.sort(declarationTypeList, new DeclarationTypeAlphanumericComparator());
-		result.setDeclarationTypes(declarationTypeList);
-
-		return result;
-	}
-
-	@Override
 	public PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter) {
 		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
 				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
