@@ -15,20 +15,38 @@
 			margin-right: auto;
 			margin-left: auto;
 		}
+
+        .topPanel{
+            height: 100px;
+        }
+
+        .titlePanel{
+            width: 310px;
+        }
+
+        .titleText{
+            margin-left: 5px;
+            margin-top: 5px;
+            font-size: 25px;
+        }
+
+        .titleDesc{
+            margin-left: 5px;
+            margin-top: 5px;
+            font-size: 15px;
+        }
 	</ui:style>
 
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
-		<g:north size="160">
-			<g:VerticalPanel>
-				<g:FlowPanel width="100%" ui:field="filterContentPanel" />
-				<style:Bar>
-					<style:LeftBar>
-						<g:Button ui:field="create">Создать</g:Button>
-						<g:Button ui:field="apply">Применить</g:Button>
-					</style:LeftBar>
-				</style:Bar>
-			</g:VerticalPanel>
+		<g:north size="100">
+            <g:HorizontalPanel addStyleNames="{style.topPanel}">
+                <g:VerticalPanel addStyleNames="{style.titlePanel}">
+                    <g:Label addStyleNames="{style.titleText}">Список налоговых форм</g:Label>
+                    <g:Label addStyleNames="{style.titleDesc}">Налог на прибыль</g:Label>
+                </g:VerticalPanel>
+                <g:FlowPanel width="100%" ui:field="filterContentPanel" />
+            </g:HorizontalPanel>
 		</g:north>
 
 		<g:center>

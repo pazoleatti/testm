@@ -6,31 +6,52 @@
 		.important {
 			font-weight: bold;
 		}
+
+        .buttonMargin{
+            margin-left: 25px;
+        }
+        .createButton{
+            margin-left: 25px;
+            margin-top: 17px;
+        }
+        .searchButton{
+            margin-left: 25px;
+            margin-top: 17px;
+            margin-left: 10px;
+        }
 	</ui:style>
 
-	<g:HorizontalPanel width="50%">
-        <g:VerticalPanel spacing="5" width="100%">
-            <g:VerticalPanel ui:field="reportPeriodPanel">
-                <g:Label width="200px" text="Отчетный период" />
-            </g:VerticalPanel>
 
-            <g:VerticalPanel ui:field="departmentSelectionTreePanel">
-                <g:Label width="200px" text="Подразделение" />
-            </g:VerticalPanel>
-        </g:VerticalPanel>
+        <g:FlowPanel>
+            <g:HorizontalPanel>
+                <g:VerticalPanel addStyleNames="{style.buttonMargin}" ui:field="reportPeriodPanel">
+                    <g:Label width="200px" text="Отчетный период" />
+                </g:VerticalPanel>
 
-        <g:VerticalPanel spacing="5" width="100%">
-	        <g:Label width="200px" text="Тип налоговой формы"/>
-            <g:ValueListBox width="200px" ui:field="formDataKind" />
+                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                    <g:Label width="200px" text="Тип налоговой формы"/>
+                    <g:ValueListBox width="200px" ui:field="formDataKind" />
+                </g:VerticalPanel>
 
-            <g:Label width="200px" text="Вид налоговой формы"/>
-            <g:ValueListBox width="200px" ui:field="formTypeId" />
-        </g:VerticalPanel>
+                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                    <g:Label width="200px" text="Вид налоговой формы"/>
+                    <g:ValueListBox width="200px" ui:field="formTypeId" />
+                </g:VerticalPanel>
 
-        <g:VerticalPanel spacing="5" width="100%">
-            <g:Label width="200px" text="Статус формы"/>
-            <g:ValueListBox width="200px" ui:field="formState"/>
-        </g:VerticalPanel>
-    </g:HorizontalPanel>
+                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                    <g:Label width="200px" text="Статус формы"/>
+                    <g:ValueListBox width="200px" ui:field="formState"/>
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
+            <g:HorizontalPanel>
+                <g:VerticalPanel addStyleNames="{style.buttonMargin}" ui:field="departmentSelectionTreePanel">
+                    <g:Label width="200px" text="Подразделение" />
+                </g:VerticalPanel>
+                <g:Button addStyleNames="{style.createButton}" ui:field="create">Создать</g:Button>
+                <g:Button addStyleNames="{style.searchButton}" ui:field="apply">Применить</g:Button>
+            </g:HorizontalPanel>
+
+        </g:FlowPanel>
+
 
 </ui:UiBinder> 

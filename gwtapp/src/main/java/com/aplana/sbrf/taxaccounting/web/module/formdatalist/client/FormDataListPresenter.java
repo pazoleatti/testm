@@ -1,38 +1,26 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterReadyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
+import com.google.gwt.view.client.*;
+import com.google.inject.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
-		FormDataListUiHandlers, FilterReadyEvent.MyHandler {
+		FormDataListUiHandlers, FilterReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
+		FormDataListApplyEvent.FormDataApplyHandler {
 
 
 	private static final int PAGE_SIZE = 20;
@@ -102,15 +90,39 @@ public class FormDataListPresenter extends
 	}
 
 	@Override
-	public void onApplyFilter() {
+	@ProxyEvent
+	public void onFormDataCreateButtonClicked(FormDataListCreateEvent event) {
+		FormDataFilter filterFormData = filterPresenter.getFilterData();
+		if(filterFormData.getDepartmentId().size() > 1){
+			MessageEvent.fire(FormDataListPresenter.this, "Для создания налоговой формы необходимо" +
+					" указать только одно подразделение");
+		} else {
+			placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
+					.with(FormDataPresenter.READ_ONLY, "false")
+					.with(FormDataPresenter.FORM_DATA_ID,
+							String.valueOf(Long.MAX_VALUE))
+					.with(FormDataPresenter.FORM_DATA_KIND_ID,
+							String.valueOf(filterFormData.getFormDataKind()!=null ? filterFormData.getFormDataKind().getId() : null))
+					.with(FormDataPresenter.DEPARTMENT_ID,
+							String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId()
+									.iterator().next() : null))
+					.with(FormDataPresenter.FORM_DATA_TYPE_ID,
+							String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
+		}
+	}
+
+	@Override
+	@ProxyEvent
+	public void onFormDataApplyButtonClicked(FormDataListApplyEvent event) {
 		FormDataFilter filterFormData = filterPresenter.getFilterData();
 		loadFormDataList(filterFormData);
-        filterPresenter.updateSavedFilterData(filterFormData);
+		filterPresenter.updateSavedFilterData(filterFormData);
 	}
+
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.
 	 * FilterReadyEvent
 	 * .MyHandler#onFilterReady(com.aplana.sbrf.taxaccounting.web
@@ -127,27 +139,6 @@ public class FormDataListPresenter extends
 
 	public void refreshTable() {
 		dataProvider.update();
-	}
-
-	@Override
-	public void onCreateClicked() {
-		FormDataFilter filterFormData = filterPresenter.getFilterData();
-		if(filterFormData.getDepartmentId().size() > 1){
-			MessageEvent.fire(FormDataListPresenter.this, "Для создания налоговой формы необходимо" +
-					" указать только одно подразделение");
-		} else {
-		placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
-				.with(FormDataPresenter.READ_ONLY, "false")
-				.with(FormDataPresenter.FORM_DATA_ID,
-						String.valueOf(Long.MAX_VALUE))
-				.with(FormDataPresenter.FORM_DATA_KIND_ID,
-						String.valueOf(filterFormData.getFormDataKind()!=null ? filterFormData.getFormDataKind().getId() : null))
-				.with(FormDataPresenter.DEPARTMENT_ID,
-						String.valueOf(filterFormData.getDepartmentId()!=null ? filterFormData.getDepartmentId()
-								.iterator().next() : null))
-				.with(FormDataPresenter.FORM_DATA_TYPE_ID,
-						String.valueOf(filterFormData.getFormTypeId()!=null ? filterFormData.getFormTypeId() : null)));
-		}
 	}
 
 	@Override

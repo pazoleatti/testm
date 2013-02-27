@@ -1,28 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.*;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.*;
+import com.google.gwt.cell.client.*;
+import com.google.gwt.safehtml.shared.*;
+import com.google.gwt.uibinder.client.*;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.*;
+import com.google.inject.*;
+import com.gwtplatform.mvp.client.*;
+
+import java.util.*;
 
 public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
@@ -154,20 +146,6 @@ public class FormDataListView extends
 	@Override
 	public boolean isAscSorting(){
 		return isAscSorting;
-	}
-
-	@UiHandler("apply")
-	void onApplyButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onApplyFilter();
-		}
-	}
-
-	@UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onCreateClicked();
-		}
 	}
 
 	private Header<String> getHeader(final String columnName){

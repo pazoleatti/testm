@@ -1,20 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.*;
+import com.aplana.sbrf.taxaccounting.web.widget.treepicker.*;
+import com.google.gwt.editor.client.*;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.text.shared.*;
+import com.google.gwt.uibinder.client.*;
+import com.google.gwt.user.client.ui.*;
+import com.google.inject.*;
+import com.gwtplatform.mvp.client.*;
 
 import java.util.*;
 
@@ -211,6 +206,20 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
 		if(getUiHandlers() != null){
 			getUiHandlers().onTaxPeriodSelected(taxPeriod);
+		}
+	}
+
+	@UiHandler("create")
+	void onCreateButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCreateClicked();
+		}
+	}
+
+	@UiHandler("apply")
+	void onAppyButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onApplyClicked();
 		}
 	}
 }

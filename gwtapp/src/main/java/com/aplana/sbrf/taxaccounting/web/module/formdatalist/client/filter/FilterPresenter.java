@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.PresenterWidget;
-import com.gwtplatform.mvp.client.View;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
+import com.google.inject.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.*;
 
 import java.util.*;
 
@@ -121,6 +118,16 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	@Override
 	public TaxType getCurrentTaxType(){
 		return this.taxType;
+	}
+
+	@Override
+	public void onCreateClicked() {
+		FormDataListCreateEvent.fire(this);
+	}
+
+	@Override
+	public void onApplyClicked() {
+		FormDataListApplyEvent.fire(this);
 	}
 
 	private FormDataFilter prepareFormDataFilter(GetFilterDataResult result){
