@@ -44,12 +44,6 @@ public class MainPageView extends ViewImpl implements MyView {
 	@UiField
 	Element loadingMessage;
 
-	//@UiField
-	//Widget titlePanel;
-
-	//@UiField
-	//HasText title;
-
 	@Inject
 	public MainPageView(Binder binder) {
 		widget = binder.createAndBindUi(this);
@@ -109,16 +103,6 @@ public class MainPageView extends ViewImpl implements MyView {
 		loadingMessage.getStyle().setVisibility(
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
 	}
-
-	/*
-	@Override
-	public void updateTitle(String title, String desc) {
-		dockPanel.setWidgetHidden(titlePanel, title == null && desc == null);
-		StringBuilder text = new StringBuilder(title != null ? title : "");
-		text.append(desc != null ? " / " + desc : "");
-		this.title.setText(text.toString());
-	}
-	*/
 
 	@Override
 	public void setProjectVersion(String version){
