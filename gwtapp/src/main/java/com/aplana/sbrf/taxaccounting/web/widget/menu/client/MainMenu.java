@@ -54,15 +54,21 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 				}
 				menu.addItem(menuItem.getName(), subMenuBar);
 				menu.addSeparator();
-				panel.add(menu);
 			}
 			else {
-				InlineHyperlink link = new InlineHyperlink();
-				link.setTargetHistoryToken(menuItem.getLink());
-				link.setText(menuItem.getName());
-				panel.add(link);
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				sb.appendHtmlConstant("<style>a:hover {color: #000000 !important}</style>");
+				sb.appendHtmlConstant("<a href=\"#"
+						+ menuItem.getLink() + ";"
+						+ "nType="
+						+ menuItem.getLink()
+						+ "\" style=\"color:white; font-family: Tahoma; text-decoration:none;\">"
+						+ menuItem.getName() + "</a>");
+				menu.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
+				menu.addSeparator();
 			}
 		}
+		panel.add(menu);
 	}
 
 }
