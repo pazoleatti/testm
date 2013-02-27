@@ -6,35 +6,46 @@
         @external .gwt-MenuBar-horizontal .gwt-MenuItem;
         .gwt-MenuBar-horizontal .gwt-MenuItem {
             color: white;
+            font-size: 14px;
+            font-family: Tahoma;
+            font-weight: normal;
+            height: 30px;
+            vertical-align: middle;
         }
+
         @external .gwt-MenuBar .gwt-MenuItem-selected;
         .gwt-MenuBar .gwt-MenuItem-selected {
-            background: none;
-            color: #3964C2 !important;
             cursor: pointer;
+            color: #000000;
+            font-family: Tahoma;
+            background-color: #7E7F7F;
         }
 
         @external .gwt-MenuBar-vertical .gwt-MenuItem;
         .gwt-MenuBar-vertical .gwt-MenuItem {
-            background-color: #76BD43;
-            padding: 5px;
+            margin-left: 15px !important;
+            width: 150px;
+            width: 135px;
+            padding: 3px 5px 3px 14px;
         }
 
-        <!--убрать рамку для подменю-->
-        @external .gwt-MenuBarPopup .menuPopupBottomRightInner, .gwt-MenuBarPopup .menuPopupBottomLeftInner;
-        @external .gwt-MenuBarPopup .menuPopupTopLeftInner .gwt-MenuBarPopup .menuPopupTopRightInner;
-        .gwt-MenuBarPopup .menuPopupBottomRightInner, .gwt-MenuBarPopup .menuPopupBottomLeftInner,
-        .gwt-MenuBarPopup .menuPopupTopLeftInner, .gwt-MenuBarPopup .menuPopupTopRightInner {
-            width: 0;
-            height: 0;
+        @external .gwt-MenuBarPopup;
+        .gwt-MenuBarPopup {
+            top: 35px !important;
         }
+
         @external .gwt-MenuBar-horizontal;
         .gwt-MenuBar-horizontal {
             background: none;
             border: none;
+            vertical-align: middle;
+            height: 32px;
+            padding-top: 3px;
+            padding-bottom: 5px;
+            padding-left: 135px;
         }
     </ui:style>
 
-	<g:FlowPanel ui:field="panel"/>
+	<g:HTMLPanel ui:field="panel"/>
 
 </ui:UiBinder> 

@@ -38,23 +38,22 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		panel.clear();
 		MenuBar menu = new MenuBar();
 		menu.setAnimationEnabled(true);
-		menu.setAutoOpen(true);
 
 		for (final MenuItem menuItem : menuItems) {
 			if (!menuItem.getSubMenu().isEmpty()) {
 				MenuBar subMenuBar = new MenuBar(true);
 				for (MenuItem subMenu : menuItem.getSubMenu()) {
 					SafeHtmlBuilder sb = new SafeHtmlBuilder();
-					sb.appendHtmlConstant("<style>a:hover {color: #3964C2 !important}</style>");
 					sb.appendHtmlConstant("<a href=\"#"
 							+ subMenu.getLink() + ";"
 							+ "nType="
 							+ menuItem.getLink()
-							+ "\" style=\"color:white; text-decoration:none;\"><div>"
+							+ "\" style=\"color:#000000; font-family: Tahoma; text-decoration:none;\"><div>"
 							+ subMenu.getName() + "</div></a>");
 					subMenuBar.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
 				}
 				menu.addItem(menuItem.getName(), subMenuBar);
+				menu.addSeparator();
 				panel.add(menu);
 			}
 			else {

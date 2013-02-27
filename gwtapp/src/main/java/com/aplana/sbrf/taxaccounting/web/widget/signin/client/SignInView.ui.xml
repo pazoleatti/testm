@@ -1,9 +1,26 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<g:HTMLPanel>
-		<g:Label ui:field="userName" />
-		<br/>
-		<div><g:Anchor href="logout" text="выйти"/></div>
+    <ui:style>
+        .signin {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-family: Tahoma;
+            float: right;
+            color: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .whiteColor {
+            color: #FFFFFF !important;
+        }
+    </ui:style>
+
+    <g:HTMLPanel styleName="{style.signin}" height="30px">
+        <div style="float: left; text-align: center; margin-right: 20px; text-decoration: underline">
+            <g:Label height="15px" ui:field="roleAndDepartment"/>
+            <g:Label height="15px" ui:field="userName"/>
+        </div>
+	    <div style="float: right; margin-top: 5px"><g:Anchor styleName="{style.whiteColor}" href="logout" text="Выход"/></div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

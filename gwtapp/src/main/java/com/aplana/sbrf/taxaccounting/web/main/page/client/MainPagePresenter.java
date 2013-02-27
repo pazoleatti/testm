@@ -42,7 +42,7 @@ public class MainPagePresenter extends
 	public interface MyView extends View {
 		void showLoading(boolean visibile);
 
-		void updateTitle(String title, String desc);
+		//void updateTitle(String title, String desc);
 
 		void setProjectVersion(String version);
 	
@@ -169,7 +169,7 @@ public class MainPagePresenter extends
 	 * @param desc
 	 */
 	private void updateTitle(String title, String desc) {
-		getView().updateTitle(title, desc);
+		//getView().updateTitle(title, desc);
 
 		StringBuilder pageTitleBuilder = new StringBuilder(
 				"АС \"Учет налогов\"");

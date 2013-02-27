@@ -36,7 +36,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	Panel logAreaPanel;
 
 	@UiField
-	AbsolutePanel footerPanel;
+	Panel footerPanel;
 
 	@UiField
 	Label projectVersion;
@@ -44,11 +44,11 @@ public class MainPageView extends ViewImpl implements MyView {
 	@UiField
 	Element loadingMessage;
 
-	@UiField
-	Widget titlePanel;
+	//@UiField
+	//Widget titlePanel;
 
-	@UiField
-	HasText title;
+	//@UiField
+	//HasText title;
 
 	@Inject
 	public MainPageView(Binder binder) {
@@ -110,6 +110,7 @@ public class MainPageView extends ViewImpl implements MyView {
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
 	}
 
+	/*
 	@Override
 	public void updateTitle(String title, String desc) {
 		dockPanel.setWidgetHidden(titlePanel, title == null && desc == null);
@@ -117,6 +118,7 @@ public class MainPageView extends ViewImpl implements MyView {
 		text.append(desc != null ? " / " + desc : "");
 		this.title.setText(text.toString());
 	}
+	*/
 
 	@Override
 	public void setProjectVersion(String version){

@@ -13,6 +13,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 	
 	public interface MyView extends View {
 		void setUserName(String userName);
+		void setRoleAndDepartment(String roleAndDepartment);
 	}
 	
 	private final DispatchAsync dispatchAsync;
@@ -33,6 +34,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 			@Override
 			public void onReqSuccess(GetUserInfoResult result) {
 				getView().setUserName(result.getUserName());
+				getView().setRoleAndDepartment(result.getRoleAnddepartment());
 				super.onReqSuccess(result);
 			}
 			

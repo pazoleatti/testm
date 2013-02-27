@@ -38,22 +38,16 @@ h3{
 }
 
 .topNavigation {
-	background: url("img/top_grad.gif") repeat-x scroll center bottom #F1F1F1;
-    border-top: 1px solid #E6E6E6;
-    height: 38px;
-    margin-top: 8px;
-}
-
-.mainMenuNavigation {
-	padding: 10px 0 0 32px;
+	background: url("img/top_grad.gif");
+    border-bottom: 3px solid #7E7F7F;
+    height: 40px;
 }
 
 .mainMenuNavigation div a {
 	color: white;
-	font-weight: bold;
-	font-size: 13px;
+    font-family: Tahoma;
+	font-size: 14px;
 	margin-right: 14px;
-	padding: 0;
 	text-decoration: none;
 	font-family: Helvetica,Arial;
 }
@@ -63,27 +57,37 @@ h3{
 	color: #3964C2;
 }
 
-
-
 .topHeader {
 	vertical-align: top;
-	padding: 0px;
-	margin: 2px 2px 0px 2px;
 	height: 40px;
 }
 
-.topLogo {
+.topLeftLogo {
 	float: left;
-	margin: 4px 0 0 32px;
 	background: none;
 	border: none;
 }
 
-.topLogo img {
+.topLeftLogo img {
 	margin: 0px;
 	padding: 0px;
 	background: none;
 	border: none;
+}
+
+.topRightLogo {
+    right: 0;
+    float: right;
+    background: none;
+    border: none;
+}
+
+.topRightLogo img {
+    float: right;
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    border: none;
 }
 
 .topLogoMsg {
@@ -93,17 +97,6 @@ h3{
     left: 50%;
     margin: 10px 0 0 -120px;
     position: absolute;
-}
-
-.signIn div div {
-	font-weight: bold;
-	/**color: #5B5B5B;*/
-	color: #8C8F91;
-	float: right;
-	font-size: 10px;
-	/*height: 16px;*/
-	margin: 4px 6px 0;
-	padding: 0px;
 }
 
 .footer {

@@ -40,10 +40,13 @@ public class GetMainMenuActionHandler extends
 		if (securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)
 				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL)
 				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-
-			for (TaxType taxType : TaxType.values()) {
-				menuItems.add(new MenuItem(taxType.getName(), taxType.name()));
-			}
+			/*
+			 *	тут важен порядок, поэтому мы не можем просто пробежаться по значениям
+			 */
+			menuItems.add(new MenuItem(TaxType.TRANSPORT.getName(), TaxType.TRANSPORT.name()));
+			menuItems.add(new MenuItem(TaxType.INCOME.getName(), TaxType.INCOME.name()));
+			menuItems.add(new MenuItem(TaxType.PROPERTY.getName(), TaxType.PROPERTY.name()));
+			menuItems.add(new MenuItem(TaxType.VAT.getName(), TaxType.VAT.name()));
 
 			for (MenuItem menu : menuItems) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", FormDataListNameTokens.FORM_DATA_LIST));
@@ -51,6 +54,8 @@ public class GetMainMenuActionHandler extends
 					menu.getSubMenu().add(new MenuItem("Декларации", DeclarationListNameTokens.DECLARATION_LIST));
 				}
 			}
+
+			menuItems.add(new MenuItem("Настройки", "Empty"));
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
 	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));

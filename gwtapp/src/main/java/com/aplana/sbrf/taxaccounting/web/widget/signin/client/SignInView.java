@@ -17,6 +17,9 @@ public class SignInView extends ViewImpl implements MyView{
 	@UiField
 	Label userName;
 
+	@UiField
+	Label roleAndDepartment;
+
 	@Inject
 	public SignInView(final Binder binder){
 		this.widget = binder.createAndBindUi(this);
@@ -30,5 +33,10 @@ public class SignInView extends ViewImpl implements MyView{
 	public void setUserName(String userName) {
 		this.userName.setText(userName);
 	}
-	
+
+	@Override
+	public void setRoleAndDepartment(String roleAndDepartment) {
+		this.roleAndDepartment.setText(roleAndDepartment);
+	}
+
 }

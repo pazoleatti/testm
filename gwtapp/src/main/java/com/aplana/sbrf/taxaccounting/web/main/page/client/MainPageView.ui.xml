@@ -3,71 +3,136 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
 	<ui:style>
-		.panelTitle {
-			padding-left: 10px;
-		}
+        .topGradient {
+            background: url("img/body_top_gradient.gif") repeat-x;
+            top: 0;
+            height: 32px;
+        }
 
-		.panelContent {
-			padding: 10px;
-			margin: 10px;
-			border-style: solid;
-			border-width: 2px;
-			border-color: #76bd43;
-		}
-		
-		.footerStyle {
-			font-style: italic;
-			font-size: x-small;
-		}
-	</ui:style>
+        .labelFooterStyle {
+            font-style: italic;
+            font-size: x-small;
+            position: absolute;
+            left: 30px;
+            bottom: 10px;
+        }
+
+        .footerGradient {
+            background: url("img/footer_gradient.gif") repeat-x;
+            bottom: 0px;
+            height: 32px;
+            width: 100%;
+        }
+
+        .leftGradient {
+            background: url("img/body_left_gradient.gif") repeat-y;
+            float: left;
+            width: 32px;
+            height: 100%;
+        }
+
+        .rightGradient {
+            background: url("img/body_right_gradient.gif") repeat-y;
+            float: right;
+            width: 32px;
+            height: 100%;
+        }
+
+        .footerLeft {
+            background: url("img/footer_left_corner.gif") no-repeat;
+            height: 32px;
+            float: left;
+            width: 32px;
+            bottom: 0;
+        }
+
+        .footerRight {
+            background: url("img/footer_right_corner.gif") no-repeat;
+            height: 32px;
+            float: right;
+            width: 32px;
+            bottom: 0;
+        }
+
+        .bodyTopLeft {
+            background: url("img/body_top_left_corner.gif") no-repeat;
+            height: 32px;
+            float: left;
+            width: 32px;
+            top: 0;
+        }
+
+        .bodyTopRight {
+            background: url("img/body_top_right_corner.gif") no-repeat;
+            float: right;
+            width: 32px;
+            height: 32px;
+            top: 0;
+        }
+
+        .panelContent {
+            margin: 10px;
+            position: absolute !important;
+            top: 0px;
+            right: 7px;
+            left: 7px;
+        }
+    </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
 		height="100%" width="100%">
-		<g:north size="90">
+		<g:north size="42">
 			<g:HTMLPanel>
 				<div ui:field="loadingMessage" class="loadingStatusLabel">
 					<div>Загрузка...</div>
 				</div>
 
-				<div class="topHeader">
-					<div class="topLogo">
-						<img border="0" src="img/sber_logo.png" />
-					</div>
-					<div class="topLogoMsg">СБРФ - Учет налогов</div>
-					<g:FlowPanel ui:field="signInContentPanel" styleName="signIn" />
-				</div>
-
 				<div class="topNavigation">
-					<g:FlowPanel ui:field="mainMenuContentPanel" styleName="mainMenuNavigation" />
+                    <div class="topHeader">
+                        <div class="topLeftLogo">
+                            <img style="height: 40px; width:126px;" height="40px" width="126px" src="img/header_left.gif" />
+                        </div>
+                        <div class="topRightLogo">
+                            <img style="height: 40px; width:27px;" height="40px" width="27px" src="img/header_right.gif" />
+                        </div>
+
+                        <g:HTMLPanel ui:field="signInContentPanel"/>
+                        <g:HTMLPanel ui:field="mainMenuContentPanel"/>
+                    </div>
 				</div>
 			</g:HTMLPanel>
 		</g:north>
 
-		<g:north size="40">
-			<g:HTMLPanel ui:field="titlePanel" styleName="{style.panelTitle}">
-				<h3>
-					<g:Label text="Название презентора" ui:field="title" />
-				</h3>
-			</g:HTMLPanel>
-		</g:north>
+        <g:center>
+            <g:HTMLPanel height="100%">
+                <div class="{style.topGradient}">
+                    <div class="{style.bodyTopLeft}"/>
+                    <div class="{style.bodyTopRight}"/>
+                </div>
+                <g:HTMLPanel height="100%" >
+                    <div class="{style.rightGradient}"/>
+                    <div class="{style.leftGradient}"/>
+                    <g:SplitLayoutPanel height="100%" ui:field="splitPanel" styleName="{style.panelContent}">
+                        <g:center>
+                            <g:FlowPanel ui:field="mainContentPanel"/>
+                        </g:center>
+                        <g:south size="0">
+                            <g:FlowPanel ui:field="logAreaPanel" />
+                        </g:south>
+                    </g:SplitLayoutPanel>
 
-		<g:center>
-			<g:SplitLayoutPanel ui:field="splitPanel" styleName="{style.panelContent}">
-				<g:center>
-					<g:FlowPanel ui:field="mainContentPanel" />
-				</g:center>
-				<g:south size="0">
-					<g:FlowPanel ui:field="logAreaPanel" />
-				</g:south>
-			</g:SplitLayoutPanel>
-		</g:center>
 
-		<!-- <g:south size='20'> <g:HTML>FOOTER</g:HTML> </g:south> -->
-		<g:south size="20">
-			<g:AbsolutePanel ui:field="footerPanel">
-				<g:Label ui:field="projectVersion" styleName="{style.footerStyle}" />
-			</g:AbsolutePanel>
-		</g:south>
+                </g:HTMLPanel>
+            </g:HTMLPanel>
+        </g:center>
+
+        <g:south size="32">
+            <g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
+                <div class="{style.footerLeft}"/>
+                <div class="{style.footerRight}"/>
+                <g:Label ui:field="projectVersion" styleName="{style.labelFooterStyle}" />
+            </g:HTMLPanel>
+        </g:south>
 	</g:DockLayoutPanel>
 
 </ui:UiBinder> 

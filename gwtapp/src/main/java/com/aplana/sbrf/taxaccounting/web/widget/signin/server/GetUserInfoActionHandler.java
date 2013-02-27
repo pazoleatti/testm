@@ -29,18 +29,18 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 	public GetUserInfoResult execute(GetUserInfoAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Department department = departmentService.getDepartment(user.getDepartmentId());
-		StringBuilder name = new StringBuilder(user.getLogin());
-		name.append(" (").append(user.getName());
+
+		StringBuilder roleAndDepartment = new StringBuilder(user.getName());
 		if (department != null) {
-			name.append(" - ")
+			roleAndDepartment.append(" - ")
 				.append(department.getType().getLabel())
 				.append(" \"")
 				.append(department.getName())
 				.append("\"");
 		}
-		name.append(")");
 		GetUserInfoResult result = new GetUserInfoResult();
-		result.setUserName(name.toString());
+		result.setUserName(user.getLogin());
+		result.setRoleAnddepartment(roleAndDepartment.toString());
 		return result;
 	}
 
