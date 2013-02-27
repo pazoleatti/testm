@@ -516,6 +516,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			this.controllerOfUNP = controllerOfUNP;
 		}
 
+		@SuppressWarnings("unused")
 		public boolean isAutoCreatingForm() {
 			return autoCreatingForm;
 		}

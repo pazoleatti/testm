@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.event;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 

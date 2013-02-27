@@ -1,5 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -18,22 +26,16 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.LogHasErrorsException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
- *
+ * 
  * @author Vitalii Samolovskikh
  */
 @Service("unlockFormData")
@@ -57,51 +59,69 @@ public class FormDataServiceImpl implements FormDataService {
 	private ObjectLockDao lockDao;
 
 	/**
-	 * Создать налоговую форму заданного типа
-	 * При создании формы выполняются следующие действия:
-	 * 1) создаётся пустой объект
-	 * 2) если в объявлении формы заданы строки по-умолчанию (начальные данные), то эти строки копируются в созданную форму
-	 * 3) если в объявлении формы задан скрипт создания, то этот скрипт выполняется над создаваемой формой
-	 *
-	 * @param logger         логгер-объект для фиксации диагностических сообщений
-	 * @param userId         идентификатор пользователя, запросившего операцию
-	 * @param formTemplateId идентификатор шаблона формы, по которой создавать объект
-	 * @param departmentId   идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}, к которому относится форма
-	 * @param kind           {@link com.aplana.sbrf.taxaccounting.model.FormDataKind тип налоговой формы} (первичная, сводная, и т.д.), это поле необходимо, так как некоторые виды
-	 *                       налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
-	 *                       - в виде первичной и консолидированной)
+	 * Создать налоговую форму заданного типа При создании формы выполняются
+	 * следующие действия: 1) создаётся пустой объект 2) если в объявлении формы
+	 * заданы строки по-умолчанию (начальные данные), то эти строки копируются в
+	 * созданную форму 3) если в объявлении формы задан скрипт создания, то этот
+	 * скрипт выполняется над создаваемой формой
+	 * 
+	 * @param logger
+	 *            логгер-объект для фиксации диагностических сообщений
+	 * @param userId
+	 *            идентификатор пользователя, запросившего операцию
+	 * @param formTemplateId
+	 *            идентификатор шаблона формы, по которой создавать объект
+	 * @param departmentId
+	 *            идентификатор
+	 *            {@link com.aplana.sbrf.taxaccounting.model.Department
+	 *            подразделения}, к которому относится форма
+	 * @param kind
+	 *            {@link com.aplana.sbrf.taxaccounting.model.FormDataKind тип
+	 *            налоговой формы} (первичная, сводная, и т.д.), это поле
+	 *            необходимо, так как некоторые виды налоговых форм в одном и
+	 *            том же подразделении могут существовать в нескольких вариантах
+	 *            (например один и тот же РНУ на уровне ТБ - в виде первичной и
+	 *            консолидированной)
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
-	 *          если у пользователя нет прав создавать налоговую форму с такими параметрами
+	 *             если у пользователя нет прав создавать налоговую форму с
+	 *             такими параметрами
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-	 *          если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
-	 *          обязательных параметров
+	 *             если при создании формы произошли ошибки, вызванные
+	 *             несоблюдением каких-то бизнес-требований, например
+	 *             отсутствием обязательных параметров
 	 */
 	@Override
-	public FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind) {
-		if (formDataAccessService.canCreate(userId, formTemplateId, kind, departmentId)) {
-			return createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind);
+	public FormData createFormData(Logger logger, int userId,
+			int formTemplateId, int departmentId, FormDataKind kind) {
+		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
+				departmentId)) {
+			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
+					formTemplateId, departmentId, kind);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для создания налоговой формы с указанными параметрами");
+			throw new AccessDeniedException(
+					"Недостаточно прав для создания налоговой формы с указанными параметрами");
 		}
 	}
 
 	@Override
-	public FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind) {
+	public FormData createFormDataWithoutCheck(Logger logger, TAUser user,
+			int formTemplateId, int departmentId, FormDataKind kind) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
 
 		result.setState(WorkflowState.CREATED);
 		result.setDepartmentId(departmentId);
 		result.setKind(kind);
-		result.setReportPeriodId(reportPeriodDao.getCurrentPeriod(form.getType().getTaxType()).getId());
+		result.setReportPeriodId(reportPeriodDao.getCurrentPeriod(
+				form.getType().getTaxType()).getId());
 
 		for (DataRow predefinedRow : form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
 			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
-				String columnAlias = entry.getKey();				
+				String columnAlias = entry.getKey();
 				dataRow.put(columnAlias, entry.getValue());
-				Cell cell = dataRow.getCell(columnAlias); 
+				Cell cell = dataRow.getCell(columnAlias);
 				Cell predefinedCell = predefinedRow.getCell(columnAlias);
 				cell.setColSpan(predefinedCell.getColSpan());
 				cell.setRowSpan(predefinedCell.getRowSpan());
@@ -111,67 +131,89 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		// Execute scripts for the form event CREATE
-		formDataScriptingService.executeScripts(user, result, FormDataEvent.CREATE, logger);
+		formDataScriptingService.executeScripts(user, result,
+				FormDataEvent.CREATE, logger);
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			throw new LogHasErrorsException(
+					"Произошли ошибки в скрипте создания налоговой формы",
+					logger.getEntries());
+		}
 		return result;
 	}
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.
-	 *
-	 * @param logger логгер для регистрации ошибок
-	 * @param userId идентификатор пользователя
-	 * @param formData данные формы
+	 * 
+	 * @param logger
+	 *            логгер для регистрации ошибок
+	 * @param userId
+	 *            идентификатор пользователя
+	 * @param formData
+	 *            данные формы
 	 */
 	@Override
 	public void addRow(Logger logger, int userId, FormData formData) {
 		boolean canDo;
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+			canDo = formDataAccessService.canCreate(userId,
+					formData.getFormTemplateId(), formData.getKind(),
+					formData.getDepartmentId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
 
 		if (canDo) {
-			if(formDataScriptingService.hasScripts(formData, FormDataEvent.ADD_ROW)){
+			if (formDataScriptingService.hasScripts(formData,
+					FormDataEvent.ADD_ROW)) {
 				TAUser user = userDao.getUser(userId);
-				formDataScriptingService.executeScripts(user, formData, FormDataEvent.ADD_ROW, logger);
+				formDataScriptingService.executeScripts(user, formData,
+						FormDataEvent.ADD_ROW, logger);
 			} else {
 				formData.appendDataRow();
 			}
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для добавления строки к налоговой форме");
+			throw new AccessDeniedException(
+					"Недостаточно прав для добавления строки к налоговой форме");
 		}
 	}
 
 	/**
 	 * Выполнить расчёты по налоговой форме
-	 *
-	 * @param logger   логгер-объект для фиксации диагностических сообщений
-	 * @param userId   идентификатор пользователя, запросившего операцию
-	 * @param formData объект с данными по налоговой форме
+	 * 
+	 * @param logger
+	 *            логгер-объект для фиксации диагностических сообщений
+	 * @param userId
+	 *            идентификатор пользователя, запросившего операцию
+	 * @param formData
+	 *            объект с данными по налоговой форме
 	 */
 	@Override
 	public void doCalc(Logger logger, int userId, FormData formData) {
 		boolean canDo;
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+			canDo = formDataAccessService.canCreate(userId,
+					formData.getFormTemplateId(), formData.getKind(),
+					formData.getDepartmentId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
-		
+
 		if (canDo) {
 			TAUser user = userDao.getUser(userId);
-			formDataScriptingService.executeScripts(user, formData, FormDataEvent.CALCULATE, logger);
+			formDataScriptingService.executeScripts(user, formData,
+					FormDataEvent.CALCULATE, logger);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для выполенения расчёта по налоговой форме");
+			throw new AccessDeniedException(
+					"Недостаточно прав для выполенения расчёта по налоговой форме");
 		}
 	}
-	
+
 	@Override
 	public void doCheck(Logger logger, int userId, FormData formData) {
 		TAUser user = userDao.getUser(userId);
-		formDataScriptingService.executeScripts(user, formData, FormDataEvent.CHECK, logger);
-		
+		formDataScriptingService.executeScripts(user, formData,
+				FormDataEvent.CHECK, logger);
+
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			logger.error("Проверка завершена, обнаружены ошибки");
 		} else {
@@ -181,71 +223,101 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Сохранить данные по налоговой форме
-	 *
-	 * @param userId   идентификатор пользователя, выполняющего операцию
-	 * @param formData объект с данными налоговой формы
+	 * 
+	 * @param userId
+	 *            идентификатор пользователя, выполняющего операцию
+	 * @param formData
+	 *            объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
-	 *          если у пользователя нет прав редактировать налоговую форму с такими параметрами
-	 *          или форма заблокирована другим пользователем
+	 *             если у пользователя нет прав редактировать налоговую форму с
+	 *             такими параметрами или форма заблокирована другим
+	 *             пользователем
 	 */
 	@Override
 	@Transactional
-	public long saveFormData(int userId, FormData formData) {
+	public long saveFormData(Logger logger, int userId, FormData formData) {
 		checkLockedByAnotherUser(formData.getId(), userId);
 		boolean canDo;
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId, formData.getFormTemplateId(), formData.getKind(), formData.getDepartmentId());
+			canDo = formDataAccessService.canCreate(userId,
+					formData.getFormTemplateId(), formData.getKind(),
+					formData.getDepartmentId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
-		
+
 		if (canDo) {
+
+			// Перед сохранением формы всегда делаем её пересчет.
+			doCalc(logger, userId, formData);
+
+			// Проверяем ошибки при пересчете
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new LogHasErrorsException(
+						"Произошли ошибки при пересчете формы",
+						logger.getEntries());
+			}
+
 			boolean needLock = formData.getId() == null;
 			long id = formDataDao.save(formData);
-			if (needLock){
+			if (needLock) {
 				lock(id, userId);
 			}
 			return id;
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для изменения налоговой формы");
+			throw new AccessDeniedException(
+					"Недостаточно прав для изменения налоговой формы");
 		}
 	}
 
 	/**
 	 * Получить данные по налоговой форме
-	 *
-	 * @param userId     идентификатор пользователя, выполняющего операцию
-	 * @param formDataId идентификатор записи, которую необходимо считать
-	 * @param tryLock выполнить попытку блокировки
+	 * 
+	 * @param userId
+	 *            идентификатор пользователя, выполняющего операцию
+	 * @param formDataId
+	 *            идентификатор записи, которую необходимо считать
+	 * @param tryLock
+	 *            выполнить попытку блокировки
 	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
-	 *          если у пользователя нет прав просматривать налоговую форму с такими параметрами
+	 *             если у пользователя нет прав просматривать налоговую форму с
+	 *             такими параметрами
 	 */
 	@Override
 	@Transactional
 	public FormData getFormData(int userId, long formDataId, Logger logger) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
-			
+
 			FormData formData = formDataDao.get(formDataId);
 
-			formDataScriptingService.executeScripts(userDao.getUser(userId), formData, FormDataEvent.AFTER_LOAD, logger);
+			formDataScriptingService.executeScripts(userDao.getUser(userId),
+					formData, FormDataEvent.AFTER_LOAD, logger);
+
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new LogHasErrorsException(
+						"Произошли ошибки при в скрипте который выполняется после загрузки формы",
+						logger.getEntries());
+			}
 
 			return formData;
 		} else {
-			throw new AccessDeniedException("Недостаточно прав на просмотр данных налоговой формы",
-				userId, formDataId
-			);
+			throw new AccessDeniedException(
+					"Недостаточно прав на просмотр данных налоговой формы",
+					userId, formDataId);
 		}
 	}
 
 	/**
 	 * Удалить данные по налоговой форме
-	 *
-	 * @param userId     идентификатор пользователя, выполняющего операцию
-	 * @param formDataId идентификатор записи, котрую нужно удалить
+	 * 
+	 * @param userId
+	 *            идентификатор пользователя, выполняющего операцию
+	 * @param formDataId
+	 *            идентификатор записи, котрую нужно удалить
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
-	 *          если у пользователя недостаточно прав для удаления записи
+	 *             если у пользователя недостаточно прав для удаления записи
 	 */
 	@Override
 	@Transactional
@@ -254,69 +326,95 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для удаления налоговой формы");
+			throw new AccessDeniedException(
+					"Недостаточно прав для удаления налоговой формы");
 		}
 	}
 
 	/**
 	 * Перемещает форму из одного состояния в другое.
-	 *
-	 * @param formDataId   идентификатор налоговой формы
-	 * @param userId       идентификатор текщуего пользователя
-	 * @param workflowMove переход
+	 * 
+	 * @param formDataId
+	 *            идентификатор налоговой формы
+	 * @param userId
+	 *            идентификатор текщуего пользователя
+	 * @param workflowMove
+	 *            переход
 	 */
 	@Override
-	public boolean doMove(long formDataId, int userId, WorkflowMove workflowMove, Logger logger) {
+	public void doMove(long formDataId, int userId, WorkflowMove workflowMove,
+			Logger logger) {
 		checkLockedByAnotherUser(formDataId, userId);
-		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userId, formDataId);
+		List<WorkflowMove> availableMoves = formDataAccessService
+				.getAvailableMoves(userId, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
-			throw new ServiceException("Переход \"" + workflowMove + "\" из текущего состояния невозможен, или пользователя с id = " + userId + " не хватает полномочий для его осуществления");
+			throw new ServiceException(
+					"Переход \""
+							+ workflowMove
+							+ "\" из текущего состояния невозможен, или пользователя с id = "
+							+ userId
+							+ " не хватает полномочий для его осуществления");
 		}
 
 		FormData formData = formDataDao.get(formDataId);
-		formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getEvent(), logger);
+		formDataScriptingService.executeScripts(userDao.getUser(userId),
+				formData, workflowMove.getEvent(), logger);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
-			formDataWorkflowDao.changeFormDataState(formDataId, workflowMove.getToState(), workflowMove.getToState().equals(WorkflowState.ACCEPTED) ? new Date() : null);
+			formDataWorkflowDao
+					.changeFormDataState(
+							formDataId,
+							workflowMove.getToState(),
+							workflowMove.getToState().equals(
+									WorkflowState.ACCEPTED) ? new Date() : null);
 
-			if(workflowMove.getAfterEvent()!=null){
-				formDataScriptingService.executeScripts(userDao.getUser(userId), formData, workflowMove.getAfterEvent(), logger);
+			if (workflowMove.getAfterEvent() != null) {
+				formDataScriptingService.executeScripts(
+						userDao.getUser(userId), formData,
+						workflowMove.getAfterEvent(), logger);
+				if (logger.containsLevel(LogLevel.ERROR)) {
+					throw new LogHasErrorsException(
+							"Произошли ошибки при в скрипте который выполняется после перехода",
+							logger.getEntries());
+				}
 			}
 
-			return true;
 		} else {
-			return false;
+			throw new LogHasErrorsException(
+					"Произошли ошибки при в скрипте который выполняется перед переходом",
+					logger.getEntries());
 		}
 	}
-	
+
 	/**
 	 * Проверяет, не заблокирована ли форма другим пользователем
+	 * 
 	 * @param formDataId
 	 * @param userId
 	 */
-	private void checkLockedByAnotherUser(Long formDataId, int userId){
-		if (formDataId!=null){
+	private void checkLockedByAnotherUser(Long formDataId, int userId) {
+		if (formDataId != null) {
 			ObjectLock<Long> objectLock = getObjectLock(formDataId);
-			if(objectLock != null && objectLock.getUserId() != userId){
-				throw new AccessDeniedException("Форма заблокирована другим пользователем");
+			if (objectLock != null && objectLock.getUserId() != userId) {
+				throw new AccessDeniedException(
+						"Форма заблокирована другим пользователем");
 			}
 		}
 	}
 
-
-	public boolean lock(long formDataId, int userId){
+	public boolean lock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if (objectLock != null && objectLock.getUserId() != userId) {
 			return false;
 		} else {
-			lockDao.lockObject(formDataId, FormData.class ,userId);
+			lockDao.lockObject(formDataId, FormData.class, userId);
 			return true;
 		}
 	}
 
 	@Override
-	public boolean unlock(long formDataId, int userId){
+	public boolean unlock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if (objectLock != null && objectLock.getUserId() != userId) {
 			return false;
 		} else {
 			lockDao.unlockObject(formDataId, FormData.class, userId);
@@ -328,11 +426,11 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public boolean unlockAllByUserId(int userId) {
 		lockDao.unlockAllObjectByUserId(userId);
-		return true;//TODO обработать возможные ошибки
+		return true;// TODO обработать возможные ошибки
 	}
 
 	@Override
-	public  ObjectLock<Long> getObjectLock(long formDataId){
+	public ObjectLock<Long> getObjectLock(long formDataId) {
 		return lockDao.getObjectLock(formDataId, FormData.class);
 	}
 

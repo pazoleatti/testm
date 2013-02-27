@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.ModelUtils;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
@@ -21,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.WrongInputDataServiceException;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -50,7 +47,8 @@ public class FormDataPresenter extends
 
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter) {
+			PlaceManager placeManager, DispatchAsync dispatcher,
+			SignersPresenter signersPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter);
 		getView().setUiHandlers(this);
 	}
@@ -80,45 +78,26 @@ public class FormDataPresenter extends
 					new AbstractCallback<GetFormDataResult>() {
 						@Override
 						public void onReqSuccess(GetFormDataResult result) {
-							
+
 							LogAddEvent.fire(this, result.getLogEntries());
-							
-							if (ModelUtils.findByProperties(
-									result.getLogEntries(),
-									LogLevel.ERROR,
-									new ModelUtils.GetPropertiesFunc<LogEntry, LogLevel>() {
-										@Override
-										public LogLevel getProperties(
-												LogEntry object) {
-											return object.getLevel();
-										}
-									}) != null) {
-								if (!isVisible()) {
-									MessageEvent
-											.fire(FormDataPresenter.this,
-													"Не удалось открыть/создать налоговую форму");
-								}
-								getProxy().manualRevealFailed();
-							} else {
-								getProxy().manualReveal(FormDataPresenter.this);
-							}
-							
+
 							formData = result.getFormData();
-							formDataAccessParams = result.getFormDataAccessParams();
+							formDataAccessParams = result
+									.getFormDataAccessParams();
 
 							switch (result.getFormMode()) {
 							case READ_UNLOCKED:
 								setReadUnlockedMode();
 								break;
 							case READ_LOCKED:
-								setReadLockedMode(result.getLockedByUser(), result.getLockDate());
+								setReadLockedMode(result.getLockedByUser(),
+										result.getLockDate());
 								break;
 							case EDIT:
 								setEditMode();
 								break;
 							}
-							
-							
+
 							manageDeleteRowButtonEnabled();
 
 							getView().setAdditionalFormInfo(
@@ -138,30 +117,26 @@ public class FormDataPresenter extends
 									.addCustomHeader(result.isNumberedHeader());
 							getView().addCustomTableStyles(
 									result.getAllStyles());
-							
+
 							TitleUpdateEvent.fire(this,
 									readOnlyMode ? "Налоговая форма"
 											: "Редактирование налоговой формы",
 									formData.getFormType().getName());
-
-
-
+							getProxy().manualReveal(FormDataPresenter.this);
 							super.onReqSuccess(result);
 						}
 
 						@Override
 						protected void onReqFailure(Throwable throwable) {
-							getProxy().manualRevealFailed();
-							if (throwable instanceof WrongInputDataServiceException) {
-								MessageEvent.fire(this,
-										"Не удалось создать налоговую форму: "
-												+ throwable.getMessage());
-							} else {
-								MessageEvent
-										.fire(this,
-												"Не удалось открыть/создать налоговую форму",
-												throwable);
+							if (throwable instanceof ExtActionException) {
+								LogAddEvent.fire(this,
+										((ExtActionException) throwable)
+												.getLogEntries());
+
 							}
+							MessageEvent.fire(this,
+									throwable.getLocalizedMessage());
+							getProxy().manualRevealFailed();
 						}
 
 						@Override
@@ -207,8 +182,10 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onPrintClicked() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadController/"
-				+ formData.getId() + "/" + getView().getCheckedColumnsClicked(), "", "");
+		Window.open(
+				GWT.getHostPageBaseURL() + "download/downloadController/"
+						+ formData.getId() + "/"
+						+ getView().getCheckedColumnsClicked(), "", "");
 	}
 
 	@Override
@@ -242,6 +219,25 @@ public class FormDataPresenter extends
 			public void onReqSuccess(FormDataResult result) {
 				processFormDataResult(result);
 				super.onReqSuccess(result);
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				if (throwable instanceof ExtActionException) {
+					LogAddEvent.fire(this,
+							((ExtActionException) throwable).getLogEntries());
+
+				}
+				MessageEvent.fire(
+						this,
+						"Не удалось сохранить налоговую форму: "
+								+ throwable.getLocalizedMessage());
+				super.onReqFailure(throwable);
+			}
+
+			@Override
+			protected boolean needErrorOnFailure() {
+				return false;
 			}
 		});
 

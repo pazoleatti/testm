@@ -16,7 +16,7 @@ public class LogHasErrorsException extends ServiceException{
 	
 	private List<LogEntry> logEntries;
 
-	public LogHasErrorsException(String message, List<LogEntry> logEntries, Object[] params) {
+	public LogHasErrorsException(String message, List<LogEntry> logEntries, Object... params) {
 		super(message, params);
 		this.logEntries = logEntries;
 	}

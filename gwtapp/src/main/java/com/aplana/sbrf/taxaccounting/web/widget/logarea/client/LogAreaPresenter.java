@@ -43,7 +43,9 @@ public class LogAreaPresenter extends
 	
 	@Override
 	public void onLogAdd(LogAddEvent event) {
-		logEntries.addAll(event.getLogEntries());
+		if (event.getLogEntries()!=null){
+			logEntries.addAll(event.getLogEntries());
+		}
 		updateView();
 		
 		if (!logEntries.isEmpty()){

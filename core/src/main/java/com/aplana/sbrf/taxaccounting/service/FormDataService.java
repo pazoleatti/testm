@@ -53,7 +53,7 @@ public interface FormDataService {
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
-	long saveFormData(int userId, FormData formData);
+	long saveFormData(Logger logger, int userId, FormData formData);
 	
 	/**
 	 * Получить данные по налоговой форме
@@ -79,7 +79,7 @@ public interface FormDataService {
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	public boolean doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
+	public void doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 
 	/**
 	 * Создаёт налоговую форму без проверок прав доступа
