@@ -81,6 +81,8 @@ public class FormDataPresenter extends
 						@Override
 						public void onReqSuccess(GetFormDataResult result) {
 							
+							LogAddEvent.fire(this, result.getLogEntries());
+							
 							if (ModelUtils.findByProperties(
 									result.getLogEntries(),
 									LogLevel.ERROR,
@@ -94,8 +96,7 @@ public class FormDataPresenter extends
 								if (!isVisible()) {
 									MessageEvent
 											.fire(FormDataPresenter.this,
-													"Не удалось открыть/создать налоговую форму",
-													result.getLogEntries());
+													"Не удалось открыть/создать налоговую форму");
 								}
 								getProxy().manualRevealFailed();
 							} else {
@@ -120,7 +121,6 @@ public class FormDataPresenter extends
 							
 							manageDeleteRowButtonEnabled();
 
-							LogAddEvent.fire(this, result.getLogEntries());
 							getView().setAdditionalFormInfo(
 									result.getFormData().getFormType()
 											.getName(),

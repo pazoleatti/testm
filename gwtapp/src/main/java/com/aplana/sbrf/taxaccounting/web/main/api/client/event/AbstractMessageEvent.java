@@ -24,14 +24,6 @@ abstract public class AbstractMessageEvent<T extends EventHandler> extends GwtEv
 		this.message = message;
 	}
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
-
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
-	}
-
 	public Throwable getThrowable() {
 		return throwable;
 	}
@@ -43,8 +35,6 @@ abstract public class AbstractMessageEvent<T extends EventHandler> extends GwtEv
 	private String title;
 
 	private String message;
-	
-	private List<LogEntry> logEntries;
 
 	private Throwable throwable;
 

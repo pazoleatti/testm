@@ -30,13 +30,6 @@ public class MessageEvent extends AbstractMessageEvent<MessageEvent.MyHandler> {
 		errorEvent.setThrowable(throwable);
 		source.fireEvent(errorEvent);
 	}
-	
-	public static void fire(HasHandlers source, String msg, List<LogEntry> logEntries) {
-		MessageEvent errorEvent = new MessageEvent();
-		errorEvent.setMessage(msg);
-		errorEvent.setLogEntries(logEntries);	
-		source.fireEvent(errorEvent);
-	}
 
 	public static void fire(HasHandlers source, String msg) {
 		MessageEvent errorEvent = new MessageEvent();

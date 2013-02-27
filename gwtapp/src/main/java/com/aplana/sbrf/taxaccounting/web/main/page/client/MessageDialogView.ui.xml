@@ -14,7 +14,6 @@
 	<g:DialogBox ui:field="dialogBox" modal="false">
 		<g:VerticalPanel ui:field="htmlPanel">
 			<g:Label ui:field="message" />
-			<log:LogEntriesWidget ui:field="logEntriesView" />
 			<log:ThrowableWidget ui:field="throwableView" />
             <g:cell horizontalAlignment="ALIGN_CENTER">
 			    <g:Button width="50%" ui:field="okButton">Закрыть сообщение</g:Button>

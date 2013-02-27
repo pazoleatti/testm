@@ -36,17 +36,9 @@ public class ErrorEvent extends AbstractMessageEvent<ErrorEvent.MyHandler> {
 		source.fireEvent(errorEvent);
 	}
 	
-	public static void fire(HasHandlers source, String msg, List<LogEntry> logEntries) {
-		ErrorEvent errorEvent = new ErrorEvent();
-		errorEvent.setMessage(msg);
-		errorEvent.setLogEntries(logEntries);
-		source.fireEvent(errorEvent);
-	}
-	
 	public static void fire(HasHandlers source, AbstractMessageEvent<?> msgEvent) {
 		ErrorEvent errorEvent = new ErrorEvent();
 		errorEvent.setMessage(msgEvent.getMessage());
-		errorEvent.setLogEntries(msgEvent.getLogEntries());
 		errorEvent.setThrowable(msgEvent.getThrowable());
 		source.fireEvent(errorEvent);
 	}

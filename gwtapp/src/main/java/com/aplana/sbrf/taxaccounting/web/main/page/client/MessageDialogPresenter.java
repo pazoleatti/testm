@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -19,8 +16,6 @@ public class MessageDialogPresenter extends
 		void setMeassege(String text);
 		
 		void setStackTrace(Throwable throwable);
-		
-		void setLog(List<LogEntry> log);
 
 		void setModal(boolean modal);
 	}
@@ -35,7 +30,6 @@ public class MessageDialogPresenter extends
 		getView().setMeassege(messageEvent.getMessage());
 		getView().setModal(true);
 		getView().setStackTrace(messageEvent.getThrowable());
-		getView().setLog(messageEvent.getLogEntries());
 		super.onReveal();
 	}
 

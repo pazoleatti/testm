@@ -3,7 +3,6 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log">
 	<g:HTMLPanel>
 		<g:Label ui:field="message" />
-		<log:LogEntriesWidget ui:field="logEntriesView" />
 		<log:ThrowableWidget ui:field="throwableView" />
 	</g:HTMLPanel>
 </ui:UiBinder> 
