@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fontFamilies>
 	<fontFamily name="EanGnivc">
-		<normal>barcode/eang000.ttf</normal>
+		<normal>barcode/Eang000.ttf</normal>
 		<pdfEncoding>Identity-H</pdfEncoding>
 		<pdfEmbedded>true</pdfEmbedded>
 		<exportFonts>
