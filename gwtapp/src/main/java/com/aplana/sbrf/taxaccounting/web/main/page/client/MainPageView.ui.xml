@@ -31,6 +31,15 @@
             height: 100%;
         }
 
+        .content {
+            right: 7px;
+            left: 7px;
+            bottom: 17px;
+            margin: 10px;
+            position: fixed;
+            top: 43px;
+        }
+
         .rightGradient {
             background: url("img/body_right_gradient.gif") repeat-y;
             float: right;
@@ -69,15 +78,6 @@
             height: 32px;
             top: 0;
         }
-
-        .panelContent {
-            margin: 10px;
-            position: absolute !important;
-            top: 0px;
-            right: 7px;
-            left: 7px;
-            bottom: 17px;
-        }
     </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
@@ -110,17 +110,19 @@
                     <div class="{style.bodyTopLeft}"/>
                     <div class="{style.bodyTopRight}"/>
                 </div>
-                <g:HTMLPanel height="100%" >
+                <g:HTMLPanel height="100%">
                     <div class="{style.rightGradient}"/>
                     <div class="{style.leftGradient}"/>
-                    <g:SplitLayoutPanel height="99%" ui:field="splitPanel" styleName="{style.panelContent}">
-                        <g:center>
-                            <g:FlowPanel ui:field="mainContentPanel"/>
-                        </g:center>
-                        <g:south size="0">
-                            <g:FlowPanel ui:field="logAreaPanel" />
-                        </g:south>
-                    </g:SplitLayoutPanel>
+                    <div class="{style.content}">
+                        <g:SplitLayoutPanel height="100%" ui:field="splitPanel">
+                            <g:center>
+                                <g:FlowPanel ui:field="mainContentPanel"/>
+                            </g:center>
+                            <g:south size="0">
+                                <g:FlowPanel ui:field="logAreaPanel" />
+                            </g:south>
+                        </g:SplitLayoutPanel>
+                    </div>
                 </g:HTMLPanel>
             </g:HTMLPanel>
         </g:center>
