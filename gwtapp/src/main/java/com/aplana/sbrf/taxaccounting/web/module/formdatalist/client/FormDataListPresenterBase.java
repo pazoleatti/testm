@@ -16,21 +16,16 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.*;
+import com.google.gwt.view.client.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.*;
+import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -57,6 +52,8 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		FormDataSearchOrdering getSearchOrdering();
 
 		boolean isAscSorting();
+
+		void updateTitle(String title);
 	}
 	
 	protected final PlaceManager placeManager;

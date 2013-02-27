@@ -58,8 +58,9 @@ public class FormDataListPresenter extends
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
-			filterPresenter.initFilter(TaxType.valueOf(request.getParameter(
-					"nType", "")));
+			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+			filterPresenter.initFilter(taxType);
+			getView().updateTitle(taxType.getName());
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список форм", e);
 		}

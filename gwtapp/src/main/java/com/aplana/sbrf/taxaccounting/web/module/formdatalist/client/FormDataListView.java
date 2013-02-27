@@ -38,9 +38,11 @@ public class FormDataListView extends
 	@UiField
 	FlexiblePager pager;
 
+	@UiField
+	Label titleDesc;
+
 	@Inject
 	public FormDataListView(final MyBinder binder) {
-
 		widget = binder.createAndBindUi(this);
 
 		TextColumn<FormDataSearchResultItem> formKindColumn = new TextColumn<FormDataSearchResultItem>() {
@@ -146,6 +148,11 @@ public class FormDataListView extends
 	@Override
 	public boolean isAscSorting(){
 		return isAscSorting;
+	}
+
+	@Override
+	public void updateTitle(String title){
+		titleDesc.setText(title);
 	}
 
 	private Header<String> getHeader(final String columnName){
