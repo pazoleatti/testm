@@ -100,7 +100,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(linkColumn, getHeader("Вид налоговой формы"));
 		formDataTable.addColumn(departmentColumn, getHeader("Подразделение"));
 		formDataTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
-		formDataTable.addColumn(stateColumn, getHeader("Статус формы"));
+		formDataTable.addColumn(stateColumn, getHeader("Состояние"));
 
 		pager.setDisplay(formDataTable);
 
@@ -185,7 +185,7 @@ public class FormDataListView extends
 			this.sortByColumn = FormDataSearchOrdering.DEPARTMENT_NAME;
 		} else if ("Отчетный период".equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.REPORT_PERIOD_NAME;
-		} else if ("Статус формы".equals(sortByColumn)){
+		} else if ("Состояние".equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.STATE;
 		} else {
 			this.sortByColumn = FormDataSearchOrdering.ID;
