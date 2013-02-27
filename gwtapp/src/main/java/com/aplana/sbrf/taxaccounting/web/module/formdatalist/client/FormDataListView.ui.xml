@@ -43,7 +43,7 @@
             <g:HorizontalPanel addStyleNames="{style.topPanel}">
                 <g:VerticalPanel addStyleNames="{style.titlePanel}">
                     <g:Label addStyleNames="{style.titleText}">Список налоговых форм</g:Label>
-                    <g:Label addStyleNames="{style.titleDesc}">Налог на прибыль</g:Label>
+                    <g:Label addStyleNames="{style.titleDesc}">Налог ТАКОЙ-ТО</g:Label>
                 </g:VerticalPanel>
                 <g:FlowPanel width="100%" ui:field="filterContentPanel" />
             </g:HorizontalPanel>
