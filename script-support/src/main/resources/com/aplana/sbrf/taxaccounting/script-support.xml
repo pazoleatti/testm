@@ -14,7 +14,8 @@
 
     <!-- JDBC-based DAOs -->
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.script.impl"/>
-    <!-- Services --> 
+    <!-- Services -->
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.script.impl"/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.script.dictionary.impl"/>
 
 </beans>
