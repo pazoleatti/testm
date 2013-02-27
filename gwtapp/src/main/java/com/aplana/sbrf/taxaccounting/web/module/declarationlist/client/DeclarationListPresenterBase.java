@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -20,11 +20,11 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<DeclarationListPresenterBase.MyView, Proxy_> {
 
 	public interface MyView extends View, HasUiHandlers<DeclarationListUiHandlers> {
-		void setDeclarationsList(int start, long totalCount, List<DeclarationSearchResultItem> records);
+		void setDeclarationsList(int start, long totalCount, List<DeclarationDataSearchResultItem> records);
 
-		void assignDataProvider(int pageSize, AbstractDataProvider<DeclarationSearchResultItem> data);
+		void assignDataProvider(int pageSize, AbstractDataProvider<DeclarationDataSearchResultItem> data);
 
-		DeclarationSearchOrdering getSearchOrdering();
+		DeclarationDataSearchOrdering getSearchOrdering();
 
 		boolean isAscSorting();
 

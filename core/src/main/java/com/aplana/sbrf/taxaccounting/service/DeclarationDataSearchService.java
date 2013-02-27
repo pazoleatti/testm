@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -18,7 +18,7 @@ public interface DeclarationDataSearchService {
 	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
 	 */
-	PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter);
+	PaginatedSearchResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter);
 	
 	/**
 	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога
@@ -27,5 +27,5 @@ public interface DeclarationDataSearchService {
 	 * @return объект, содержащий информацию о допустимых значениях фильтров для поиска по декларациям
 	 * @throws AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
 	 */
-	DeclarationFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType);
+	DeclarationDataFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType);
 }

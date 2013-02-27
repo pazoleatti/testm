@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,25 +18,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDaoTest.xml"})
 @Transactional
-public class DeclarationDaoTest {
+public class DeclarationDataDaoTest {
 	@Autowired
-	private DeclarationDao declarationDao;
+	private DeclarationDataDao declarationDataDao;
 	
 	@Test
 	public void testGet() {
-		Declaration d1 = declarationDao.get(1);
+		DeclarationData d1 = declarationDataDao.get(1);
 		assertEquals(1, d1.getId().longValue());
 		assertEquals(1, d1.getDeclarationTemplateId());
 		assertEquals(1, d1.getReportPeriodId());
 		assertEquals(2, d1.getDepartmentId());
 		assertTrue(d1.isAccepted());
 
-		Declaration d2 = declarationDao.get(2);
+		DeclarationData d2 = declarationDataDao.get(2);
 		assertEquals(2, d2.getId().longValue());
 		assertEquals(1, d2.getDeclarationTemplateId());
 		assertEquals(2, d2.getReportPeriodId());
@@ -41,48 +51,48 @@ public class DeclarationDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void testGetNotExisted() {
-		declarationDao.get(1000l);
+		declarationDataDao.get(1000l);
 	}
 	
 	@Test
 	public void testGetData() {
-		String data = declarationDao.getXmlData(1);
+		String data = declarationDataDao.getXmlData(1);
 		assertEquals("test-data-string-1", data);
 	}
 	
 	@Test
 	public void testGetDataEmpty() {
-		String data = declarationDao.getXmlData(2);
+		String data = declarationDataDao.getXmlData(2);
 		assertNull(data);
 	}
 	
 	
 	@Test(expected=DaoException.class)
 	public void testGetDataNotExisted() {
-		declarationDao.getXmlData(1000l);
+		declarationDataDao.getXmlData(1000l);
 	}
 	
 	@Test
 	public void testSetAccepted() {
-		declarationDao.setAccepted(3l, false);
-		Declaration d3 = declarationDao.get(3l);
+		declarationDataDao.setAccepted(3l, false);
+		DeclarationData d3 = declarationDataDao.get(3l);
 		assertFalse(d3.isAccepted());
 		
-		declarationDao.setAccepted(4l, true);
-		Declaration d4 = declarationDao.get(4l);
+		declarationDataDao.setAccepted(4l, true);
+		DeclarationData d4 = declarationDataDao.get(4l);
 		assertTrue(d4.isAccepted());
 	}
 	
 	@Test(expected=DaoException.class)
 	public void testSetAcceptedNotExistsed() {
-		declarationDao.setAccepted(1000l, true);
+		declarationDataDao.setAccepted(1000l, true);
 	}
 
 	@Test
 	public void testDelete() {
-		declarationDao.delete(5);
+		declarationDataDao.delete(5);
 		try {
-			declarationDao.get(5);
+			declarationDataDao.get(5);
 			fail("Record was not deleted");
 		} catch (DaoException e) {
 		}
@@ -90,20 +100,20 @@ public class DeclarationDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void testDeleteNotExisted() {
-		declarationDao.delete(1000l);
+		declarationDataDao.delete(1000l);
 	}
 	
 	@Test
 	public void testSaveNew() {
-		Declaration d = new Declaration();
+		DeclarationData d = new DeclarationData();
 		d.setAccepted(true);
 		d.setDeclarationTemplateId(1);
 		d.setDepartmentId(1);
 		d.setReportPeriodId(6);
 		
-		long id = declarationDao.saveNew(d);
+		long id = declarationDataDao.saveNew(d);
 
-		Declaration d2 = declarationDao.get(id);
+		DeclarationData d2 = declarationDataDao.get(id);
 		assertEquals(1, d2.getDeclarationTemplateId());
 		assertEquals(1, d2.getDepartmentId());
 		assertEquals(6, d2.getReportPeriodId());
@@ -112,34 +122,34 @@ public class DeclarationDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void testSaveNewWithId() {
-		Declaration d = new Declaration();
+		DeclarationData d = new DeclarationData();
 		d.setId(1000l);
 		d.setAccepted(true);
 		d.setDeclarationTemplateId(1);
 		d.setDepartmentId(1);
 		d.setReportPeriodId(6);		
-		declarationDao.saveNew(d);
+		declarationDataDao.saveNew(d);
 	}
 	
 	
 	@Test
 	public void testSaveData() {
-		declarationDao.setXmlData(7, "test-data-string-2");
-		String data = declarationDao.getXmlData(7);
+		declarationDataDao.setXmlData(7, "test-data-string-2");
+		String data = declarationDataDao.getXmlData(7);
 		assertEquals("test-data-string-2", data);
 	}
 
 	@Test
 	public void findPageTest(){
-		DeclarationFilter filter = new DeclarationFilter();
+		DeclarationDataFilter filter = new DeclarationDataFilter();
 		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 0);
-		PaginatedSearchResult<DeclarationSearchResultItem> res;
-		final long TOTAL_RECORDS_COUNT = declarationDao.getCount(filter);
+		PaginatedSearchResult<DeclarationDataSearchResultItem> res;
+		final long TOTAL_RECORDS_COUNT = declarationDataDao.getCount(filter);
 
 		for(int requestedCount = 0; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 2){
 			pageParams.setStartIndex(0);
 			pageParams.setCount(requestedCount);
-			res = declarationDao.findPage(filter, DeclarationSearchOrdering.ID, true, pageParams);
+			res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
 			assertEquals(requestedCount, res.getRecords().size());
 			assertEquals(TOTAL_RECORDS_COUNT, res.getTotalRecordCount());
 		}
@@ -147,42 +157,42 @@ public class DeclarationDaoTest {
 
 	@Test
 	public void findPageSortingTest() {
-		DeclarationFilter filter = new DeclarationFilter();
+		DeclarationDataFilter filter = new DeclarationDataFilter();
 		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 5);
 
-		PaginatedSearchResult<DeclarationSearchResultItem> res;
+		PaginatedSearchResult<DeclarationDataSearchResultItem> res;
 
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.ID, true, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
 		assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res.getRecords());
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.ID, false, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, false, pageParams);
 		assertIdsEquals(new long[] {7, 5, 4, 3, 2}, res.getRecords());
 
 
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
 		assertIdsEquals(new long[]{3, 1, 2, 4, 5}, res.getRecords());
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
 		assertIdsEquals(new long[] {7, 5, 4, 2, 1}, res.getRecords());
 
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.DEPARTMENT_NAME, true, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
 		assertIdsEquals(new long[]{4, 3, 2, 5, 7}, res.getRecords());
-		res = declarationDao.findPage(filter, DeclarationSearchOrdering.DEPARTMENT_NAME, false, pageParams);
+		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
 		assertIdsEquals(new long[] {1, 7, 5, 2, 3}, res.getRecords());
 
 	}
 
 	@Test
 	public void findTest() {
-		Declaration declaration = declarationDao.find(1, 2, 1);
+		DeclarationData declaration = declarationDataDao.find(1, 2, 1);
 		assertEquals(1, declaration.getId().longValue());
 	}
 
 	@Test
 	public void findEmptyResultTest() {
-		Declaration declaration = declarationDao.find(222, 222, 222);
+		DeclarationData declaration = declarationDataDao.find(222, 222, 222);
 		assertNull(declaration);
 	}
 
-	private void assertIdsEquals(long[] expected, List<DeclarationSearchResultItem> items) {
+	private void assertIdsEquals(long[] expected, List<DeclarationDataSearchResultItem> items) {
 		if (expected.length != items.size()) {
 			fail("List size mismatch: " + expected.length + " expected but " + items.size() + " received");
 			return;
@@ -192,7 +202,7 @@ public class DeclarationDaoTest {
 
 		boolean failed = false;
 		for (int i = 0; i < expected.length; ++i) {
-			DeclarationSearchResultItem item = items.get(i);
+			DeclarationDataSearchResultItem item = items.get(i);
 			received[i] = item.getDeclarationId();
 			if (received[i] != expected[i]) {
 				failed = true;

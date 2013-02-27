@@ -11,7 +11,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private ReportPeriod currentReportPeriod;
 	private List<Department> departments;
 	private List<TaxPeriod> taxPeriods;
-	private DeclarationFilterAvailableValues filterValues;
+	private DeclarationDataFilterAvailableValues filterValues;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -29,11 +29,11 @@ public class GetDeclarationFilterDataResult implements Result {
 		this.taxPeriods = taxPeriods;
 	}
 
-	public DeclarationFilterAvailableValues getFilterValues() {
+	public DeclarationDataFilterAvailableValues getFilterValues() {
 		return filterValues;
 	}
 
-	public void setFilterValues(DeclarationFilterAvailableValues filterValues) {
+	public void setFilterValues(DeclarationDataFilterAvailableValues filterValues) {
 		this.filterValues = filterValues;
 	}
 

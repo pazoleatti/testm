@@ -17,11 +17,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
@@ -29,8 +29,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
-public class DeclarationAccessServiceImplTest {
-	private static DeclarationAccessServiceImpl service;
+public class DeclarationDataAccessServiceImplTest {
+	private static DeclarationDataAccessServiceImpl service;
 	
 	private final static int DEPARTMENT_TB1_ID = 1;
 	private final static int DEPARTMENT_TB2_ID = 2;
@@ -53,7 +53,7 @@ public class DeclarationAccessServiceImplTest {
 	
 	@BeforeClass
 	public static void tearUp() {
-		service = new DeclarationAccessServiceImpl();
+		service = new DeclarationDataAccessServiceImpl();
 		
 		TAUser controlUnp = mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP);
 		TAUser controlTB1 = mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL);
@@ -87,16 +87,16 @@ public class DeclarationAccessServiceImplTest {
 		when(declarationTemplateDao.get(DECLARATION_TEMPLATE_2_ID)).thenReturn(declarationTemplate2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 		
-		Declaration declarationCreatedTB1 = mockDeclaration(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID);
-		Declaration declarationAcceptedTB1 = mockDeclaration(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID);
-		Declaration declarationCreatedTB2 = mockDeclaration(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID);
-		Declaration declarationAcceptedTB2 = mockDeclaration(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID);
-		DeclarationDao declarationDao = mock(DeclarationDao.class);
-		when(declarationDao.get(DECLARATION_CREATED_TB1_ID)).thenReturn(declarationCreatedTB1);
-		when(declarationDao.get(DECLARATION_ACCEPTED_TB1_ID)).thenReturn(declarationAcceptedTB1);
-		when(declarationDao.get(DECLARATION_CREATED_TB2_ID)).thenReturn(declarationCreatedTB2);
-		when(declarationDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);		
-		ReflectionTestUtils.setField(service, "declarationDao", declarationDao);
+		DeclarationData declarationCreatedTB1 = mockDeclaration(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID);
+		DeclarationData declarationAcceptedTB1 = mockDeclaration(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID);
+		DeclarationData declarationCreatedTB2 = mockDeclaration(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID);
+		DeclarationData declarationAcceptedTB2 = mockDeclaration(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID);
+		DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
+		when(declarationDataDao.get(DECLARATION_CREATED_TB1_ID)).thenReturn(declarationCreatedTB1);
+		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB1_ID)).thenReturn(declarationAcceptedTB1);
+		when(declarationDataDao.get(DECLARATION_CREATED_TB2_ID)).thenReturn(declarationCreatedTB2);
+		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);		
+		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 	}
 	
 	@Test

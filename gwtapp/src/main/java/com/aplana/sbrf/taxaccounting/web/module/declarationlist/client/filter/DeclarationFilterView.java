@@ -86,7 +86,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	}
 
 	@Override
-	public void setDataFilter(DeclarationFilter declarationFilter, TaxType taxType) {
+	public void setDataFilter(DeclarationDataFilter declarationFilter, TaxType taxType) {
 		declarationType.setValue(declarationFilter.getDeclarationTypeId());
 	}
 

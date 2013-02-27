@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 
 /**
- * Интерфейс для проверки прав пользователя на работу с {@link Declaration декларациями}
+ * Интерфейс для проверки прав пользователя на работу с {@link DeclarationData декларациями}
  * @author dsultanbekov
  */
-public interface DeclarationAccessService {
+public interface DeclarationDataAccessService {
 	/**
 	 * Проверяет, имеет ли пользователь права на просмотр декларации.
 	 * @param userId идентфикатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true если пользователь имеет права на просмотр декларации, false - в противном случае
 	 */
-	boolean canRead(int userId, long declarationId);
+	boolean canRead(int userId, long declarationDataId);
 	
 	/**
 	 * Проверяет права пользователя для операции создания декларации.
@@ -30,40 +30,40 @@ public interface DeclarationAccessService {
 	/**
 	 * Проверяет, может ли пользователь принять декларацию
 	 * @param userId идентификатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true - если у пользователя есть права на принятие декларации, false - в противном случае
 	 */
-	boolean canAccept(int userId, long declarationId);
+	boolean canAccept(int userId, long declarationDataId);
 	
 	/**
 	 * Проверяет, может ли пользователь отменить принятие декларации.
 	 * @param userId идентификатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true - если у пользователя есть права на отмену принятия декларации, false - в противном случае
 	 */
-	boolean canReject(int userId, long declarationId);
+	boolean canReject(int userId, long declarationDataId);
 	
 	/**
 	 * Проверяет, может ли пользователь удалить декларацию
 	 * @param userId идентификатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true - если у пользователя есть права на удаление декларации, false - в противном случае
 	 */
-	boolean canDelete(int userId, long declarationId);
+	boolean canDelete(int userId, long declarationDataId);
 
 	/**
 	 * Проверяет, имеет ли пользователь права на обновление декларации
 	 * @param userId идентификатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true если пользователь имеет права на обновление декларации, false - в противном случае
 	 */
-	boolean canRefresh(int userId, long declarationId);
+	boolean canRefresh(int userId, long declarationDataId);
 	
 	/**
 	 * Проверяет, может ли пользователь скачать файл в формате законодателя (XML)
 	 * @param userId идентификатор пользователя
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @return true - если у пользователя есть права на скачиваение XML декларации, false - в противном случае
 	 */
-	boolean canDownloadXml(int userId, long declarationId);
+	boolean canDownloadXml(int userId, long declarationDataId);
 }

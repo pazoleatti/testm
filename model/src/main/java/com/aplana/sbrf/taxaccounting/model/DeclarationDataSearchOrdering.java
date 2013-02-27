@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Способы сортировки списка налоговых форм
  * @author srybakov
  */
-public enum DeclarationSearchOrdering {
+public enum DeclarationDataSearchOrdering {
 	/**
 	 * По идентификатору
 	 */

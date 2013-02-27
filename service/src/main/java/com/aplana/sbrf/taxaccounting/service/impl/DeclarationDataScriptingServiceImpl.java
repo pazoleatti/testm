@@ -31,7 +31,7 @@ import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.DeclarationScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
@@ -39,7 +39,7 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author dsultanbekov
  */
 @Service
-public class DeclarationScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements DeclarationScriptingService {
+public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements DeclarationDataScriptingService {
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
 	

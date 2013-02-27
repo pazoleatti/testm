@@ -7,11 +7,11 @@ import java.io.Serializable;
  * Используется для того, чтобы отображать результаты поисковых запросов по декларациям в таблицах, без необходимости
  * запрашивать из БД сведения по связанным объектам (название подразделения, вид налога и т.п.)
  */
-public class DeclarationSearchResultItem implements Serializable {
+public class DeclarationDataSearchResultItem implements Serializable {
 
 	private static final long serialVersionUID = -43124124124124L;
 
-	public DeclarationSearchResultItem() {
+	public DeclarationDataSearchResultItem() {
 	}
 
 	// Идентификатор записи с данными декларации

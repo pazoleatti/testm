@@ -14,7 +14,7 @@ import java.util.*;
 public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchService {
 
 	@Autowired
-	private DeclarationDao declarationDao;
+	private DeclarationDataDao declarationDao;
 
 	@Autowired
 	private TAUserDao taUserDao;
@@ -29,15 +29,15 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	private DepartmentDao departmentDao;
 
 	@Override
-	public PaginatedSearchResult<DeclarationSearchResultItem> search(DeclarationFilter declarationFilter) {
+	public PaginatedSearchResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
 		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
 				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
 				declarationFilter.getCountOfRecords()));
 	}
 	
 	@Override
-	public DeclarationFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType) {
-		DeclarationFilterAvailableValues result = new DeclarationFilterAvailableValues();
+	public DeclarationDataFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType) {
+		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
 		TAUser user = taUserDao.getUser(userId);
 		
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {

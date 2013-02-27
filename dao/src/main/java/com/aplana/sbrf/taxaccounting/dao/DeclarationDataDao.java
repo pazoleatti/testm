@@ -3,17 +3,17 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
- * Dao-объект для работы с {@link Declaration декларациями}
+ * Dao-объект для работы с {@link DeclarationData декларациями}
  * @author dsultanbekov
  */
-public interface DeclarationDao {
+public interface DeclarationDataDao {
 	/**
 	 * Получить декларацию
 	 * @param declarationId идентификатор декларации
 	 * @return объект декларации
 	 * @throws DaoException если такой декларации не существует
 	 */
-	Declaration get(long declarationId);
+	DeclarationData get(long declarationId);
 	
 	/**
 	 * Получить данные декларации в формате законодателя (XML)
@@ -31,7 +31,7 @@ public interface DeclarationDao {
 	 * @return идентификатор сохранённой записи
 	 * @throws DaoException если передана декларация с непустым id
 	 */
-	long saveNew(Declaration declaration);
+	long saveNew(DeclarationData declaration);
 	
 	/**
 	 * Установить флаг принятия декларации
@@ -65,7 +65,7 @@ public interface DeclarationDao {
 	 * @param paginatedSearchParams - диапазон индексов, задающий страницу
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
 	 */
-	PaginatedSearchResult<DeclarationSearchResultItem> findPage(DeclarationFilter declarationFilter, DeclarationSearchOrdering ordering,
+	PaginatedSearchResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
 	                                          boolean ascSorting, PaginatedSearchParams paginatedSearchParams);
 
 	/**
@@ -76,12 +76,12 @@ public interface DeclarationDao {
 	 * @return декларацию или null, если такой декларации не найдено
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
-	Declaration find(int declarationTypeId, int departmentId, int reportPeriodId);
+	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
 	/**
 	 * Получить количество записей, удовлетворяющих запросу
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
-	long getCount(DeclarationFilter filter);
+	long getCount(DeclarationDataFilter filter);
 }

@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
@@ -96,7 +96,7 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	@Test
 	public void testGetAvailableFilterValuesControlUnp() {
-		DeclarationFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_UNP_USER_ID, TaxType.INCOME);
+		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_UNP_USER_ID, TaxType.INCOME);
 		assertEquals(2, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_2, valuesIncome.getDeclarationTypes().get(1).getId());
@@ -108,7 +108,7 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	@Test
 	public void testGetAvailableFilterValuesControl() {
-		DeclarationFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_USER_ID, TaxType.INCOME);
+		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_USER_ID, TaxType.INCOME);
 		assertEquals(1, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(1, valuesIncome.getDepartmentIds().size());

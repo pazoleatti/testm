@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -55,7 +55,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setDeclarationData(Declaration declaration) {
+	public void setDeclarationData(DeclarationData declaration) {
 		if (declaration.isAccepted()) {
 			acceptButton.setVisible(false);
 			cancelButton.setVisible(true);

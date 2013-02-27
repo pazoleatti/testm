@@ -1,5 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-public class DeclarationServiceImplTest {
+public class DeclarationDataServiceImplTest {
 	// TODO: сделать тесты!!
 }

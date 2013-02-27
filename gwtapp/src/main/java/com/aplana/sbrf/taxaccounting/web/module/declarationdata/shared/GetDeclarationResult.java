@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
 
 public class GetDeclarationResult implements Result {
-    private Declaration declaration;
+    private DeclarationData declaration;
 	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
@@ -17,11 +17,11 @@ public class GetDeclarationResult implements Result {
 	private boolean canDownload;
 	private boolean canDelete;
 
-    public Declaration getDeclaration() {
+    public DeclarationData getDeclaration() {
         return declaration;
     }
 
-    public void setDeclaration(Declaration declaration) {
+    public void setDeclaration(DeclarationData declaration) {
         this.declaration = declaration;
     }
 

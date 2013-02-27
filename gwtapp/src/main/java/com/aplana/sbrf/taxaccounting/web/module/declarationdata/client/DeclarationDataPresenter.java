@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -32,7 +32,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationDataUiHandlers> {
-		void setDeclarationData(Declaration declaration);
+		void setDeclarationData(DeclarationData declaration);
 		void setCannotAccept();
 		void setCannotReject();
 		void setCannotDownloadXml();
@@ -44,7 +44,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
-	private Declaration declaration;
+	private DeclarationData declaration;
 	private String taxName;
 
 	@Inject

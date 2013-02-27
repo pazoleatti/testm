@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -27,7 +27,7 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 	private DepartmentService departmentService;
 
 	@Autowired
-	private DeclarationAccessService declarationAccessService;
+	private DeclarationDataAccessService declarationAccessService;
 
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
@@ -48,7 +48,7 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 		Integer userId = user.getId();
 
 		GetDeclarationResult result = new GetDeclarationResult();
-		Declaration declaration = declarationService.get(action.getId(), userId);
+		DeclarationData declaration = declarationService.get(action.getId(), userId);
 		result.setDeclaration(declaration);
 		result.setCanRead(declarationAccessService.canRead(userId, action.getId()));
 		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));

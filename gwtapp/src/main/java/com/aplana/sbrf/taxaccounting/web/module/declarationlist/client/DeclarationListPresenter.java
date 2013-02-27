@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
@@ -90,7 +90,7 @@ public class DeclarationListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-		DeclarationFilter filter = filterPresenter.getFilterData();
+		DeclarationDataFilter filter = filterPresenter.getFilterData();
 		if(isFilterDataCorrect(filter)){
 			CreateDeclaration command = new CreateDeclaration();
 			command.setDeclarationTypeId(filter.getDeclarationTypeId());
@@ -128,7 +128,7 @@ public class DeclarationListPresenter extends
 		refreshTable();
 	}
 
-	private boolean isFilterDataCorrect(DeclarationFilter filter){
+	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
 		if(filter.getDeclarationTypeId() == null){
 			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать вид декларации");
 			return false;
@@ -158,18 +158,18 @@ public class DeclarationListPresenter extends
 		TitleUpdateEvent.fire(this, "Список деклараций", description);
 	}
 
-	private class TableDataProvider extends AsyncDataProvider<DeclarationSearchResultItem> {
+	private class TableDataProvider extends AsyncDataProvider<DeclarationDataSearchResultItem> {
 
 		private int ZERO_RECORDS_COUNT = 0;
 
 		public void update() {
-			for (HasData<DeclarationSearchResultItem> display: getDataDisplays()) {
+			for (HasData<DeclarationDataSearchResultItem> display: getDataDisplays()) {
 				onRangeChanged(display);
 			}
 		}
 
 		@Override
-		protected void onRangeChanged(HasData<DeclarationSearchResultItem> display) {
+		protected void onRangeChanged(HasData<DeclarationDataSearchResultItem> display) {
 			final Range range = display.getVisibleRange();
 			GetDeclarationList requestData = createRequestData(range);
 			dispatcher.execute(requestData,
@@ -178,7 +178,7 @@ public class DeclarationListPresenter extends
 						public void onReqSuccess(GetDeclarationListResult result) {
 							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
 								getView().setDeclarationsList(range.getStart(), ZERO_RECORDS_COUNT,
-										new ArrayList<DeclarationSearchResultItem>());
+										new ArrayList<DeclarationDataSearchResultItem>());
 							} else {
 								handleResponse(result, range);
 							}
@@ -188,7 +188,7 @@ public class DeclarationListPresenter extends
 
 		private GetDeclarationList createRequestData(Range range) {
 			if(IS_FIRST_TIME){
-				DeclarationFilter filter = filterPresenter.getFilterData();
+				DeclarationDataFilter filter = filterPresenter.getFilterData();
 				filter.setCountOfRecords(PAGE_SIZE);
 				filter.setStartIndex(range.getStart());
 				filter.setAscSorting(getView().isAscSorting());

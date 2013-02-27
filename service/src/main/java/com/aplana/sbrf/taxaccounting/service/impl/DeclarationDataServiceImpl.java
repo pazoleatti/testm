@@ -1,23 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import net.sf.jasperreports.engine.JRException;
@@ -34,12 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Сервис для работы с декларациями
@@ -47,48 +31,36 @@ import java.util.Set;
  * @author dsultanbekov
  */
 @Service
-public class DeclarationServiceImpl implements DeclarationService {
+public class DeclarationDataServiceImpl implements DeclarationService {
 
 	private Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
-	private DeclarationDao declarationDao;
+	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
-	private DeclarationAccessService declarationAccessService ;
+	private DeclarationDataAccessService declarationDataAccessService ;
 	
 	@Autowired
-	private DeclarationScriptingService declarationScriptingService;
+	private DeclarationDataScriptingService declarationDataScriptingService;
 
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
-	
-	@Autowired
-	private DeclarationTypeDao declarationTypeDao;
-	
-	@Autowired
-	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-	
-	@Autowired
-	private DepartmentDao departmentDao;
-	
-	@Autowired
-	private TAUserDao userDao;
 
 	@Override
 	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
-		if (declarationAccessService.canCreate(userId, declarationTemplateId, departmentId, reportPeriodId)) {
-			Declaration newDeclaration = new Declaration();
+		if (declarationDataAccessService.canCreate(userId, declarationTemplateId, departmentId, reportPeriodId)) {
+			DeclarationData newDeclaration = new DeclarationData();
 			newDeclaration.setDepartmentId(departmentId);
 			newDeclaration.setReportPeriodId(reportPeriodId);
 			newDeclaration.setAccepted(false);
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 			
-			long declarationId = declarationDao.saveNew(newDeclaration);
+			long declarationId = declarationDataDao.saveNew(newDeclaration);
 			
 			this.logger.debug("New declaration saved, id = " + declarationId);
-			String xml = declarationScriptingService.create(logger, departmentId, declarationTemplateId, reportPeriodId);
-			declarationDao.setXmlData(declarationId, xml);
+			String xml = declarationDataScriptingService.create(logger, departmentId, declarationTemplateId, reportPeriodId);
+			declarationDataDao.setXmlData(declarationId, xml);
 			return declarationId;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для создания декларации с указанными параметрами");
@@ -96,9 +68,9 @@ public class DeclarationServiceImpl implements DeclarationService {
 	}
 
 	@Override
-	public Declaration get(long declarationId, int userId) {
-		if (declarationAccessService.canRead(userId, declarationId)) {
-			Declaration declaration = declarationDao.get(declarationId);
+	public DeclarationData get(long declarationId, int userId) {
+		if (declarationDataAccessService.canRead(userId, declarationId)) {
+			DeclarationData declaration = declarationDataDao.get(declarationId);
 			return declaration;
 		} else {
 			throw new AccessDeniedException("Недостаточно прав на просмотр данных декларации");
@@ -108,8 +80,8 @@ public class DeclarationServiceImpl implements DeclarationService {
 	@Override
 	@Transactional
 	public void delete(long declarationId, int userId) {
-		if (declarationAccessService.canDelete(userId, declarationId)) {
-			declarationDao.delete(declarationId);
+		if (declarationDataAccessService.canDelete(userId, declarationId)) {
+			declarationDataDao.delete(declarationId);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав на удаление декларации");
 		}
@@ -118,21 +90,21 @@ public class DeclarationServiceImpl implements DeclarationService {
 	@Override
 	public void setAccepted(long declarationId, boolean accepted, int userId) {
 		if (accepted) {
-			if (!declarationAccessService.canAccept(userId, declarationId)) {
+			if (!declarationDataAccessService.canAccept(userId, declarationId)) {
 				throw new AccessDeniedException("Невозможно принять декларацию");
 			}
 		} else {
-			if (!declarationAccessService.canReject(userId, declarationId)) {
+			if (!declarationDataAccessService.canReject(userId, declarationId)) {
 				throw new AccessDeniedException("Невозможно отменить принятие декларации");
 			}
 		}
-		declarationDao.setAccepted(declarationId, accepted);
+		declarationDataDao.setAccepted(declarationId, accepted);
 	}
 
 	@Override
 	public String getXmlData(long declarationId, int userId) {
-		if (declarationAccessService.canDownloadXml(userId, declarationId)) {
-			String xmlData = declarationDao.getXmlData(declarationId);
+		if (declarationDataAccessService.canDownloadXml(userId, declarationId)) {
+			String xmlData = declarationDataDao.getXmlData(declarationId);
 			return xmlData;
 		} else {
 			throw new AccessDeniedException("Невозможно получить xml");
@@ -141,10 +113,10 @@ public class DeclarationServiceImpl implements DeclarationService {
 
 	@Override
 	public byte[] getXlsxData(long declarationId, int userId) {
-		if (declarationAccessService.canRead(userId, declarationId)) {
-			Declaration declaration = declarationDao.get(declarationId);
+		if (declarationDataAccessService.canRead(userId, declarationId)) {
+			DeclarationData declaration = declarationDataDao.get(declarationId);
 			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
-			String xmlData = declarationDao.getXmlData(declarationId);
+			String xmlData = declarationDataDao.getXmlData(declarationId);
 			JasperPrint print = null;
 			try {
 				JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));

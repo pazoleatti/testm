@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class DeclarationFilter implements Serializable {
+public class DeclarationDataFilter implements Serializable {
 
 	private static final long serialVersionUID = -4400641153082281834L;
 
@@ -21,7 +21,7 @@ public class DeclarationFilter implements Serializable {
 	/*Количество записей, которые нужно вернуть*/
 	private int countOfRecords;
 
-	private DeclarationSearchOrdering searchOrdering;
+	private DeclarationDataSearchOrdering searchOrdering;
 
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
@@ -66,11 +66,11 @@ public class DeclarationFilter implements Serializable {
 		this.countOfRecords = countOfRecords;
 	}
 
-	public DeclarationSearchOrdering getSearchOrdering() {
+	public DeclarationDataSearchOrdering getSearchOrdering() {
 		return searchOrdering;
 	}
 
-	public void setSearchOrdering(DeclarationSearchOrdering searchOrdering) {
+	public void setSearchOrdering(DeclarationDataSearchOrdering searchOrdering) {
 		this.searchOrdering = searchOrdering;
 	}
 

@@ -2,12 +2,12 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
 /**
- * Сервис для работы с {@link налоговыми декларациями Declaration}
+ * Сервис для работы с {@link налоговыми декларациями DeclarationData}
  * @author dsultanbekov
  */
 public interface DeclarationService {
@@ -27,52 +27,52 @@ public interface DeclarationService {
 	/**
 	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
 	 * @param logger - объект журнала
-	 * @param declarationId - идентификатор декларации
+	 * @param declarationDataId - идентификатор декларации
 	 * @param userId - идентификатор пользователя, выполняющего операцию
 	 */
-	void refreshDeclaration(Logger logger, long declarationId, int userId);
+	void refreshDeclaration(Logger logger, long declarationDataId, int userId);
 	
 	/**
 	 * Получить декларацию
-	 * @param declarationId
+	 * @param declarationDataId
 	 * @param userId идентификатор пользователя, выполняющего действие
 	 * @return объект декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	Declaration get(long declarationId, int userId);
+	DeclarationData get(long declarationDataId, int userId);
 
 	/**
 	 * Удалить декларацию
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @param userId идентификатор пользователя, выполняющего действие
 	 * @throws DaoException если такой декларации не существует
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
-	void delete(long declarationId, int userId);
+	void delete(long declarationDataId, int userId);
 
 	/**
 	 * Установить в декларации флаг принятия
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @param accepted значение флага
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(long declarationId, boolean accepted, int userId);
+	void setAccepted(long declarationDataId, boolean accepted, int userId);
 	/**
 	 * Получить данные декларации в формате законодателя (XML)
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @return строка, содержащая данные декларации в формате законодателя
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	String getXmlData(long declarationId, int userId);
+	String getXmlData(long declarationDataId, int userId);
 	/**
 	 * Получить печатное представление данные декларации.
 	 * Получается путём подстановки данных декларации в формате xml в Jasper-reports отчёт, шаблона декларации
-	 * @param declarationId идентификатор декларации
+	 * @param declarationDataId идентификатор декларации
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @return файл Xlsx в виде байтового массива
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	byte[] getXlsxData(long declarationId, int userId);
+	byte[] getXlsxData(long declarationDataId, int userId);
 }

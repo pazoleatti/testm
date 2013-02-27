@@ -13,7 +13,7 @@ import java.util.Set;
  * 2) какие декларации назначены подразделению пользователя,
  * @author dsultanbekov
  */
-public class DeclarationFilterAvailableValues implements Serializable {
+public class DeclarationDataFilterAvailableValues implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Set<Integer> departmentIds;

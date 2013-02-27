@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
 public class GetDeclarationListResult implements Result {
 
-	private List<DeclarationSearchResultItem> records;
+	private List<DeclarationDataSearchResultItem> records;
 
 	//общее количество записей (на всех страницах)
 	private long totalCountOfRecords;
@@ -16,11 +16,11 @@ public class GetDeclarationListResult implements Result {
 
 	}
 
-	public List<DeclarationSearchResultItem> getRecords() {
+	public List<DeclarationDataSearchResultItem> getRecords() {
 		return records;
 	}
 
-	public void setRecords(List<DeclarationSearchResultItem> records) {
+	public void setRecords(List<DeclarationDataSearchResultItem> records) {
 		this.records = records;
 	}
 

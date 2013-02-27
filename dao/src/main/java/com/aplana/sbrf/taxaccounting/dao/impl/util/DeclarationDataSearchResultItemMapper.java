@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,10 +8,10 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DeclarationSearchResultItemMapper implements RowMapper<DeclarationSearchResultItem> {
+public class DeclarationDataSearchResultItemMapper implements RowMapper<DeclarationDataSearchResultItem> {
 	@Override
-	public DeclarationSearchResultItem mapRow(ResultSet rs, int i) throws SQLException {
-		DeclarationSearchResultItem result = new DeclarationSearchResultItem();
+	public DeclarationDataSearchResultItem mapRow(ResultSet rs, int i) throws SQLException {
+		DeclarationDataSearchResultItem result = new DeclarationDataSearchResultItem();
 
 		result.setDepartmentId(rs.getInt("department_id"));
 		result.setDepartmentName(rs.getString("department_name"));

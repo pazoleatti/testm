@@ -28,12 +28,12 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
-public class DeclarationScriptingServiceImplTest {
-	private static DeclarationScriptingServiceImpl service;
+public class DeclarationDataScriptingServiceImplTest {
+	private static DeclarationDataScriptingServiceImpl service;
 	
 	@BeforeClass
 	public static void tearUp() throws IOException {
-		service = new DeclarationScriptingServiceImpl();
+		service = new DeclarationDataScriptingServiceImpl();
 		
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
@@ -50,14 +50,14 @@ public class DeclarationScriptingServiceImplTest {
 		
 		// Этот шаблон генерирует демо-XML
 		DeclarationTemplate template1 = mock(DeclarationTemplate.class);
-		InputStream stream = DeclarationScriptingServiceImplTest.class.getResourceAsStream("createDeclaration.groovy");
+		InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclaration.groovy");
 		String createScript = IOUtils.toString(stream, "UTF-8");
 		when(template1.getCreateScript()).thenReturn(createScript);
 		when(template1.getDeclarationType()).thenReturn(declarationType);
 		
 		// Этот шаблон содержит ошибку в скрипте
 		DeclarationTemplate template2 = mock(DeclarationTemplate.class);
-		stream = DeclarationScriptingServiceImplTest.class.getResourceAsStream("createDeclarationException.groovy");
+		stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclarationException.groovy");
 		createScript = IOUtils.toString(stream, "UTF-8");
 		when(template2.getCreateScript()).thenReturn(createScript);
 		when(template2.getDeclarationType()).thenReturn(declarationType);

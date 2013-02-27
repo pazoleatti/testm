@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -32,7 +32,7 @@ public class DeclarationListView extends
 
 	private final Widget widget;
 
-	private DeclarationSearchOrdering sortByColumn;
+	private DeclarationDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
 
@@ -40,7 +40,7 @@ public class DeclarationListView extends
 	Panel filterContentPanel;
 
 	@UiField
-	CellTable<DeclarationSearchResultItem> declarationTable;
+	CellTable<DeclarationDataSearchResultItem> declarationTable;
 
 	@UiField
 	VerticalPanel verticalPanelWithTable;
@@ -50,40 +50,40 @@ public class DeclarationListView extends
 		widget = binder.createAndBindUi(this);
 
 
-		TextColumn<DeclarationSearchResultItem> departmentColumn = new TextColumn<DeclarationSearchResultItem>() {
+		TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
-			public String getValue(DeclarationSearchResultItem object) {
+			public String getValue(DeclarationDataSearchResultItem object) {
 				return object.getDepartmentName();
 			}
 		};
 
-		TextColumn<DeclarationSearchResultItem> reportPeriodColumn = new TextColumn<DeclarationSearchResultItem>() {
+		TextColumn<DeclarationDataSearchResultItem> reportPeriodColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
-			public String getValue(DeclarationSearchResultItem object) {
+			public String getValue(DeclarationDataSearchResultItem object) {
 				return object.getReportPeriodName();
 			}
 		};
 
-		TextColumn<DeclarationSearchResultItem> declarationTypeColumn = new TextColumn<DeclarationSearchResultItem>() {
+		TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
-			public String getValue(DeclarationSearchResultItem object) {
+			public String getValue(DeclarationDataSearchResultItem object) {
 				return object.getDeclarationType();
 			}
 		};
 
-		TextColumn<DeclarationSearchResultItem> stateColumn = new TextColumn<DeclarationSearchResultItem>() {
+		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
-			public String getValue(DeclarationSearchResultItem object) {
+			public String getValue(DeclarationDataSearchResultItem object) {
 				return object.isAccepted() ? "Принята" : "Создана";
 			}
 		};
 
-		Column<DeclarationSearchResultItem, DeclarationSearchResultItem> linkColumn = new Column<DeclarationSearchResultItem, DeclarationSearchResultItem>(
-				new AbstractCell<DeclarationSearchResultItem>() {
+		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> linkColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+				new AbstractCell<DeclarationDataSearchResultItem>() {
 
 					@Override
 					public void render(Context context,
-					                   DeclarationSearchResultItem declaration,
+					                   DeclarationDataSearchResultItem declaration,
 					                   SafeHtmlBuilder sb) {
 						if (declaration == null) {
 							return;
@@ -95,8 +95,8 @@ public class DeclarationListView extends
 								+ declaration.getTaxType().getName() + "</a>");
 					}
 				}) {
-			public DeclarationSearchResultItem getValue(
-					DeclarationSearchResultItem object) {
+			public DeclarationDataSearchResultItem getValue(
+					DeclarationDataSearchResultItem object) {
 				return object;
 			}
 		};
@@ -130,19 +130,19 @@ public class DeclarationListView extends
 	}
 
 	@Override
-	public void setDeclarationsList(int start, long totalCount, List<DeclarationSearchResultItem> records) {
+	public void setDeclarationsList(int start, long totalCount, List<DeclarationDataSearchResultItem> records) {
 		declarationTable.setRowCount((int) totalCount);
 		declarationTable.setRowData(start, records);
 	}
 
 	@Override
-	public void assignDataProvider(int pageSize, AbstractDataProvider<DeclarationSearchResultItem> data) {
+	public void assignDataProvider(int pageSize, AbstractDataProvider<DeclarationDataSearchResultItem> data) {
 		declarationTable.setPageSize(pageSize);
 		data.addDataDisplay(declarationTable);
 	}
 
 	@Override
-	public DeclarationSearchOrdering getSearchOrdering(){
+	public DeclarationDataSearchOrdering getSearchOrdering(){
 		final String DEFAULT_SORTING_BY_ID = "";
 		if (sortByColumn != null){
 			return sortByColumn;
@@ -205,13 +205,13 @@ public class DeclarationListView extends
 
 	private void setSortByColumn(String sortByColumn){
 		if ("Подразделение".equals(sortByColumn)){
-			this.sortByColumn = DeclarationSearchOrdering.DEPARTMENT_NAME;
+			this.sortByColumn = DeclarationDataSearchOrdering.DEPARTMENT_NAME;
 		} else if ("Отчетный период".equals(sortByColumn)){
-			this.sortByColumn = DeclarationSearchOrdering.REPORT_PERIOD_NAME;
+			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
 		} else if("Вид декларации".equals(sortByColumn)){
-			this.sortByColumn = DeclarationSearchOrdering.DECLARATION_TYPE_NAME;
+			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
 		} else {
-			this.sortByColumn = DeclarationSearchOrdering.ID;
+			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}
 	}
 

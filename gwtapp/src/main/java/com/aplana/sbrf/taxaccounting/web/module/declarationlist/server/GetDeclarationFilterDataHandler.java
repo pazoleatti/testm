@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -54,7 +54,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
-		DeclarationFilterAvailableValues declarationFilterValues = declarationDataSearchService.getFilterAvailableValues(securityService
+		DeclarationDataFilterAvailableValues declarationFilterValues = declarationDataSearchService.getFilterAvailableValues(securityService
 				.currentUser().getId(), action.getTaxType());
 
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues

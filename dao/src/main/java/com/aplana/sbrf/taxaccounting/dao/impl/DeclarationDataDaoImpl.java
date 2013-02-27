@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationSearchResultItemMapper;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -24,12 +24,12 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
  */
 @Repository
 @Transactional
-public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
+public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 	
-	private static final class DeclarationRowMapper implements RowMapper<Declaration> {
+	private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
 		@Override
-		public Declaration mapRow(ResultSet rs, int index) throws SQLException {
-			Declaration d = new Declaration();
+		public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
+			DeclarationData d = new DeclarationData();
 			d.setId(rs.getLong("id"));
 			d.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
 			d.setDepartmentId(rs.getInt("department_id"));			
@@ -40,38 +40,38 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 	}
 	
 	@Override
-	public Declaration get(long declarationId) {
+	public DeclarationData get(long declarationDataId) {
 		try {
 			return getJdbcTemplate().queryForObject(
 				"select * from declaration where id = ?",
-				new Object[] { declarationId },
-				new DeclarationRowMapper()
+				new Object[] { declarationDataId },
+				new DeclarationDataRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", declarationId);
+			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
 		}
 	}
 
 	@Override
-	public String getXmlData(long declarationId) {
+	public String getXmlData(long declarationDataId) {
 		try {
 			return getJdbcTemplate().queryForObject(
 				"select data from declaration where id = ?",
-				new Object[] { declarationId },
+				new Object[] { declarationDataId },
 				String.class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", declarationId);
+			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
 		}
 	}
 
 	@Override
-	public void setXmlData(long declarationId, String xmlData) {
+	public void setXmlData(long declarationDataId, String xmlData) {
 		int count = getJdbcTemplate().update(
 			"update declaration set data = ? where id = ?",
 			new Object[] {
 				xmlData,
-				declarationId
+				declarationDataId
 			},
 			new int[] {
 				Types.VARCHAR,
@@ -84,20 +84,20 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 	}
 
 	@Override
-	public void delete(long declarationId) {
+	public void delete(long declarationDataId) {
 		int count = getJdbcTemplate().update(
 			"delete from declaration where id = ?",
-			declarationId
+			declarationDataId
 		);
 		if (count == 0) {
-			throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", declarationId);
+			throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", declarationDataId);
 		}
 	}
 
 	@Override
-	public Declaration find(int declarationTypeId, int departmentId, int reportPeriodId){
+	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId){
 		try {
-			Long declarationId = getJdbcTemplate().queryForLong(
+			Long declarationDataId = getJdbcTemplate().queryForLong(
 					"select dec.id from declaration dec where exists (select 1 from declaration_template dt where dec.declaration_template_id=dt.id and dt.declaration_type_id = ?)"
 							+ " and dec.department_id = ? and dec.report_period_id = ?",
 					new Object[] {
@@ -111,7 +111,7 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 							Types.NUMERIC
 					}
 			);
-			return get(declarationId);
+			return get(declarationDataId);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (IncorrectResultSizeDataAccessException e) {
@@ -125,7 +125,7 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 	}
 
 	@Override
-	public PaginatedSearchResult<DeclarationSearchResultItem> findPage(DeclarationFilter declarationFilter, DeclarationSearchOrdering ordering,
+	public PaginatedSearchResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
 	                                                 boolean ascSorting,PaginatedSearchParams pageParams) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
@@ -133,7 +133,7 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 		appendOrderByClause(sql, ordering, ascSorting);
 		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
 				.append(" order by ordDat.rn");
-		List<DeclarationSearchResultItem> records = getJdbcTemplate().query(
+		List<DeclarationDataSearchResultItem> records = getJdbcTemplate().query(
 				sql.toString(),
 				new Object[] {
 						pageParams.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
@@ -143,20 +143,20 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 						Types.NUMERIC,
 						Types.NUMERIC
 				},
-				new DeclarationSearchResultItemMapper()
+				new DeclarationDataSearchResultItemMapper()
 		);
 		long count = getCount(declarationFilter);
-		PaginatedSearchResult<DeclarationSearchResultItem>  result = new PaginatedSearchResult<DeclarationSearchResultItem>();
+		PaginatedSearchResult<DeclarationDataSearchResultItem>  result = new PaginatedSearchResult<DeclarationDataSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(count);
 		return result;
 	}
 
 	@Override
-	public long saveNew(Declaration declaration) {
+	public long saveNew(DeclarationData declarationData) {
 		JdbcTemplate jt = getJdbcTemplate();
 		
-		Long id = declaration.getId();
+		Long id = declarationData.getId();
 		if (id != null) {
 			throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию");
 		}
@@ -164,35 +164,35 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 		jt.update(
 			"insert into declaration (id, declaration_template_id, report_period_id, department_id, is_accepted) values (?, ?, ?, ?, ?)",
 			id,
-			declaration.getDeclarationTemplateId(),
-			declaration.getReportPeriodId(),
-			declaration.getDepartmentId(),
-			declaration.isAccepted() ? 1 : 0
+			declarationData.getDeclarationTemplateId(),
+			declarationData.getReportPeriodId(),
+			declarationData.getDepartmentId(),
+			declarationData.isAccepted() ? 1 : 0
 		);
-		declaration.setId(id);
+		declarationData.setId(id);
 		return id.longValue();
 	}
 
 	@Override
-	public void setAccepted(long declarationId, boolean accepted) {
+	public void setAccepted(long declarationDataId, boolean accepted) {
 		int count = getJdbcTemplate().update(
 			"update declaration set is_accepted = ? where id = ?",
 			accepted,
-			declarationId
+			declarationDataId
 		);
 		if (count == 0) {
-			throw new DaoException("Не удалось изменить статус декларации с id = %d, так как она не существует.", declarationId);
+			throw new DaoException("Не удалось изменить статус декларации с id = %d, так как она не существует.", declarationDataId);
 		}		
 	}
 
 	@Override
-	public long getCount(DeclarationFilter filter) {
+	public long getCount(DeclarationDataFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*)");
 		appendFromAndWhereClause(sql, filter);
 		return getJdbcTemplate().queryForLong(sql.toString());
 	}
 
-	private void appendFromAndWhereClause(StringBuilder sql, DeclarationFilter filter) {
+	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
 		sql.append(" FROM declaration dec, declaration_type dectype, department dp, report_period rp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id");
@@ -221,7 +221,7 @@ public class DeclarationDaoImpl extends AbstractDao implements DeclarationDao {
 				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE");
 	}
 
-	public void appendOrderByClause(StringBuilder sql, DeclarationSearchOrdering ordering, boolean ascSorting) {
+	public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
 		sql.append(" order by ");
 
 		String column = null;

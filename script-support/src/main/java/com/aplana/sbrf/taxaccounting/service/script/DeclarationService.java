@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 
 
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 
@@ -17,5 +17,5 @@ public interface DeclarationService {
 	 * @return декларацию или null, если такой декларации не найдено
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
-	Declaration find(int declarationTypeId, int departmentId, int reportPeriodId);
+	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 }

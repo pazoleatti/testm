@@ -5,35 +5,35 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.service.DeclarationAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
  * @author dsultanbekov
  */
 @Service
-public class DeclarationAccessServiceImpl implements DeclarationAccessService {
+public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessService {
 	@Autowired
-	TAUserDao userDao;
+	private TAUserDao userDao;
 	
 	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
+	private DeclarationTemplateDao declarationTemplateDao;
 	
 	@Autowired
-	DepartmentDao departmentDao;
+	private DepartmentDao departmentDao;
 	
 	@Autowired
-	DeclarationDao declarationDao;
+	private DeclarationDataDao declarationDataDao;
 	
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации, логика вынесена в отдельный метод,
@@ -72,8 +72,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 	
 	@Override
-	public boolean canRead(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canRead(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Просматривать декларацию может только контролёр УНП и контролёр текущего уровня
 		return checkRolesForReading(userId, declaration.getDepartmentId());
 	}
@@ -101,8 +101,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canAccept(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canAccept(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Принять декларацию можно только если она еще не принята
 		if (declaration.isAccepted()) {
 			return false;
@@ -112,8 +112,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canReject(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canReject(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Отменить принятие декларации можно только если она принята
 		if (!declaration.isAccepted()) {
 			return false;
@@ -123,8 +123,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canDelete(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canDelete(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Удалять декларацию можно только если она не принята 
 		if (declaration.isAccepted()) {
 			return false;
@@ -134,8 +134,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canRefresh(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canRefresh(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Обновлять декларацию можно только если она не принята 
 		if (declaration.isAccepted()) {
 			return false;
@@ -145,8 +145,8 @@ public class DeclarationAccessServiceImpl implements DeclarationAccessService {
 	}
 
 	@Override
-	public boolean canDownloadXml(int userId, long declarationId) {
-		Declaration declaration = declarationDao.get(declarationId);
+	public boolean canDownloadXml(int userId, long declarationDataId) {
+		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Скачивать файл в формате законодателя можно только для принятых деклараций
 		if (!declaration.isAccepted()) {
 			return false;

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDao;
-import com.aplana.sbrf.taxaccounting.model.Declaration;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 public class DeclarationServiceImpl implements DeclarationService{
 
 	@Autowired
-	DeclarationDao dao;
+	DeclarationDataDao dao;
 	
 	@Override
-	public Declaration find(int declarationTypeId, int departmentId, int reportPeriodId) {
+	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return dao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 

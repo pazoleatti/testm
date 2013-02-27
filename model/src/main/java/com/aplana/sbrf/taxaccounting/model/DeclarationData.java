@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Работа с ними должна вестись через отдельные методы на dao и сервисном слое
  * @author dsultanbekov
  */
-public class Declaration extends IdentityObject<Long> {
+public class DeclarationData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
 
 	private int declarationTemplateId;	
