@@ -1,24 +1,26 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:sel="urn:import:com.aplana.sbrf.taxaccounting.web.widget.treepicker"
         >
 	<ui:style>
 		.important {
 			font-weight: bold;
 		}
+        .filterElementsMargin{
+            margin-left: 25px;
+        }
 	</ui:style>
 
 	<g:HorizontalPanel width="50%">
-        <g:VerticalPanel ui:field="reportPeriodPanel" spacing="5" width="100%">
+        <g:VerticalPanel ui:field="reportPeriodPanel">
             <g:Label width="200px" text="Отчетный период" />
         </g:VerticalPanel>
 
-        <g:VerticalPanel ui:field="departmentSelectionTreePanel"  spacing="5" width="100%">
+        <g:VerticalPanel addStyleNames="{style.filterElementsMargin}" ui:field="departmentSelectionTreePanel">
             <g:Label width="200px" text="Подразделение" />
         </g:VerticalPanel>
 
-        <g:VerticalPanel spacing="5" width="100%">
+        <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
             <g:Label width="200px" text="Вид декларации" />
             <g:ValueListBox width="200px" ui:field="declarationType" />
         </g:VerticalPanel>

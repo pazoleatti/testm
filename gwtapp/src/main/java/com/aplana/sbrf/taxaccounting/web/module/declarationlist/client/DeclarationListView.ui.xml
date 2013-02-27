@@ -2,24 +2,58 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+<ui:style>
 
+    .filterElementsMargin{
+        margin-left: 25px;
+    }
+
+    .topPanel{
+        height: 100px;
+    }
+
+    .titlePanel{
+        width: 310px;
+    }
+
+    .titleText{
+        margin-left: 5px;
+        margin-top: 5px;
+        font-size: 25px;
+    }
+
+    .titleDesc{
+        margin-left: 5px;
+        margin-top: 5px;
+        font-size: 15px;
+    }
+    .createButtonStyle{
+        margin-left: 25px;
+        margin-top: 10px;
+    }
+
+    .searchButtonStyle{
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+</ui:style>
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
 
-        <g:north size="160">
-
-            <g:VerticalPanel>
-
-                <g:FlowPanel width="100%" ui:field="filterContentPanel" />
-
-                <style:Bar>
-                    <style:LeftBar>
-                        <g:Button ui:field="create">Создать</g:Button>
-                        <g:Button ui:field="apply">Применить</g:Button>
-                    </style:LeftBar>
-                </style:Bar>
-            </g:VerticalPanel>
-
+        <g:north size="100">
+            <g:HorizontalPanel addStyleNames="{style.topPanel}">
+                <g:VerticalPanel addStyleNames="{style.titlePanel}">
+                    <g:Label addStyleNames="{style.titleText}">Список деклараций</g:Label>
+                    <g:Label ui:field="titleDesc" addStyleNames="{style.titleDesc}"/>
+                </g:VerticalPanel>
+                <g:FlowPanel>
+                    <g:FlowPanel width="100%" ui:field="filterContentPanel" addStyleNames="{style.filterElementsMargin}"/>
+                    <g:HorizontalPanel>
+                        <g:Button addStyleNames="{style.createButtonStyle}" ui:field="create">Создать</g:Button>
+                        <g:Button addStyleNames="{style.searchButtonStyle}" ui:field="apply">Поиск</g:Button>
+                    </g:HorizontalPanel>
+                </g:FlowPanel>
+            </g:HorizontalPanel>
         </g:north>
 
         <g:center>

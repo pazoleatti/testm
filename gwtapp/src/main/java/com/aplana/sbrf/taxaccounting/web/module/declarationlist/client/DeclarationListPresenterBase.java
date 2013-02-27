@@ -1,20 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.*;
+import com.google.gwt.view.client.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.*;
+import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.List;
+import java.util.*;
 
 public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<DeclarationListPresenterBase.MyView, Proxy_> {
@@ -27,6 +22,8 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		DeclarationDataSearchOrdering getSearchOrdering();
 
 		boolean isAscSorting();
+
+		void updateTitle(String title);
 
 	}
 

@@ -1,36 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclaration;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.google.gwt.view.client.*;
+import com.google.inject.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class DeclarationListPresenter extends
 		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
@@ -60,8 +44,9 @@ public class DeclarationListPresenter extends
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
-			filterPresenter.initFilter(TaxType.valueOf(request.getParameter(
-					"nType", "")));
+			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+			filterPresenter.initFilter(taxType);
+			getView().updateTitle(taxType.getName());
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список деклараций", e);
 		}

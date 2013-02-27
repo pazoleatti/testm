@@ -7,7 +7,7 @@
 			font-weight: bold;
 		}
 
-        .buttonMargin{
+        .filterElementsMargin{
             margin-left: 25px;
         }
         .createButton{
@@ -24,27 +24,27 @@
 
         <g:FlowPanel>
             <g:HorizontalPanel>
-                <g:VerticalPanel addStyleNames="{style.buttonMargin}" ui:field="reportPeriodPanel">
+                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}" ui:field="reportPeriodPanel">
                     <g:Label width="200px" text="Отчетный период" />
                 </g:VerticalPanel>
 
-                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
                     <g:Label width="200px" text="Тип налоговой формы"/>
                     <g:ValueListBox width="200px" ui:field="formDataKind" />
                 </g:VerticalPanel>
 
-                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
                     <g:Label width="200px" text="Вид налоговой формы"/>
                     <g:ValueListBox width="200px" ui:field="formTypeId" />
                 </g:VerticalPanel>
 
-                <g:VerticalPanel addStyleNames="{style.buttonMargin}">
+                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
                     <g:Label width="200px" text="Состояние"/>
                     <g:ValueListBox width="200px" ui:field="formState"/>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
             <g:HorizontalPanel>
-                <g:VerticalPanel addStyleNames="{style.buttonMargin}" ui:field="departmentSelectionTreePanel">
+                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}" ui:field="departmentSelectionTreePanel">
                     <g:Label width="200px" text="Подразделение" />
                 </g:VerticalPanel>
                 <g:Button addStyleNames="{style.createButton}" ui:field="create">Создать</g:Button>
