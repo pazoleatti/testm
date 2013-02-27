@@ -18,10 +18,10 @@ insert into department_declaration_type (id, department_id, declaration_type_id)
 insert into department_declaration_type (id, department_id, declaration_type_id) values (4, 2, 1);
 
 -- FORM_TYPE
-insert into form_type (id, name, tax_type, fixed_rows) values (1, 'FormType - Transport', 'T', 1);
-insert into form_type (id, name, tax_type, fixed_rows) values (2, 'FormType - Income', 'I', 0);
-insert into form_type (id, name, tax_type, fixed_rows) values (3, 'FormType - VAT', 'V', 1);
-insert into form_type (id, name, tax_type, fixed_rows) values (4, 'FormType - Property', 'P', 0);
+insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
+insert into form_type (id, name, tax_type) values (2, 'FormType - Income', 'I');
+insert into form_type (id, name, tax_type) values (3, 'FormType - VAT', 'V');
+insert into form_type (id, name, tax_type) values (4, 'FormType - Property', 'P');
 
 -- DEPARTMENT_FORM_TYPE
 insert into department_form_type (id, department_id, form_type_id, kind) values (1, 1, 1, 1);

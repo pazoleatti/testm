@@ -13,7 +13,7 @@ public class FormType implements Serializable {
 	private int id;
 	private String name;
 	private TaxType taxType;
-    boolean fixedRows;
+
 
     /**
 	 * Получить идентификатор типа налоговой формы
@@ -58,21 +58,4 @@ public class FormType implements Serializable {
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
-
-    /**
-     * Определить работаем-ли мы с фиксированным набором строк или нет
-     * @return true - пользователь работает с предопределённым набором строк. false -  пользователь может
-     * добавлять и удалять строки в/из налоговой формы
-     */
-    public boolean isFixedRows() {
-        return fixedRows;
-    }
-
-    /**
-     * Задать признак того, что в налоговой форме используется фиксированный набор строк
-     * @param fixedRows признак того, что в налоговой форме используется фиксированный набор строк
-     */
-    public void setFixedRows(boolean fixedRows) {
-        this.fixedRows = fixedRows;
-    }
 }

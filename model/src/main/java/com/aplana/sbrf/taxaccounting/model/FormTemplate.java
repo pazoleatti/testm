@@ -17,6 +17,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	private String version;
 	private Integer edition;
 	private boolean numberedColumns;
+    private boolean fixedRows;	
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();
@@ -384,4 +385,21 @@ public class FormTemplate extends IdentityObject<Integer> {
 		throw new IllegalArgumentException("Wrong style alias: '" + alias
 				+ '\'');
 	}
+	
+    /**
+     * Определить работаем-ли мы с фиксированным набором строк или нет
+     * @return true - пользователь работает с предопределённым набором строк. false -  пользователь может
+     * добавлять и удалять строки в/из налоговой формы
+     */
+    public boolean isFixedRows() {
+        return fixedRows;
+    }
+
+    /**
+     * Задать признак того, что в налоговой форме используется фиксированный набор строк
+     * @param fixedRows признак того, что в налоговой форме используется фиксированный набор строк
+     */
+    public void setFixedRows(boolean fixedRows) {
+        this.fixedRows = fixedRows;
+    }
 }

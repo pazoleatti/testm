@@ -197,8 +197,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showSaveButton(true);
 		view.showRecalculateButton(true);
-		view.showAddRowButton(!formData.getFormType().isFixedRows());
-		view.showRemoveRowButton(!formData.getFormType().isFixedRows());
+		// TODO: устанавливать флаг на показ кнопок для добавления/удаления строк
+		// на основе FormTemplate.isFixedRows()
+		view.showAddRowButton(false);
+		view.showRemoveRowButton(false);
 
 		view.showPrintButton(false);
 		view.showManualInputButton(false);

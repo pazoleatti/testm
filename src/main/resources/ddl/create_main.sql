@@ -53,19 +53,16 @@ comment on column dict_tax_benefit_param.rate is 'Пониженная став�
 create table form_type (
 	id number(9) not null,
 	name varchar(200) not null,
-	tax_type char(1) not null,
-	fixed_rows number(1) not null
+	tax_type char(1) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
-alter table form_type add constraint form_type_chk_fixed_rows check(fixed_rows in (0, 1));
 
 comment on table form_type is 'Типы налоговых форм (названия)';
 
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
-comment on column form_type.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
@@ -115,13 +112,15 @@ create table form_template (
 	version varchar2(20) not null,
 	is_active number(9) default 1 not null,
 	edition number(9) not null,
-	numbered_columns NUMBER(1) not null
+	numbered_columns NUMBER(1) not null,
+	fixed_rows number(1) not null
 );
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
 alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
+alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 
 comment on table form_template is 'Описания налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -131,6 +130,7 @@ comment on column form_template.type_id is 'Идентификатор вида 
 comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
 comment on column form_template.edition is 'Номер редакции записи';
 comment on column form_template.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
+comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 ---------------------------------------------------------------------------------------------------
 create table form_style
 (

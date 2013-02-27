@@ -24,5 +24,3 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id) values (13, 1, 1, 1, 3, 12);
 
 insert into report_period (id, name, is_active, months, tax_period_id, ord) values (13, 'Transport report period 13', 0, 3, 10, 3);
-
-

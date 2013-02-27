@@ -2,15 +2,15 @@ insert into declaration_type (id, name, tax_type) values (1, 'Вид декла�
 
 -- TODO: сейчас с источниками бардак формы являются источниками друг друга без учёта вида налога
 
-insert into form_type (id, name, tax_type, fixed_rows) values (1, 'FormType - Transport', 'T', 1);
-insert into form_type (id, name, tax_type, fixed_rows) values (2, 'FormType - Income', 'I', 0);
-insert into form_type (id, name, tax_type, fixed_rows) values (3, 'FormType - VAT', 'V', 1);
-insert into form_type (id, name, tax_type, fixed_rows) values (4, 'FormType - Property', 'P', 0);
+insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
+insert into form_type (id, name, tax_type) values (2, 'FormType - Income', 'I');
+insert into form_type (id, name, tax_type) values (3, 'FormType - VAT', 'V');
+insert into form_type (id, name, tax_type) values (4, 'FormType - Property', 'P');
 
-insert into form_type (id, name, tax_type, fixed_rows) values (11, 'FormType - Transport2', 'T', 1);
-insert into form_type (id, name, tax_type, fixed_rows) values (12, 'FormType - Transport3', 'T', 1);
+insert into form_type (id, name, tax_type) values (11, 'FormType - Transport2', 'T');
+insert into form_type (id, name, tax_type) values (12, 'FormType - Transport3', 'T');
 
-insert into form_type (id, name, tax_type, fixed_rows) values (21, 'FormType - Income2', 'I', 1);
+insert into form_type (id, name, tax_type) values (21, 'FormType - Income2', 'I');
 
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
 insert into department (id, name, parent_id, type) values (2, 'ТБ1', 1, 2);

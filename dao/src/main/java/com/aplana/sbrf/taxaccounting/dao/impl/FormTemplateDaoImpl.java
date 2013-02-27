@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -48,6 +52,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setEdition(rs.getInt("edition"));
 			formTemplate.setVersion(rs.getString("version"));
 			formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
+			formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
 		    formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
@@ -87,6 +92,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 */
 	@Transactional(readOnly = false)
 	@CacheEvict(value = "FormTemplate", key = "#formTemplate.id", beforeInvocation = true)
+	@Override
 	public int save(final FormTemplate formTemplate) {
 		final Integer formTemplateId = formTemplate.getId();
 
@@ -110,11 +116,12 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		
 		// TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, edition = ?, numbered_columns = ?, version = ? where id = ?",
+			"update form_template set data_rows = ?, edition = ?, numbered_columns = ?, version = ?, fixed_rows = ? where id = ?",
 			dataRowsXml, 
 			storedEdition + 1,
 			formTemplate.isNumberedColumns(),
 			formTemplate.getVersion(),
+			formTemplate.isFixedRows(),
 			formTemplateId
 		);
 		formStyleDao.saveFormStyles(formTemplate);
@@ -123,6 +130,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		return formTemplateId;
 	}
 
+	@Override
 	public List<FormTemplate> listAll() {
 		return getJdbcTemplate().query("select * from form_template", new FormTemplateMapper(false));
 	}
