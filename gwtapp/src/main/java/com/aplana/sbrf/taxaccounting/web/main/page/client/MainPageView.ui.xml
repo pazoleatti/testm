@@ -76,6 +76,7 @@
             top: 0px;
             right: 7px;
             left: 7px;
+            bottom: 17px;
         }
     </ui:style>
 
@@ -112,7 +113,7 @@
                 <g:HTMLPanel height="100%" >
                     <div class="{style.rightGradient}"/>
                     <div class="{style.leftGradient}"/>
-                    <g:SplitLayoutPanel height="100%" ui:field="splitPanel" styleName="{style.panelContent}">
+                    <g:SplitLayoutPanel height="99%" ui:field="splitPanel" styleName="{style.panelContent}">
                         <g:center>
                             <g:FlowPanel ui:field="mainContentPanel"/>
                         </g:center>
@@ -120,8 +121,6 @@
                             <g:FlowPanel ui:field="logAreaPanel" />
                         </g:south>
                     </g:SplitLayoutPanel>
-
-
                 </g:HTMLPanel>
             </g:HTMLPanel>
         </g:center>
