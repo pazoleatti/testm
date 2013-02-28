@@ -14,62 +14,146 @@
             font-weight: bold;
             color: #ff4500;
         }
+
+        .headerRight {
+            float: right;
+            top: 0;
+            width: 790px;
+        }
+
+        .headerLeft {
+            float: left;
+            top: 0;
+        }
+
+        .titleLabel {
+            font-family: Tahoma;
+            font-size: 16px;
+            float: left;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .marginTop7 {
+            margin-top: 7px;
+        }
+
+        .anchor {
+            vertical-align: middle;
+            font-size: 12px;
+            text-decoration: underline;
+            font-family: Tahoma;
+            color: #004276;
+            cursor: pointer;
+            float: left;
+        }
+
+        .marginLeft15 {
+            margin-left: 15px;
+        }
+
+        .headerAttr {
+            margin-left: 5px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: Tahoma;
+        }
+
+        .headerAttrName {
+            text-align: right;
+            font-size: 12px;
+            font-family: Tahoma;
+        }
+
+        .showCheckedColumns {
+            font-size: 12px;
+            font-family: Tahoma;
+        }
+
+        .headerTopRight {
+            height: 70px;
+        }
     </ui:style>
 
 	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
 		ui:field="dockPanel">
-
-		<g:north size="90">
-			<g:HorizontalPanel width="100%">
-				<g:VerticalPanel spacing="5">
-					<g:Label ui:field="taxTypeLabel" />
-					<g:Label ui:field="formTypeLabel" />
-					<g:Label ui:field="formKindLabel" />
-                </g:VerticalPanel>
-				<g:VerticalPanel spacing="5">
-					<g:Label ui:field="departmentIdLabel" />
-					<g:Label ui:field="reportPeriodLabel" />
-					<g:Label ui:field="stateLabel" />
-				</g:VerticalPanel>
-            </g:HorizontalPanel>
-		</g:north>
-
-		<g:north size="30">
-                <style:Bar>
-                    <style:LeftBar>
-					    <g:Button ui:field="addRowButton">Добавить строку</g:Button>
-					    <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
-					    <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
-					    <g:Button ui:field="recalculateButton">Пересчитать</g:Button>
-                        <g:Button ui:field="checkButton">Проверить</g:Button>
-					    <g:Button ui:field="printButton">Печать</g:Button>
-                        <g:Button ui:field="signersButton">Исполнитель и подписанты</g:Button>
-				    </style:LeftBar>
-				    <style:RightBar>
-					    <g:Button ui:field="manualInputButton">Ручной ввод</g:Button>
-					    <g:Button ui:field="deleteFormButton">Удалить</g:Button>
-					    <g:Button ui:field="saveButton">Сохранить</g:Button>
-					    <g:Button ui:field="cancelButton">Отмена</g:Button>
-				    </style:RightBar>
-			    </style:Bar>
-		</g:north>
-		
-		<g:north size="30">
-            <style:Bar ui:field="workflowBar">
-                <style:LeftBar ui:field="workflowButtons" />
-            </style:Bar>
+        <g:north size="100">
+            <g:HTMLPanel height="100px" width="100%">
+                <div class="{style.headerLeft}">
+                    <g:HorizontalPanel height="35px">
+                        <g:HTMLPanel>
+                            <img height="20px" width="20px" ui:field="returnImage" src="img/but-l.gif"
+                                style="float: left; margin-top: 10px; cursor: pointer;"/>
+                        </g:HTMLPanel>
+                        <g:Label ui:field="title" styleName="{style.titleLabel}"/>
+                    </g:HorizontalPanel>
+                    <g:FlowPanel height="35px">
+                        <g:Anchor ui:field="signersAnchor" styleName="{style.anchor} {style.marginTop7}">
+                            <img src="img/print.png"/>
+                            Исполнитель и подписанты
+                        </g:Anchor>
+                        <g:Anchor addStyleNames="{style.marginLeft15} {style.anchor} {style.marginTop7}" ui:field="printAnchor">
+                            <img src="img/print.png"/>
+                            Печать
+                        </g:Anchor>
+                    </g:FlowPanel>
+                    <g:FlowPanel height="30px">
+                        <style:Bar>
+                            <style:LeftBar>
+                                <g:Button ui:field="checkButton">Проверить</g:Button>
+                                <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
+                                <g:Button visible="false">Вернуть контролеру текущего уровня</g:Button>
+                                <g:Button visible="false">Принять</g:Button>
+                                <g:Button ui:field="addRowButton">Добавить строку</g:Button>
+                                <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+                                <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
+                                <g:Button ui:field="deleteFormButton">Удалить</g:Button>
+                                <g:Button ui:field="saveButton">Сохранить</g:Button>
+                                <g:Button ui:field="cancelButton">Отмена</g:Button>
+                            </style:LeftBar>
+                            <style:LeftBar ui:field="workflowButtons" />
+                        </style:Bar>
+                    </g:FlowPanel>
+                </div>
+                <div class="{style.headerRight}">
+                    <div class="{style.headerTopRight} {style.marginTop7}">
+                        <g:HorizontalPanel>
+                            <g:Label width="100px" text="Подразделение:" styleName="{style.headerAttrName}"/>
+                            <g:Label ui:field="departmentIdLabel" styleName="{style.headerAttr}"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel>
+                            <g:Label width="100px" text="Тип:" styleName="{style.headerAttrName}"/>
+                            <g:Label ui:field="formKindLabel" styleName="{style.headerAttr}"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel>
+                            <g:Label width="100px" text="Период:" styleName="{style.headerAttrName}"/>
+                            <g:Label ui:field="reportPeriodLabel" styleName="{style.headerAttr}"/>
+                        </g:HorizontalPanel>
+                        <g:HorizontalPanel>
+                            <g:Label width="100px" text="Состояние:" styleName="{style.headerAttrName}"/>
+                            <g:Label ui:field="stateLabel" styleName="{style.headerAttr}"/>
+                        </g:HorizontalPanel>
+                    </div>
+                    <g:HorizontalPanel>
+                        <g:Anchor width="245px" ui:field="manualInputAnchor" styleName="{style.anchor}">
+                            <img src="img/print.png"/>
+                            Ручной ввод
+                        </g:Anchor>
+                        <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
+                            text="Показывать контрольные поля"/>
+                    </g:HorizontalPanel>
+                </div>
+            </g:HTMLPanel>
         </g:north>
 
         <g:north size="30">
             <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}"/>
         </g:north>
-        <g:north size="20">
-            <g:CheckBox ui:field="showCheckedColumns" value="true" text="Показывать контрольные поля"/>
-        </g:north>
-        <g:center>
-			<style:GenericDataGrid ui:field="formDataTable" />
-		</g:center>
 
+        <g:center>
+            <style:GenericDataGrid ui:field="formDataTable" />
+        </g:center>
 	</g:DockLayoutPanel>
 
 

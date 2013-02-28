@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,11 +17,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -39,12 +34,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
 	@UiField
-	DockLayoutPanel dockPanel;
-
-	@UiField
-	Bar workflowBar;
-
-	@UiField
 	DataGrid<DataRow> formDataTable;
 	@UiField
 	Button saveButton;
@@ -53,7 +42,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button removeRowButton;
 	@UiField
-	Button manualInputButton;
+	Anchor manualInputAnchor;
 	@UiField
 	Button originalVersionButton;
 	@UiField
@@ -61,19 +50,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button checkButton;
 	@UiField
-	Button printButton;
+	Anchor printAnchor;
 	@UiField
-	Button signersButton;
+	Anchor signersAnchor;
 	@UiField
 	Button deleteFormButton;
 
 	@UiField
 	LeftBar workflowButtons;
 
-	@UiField
-	Label formTypeLabel;
-	@UiField
-	Label taxTypeLabel;
 	@UiField
 	Label formKindLabel;
 	@UiField
@@ -84,6 +69,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Label reportPeriodLabel;
 	@UiField
 	Label stateLabel;
+	@UiField
+	Label title;
 
 	@UiField
 	CheckBox showCheckedColumns;
@@ -192,7 +179,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		return selectionModel.getSelectedObject();
 	}
 
-	@UiHandler("manualInputButton")
+	@UiHandler("manualInputAnchor")
 	void onManualInputButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onManualInputClicked();
@@ -220,14 +207,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
-	@UiHandler("printButton")
+	@UiHandler("printAnchor")
 	void onPrintButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onPrintClicked();
 		}
 	}
 
-	@UiHandler("signersButton")
+	@UiHandler("signersAnchor")
 	void onSignersButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSignersClicked();
@@ -254,12 +241,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			String formKind, String departmentId, String reportPeriod,
 			String state
 	) {
-		taxTypeLabel.setText("Тип налога: " + taxType);
-		formTypeLabel.setText(" Вид налоговой формы: " + formType);
-		formKindLabel.setText("Тип налоговой формы: " + formKind);
-		departmentIdLabel.setText("Подразделение: " + departmentId);
-		reportPeriodLabel.setText("Отчётный период: " + reportPeriod);
-		stateLabel.setText("Состояние: " + state);
+		title.setText(taxType + " / " + formType);
+		formKindLabel.setText(formKind);
+		departmentIdLabel.setText(departmentId);
+		reportPeriodLabel.setText(reportPeriod);
+		stateLabel.setText(state);
 	}
 
 	/**
@@ -284,7 +270,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			}
 			show = true;
 		}
-		dockPanel.setWidgetHidden(workflowBar, !show);
+
 		workflowButtons.setVisible(show);
 	}
 
@@ -325,12 +311,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showPrintButton(boolean show) {
-		printButton.setVisible(show);
+		printAnchor.setVisible(show);
 	}
 
 	@Override
 	public void showManualInputButton(boolean show) {
-		manualInputButton.setVisible(show);
+		manualInputAnchor.setVisible(show);
 	}
 
 	@Override

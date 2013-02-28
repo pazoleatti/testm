@@ -14,7 +14,7 @@
             font-size: x-small;
             position: absolute;
             left: 30px;
-            bottom: 10px;
+            bottom: 5px;
         }
 
         .footerGradient {
@@ -35,7 +35,6 @@
             right: 7px;
             left: 7px;
             bottom: 17px;
-            margin: 10px;
             position: fixed;
             top: 43px;
         }
