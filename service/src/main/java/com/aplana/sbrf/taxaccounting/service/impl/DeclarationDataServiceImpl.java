@@ -136,8 +136,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public void refreshDeclaration(Logger logger, long declarationId, int userId) {
-		// TODO: реализовать и сделать тест!
-		throw new UnsupportedOperationException("not implemented");
+	public void refreshDeclaration(Logger logger, long declarationDataId, int userId) {
+		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
+			this.logger.debug("Refreshing declaration with id = " + declarationDataId);
+			DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+			String xml = declarationDataScriptingService.create(
+				logger,
+				declarationData.getDepartmentId(),
+				declarationData.getDeclarationTemplateId(),
+				declarationData.getReportPeriodId()
+			);
+			declarationDataDao.setXmlData(declarationDataId, xml);
+		} else {
+			throw new AccessDeniedException("Недостаточно прав для обновления указанной декларации");
+		}
 	}
 }
