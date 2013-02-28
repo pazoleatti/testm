@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.exception.LogHasErrorsException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -45,7 +45,7 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
 			result.setFormData(formData);
             result.setLogEntries(logger.getEntries());
             return result;
-        } catch (LogHasErrorsException e) {
+        } catch (ServiceLoggerException e) {
         	throw new ExtActionException(e.getLocalizedMessage(), e.getLogEntries());
         } catch (Exception e) {
             log.error("Failed to save FormData object", e);

@@ -18,7 +18,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.exception.LogHasErrorsException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -80,7 +80,7 @@ public class GetFormDataHandler extends
 			result.setLogEntries(logger.getEntries());
 			
 			return result;
-		} catch (LogHasErrorsException e) {
+		} catch (ServiceLoggerException e) {
 			throw new ExtActionException(e.getLocalizedMessage(), e.getLogEntries());
 		} catch (Exception e) {
 			log.error(e);

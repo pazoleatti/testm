@@ -11,12 +11,12 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
  * @author sgoryachkin
  *
  */
-public class LogHasErrorsException extends ServiceException{
+public class ServiceLoggerException extends ServiceException{
 	private static final long serialVersionUID = -6734031798154470925L;
 	
 	private List<LogEntry> logEntries;
 
-	public LogHasErrorsException(String message, List<LogEntry> logEntries, Object... params) {
+	public ServiceLoggerException(String message, List<LogEntry> logEntries, Object... params) {
 		super(message, params);
 		this.logEntries = logEntries;
 	}

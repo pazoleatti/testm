@@ -26,7 +26,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.LogHasErrorsException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
@@ -134,7 +134,7 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScripts(user, result,
 				FormDataEvent.CREATE, logger);
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new LogHasErrorsException(
+			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
@@ -169,7 +169,7 @@ public class FormDataServiceImpl implements FormDataService {
 				formDataScriptingService.executeScripts(user, formData,
 						FormDataEvent.ADD_ROW, logger);
 				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new LogHasErrorsException(
+					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте добавления новой строки",
 							logger.getEntries());
 				}
@@ -259,7 +259,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 			// Проверяем ошибки при пересчете
 			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new LogHasErrorsException(
+				throw new ServiceLoggerException(
 						"Произошли ошибки при пересчете формы",
 						logger.getEntries());
 			}
@@ -301,7 +301,7 @@ public class FormDataServiceImpl implements FormDataService {
 					formData, FormDataEvent.AFTER_LOAD, logger);
 
 			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new LogHasErrorsException(
+				throw new ServiceLoggerException(
 						"Произошли ошибки при в скрипте который выполняется после загрузки формы",
 						logger.getEntries());
 			}
@@ -377,14 +377,14 @@ public class FormDataServiceImpl implements FormDataService {
 						userDao.getUser(userId), formData,
 						workflowMove.getAfterEvent(), logger);
 				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new LogHasErrorsException(
+					throw new ServiceLoggerException(
 							"Произошли ошибки при в скрипте который выполняется после перехода",
 							logger.getEntries());
 				}
 			}
 
 		} else {
-			throw new LogHasErrorsException(
+			throw new ServiceLoggerException(
 					"Произошли ошибки при в скрипте который выполняется перед переходом",
 					logger.getEntries());
 		}
