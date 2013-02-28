@@ -9,7 +9,7 @@
             height: 32px;
         }
 
-        .labelFooterStyle {
+        .versionProjectStyle {
             font-style: italic;
             font-size: x-small;
             position: absolute;
@@ -130,7 +130,7 @@
             <g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
                 <div class="{style.footerLeft}"/>
                 <div class="{style.footerRight}"/>
-                <g:FlowPanel ui:field="projectVersion" />
+                <g:FlowPanel ui:field="projectVersion" styleName="{style.versionProjectStyle}"/>
             </g:HTMLPanel>
         </g:south>
 	</g:DockLayoutPanel>
