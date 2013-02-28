@@ -163,7 +163,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 			}
 		}
 		
-		perm.add(new AllPermission());
+		//perm.add(new AllPermission());
 		/*perm.add(new GroovyCodeSourcePermission("/groovy/script"));
 		perm1.add(new FilePermission("/tmp/*", "read"));*/
 		/*perm1.add(new PropertyPermission("file.encoding","read"));
@@ -171,10 +171,10 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		/*perm2.add(new AllPermission());
 		perm2.add(new GroovyCodeSourcePermission("/restrictedScript"));*/
 		
-		StringBuilder sb = new StringBuilder(projector);
-		sb.append("-");
-		
-		ProtectionDomain protectionDomain = new ProtectionDomain(new CodeSource(null, 
+		System.out.println(ScriptSecureSandBoxWrapper.class.getProtectionDomain().getCodeSource().getLocation().toString() + ScriptSecureSandBoxWrapper.class.getSimpleName());
+		ProtectionDomain protectionDomain = new ProtectionDomain(new CodeSource(
+				new URL(ScriptSecureSandBoxWrapper.class.getProtectionDomain().getCodeSource().getLocation().toString() + 
+						ScriptSecureSandBoxWrapper.class.getSimpleName() + ".class"), 
 						(Certificate[])null), 
 					perm);
 		/*ProtectionDomain protectionDomain1 = new ProtectionDomain(
@@ -184,9 +184,6 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		/*ProtectionDomain protectionDomain2 = new ProtectionDomain(new CodeSource(new URL("file:/restrictedScript"), 
 				(Certificate[])null), 
 				perm2);*/
-		
-		System.out.println(projector);
-		System.out.println("new URL(sb.toString() " + new URL(projector));
 		
 		accessControlContext = new AccessControlContext(
 				new ProtectionDomain[]{protectionDomain});
