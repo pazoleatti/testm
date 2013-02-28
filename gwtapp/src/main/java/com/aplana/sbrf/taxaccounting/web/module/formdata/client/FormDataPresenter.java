@@ -229,10 +229,7 @@ public class FormDataPresenter extends
 							((ExtActionException) throwable).getLogEntries());
 
 				}
-				MessageEvent.fire(
-						this,
-						"Не удалось сохранить налоговую форму: "
-								+ throwable.getLocalizedMessage());
+				MessageEvent.fire(this, throwable.getLocalizedMessage());
 				super.onReqFailure(throwable);
 			}
 
@@ -260,6 +257,22 @@ public class FormDataPresenter extends
 			public void onReqSuccess(FormDataResult result) {
 				processFormDataResult(result);
 				super.onReqSuccess(result);
+			}
+
+			@Override
+			protected void onReqFailure(Throwable throwable) {
+				if (throwable instanceof ExtActionException) {
+					LogAddEvent.fire(this,
+							((ExtActionException) throwable).getLogEntries());
+
+				}
+				MessageEvent.fire(this, throwable.getLocalizedMessage());
+				super.onReqFailure(throwable);
+			}
+
+			@Override
+			protected boolean needErrorOnFailure() {
+				return false;
 			}
 		});
 	}

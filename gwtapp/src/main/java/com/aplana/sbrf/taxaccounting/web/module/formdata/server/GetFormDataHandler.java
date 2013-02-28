@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetFormDataHandler extends
 		AbstractActionHandler<GetFormData, GetFormDataResult> {
+	
+	private final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -79,6 +83,7 @@ public class GetFormDataHandler extends
 		} catch (LogHasErrorsException e) {
 			throw new ExtActionException(e.getLocalizedMessage(), e.getLogEntries());
 		} catch (Exception e) {
+			log.error(e);
 			throw new ExtActionException("Не удалось открыть/создать налоговую форму: " + e.getLocalizedMessage());
 		}
 

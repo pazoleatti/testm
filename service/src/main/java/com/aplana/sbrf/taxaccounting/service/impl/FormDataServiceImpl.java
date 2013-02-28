@@ -168,6 +168,11 @@ public class FormDataServiceImpl implements FormDataService {
 				TAUser user = userDao.getUser(userId);
 				formDataScriptingService.executeScripts(user, formData,
 						FormDataEvent.ADD_ROW, logger);
+				if (logger.containsLevel(LogLevel.ERROR)) {
+					throw new LogHasErrorsException(
+							"Произошли ошибки в скрипте добавления новой строки",
+							logger.getEntries());
+				}
 			} else {
 				formData.appendDataRow();
 			}
