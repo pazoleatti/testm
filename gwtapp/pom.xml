@@ -16,7 +16,7 @@
 	<properties>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gwt.version>2.5.0</gwt.version>
+		<gwt.version>2.5.1-rc1</gwt.version>
 		<gwtp.version>0.7</gwtp.version>
 	</properties>
 
