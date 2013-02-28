@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import static com.aplana.sbrf.taxaccounting.test.DeclarationMockUtils.mockDeclaration;
+import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mockDeclarationTemplate;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
@@ -87,10 +87,10 @@ public class DeclarationDataAccessServiceImplTest {
 		when(declarationTemplateDao.get(DECLARATION_TEMPLATE_2_ID)).thenReturn(declarationTemplate2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 		
-		DeclarationData declarationCreatedTB1 = mockDeclaration(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationAcceptedTB1 = mockDeclaration(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationCreatedTB2 = mockDeclaration(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID);
-		DeclarationData declarationAcceptedTB2 = mockDeclaration(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID);
+		DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID);
+		DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID);
+		DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID);
+		DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID);
 		DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
 		when(declarationDataDao.get(DECLARATION_CREATED_TB1_ID)).thenReturn(declarationCreatedTB1);
 		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB1_ID)).thenReturn(declarationAcceptedTB1);
