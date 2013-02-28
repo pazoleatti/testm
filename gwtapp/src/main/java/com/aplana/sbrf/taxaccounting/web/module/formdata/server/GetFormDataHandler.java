@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.exception.LogHasErrorsException;
@@ -128,14 +129,15 @@ public class GetFormDataHandler extends
 			formData = formDataService.getFormData(userId,
 					action.getFormDataId(), logger);
 		}
+		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+		
 		result.setReportPeriod(reportPeriodDao
 				.get(formData.getReportPeriodId()).getName());
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
-		result.setNumberedHeader(formTemplateService.get(
-				formData.getFormTemplateId()).isNumberedColumns());
-		result.setAllStyles(formTemplateService.get(
-				formData.getFormTemplateId()).getStyles());
+		result.setNumberedHeader(formTemplate.isNumberedColumns());
+		result.setAllStyles(formTemplate.getStyles());
+		result.setFixedRows(formTemplate.isFixedRows());
 		result.setFormData(formData);
 	}
 

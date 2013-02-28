@@ -106,6 +106,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 
 	protected boolean readOnlyMode;
+	
+	protected boolean fixedRows;
 
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
@@ -197,10 +199,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showSaveButton(true);
 		view.showRecalculateButton(true);
-		// TODO: устанавливать флаг на показ кнопок для добавления/удаления строк
-		// на основе FormTemplate.isFixedRows()
-		view.showAddRowButton(false);
-		view.showRemoveRowButton(false);
+		view.showAddRowButton(fixedRows);
+		view.showRemoveRowButton(fixedRows);
 
 		view.showPrintButton(false);
 		view.showManualInputButton(false);

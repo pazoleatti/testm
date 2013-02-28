@@ -43,6 +43,8 @@ public class GetFormDataResult implements Result {
 	private String lockedByUser;
 
 	private FormMode formMode;
+	
+	private boolean fixedRows;
 
 	public FormData getFormData() {
 		return formData;
@@ -123,5 +125,47 @@ public class GetFormDataResult implements Result {
 	public void setFormMode(FormMode formMode) {
 		this.formMode = formMode;
 	}
+
+	public boolean isFixedRows() {
+		return fixedRows;
+	}
+
+	public void setFixedRows(boolean fixedRows) {
+		this.fixedRows = fixedRows;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("GetFormDataResult [formData=");
+		builder.append(formData);
+		builder.append(", logEntries=");
+		builder.append(logEntries);
+		builder.append(", departmenName=");
+		builder.append(departmenName);
+		builder.append(", reportPeriod=");
+		builder.append(reportPeriod);
+		builder.append(", formDataAccessParams=");
+		builder.append(formDataAccessParams);
+		builder.append(", numberedHeader=");
+		builder.append(numberedHeader);
+		builder.append(", allStyles=");
+		builder.append(allStyles);
+		builder.append(", lockDate=");
+		builder.append(lockDate);
+		builder.append(", lockedByUser=");
+		builder.append(lockedByUser);
+		builder.append(", formMode=");
+		builder.append(formMode);
+		builder.append(", fixedRows=");
+		builder.append(fixedRows);
+		builder.append("]");
+		return builder.toString();
+	}
+	
+	
 
 }

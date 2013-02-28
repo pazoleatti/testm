@@ -84,6 +84,7 @@ public class FormDataPresenter extends
 							formData = result.getFormData();
 							formDataAccessParams = result
 									.getFormDataAccessParams();
+							fixedRows = result.isFixedRows();
 
 							switch (result.getFormMode()) {
 							case READ_UNLOCKED:
