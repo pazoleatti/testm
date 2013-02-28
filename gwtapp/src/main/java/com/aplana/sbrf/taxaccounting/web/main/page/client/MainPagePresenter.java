@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -11,13 +10,10 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
-import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersionResult;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
@@ -68,7 +64,6 @@ public class MainPagePresenter extends
 
 	private final MessageDialogPresenter messageDialogPresenter;
 
-	private final DispatchAsync dispatchAsync;
 
 	/**
 	 * Флаг показывает, что заголовки обновлены через UpdateEvent и в обновлении
@@ -83,7 +78,7 @@ public class MainPagePresenter extends
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
 			MessageDialogPresenter messageDialogPresenter, LogAreaPresenter notificationPresenter,
-			ProjectVersionPresenter projectVersionPresenter, DispatchAsync dispatchAsync) {
+			ProjectVersionPresenter projectVersionPresenter) {
 		super(eventBus, view, proxy);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
@@ -91,7 +86,6 @@ public class MainPagePresenter extends
 		this.messageDialogPresenter = messageDialogPresenter;
 		this.logAreaPresenter = notificationPresenter;
 		this.projectVersionPresenter = projectVersionPresenter;
-		this.dispatchAsync = dispatchAsync;
 	}
 
 	@Override
