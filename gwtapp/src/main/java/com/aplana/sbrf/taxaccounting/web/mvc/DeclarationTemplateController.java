@@ -5,17 +5,16 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,17 +43,22 @@ public class DeclarationTemplateController {
 
 	@RequestMapping(value = "/uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-
+			throws FileUploadException {
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
+		List<FileItem> items = upload.parseRequest(req);
+		declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString());
+
+	}
+
+	@ExceptionHandler(Exception.class)
+	public void exceptionHandler(Exception e, final HttpServletResponse response) {
+		response.setContentType("text/html");
+		response.setCharacterEncoding("UTF-8");
 		try {
-			List<FileItem> items = upload.parseRequest(req);
-			declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString());
-		}
-		catch (Exception e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"An error occurred while creating the file : " + e.getMessage());
+			response.getWriter().append("error ").append(e.getMessage()).close();
+		} catch (IOException ioException) {
+			Logger.logMsg(Logger.ERROR, ioException.getMessage());
 		}
 	}
 }

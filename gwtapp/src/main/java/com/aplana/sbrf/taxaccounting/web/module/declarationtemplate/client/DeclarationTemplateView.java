@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -16,11 +14,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 
 public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTemplateUiHandlers>
 		implements DeclarationTemplatePresenter.MyView, Editor<DeclarationTemplate> {
@@ -133,7 +126,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 					getUiHandlers().save();
 				}
 				else {
-					getUiHandlers().formSubmitFail(upload.getFilename(), event.getResults());
+					getUiHandlers().formSubmitFail(upload.getFilename(), event.getResults().replaceFirst("error ", ""));
 				}
 			}
 		});
