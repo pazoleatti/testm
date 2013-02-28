@@ -11,6 +11,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.listeditor.ListEditor" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.DictionaryPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.logarea.LogArea" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.version.ProjectVersion" />
 	
 	<source path="cell"/>
     <source path="style"/>

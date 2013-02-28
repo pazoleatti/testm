@@ -39,10 +39,10 @@ public class MainPageView extends ViewImpl implements MyView {
 	Panel footerPanel;
 
 	@UiField
-	Label projectVersion;
-
-	@UiField
 	Element loadingMessage;
+	
+	@UiField
+	Panel projectVersion;
 
 	@Inject
 	public MainPageView(Binder binder) {
@@ -66,6 +66,8 @@ public class MainPageView extends ViewImpl implements MyView {
 			setMainMenuContent(content);
 		} else if (slot == MainPagePresenter.TYPE_LogAreaContent){
 			setNotificationContent(content);
+		} else if(slot == MainPagePresenter.TYPE_ProjectVersionContent){
+			setProjectVersion(content);
 		} else {
 			super.setInSlot(slot, content);
 		}
@@ -98,16 +100,18 @@ public class MainPageView extends ViewImpl implements MyView {
 			logAreaPanel.add(content);
 		}
 	}
+	
+	private void setProjectVersion(Widget content) {
+		projectVersion.clear();
+		if (content != null) {
+			projectVersion.add(content);
+		}
+	}
 
 	@Override
 	public void showLoading(boolean locked) {
 		loadingMessage.getStyle().setVisibility(
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
-	}
-
-	@Override
-	public void setProjectVersion(String version){
-		projectVersion.setText("Версия: " + version);
 	}
 
 	@Override

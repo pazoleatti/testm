@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataList
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.server.DictionaryPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.server.MainMenuServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServerModule;
+import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionControlServerModule;
+
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -19,7 +21,7 @@ import org.springframework.context.annotation.Import;
 @Import(value = {MainHandlerModule.class,  FormDataListServerModule.class,
 		FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class, DictionaryPickerServerModule.class,
 		AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class, MainPageServerModule.class,
-		DeclarationServerModule.class})
+		DeclarationServerModule.class,ProjectVersionControlServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 public class MainServerModule {
 

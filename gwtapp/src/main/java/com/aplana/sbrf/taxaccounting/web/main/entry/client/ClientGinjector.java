@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientGinjector;
+import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionGinjector;
 import com.google.gwt.inject.client.GinModules;
 
 @GinModules({ ClientModule.class })
@@ -25,7 +26,8 @@ public interface ClientGinjector extends ClientGinjectorBase,
 		ErrorGinjector,
 		DeclarationListGinjector,
 		DeclarationDataGinjector,
-		LogAreaGinjector
+		LogAreaGinjector,
+		ProjectVersionGinjector
 {
 
 }

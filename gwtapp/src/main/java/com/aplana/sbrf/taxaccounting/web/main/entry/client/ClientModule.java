@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientModule;
+import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionModule;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -63,5 +64,6 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new ErrorModule());
 		install(new DeclarationListModule());
 		install(new LogAreaClientModule());
+		install(new ProjectVersionModule());
 	}
 }

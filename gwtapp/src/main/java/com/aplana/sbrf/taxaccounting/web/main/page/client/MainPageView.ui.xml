@@ -130,7 +130,7 @@
             <g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
                 <div class="{style.footerLeft}"/>
                 <div class="{style.footerRight}"/>
-                <g:Label ui:field="projectVersion" styleName="{style.labelFooterStyle}" />
+                <g:FlowPanel ui:field="projectVersion" />
             </g:HTMLPanel>
         </g:south>
 	</g:DockLayoutPanel>
