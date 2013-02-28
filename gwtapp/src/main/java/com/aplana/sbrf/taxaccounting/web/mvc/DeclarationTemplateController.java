@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import java.io.*;
-import java.net.URLEncoder;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -58,7 +56,7 @@ public class DeclarationTemplateController {
 		try {
 			response.getWriter().append("error ").append(e.getMessage()).close();
 		} catch (IOException ioException) {
-			Logger.logMsg(Logger.ERROR, ioException.getMessage());
+			ioException.printStackTrace();
 		}
 	}
 }
