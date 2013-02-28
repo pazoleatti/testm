@@ -1,18 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker;
 
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.google.gwt.core.client.*;
+import com.google.gwt.dom.client.*;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.*;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.i18n.client.*;
+import com.google.gwt.uibinder.client.*;
+import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -130,6 +126,7 @@ public class ReportPeriodPicker extends Composite{
 
 	@UiHandler("selectButton")
 	public void onClickSelectButton(ClickEvent event) {
+		popup.setPopupPosition(getPopupLeftOffset(), getPopupTopOffset());
 		if(!taxPeriodNodes.isEmpty()){
 			popup.show();
 			return;
@@ -144,6 +141,14 @@ public class ReportPeriodPicker extends Composite{
 			taxPeriodNodes.put(taxPeriod, element);
 		}
 		popup.show();
+	}
+
+	private int getPopupLeftOffset(){
+		return (Window.getClientWidth() / 2) - 125;
+	}
+
+	private int getPopupTopOffset(){
+		return (Window.getClientHeight() / 2) - 125;
 	}
 
 	private String getFormattedTaxPeriodDate(TaxPeriod taxPeriod){
@@ -181,6 +186,7 @@ public class ReportPeriodPicker extends Composite{
 		rootPanel.add(panelWithTree);
 		rootPanel.add(buttonsPanel);
 		popup.add(rootPanel);
+		popup.setPopupPosition(getPopupLeftOffset(), getPopupTopOffset());
 		panelWithTree.add(tree);
 	}
 

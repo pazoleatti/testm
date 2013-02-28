@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.treepicker;
 
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.google.gwt.core.client.*;
+import com.google.gwt.dom.client.*;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.*;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.event.shared.*;
+import com.google.gwt.uibinder.client.*;
+import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -151,7 +148,7 @@ public class TreePicker extends Composite{
 				popup.hide();
 			}
 		});
-
+		popup.setPopupPosition(getPopupLeftOffset(), getPopupTopOffset());
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
@@ -170,6 +167,7 @@ public class TreePicker extends Composite{
 						Window.alert("Нету доступных подразделений");
 					}
 				} else {
+					popup.setPopupPosition(getPopupLeftOffset(), getPopupTopOffset());
 					popup.show();
 				}
 			}
@@ -200,6 +198,14 @@ public class TreePicker extends Composite{
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());
+	}
+
+	private int getPopupLeftOffset(){
+		return (Window.getClientWidth() / 2) - 125;
+	}
+
+	private int getPopupTopOffset(){
+		return (Window.getClientHeight() / 2) - 125;
 	}
 
 	private final class Pair<A, B> {
