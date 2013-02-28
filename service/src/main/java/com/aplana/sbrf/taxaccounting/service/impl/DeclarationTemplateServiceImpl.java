@@ -57,9 +57,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		ByteArrayOutputStream  xlsReport = new ByteArrayOutputStream();
 		JasperDesign jasperDesign = null;
 		try {
-			jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes()));
+			jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes("UTF-8")));
 			JasperCompileManager.compileReportToStream(jasperDesign, xlsReport);
 		} catch (JRException e) {
+			throw new ServiceException("Некорректный файл шаблона");
+		} catch (UnsupportedEncodingException e2) {
 			throw new ServiceException("Некорректный файл шаблона");
 		}
 

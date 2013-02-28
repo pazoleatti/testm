@@ -31,7 +31,8 @@ public class DeclarationTemplateController {
 			String fileName = "DeclarationTemplate_" + declarationTemplateId + ".jrxml";
 			resp.setContentType("application/octet-stream");
 			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-			respOut.write(declarationTemplateService.getJrxml(declarationTemplateId).getBytes());
+			resp.setCharacterEncoding("UTF-8");
+			respOut.write(declarationTemplateService.getJrxml(declarationTemplateId).getBytes("UTF-8"));
 			respOut.close();
 		}
 		else {
@@ -41,12 +42,11 @@ public class DeclarationTemplateController {
 
 	@RequestMapping(value = "/uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws FileUploadException {
+			throws FileUploadException, UnsupportedEncodingException {
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
-		declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString());
-
+		declarationTemplateService.setJrxml(declarationTemplateId, items.get(0).getString("UTF-8"));
 	}
 
 	@ExceptionHandler(Exception.class)
