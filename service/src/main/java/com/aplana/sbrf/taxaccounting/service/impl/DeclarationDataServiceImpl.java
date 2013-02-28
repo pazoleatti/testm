@@ -1,29 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JRXmlDataSource;
-import net.sf.jasperreports.engine.export.JRXlsExporter;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.log.*;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.*;
+import com.aplana.sbrf.taxaccounting.service.*;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.*;
+import net.sf.jasperreports.engine.export.*;
+import net.sf.jasperreports.engine.export.ooxml.*;
+import org.apache.commons.logging.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 
 /**
  * Сервис для работы с декларациями
@@ -124,7 +116,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			} catch (JRException e) {
 				throw new ServiceException("Невозможно заполнить отчет");
 			}
-			JRXlsExporter exporter = new JRXlsExporter();
+			JRXlsxExporter exporter = new JRXlsxExporter();
 			ByteArrayOutputStream xls = new ByteArrayOutputStream();
 			exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT, print);
 			exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, xls);
