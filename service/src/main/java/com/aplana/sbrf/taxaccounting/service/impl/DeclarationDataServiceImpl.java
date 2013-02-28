@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -31,7 +31,7 @@ import java.util.HashMap;
  * @author dsultanbekov
  */
 @Service
-public class DeclarationDataServiceImpl implements DeclarationService {
+public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private Log logger = LogFactory.getLog(getClass());
 
@@ -145,6 +145,7 @@ public class DeclarationDataServiceImpl implements DeclarationService {
 
 	@Override
 	public void refreshDeclaration(Logger logger, long declarationId, int userId) {
+		// TODO: реализовать и сделать тест!
 		throw new UnsupportedOperationException("not implemented");
 	}
 }

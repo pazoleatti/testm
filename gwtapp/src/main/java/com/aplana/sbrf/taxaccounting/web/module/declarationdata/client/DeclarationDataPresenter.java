@@ -6,10 +6,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -78,12 +78,12 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void refreshDeclaration(){
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
+		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		action.setRefresh(true);
-		action.setDeclaration(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
+		action.setDeclarationData(declaration);
+		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
 			@Override
-			public void onReqSuccess(UpdateDeclarationResult result) {
+			public void onReqSuccess(UpdateDeclarationDataResult result) {
 				MessageEvent.fire(this, "Декларация обновлена");
 				setDeclaration();
 			}
@@ -103,12 +103,12 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void setAccepted(boolean accepted) {
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
+		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		declaration.setAccepted(accepted);
-		action.setDeclaration(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
+		action.setDeclarationData(declaration);
+		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
 			@Override
-			public void onReqSuccess(UpdateDeclarationResult result) {
+			public void onReqSuccess(UpdateDeclarationDataResult result) {
 				MessageEvent.fire(this, "Декларация сохранена");
 				setDeclaration();
 			}
@@ -128,12 +128,12 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void delete() {
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
+		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		action.setDelete(true);
-		action.setDeclaration(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
+		action.setDeclarationData(declaration);
+		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
 			@Override
-			public void onReqSuccess(UpdateDeclarationResult result) {
+			public void onReqSuccess(UpdateDeclarationDataResult result) {
 				MessageEvent.fire(this, "Декларация удалена");
 				placeManager
 						.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
@@ -165,13 +165,13 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	private void setDeclaration() {
 		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationId, "0"));
 		if (declarationId != 0) {
-			GetDeclarationAction action = new GetDeclarationAction();
+			GetDeclarationDataAction action = new GetDeclarationDataAction();
 			action.setId(declarationId);
-			dispatcher.execute(action, new AbstractCallback<GetDeclarationResult>() {
+			dispatcher.execute(action, new AbstractCallback<GetDeclarationDataResult>() {
 				@Override
-				public void onReqSuccess(GetDeclarationResult result) {
+				public void onReqSuccess(GetDeclarationDataResult result) {
 					if (result.isCanRead()) {
-						declaration = result.getDeclaration();
+						declaration = result.getDeclarationData();
 						taxName = result.getTaxType().name();
 						getView().setDeclarationData(declaration);
 						getView().setTaxType(result.getTaxType().getName());

@@ -89,10 +89,11 @@ public class DeclarationListView extends
 						sb.appendHtmlConstant("<a href=\"#"
 								+ DeclarationDataTokens.declarationData + ";"
 								+ DeclarationDataTokens.declarationId + "="
-								+ declaration.getDeclarationId() + "\">"
+								+ declaration.getDeclarationDataId() + "\">"
 								+ declaration.getTaxType().getName() + "</a>");
 					}
 				}) {
+			@Override
 			public DeclarationDataSearchResultItem getValue(
 					DeclarationDataSearchResultItem object) {
 				return object;

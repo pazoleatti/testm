@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
@@ -41,9 +41,6 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 
 	@Autowired
 	private DepartmentService departmentService;
-
-	@Autowired
-	private DeclarationService declarationService;
 	
 	@Autowired
 	private DeclarationDataSearchService declarationDataSearchService;	

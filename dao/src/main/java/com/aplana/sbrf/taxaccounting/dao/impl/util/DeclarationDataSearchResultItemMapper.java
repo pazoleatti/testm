@@ -16,7 +16,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 		result.setDepartmentId(rs.getInt("department_id"));
 		result.setDepartmentName(rs.getString("department_name"));
 		result.setDepartmentType(DepartmentType.fromCode(rs.getInt("department_type")));
-		result.setDeclarationId(rs.getLong("declaration_id"));
+		result.setDeclarationDataId(rs.getLong("declaration_data_id"));
 		result.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
 		result.setReportPeriodId(rs.getInt("report_period_id"));
 		result.setReportPeriodName(rs.getString("report_period_name"));

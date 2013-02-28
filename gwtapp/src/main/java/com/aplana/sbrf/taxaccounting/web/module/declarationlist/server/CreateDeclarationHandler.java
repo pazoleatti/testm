@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
@@ -22,7 +22,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	}
 
 	@Autowired
-	DeclarationService declarationService;
+	DeclarationDataService declarationDataService;
 
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
@@ -36,7 +36,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 		Integer userId = user.getId();
 
 		CreateDeclarationResult result = new CreateDeclarationResult();
-		result.setDeclarationId(declarationService.createDeclaration(new Logger(), declarationTemplateService
+		result.setDeclarationId(declarationDataService.createDeclaration(new Logger(), declarationTemplateService
 				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(), userId, command.getReportPeriodId()));
 		return result;
 	}

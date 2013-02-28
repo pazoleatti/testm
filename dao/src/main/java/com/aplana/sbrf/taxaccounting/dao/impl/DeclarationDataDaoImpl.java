@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,6 +16,12 @@ import java.sql.Types;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -25,7 +30,6 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 @Transactional
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
-	
 	private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
 		@Override
 		public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -43,7 +47,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	public DeclarationData get(long declarationDataId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-				"select * from declaration where id = ?",
+				"select * from declaration_data where id = ?",
 				new Object[] { declarationDataId },
 				new DeclarationDataRowMapper()
 			);
@@ -51,12 +55,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
 		}
 	}
+	
+	@Override
+	public boolean hasXmlData(long declarationDataId) {
+		return getJdbcTemplate().queryForInt("select count(*) from declaration_data where data is not null and id = ?", declarationDataId) == 1;
+	}
 
 	@Override
 	public String getXmlData(long declarationDataId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-				"select data from declaration where id = ?",
+				"select data from declaration_data where id = ?",
 				new Object[] { declarationDataId },
 				String.class
 			);
@@ -68,7 +77,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	@Override
 	public void setXmlData(long declarationDataId, String xmlData) {
 		int count = getJdbcTemplate().update(
-			"update declaration set data = ? where id = ?",
+			"update declaration_data set data = ? where id = ?",
 			new Object[] {
 				xmlData,
 				declarationDataId
@@ -86,7 +95,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	@Override
 	public void delete(long declarationDataId) {
 		int count = getJdbcTemplate().update(
-			"delete from declaration where id = ?",
+			"delete from declaration_data where id = ?",
 			declarationDataId
 		);
 		if (count == 0) {
@@ -98,7 +107,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId){
 		try {
 			Long declarationDataId = getJdbcTemplate().queryForLong(
-					"select dec.id from declaration dec where exists (select 1 from declaration_template dt where dec.declaration_template_id=dt.id and dt.declaration_type_id = ?)"
+					"select dec.id from declaration_data dec where exists (select 1 from declaration_template dt where dec.declaration_template_id=dt.id and dt.declaration_type_id = ?)"
 							+ " and dec.department_id = ? and dec.report_period_id = ?",
 					new Object[] {
 							declarationTypeId,
@@ -160,9 +169,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		if (id != null) {
 			throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию");
 		}
-		id = generateId("seq_declaration", Long.class);
+		id = generateId("seq_declaration_data", Long.class);
 		jt.update(
-			"insert into declaration (id, declaration_template_id, report_period_id, department_id, is_accepted) values (?, ?, ?, ?, ?)",
+			"insert into declaration_data (id, declaration_template_id, report_period_id, department_id, is_accepted) values (?, ?, ?, ?, ?)",
 			id,
 			declarationData.getDeclarationTemplateId(),
 			declarationData.getReportPeriodId(),
@@ -176,7 +185,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	@Override
 	public void setAccepted(long declarationDataId, boolean accepted) {
 		int count = getJdbcTemplate().update(
-			"update declaration set is_accepted = ? where id = ?",
+			"update declaration_data set is_accepted = ? where id = ?",
 			accepted,
 			declarationDataId
 		);
@@ -193,7 +202,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
-		sql.append(" FROM declaration dec, declaration_type dectype, department dp, report_period rp")
+		sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp")
 				.append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
 				.append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id");
 
@@ -215,7 +224,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	private void appendSelectClause(StringBuilder sql) {
-		sql.append("SELECT dec.ID as declaration_id, dec.declaration_template_id, dec.is_accepted,")
+		sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted,")
 				.append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
 				.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
 				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE");

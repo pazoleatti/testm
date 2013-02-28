@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
  * Сервис для работы с {@link налоговыми декларациями DeclarationData}
  * @author dsultanbekov
  */
-public interface DeclarationService {
+public interface DeclarationDataService {
 	/**
 	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
 	 * @param logger - объект журнала

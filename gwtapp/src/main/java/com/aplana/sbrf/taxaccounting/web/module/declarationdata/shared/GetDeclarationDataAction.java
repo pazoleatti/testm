@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetDeclarationAction extends UnsecuredActionImpl<GetDeclarationResult> {
+public class GetDeclarationDataAction extends UnsecuredActionImpl<GetDeclarationDataResult> {
     private Long id;
 
     public Long getId() {

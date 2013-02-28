@@ -9,10 +9,10 @@ comment on column dict_tax_period.code is 'код';
 comment on column dict_tax_period.name is 'наименование';
 ---------------------------------------------------------------------------------------------
 create table dict_region(
-code number(2) not null,
-name varchar2(510) not null,
-okato varchar2(11),
-okato_definition varchar2(11)
+	code number(2) not null,
+	name varchar2(510) not null,
+	okato varchar2(11),
+	okato_definition varchar2(11)
 );
 alter table dict_region add constraint dict_region_pk primary key (code);
 alter table dict_region add constraint dict_region_uniq_okato_def unique (okato_definition);
@@ -301,7 +301,7 @@ comment on column declaration_template.declaration_type_id  is 'вид декл�
 create sequence seq_declaration_template start with 10000;
 
 -----------------------------------------------------------------------------------------------------------------------------------
-create table declaration
+create table declaration_data
 (
   id                      number(18) not null,
   declaration_template_id number(9) not null,
@@ -310,22 +310,22 @@ create table declaration
   data                    clob,
   is_accepted             number(1) not null
 );
-alter table declaration add constraint declaration_pk primary key (id);
-alter table declaration add constraint declaration_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
-alter table declaration add constraint declaration_fk_report_p_id foreign key (report_period_id) references report_period (id);
-alter table declaration add constraint declaration_fk_department_id foreign key (department_id) references department (id);
-alter table declaration add constraint declaration_chk_is_accepted check (is_accepted in (0,1));
-alter table declaration add constraint declaration_uniq_template unique(report_period_id, department_id, declaration_template_id);
+alter table declaration_data add constraint declaration_data_pk primary key (id);
+alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
+alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
+alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
+alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
+alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
 
-comment on table declaration is 'Налоговые декларации';
-comment on column declaration.id is 'идентификатор (первичный ключ)';
-comment on column declaration.declaration_template_id is 'ссылка шаблон декларации';
-comment on column declaration.report_period_id is 'отчётный период';
-comment on column declaration.department_id is 'подразделение';
-comment on column declaration.data is 'данные декларации в формате законодателя (XML) ';
-comment on column declaration.is_accepted is 'признак того, что декларация принята';
+comment on table declaration_data is 'Налоговые декларации';
+comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
+comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
+comment on column declaration_data.report_period_id is 'Отчётный период';
+comment on column declaration_data.department_id is 'Подразделение';
+comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML) ';
+comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 
-create sequence seq_declaration start with 10000;
+create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
 	id number(18) not null,

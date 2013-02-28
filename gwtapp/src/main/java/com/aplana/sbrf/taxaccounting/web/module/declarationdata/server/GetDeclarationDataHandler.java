@@ -4,12 +4,12 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarationAction, GetDeclarationResult> {
+public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarationDataAction, GetDeclarationDataResult> {
     @Autowired
-	private DeclarationService declarationService;
+	private DeclarationDataService declarationDataService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -39,17 +39,17 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 	private SecurityService securityService;
 
     public GetDeclarationDataHandler() {
-        super(GetDeclarationAction.class);
+        super(GetDeclarationDataAction.class);
     }
 
     @Override
-    public GetDeclarationResult execute(GetDeclarationAction action, ExecutionContext context) throws ActionException {
+    public GetDeclarationDataResult execute(GetDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
-		GetDeclarationResult result = new GetDeclarationResult();
-		DeclarationData declaration = declarationService.get(action.getId(), userId);
-		result.setDeclaration(declaration);
+		GetDeclarationDataResult result = new GetDeclarationDataResult();
+		DeclarationData declaration = declarationDataService.get(action.getId(), userId);
+		result.setDeclarationData(declaration);
 		result.setCanRead(declarationAccessService.canRead(userId, action.getId()));
 		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));
 		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
@@ -64,7 +64,7 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
     }
 
     @Override
-    public void undo(GetDeclarationAction action, GetDeclarationResult result, ExecutionContext context) throws ActionException {
+    public void undo(GetDeclarationDataAction action, GetDeclarationDataResult result, ExecutionContext context) throws ActionException {
         // Nothing!
     }
 }

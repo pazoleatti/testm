@@ -3,17 +3,17 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarationResult> {
-    private DeclarationData declaration;
+public class UpdateDeclarationDataAction extends UnsecuredActionImpl<UpdateDeclarationDataResult> {
+    private DeclarationData declarationData;
 	private boolean isRefresh;
 	private boolean isDelete;
 
-    public DeclarationData getDeclaration() {
-        return declaration;
+    public DeclarationData getDeclarationData() {
+        return declarationData;
     }
 
-    public void setDeclaration(DeclarationData declaration) {
-        this.declaration = declaration;
+    public void setDeclarationData(DeclarationData declaration) {
+        this.declarationData = declaration;
     }
 
 	public boolean isRefresh() {

@@ -15,7 +15,7 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	}
 
 	// Идентификатор записи с данными декларации
-	private Long declarationId;
+	private Long declarationDataId;
 	// Идентификатор шаблона декларации
 	private Integer declarationTemplateId;
 	// True - декларация принята, False - нет
@@ -35,12 +35,12 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	// Идентификатор вида декларации
 	private String declarationType;
 
-	public Long getDeclarationId() {
-		return declarationId;
+	public Long getDeclarationDataId() {
+		return declarationDataId;
 	}
 
-	public void setDeclarationId(Long declarationId) {
-		this.declarationId = declarationId;
+	public void setDeclarationDataId(Long declarationDataId) {
+		this.declarationDataId = declarationDataId;
 	}
 
 	public Integer getDeclarationTemplateId() {

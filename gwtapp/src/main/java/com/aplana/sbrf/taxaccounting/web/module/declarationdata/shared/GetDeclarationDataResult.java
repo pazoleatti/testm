@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
 
-public class GetDeclarationResult implements Result {
-    private DeclarationData declaration;
+public class GetDeclarationDataResult implements Result {
+    private DeclarationData declarationData;
 	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
@@ -17,12 +17,12 @@ public class GetDeclarationResult implements Result {
 	private boolean canDownload;
 	private boolean canDelete;
 
-    public DeclarationData getDeclaration() {
-        return declaration;
+    public DeclarationData getDeclarationData() {
+        return declarationData;
     }
 
-    public void setDeclaration(DeclarationData declaration) {
-        this.declaration = declaration;
+    public void setDeclarationData(DeclarationData declarationData) {
+        this.declarationData = declarationData;
     }
 
 	public boolean isCanRead() {

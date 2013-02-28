@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"DeclarationDaoTest.xml"})
+@ContextConfiguration({"DeclarationDataDaoTest.xml"})
 @Transactional
 public class DeclarationDataDaoTest {
 	@Autowired
@@ -52,6 +52,12 @@ public class DeclarationDataDaoTest {
 	@Test(expected=DaoException.class)
 	public void testGetNotExisted() {
 		declarationDataDao.get(1000l);
+	}
+	
+	@Test
+	public void testHasXmlData() {
+		assertTrue(declarationDataDao.hasXmlData(1));
+		assertFalse(declarationDataDao.hasXmlData(2));
 	}
 	
 	@Test
@@ -203,7 +209,7 @@ public class DeclarationDataDaoTest {
 		boolean failed = false;
 		for (int i = 0; i < expected.length; ++i) {
 			DeclarationDataSearchResultItem item = items.get(i);
-			received[i] = item.getDeclarationId();
+			received[i] = item.getDeclarationDataId();
 			if (received[i] != expected[i]) {
 				failed = true;
 			}
@@ -213,5 +219,4 @@ public class DeclarationDataDaoTest {
 			fail("Wrong list of ids: " + expected + " expected but " + received + " received");
 		}
 	}
-	
 }
