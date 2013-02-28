@@ -3,81 +3,81 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
 	<ui:style>
-        .topGradient {
-            background: url("img/body_top_gradient.gif") repeat-x;
-            top: 0;
-            height: 32px;
-        }
-
-        .versionProjectStyle {
-            font-style: italic;
-            font-size: x-small;
-            position: absolute;
-            left: 30px;
-            bottom: 5px;
-        }
-
-        .footerGradient {
-            background: url("img/footer_gradient.gif") repeat-x;
-            bottom: 0px;
-            height: 32px;
-            width: 100%;
-        }
-
-        .leftGradient {
-            background: url("img/body_left_gradient.gif") repeat-y;
-            float: left;
-            width: 32px;
-            height: 100%;
-        }
-
-        .content {
-            right: 7px;
-            left: 7px;
-            bottom: 17px;
-            position: fixed;
-            top: 43px;
-        }
-
-        .rightGradient {
-            background: url("img/body_right_gradient.gif") repeat-y;
-            float: right;
-            width: 32px;
-            height: 100%;
-        }
-
-        .footerLeft {
-            background: url("img/footer_left_corner.gif") no-repeat;
-            height: 32px;
-            float: left;
-            width: 32px;
-            bottom: 0;
-        }
-
-        .footerRight {
-            background: url("img/footer_right_corner.gif") no-repeat;
-            height: 32px;
-            float: right;
-            width: 32px;
-            bottom: 0;
-        }
-
-        .bodyTopLeft {
-            background: url("img/body_top_left_corner.gif") no-repeat;
-            height: 32px;
-            float: left;
-            width: 32px;
-            top: 0;
-        }
-
-        .bodyTopRight {
-            background: url("img/body_top_right_corner.gif") no-repeat;
-            float: right;
-            width: 32px;
-            height: 32px;
-            top: 0;
-        }
-    </ui:style>
+		.topGradient {
+			background: url("img/body_top_gradient.gif") repeat-x;
+			top: 0;
+			height: 32px;
+		}
+		
+		.versionProjectStyle {
+			font-style: italic;
+			font-size: x-small;
+			position: absolute;
+			left: 30px;
+			bottom: 5px;
+		}
+		
+		.footerGradient {
+			background: url("img/footer_gradient.gif") repeat-x;
+			bottom: 0px;
+			height: 32px;
+			width: 100%;
+		}
+		
+		.leftGradient {
+			background: url("img/body_left_gradient.gif") repeat-y;
+			float: left;
+			width: 32px;
+			height: 100%;
+		}
+		
+		.content {
+			right: 7px;
+			left: 7px;
+			bottom: 17px;
+			position: fixed;
+			top: 43px;
+		}
+		
+		.rightGradient {
+			background: url("img/body_right_gradient.gif") repeat-y;
+			float: right;
+			width: 32px;
+			height: 100%;
+		}
+		
+		.footerLeft {
+			background: url("img/footer_left_corner.gif") no-repeat;
+			height: 32px;
+			float: left;
+			width: 32px;
+			bottom: 0;
+		}
+		
+		.footerRight {
+			background: url("img/footer_right_corner.gif") no-repeat;
+			height: 32px;
+			float: right;
+			width: 32px;
+			bottom: 0;
+		}
+		
+		.bodyTopLeft {
+			background: url("img/body_top_left_corner.gif") no-repeat;
+			height: 32px;
+			float: left;
+			width: 32px;
+			top: 0;
+		}
+		
+		.bodyTopRight {
+			background: url("img/body_top_right_corner.gif") no-repeat;
+			float: right;
+			width: 32px;
+			height: 32px;
+			top: 0;
+		}
+	</ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
 		height="100%" width="100%">
@@ -88,51 +88,53 @@
 				</div>
 
 				<div class="topNavigation">
-                    <div class="topHeader">
-                        <div class="topLeftLogo">
-                            <img style="height: 40px; width:126px;" height="40px" width="126px" src="img/header_left.gif" />
-                        </div>
-                        <div class="topRightLogo">
-                            <img style="height: 40px; width:27px;" height="40px" width="27px" src="img/header_right.gif" />
-                        </div>
+					<div class="topHeader">
+						<div class="topLeftLogo">
+							<img style="height: 40px; width:126px;" height="40px" width="126px"
+								src="img/header_left.gif" />
+						</div>
+						<div class="topRightLogo">
+							<img style="height: 40px; width:27px;" height="40px" width="27px"
+								src="img/header_right.gif" />
+						</div>
 
-                        <g:HTMLPanel ui:field="signInContentPanel"/>
-                        <g:HTMLPanel ui:field="mainMenuContentPanel"/>
-                    </div>
+						<g:HTMLPanel ui:field="signInContentPanel" />
+						<g:HTMLPanel ui:field="mainMenuContentPanel" />
+					</div>
 				</div>
 			</g:HTMLPanel>
 		</g:north>
 
-        <g:center>
-            <g:HTMLPanel height="100%">
-                <div class="{style.topGradient}">
-                    <div class="{style.bodyTopLeft}"/>
-                    <div class="{style.bodyTopRight}"/>
-                </div>
-                <g:HTMLPanel height="100%">
-                    <div class="{style.rightGradient}"/>
-                    <div class="{style.leftGradient}"/>
-                    <div class="{style.content}">
-                        <g:SplitLayoutPanel height="100%" ui:field="splitPanel">
-                            <g:center>
-                                <g:FlowPanel ui:field="mainContentPanel"/>
-                            </g:center>
-                            <g:south size="0">
-                                <g:FlowPanel ui:field="logAreaPanel" />
-                            </g:south>
-                        </g:SplitLayoutPanel>
-                    </div>
-                </g:HTMLPanel>
-            </g:HTMLPanel>
-        </g:center>
+		<g:center>
+			<g:HTMLPanel height="100%">
+				<div class="{style.topGradient}">
+					<div class="{style.bodyTopLeft}" />
+					<div class="{style.bodyTopRight}" />
+				</div>
+				<g:HTMLPanel height="100%">
+					<div class="{style.rightGradient}" />
+					<div class="{style.leftGradient}" />
+					<div class="{style.content}">
+						<g:SplitLayoutPanel height="100%" ui:field="splitPanel">
+							<g:center>
+								<g:ResizeLayoutPanel ui:field="mainContentPanel" />
+							</g:center>
+							<g:south size="0">
+								<g:FlowPanel ui:field="logAreaPanel" />
+							</g:south>
+						</g:SplitLayoutPanel>
+					</div>
+				</g:HTMLPanel>
+			</g:HTMLPanel>
+		</g:center>
 
-        <g:south size="32">
-            <g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
-                <div class="{style.footerLeft}"/>
-                <div class="{style.footerRight}"/>
-                <g:FlowPanel ui:field="projectVersion" styleName="{style.versionProjectStyle}"/>
-            </g:HTMLPanel>
-        </g:south>
+		<g:south size="32">
+			<g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
+				<div class="{style.footerLeft}" />
+				<div class="{style.footerRight}" />
+				<g:FlowPanel ui:field="projectVersion" styleName="{style.versionProjectStyle}" />
+			</g:HTMLPanel>
+		</g:south>
 	</g:DockLayoutPanel>
 
 </ui:UiBinder> 
