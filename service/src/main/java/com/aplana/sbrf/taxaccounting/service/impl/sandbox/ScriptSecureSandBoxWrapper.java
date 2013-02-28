@@ -35,7 +35,6 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 	
 	private ScriptEngine scriptEngine;
 	private AccessControlContext accessControlContext;
-	private String projector;
 	
 	public ScriptSecureSandBoxWrapper(){
 		
@@ -43,7 +42,6 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 	
 	public ScriptSecureSandBoxWrapper(ScriptEngine scriptEngine) throws MalformedURLException {
 		this.scriptEngine = scriptEngine;
-		this.projector = "file:/home/avanteev/iask/iask-acctax/trunk/workspace/SBRFACCTAX/taxaccounting/service/target/classes/";
 		setPermissions(null);
 	}
 	
