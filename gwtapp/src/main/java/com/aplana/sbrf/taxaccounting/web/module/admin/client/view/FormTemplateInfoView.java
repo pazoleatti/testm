@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.view;
 
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.FormTemplateInfoPresenter;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter.*;
+import com.google.gwt.uibinder.client.*;
+import com.google.gwt.user.client.ui.*;
+import com.google.inject.*;
+import com.gwtplatform.mvp.client.*;
 
 
 public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiHandlers> implements FormTemplateInfoPresenter.MyView{
@@ -21,21 +18,26 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	@UiField
 	CheckBox numberedColumnsBox;
 
+	@UiField
+	CheckBox fixedRowsCheckBox;
+
 	@Inject
 	public FormTemplateInfoView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
 	}
 
 	@Override
-	public void setViewData(String version, boolean numberedColumns) {
+	public void setViewData(String version, boolean numberedColumns, boolean fixedRows) {
 		versionBox.setValue(version);
 		numberedColumnsBox.setValue(numberedColumns);
+		fixedRowsCheckBox.setValue(fixedRows);
 	}
 
 	@Override
 	public void onFlush() {
 		getUiHandlers().setVersion(versionBox.getValue());
 		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
+		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
 	}
 
 	@Override

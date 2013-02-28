@@ -23,6 +23,11 @@
                 <g:Label width="300px">Использовать нумерованные столбцы</g:Label>
                 <g:CheckBox ui:field="numberedColumnsBox"/>
             </g:HorizontalPanel>
+
+            <g:HorizontalPanel>
+                <g:Label width="300px">Фиксированный набор строк</g:Label>
+                <g:CheckBox ui:field="fixedRowsCheckBox"/>
+            </g:HorizontalPanel>
         </g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -1,19 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.admin.client.presenter;
 
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateFlushEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.FormTemplateSetEvent;
-import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.FormTemplateInfoUiHandlers;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.module.admin.client.view.*;
+import com.google.inject.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.mvp.client.*;
 import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
+import com.gwtplatform.mvp.client.proxy.*;
 
 public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresenter.MyView, FormTemplateInfoPresenter.MyProxy>
 		implements FormTemplateInfoUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
@@ -30,7 +26,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(String version, boolean numberedColumns);
+		void setViewData(String version, boolean numberedColumns, boolean fixedRows);
 		void onFlush();
 	}
 
@@ -46,7 +42,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
-		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns());
+		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns(), formTemplate.isFixedRows());
 	}
 
 	@ProxyEvent
@@ -68,5 +64,10 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void setVersion(String version) {
 		formTemplate.setVersion(version);
+	}
+
+	@Override
+	public void setFixedRows(boolean fixedRows){
+		formTemplate.setFixedRows(fixedRows);
 	}
 }
