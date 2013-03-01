@@ -40,26 +40,12 @@ h3{
 .topNavigation {
 	background: url("img/top_grad.gif");
     border-bottom: 3px solid #7E7F7F;
-    height: 40px;
-}
-
-.mainMenuNavigation div a {
-	color: white;
-    font-family: Tahoma;
-	font-size: 14px;
-	margin-right: 14px;
-	text-decoration: none;
-	font-family: Helvetica,Arial;
-}
-
-.mainMenuNavigation div a:hover {
-	border-bottom: 1px dotted #6A8EA4;
-	color: #3964C2;
+    height: 41px;
 }
 
 .topHeader {
 	vertical-align: top;
-	height: 40px;
+	height: 41px;
 }
 
 .topLeftLogo {
@@ -97,16 +83,6 @@ h3{
     left: 50%;
     margin: 10px 0 0 -120px;
     position: absolute;
-}
-
-.footer {
-	border-top: 1px solid #CCCCCC;
-	color: #B3B2B1;
-    clear: both;
-    font-size: 0.8em;
-    margin-top: 1em;
-    padding: 1em;
-    text-align: center;
 }
 
 

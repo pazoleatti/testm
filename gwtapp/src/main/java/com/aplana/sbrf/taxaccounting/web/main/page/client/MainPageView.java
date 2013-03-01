@@ -47,7 +47,6 @@ public class MainPageView extends ViewImpl implements MyView {
 	@Inject
 	public MainPageView(Binder binder) {
 		widget = binder.createAndBindUi(this);
-		footerPanel.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.BOTTOM);
 		splitPanel.setWidgetHidden(logAreaPanel, true);
 	}
 

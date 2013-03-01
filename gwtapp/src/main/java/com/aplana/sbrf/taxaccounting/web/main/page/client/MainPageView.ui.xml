@@ -8,7 +8,7 @@
 			top: 0;
 			height: 32px;
 		}
-		
+
 		.versionProjectStyle {
 			font-style: italic;
 			font-size: x-small;
@@ -16,36 +16,36 @@
 			left: 30px;
 			bottom: 5px;
 		}
-		
+
 		.footerGradient {
 			background: url("img/footer_gradient.gif") repeat-x;
 			bottom: 0px;
 			height: 32px;
 			width: 100%;
 		}
-		
+
 		.leftGradient {
 			background: url("img/body_left_gradient.gif") repeat-y;
 			float: left;
 			width: 32px;
 			height: 100%;
 		}
-		
+
 		.content {
 			right: 7px;
 			left: 7px;
 			bottom: 17px;
 			position: fixed;
-			top: 43px;
+            top: 45px;
 		}
-		
+
 		.rightGradient {
 			background: url("img/body_right_gradient.gif") repeat-y;
 			float: right;
 			width: 32px;
 			height: 100%;
 		}
-		
+
 		.footerLeft {
 			background: url("img/footer_left_corner.gif") no-repeat;
 			height: 32px;
@@ -53,7 +53,7 @@
 			width: 32px;
 			bottom: 0;
 		}
-		
+
 		.footerRight {
 			background: url("img/footer_right_corner.gif") no-repeat;
 			height: 32px;
@@ -61,7 +61,7 @@
 			width: 32px;
 			bottom: 0;
 		}
-		
+
 		.bodyTopLeft {
 			background: url("img/body_top_left_corner.gif") no-repeat;
 			height: 32px;
@@ -69,7 +69,7 @@
 			width: 32px;
 			top: 0;
 		}
-		
+
 		.bodyTopRight {
 			background: url("img/body_top_right_corner.gif") no-repeat;
 			float: right;
@@ -81,7 +81,7 @@
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
 		height="100%" width="100%">
-		<g:north size="42">
+		<g:north size="44">
 			<g:HTMLPanel>
 				<div ui:field="loadingMessage" class="loadingStatusLabel">
 					<div>Загрузка...</div>
@@ -90,11 +90,11 @@
 				<div class="topNavigation">
 					<div class="topHeader">
 						<div class="topLeftLogo">
-							<img style="height: 40px; width:126px;" height="40px" width="126px"
+							<img style="height: 41x; width:126px;" height="41px" width="126px"
 								src="img/header_left.gif" />
 						</div>
 						<div class="topRightLogo">
-							<img style="height: 40px; width:27px;" height="40px" width="27px"
+							<img style="height: 41px; width:27px;" height="41px" width="27px"
 								src="img/header_right.gif" />
 						</div>
 

@@ -112,7 +112,7 @@
                                 <g:Button ui:field="saveButton">Сохранить</g:Button>
                                 <g:Button ui:field="cancelButton">Отмена</g:Button>
                             </style:LeftBar>
-                            <style:LeftBar ui:field="workflowButtons" />
+                            <style:RightBar ui:field="workflowButtons" />
                         </style:Bar>
                     </g:FlowPanel>
                 </div>
