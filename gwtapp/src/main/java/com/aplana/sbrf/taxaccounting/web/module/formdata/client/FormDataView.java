@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -53,6 +51,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Anchor printAnchor;
 	@UiField
 	Anchor signersAnchor;
+	@UiField
+	Anchor returnAnchor;
 	@UiField
 	Button deleteFormButton;
 
@@ -237,15 +237,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setAdditionalFormInfo(
-			String formType, String taxType,
+			String formType, TaxType taxType,
 			String formKind, String departmentId, String reportPeriod,
 			String state
 	) {
-		title.setText(taxType + " / " + formType);
+		title.setText(taxType.getName() + " / " + formType);
 		formKindLabel.setText(formKind);
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
 		stateLabel.setText(state);
+		returnAnchor.setHref("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType=" +
+				String.valueOf(taxType));
 	}
 
 	/**

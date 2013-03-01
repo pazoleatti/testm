@@ -3,13 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -46,7 +40,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void addCustomTableStyles(List<FormStyle> allStyles);
 
-		void setAdditionalFormInfo(String formType, String taxType,
+		void setAdditionalFormInfo(String formType, TaxType taxType,
 				String formKind, String departmentId, String reportPeriod,
 				String state);
 

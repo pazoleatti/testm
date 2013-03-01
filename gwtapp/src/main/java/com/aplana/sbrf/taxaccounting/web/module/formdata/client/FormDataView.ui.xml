@@ -38,16 +38,6 @@
             margin-top: 7px;
         }
 
-        .anchor {
-            vertical-align: middle;
-            font-size: 12px;
-            text-decoration: underline;
-            font-family: Tahoma;
-            color: #004276;
-            cursor: pointer;
-            float: left;
-        }
-
         .marginLeft15 {
             margin-left: 15px;
         }
@@ -76,28 +66,24 @@
         }
     </ui:style>
 
-	<g:DockLayoutPanel unit='PX' height="100%" width="100%"
-		ui:field="dockPanel">
+	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
         <g:north size="100">
             <g:HTMLPanel height="100px" width="100%">
                 <div class="{style.headerLeft}">
                     <g:HorizontalPanel height="35px">
-                        <g:HTMLPanel>
-                            <img height="20px" width="20px" ui:field="returnImage" src="img/but-l.gif"
-                                style="float: left; margin-top: 10px; cursor: pointer;"/>
-                        </g:HTMLPanel>
+                        <g:FlowPanel styleName="{style.marginTop7}">
+                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
+                        </g:FlowPanel>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
-                    <g:FlowPanel height="35px">
-                        <g:Anchor ui:field="signersAnchor" styleName="{style.anchor} {style.marginTop7}">
-                            <img src="img/print.png"/>
-                            Исполнитель и подписанты
-                        </g:Anchor>
-                        <g:Anchor addStyleNames="{style.marginLeft15} {style.anchor} {style.marginTop7}" ui:field="printAnchor">
-                            <img src="img/print.png"/>
-                            Печать
-                        </g:Anchor>
-                    </g:FlowPanel>
+                    <g:HorizontalPanel height="35px">
+                        <g:FlowPanel styleName="{style.marginTop7}">
+                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"/>
+                        </g:FlowPanel>
+                        <g:FlowPanel styleName="{style.marginLeft15} {style.marginTop7}">
+                             <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
+                        </g:FlowPanel>
+                    </g:HorizontalPanel>
                     <g:FlowPanel height="30px">
                         <style:Bar>
                             <style:LeftBar>
@@ -112,7 +98,7 @@
                                 <g:Button ui:field="saveButton">Сохранить</g:Button>
                                 <g:Button ui:field="cancelButton">Отмена</g:Button>
                             </style:LeftBar>
-                            <style:RightBar ui:field="workflowButtons" />
+                            <style:LeftBar ui:field="workflowButtons" />
                         </style:Bar>
                     </g:FlowPanel>
                 </div>
@@ -136,10 +122,9 @@
                         </g:HorizontalPanel>
                     </div>
                     <g:HorizontalPanel>
-                        <g:Anchor width="245px" ui:field="manualInputAnchor" styleName="{style.anchor}">
-                            <img src="img/print.png"/>
-                            Ручной ввод
-                        </g:Anchor>
+                        <g:FlowPanel width="245px">
+                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor"/>
+                        </g:FlowPanel>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
                             text="Показывать контрольные поля"/>
                     </g:HorizontalPanel>
@@ -148,7 +133,7 @@
         </g:north>
 
         <g:north size="30">
-            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}"/>
+            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
         </g:north>
 
         <g:center>

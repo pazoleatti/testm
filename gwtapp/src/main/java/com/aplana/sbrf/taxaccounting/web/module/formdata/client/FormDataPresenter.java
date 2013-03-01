@@ -105,7 +105,7 @@ public class FormDataPresenter extends
 									result.getFormData().getFormType()
 											.getName(),
 									result.getFormData().getFormType()
-											.getTaxType().getName(),
+											.getTaxType(),
 									result.getFormData().getKind().getName(),
 									result.getDepartmenName(),
 									result.getReportPeriod(),

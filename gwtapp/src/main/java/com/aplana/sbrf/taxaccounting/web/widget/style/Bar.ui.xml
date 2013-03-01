@@ -6,10 +6,10 @@
 	</ui:style>
 	<g:HorizontalPanel width="100%">
 		<g:cell horizontalAlignment="ALIGN_LEFT">
-				<g:FlowPanel ui:field="leftPlaceHolder" />
+				<g:HorizontalPanel ui:field="leftPlaceHolder" />
 		</g:cell>
 		<g:cell horizontalAlignment="ALIGN_RIGHT">
-				<g:FlowPanel ui:field="rightPlaceHolder" />
+				<g:HorizontalPanel ui:field="rightPlaceHolder" />
 		</g:cell>
 	</g:HorizontalPanel>
 
