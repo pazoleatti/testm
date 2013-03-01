@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -37,7 +38,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	public void setMenuItems(final List<MenuItem> menuItems) {
 		panel.clear();
 		MenuBar menu = new MenuBar();
-		menu.setAnimationEnabled(true);
+		menu.setAnimationEnabled(false);
 
 		for (final MenuItem menuItem : menuItems) {
 			if (!menuItem.getSubMenu().isEmpty()) {
@@ -50,10 +51,13 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 							+ menuItem.getLink()
 							+ "\" style=\"color:#000000; font-family: Tahoma; text-decoration:none;\"><div>"
 							+ subMenu.getName() + "</div></a>");
-					subMenuBar.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
+					com.google.gwt.user.client.ui.MenuItem subMenuItem =
+							new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml());
+					subMenuItem.getElement().addClassName("gray-MenuItem");
+					subMenuBar.addItem(subMenuItem);
 				}
-				menu.addItem(menuItem.getName(), subMenuBar);
-				menu.addSeparator();
+				menu.addItem(menuItem.getName() + " " + getArrowSymbol(), subMenuBar);
+				menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 			}
 			else {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -65,10 +69,14 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 						+ "\" style=\"color:white; font-family: Tahoma; text-decoration:none;\">"
 						+ menuItem.getName() + "</a>");
 				menu.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
-				menu.addSeparator();
+				menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 			}
 		}
 		panel.add(menu);
+	}
+
+	private String getArrowSymbol() {
+		return "\u25BC";
 	}
 
 }

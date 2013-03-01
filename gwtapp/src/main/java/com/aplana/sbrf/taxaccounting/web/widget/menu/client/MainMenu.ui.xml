@@ -18,7 +18,7 @@
             cursor: pointer;
             color: #000000;
             font-family: Tahoma;
-            background-color: #7E7F7F;
+            background-color: #FFFFFF;
         }
 
         @external .gwt-MenuBar-vertical .gwt-MenuItem;
@@ -26,6 +26,8 @@
             margin-left: 15px !important;
             width: 150px;
             width: 135px;
+            font-family: Tahoma;
+            font-size: 10px;
             padding: 3px 5px 3px 14px;
         }
 
@@ -43,6 +45,11 @@
             padding-top: 3px;
             padding-bottom: 5px;
             padding-left: 135px;
+        }
+
+        @external .gray-MenuItem;
+        .gray-MenuItem:hover {
+            background-color: gray;
         }
     </ui:style>
 
