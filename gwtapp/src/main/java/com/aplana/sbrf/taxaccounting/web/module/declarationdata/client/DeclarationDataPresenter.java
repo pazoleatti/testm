@@ -1,26 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.UpdateDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
+import com.google.gwt.core.client.*;
+import com.google.gwt.user.client.*;
+import com.google.inject.*;
+import com.google.web.bindery.event.shared.*;
+import com.gwtplatform.dispatch.shared.*;
+import com.gwtplatform.mvp.client.*;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
 
 public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
@@ -38,8 +29,10 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setCannotDownloadXml();
 		void setCannotDelete();
 		void setTaxType(String taxType);
+		void setTitle(String title);
 		void setDepartment(String department);
 		void setReportPeriod(String reportPeriod);
+		void setBackButton(TaxType taxType);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -177,6 +170,8 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						getView().setTaxType(result.getTaxType().getName());
 						getView().setReportPeriod(result.getReportPeriod());
 						getView().setDepartment(result.getDepartment());
+						getView().setBackButton(result.getTaxType());
+						getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
 						updateTitle(result.getDeclarationType());
 
 						if (!result.isCanAccept()) {

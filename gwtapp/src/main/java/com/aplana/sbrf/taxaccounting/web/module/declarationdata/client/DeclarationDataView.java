@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
-import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.google.inject.*;
+import com.gwtplatform.mvp.client.*;
 
 
 public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHandlers>
@@ -47,6 +45,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiField
 	CheckBox accepted;
+
+	@UiField
+	Label title;
+
+	@UiField
+	Anchor returnAnchor;
 
 	@Inject
 	@UiConstructor
@@ -93,6 +97,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
+	public void setTitle(String title) {
+		this.title.setText(title);
+	}
+
+	@Override
 	public void setDepartment(String department) {
 		this.department.setText(department);
 	}
@@ -105,6 +114,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public Widget asWidget() {
 		return widget;
+	}
+
+	@Override
+	public void setBackButton(TaxType taxType){
+		returnAnchor.setHref("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
+				+ String.valueOf(taxType));
 	}
 
 
