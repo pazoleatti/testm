@@ -19,6 +19,7 @@
         float: right;
         top: 0;
         width: 790px;
+        margin-top: 7px;
     }
 
     .headerAttr {
@@ -39,6 +40,10 @@
         margin-top: 7px;
     }
 
+    .marginTop4 {
+        margin-top: 4px;
+    }
+
     .marginLeft15 {
         margin-left: 15px;
     }
@@ -46,10 +51,10 @@
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
         <g:north size="100">
-            <g:HTMLPanel height="100px" width="100%">
+            <g:HTMLPanel height="100" width="100%">
                 <div class="{style.headerLeft}">
                     <g:HorizontalPanel height="35px">
-                        <g:HTMLPanel>
+                        <g:HTMLPanel addStyleNames="{style.marginTop7}">
                             <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
                         </g:HTMLPanel>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
@@ -59,10 +64,10 @@
                         <g:Button text="Скачать в формате законодателя" ui:field="downloadAsLegislatorButton"/>
                     </g:FlowPanel>
                     <g:FlowPanel height="30px">
-                        <g:Button text="Обновить" ui:field="refreshButton" addStyleNames="{style.marginTop7}"/>
-                        <g:Button text="Удалить" ui:field="deleteButton" addStyleNames="{style.marginTop7} {style.marginLeft15}"/>
-                        <g:Button text="Принять" ui:field="acceptButton" addStyleNames="{style.marginTop7} {style.marginLeft15}"/>
-                        <g:Button text="Отменить принятие" ui:field="cancelButton" addStyleNames="{style.marginTop7} {style.marginLeft15}"/>
+                        <g:Button text="Обновить" ui:field="refreshButton" addStyleNames="{style.marginTop4}"/>
+                        <g:Button text="Удалить" ui:field="deleteButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
+                        <g:Button text="Принять" ui:field="acceptButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
+                        <g:Button text="Отменить принятие" ui:field="cancelButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
                     </g:FlowPanel>
                 </div>
                 <div class="{style.headerRight}">
