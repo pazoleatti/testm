@@ -14,6 +14,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 public class EditStringDictionaryColumn extends DataRowColumn<String> {
     public EditStringDictionaryColumn(StringColumn stringColumn, ColumnContext columnContext) {
     	super(new TextDictionaryCell(stringColumn.getDictionaryCode(), columnContext), stringColumn);
+	    this.setHorizontalAlignment(ALIGN_LEFT);
         this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
 			@Override
 			public void update(int index, DataRow dataRow, String value) {

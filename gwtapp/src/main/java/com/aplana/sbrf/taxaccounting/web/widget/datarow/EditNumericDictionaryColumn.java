@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class EditNumericDictionaryColumn extends DataRowColumn<BigDecimal> {
 	public EditNumericDictionaryColumn(NumericColumn column, ColumnContext columnContext) {
 		super(new NumericDictionaryCell(column.getDictionaryCode(), columnContext), column);
+		this.setHorizontalAlignment(ALIGN_RIGHT);
 		this.setFieldUpdater(new FieldUpdater<DataRow, BigDecimal>() {
 			@Override
 			public void update(int index, DataRow dataRow, BigDecimal value) {

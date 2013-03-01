@@ -21,15 +21,15 @@ public class EditDateColumn extends DataRowColumn<Date> {
 
     public EditDateColumn(DateColumn dateColumn, ColumnContext columnContext) {
     	
-    		super(new NullableDatePickerCell(FORMAT, columnContext), dateColumn);
-
+    	super(new NullableDatePickerCell(FORMAT, columnContext), dateColumn);
+	    this.setHorizontalAlignment(ALIGN_CENTER);
         this.setFieldUpdater(new FieldUpdater<DataRow, Date>() {
 			@Override
 			public void update(int index, DataRow dataRow, Date value) {
 				dataRow.put(getAlias(), value);
 			}
 		});
-        
+
     }
 
     @Override

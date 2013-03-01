@@ -24,7 +24,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 
 	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable, ColumnContext columnContext) {
 		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision()), columnContext), column);
-
+		this.setHorizontalAlignment(ALIGN_RIGHT);
 		StringBuffer mask = new StringBuffer("#");
 		int precision = column.getPrecision();
 		if (precision > 0) {

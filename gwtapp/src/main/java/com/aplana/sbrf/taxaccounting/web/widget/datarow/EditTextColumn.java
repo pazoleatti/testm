@@ -19,6 +19,7 @@ public class EditTextColumn extends DataRowColumn<String> {
 
     public EditTextColumn(StringColumn col, ColumnContext columnContext) {
         super(new ValidatedInputCell(new TextValidationStrategy(col.getMaxLength()), columnContext), col);
+	    this.setHorizontalAlignment(ALIGN_LEFT);
         this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
 			@Override
 			public void update(int index, DataRow dataRow, String value) {
