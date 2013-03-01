@@ -62,6 +62,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	LeftBar workflowButtons;
 
 	@UiField
+	Panel manualInputPanel;
+
+	@UiField
 	Label formKindLabel;
 	@UiField
 	Label lockInformation;
@@ -333,7 +336,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showManualInputButton(boolean show) {
-		manualInputAnchor.setVisible(show);
+		manualInputPanel.setVisible(show);
 	}
 
 	@Override

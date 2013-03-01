@@ -12,7 +12,7 @@ public class ButtonLink extends Anchor{
 				"color: #004276; font-size: 12px; margin-left: 25px;\">{0}</div>")
 		SafeHtml text(String text);
 
-		@Template("<img style=\"position:absolute; float:left;\" src=\"{0}\">")
+		@Template("<img style=\"position:absolute; float:left; border: none;\" src=\"{0}\">")
 		SafeHtml img(String url);
 	}
 

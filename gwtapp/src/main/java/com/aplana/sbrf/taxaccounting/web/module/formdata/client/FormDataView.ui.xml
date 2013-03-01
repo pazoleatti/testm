@@ -59,6 +59,7 @@
         .showCheckedColumns {
             font-size: 12px;
             font-family: Tahoma;
+            float: left;
         }
 
         .headerTopRight {
@@ -122,7 +123,7 @@
                         </g:HorizontalPanel>
                     </div>
                     <g:HorizontalPanel>
-                        <g:FlowPanel width="245px">
+                        <g:FlowPanel width="245px" ui:field="manualInputPanel">
                             <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor"/>
                         </g:FlowPanel>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
