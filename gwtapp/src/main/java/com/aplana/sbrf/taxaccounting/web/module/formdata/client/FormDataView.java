@@ -126,8 +126,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 
 		factory.setReadOnly(readOnly);
-
+		boolean hideCheckedColumnsCheckbox = true;
 		for (Column col : columnsData) {
+			if (col.isChecking()) {
+				hideCheckedColumnsCheckbox = false;
+			}
+
 			if (showCheckedColumns.getValue() || !col.isChecking()) {
 				com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
@@ -135,6 +139,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 			}
 		}
+		showCheckedColumns.setVisible(!hideCheckedColumnsCheckbox);
 
 	}
 
