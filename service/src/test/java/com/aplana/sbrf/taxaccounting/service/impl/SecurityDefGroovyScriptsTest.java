@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import groovy.lang.GroovyCodeSource;
-import groovy.lang.GroovyShell;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.security.AccessControlException;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -29,47 +22,45 @@ public class SecurityDefGroovyScriptsTest {
 	private static String file = "accessFile.groovy";
 	SecurityManager sm;
 	ScriptEngine scriptEngine;
+	ScriptEngine groovyScriptEngine;
 	
 	@Before
 	public void init() throws MalformedURLException{
-		/*System.out.println(SecurityDefGroovyScriptsTest.class.getResource(file));
+		File policyFile = new File(System.getProperty("user.home") + File.separator + ".java.policy");
 		stream = SecurityDefGroovyScriptsTest.class.getResourceAsStream(file);
-		if(System.getSecurityManager() == null){
-			System.out.println("Security manager not enabled, using default.");
-			sm = new SecurityManager();
-			System.setSecurityManager(sm);
-		}
-		else {
-		      System.out.println("Security manager enabled.");
-		}*/
-		
-		stream = SecurityDefGroovyScriptsTest.class.getResourceAsStream(file);
-		System.out.println(stream);
+		System.out.println(System.getProperty("user.home") + File.separator + ".java.policy");
 		ScriptEngineManager factory = new ScriptEngineManager();
-		this.scriptEngine = new ScriptSecureSandBoxWrapper(factory.getEngineByName("groovy"));
-		/*if(System.getSecurityManager() == null){
+		this.groovyScriptEngine = factory.getEngineByName("groovy");
+		this.scriptEngine = new ScriptSecureSandBoxWrapper(groovyScriptEngine);
+		if(System.getSecurityManager() == null && policyFile.exists()){
 			System.out.println("Security manager not enabled, using default.");
 			sm = new SecurityManager();
 			System.setSecurityManager(sm);
 		}
+		else if(!policyFile.exists())
+			System.out.println("Doesn't have local settings for security manager");
 		else {
 		      System.out.println("Security manager enabled.");
-		}*/
+		}
 	}
 	
 	@Test
-	public void test() throws IOException, ScriptException{
-		/*sm.checkPermission(new FilePermission("/tmp/1", "read,write,delete"));
-		System.out.println(stream);
-		String accessScript = IOUtils.toString(stream, "UTF-8");
-		System.out.println(accessScript);
-		GroovyCodeSource groovyCodeSource = new GroovyCodeSource(accessScript, "accessScript", "/restrictedScript");
-		System.out.println(groovyCodeSource);
-		new GroovyShell().evaluate(groovyCodeSource);*/
+	public void testWithSandBox() throws IOException, ScriptException{
 		String accessScript = IOUtils.toString(stream, "UTF-8");
 		scriptEngine.eval(accessScript);
 		
-
+	}
+	
+	@Test
+	public void testWithoutSandBox() throws ScriptException, IOException{
+		String accessScript = IOUtils.toString(stream, "UTF-8");
+		groovyScriptEngine.eval(accessScript);
+	}
+	
+	@After
+	public void reset(){
+		System.setSecurityManager(null);
+		System.out.println(System.getSecurityManager());
 	}
 
 }

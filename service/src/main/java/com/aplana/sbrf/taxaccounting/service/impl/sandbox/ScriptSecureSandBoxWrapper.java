@@ -1,35 +1,26 @@
 package com.aplana.sbrf.taxaccounting.service.impl.sandbox;
 
-import groovy.lang.GroovyCodeSource;
-import groovy.lang.GroovyShell;
-import groovy.security.GroovyCodeSourcePermission;
-
 import java.io.FilePermission;
 import java.io.Reader;
+import java.lang.reflect.ReflectPermission;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.AccessControlContext;
-import java.security.AccessControlException;
 import java.security.AccessController;
-import java.security.AllPermission;
-import java.security.BasicPermission;
 import java.security.CodeSource;
 import java.security.Permission;
-import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.PropertyPermission;
+import java.util.logging.LoggingPermission;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
-import javax.security.auth.Subject;
-import javax.security.auth.SubjectDomainCombiner;
 
 public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 	
@@ -53,8 +44,8 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 
 	@Override
 	public Object eval(final String script) throws ScriptException {
-		SecurityManager sm = System.getSecurityManager();
-		AccessControlContext acc;
+		final SecurityManager sm = System.getSecurityManager();
+		AccessControlContext acc = null;
 		if(sm!=null){
 			acc = (AccessControlContext)sm.getSecurityContext();
 			System.out.println(acc);
@@ -63,15 +54,15 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 
 			@Override
 			public Object run() {
-				/*try {
-					AccessControlContext acc = AccessController.getContext();
+				try {
 					return scriptEngine.eval(script);
 				} catch (ScriptException e) {
 					e.printStackTrace();
 				}
-				return null;*/
-				GroovyCodeSource groovyCodeSource = new GroovyCodeSource(script, "accessScript", "/restrictedScript");
-				return new GroovyShell().evaluate(groovyCodeSource);
+				return null;
+				//AccessControlContext acc = (AccessControlContext) sm.getSecurityContext();
+				/*GroovyCodeSource groovyCodeSource = new GroovyCodeSource(script, "accessScript", "/restrictedScript");
+				return new GroovyShell().evaluate(groovyCodeSource);*/
 			}
 		},accessControlContext);
 	}
@@ -150,44 +141,39 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 	
 	public void setPermissions(Collection<Permission> permissionCollection) throws MalformedURLException{
 		Permissions perm = new Permissions();
-		Permissions perm1 = new Permissions();
-		Permissions perm2 = new Permissions();
-		//perm.add(new PropertyPermission("file.encoding","read"));
-		//perm.add(new FilePermission("/*", "read"));
-		//perm.add(new GroovyCodeSourcePermission("/groovy/script"));
 		if(permissionCollection != null){
 			for (Permission p : permissionCollection) {
-	//			perm.add(p);
+				perm.add(p);
 			}
 		}
 		
-		//perm.add(new AllPermission());
-		/*perm.add(new GroovyCodeSourcePermission("/groovy/script"));
-		perm1.add(new FilePermission("/tmp/*", "read"));*/
-		/*perm1.add(new PropertyPermission("file.encoding","read"));
-		perm1.add(new GroovyCodeSourcePermission("/groovy/script"));*/
-		/*perm2.add(new AllPermission());
-		perm2.add(new GroovyCodeSourcePermission("/restrictedScript"));*/
+		//perm.add(new GroovyCodeSourcePermission("/restrictedScript"));
+		perm.add(new RuntimePermission("accessDeclaredMembers"));
+		perm.add(new FilePermission("<<ALL FILES>>", "read,write"));
+		perm.add(new PropertyPermission("ANTLR_DO_NOT_EXIT", "read"));
+		perm.add(new PropertyPermission("ANTLR_USE_DIRECT_CLASS_LOADING", "read"));
+		perm.add(new PropertyPermission("line.separator", "read"));
+		perm.add(new LoggingPermission("control", null));
+		perm.add(new RuntimePermission("setSecurityManager"));
+		perm.add(new ReflectPermission("suppressAccessChecks"));
+		perm.add(new PropertyPermission("cglib.debugLocation", "read"));
+		perm.add(new RuntimePermission("getProtectionDomain"));
+		perm.add(new PropertyPermission("guice.allow.nulls.bad.bad.bad", "read"));
+		perm.add(new RuntimePermission("createClassLoader"));
+		perm.add(new PropertyPermission("groovyjarjarantlr.ast", "read"));
+		perm.add(new PropertyPermission("groovy.ast", "read"));
+		perm.add(new RuntimePermission("setContextClassLoader"));
 		
-		System.out.println(ScriptSecureSandBoxWrapper.class.getProtectionDomain().getCodeSource().getLocation().toString() + ScriptSecureSandBoxWrapper.class.getSimpleName());
 		ProtectionDomain protectionDomain = new ProtectionDomain(new CodeSource(
-				new URL(ScriptSecureSandBoxWrapper.class.getProtectionDomain().getCodeSource().getLocation().toString() + 
-						ScriptSecureSandBoxWrapper.class.getSimpleName() + ".class"), 
-						(Certificate[])null), 
-					perm);
-		/*ProtectionDomain protectionDomain1 = new ProtectionDomain(
-				new CodeSource(new URL("file:/home/avanteev/iask/iask-acctax/trunk/workspace/SBRFACCTAX/taxaccounting/service/target/test-classes/"), 
-						(Certificate[])null), 
-					perm1);*/
-		/*ProtectionDomain protectionDomain2 = new ProtectionDomain(new CodeSource(new URL("file:/restrictedScript"), 
+				null, 
 				(Certificate[])null), 
-				perm2);*/
+				perm);
 		
 		accessControlContext = new AccessControlContext(
 				new ProtectionDomain[]{protectionDomain});
-		AccessControlContext acc = (AccessControlContext)AccessController.getContext();
-		//AccessController.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));
-		//accessControlContext.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));
+		/*AccessControlContext acc = (AccessControlContext)AccessController.getContext();
+		AccessController.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));
+		accessControlContext.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));*/
 		
 		
 	}
