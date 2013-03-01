@@ -3,12 +3,18 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormDataResult;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.web.bindery.event.shared.EventBus;
@@ -222,13 +228,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 						formData.getId().toString()));
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void unlockForm(Long formId){
 		if (!readOnlyMode && formData.getId()!=null){
 			UnlockFormData action = new UnlockFormData();
 			action.setFormId(formId);
-			dispatcher.execute(action,
-					new AbstractCallback<UnlockFormDataResult>() {
-					});
+			dispatcher.execute(action, CompositeCallback.create());
 		}
 	}
 }

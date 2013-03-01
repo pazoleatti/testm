@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LogActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
@@ -56,11 +56,11 @@ public class AddRowHandler extends
 			result.setLogEntries(logger.getEntries());
 			return result;
 		} catch (ServiceLoggerException e) {
-			throw new ExtActionException("Не удалось добавить строку",
+			throw new LogActionException("Не удалось добавить строку",
 					e.getLogEntries());
 		} catch (Exception e) {
 			log.error(e);
-			throw new ExtActionException("Не удалось добавить строку", e);
+			throw new LogActionException("Не удалось добавить строку", e);
 		}
 	}
 

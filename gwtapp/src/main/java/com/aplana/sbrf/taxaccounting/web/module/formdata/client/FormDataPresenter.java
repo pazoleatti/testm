@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LockScrCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.MsgOnFailureCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -27,6 +29,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
@@ -74,77 +77,74 @@ public class FormDataPresenter extends
 			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
 					READ_ONLY, "true")));
 
-			dispatcher.execute(action,
-					new AbstractCallback<GetFormDataResult>() {
-						@Override
-						public void onReqSuccess(GetFormDataResult result) {
+			dispatcher.execute(
+					action,
+					CompositeCallback
+							.create(new AbstractCallback<GetFormDataResult>() {
+								@Override
+								public void onSuccess(GetFormDataResult result) {
 
-							LogAddEvent.fire(this, result.getLogEntries());
+									LogAddEvent.fire(FormDataPresenter.this,
+											result.getLogEntries());
 
-							formData = result.getFormData();
-							formDataAccessParams = result
-									.getFormDataAccessParams();
-							fixedRows = result.isFixedRows();
+									formData = result.getFormData();
+									formDataAccessParams = result
+											.getFormDataAccessParams();
+									fixedRows = result.isFixedRows();
 
-							switch (result.getFormMode()) {
-							case READ_UNLOCKED:
-								setReadUnlockedMode();
-								break;
-							case READ_LOCKED:
-								setReadLockedMode(result.getLockedByUser(),
-										result.getLockDate());
-								break;
-							case EDIT:
-								setEditMode();
-								break;
-							}
+									switch (result.getFormMode()) {
+									case READ_UNLOCKED:
+										setReadUnlockedMode();
+										break;
+									case READ_LOCKED:
+										setReadLockedMode(
+												result.getLockedByUser(),
+												result.getLockDate());
+										break;
+									case EDIT:
+										setEditMode();
+										break;
+									}
 
-							manageDeleteRowButtonEnabled();
+									manageDeleteRowButtonEnabled();
 
-							getView().setAdditionalFormInfo(
-									result.getFormData().getFormType()
-											.getName(),
-									result.getFormData().getFormType()
+									getView().setAdditionalFormInfo(
+											result.getFormData().getFormType()
+													.getName(),
+											result.getFormData().getFormType()
 											.getTaxType(),
-									result.getFormData().getKind().getName(),
-									result.getDepartmenName(),
-									result.getReportPeriod(),
-									result.getFormData().getState().getName());
+											result.getFormData().getKind()
+													.getName(),
+											result.getDepartmenName(),
+											result.getReportPeriod(),
+											result.getFormData().getState()
+													.getName());
 
-							getView().setColumnsData(formData.getFormColumns(),
-									readOnlyMode);
-							getView().setRowsData(formData.getDataRows());
-							getView()
-									.addCustomHeader(result.isNumberedHeader());
-							getView().addCustomTableStyles(
-									result.getAllStyles());
+									getView().setColumnsData(
+											formData.getFormColumns(),
+											readOnlyMode);
+									getView().setRowsData(
+											formData.getDataRows());
+									getView().addCustomHeader(
+											result.isNumberedHeader());
+									getView().addCustomTableStyles(
+											result.getAllStyles());
 
-							TitleUpdateEvent.fire(this,
-									readOnlyMode ? "Налоговая форма"
-											: "Редактирование налоговой формы",
-									formData.getFormType().getName());
-							getProxy().manualReveal(FormDataPresenter.this);
-							super.onReqSuccess(result);
-						}
+									TitleUpdateEvent
+											.fire(FormDataPresenter.this,
+													readOnlyMode ? "Налоговая форма"
+															: "Редактирование налоговой формы",
+													formData.getFormType()
+															.getName());
 
-						@Override
-						protected void onReqFailure(Throwable throwable) {
-							if (throwable instanceof ExtActionException) {
-								LogAddEvent.fire(this,
-										((ExtActionException) throwable)
-												.getLogEntries());
+								}
 
-							}
-							MessageEvent.fire(this,
-									throwable.getLocalizedMessage());
-							getProxy().manualRevealFailed();
-						}
-
-						@Override
-						protected boolean needErrorOnFailure() {
-							return false;
-						}
-					});
+							})
+							.addCallback(MsgOnFailureCallback.create())
+							.addCallback(LockScrCallback.create())
+							.addCallback(
+									new ManualRevealCallback<GetFormDataResult>(
+											this)));
 
 		} catch (Exception e) {
 			getProxy().manualRevealFailed();
@@ -215,30 +215,17 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
-			@Override
-			public void onReqSuccess(FormDataResult result) {
-				processFormDataResult(result);
-				super.onReqSuccess(result);
-			}
+		dispatcher.execute(
+				action,
+				CompositeCallback
+						.create(new AbstractCallback<FormDataResult>() {
+							@Override
+							public void onSuccess(FormDataResult result) {
+								processFormDataResult(result);
+							}
 
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				if (throwable instanceof ExtActionException) {
-					LogAddEvent.fire(this,
-							((ExtActionException) throwable).getLogEntries());
-
-				}
-				MessageEvent.fire(this, throwable.getLocalizedMessage());
-				super.onReqFailure(throwable);
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-		});
-
+						}).addCallback(MsgOnFailureCallback.create())
+						.addCallback(LockScrCallback.create()));
 	}
 
 	private void processFormDataResult(FormDataResult result) {
@@ -252,29 +239,17 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		AddRowAction action = new AddRowAction();
 		action.setFormData(formData);
-		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
-			@Override
-			public void onReqSuccess(FormDataResult result) {
-				processFormDataResult(result);
-				super.onReqSuccess(result);
-			}
+		dispatcher.execute(
+				action,
+				CompositeCallback
+						.create(new AbstractCallback<FormDataResult>() {
+							@Override
+							public void onSuccess(FormDataResult result) {
+								processFormDataResult(result);
+							}
 
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				if (throwable instanceof ExtActionException) {
-					LogAddEvent.fire(this,
-							((ExtActionException) throwable).getLogEntries());
-
-				}
-				MessageEvent.fire(this, throwable.getLocalizedMessage());
-				super.onReqFailure(throwable);
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-		});
+						}).addCallback(MsgOnFailureCallback.create())
+						.addCallback(LockScrCallback.create()));
 	}
 
 	@Override
@@ -293,13 +268,17 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(action, new AbstractCallback<FormDataResult>() {
-			@Override
-			public void onReqSuccess(FormDataResult result) {
-				processFormDataResult(result);
-				super.onReqSuccess(result);
-			}
-		});
+		dispatcher.execute(
+				action,
+				CompositeCallback
+						.create(new AbstractCallback<FormDataResult>() {
+							@Override
+							public void onSuccess(FormDataResult result) {
+								processFormDataResult(result);
+							}
+
+						}).addCallback(MsgOnFailureCallback.create())
+						.addCallback(LockScrCallback.create()));
 	}
 
 	@Override
@@ -307,13 +286,18 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		CheckFormDataAction checkAction = new CheckFormDataAction();
 		checkAction.setFormData(formData);
-		dispatcher.execute(checkAction, new AbstractCallback<FormDataResult>() {
-			@Override
-			protected void onReqSuccess(FormDataResult result) {
-				LogAddEvent.fire(this, result.getLogEntries());
-				super.onReqSuccess(result);
-			}
-		});
+		dispatcher.execute(
+				checkAction,
+				CompositeCallback
+						.create(new AbstractCallback<FormDataResult>() {
+							@Override
+							public void onSuccess(FormDataResult result) {
+								LogAddEvent.fire(FormDataPresenter.this,
+										result.getLogEntries());
+							}
+
+						}).addCallback(MsgOnFailureCallback.create(true))
+						.addCallback(LockScrCallback.create()));
 	}
 
 	@Override
@@ -322,13 +306,20 @@ public class FormDataPresenter extends
 		if (isOK) {
 			DeleteFormDataAction action = new DeleteFormDataAction();
 			action.setFormDataId(formData.getId());
-			dispatcher.execute(action,
-					new AbstractCallback<DeleteFormDataResult>() {
-						@Override
-						public void onReqSuccess(DeleteFormDataResult result) {
-							goToFormDataList();
-						}
-					});
+			dispatcher
+					.execute(
+							action,
+							CompositeCallback
+									.create(new AbstractCallback<DeleteFormDataResult>() {
+										@Override
+										public void onSuccess(
+												DeleteFormDataResult result) {
+											goToFormDataList();
+										}
+
+									})
+									.addCallback(MsgOnFailureCallback.create())
+									.addCallback(LockScrCallback.create()));
 		}
 	}
 

@@ -23,7 +23,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LogActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -81,10 +81,10 @@ public class GetFormDataHandler extends
 			
 			return result;
 		} catch (ServiceLoggerException e) {
-			throw new ExtActionException(e.getLocalizedMessage(), e.getLogEntries());
+			throw new LogActionException(e.getLocalizedMessage(), e.getLogEntries());
 		} catch (Exception e) {
 			log.error(e);
-			throw new ExtActionException("Не удалось открыть/создать налоговую форму: " + e.getLocalizedMessage());
+			throw new LogActionException("Не удалось открыть/создать налоговую форму: " + e.getLocalizedMessage());
 		}
 
 	}
@@ -185,7 +185,7 @@ public class GetFormDataHandler extends
 			if (!errorMessage.isEmpty()) {
 				errorMessage = errorMessage.startsWith(",") ? errorMessage
 						.substring(1) : errorMessage;
-				throw new ExtActionException("Не удалось создать налоговую форму:" + errorMessage);
+				throw new LogActionException("Не удалось создать налоговую форму:" + errorMessage);
 			}
 		}
 	}

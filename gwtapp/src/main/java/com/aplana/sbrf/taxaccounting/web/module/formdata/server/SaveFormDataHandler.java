@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ExtActionException;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LogActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
@@ -46,10 +46,10 @@ public class SaveFormDataHandler extends AbstractActionHandler<SaveFormDataActio
             result.setLogEntries(logger.getEntries());
             return result;
         } catch (ServiceLoggerException e) {
-        	throw new ExtActionException(e.getLocalizedMessage(), e.getLogEntries());
+        	throw new LogActionException(e.getLocalizedMessage(), e.getLogEntries());
         } catch (Exception e) {
             log.error("Failed to save FormData object", e);
-            throw new ExtActionException(e);
+            throw new LogActionException(e);
         }
     }
 
