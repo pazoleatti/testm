@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,6 +17,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -89,6 +91,19 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				FormDataUiHandlers handlers = getUiHandlers();
 				if (handlers != null) {
 					handlers.onSelectRow();
+				}
+			}
+		});
+		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow>() {
+			@Override
+			public void onCellPreview(CellPreviewEvent<DataRow> event) {
+				if ("mouseover".equals(event.getNativeEvent().getType())) {
+					TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+					// Не показываем тултип на пкстых ячейках
+					if (cellElement.getInnerText().length() > 1
+							|| !cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+						cellElement.setTitle(cellElement.getInnerText());
+					}
 				}
 			}
 		});
