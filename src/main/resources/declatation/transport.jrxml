@@ -652,6 +652,15 @@ $F{ДатаДок}]]></initialValueExpression>
 :
 ($F{КБК}+"--------------------").substring(0,20)]]></initialValueExpression>
 	</variable>
+	<variable name="BarcodeImage" class="java.lang.String">
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAAAXNSR0IArs4c6QAAAARnQU1BAACx jwv8YQUAAAMAUExURQAAAAIECwUJDQkEAQ0JBQ0NDgULFAoSGxYHAxURDRsSDBUSEBEWGxYaHRoV ER4dHQsWIxIbJxQcMBoiKxknOCQTBSAVCyUYDi0cDCEWESUaFCMeGSkcETAfFCMgHSwhFishGjUm GSQjIyEoLiklIi8oIisrKyYtNiQrOSksMCs0PTUrIzQwLDIxMTM4PDs3NDs4NDs7Ox0tQCc2RjA8 SC9AUTlCSjZGVjtNYUIwHkg2JUk8M1A9LElBOFZHN2BOPGJQPkZGRkJHTEJITU5GQ01NTUJPXFRL Q1lRSlBQUFBUWFpaWkRUZk1dc1NeaE1hcltialRmeWVUQ2RVSGhWQ2tZR2xcTGNbVHBeTWhjXXJg TntpV2JiYmtra2twdGt0fndvZXNzc3t7e19vgl1wgWJ0hmV5jGl7jGx9kHV8g26Ck32FjHaGl3yO oH+QooNwXYt5Z4t9dJB6a42CeZKAbZaEcpCHfpaIepmGdpuJdp2LeaCOe6GRfoKCgoWJjYmJiYWN lomOkYeSnJGJgZiOgpqRiZSUlJCXn5qWkp+Zk5ycnIKTpYWXqImXpoubp4iarI2esZKcpI+itJai rZSjs5WnuZarvZ6rtpiqvJ+wvaWTgqKYi6qXhaqYh6yaiaSbk6idkrGdi6mknbGgj7inlaSkpKOm qq6ooampqaStt6exubSvq7mto76xorq1r7Ozs7C0uLm5uZ2vwJ+yxKi4x7e+xLS/yLq/w6/Az6/B 1LPAyrnCyrPD07TE2bfI1rXI2b3H0LjK2b7R48Gsm8m5p8W7sMvDuNPAr9XHuMTExMTIy87Iw8rK ysfN1MLO2cvP0sbS3dTMxt7RwtTU1NTZ3drW0d3Z1d7e3sLT5MXZ6szZ483b6NLc5M/h8Nnk7NPl 8+bXxePb0uTf2une0fDfy+3j1/Tp2+Pj4+Dl6uHo7ujl4Ozs7OPs8+bw9+Px+u3z9+z0+ez4/fPt 5fbw5/fy7Pzy5Pnz6/757Pb29vD2+/T6/fn18f388v7+/gAAAAAAAMp8B7AAAAAJcEhZcwAADsMA AA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAACw1JREFUeF7t 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"]]></variableExpression>
+	</variable>
+	<variable name="BarcodeImage2" class="java.lang.String">
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAAAXNSR0IArs4c6QAAAARnQU1BAACx jwv8YQUAAAMAUExURQAAAAIECgUJDAkEAg0IBAwMDAAGFgQLEwILGgkNEggPGQsRGhAGABIJBBMN CRsKBhgOCBYQChoRChYWFh0dHQkXJhIXIBIaJBEdKhoeIxYhLRonOCYXCyEXESQaEyEdGS0eEyMh HywgFSwiGjcnFyEhISElLCIoLi0oJCsrKyUmMSIrMyYwOiwwNCo1PjQsJDIvKjgrITUwKj4wJTU1 NTQ3ODQ6Pzs3Mzk5Nh4vQCk2Qys2SC05STI7Ri1BUzhCSjNDUzZKWj9JVTpKXD5PYD9QYUEwHkY2 JkY9NUtCOlJCLlNBMVFFOVVIO1hGNlxMPWJQP0ZDQERKT0hFQ0pKSkROWFlNQ1dRTFVVVVlVUlhY WEVXaE1ecFFZYE9gclZgbFxgZFlgalVneGhXR3BeTW5jWHJhTnRjU3RmWHpoVnxrWWBgYGdqbWxs bGNtdWx0fXhuZnZ2dn94cX19fVxugF9wgmd4im1+kHR7gW6AknSAinmFjnCClHaJmHqLnYBuXIBx XYd1ZIV+dpB+bpF+cY2DdpKAbpqJd6CNfIGBgYSGiYuJhouLi4KMlYyTmpeNg5KNiJySh5qSjZWV lZiUkZyZlJ2dnYKUpIWWqIaaq4qcrI2esJadpo6gsZ6kqZeouaSTgqmWhKqah62di7CejK+gjqWh nq6gk7Ggjrqol6KioqqqqqaqsKGwvquxubGsp7OsqL+1qrS0tLC0uLW6v7y8vJuuwKW2xaa4yam2 w6y5xKu9y7G8xq3A0LXEz7zDy7jI2L/P4L/S5MCum8i3p8W/uMrAts7Gu9bHt8TExMHFyMPJzsrG ws7IxMvLy8LM1MbQ2dPLxtHNydvPwd/Ux9XV1dHW3NzZ1d3d3cfW49Pd5dLf6dzf5Nrk69no8+TU w+HWyuXZy+vdzOTe1uzh0+vl3PPo2+Hh4eLn7ePq7u7n4e7p4+rq6uTs8+Lu+Onu8+bw9eTx+evx 9u31+u/4+/Pt5fbx6vvz5vr17P746/b29vP2+fT5/Pr28v368/7+/jSo5yIAAAAJcEhZcwAADsMA AA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAACq5JREFUeF7t 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 AAAASUVORK5CYII="]]></variableExpression>
+	</variable>
+	<variable name="BarcodeImage3" class="java.lang.String">
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAAAXNSR0IArs4c6QAAAARnQU1BAACx jwv8YQUAAAMAUExURQAAAAIFCgUIDAoFAQ0JBQ4NDQULFQQSHw0RFQoSHBQLBhUQDBkRCxIWGxIY HRoVERwYFBsbGwMTIgYYJwoUIg4aKRUcJRchLBkmNiIOCSQWCyYcFTIeFCUhHiwiGzEgDzUiFDIl GjUoGzwrHCQkJCEmKysmIiwqKSQqNCEtOigsMSQwPS0wMSs0PDQrIzosIzgvKTw1LDU1NTE4PT03 MT09PSg3Ry8/UTI6QTI/Ti9BUjtCSTZIWD1OYEAtHkU1KEg8MklBOVlHNmBOPGNSPkBAQEBGS09J Q01NTUZMUkpTW1NMRlVRTlRUVFFXXFxbW0dWZ01dcFRcZU1gclZmd2RTQ2ZTSWlXRW1cSmVcU3Ff T3FgTnhmVmVlZWRoa2pqamJsdnVuZXxxaHFxcXx3cHt7e1xugF5wgmV3iG1/kXJ9im2BkXmEjHGC lHSGmHeIm3yGkn6JlXqKm36PoH6Ro4BtXYh2ZYR5cIh+dY2GfpGAbpiHdqCPfaKRfoKCgoGHi4iE gIqKioSLk4yRl5WLg52QhJGRkZOWmpGYnpqWk5+ak5ubm4aWp42dspSbpJCerZmdoY+hr46gsZeo uZ+wv6iWhbCdjLSfkKmhmLKhj7mpmKSkpKOnq6Wpr66qpqioqKats6Wzv62xtauzubaso76xo7Ky srK4vrq1s729vZ2uwJ+zw6e4yLO6w7K9ybjCy7LD07nJ17rL27zN4MGvnMKwncW0osC0qce4pca5 qsi0pMq6psy6qcO6sMK9uci/tNC9rMvDuNfIuMTExMLFyczMzMPN1sLN2cPR3c3Q1dPOytrPw9XR zd3QwtvUy9PT09HW2drW09nZ2cDS4cfY5sXY6srW4cvZ5Mzc69Pa4dPe6djd48/g7s3g8NTh7Nzg 5dvj69fn8+nayeTc0u7gz+zj2PPn2OLi4uHn7OTp7ezn4u/q5Ojo6OLr8unu8eXw9+Tz++vx9Oz0 +ev4+/Pr4/Xv6Pfw5fbx6fvw4/v17PX19fH2+vT6/Pn28v369P7+/rcwx1EAAAAJcEhZcwAADsMA AA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAC0RJREFUeF7t mmlgFVcVgE8S+iQPWkAhILFYpCjVUixVXFqF4laKWESwIESoT1wQdxtFLPpoGhdqrQuKqRrEFonW XVuXugTEpWVR3Ncq8YELVatRDJo3PefeM3eWe+ZBGnzz53w/4MyZzPbdfeZBoOSGys8RlZ8jKj9H hiT/YFtbmwn2hoGjGzPETWarHAacXW02HFva2jpN0NPWVjKBo5OP4E2GrkfsMVvh2Y9i5pjJYLCX /k+eb605xrLTZEq8RRwyGcLdLT7EJhMkcJfBszvsZQ5hdMJEBJ69h/4/htno7DUYkvydAGCu5QJH CTOE1fzYMODsGWbDcQXAZSYoA4wzgeMyPiJ59m7ObjFb4dn3YsY+JAbd9H9n4nznmmMsZZMZx1uE LUjiaQC2sPEhZpsggbsMnt1hL9ODkS1+As9uLnMUs9HZa6DyVb5D5Weh8h0qHzMqH1H5Kl/lq3yV r/ItKl9E5at8h8rPQuU7VD5mVD6i8lW+ylf5Kl/lW1S+iMpX+Q6Vn4XKd6h8zKh8ROWrfJWv8lW+ yreofBGVr/IdKj8Lle9Q+ZhR+YjKV/kqX+WrfJVvUfkiKl/lO1R+FirfofIxo/IRla/yVb7KV/kq 36LyRVS+yneo/CxUvkPlY0blIypf5at8la/yVb5F5YuofJXvUPlZqHyHyseMykdUvspX+Spf5at8 i8oXUfkq36Hys1D5DpWPGZWPqHyVr/JVvspX+RaVL6LyVb5D5Weh8h0qHzMqH1H5Kl/lq3yVr/It Kl9E5at8h8rPQuU7VD5mVD6i8lW+ylf5Kl/lW1S+iMpX+Q6Vn4XKd6h8zKh8ROWrfJWv8lW+yreo fBGVr/IdKj8Lle9Q+ZhR+YjKV/kqX+XXWf7OksU4CDrDgLNrzYbjplLJatxTKm0ygWMLH8GbzF7O 2kcKz+7Lx/PFLrWJjyJ6vIw9knB3iw/RaYIER/GPjWE8u8Pe9iGMIg+5yc8DX36+qPwcUfk5ovJz ROXniMrPEZWfIyo/R/KRP7ir3Pl9jiVOhPC2QH+5fA+Hafo/Ur7xVxwnyJTPV8u63g/fXt5xL8c+ d3aW31rjYarfKJc/9DveSJKL/OvGwPlnw+O/w5seK/GvLZ/njM8ygB9xmGTwBSMaZ4+By4XnzZBf fZi5FjL+H5yKc+BSGDe7aeSreTPF7ReYI2d8mrdTDLx+VMPsswEul2pDDvIHF8LMXwTBLcXG93Im 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"]]></variableExpression>
+	</variable>
 	<detail>
 		<band height="842">
 			<textField>
@@ -1043,15 +1052,8 @@ $F{ДатаДок}]]></initialValueExpression>
 				<reportElement uuid="3f2639ec-acd3-43b4-a59a-dd2dfab0159c" x="1" y="1" width="12" height="12" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
-				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="130" y="1" width="12" height="12" backcolor="#000000"/>
+				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="132" y="1" width="12" height="12" backcolor="#000000"/>
 			</rectangle>
-			<textField>
-				<reportElement uuid="43e599f7-e12f-465e-b477-84051236d3d3" x="22" y="2" width="100" height="38"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font fontName="EanGnivc" size="36"/>
-				</textElement>
-				<textFieldExpression><![CDATA["!0540!5015!"]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement uuid="9d12f756-38fc-48ae-b77f-fc6fcd805da8" x="0" y="249" width="594" height="11"/>
 				<textElement textAlignment="Center">
@@ -8843,6 +8845,10 @@ $F{ДатаДок}]]></initialValueExpression>
 				</textElement>
 				<text><![CDATA[(код)]]></text>
 			</staticText>
+			<image>
+				<reportElement uuid="d2ae7efc-c968-49bb-85b2-2fb6fb519287" x="16" y="1" width="115" height="48"/>
+				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage}).processString() )]]></imageExpression>
+			</image>
 		</band>
 		<band height="842">
 			<textField>
@@ -9231,18 +9237,11 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
 			</textField>
 			<rectangle>
-				<reportElement uuid="3f2639ec-acd3-43b4-a59a-dd2dfab0159c" x="1" y="1" width="12" height="12" backcolor="#000000"/>
+				<reportElement uuid="3f2639ec-acd3-43b4-a59a-dd2dfab0159c" x="1" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
-				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="130" y="1" width="12" height="12" backcolor="#000000"/>
+				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="130" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
-			<textField>
-				<reportElement uuid="43e599f7-e12f-465e-b477-84051236d3d3" x="22" y="2" width="100" height="38" isPrintWhenDetailOverflows="true"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font fontName="EanGnivc" size="36"/>
-				</textElement>
-				<textFieldExpression><![CDATA["!0540!5022!"]]></textFieldExpression>
-			</textField>
 			<frame>
 				<reportElement uuid="71b059a1-6211-4714-a1d8-1589f74372f1" x="0" y="588" width="595" height="214" isPrintWhenDetailOverflows="true"/>
 				<staticText>
@@ -14189,6 +14188,10 @@ $F{ДатаДок}]]></initialValueExpression>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
+			<image>
+				<reportElement uuid="6fd667b8-d4e1-435e-b632-bfae6e5e5974" x="14" y="2" width="115" height="48" isPrintWhenDetailOverflows="true"/>
+				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage2}).processString() )]]></imageExpression>
+			</image>
 		</band>
 		<band height="842">
 			<textField>
@@ -14577,18 +14580,11 @@ $F{ДатаДок}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
 			</textField>
 			<rectangle>
-				<reportElement uuid="3f2639ec-acd3-43b4-a59a-dd2dfab0159c" x="1" y="1" width="12" height="12" backcolor="#000000"/>
+				<reportElement uuid="3f2639ec-acd3-43b4-a59a-dd2dfab0159c" x="1" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
 			<rectangle>
-				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="130" y="1" width="12" height="12" backcolor="#000000"/>
+				<reportElement uuid="33df9a4a-e50d-44d0-8e76-51741a5a7f26" x="132" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
 			</rectangle>
-			<textField>
-				<reportElement uuid="43e599f7-e12f-465e-b477-84051236d3d3" x="22" y="2" width="100" height="38" isPrintWhenDetailOverflows="true"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font fontName="EanGnivc" size="36"/>
-				</textElement>
-				<textFieldExpression><![CDATA["!0540!5039!"]]></textFieldExpression>
-			</textField>
 			<componentElement>
 				<reportElement uuid="9a026b75-8c0e-418a-a78d-929c7d9c7268" x="-2" y="49" width="613" height="780"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -18806,6 +18802,10 @@ $F{ЭкологКл}]]></textFieldExpression>
 			<break>
 				<reportElement uuid="ffe3ea14-916d-4a02-ad16-bebd0e558158" x="0" y="784" width="100" height="1"/>
 			</break>
+			<image>
+				<reportElement uuid="f5f0bac3-f673-4b93-8a7f-e4fb120ac900" x="16" y="1" width="115" height="48" isPrintWhenDetailOverflows="true"/>
+				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage3}).processString() )]]></imageExpression>
+			</image>
 		</band>
 	</detail>
 </jasperReport>
