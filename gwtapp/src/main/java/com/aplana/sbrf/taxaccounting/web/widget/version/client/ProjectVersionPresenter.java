@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersionResult;
 import com.google.inject.Inject;
@@ -8,7 +8,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 
 public class ProjectVersionPresenter extends
 		PresenterWidget<ProjectVersionView> {
@@ -29,19 +28,14 @@ public class ProjectVersionPresenter extends
 	@Override
 	protected void onReveal() {
 		GetProjectVersion action = new GetProjectVersion();
-		dispatchAsync
-				.execute(
-						action,
-						CallbackUtils
-								.createTACallback(new AbstractCallback<GetProjectVersionResult>() {
-									@Override
-									public void onSuccess(
-											GetProjectVersionResult result) {
-										getView().setProjectVersion(
-												result.getProjectVersion());
-									}
+		dispatchAsync.execute(action,
+				new AbstractCallback<GetProjectVersionResult>() {
+					@Override
+					public void onReqSuccess(GetProjectVersionResult result) {
+						getView().setProjectVersion(result.getProjectVersion());
+					}
 
-								}));
+				});
 		super.onReveal();
 	}
 
