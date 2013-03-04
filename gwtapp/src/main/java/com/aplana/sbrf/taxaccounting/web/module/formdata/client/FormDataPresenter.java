@@ -278,13 +278,6 @@ public class FormDataPresenter extends
 						LogAddEvent.fire(FormDataPresenter.this,
 								result.getLogEntries());
 					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						System.out.println("fdsfsdfsdfsdgasfhadsfhasdfhaSHA: " + caught.toString());
-						caught.printStackTrace();
-					}
-
 				}));
 	}
 
