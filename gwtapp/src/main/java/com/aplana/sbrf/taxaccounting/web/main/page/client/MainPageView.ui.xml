@@ -10,11 +10,9 @@
 		}
 
 		.versionProjectStyle {
-			font-style: italic;
-			font-size: x-small;
 			position: absolute;
 			left: 30px;
-			bottom: 5px;
+			bottom: 3px;
 		}
 
 		.footerGradient {

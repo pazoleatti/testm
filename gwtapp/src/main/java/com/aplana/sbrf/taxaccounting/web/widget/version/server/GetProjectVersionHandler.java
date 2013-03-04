@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.server;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
@@ -15,33 +14,47 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
-public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVersion,GetProjectVersionResult> {
+public class GetProjectVersionHandler extends
+		AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
+
+	private static final String RESOURCE_FOR_GETTING_VERSION = "META-INF/maven/com.aplana.taxaccounting/gwtapp/pom.properties";
+
+	private Log log = LogFactory.getLog(getClass());
 
 	public GetProjectVersionHandler() {
 		super(GetProjectVersion.class);
 	}
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	@Override
-	public GetProjectVersionResult execute(GetProjectVersion action, ExecutionContext executionContext) throws ActionException {
-		InputStream inputStream = getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/version.txt");
-		String version = "unknown";
-		if(inputStream != null){
-			try {
-				version = IOUtils.toString(inputStream) ;
-			} catch (IOException e) {
-				logger.error("A error occurred during getting version from resource: /com/aplana/sbrf/taxaccounting/version.txt");
-			}
-		}
+	public GetProjectVersionResult execute(GetProjectVersion action,
+			ExecutionContext executionContext) throws ActionException {
 
+		
+		String version = "unknown";
+		try {
+			InputStream inputStream = this.getClass().getClassLoader()
+					.getResourceAsStream(RESOURCE_FOR_GETTING_VERSION);
+			Properties prop = new Properties();
+			prop.load(inputStream);
+			version = prop.getProperty("version", "unknown");
+		} catch (NullPointerException e) {
+			log.error("Resource is absent: "
+					+ RESOURCE_FOR_GETTING_VERSION);
+		} catch (Exception e) {
+			log.error("A error occurred during getting version from resource: "
+					+ RESOURCE_FOR_GETTING_VERSION, e);
+		}
+		
 		GetProjectVersionResult result = new GetProjectVersionResult();
 		result.setProjectVersion(version);
 		return result;
+
 	}
 
 	@Override
-	public void undo(GetProjectVersion getProjectVersion, GetProjectVersionResult getProjectVersionResult, ExecutionContext executionContext) throws ActionException {
-		//ничего не делаем
+	public void undo(GetProjectVersion getProjectVersion,
+			GetProjectVersionResult getProjectVersionResult,
+			ExecutionContext executionContext) throws ActionException {
+		// ничего не делаем
 	}
 }

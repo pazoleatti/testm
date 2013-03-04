@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	     
-    <g:Label ui:field="projectVersion" />
-    
+
+	<ui:style>
+		.myStyle {
+			font-family: sans-serif;
+			font-size: 12px;
+			color: #737B8C;
+		}
+	</ui:style>
+
+	<g:HorizontalPanel>
+		<g:Label text="Версия: " styleName="{style.myStyle}"/>
+		<g:Label ui:field="projectVersion" styleName="{style.myStyle}"/>
+	</g:HorizontalPanel>
+
+
 </ui:UiBinder> 
