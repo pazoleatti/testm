@@ -136,6 +136,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
+	public byte[] getPdfData(long declarationId, int userId){
+		if (declarationDataAccessService.canRead(userId, declarationId)) {
+			DeclarationData declaration = declarationDataDao.get(declarationId);
+			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
+			String xmlData = declarationDataDao.getXmlData(declarationId);
+			JasperPrint print = null;
+			try {
+				JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));
+				print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
+			} catch (JRException e) {
+				throw new ServiceException("Невозможно заполнить отчет");
+			}
+			JRPdfExporter exporter = new JRPdfExporter();
+			ByteArrayOutputStream pdf = new ByteArrayOutputStream();
+			exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, print);
+			exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, pdf);
+			try {
+				exporter.exportReport();
+			} catch (JRException e) {
+				throw new ServiceException("Невозможно экспортировать отчет");
+			}
+			return pdf.toByteArray();
+		} else {
+			throw new AccessDeniedException("Невозможно получить pdf, так как у пользователя нет прав на просмотр декларации");
+		}
+	}
+
+	@Override
 	public void refreshDeclaration(Logger logger, long declarationDataId, int userId) {
 		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
 			this.logger.debug("Refreshing declaration with id = " + declarationDataId);

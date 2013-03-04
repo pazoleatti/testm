@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.exception.*;
+import com.aplana.sbrf.taxaccounting.log.*;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.*;
 
 /**
  * Сервис для работы с {@link налоговыми декларациями DeclarationData}
@@ -75,4 +74,12 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	byte[] getXlsxData(long declarationDataId, int userId);
+	/**
+	 * Получить печатное представление данных декларации в PDF формате
+	 * @param declarationId идентификатор декларации
+	 * @param userId идентификатор пользователя, выполняющего операцию
+	 * @return файл Pdf в виде байтового массива
+	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+	 */
+	byte[] getPdfData(long declarationId, int userId);
 }
