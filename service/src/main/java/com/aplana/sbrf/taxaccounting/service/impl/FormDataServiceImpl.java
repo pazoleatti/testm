@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -39,6 +40,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataService;
  * @author Vitalii Samolovskikh
  */
 @Service("unlockFormData")
+@Transactional
 public class FormDataServiceImpl implements FormDataService {
 
 	@Autowired
@@ -419,6 +421,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 	}
 
+	@Override
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public boolean lock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if (objectLock != null && objectLock.getUserId() != userId) {
@@ -430,6 +434,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public boolean unlock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if (objectLock != null && objectLock.getUserId() != userId) {
@@ -442,12 +447,14 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public boolean unlockAllByUserId(int userId) {
 		lockDao.unlockAllObjectByUserId(userId);
 		return true;// TODO обработать возможные ошибки
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public ObjectLock<Long> getObjectLock(long formDataId) {
 		return lockDao.getObjectLock(formDataId, FormData.class);
 	}
