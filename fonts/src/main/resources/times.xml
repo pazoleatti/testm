@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+    <fontFamily name="Times New Roman">
+        <normal>times/times.ttf</normal>
+        <bold>times/timesbd.ttf</bold>
+        <italic>times/timesi.ttf</italic>
+        <boldItalic>times/timesbi.ttf</boldItalic>
+        <pdfEncoding>Cp1251</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+        <exportFonts>
+            <export key="net.sf.jasperreports.html">Times New Roman</export>
+            <export key="net.sf.jasperreports.xhtml">Times New Roman</export>
+        </exportFonts>
+    </fontFamily>
+</fontFamilies>

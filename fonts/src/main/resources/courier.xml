@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+    <fontFamily name="Courier New">
+        <normal>courier/cour.ttf</normal>
+        <bold>courier/courbd.ttf</bold>
+        <italic>courier/couri.ttf</italic>
+        <boldItalic>courier/courbi.ttf</boldItalic>
+        <pdfEncoding>Cp1251</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+        <exportFonts>
+            <export key="net.sf.jasperreports.html">Courier New</export>
+            <export key="net.sf.jasperreports.xhtml">Courier New</export>
+        </exportFonts>
+    </fontFamily>
+</fontFamilies>
