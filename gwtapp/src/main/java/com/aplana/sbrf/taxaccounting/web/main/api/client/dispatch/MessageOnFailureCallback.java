@@ -1,43 +1,47 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.DelayedBindRegistry;
-import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
-public class LockScrCallback<T> implements AsyncCallback<T>, HasHandlers {
+public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
+		HasHandlers {
 
 	// TODO: Почему то не получается использовать @Inject для статических полей.
 	// Надо разобраться.
 	// Пока ворк эраунд - получение инжектора руками и установка значения.
 	private static EventBus EVENT_BUS = ((ClientGinjector) DelayedBindRegistry
 			.getGinjector()).getEventBus();
-	
+
 	private final AsyncCallback<T> callback;
+	private boolean showLogOnly;
 
 	public static <T> AsyncCallback<T> create() {
-		return new LockScrCallback<T>(true, null);
+		return new MessageOnFailureCallback<T>(false, null);
 	}
-	
+
 	public static <T> AsyncCallback<T> create(AsyncCallback<T> callback) {
-		return new LockScrCallback<T>(true, callback);
+		return new MessageOnFailureCallback<T>(false, callback);
 	}
-	
-	public static <T> AsyncCallback<T> create(boolean lockImmediately) {
-		return new LockScrCallback<T>(lockImmediately, null);
+
+	public static <T> AsyncCallback<T> create(boolean showLogOnly) {
+		return new MessageOnFailureCallback<T>(showLogOnly, null);
 	}
-	
-	public static <T> AsyncCallback<T> create(boolean lockImmediately, AsyncCallback<T> callback) {
-		return new LockScrCallback<T>(lockImmediately, callback);
+
+	public static <T> AsyncCallback<T> create(boolean showLogOnly,
+			AsyncCallback<T> callback) {
+		return new MessageOnFailureCallback<T>(showLogOnly, callback);
 	}
-	
-	
-	private LockScrCallback(boolean lockImmediately, AsyncCallback<T> callback) {
-		LockInteractionEvent.fire(this, true);
+
+	private MessageOnFailureCallback(boolean showLogOnly, AsyncCallback<T> callback) {
 		this.callback = callback;
+		this.showLogOnly = showLogOnly;
 	}
 
 	@Override
@@ -45,7 +49,14 @@ public class LockScrCallback<T> implements AsyncCallback<T>, HasHandlers {
 		if (callback != null) {
 			callback.onFailure(caught);
 		}
-		LockInteractionEvent.fire(this, false);
+		if (caught instanceof TaActionException) {
+			LogAddEvent.fire(this,
+					((TaActionException) caught).getLogEntries());
+
+		}
+		if (!showLogOnly) {
+			MessageEvent.fire(this, caught.getLocalizedMessage());
+		}
 	}
 
 	@Override
@@ -53,7 +64,6 @@ public class LockScrCallback<T> implements AsyncCallback<T>, HasHandlers {
 		if (callback != null) {
 			callback.onSuccess(result);
 		}
-		LockInteractionEvent.fire(this, false);
 	}
 
 	@Override

@@ -34,8 +34,7 @@ import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
  * её надо по таймеру, а то приложение может никогда не очнуться.
  * 
  * 
- * @deprecated Используйте цепочку из <code>LockCallback.create</code>,
- *             <code>LogOnFailureCallback.create</code>.
+ * @deprecated Используйте <code>CallbackUtils</code>.
  * @deprecated
  */
 @Deprecated
@@ -52,10 +51,9 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>,
 
 	/**
 	 * Создает новый обработчик возврата запросак к серверу. При этом
-	 * блокируется экран пользователя и он ничего не может сделать. 
+	 * блокируется экран пользователя и он ничего не может сделать.
 	 * 
-	 * @deprecated
-	 * Используйте <code>CallbackUtils</code> or <code>CompositeCallbak.create</code>.
+	 * @deprecated Используйте <code>CallbackUtils</code>.
 	 * @deprecated
 	 */
 	public AbstractCallback() {
