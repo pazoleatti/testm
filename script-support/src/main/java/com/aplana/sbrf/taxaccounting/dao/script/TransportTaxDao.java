@@ -21,9 +21,11 @@ public interface TransportTaxDao {
 	 * @param code  код типа транспортного средства
 	 * @param age   срок использования в годах
 	 * @param power мощность в л.с.
+	 * @param regionId Код региона субъекта РФ
+	 * 
 	 * @return значение ставки налога в рублях
 	 */
-	int getTaxRate(String code, BigDecimal age, BigDecimal power);
+	int getTaxRate(String code, BigDecimal age, BigDecimal power, int regionId);
 
 	/**
 	 * Возвращает название вида транспортного средства
