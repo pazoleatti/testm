@@ -54,7 +54,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showOriginalVersionButton(boolean show);
 
-		void showSaveButton(boolean show);
+		void showSaveAnchor(boolean show);
 
 		void showRecalculateButton(boolean show);
 
@@ -64,9 +64,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showRemoveRowButton(boolean show);
 
-		void showPrintButton(boolean show);
+		void showPrintAnchor(boolean show);
 
-		void showManualInputButton(boolean show);
+		void showManualInputAnchor(boolean show);
+
+		void showCancelAnchor(boolean show);
+
+		void showManualInputPanel(boolean show);
 
 		void showDeleteFormButton(boolean show);
 
@@ -152,13 +156,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveButton(false);
+		view.showSaveAnchor(false);
+		view.showCancelAnchor(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
-		view.showPrintButton(true);
-		view.showManualInputButton(false);
+		view.showPrintAnchor(true);
+		view.showManualInputAnchor(false);
+		view.showManualInputPanel(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(true, lockDate, lockedBy);
 		
@@ -171,13 +177,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveButton(false);
+		view.showSaveAnchor(false);
+		view.showCancelAnchor(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
-		view.showPrintButton(true);
-		view.showManualInputButton(formDataAccessParams.isCanEdit());
+		view.showPrintAnchor(true);
+		view.showManualInputAnchor(formDataAccessParams.isCanEdit());
+		view.showManualInputPanel(formDataAccessParams.isCanEdit());
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
 		view.setLockInformation(false, null, null);
 		
@@ -197,13 +205,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 			view.showOriginalVersionButton(false);
 		}
 
-		view.showSaveButton(true);
+		view.showCancelAnchor(true);
+		view.showSaveAnchor(true);
+		view.showManualInputPanel(true);
 		view.showRecalculateButton(true);
 		view.showAddRowButton(fixedRows);
 		view.showRemoveRowButton(fixedRows);
 
-		view.showPrintButton(false);
-		view.showManualInputButton(false);
+		view.showPrintAnchor(false);
+		view.showManualInputAnchor(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(false, null, null);
 		

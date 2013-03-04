@@ -65,9 +65,16 @@
         .headerTopRight {
             height: 70px;
         }
+
+        .workArea {
+            border: 1px solid #969696;
+            border-radius: 3px;
+            padding: 5px;
+            margin-top: 3px;
+        }
     </ui:style>
 
-	<g:DockLayoutPanel unit='PX' height="100%" width="100%">
+	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
         <g:north size="100">
             <g:HTMLPanel height="100px" width="100%">
                 <div class="{style.headerLeft}">
@@ -96,8 +103,6 @@
                                 <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
                                 <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
                                 <g:Button ui:field="deleteFormButton">Удалить</g:Button>
-                                <g:Button ui:field="saveButton">Сохранить</g:Button>
-                                <g:Button ui:field="cancelButton">Отмена</g:Button>
                             </style:LeftBar>
                             <style:LeftBar ui:field="workflowButtons" />
                         </style:Bar>
@@ -123,9 +128,11 @@
                         </g:HorizontalPanel>
                     </div>
                     <g:HorizontalPanel>
-                        <g:FlowPanel width="245px" ui:field="manualInputPanel">
+                        <g:HorizontalPanel width="245px" ui:field="manualInputPanel">
                             <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor"/>
-                        </g:FlowPanel>
+                            <style:ButtonLink ui:field="saveAnchor" text="Сохранить" />
+                            <style:ButtonLink ui:field="cancelAnchor" img="img/cancel.gif" text="Отмена" />
+                        </g:HorizontalPanel>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
                             text="Показывать контрольные поля"/>
                     </g:HorizontalPanel>
@@ -138,7 +145,9 @@
         </g:north>
 
         <g:center>
-            <style:GenericDataGrid ui:field="formDataTable" />
+            <g:SimplePanel addStyleNames="{style.workArea}">
+                <style:GenericDataGrid height="100%" ui:field="formDataTable" />
+            </g:SimplePanel>
         </g:center>
 	</g:DockLayoutPanel>
 

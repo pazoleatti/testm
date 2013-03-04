@@ -172,8 +172,8 @@ public class FormDataPresenter extends
 	}
 
 	@Override
-	public void onManualInputClicked() {
-		revealForm(false);
+	public void onManualInputClicked(boolean readOnlyMode) {
+		revealForm(readOnlyMode);
 	}
 
 	@Override

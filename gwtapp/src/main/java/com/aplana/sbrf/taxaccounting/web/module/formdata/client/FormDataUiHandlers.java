@@ -13,7 +13,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	public void onRemoveRowClicked();
 
-	public void onManualInputClicked();
+	public void onManualInputClicked(boolean readOnlyMode);
 
 	public void onOriginalVersionClicked();
 	

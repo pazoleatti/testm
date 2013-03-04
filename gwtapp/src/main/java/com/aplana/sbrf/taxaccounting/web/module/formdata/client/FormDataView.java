@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -34,15 +33,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
 	@UiField
-	DataGrid<DataRow> formDataTable;
+	DockLayoutPanel dockPanel;
 	@UiField
-	Button saveButton;
+	DataGrid<DataRow> formDataTable;
 	@UiField
 	Button addRowButton;
 	@UiField
 	Button removeRowButton;
-	@UiField
-	Anchor manualInputAnchor;
 	@UiField
 	Button originalVersionButton;
 	@UiField
@@ -50,13 +47,20 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button checkButton;
 	@UiField
+	Button deleteFormButton;
+
+	@UiField
 	Anchor printAnchor;
 	@UiField
 	Anchor signersAnchor;
 	@UiField
 	Anchor returnAnchor;
 	@UiField
-	Button deleteFormButton;
+	Anchor manualInputAnchor;
+	@UiField
+	Anchor cancelAnchor;
+	@UiField
+	Anchor saveAnchor;
 
 	@UiField
 	LeftBar workflowButtons;
@@ -169,14 +173,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 
-	@UiHandler("cancelButton")
+	@UiHandler("cancelAnchor")
 	void onCancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onCancelClicked();
+			getUiHandlers().onManualInputClicked(true);
 		}
 	}
 
-	@UiHandler("saveButton")
+	@UiHandler("saveAnchor")
 	void onSaveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSaveClicked();
@@ -205,7 +209,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("manualInputAnchor")
 	void onManualInputButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onManualInputClicked();
+			getUiHandlers().onManualInputClicked(false);
 		}
 	}
 
@@ -231,16 +235,23 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@UiHandler("printAnchor")
-	void onPrintButtonClicked(ClickEvent event) {
+	void onPrintAnchorClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onPrintClicked();
 		}
 	}
 
 	@UiHandler("signersAnchor")
-	void onSignersButtonClicked(ClickEvent event) {
+	void onSignersAnchorClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSignersClicked();
+		}
+	}
+
+	@UiHandler("returnAnchor")
+	void onReturnAnchorClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCancelClicked();
 		}
 	}
 
@@ -269,8 +280,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
 		stateLabel.setText(state);
-		returnAnchor.setHref("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType=" +
-				String.valueOf(taxType));
 	}
 
 	/**
@@ -305,8 +314,18 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void showSaveButton(boolean show) {
-		saveButton.setVisible(show);
+	public void showSaveAnchor(boolean show) {
+		saveAnchor.setVisible(show);
+	}
+
+	@Override
+	public void showCancelAnchor(boolean show) {
+		cancelAnchor.setVisible(show);
+	}
+
+	@Override
+	public void showManualInputPanel(boolean show) {
+		manualInputPanel.setVisible(show);
 	}
 
 	@Override
@@ -335,13 +354,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void showPrintButton(boolean show) {
+	public void showPrintAnchor(boolean show) {
 		printAnchor.setVisible(show);
 	}
 
 	@Override
-	public void showManualInputButton(boolean show) {
-		manualInputPanel.setVisible(show);
+	public void showManualInputAnchor(boolean show) {
+		manualInputAnchor.setVisible(show);
 	}
 
 	@Override
@@ -351,7 +370,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
-		lockInformation.setVisible(isVisible);
+		dockPanel.setWidgetHidden(lockInformation, !isVisible);
 		if(lockedBy != null && lockDate != null){
 			lockInformation.setText("Данная налоговая форма в настоящий момент редактируется пользователем \"" + lockedBy
 					+ "\" (с "+ lockDate + " )");
