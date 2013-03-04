@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.log;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryImageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryIndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.google.gwt.core.client.GWT;
@@ -34,6 +35,14 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 				return object;
 			}
 		};
+		
+		Column<LogEntry, LogEntry> imageColumn = new Column<LogEntry, LogEntry>(
+				new LogEntryImageCell()) {
+			@Override
+			public LogEntry getValue(LogEntry object) {
+				return object;
+			}
+		};
 
 		Column<LogEntry, LogEntry> indexColumn = new Column<LogEntry, LogEntry>(
 				new LogEntryIndexCell()) {
@@ -45,6 +54,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 
 		logCellTable.addColumn(indexColumn);
 		logCellTable.setColumnWidth(indexColumn, "30px");
+		logCellTable.addColumn(imageColumn);
 		
 		logCellTable.addColumn(messageColumn);
 		setLogEntries(null);
