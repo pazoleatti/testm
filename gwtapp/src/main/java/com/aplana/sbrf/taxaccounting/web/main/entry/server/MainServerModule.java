@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionCon
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 @Configuration
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Import;
 		AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
 		DeclarationServerModule.class,ProjectVersionControlServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
+@EnableAspectJAutoProxy
 public class MainServerModule {
 
 

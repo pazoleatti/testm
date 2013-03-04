@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -18,13 +16,12 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LogActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
@@ -36,8 +33,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetFormDataHandler extends
 		AbstractActionHandler<GetFormData, GetFormDataResult> {
-	
-	private final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -64,28 +59,21 @@ public class GetFormDataHandler extends
 	@Override
 	public GetFormDataResult execute(GetFormData action,
 			ExecutionContext context) throws ActionException {
-		
+
 		checkAction(action);
 
-		try {
-			Integer userId = securityService.currentUser().getId();
-			GetFormDataResult result = new GetFormDataResult();
-			Logger logger = new Logger();
+		Integer userId = securityService.currentUser().getId();
+		GetFormDataResult result = new GetFormDataResult();
+		Logger logger = new Logger();
 
-			fillLockData(action, userId, result);
-			workFlowMove(action, userId, logger);
-			fillFormAndTemplateData(action, userId, logger, result);
-			fillFormDataAccessParams(action, userId, result);
+		fillLockData(action, userId, result);
+		workFlowMove(action, userId, logger);
+		fillFormAndTemplateData(action, userId, logger, result);
+		fillFormDataAccessParams(action, userId, result);
 
-			result.setLogEntries(logger.getEntries());
-			
-			return result;
-		} catch (ServiceLoggerException e) {
-			throw new LogActionException(e.getLocalizedMessage(), e.getLogEntries());
-		} catch (Exception e) {
-			log.error(e);
-			throw new LogActionException("Не удалось открыть/создать налоговую форму: " + e.getLocalizedMessage());
-		}
+		result.setLogEntries(logger.getEntries());
+
+		return result;
 
 	}
 
@@ -134,8 +122,9 @@ public class GetFormDataHandler extends
 			formData = formDataService.getFormData(userId,
 					action.getFormDataId(), logger);
 		}
-		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-		
+		FormTemplate formTemplate = formTemplateService.get(formData
+				.getFormTemplateId());
+
 		result.setReportPeriod(reportPeriodDao
 				.get(formData.getReportPeriodId()).getName());
 		result.setDepartmenName(departmentService.getDepartment(
@@ -151,9 +140,11 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
+	 * @param log
 	 * @param result
 	 */
-	private void fillFormDataAccessParams(GetFormData action, int userId, GetFormDataResult result) {
+	private void fillFormDataAccessParams(GetFormData action, int userId,
+			GetFormDataResult result) {
 		FormDataAccessParams accessParams;
 		if (action.getFormDataId() == Long.MAX_VALUE) {
 			accessParams = new FormDataAccessParams();
@@ -184,7 +175,8 @@ public class GetFormDataHandler extends
 			if (!errorMessage.isEmpty()) {
 				errorMessage = errorMessage.startsWith(",") ? errorMessage
 						.substring(1) : errorMessage;
-				throw new LogActionException("Не удалось создать налоговую форму:" + errorMessage);
+				throw new TaActionException(
+						"Не удалось создать налоговую форму:" + errorMessage);
 			}
 		}
 	}
@@ -194,10 +186,12 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
+	 * @param log
 	 * @param result
 	 * @throws WrongInputDataServiceException
 	 */
-	private void fillLockData(GetFormData action, int userId, GetFormDataResult result) {
+	private void fillLockData(GetFormData action, int userId,
+			GetFormDataResult result) {
 		FormMode formMode = FormMode.READ_LOCKED;
 
 		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action

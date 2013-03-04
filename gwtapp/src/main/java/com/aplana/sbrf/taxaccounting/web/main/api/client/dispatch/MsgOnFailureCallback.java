@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
@@ -48,9 +49,9 @@ public class MsgOnFailureCallback<T> implements AsyncCallback<T>,
 		if (callback != null) {
 			callback.onFailure(caught);
 		}
-		if (caught instanceof LogActionException) {
+		if (caught instanceof TaActionException) {
 			LogAddEvent.fire(this,
-					((LogActionException) caught).getLogEntries());
+					((TaActionException) caught).getLogEntries());
 
 		}
 		if (!showLogOnly) {

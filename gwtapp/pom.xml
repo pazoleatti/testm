@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- POM file generated with GWT webAppCreator -->
 	<modelVersion>4.0.0</modelVersion>
 
@@ -31,11 +32,11 @@
 			<artifactId>core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>script-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>script-support</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
@@ -47,7 +48,7 @@
 			<artifactId>gwt-servlet</artifactId>
 			<version>${gwt.version}</version>
 			<scope>runtime</scope>
-		</dependency>		
+		</dependency>
 
 		<!-- DI dependencies -->
 		<dependency>
@@ -124,6 +125,16 @@
 			<version>2.2.2</version>
 		</dependency>
 		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>1.6.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.12</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${springframework.version}</version>
@@ -153,11 +164,11 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
 		</dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.2</version>
-        </dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -203,25 +214,11 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-            <!--
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<phase>generate-resources</phase>
-						<configuration>
-							<target>
-								<echo message="${project.version}" file="${project.build.outputDirectory}/com/aplana/sbrf/taxaccounting/version.txt"/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			-->
+			<!-- <plugin> <artifactId>maven-antrun-plugin</artifactId> <version>1.7</version> 
+				<executions> <execution> <phase>generate-resources</phase> <configuration> 
+				<target> <echo message="${project.version}" file="${project.build.outputDirectory}/com/aplana/sbrf/taxaccounting/version.txt"/> 
+				</target> </configuration> <goals> <goal>run</goal> </goals> </execution> 
+				</executions> </plugin> -->
 		</plugins>
 	</build>
 	<dependencyManagement>
@@ -276,15 +273,15 @@
 				<resources>
 					<resource>
 						<directory>src/main/resources</directory>
-                		<includes>
-                    		<include>**/*</include>
-                		</includes>					
-					</resource>				
+						<includes>
+							<include>**/*</include>
+						</includes>
+					</resource>
 					<resource>
 						<directory>src/main/resources-development</directory>
-                		<includes>
-                    		<include>**/*</include>
-                		</includes>					
+						<includes>
+							<include>**/*</include>
+						</includes>
 					</resource>
 				</resources>
 				<plugins>
@@ -329,7 +326,7 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>jcl-over-slf4j</artifactId>
 					<version>1.7.2</version>
-				</dependency>				
+				</dependency>
 			</dependencies>
 		</profile>
 		<profile>
@@ -338,15 +335,15 @@
 				<resources>
 					<resource>
 						<directory>src/main/resources</directory>
-                		<includes>
-                    		<include>**/*</include>
-                		</includes>					
-					</resource>				
+						<includes>
+							<include>**/*</include>
+						</includes>
+					</resource>
 					<resource>
 						<directory>src/main/resources-production</directory>
-                		<includes>
-                    		<include>**/*</include>
-                		</includes>					
+						<includes>
+							<include>**/*</include>
+						</includes>
 					</resource>
 				</resources>
 				<plugins>
@@ -359,10 +356,10 @@
 						</configuration>
 						<executions>
 							<execution>
-		         				<goals>
-		              				<goal>compile</goal>
-		              				<goal>test</goal>
-		            			</goals>					
+								<goals>
+									<goal>compile</goal>
+									<goal>test</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>

@@ -12,7 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -243,7 +243,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		if (!readOnlyMode && formData.getId()!=null){
 			UnlockFormData action = new UnlockFormData();
 			action.setFormId(formId);
-			dispatcher.execute(action, CompositeCallback.create());
+			dispatcher.execute(action, CallbackUtils.emptyCallback());
 		}
 	}
 }

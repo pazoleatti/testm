@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -10,17 +14,14 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 
 /**
- * @author Eugene Stetsenko
- *         Обработчик запроса для проверки формы.
+ * @author Eugene Stetsenko Обработчик запроса для проверки формы.
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAction, FormDataResult> {
+public class CheckFormDataHandler extends
+		AbstractActionHandler<CheckFormDataAction, FormDataResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -33,19 +34,22 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 	}
 
 	@Override
-	public FormDataResult execute(CheckFormDataAction action, ExecutionContext context) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-		Logger logger = new Logger();
-		FormData formData = action.getFormData();
-		formDataService.doCheck(logger, userId, formData);
-		FormDataResult result = new FormDataResult();
-		result.setLogEntries(logger.getEntries());
-		return result;
+	public FormDataResult execute(CheckFormDataAction action,
+			ExecutionContext context) throws ActionException {
+
+			TAUser user = securityService.currentUser();
+			Integer userId = user.getId();
+			Logger logger = new Logger();
+			FormData formData = action.getFormData();
+			formDataService.doCheck(logger, userId, formData);
+			FormDataResult result = new FormDataResult();
+			result.setLogEntries(logger.getEntries());
+			return result;
 	}
 
 	@Override
-	public void undo(CheckFormDataAction action, FormDataResult result, ExecutionContext context) throws ActionException {
+	public void undo(CheckFormDataAction action, FormDataResult result,
+			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
 }

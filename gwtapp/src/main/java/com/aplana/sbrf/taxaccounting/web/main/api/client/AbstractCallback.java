@@ -55,8 +55,7 @@ public abstract class AbstractCallback<T> implements AsyncCallback<T>,
 	 * блокируется экран пользователя и он ничего не может сделать. 
 	 * 
 	 * @deprecated
-	 * Используйте цепочку из <code>LockCallback.create</code>,
-	 * <code>LogOnFailureCallback.create</code> or <code>CompositeCallbak.create</code>.
+	 * Используйте <code>CallbackUtils</code> or <code>CompositeCallbak.create</code>.
 	 * @deprecated
 	 */
 	public AbstractCallback() {

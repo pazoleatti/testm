@@ -207,6 +207,19 @@ public class FormDataServiceImpl implements FormDataService {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData,
 					FormDataEvent.CALCULATE, logger);
+			
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				logger.error("Рассчет завершен, обнаружены ошибки");
+			} else {
+				logger.info("Рассчет завершен, ошибок не обнаружено");
+			}
+			
+			// Проверяем ошибки при пересчете
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Найдены ошибки при выполнении рассчета формы",
+						logger.getEntries());
+			}
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для выполенения расчёта по налоговой форме");
@@ -223,6 +236,13 @@ public class FormDataServiceImpl implements FormDataService {
 			logger.error("Проверка завершена, обнаружены ошибки");
 		} else {
 			logger.info("Проверка завершена, ошибок не обнаружено");
+		}
+		
+		// Проверяем ошибки при пересчете
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			throw new ServiceLoggerException(
+					"Найдены ошибки при выполнении проверки формы",
+					logger.getEntries());
 		}
 	}
 
@@ -256,13 +276,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 			// Перед сохранением формы всегда делаем её пересчет.
 			doCalc(logger, userId, formData);
-
-			// Проверяем ошибки при пересчете
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new ServiceLoggerException(
-						"Произошли ошибки при пересчете формы",
-						logger.getEntries());
-			}
 
 			boolean needLock = formData.getId() == null;
 			long id = formDataDao.save(formData);

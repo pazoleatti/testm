@@ -22,8 +22,6 @@ public class UnlockFormDataHandler extends AbstractActionHandler<UnlockFormData,
 	@Autowired
 	private SecurityService securityService;
 
-
-
 	public UnlockFormDataHandler() {
 		super(UnlockFormData.class);
 	}

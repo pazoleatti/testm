@@ -4,9 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.LockScrCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.MsgOnFailureCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -79,8 +77,8 @@ public class FormDataPresenter extends
 
 			dispatcher.execute(
 					action,
-					CompositeCallback
-							.create(new AbstractCallback<GetFormDataResult>() {
+					CallbackUtils.defaultCallback(
+							new AbstractCallback<GetFormDataResult>() {
 								@Override
 								public void onSuccess(GetFormDataResult result) {
 
@@ -112,7 +110,7 @@ public class FormDataPresenter extends
 											result.getFormData().getFormType()
 													.getName(),
 											result.getFormData().getFormType()
-											.getTaxType(),
+													.getTaxType(),
 											result.getFormData().getKind()
 													.getName(),
 											result.getDepartmenName(),
@@ -139,12 +137,8 @@ public class FormDataPresenter extends
 
 								}
 
-							})
-							.addCallback(MsgOnFailureCallback.create())
-							.addCallback(LockScrCallback.create())
-							.addCallback(
-									new ManualRevealCallback<GetFormDataResult>(
-											this)));
+							}).addCallback(
+							new ManualRevealCallback<GetFormDataResult>(this)));
 
 		} catch (Exception e) {
 			getProxy().manualRevealFailed();
@@ -215,17 +209,14 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(
-				action,
-				CompositeCallback
-						.create(new AbstractCallback<FormDataResult>() {
-							@Override
-							public void onSuccess(FormDataResult result) {
-								processFormDataResult(result);
-							}
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<FormDataResult>() {
+					@Override
+					public void onSuccess(FormDataResult result) {
+						processFormDataResult(result);
+					}
 
-						}).addCallback(MsgOnFailureCallback.create())
-						.addCallback(LockScrCallback.create()));
+				}));
 	}
 
 	private void processFormDataResult(FormDataResult result) {
@@ -239,17 +230,14 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		AddRowAction action = new AddRowAction();
 		action.setFormData(formData);
-		dispatcher.execute(
-				action,
-				CompositeCallback
-						.create(new AbstractCallback<FormDataResult>() {
-							@Override
-							public void onSuccess(FormDataResult result) {
-								processFormDataResult(result);
-							}
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<FormDataResult>() {
+					@Override
+					public void onSuccess(FormDataResult result) {
+						processFormDataResult(result);
+					}
 
-						}).addCallback(MsgOnFailureCallback.create())
-						.addCallback(LockScrCallback.create()));
+				}));
 	}
 
 	@Override
@@ -268,17 +256,14 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
-		dispatcher.execute(
-				action,
-				CompositeCallback
-						.create(new AbstractCallback<FormDataResult>() {
-							@Override
-							public void onSuccess(FormDataResult result) {
-								processFormDataResult(result);
-							}
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<FormDataResult>() {
+					@Override
+					public void onSuccess(FormDataResult result) {
+						processFormDataResult(result);
+					}
 
-						}).addCallback(MsgOnFailureCallback.create())
-						.addCallback(LockScrCallback.create()));
+				}));
 	}
 
 	@Override
@@ -286,18 +271,21 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		CheckFormDataAction checkAction = new CheckFormDataAction();
 		checkAction.setFormData(formData);
-		dispatcher.execute(
-				checkAction,
-				CompositeCallback
-						.create(new AbstractCallback<FormDataResult>() {
-							@Override
-							public void onSuccess(FormDataResult result) {
-								LogAddEvent.fire(FormDataPresenter.this,
-										result.getLogEntries());
-							}
+		dispatcher.execute(checkAction, CallbackUtils
+				.defaultCallback(new AbstractCallback<FormDataResult>() {
+					@Override
+					public void onSuccess(FormDataResult result) {
+						LogAddEvent.fire(FormDataPresenter.this,
+								result.getLogEntries());
+					}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+						System.out.println("fdsfsdfsdfsdgasfhadsfhasdfhaSHA: " + caught.toString());
+						caught.printStackTrace();
+					}
 
-						}).addCallback(MsgOnFailureCallback.create(true))
-						.addCallback(LockScrCallback.create()));
+				}));
 	}
 
 	@Override
@@ -309,17 +297,15 @@ public class FormDataPresenter extends
 			dispatcher
 					.execute(
 							action,
-							CompositeCallback
-									.create(new AbstractCallback<DeleteFormDataResult>() {
+							CallbackUtils
+									.defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
 										@Override
 										public void onSuccess(
 												DeleteFormDataResult result) {
 											goToFormDataList();
 										}
 
-									})
-									.addCallback(MsgOnFailureCallback.create())
-									.addCallback(LockScrCallback.create()));
+									}));
 		}
 	}
 
@@ -333,4 +319,5 @@ public class FormDataPresenter extends
 				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
 				String.valueOf(formData.getFormType().getTaxType())));
 	}
+
 }

@@ -1,37 +1,37 @@
-package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
+package com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch;
 
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.ActionException;
 
-public class LogActionException extends ActionException {
+public class TaActionException extends ActionException {
 	private static final long serialVersionUID = 2378347325524891374L;
 	
 	private List<LogEntry> logEntries;
 	
-	public LogActionException() {
+	public TaActionException() {
 		super();
 	}
 
-	public LogActionException(String msg) {
+	public TaActionException(String msg) {
 		super(msg);
 	}
 	
-	public LogActionException(String msg, Throwable e) {
+	public TaActionException(String msg, Throwable e) {
 		super(msg, e);
 	}
 	
-	public LogActionException(Throwable e) {
+	public TaActionException(Throwable e) {
 		super(e);
 	}
 	
-	public LogActionException(String msg, List<LogEntry> logEntries, Throwable e) {
+	public TaActionException(String msg, List<LogEntry> logEntries, Throwable e) {
 		super(msg, e);
 		this.logEntries = logEntries;
 	}
 	
-	public LogActionException(String msg, List<LogEntry> logEntries) {
+	public TaActionException(String msg, List<LogEntry> logEntries) {
 		super(msg);
 		this.logEntries = logEntries;
 	}
