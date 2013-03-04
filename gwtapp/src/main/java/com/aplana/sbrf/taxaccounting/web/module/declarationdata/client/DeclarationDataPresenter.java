@@ -33,6 +33,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setDepartment(String department);
 		void setReportPeriod(String reportPeriod);
 		void setBackButton(TaxType taxType);
+		void setPdfFile(String fileUrl);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -155,6 +156,11 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
 	}
 
+	@Override
+	public void loadPdfFile() {
+		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declaration.getId());
+	}
+
 	private void setDeclaration() {
 		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationId, "0"));
 		if (declarationId != 0) {
@@ -173,6 +179,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						getView().setBackButton(result.getTaxType());
 						getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
 						updateTitle(result.getDeclarationType());
+						loadPdfFile();
 
 						if (!result.isCanAccept()) {
 							getView().setCannotAccept();

@@ -52,6 +52,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	Anchor returnAnchor;
 
+	@UiField
+	HTMLPanel pdfContent;
+
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
@@ -120,6 +123,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	public void setBackButton(TaxType taxType){
 		returnAnchor.setHref("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
 				+ String.valueOf(taxType));
+	}
+
+	@Override
+	public void setPdfFile(String fileUrl) {
+		Frame pdf = new Frame(fileUrl);
+		pdf.setWidth("100%");
+		pdf.setHeight("100%");
+		pdfContent.add(pdf);
 	}
 
 

@@ -94,6 +94,10 @@
                 </div>
             </g:HTMLPanel>
         </g:north>
+        <g:center>
+            <g:HTMLPanel height="100%" width="100%" ui:field="pdfContent">
+            </g:HTMLPanel>
+        </g:center>
     </g:DockLayoutPanel>
 
 

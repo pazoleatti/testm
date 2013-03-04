@@ -76,9 +76,7 @@ public class DeclarationDataController {
 
 		if (declarationService.getPdfData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
-			String fileName = generateFileName(declarationId, userId, "pdf");
-			resp.setContentType("application/octet-stream");
-			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+			resp.setContentType("application/pdf");
 			respOut.write(declarationService.getPdfData(declarationId, userId));
 			respOut.close();
 		}
