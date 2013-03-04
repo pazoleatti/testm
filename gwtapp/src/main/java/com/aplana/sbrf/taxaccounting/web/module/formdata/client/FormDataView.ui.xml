@@ -11,8 +11,14 @@
         }
 
         .lockInformation {
-            font-weight: bold;
-            color: #ff4500;
+            height: 30px;
+            background: #FFDC82;
+            padding-left: 15px;
+            margin-bottom: 5px;
+            padding-top: 10px;
+            font-size: 16px;
+            font-family: Tahoma;
+            border: 1px solid #DBDBDB;
         }
 
         .headerRight {
@@ -150,15 +156,12 @@
             </g:HTMLPanel>
         </g:north>
 
-        <g:north size="30">
-            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
-        </g:north>
-
         <g:center>
             <g:ResizeLayoutPanel>
-                <g:SimplePanel styleName="{style.workArea}">
+                <g:FlowPanel styleName="{style.workArea}">
+                    <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
                     <style:GenericDataGrid height="100%" ui:field="formDataTable" />
-                </g:SimplePanel>
+                </g:FlowPanel>
             </g:ResizeLayoutPanel>
         </g:center>
 	</g:DockLayoutPanel>

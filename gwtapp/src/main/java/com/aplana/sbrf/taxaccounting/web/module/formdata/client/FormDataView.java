@@ -370,10 +370,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
-		dockPanel.setWidgetHidden(lockInformation, !isVisible);
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
-			lockInformation.setText("Данная налоговая форма в настоящий момент редактируется пользователем \"" + lockedBy
+			lockInformation.setText("Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy
 					+ "\" (с "+ lockDate + " )");
 		}
 	}
