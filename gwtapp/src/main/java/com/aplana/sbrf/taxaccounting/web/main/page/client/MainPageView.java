@@ -3,11 +3,13 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter.MyView;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -115,8 +117,6 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@Override
 	public void setLogAreaShow(boolean show) {
-		// TODO: Проблема: Сплиттер не пропадает. Это исправлено в GWT 2.5.1
-		// https://code.google.com/p/google-web-toolkit/issues/detail?id=7715
 		splitPanel.setWidgetHidden(logAreaPanel, !show);
 		
 		if (splitPanel.getWidgetSize(logAreaPanel) <= 0){
