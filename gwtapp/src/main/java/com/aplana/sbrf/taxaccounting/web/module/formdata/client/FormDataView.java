@@ -58,9 +58,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Anchor manualInputAnchor;
 	@UiField
-	Anchor cancelAnchor;
+	Button cancelButton;
 	@UiField
-	Anchor saveAnchor;
+	Button saveButton;
 
 	@UiField
 	LeftBar workflowButtons;
@@ -173,14 +173,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 
-	@UiHandler("cancelAnchor")
+	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onManualInputClicked(true);
 		}
 	}
 
-	@UiHandler("saveAnchor")
+	@UiHandler("saveButton")
 	void onSaveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onSaveClicked();
@@ -315,12 +315,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showSaveAnchor(boolean show) {
-		saveAnchor.setVisible(show);
+		saveButton.setVisible(show);
 	}
 
 	@Override
 	public void showCancelAnchor(boolean show) {
-		cancelAnchor.setVisible(show);
+		cancelButton.setVisible(show);
 	}
 
 	@Override
@@ -371,6 +371,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
 		dockPanel.setWidgetHidden(lockInformation, !isVisible);
+		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
 			lockInformation.setText("Данная налоговая форма в настоящий момент редактируется пользователем \"" + lockedBy
 					+ "\" (с "+ lockDate + " )");

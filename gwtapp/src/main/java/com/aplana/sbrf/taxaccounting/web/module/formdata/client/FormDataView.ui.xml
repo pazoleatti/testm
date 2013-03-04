@@ -38,6 +38,10 @@
             margin-top: 7px;
         }
 
+        .paddingTop7 {
+            padding-top: 7px;
+        }
+
         .marginLeft15 {
             margin-left: 15px;
         }
@@ -70,7 +74,7 @@
             border: 1px solid #969696;
             border-radius: 3px;
             padding: 5px;
-            margin-top: 3px;
+            margin-top: 5px;
         }
     </ui:style>
 
@@ -97,8 +101,6 @@
                             <style:LeftBar>
                                 <g:Button ui:field="checkButton">Проверить</g:Button>
                                 <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
-                                <g:Button visible="false">Вернуть контролеру текущего уровня</g:Button>
-                                <g:Button visible="false">Принять</g:Button>
                                 <g:Button ui:field="addRowButton">Добавить строку</g:Button>
                                 <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
                                 <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
@@ -109,8 +111,8 @@
                     </g:FlowPanel>
                 </div>
                 <div class="{style.headerRight}">
-                    <div class="{style.headerTopRight} {style.marginTop7}">
-                        <g:HorizontalPanel>
+                    <div class="{style.headerTopRight}">
+                        <g:HorizontalPanel addStyleNames="{style.paddingTop7}">
                             <g:Label width="100px" text="Подразделение:" styleName="{style.headerAttrName}"/>
                             <g:Label ui:field="departmentIdLabel" styleName="{style.headerAttr}"/>
                         </g:HorizontalPanel>
@@ -127,14 +129,22 @@
                             <g:Label ui:field="stateLabel" styleName="{style.headerAttr}"/>
                         </g:HorizontalPanel>
                     </div>
-                    <g:HorizontalPanel>
-                        <g:HorizontalPanel width="245px" ui:field="manualInputPanel">
-                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor"/>
-                            <style:ButtonLink ui:field="saveAnchor" text="Сохранить" />
-                            <style:ButtonLink ui:field="cancelAnchor" img="img/cancel.gif" text="Отмена" />
-                        </g:HorizontalPanel>
-                        <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
-                            text="Показывать контрольные поля"/>
+                    <g:HorizontalPanel height="30px">
+                        <g:FlowPanel width="245px" ui:field="manualInputPanel">
+                            <g:SimplePanel styleName="{style.paddingTop7}">
+                                <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
+                            </g:SimplePanel>
+                            <style:Bar>
+                                <style:LeftBar>
+                                    <style:Button ui:field="saveButton" text="Сохранить" />
+                                    <style:Button ui:field="cancelButton" text="Отмена" />
+                                </style:LeftBar>
+                            </style:Bar>
+                        </g:FlowPanel>
+                        <g:SimplePanel styleName="{style.paddingTop7}">
+                            <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
+                                text="Показывать контрольные поля"/>
+                        </g:SimplePanel>
                     </g:HorizontalPanel>
                 </div>
             </g:HTMLPanel>
@@ -145,9 +155,11 @@
         </g:north>
 
         <g:center>
-            <g:SimplePanel addStyleNames="{style.workArea}">
-                <style:GenericDataGrid height="100%" ui:field="formDataTable" />
-            </g:SimplePanel>
+            <g:ResizeLayoutPanel>
+                <g:SimplePanel styleName="{style.workArea}">
+                    <style:GenericDataGrid height="100%" ui:field="formDataTable" />
+                </g:SimplePanel>
+            </g:ResizeLayoutPanel>
         </g:center>
 	</g:DockLayoutPanel>
 

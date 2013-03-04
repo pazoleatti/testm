@@ -17,9 +17,7 @@ h3{
 	margin: 0 auto;
 	width: 1000px;*/
 }
-.buttonWithMargin {
-    margin: 4px !important;
-}
+
 .loadingStatusLabel {
     background-color: #FFF1A8;
     border-color: #FFF1A8 #FFF1A8;

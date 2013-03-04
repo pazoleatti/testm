@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.style;
 import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -16,9 +17,16 @@ public class LeftBar extends Composite implements HasWidgets{
 
 	interface Binder extends UiBinder<Widget, LeftBar> {
 	}
-	
+
+	interface ButtonStyle extends CssResource {
+		String buttonMarginLeft();
+	}
+
 	@UiField
 	Panel placeHolder;
+
+	@UiField
+	ButtonStyle style;
 
 	public LeftBar() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -26,7 +34,7 @@ public class LeftBar extends Composite implements HasWidgets{
 
 	@Override
 	public void add(Widget w) {
-		w.setStyleName("buttonWithMargin", true);
+		w.setStyleName(style.buttonMarginLeft(), true);
 		placeHolder.add(w);
 	}
 
