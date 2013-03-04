@@ -209,8 +209,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showSaveAnchor(true);
 		view.showManualInputPanel(true);
 		view.showRecalculateButton(true);
-		view.showAddRowButton(fixedRows);
-		view.showRemoveRowButton(fixedRows);
+		view.showAddRowButton(!fixedRows);
+		view.showRemoveRowButton(!fixedRows);
 
 		view.showPrintAnchor(false);
 		view.showManualInputAnchor(false);
