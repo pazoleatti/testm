@@ -151,7 +151,6 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
-	 * @param logger
 	 * @param result
 	 */
 	private void fillFormDataAccessParams(GetFormData action, int userId, GetFormDataResult result) {
@@ -195,7 +194,6 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
-	 * @param logger
 	 * @param result
 	 * @throws WrongInputDataServiceException
 	 */
