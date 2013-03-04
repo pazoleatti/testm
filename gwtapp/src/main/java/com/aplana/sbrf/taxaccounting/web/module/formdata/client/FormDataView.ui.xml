@@ -36,12 +36,17 @@
             font-family: Tahoma;
             font-size: 16px;
             float: left;
-            margin-top: 10px;
+            margin-top: 4px;
             text-align: left;
+            margin-left: 25px;
         }
 
         .marginTop7 {
             margin-top: 7px;
+        }
+
+        .paddingTop5 {
+            padding-top: 5px;
         }
 
         .paddingTop7 {
@@ -75,23 +80,14 @@
         .headerTopRight {
             height: 70px;
         }
-
-        .workArea {
-            border: 1px solid #969696;
-            border-radius: 3px;
-            padding: 5px;
-            margin-top: 5px;
-        }
     </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
         <g:north size="100">
             <g:HTMLPanel height="100px" width="100%">
                 <div class="{style.headerLeft}">
-                    <g:HorizontalPanel height="35px">
-                        <g:FlowPanel styleName="{style.marginTop7}">
-                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
-                        </g:FlowPanel>
+                    <g:HorizontalPanel height="35px" styleName="{style.paddingTop7}">
+                        <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
@@ -102,19 +98,17 @@
                              <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
                         </g:FlowPanel>
                     </g:HorizontalPanel>
-                    <g:FlowPanel height="30px">
-                        <style:Bar>
-                            <style:LeftBar>
-                                <g:Button ui:field="checkButton">Проверить</g:Button>
-                                <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
-                                <g:Button ui:field="addRowButton">Добавить строку</g:Button>
-                                <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
-                                <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
-                                <g:Button ui:field="deleteFormButton">Удалить</g:Button>
-                            </style:LeftBar>
-                            <style:LeftBar ui:field="workflowButtons" />
-                        </style:Bar>
-                    </g:FlowPanel>
+                    <style:Bar height="30px">
+                        <style:LeftBar>
+                            <g:Button ui:field="checkButton">Проверить</g:Button>
+                            <g:Button ui:field="recalculateButton">Рассчитать</g:Button>
+                            <g:Button ui:field="addRowButton">Добавить строку</g:Button>
+                            <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
+                            <g:Button ui:field="originalVersionButton">Исходная версия</g:Button>
+                            <g:Button ui:field="deleteFormButton">Удалить</g:Button>
+                        </style:LeftBar>
+                        <style:LeftBar ui:field="workflowButtons" />
+                    </style:Bar>
                 </div>
                 <div class="{style.headerRight}">
                     <div class="{style.headerTopRight}">
@@ -136,18 +130,18 @@
                         </g:HorizontalPanel>
                     </div>
                     <g:HorizontalPanel height="30px">
-                        <g:FlowPanel width="245px" ui:field="manualInputPanel">
-                            <g:SimplePanel styleName="{style.paddingTop7}">
+                        <g:HTMLPanel width="245px" ui:field="manualInputPanel">
+                            <div class="{style.paddingTop5}">
                                 <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
-                            </g:SimplePanel>
-                            <style:Bar>
-                                <style:LeftBar>
-                                    <style:Button ui:field="saveButton" text="Сохранить" />
-                                    <style:Button ui:field="cancelButton" text="Отмена" />
-                                </style:LeftBar>
-                            </style:Bar>
-                        </g:FlowPanel>
-                        <g:SimplePanel styleName="{style.paddingTop7}">
+                            </div>
+                        </g:HTMLPanel>
+                        <style:Bar width="245px" ui:field="saveCancelBar">
+                            <style:LeftBar>
+                                <style:Button ui:field="saveButton" text="Сохранить" />
+                                <style:Button ui:field="cancelButton" text="Отмена" />
+                            </style:LeftBar>
+                        </style:Bar>
+                        <g:SimplePanel styleName="{style.paddingTop5}">
                             <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
                                 text="Показывать контрольные поля"/>
                         </g:SimplePanel>
@@ -156,12 +150,13 @@
             </g:HTMLPanel>
         </g:north>
 
+        <g:north size="30">
+            <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
+        </g:north>
+
         <g:center>
             <g:ResizeLayoutPanel>
-                <g:FlowPanel styleName="{style.workArea}">
-                    <g:Label ui:field="lockInformation" visible="false" addStyleNames="{style.lockInformation}" />
-                    <style:GenericDataGrid height="100%" ui:field="formDataTable" />
-                </g:FlowPanel>
+                <style:GenericDataGrid height="100%" ui:field="formDataTable" />
             </g:ResizeLayoutPanel>
         </g:center>
 	</g:DockLayoutPanel>

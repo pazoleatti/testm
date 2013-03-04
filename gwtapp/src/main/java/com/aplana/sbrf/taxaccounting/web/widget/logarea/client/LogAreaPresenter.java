@@ -22,7 +22,7 @@ public class LogAreaPresenter extends
 	public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers>{
 		
 		void setLogEntries(List<LogEntry> entries);
-		void setLogSize(int full, int error, int warn, int info);
+		void setLogSize(int full, int error);
 
 	}
 	
@@ -61,7 +61,7 @@ public class LogAreaPresenter extends
 	
 	private void updateView(){
 		getView().setLogEntries(logEntries);
-		int error = 0, warn = 0, info = 0;
+		int error = 0, warn = 0;
 		for (LogEntry logEntry : logEntries) {
 			switch (logEntry.getLevel()) {
 			case ERROR:
@@ -70,11 +70,9 @@ public class LogAreaPresenter extends
 			case WARNING:
 				warn++;
 				break;
-			case INFO:
-				info++;
 			}
 		}
-		getView().setLogSize(logEntries.size(), error, warn, info);
+		getView().setLogSize(error + warn, error);
 	}
 
 	@Override

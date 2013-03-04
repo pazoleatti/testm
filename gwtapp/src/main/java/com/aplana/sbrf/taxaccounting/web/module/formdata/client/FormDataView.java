@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,6 +65,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	LeftBar workflowButtons;
+	@UiField
+	Bar saveCancelBar;
 
 	@UiField
 	Panel manualInputPanel;
@@ -314,18 +317,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void showSaveAnchor(boolean show) {
-		saveButton.setVisible(show);
-	}
-
-	@Override
-	public void showCancelAnchor(boolean show) {
-		cancelButton.setVisible(show);
-	}
-
-	@Override
-	public void showManualInputPanel(boolean show) {
-		manualInputPanel.setVisible(show);
+	public void showSaveCancelBar(boolean show) {
+		saveCancelBar.setVisible(show);
 	}
 
 	@Override
@@ -360,7 +353,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showManualInputAnchor(boolean show) {
-		manualInputAnchor.setVisible(show);
+		manualInputPanel.setVisible(show);
 	}
 
 	@Override
@@ -370,6 +363,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
+		dockPanel.setWidgetHidden(lockInformation, !isVisible);
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
 			lockInformation.setText("Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy

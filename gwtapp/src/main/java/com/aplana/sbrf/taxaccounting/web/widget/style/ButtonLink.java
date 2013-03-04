@@ -9,10 +9,10 @@ public class ButtonLink extends Anchor{
 
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
 		@Template("<div style=\"text-decoration: underline; font-family: Tahoma;"+
-				"color: #004276; font-size: 12px; margin-left: 25px;\">{0}</div>")
+				"color: #004276; font-size: 12px; margin-left: 20px;\">{0}</div>")
 		SafeHtml text(String text);
 
-		@Template("<img style=\"position:absolute; float:left; border: none;\" src=\"{0}\">")
+		@Template("<img style=\"position:absolute; border: none;\" src=\"{0}\">")
 		SafeHtml img(String url);
 	}
 
@@ -30,6 +30,6 @@ public class ButtonLink extends Anchor{
 	}
 
 	public void setImg(String url) {
-		setHTML(templates.img(url).asString() + templates.text(text).asString());
+		setHTML(templates.img(url).asString() + (!text.isEmpty() ? templates.text(text).asString() : ""));
 	}
 }

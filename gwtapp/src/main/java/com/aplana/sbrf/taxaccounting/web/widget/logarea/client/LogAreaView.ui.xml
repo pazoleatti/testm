@@ -3,19 +3,46 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
+    <ui:style>
+        .header {
+            background: #949494;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 110px;
+        }
+
+        .title {
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            font-family: Tahoma;
+        }
+
+        .floatRight {
+            float: right;
+        }
+
+        .floatLeft {
+            float: left;
+        }
+    </ui:style>
+
 	<g:DockLayoutPanel unit="PX" height="100%" width="100%">
 
-		<g:north size="32">
-			<style:Bar>
-				<style:LeftBar>
-					<g:HTML ui:field="title" />
-				</style:LeftBar>
-				<style:RightBar>
-					<g:Button text="Печать" width="100px" ui:field="printButton" />
-					<g:Button text="Очистить" width="100px" ui:field="cleanButton" />
-					<g:Button text="Скрыть" width="100px" ui:field="hideButton" />
-				</style:RightBar>
-			</style:Bar>
+		<g:north size="25">
+			<g:HorizontalPanel height="100%" width="100%" addStyleNames="{style.header}">
+                <g:cell width="100%">
+				    <g:HTML ui:field="title" addStyleNames="{style.title}"/>
+                </g:cell>
+                <g:HTMLPanel width="110px" addStyleNames="{style.floatRight}">
+                    <div class="{style.floatLeft}">
+                        <style:ButtonLink text="Печать" img="img/print.png" ui:field="printButton"/>
+                    </div>
+                    <div class="{style.floatRight}" style="margin-right: 20px;">
+                        <style:ButtonLink img="img/light_close.gif" ui:field="hideButton"/>
+                    </div>
+                </g:HTMLPanel>
+			</g:HorizontalPanel>
 		</g:north>
 		<g:center>
 			<g:ScrollPanel width="100%" ui:field="logPanel" height="100%">

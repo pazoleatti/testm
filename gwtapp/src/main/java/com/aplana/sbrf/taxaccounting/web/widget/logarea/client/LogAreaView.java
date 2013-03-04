@@ -20,8 +20,8 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 		LogAreaPresenter.MyView {
 	
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<span>Список сообщений (всего: {0}, фатальных: {1}, предупреждений: {2}, информационных: {3})</span>")
-		SafeHtml title(int full, int error, int warn, int info);
+		@SafeHtmlTemplates.Template("<span>Список ошибок (всего: {0}; фатальных: {1})</span>")
+		SafeHtml title(int full, int error);
 	} 
 	
 	private static Templates templates = GWT.create(Templates.class);
@@ -53,22 +53,18 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 	}
 
 	@Override
-	public void setLogSize(int full, int error, int warn, int info) {
-		title.setHTML(templates.title(full, error, warn, info));
+	public void setLogSize(int full, int error) {
+		title.setHTML(templates.title(full, error));
 	}	
 	
 	@UiHandler("printButton")
 	void print(ClickEvent event){
 		getUiHandlers().print();
 	}
-	
-	@UiHandler("cleanButton")
-	void clean(ClickEvent event){
-		getUiHandlers().clean();
-	}
-	
+
 	@UiHandler("hideButton")
 	void hide(ClickEvent event){
+		getUiHandlers().clean();
 		getUiHandlers().hide();
 	}
 

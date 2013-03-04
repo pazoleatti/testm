@@ -54,7 +54,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showOriginalVersionButton(boolean show);
 
-		void showSaveAnchor(boolean show);
+		void showSaveCancelBar(boolean show);
 
 		void showRecalculateButton(boolean show);
 
@@ -67,10 +67,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void showPrintAnchor(boolean show);
 
 		void showManualInputAnchor(boolean show);
-
-		void showCancelAnchor(boolean show);
-
-		void showManualInputPanel(boolean show);
 
 		void showDeleteFormButton(boolean show);
 
@@ -156,15 +152,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveAnchor(false);
-		view.showCancelAnchor(false);
+		view.showSaveCancelBar(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showManualInputAnchor(false);
-		view.showManualInputPanel(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(true, lockDate, lockedBy);
 		
@@ -177,15 +171,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		readOnlyMode = true;
 		
 		MyView view = getView();
-		view.showSaveAnchor(false);
-		view.showCancelAnchor(false);
+		view.showSaveCancelBar(false);
 		view.showRemoveRowButton(false);
 		view.showRecalculateButton(false);
 		view.showAddRowButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showManualInputAnchor(formDataAccessParams.isCanEdit());
-		view.showManualInputPanel(formDataAccessParams.isCanEdit());
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
 		view.setLockInformation(false, null, null);
 		
@@ -205,9 +197,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 			view.showOriginalVersionButton(false);
 		}
 
-		view.showCancelAnchor(true);
-		view.showSaveAnchor(true);
-		view.showManualInputPanel(true);
+		view.showSaveCancelBar(true);
 		view.showRecalculateButton(true);
 		view.showAddRowButton(!fixedRows);
 		view.showRemoveRowButton(!fixedRows);
