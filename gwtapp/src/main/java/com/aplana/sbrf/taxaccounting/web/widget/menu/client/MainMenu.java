@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -18,11 +19,16 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
 	interface Binder extends UiBinder<Widget, MainMenu> {
 	}
+	interface MainMenuStyle extends CssResource {
+		String grayMenuItem();
+	}
 
 	private Widget widget;
 
 	@UiField
 	Panel panel;
+
+	@UiField MainMenuStyle style;
 
 	@Inject
 	public MainMenu(final Binder binder) {
@@ -53,7 +59,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 							+ subMenu.getName() + "</div></a>");
 					com.google.gwt.user.client.ui.MenuItem subMenuItem =
 							new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml());
-					subMenuItem.getElement().addClassName("gray-MenuItem");
+					subMenuItem.getElement().addClassName(style.grayMenuItem());
 					subMenuBar.addItem(subMenuItem);
 				}
 				menu.addItem(menuItem.getName() + " " + getArrowSymbol(), subMenuBar);

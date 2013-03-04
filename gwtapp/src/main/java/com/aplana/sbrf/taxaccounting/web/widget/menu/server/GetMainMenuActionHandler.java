@@ -55,7 +55,10 @@ public class GetMainMenuActionHandler extends
 				}
 			}
 
-			menuItems.add(new MenuItem("Настройки", "Empty"));
+			MenuItem settingMenuItem = new MenuItem("Настройки", "Настройки");
+			settingMenuItem.getSubMenu().add(new MenuItem("Настройки", "Empty"));
+			menuItems.add(settingMenuItem);
+
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
 	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
