@@ -18,14 +18,14 @@ public class LogAreaPresenter extends
 		PresenterWidget<LogAreaPresenter.MyView> implements
 		LogAddEvent.MyHandler, LogCleanEvent.MyHandler, LogAreaUiHandlers {
 
-	
+
 	public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers>{
-		
+
 		void setLogEntries(List<LogEntry> entries);
-		void setLogSize(int full, int error);
+		void setLogSize(int full, int error, int warn, int info);
 
 	}
-	
+
 	private List<LogEntry> logEntries = new ArrayList<LogEntry>();
 
 	@Inject
@@ -33,21 +33,21 @@ public class LogAreaPresenter extends
 		super(eventBus, view);
 		getView().setUiHandlers(this);
 	}
-	
+
 	@Override
 	protected void onBind() {
 		super.onBind();
 		addRegisteredHandler(LogAddEvent.getType(), this);
 		addRegisteredHandler(LogCleanEvent.getType(), this);
 	}
-	
+
 	@Override
 	public void onLogAdd(LogAddEvent event) {
 		if (event.getLogEntries()!=null){
 			logEntries.addAll(event.getLogEntries());
 		}
 		updateView();
-		
+
 		if (!logEntries.isEmpty()){
 			LogShowEvent.fire(this, true);
 		}
@@ -58,10 +58,10 @@ public class LogAreaPresenter extends
 		logEntries.clear();
 		updateView();
 	}
-	
+
 	private void updateView(){
 		getView().setLogEntries(logEntries);
-		int error = 0, warn = 0;
+		int error = 0, warn = 0, info = 0;
 		for (LogEntry logEntry : logEntries) {
 			switch (logEntry.getLevel()) {
 			case ERROR:
@@ -70,14 +70,16 @@ public class LogAreaPresenter extends
 			case WARNING:
 				warn++;
 				break;
+			case INFO:
+				info++;
 			}
 		}
-		getView().setLogSize(error + warn, error);
+		getView().setLogSize(logEntries.size(), error, warn, info);
 	}
 
 	@Override
 	public void print() {
-		Window.alert("Не реализовано");	
+		Window.alert("Не реализовано");
 		// TODO: SBRFACCTAX-1414
 	}
 

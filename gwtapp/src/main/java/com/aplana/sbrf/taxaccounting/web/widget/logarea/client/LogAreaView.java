@@ -53,7 +53,7 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 	}
 
 	@Override
-	public void setLogSize(int full, int error) {
+	public void setLogSize(int full, int error, int warn, int info) {
 		title.setHTML(templates.title(full, error));
 	}	
 	
