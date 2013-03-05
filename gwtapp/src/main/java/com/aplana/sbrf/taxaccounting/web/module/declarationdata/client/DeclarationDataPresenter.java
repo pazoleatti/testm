@@ -152,7 +152,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	@Override
-	public void downloadAsLegislator() {
+	public void downloadXml() {
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
 	}
 

@@ -7,6 +7,6 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void setAccepted(boolean accepted);
 	void delete();
 	void downloadExcel();
-	void downloadAsLegislator();
+	void downloadXml();
 	void loadPdfFile();
 }

@@ -7,6 +7,7 @@
         font-size: 16px;
         float: left;
         margin-top: 10px;
+        margin-left: 25px;
         text-align: left;
     }
 
@@ -19,7 +20,7 @@
         float: right;
         top: 0;
         width: 790px;
-        margin-top: 7px;
+        padding-top: 7px;
     }
 
     .headerAttr {
@@ -36,12 +37,8 @@
         font-family: Tahoma;
     }
 
-    .marginTop7 {
-        margin-top: 7px;
-    }
-
-    .marginTop4 {
-        margin-top: 4px;
+    .paddingTop7 {
+        padding-top: 7px;
     }
 
     .marginLeft15 {
@@ -54,21 +51,27 @@
             <g:HTMLPanel height="100" width="100%">
                 <div class="{style.headerLeft}">
                     <g:HorizontalPanel height="35px">
-                        <g:HTMLPanel addStyleNames="{style.marginTop7}">
+                        <g:SimplePanel addStyleNames="{style.paddingTop7}">
                             <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
-                        </g:HTMLPanel>
+                        </g:SimplePanel>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
-                    <g:FlowPanel height="35px">
-                        <g:Button text="Скачать в виде Excel" ui:field="downloadExcelButton" addStyleNames="{style.marginTop7}"/>
-                        <g:Button text="Скачать в формате законодателя" ui:field="downloadAsLegislatorButton"/>
-                    </g:FlowPanel>
-                    <g:FlowPanel height="30px">
-                        <g:Button text="Обновить" ui:field="refreshButton" addStyleNames="{style.marginTop4}"/>
-                        <g:Button text="Удалить" ui:field="deleteButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
-                        <g:Button text="Принять" ui:field="acceptButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
-                        <g:Button text="Отменить принятие" ui:field="cancelButton" addStyleNames="{style.marginTop4} {style.marginLeft15}"/>
-                    </g:FlowPanel>
+                    <g:HorizontalPanel height="35px">
+                        <g:SimplePanel styleName="{style.paddingTop7}">
+                            <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton"/>
+                        </g:SimplePanel>
+                        <g:SimplePanel styleName="{style.marginLeft15} {style.paddingTop7}">
+                            <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton"/>
+                        </g:SimplePanel>
+                    </g:HorizontalPanel>
+                    <style:Bar height="30px">
+                        <style:LeftBar>
+                            <g:Button text="Обновить" ui:field="refreshButton" />
+                            <g:Button text="Удалить" ui:field="deleteButton" />
+                            <g:Button text="Принять" ui:field="acceptButton" />
+                            <g:Button text="Отменить принятие" ui:field="cancelButton" />
+                        </style:LeftBar>
+                    </style:Bar>
                 </div>
                 <div class="{style.headerRight}">
                     <g:HorizontalPanel>

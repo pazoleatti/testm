@@ -26,10 +26,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button cancelButton;
 
 	@UiField
-	Button downloadExcelButton;
+	Anchor downloadExcelButton;
 
 	@UiField
-	Button downloadAsLegislatorButton;
+	Anchor downloadXmlButton;
 
 	@UiField
 	Button deleteButton;
@@ -86,7 +86,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setCannotDownloadXml() {
-		downloadAsLegislatorButton.setVisible(false);
+		downloadXmlButton.setVisible(false);
 	}
 
 	@Override
@@ -161,9 +161,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		getUiHandlers().downloadExcel();
 	}
 
-	@UiHandler("downloadAsLegislatorButton")
+	@UiHandler("downloadXmlButton")
 	public void onDownloadAsLegislatorButton(ClickEvent event){
-		getUiHandlers().downloadAsLegislator();
+		getUiHandlers().downloadXml();
 	}
 
 }

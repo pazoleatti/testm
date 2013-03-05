@@ -91,12 +91,12 @@
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
-                        <g:FlowPanel styleName="{style.marginTop7}">
+                        <g:SimplePanel styleName="{style.marginTop7}">
                             <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"/>
-                        </g:FlowPanel>
-                        <g:FlowPanel styleName="{style.marginLeft15} {style.marginTop7}">
+                        </g:SimplePanel>
+                        <g:SimplePanel styleName="{style.marginLeft15} {style.marginTop7}">
                              <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
-                        </g:FlowPanel>
+                        </g:SimplePanel>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
                         <style:LeftBar>
