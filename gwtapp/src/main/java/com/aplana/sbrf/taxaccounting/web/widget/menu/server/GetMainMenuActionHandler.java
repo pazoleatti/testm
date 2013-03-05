@@ -55,14 +55,16 @@ public class GetMainMenuActionHandler extends
 				}
 			}
 
-			MenuItem settingMenuItem = new MenuItem("Настройки", "Настройки");
+			MenuItem settingMenuItem = new MenuItem("Настройки", "");
 			settingMenuItem.getSubMenu().add(new MenuItem("Настройки", "Empty"));
 			menuItems.add(settingMenuItem);
 
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
-	        menuItems.add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
-			menuItems.add(new MenuItem("Шаблоны деклараций", DeclarationTemplateTokens.declarationTemplateList));
+			MenuItem settingMenuItem = new MenuItem("Настройки", "");
+			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
+			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", DeclarationTemplateTokens.declarationTemplateList));
+			menuItems.add(settingMenuItem);
 		}
 
 		GetMainMenuResult result = new GetMainMenuResult();

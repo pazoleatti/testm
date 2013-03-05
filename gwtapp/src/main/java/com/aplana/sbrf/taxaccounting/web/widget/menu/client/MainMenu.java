@@ -52,9 +52,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 				for (MenuItem subMenu : menuItem.getSubMenu()) {
 					SafeHtmlBuilder sb = new SafeHtmlBuilder();
 					sb.appendHtmlConstant("<a href=\"#"
-							+ subMenu.getLink() + ";"
-							+ "nType="
-							+ menuItem.getLink()
+							+ subMenu.getLink()
+							+ (menuItem.getLink().isEmpty() ? "" :";nType=" + menuItem.getLink())
 							+ "\" style=\"color:#000000; font-family: Tahoma; text-decoration:none;\"><div>"
 							+ subMenu.getName() + "</div></a>");
 					com.google.gwt.user.client.ui.MenuItem subMenuItem =
