@@ -45,7 +45,7 @@
 		}
 
 		.footerLeft {
-			background: url("img/footer_left_corner.gif") no-repeat;
+			background: url("img/footer_left_corner.png") no-repeat;
 			height: 32px;
 			float: left;
 			width: 32px;
@@ -53,7 +53,7 @@
 		}
 
 		.footerRight {
-			background: url("img/footer_right_corner.gif") no-repeat;
+			background: url("img/footer_right_corner.png") no-repeat;
 			height: 32px;
 			float: right;
 			width: 32px;
