@@ -17,7 +17,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetProjectVersionHandler extends
 		AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
 
-	private static final String RESOURCE_FOR_GETTING_VERSION = "META-INF/maven/com.aplana.taxaccounting/gwtapp/pom.properties";
+	private static final String RESOURCE_FOR_GETTING_VERSION = "version-info.txt";
 
 	private Log log = LogFactory.getLog(getClass());
 
@@ -31,22 +31,21 @@ public class GetProjectVersionHandler extends
 
 		
 		String version = "unknown";
+		String revision = "unknown";
 		try {
 			InputStream inputStream = this.getClass().getClassLoader()
 					.getResourceAsStream(RESOURCE_FOR_GETTING_VERSION);
 			Properties prop = new Properties();
 			prop.load(inputStream);
 			version = prop.getProperty("version", "unknown");
-		} catch (NullPointerException e) {
-			log.error("Resource is absent: "
-					+ RESOURCE_FOR_GETTING_VERSION);
+			revision = prop.getProperty("revision","unknown");
 		} catch (Exception e) {
 			log.error("A error occurred during getting version from resource: "
 					+ RESOURCE_FOR_GETTING_VERSION, e);
 		}
 		
 		GetProjectVersionResult result = new GetProjectVersionResult();
-		result.setProjectVersion(version);
+		result.setProjectVersion(version + ", Ревизия: " + revision);
 		return result;
 
 	}
