@@ -50,4 +50,10 @@ public class DictionaryRegionServiceTest {
         assertFalse(service.isValidCode(98313));
         assertTrue(service.isValidCode(72));
     }
+
+    @Test
+    public void testGetRegionByName () {
+        assertNull(service.getRegionByName(null));
+        assertEquals(regionHant, service.getRegionByName(regionHant.getName()));
+    }
 }

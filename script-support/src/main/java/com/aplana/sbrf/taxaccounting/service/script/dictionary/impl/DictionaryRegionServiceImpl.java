@@ -43,4 +43,16 @@ public class DictionaryRegionServiceImpl implements DictionaryRegionService {
         }
         return result;
     }
+
+    @Override
+    public DictionaryRegion getRegionByName(String name) {
+        List<DictionaryRegion> regions = dictionaryRegionDao.getListRegions();
+        DictionaryRegion result = null;
+        for (DictionaryRegion region : regions) {
+            if (region.getName() != null && region.getName().equals(name)) {
+                result = region;
+            }
+        }
+        return result;
+    }
 }

@@ -19,4 +19,11 @@ public interface DictionaryRegionService {
      * @return
      */
     public DictionaryRegion getRegionByOkatoOrg(String okato);
+
+    /**
+     *
+     * @param name
+     * @return
+     */
+    public DictionaryRegion getRegionByName(String name);
 }
