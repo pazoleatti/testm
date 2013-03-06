@@ -36,7 +36,7 @@
             font-family: Tahoma;
             font-size: 16px;
             float: left;
-            margin-top: 4px;
+            margin-top: 3px;
             text-align: left;
             margin-left: 25px;
         }
@@ -86,7 +86,7 @@
         <g:north size="100">
             <g:HTMLPanel height="100px" width="100%">
                 <div class="{style.headerLeft}">
-                    <g:HorizontalPanel height="35px" styleName="{style.paddingTop7}">
+                    <g:HorizontalPanel height="35px">
                         <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
@@ -112,7 +112,7 @@
                 </div>
                 <div class="{style.headerRight}">
                     <div class="{style.headerTopRight}">
-                        <g:HorizontalPanel addStyleNames="{style.paddingTop7}">
+                        <g:HorizontalPanel>
                             <g:Label width="100px" text="Подразделение:" styleName="{style.headerAttrName}"/>
                             <g:Label ui:field="departmentIdLabel" styleName="{style.headerAttr}"/>
                         </g:HorizontalPanel>

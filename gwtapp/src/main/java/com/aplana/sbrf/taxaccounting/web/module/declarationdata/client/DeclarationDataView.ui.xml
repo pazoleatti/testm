@@ -6,7 +6,7 @@
         font-family: Tahoma;
         font-size: 16px;
         float: left;
-        margin-top: 10px;
+        margin-top: 3px;
         margin-left: 25px;
         text-align: left;
     }
@@ -20,7 +20,6 @@
         float: right;
         top: 0;
         width: 790px;
-        padding-top: 7px;
     }
 
     .headerAttr {
@@ -51,9 +50,7 @@
             <g:HTMLPanel height="100" width="100%">
                 <div class="{style.headerLeft}">
                     <g:HorizontalPanel height="35px">
-                        <g:SimplePanel addStyleNames="{style.paddingTop7}">
-                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
-                        </g:SimplePanel>
+                        <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
                         <g:Label ui:field="title" styleName="{style.titleLabel}"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
