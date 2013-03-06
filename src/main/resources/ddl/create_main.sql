@@ -325,17 +325,27 @@ comment on column form_script.per_row is 'Признак строкового с
 create table department
 (
 id number(9) not null,
-name varchar2(200) not null,
+name varchar2(260) not null,
 parent_id number(9) null,
-type number(9) not null
+type number(9) not null,
+shortname      varchar2(255),
+dict_region_id number(2),
+tb_index       varchar2(3),
+sbrf_code      varchar2(255)
 );
 alter table department add constraint department_pk primary key (id);
+alter table department add constraint department_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
+alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
 comment on column department.name is 'Наименование подразделения';
 comment on column department.parent_id is 'Идентификатор родительского подразделения';
 comment on column department.type is 'Тип подразделения';
+comment on column department.shortname is 'Сокращенное наименование подразделения';
+comment on column department.dict_region_id is 'Код субъекта РФ';
+comment on column department.tb_index is 'Индекс территориального банка';
+comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
 
 alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
