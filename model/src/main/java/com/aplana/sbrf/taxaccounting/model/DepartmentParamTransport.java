@@ -10,6 +10,9 @@ public class DepartmentParamTransport {
 	private String approveDocName;
 	private String approveOrgName;
 	private String taxPlaceTypeCode;
+	private String appVersion;
+	private String formatVersion;
+	
 	public int getDepartmentId() {
 		return departmentId;
 	}
@@ -57,6 +60,18 @@ public class DepartmentParamTransport {
 	}
 	public void setTaxPlaceTypeCode(String taxPlaceTypeCode) {
 		this.taxPlaceTypeCode = taxPlaceTypeCode;
+	}
+	public String getAppVersion() {
+		return appVersion;
+	}
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
+	}
+	public String getFormatVersion() {
+		return formatVersion;
+	}
+	public void setFormatVersion(String formatVersion) {
+		this.formatVersion = formatVersion;
 	}
 
 }

@@ -20,6 +20,8 @@ public class DepartmentParamIncome implements Serializable {
 	private Long externalTaxSum;
 	private Long sumDifference;
 	private Long correctionSum;
+	private String appVersion;
+	private String formatVersion;
 
 	public DepartmentParamIncome() {
 	}
@@ -118,5 +120,21 @@ public class DepartmentParamIncome implements Serializable {
 
 	public void setCorrectionSum(Long correctionSum) {
 		this.correctionSum = correctionSum;
+	}
+	
+	public String getAppVersion() {
+		return appVersion;
+	}
+	
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
+	}
+	
+	public String getFormatVersion() {
+		return formatVersion;
+	}
+	
+	public void setFormatVersion(String formatVersion) {
+		this.formatVersion = formatVersion;
 	}
 }

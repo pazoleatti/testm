@@ -82,6 +82,8 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 							departmentParamIncome.setTaxPlaceTypeCode(rs.getString("TAX_PLACE_TYPE_CODE"));
 							departmentParamIncome.setTaxRate(Long.valueOf(rs.getLong("TAX_RATE")));
 							departmentParamIncome.setSumDifference(Long.valueOf(rs.getLong("SUM_DIFFERENCE")));
+							departmentParamIncome.setAppVersion(rs.getString("APP_VERSION"));
+							departmentParamIncome.setFormatVersion(rs.getString("FORMAT_VERSION"));
 							return departmentParamIncome;
 						}
 					}
@@ -112,7 +114,8 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 							departmentParamTransport.setSignatoryLasttname(rs.getString("SIGNATORY_LASTNAME"));
 							departmentParamTransport.setSignatorySurname(rs.getString("SIGNATORY_SURNAME"));
 							departmentParamTransport.setTaxPlaceTypeCode(rs.getString("TAX_PLACE_TYPE_CODE"));
-							
+							departmentParamTransport.setAppVersion(rs.getString("APP_VERSION"));
+							departmentParamTransport.setFormatVersion(rs.getString("FORMAT_VERSION"));
 							return departmentParamTransport;
 						}
 						
