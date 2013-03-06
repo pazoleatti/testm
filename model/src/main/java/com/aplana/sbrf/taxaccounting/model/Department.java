@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 /**
  * Подразделение банка
@@ -22,8 +22,12 @@ public class Department implements Serializable {
 
 	private int id;
 	private String name;
+	private String shortName;
 	private Integer parentId;
 	private DepartmentType type;
+	private Integer dictRegionId;
+	private String tbIndex;
+	private String SBRFCode;
 	private List<DepartmentFormType> departmentFormTypes;
 	private List<DepartmentDeclarationType> departmentDeclarationTypes;
 
@@ -138,4 +142,59 @@ public class Department implements Serializable {
 		this.departmentDeclarationTypes = departmentDeclarationTypes;
 	}
 
+	/**
+	 *  Получить код субъекта РФ
+	 */
+	public Integer getDictRegionId() {
+		return dictRegionId;
+	}
+
+	/**
+	 *  Установить код субъекта РФ
+	 */
+	public void setDictRegionId(Integer dictRegionId) {
+		this.dictRegionId = dictRegionId;
+	}
+
+	/**
+	 * Получить сокращенное наименование подразделения
+	 */
+	public String getShortName() {
+		return shortName;
+	}
+
+	/**
+	 * Установить сокращенное наименование подразделения
+	 */
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	/**
+	 * Получить индекс территориального банка
+	 */
+	public String getTbIndex() {
+		return tbIndex;
+	}
+
+	/**
+	 * Установить индекс территориального банка
+	 */
+	public void setTbIndex(String tbIndex) {
+		this.tbIndex = tbIndex;
+	}
+
+	/**
+	 * Получить код подразделения в нотации Сбербанка
+	 */
+	public String getSBRFCode() {
+		return SBRFCode;
+	}
+
+	/**
+	 * Установить код подразделения в нотации Сбербанка
+	 */
+	public void setSBRFCode(String SBRFCode) {
+		this.SBRFCode = SBRFCode;
+	}
 }
