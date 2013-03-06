@@ -1,26 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.mapper.*;
+import com.aplana.sbrf.taxaccounting.exception.*;
+import com.aplana.sbrf.taxaccounting.model.*;
+import org.apache.commons.logging.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.cache.annotation.*;
+import org.springframework.dao.*;
+import org.springframework.jdbc.core.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.mapper.DepartmentMapper;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Department;
+import java.sql.*;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -93,6 +86,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 				department.setParentId(parent_id);
 			}
 			department.setType(DepartmentType.fromCode(rs.getInt("type")));
+			department.setDictRegionId(rs.getInt("dict_region_id"));
+			department.setShortName(rs.getString("shortname"));
+			department.setTbIndex(rs.getString("tb_index"));
+			department.setSBRFCode(rs.getString("sbrf_code"));
 			return department;
 		}
 
