@@ -3,12 +3,14 @@ package com.aplana.sbrf.taxaccounting.service.script.dictionary.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.script.dictionary.DictionaryTaxBenefitParamDao;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxBenefitParam;
-import com.aplana.sbrf.taxaccounting.service.script.dictionary.DictionaryTaxPrivilegeParamService;
+import com.aplana.sbrf.taxaccounting.service.script.dictionary.DictionaryTaxBenefitParamService;
 
-public class DictionaryTaxPrivilegeParamServiceImpl implements DictionaryTaxPrivilegeParamService {
+@Service("dictionaryTaxBenefitParamService")
+public class DictionaryTaxBenefitParamServiceImpl implements DictionaryTaxBenefitParamService {
 	
 	@Autowired
 	DictionaryTaxBenefitParamDao dictionaryTaxBenefitParamDao;
@@ -24,5 +26,4 @@ public class DictionaryTaxPrivilegeParamServiceImpl implements DictionaryTaxPriv
 		}
 		return null;
 	}
-
 }

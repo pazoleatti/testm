@@ -13,12 +13,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.script.dictionary.DictionaryTaxBenefitParamDao;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxBenefitParam;
-import com.aplana.sbrf.taxaccounting.service.script.dictionary.DictionaryTaxPrivilegeParamService;
-import com.aplana.sbrf.taxaccounting.service.script.dictionary.impl.DictionaryTaxPrivilegeParamServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.script.dictionary.DictionaryTaxBenefitParamService;
+import com.aplana.sbrf.taxaccounting.service.script.dictionary.impl.DictionaryTaxBenefitParamServiceImpl;
 
-public class DictionaryTaxPrivilegeParamServiceTest {
+public class DictionaryTaxBenefitParamServiceTest {
 	
-	private static DictionaryTaxPrivilegeParamService service = new DictionaryTaxPrivilegeParamServiceImpl();
+	private static DictionaryTaxBenefitParamService service = new DictionaryTaxBenefitParamServiceImpl();
 	private static DictionaryTaxBenefitParam benefitParam1 = new DictionaryTaxBenefitParam(2, "20200", null, null, null, 0d, 0d);
     private static DictionaryTaxBenefitParam benefitParam2 = new DictionaryTaxBenefitParam(2, "20210", null, null, null, 0d, 0d);
     
