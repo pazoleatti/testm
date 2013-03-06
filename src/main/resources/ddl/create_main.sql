@@ -768,7 +768,9 @@ create table department_param_income
   tax_rate            number(4,2),
   external_tax_sum    number(15),
   sum_difference      number(15),
-  correction_sum      number(15)
+  correction_sum      number(15),
+  app_version         varchar2(40),
+  format_version      varchar2(5)
 );
 alter table department_param_income add constraint department_param_income_pk primary key (department_id);
 alter table department_param_income add constraint dept_param_income_chk_taxplace check (tax_place_type_code in ('213','214','215','216','218','220','223','225','226','231'));
@@ -787,6 +789,8 @@ comment on column department_param_income.tax_rate is 'Ставка налога
 comment on column department_param_income.external_tax_sum is 'Сумма налога, выплаченная за пределами Российской Федерации и засчитываемая в уплату налога согласно порядку, установленному ст. 311 НК ';
 comment on column department_param_income.sum_difference is 'Суммы отклонения от максимальной (расчетной) цены ';
 comment on column department_param_income.correction_sum is 'Внереализационные доходы в виде сумм корректировки прибыли вследствие применения методов определения для целей налогообложения соответствия цен, примененных в сделках, рыночным ценам (рентабельности), предусмотренным статьями 105.12 и 105.13 НК ';
+comment on column department_param_income.app_version is 'Версия программы, с помощью которой сформирован файл';
+comment on column department_param_income.format_version is 'Версия формата';
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 create table department_param_transport 
 ( department_id       number(9) not null,
@@ -796,7 +800,9 @@ create table department_param_transport
   signatory_lastname  varchar2(120), 
   approve_doc_name    varchar2(240), 
   approve_org_name    varchar2(240), 
-  tax_place_type_code varchar2(3) not null
+  tax_place_type_code varchar2(3) not null,
+  app_version         varchar2(40),
+  format_version      varchar2(5)
 );
 alter table department_param_transport add constraint department_param_transport_pk primary key (department_id);
 alter table department_param_transport add constraint dept_param_transport_fk_deptid foreign key (department_id) references department(id);
@@ -810,6 +816,8 @@ comment on column department_param_transport.signatory_lastname is 'Отчест
 comment on column department_param_transport.approve_doc_name is 'Наименование документа, подтверждающего полномочия представителя';
 comment on column department_param_transport.approve_org_name is 'Наименование организации-представителя налогоплательщика';
 comment on column department_param_transport.tax_place_type_code is 'Код места, по которому представляется документ';
+comment on column department_param_transport.app_version is 'Версия программы, с помощью которой сформирован файл';
+comment on column department_param_transport.format_version is 'Версия формата';
 ----------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
