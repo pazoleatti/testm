@@ -1,0 +1,26 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+
+<g:DockLayoutPanel unit='PX' height="100%" width="100%" ui:field="dockPanel">
+    <g:north size="30">
+        <t:LeftBar>
+            <g:Button text="Сохранить" ui:field="saveButton"/>
+            <g:Button text="Сбросить" ui:field="resetButton"/>
+            <g:Button text="Отмена" ui:field="cancelButton"/>
+        </t:LeftBar>
+    </g:north>
+
+    <g:north size="80">
+        <g:ScrollPanel width="100%" ui:field="logPanel">
+            <c:CellList ui:field="loggerList" />
+        </g:ScrollPanel>
+    </g:north>
+
+    <g:center>
+        <npui:SimpleTabPanel ui:field="tabPanel"/>
+    </g:center>
+</g:DockLayoutPanel>
+</ui:UiBinder>
