@@ -47,4 +47,16 @@ public interface DepartmentDao {
      * @return
      */
     List<Department> getIsolatedDepartments();
+    
+    /**
+     * Получение обособленного подразделения по значению 
+     * «Код подразделения в нотации Сбербанка» 
+     */
+    Department getDepartmentBySbrfCode(String sbrfCode);
+    
+    /**
+     * Получение обособленного подразделения по значению 
+     * ««Наименование подразделения»» 
+     */
+    Department getDepartmentByName(String name);
 }

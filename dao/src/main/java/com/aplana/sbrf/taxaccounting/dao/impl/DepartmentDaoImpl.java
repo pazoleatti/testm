@@ -72,6 +72,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	public List<Department> getIsolatedDepartments() {
 		return departmentMapper.getIsolatedDepartments();
 	}
+	
+	
 
 	protected class DepartmentJdbcMapper implements RowMapper<Department> {
 		@Override
@@ -93,5 +95,24 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			return department;
 		}
 
+	}
+
+
+	@Override
+	public Department getDepartmentBySbrfCode(String sbrfCode) {
+		return getJdbcTemplate().queryForObject(
+				"SELECT * FROM department dp WHERE dp.sbrf_code = ?",
+				new Object[]{sbrfCode},
+				new DepartmentJdbcMapper()
+		);
+	}
+
+	@Override
+	public Department getDepartmentByName(String name) {
+		return getJdbcTemplate().queryForObject(
+				"SELECT * FROM department dp WHERE dp.name = ?",
+				new Object[]{name},
+				new DepartmentJdbcMapper()
+		);
 	}
 }

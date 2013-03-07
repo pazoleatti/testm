@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
@@ -13,20 +14,44 @@ import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
 public class DepartmentServiceImpl implements DepartmentService {
 
 	@Autowired
-	DepartmentParamDao dao;
+	DepartmentParamDao departmentParamDao;
+	
+	@Autowired
+	DepartmentDao departmentDao;
 	
 	@Override
 	public DepartmentParam getDepartmentParam(int departmentId) {
-		return dao.getDepartmentParam(departmentId);
+		return departmentParamDao.getDepartmentParam(departmentId);
 	}
 
 	@Override
 	public DepartmentParamIncome getDepartmentParamIncome(int departmentId) {
-		return dao.getDepartmentParamIncome(departmentId);
+		return departmentParamDao.getDepartmentParamIncome(departmentId);
 	}
 
 	@Override
 	public DepartmentParamTransport getDepartmentParamTransport(int departmentId) {
-		return dao.getDepartmentParamTransport(departmentId);
+		return departmentParamDao.getDepartmentParamTransport(departmentId);
+	}
+
+	@Override
+	public Boolean issetSbrfCode(String sbrfCode) {
+		if (departmentDao.getDepartmentBySbrfCode(sbrfCode) != null){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	@Override
+	public Boolean issetName(String name) {
+		if (departmentDao.getDepartmentByName(name) != null){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 }
+

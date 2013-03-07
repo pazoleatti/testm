@@ -31,4 +31,14 @@ public interface DepartmentService {
 	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если подразделение с таким идентификатором не существует
 	 */
 	DepartmentParamTransport getDepartmentParamTransport(int departmentId);
+	
+    /**
+     * Проверка по НСИ. Проверка существования записи со значением «Код подразделения в нотации Сбербанка» 
+     */
+    Boolean issetSbrfCode(String sbrfCode);
+    
+    /**
+     * Проверка по НСИ. Проверка существования записи со значением ««Наименование подразделения»» 
+     */
+    Boolean issetName(String name);
 }

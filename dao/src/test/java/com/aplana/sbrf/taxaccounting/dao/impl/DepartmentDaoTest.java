@@ -75,4 +75,20 @@ public class DepartmentDaoTest {
 		Assert.assertEquals(1, department.getId());
 		Assert.assertEquals("Банк", department.getName());
 	}
+	
+	@Test
+	public void getSbrfCode(){
+		Department department;
+		department = departmentDao.getDepartmentBySbrfCode("23");
+		Assert.assertNotNull(department);
+		Assert.assertTrue(true);
+	}
+	
+	@Test
+	public void getName(){
+		Department department;
+		department = departmentDao.getDepartmentByName("ТБ2");
+		Assert.assertNotNull(department);
+		Assert.assertEquals(3, department.getId());
+	}
 }
