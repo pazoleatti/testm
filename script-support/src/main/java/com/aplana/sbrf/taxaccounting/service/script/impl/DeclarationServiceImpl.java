@@ -25,18 +25,18 @@ public class DeclarationServiceImpl implements DeclarationService{
 
 	@Autowired
 	DeclarationDataDao declarationDataDao;
-
+	/*
 	@Autowired
 	DepartmentService departmentService;
 
 	@Autowired
 	DeclarationTypeDao declarationTypeDao;
-
+    */
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
-
+	/*
 	@Override
 	public String generateXmlFileId(int declarationTypeId, int departmentId) {
 		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -52,5 +52,5 @@ public class DeclarationServiceImpl implements DeclarationService{
 				UUID.randomUUID().toString().toUpperCase());
 		return stringBuilder.toString();
 	}
-
+    */
 }

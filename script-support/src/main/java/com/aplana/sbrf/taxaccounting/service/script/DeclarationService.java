@@ -25,5 +25,5 @@ public interface DeclarationService {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @return идентификатор xml файла
 	 */
-	String generateXmlFileId(int declarationTypeId, int departmentId);
+	//String generateXmlFileId(int declarationTypeId, int departmentId);
 }
