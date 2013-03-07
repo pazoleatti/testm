@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.icommon.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
+public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implements ActionName {
 	
 	private Long formDataId;
 
@@ -63,6 +64,11 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> {
 
 	public void setReadOnly(boolean lockFormData) {
 		this.readOnly = lockFormData;
+	}
+
+	@Override
+	public String getName() {
+		return "\"Получение данных о выбранной налоговой форме\"";
 	}
 
 
