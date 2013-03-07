@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,23 +25,23 @@ public class DeclarationServiceImpl implements DeclarationService{
 
 	@Autowired
 	DeclarationDataDao declarationDataDao;
-	/*
+
 	@Autowired
-	DepartmentService departmentService;
+	DepartmentParamDao departmentParamDao;
 
 	@Autowired
 	DeclarationTypeDao declarationTypeDao;
-    */
+
 	@Override
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
-	/*
+
 	@Override
 	public String generateXmlFileId(int declarationTypeId, int departmentId) {
 		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 		String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
-		DepartmentParam departmentParam = departmentService.getDepartmentParam(departmentId);
+		DepartmentParam departmentParam = departmentParamDao.getDepartmentParam(departmentId);
 		Calendar calendar = Calendar.getInstance();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 		stringBuilder.append('_' +
@@ -52,5 +52,5 @@ public class DeclarationServiceImpl implements DeclarationService{
 				UUID.randomUUID().toString().toUpperCase());
 		return stringBuilder.toString();
 	}
-    */
+
 }
