@@ -37,6 +37,16 @@ public class TaActionException extends ActionException {
 		super(msg);
 		this.logEntries = logEntries;
 	}
+	
+	public TaActionException(String msg,  String trace) {
+		super(msg);
+		this.trace = trace;
+	}
+	
+	public TaActionException(String msg, String trace, Throwable e) {
+		super(msg, e);
+		this.trace = trace;
+	}
 
 	public List<LogEntry> getLogEntries() {
 		return logEntries;

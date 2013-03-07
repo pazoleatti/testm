@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.main.api.shared.icommon;
+package com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch;
 
 /**
  * Интерфейс для именования событий. Используется в ExceptionHandlerAspect
