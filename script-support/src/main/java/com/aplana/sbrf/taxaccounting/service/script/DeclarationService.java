@@ -18,4 +18,12 @@ public interface DeclarationService {
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+	/**
+	 * Создает идентификатор xml файла для декларации.
+	 * @param declarationTypeId идентификатор типа декларации
+	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
+	 * @return идентификатор xml файла
+	 */
+	String generateXmlFileId(int declarationTypeId, int departmentId);
 }

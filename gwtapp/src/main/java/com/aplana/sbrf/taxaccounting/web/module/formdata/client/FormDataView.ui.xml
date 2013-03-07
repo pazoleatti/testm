@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
         @external .gwt-PopupPanel;
@@ -21,82 +21,57 @@
             border: 1px solid #DBDBDB;
         }
 
-        .headerRight {
-            float: right;
-            top: 0;
-            width: 790px;
-        }
-
-        .headerLeft {
-            float: left;
-            top: 0;
-        }
-
         .titleLabel {
             font-family: Tahoma;
             font-size: 16px;
-            float: left;
-            margin-top: 3px;
-            text-align: left;
-            margin-left: 25px;
-        }
-
-        .marginTop7 {
-            margin-top: 7px;
-        }
-
-        .paddingTop5 {
-            padding-top: 5px;
-        }
-
-        .paddingTop7 {
-            padding-top: 7px;
-        }
-
-        .marginLeft15 {
-            margin-left: 15px;
         }
 
         .headerAttr {
             margin-left: 5px;
-            text-align: right;
             font-size: 12px;
             font-weight: bold;
             font-family: Tahoma;
         }
 
         .headerAttrName {
-            text-align: right;
             font-size: 12px;
             font-family: Tahoma;
+            text-align: right;
+        }
+
+        .marginTop5 {
+            margin-top: 5px;
         }
 
         .showCheckedColumns {
             font-size: 12px;
             font-family: Tahoma;
-            float: left;
         }
 
-        .headerTopRight {
-            height: 70px;
+        .floatRight {
+            float: right;
         }
     </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
         <g:north size="100">
-            <g:HTMLPanel height="100px" width="100%">
-                <div class="{style.headerLeft}">
-                    <g:HorizontalPanel height="35px">
-                        <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
-                        <g:Label ui:field="title" styleName="{style.titleLabel}"/>
+            <g:HorizontalPanel height="100px" width="100%">
+                <g:VerticalPanel>
+                    <g:HorizontalPanel height="28px">
+                        <g:cell width="25px">
+                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
+                        </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
-                        <g:SimplePanel styleName="{style.marginTop7}">
-                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"/>
-                        </g:SimplePanel>
-                        <g:SimplePanel styleName="{style.marginLeft15} {style.marginTop7}">
-                             <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
-                        </g:SimplePanel>
+                        <g:cell width="220px" verticalAlignment="middle">
+                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты" />
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
+                        </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
                         <style:LeftBar>
@@ -109,45 +84,41 @@
                         </style:LeftBar>
                         <style:LeftBar ui:field="workflowButtons" />
                     </style:Bar>
-                </div>
-                <div class="{style.headerRight}">
-                    <div class="{style.headerTopRight}">
+                </g:VerticalPanel>
+                <g:VerticalPanel width="790px" addStyleNames="{style.floatRight}">
+                    <g:VerticalPanel height="63px">
                         <g:HorizontalPanel>
-                            <g:Label width="100px" text="Подразделение:" styleName="{style.headerAttrName}"/>
-                            <g:Label ui:field="departmentIdLabel" styleName="{style.headerAttr}"/>
+                            <g:Label width="100px" text="Подразделение:" addStyleNames="{style.headerAttrName}" />
+                            <g:Label ui:field="departmentIdLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
-                            <g:Label width="100px" text="Тип:" styleName="{style.headerAttrName}"/>
-                            <g:Label ui:field="formKindLabel" styleName="{style.headerAttr}"/>
+                            <g:Label width="100px" text="Тип:" addStyleNames="{style.headerAttrName}" />
+                            <g:Label ui:field="formKindLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
-                            <g:Label width="100px" text="Период:" styleName="{style.headerAttrName}"/>
-                            <g:Label ui:field="reportPeriodLabel" styleName="{style.headerAttr}"/>
+                            <g:Label width="100px" text="Период:" addStyleNames="{style.headerAttrName}" />
+                            <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
-                            <g:Label width="100px" text="Состояние:" styleName="{style.headerAttrName}"/>
-                            <g:Label ui:field="stateLabel" styleName="{style.headerAttr}"/>
+                            <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
+                            <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
-                    </div>
+                    </g:VerticalPanel>
                     <g:HorizontalPanel height="30px">
-                        <g:HTMLPanel width="245px" ui:field="manualInputPanel">
-                            <div class="{style.paddingTop5}">
-                                <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
-                            </div>
-                        </g:HTMLPanel>
+                        <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.marginTop5}">
+                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
+                        </g:SimplePanel>
                         <style:Bar width="245px" ui:field="saveCancelBar">
                             <style:LeftBar>
                                 <style:Button ui:field="saveButton" text="Сохранить" />
                                 <style:Button ui:field="cancelButton" text="Отмена" />
                             </style:LeftBar>
                         </style:Bar>
-                        <g:SimplePanel styleName="{style.paddingTop5}">
-                            <g:CheckBox ui:field="showCheckedColumns" value="true" styleName="{style.showCheckedColumns}"
+                        <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns} {style.marginTop5}"
                                 text="Показывать контрольные поля"/>
-                        </g:SimplePanel>
                     </g:HorizontalPanel>
-                </div>
-            </g:HTMLPanel>
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
         </g:north>
 
         <g:north size="30">

@@ -6,8 +6,13 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.servlet.http.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -16,7 +21,9 @@ import java.util.*;
 @Controller
 public class DeclarationDataController {
 
-	public static final String DATE_FORMAT = "yyyyMMdd";
+	private static final String DATE_FORMAT = "yyyyMMdd";
+	private static final String ATTR_FILE_ID = "ИдФайл";
+	private static final String TAG_FILE = "Файл";
 
 	@Autowired
 	DeclarationDataService declarationService;
@@ -51,13 +58,20 @@ public class DeclarationDataController {
 
 	@RequestMapping(value = "/downloadXml/{declarationId}",method = RequestMethod.GET)
 	public void processDownloadXml(@PathVariable int declarationId, HttpServletResponse resp)
-			throws IOException {
+			throws IOException, ParserConfigurationException, SAXException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
 		if (declarationService.getXmlData(declarationId, userId) != null) {
+			String xml = declarationService.getXmlData(declarationId, userId);
+			InputSource inputSource = new InputSource(new StringReader(xml));
+			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
+			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
+			NamedNodeMap attributes = fileNode.getAttributes();
+			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
+			String fileName = fileNameNode.getTextContent() + ".xml";
+
 			OutputStream respOut = resp.getOutputStream();
-			String fileName = generateFileName(declarationId, userId, "xml");
 			resp.setContentType("application/octet-stream");
 			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			respOut.write(declarationService.getXmlData(declarationId, userId).getBytes());
