@@ -49,7 +49,7 @@ public class DeclarationServiceImpl implements DeclarationService{
 				departmentParam.getTaxOrganCode() + '_' +
 				departmentParam.getInn() + departmentParam.getKpp() + '_' +
 				dateFormat.format(calendar.getTime()) + '_' +
-				UUID.randomUUID().toString().toUpperCase() + ".xml");
+				UUID.randomUUID().toString().toUpperCase());
 		return stringBuilder.toString();
 	}
 
