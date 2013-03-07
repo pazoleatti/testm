@@ -48,6 +48,7 @@ public class DictionaryRegion {
         this.code = code;
     }
 
+	@Override
     public boolean equals(Object obj) {
         if (obj instanceof DictionaryRegion) {
             DictionaryRegion val = (DictionaryRegion) obj;
@@ -60,4 +61,9 @@ public class DictionaryRegion {
         }
         return false;
     }
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
 }

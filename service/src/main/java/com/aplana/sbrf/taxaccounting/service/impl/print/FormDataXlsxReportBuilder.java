@@ -56,7 +56,7 @@ public class FormDataXlsxReportBuilder {
 	
 	private CellStyleBuilder cellStyleBuilder;
 	private InputStream templeteInputStream;
-	private static String TEMPLATE = ClassUtils
+	private static final String TEMPLATE = ClassUtils
 			.classPackageAsResourcePath(FormDataXlsxReportBuilder.class)
 			+ "/acctax.xlsx";
 	

@@ -24,7 +24,7 @@ public class ExceptionHandlerAspect {
 	
 	private final Log log = LogFactory.getLog(getClass());
 	
-	private static String ERROR_MESSAGE = "Операция %s не выполнена. ";
+	private static final String ERROR_MESSAGE = "Операция %s не выполнена. ";
 	
 	private String getErrorMessage(String errName){
 		return String.format(ERROR_MESSAGE,errName);

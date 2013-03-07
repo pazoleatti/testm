@@ -119,8 +119,6 @@ public class DictionaryTaxBenefitParam {
 		return builder.toString();
 	}
 
-	
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -166,6 +164,11 @@ public class DictionaryTaxBenefitParam {
 		} else if (!taxBenefitId.equals(other.taxBenefitId))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 	
 }

@@ -16,7 +16,7 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 	// TODO: Почему то не получается использовать @Inject для статических полей.
 	// Надо разобраться.
 	// Пока ворк эраунд - получение инжектора руками и установка значения.
-	private static EventBus EVENT_BUS = ((ClientGinjector) DelayedBindRegistry
+	private static final EventBus EVENT_BUS = ((ClientGinjector) DelayedBindRegistry
 			.getGinjector()).getEventBus();
 
 	private final AsyncCallback<T> callback;

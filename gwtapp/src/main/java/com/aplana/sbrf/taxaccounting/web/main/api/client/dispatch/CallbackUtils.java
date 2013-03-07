@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author sgoryachkin
  *
  */
-public class CallbackUtils {
+public final class CallbackUtils {
 	
 	private CallbackUtils(){};
 	 
