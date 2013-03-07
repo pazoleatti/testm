@@ -202,6 +202,43 @@ comment on column report_period.tax_period_id is 'Налоговый перио�
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
 
 create sequence seq_report_period start with 100;
+----------------------------------------------------------------------------------------------------
+create table income_101
+(report_period_id number(9) not null,
+ account varchar2(255),
+ income_debet_remains number(22,4),
+ income_credit_remains number(22,4),
+ debet_rate number(22,4),
+ credit_rate number(22,4),
+ outcome_debet_remains number(22,4),
+ outcome_credit_remains number(22,4)
+);
+
+alter table income_101 add constraint income_101_pk primary key(report_period_id);
+alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
+
+comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
+comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
+comment on column income_101.account is 'Номер счета';
+comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
+comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
+comment on column income_101.debet_rate is 'Обороты по дебету';
+comment on column income_101.credit_rate is 'Обороты по кредиту';
+comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
+comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
+-------------------------------------------------------------------------------------------------------------------------------------------
+create table income_102
+(report_period_id number(9) not null,
+ opu_code varchar2(25),
+ total_sum number(22,4));
+ 
+alter table income_102 add constraint income_102_pk primary key(report_period_id);
+alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
+
+comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
+comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
+comment on column income_102.opu_code is 'Код ОПУ';
+comment on column income_102.total_sum is 'Сумма';
 
 ---------------------------------------------------------------------------------------------------
 create table form_template (

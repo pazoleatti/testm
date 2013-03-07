@@ -46,6 +46,8 @@ drop table department_param;
 drop table department_param_income;
 drop table department_param_transport;
 drop table department;
+drop table income_101;
+drop table income_102;
 drop sequence seq_report_period;
 drop table report_period;
 drop table tax_period;
