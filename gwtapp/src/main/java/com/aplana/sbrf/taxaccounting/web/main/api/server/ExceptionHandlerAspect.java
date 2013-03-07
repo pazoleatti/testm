@@ -55,5 +55,25 @@ public class ExceptionHandlerAspect {
 		}
 			
 	}
+	
+    /**
+     * <p>
+     * Метод преобразующий стек трейс исключения в формат строки.
+     * </p>
+     *
+     * @param e - брошенное исключение
+     * @return - строка содержащая в себе стектрейс исключения
+     */
+    private static String formatException(final Throwable e) {
+        if (e != null) {
+            StringBuilder sb = new StringBuilder();
+            String[] throwableStrRep = null;//new ThrowableInformation(e).getThrowableStrRep();
+            for (String aThrowableStrRep : throwableStrRep) {
+                sb.append(aThrowableStrRep).append("\n");
+            }
+            return sb.toString();
+        }
+        return null;
+    }
 
 }
