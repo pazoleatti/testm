@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormListResult;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -64,8 +65,8 @@ public class AdminView extends ViewWithUiHandlers<AdminUiHandlers> implements Ad
 	}
 
 	@Override
-	public void setFormTemplateTable(FormListResult result) {
-		formTemplateTable.setRowData(result.getForms());
+	public void setFormTemplateTable(List<FormTemplate> formTemplates) {
+		formTemplateTable.setRowData(formTemplates);
 	}
 
 }

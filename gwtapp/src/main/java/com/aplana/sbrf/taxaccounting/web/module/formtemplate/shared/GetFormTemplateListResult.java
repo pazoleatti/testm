@@ -8,10 +8,10 @@ import com.gwtplatform.dispatch.shared.Result;
 /**
  * @author Vitalii Samolovskikh
  */
-public class FormListResult implements Result {
+public class GetFormTemplateListResult implements Result {
     private List<FormTemplate> forms;
 
-    public FormListResult() {
+    public GetFormTemplateListResult() {
     }
 
     public List<FormTemplate> getForms() {

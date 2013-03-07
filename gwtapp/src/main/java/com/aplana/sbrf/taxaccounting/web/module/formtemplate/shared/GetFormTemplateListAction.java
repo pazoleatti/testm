@@ -5,5 +5,5 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * @author Vitalii Samolovskikh
  */
-public class FormListAction extends UnsecuredActionImpl<FormListResult> {
+public class GetFormTemplateListAction extends UnsecuredActionImpl<GetFormTemplateListResult> {
 }
