@@ -11,6 +11,6 @@ public class CheckFormDataAction extends AbstractFormDataAction implements Actio
 
 	@Override
 	public String getName() {
-		return "\"Обработка запроса на проверку формы\"";
+		return "Обработка запроса на проверку формы";
 	}
 }

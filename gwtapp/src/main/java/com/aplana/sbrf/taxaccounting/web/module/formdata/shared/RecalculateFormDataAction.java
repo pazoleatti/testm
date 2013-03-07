@@ -12,6 +12,6 @@ public class RecalculateFormDataAction extends AbstractFormDataAction implements
 
 	@Override
 	public String getName() {
-		return "\"Пересчет формы\"";
+		return "Пересчет формы";
 	}
 }

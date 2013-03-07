@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.icommon.ActionName;
+import com.gwtplatform.dispatch.shared.Action;
 import com.gwtplatform.dispatch.shared.ActionException;
-import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
  * Обработчик исключений для ActionHandler. Преобразует сервисные исключения в клиентские. 
@@ -32,21 +32,26 @@ public class ExceptionHandlerAspect {
 	
 	@AfterThrowing(pointcut="target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) &&" +
 					"args(action,..)", throwing="e")
-	public void handleException(@SuppressWarnings("rawtypes") UnsecuredActionImpl action, Exception e) throws ActionException {	
+	public void handleException(@SuppressWarnings("rawtypes") Action action, Exception e) throws ActionException {	
 		String actionName;
-		if(action instanceof ActionName)
+		if(action instanceof ActionName){
 			actionName = ((ActionName)action).getName();
+			if(actionName.length() == 0)
+				actionName = "";
+			else
+				actionName = "\"" +  actionName + "\"";
+		}
 		else
 			actionName = "";
 			
 		if (e instanceof ActionException) {
 			throw new ActionException(getErrorMessage(actionName),e);
 		} else if (e instanceof ServiceLoggerException) {
-			throw new TaActionException(getErrorMessage(actionName) + e.getLocalizedMessage(),
+			throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null?e.getLocalizedMessage():""),
 					((ServiceLoggerException) e).getLogEntries());
 		} else {
 			log.error(e);
-			throw new TaActionException(getErrorMessage(actionName) + e.getLocalizedMessage());
+			throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null?e.getLocalizedMessage():""));
 		}
 			
 	}

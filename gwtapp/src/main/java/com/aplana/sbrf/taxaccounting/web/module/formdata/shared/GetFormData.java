@@ -68,7 +68,7 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 
 	@Override
 	public String getName() {
-		return "\"Получение данных о выбранной налоговой форме\"";
+		return "Получение данных о выбранной налоговой форме";
 	}
 
 

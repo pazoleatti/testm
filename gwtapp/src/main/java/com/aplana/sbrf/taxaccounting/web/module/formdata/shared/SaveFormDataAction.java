@@ -11,6 +11,6 @@ public class SaveFormDataAction extends AbstractFormDataAction implements Action
 
 	@Override
 	public String getName() {
-		return "\"Сохранение формы\"";
+		return "Сохранение формы";
 	}
 }

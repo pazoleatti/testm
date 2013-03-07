@@ -17,6 +17,6 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 
 	@Override
 	public String getName() {
-		return "\"Разблокировка формы\"";
+		return "Разблокировка формы";
 	}
 }

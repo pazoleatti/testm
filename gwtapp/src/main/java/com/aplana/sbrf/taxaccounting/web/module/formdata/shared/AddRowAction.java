@@ -11,6 +11,6 @@ public class AddRowAction extends AbstractFormDataAction implements ActionName {
 
 	@Override
 	public String getName() {
-		return "\"Добавление строки на форме\"";
+		return "Добавление строки на форме";
 	}
 }

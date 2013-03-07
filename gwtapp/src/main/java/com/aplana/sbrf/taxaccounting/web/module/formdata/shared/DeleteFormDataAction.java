@@ -19,7 +19,7 @@ public class DeleteFormDataAction extends UnsecuredActionImpl<DeleteFormDataResu
 	}
 	@Override
 	public String getName() {
-		return "\"Обработка запроса на удаление формы\"";
+		return "Обработка запроса на удаление формы";
 	}
 
 	
