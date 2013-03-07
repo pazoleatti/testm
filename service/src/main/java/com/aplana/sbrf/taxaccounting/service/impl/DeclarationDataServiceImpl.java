@@ -13,7 +13,10 @@ import org.apache.commons.logging.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.util.*;
 
@@ -109,13 +112,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			DeclarationData declaration = declarationDataDao.get(declarationId);
 			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
 			String xmlData = declarationDataDao.getXmlData(declarationId);
-			JasperPrint print = null;
-			try {
-				JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));
-				print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
-			} catch (JRException e) {
-				throw new ServiceException("Невозможно заполнить отчет");
-			}
+			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
 			JRXlsxExporter exporter = new JRXlsxExporter();
 			ByteArrayOutputStream xls = new ByteArrayOutputStream();
 			exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT, print);
@@ -141,13 +138,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			DeclarationData declaration = declarationDataDao.get(declarationId);
 			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
 			String xmlData = declarationDataDao.getXmlData(declarationId);
-			JasperPrint print = null;
-			try {
-				JRXmlDataSource dataSource = new JRXmlDataSource(new ByteArrayInputStream(xmlData.getBytes()));
-				print = JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
-			} catch (JRException e) {
-				throw new ServiceException("Невозможно заполнить отчет");
-			}
+			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
 			JRPdfExporter exporter = new JRPdfExporter();
 			ByteArrayOutputStream pdf = new ByteArrayOutputStream();
 			exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, print);
@@ -177,6 +168,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			declarationDataDao.setXmlData(declarationDataId, xml);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для обновления указанной декларации");
+		}
+	}
+
+	private JasperPrint getJasperPrint(String xml, byte[] jasperTemplate) {
+		try {
+			InputSource inputSource = new InputSource(new StringReader(xml));
+			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
+			JRXmlDataSource dataSource = new JRXmlDataSource(document);
+			return JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
+		} catch (Exception e) {
+			throw new ServiceException("Невозможно заполнить отчет");
 		}
 	}
 }

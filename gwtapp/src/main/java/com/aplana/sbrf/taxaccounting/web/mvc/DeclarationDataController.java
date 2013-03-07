@@ -14,14 +14,11 @@ import javax.servlet.http.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.text.*;
-import java.util.*;
 
 
 @Controller
 public class DeclarationDataController {
 
-	private static final String DATE_FORMAT = "yyyyMMdd";
 	private static final String ATTR_FILE_ID = "ИдФайл";
 	private static final String TAG_FILE = "Файл";
 
@@ -45,7 +42,7 @@ public class DeclarationDataController {
 
 		if (declarationService.getXlsxData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
-			String fileName = generateFileName(declarationId, userId, "xlsx");
+			String fileName = getFileName(declarationId, userId, "xlsx");
 			resp.setContentType("application/octet-stream");
 			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			respOut.write(declarationService.getXlsxData(declarationId, userId));
@@ -63,14 +60,7 @@ public class DeclarationDataController {
 		Integer userId = user.getId();
 
 		if (declarationService.getXmlData(declarationId, userId) != null) {
-			String xml = declarationService.getXmlData(declarationId, userId);
-			InputSource inputSource = new InputSource(new StringReader(xml));
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
-			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
-			NamedNodeMap attributes = fileNode.getAttributes();
-			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
-			String fileName = fileNameNode.getTextContent() + ".xml";
-
+			String fileName = getFileName(declarationId, userId, "xml");
 			OutputStream respOut = resp.getOutputStream();
 			resp.setContentType("application/octet-stream");
 			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
@@ -99,23 +89,18 @@ public class DeclarationDataController {
 		}
 	}
 
-	protected String generateFileName(int declarationId, int userId, String fileExtension) {
-		DeclarationData declaration = declarationService.get(declarationId, userId);
-		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-		String declarationPrefix =
-				declarationTemplateService.get(
-						declaration.getDeclarationTemplateId()
-				).getDeclarationType().getTaxType().getDeclarationPrefix();
-		DepartmentParam departmentParam = departmentService.getDepartmentParam(declaration.getDepartmentId());
-		Calendar calendar = Calendar.getInstance();
-		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
-		stringBuilder.append('_' +
-				departmentParam.getTaxOrganCode() + '_' +
-				departmentParam.getTaxOrganCode() + '_' +
-				departmentParam.getInn() + departmentParam.getKpp() + '_' +
-				dateFormat.format(calendar.getTime()) + '_' +
-				UUID.randomUUID().toString().toUpperCase() + '.' +
-				fileExtension);
-		return stringBuilder.toString();
+	protected String getFileName(int declarationId, int userId, String fileExtension) {
+		String xml = declarationService.getXmlData(declarationId, userId);
+		InputSource inputSource = new InputSource(new StringReader(xml));
+		try {
+			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
+			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
+			NamedNodeMap attributes = fileNode.getAttributes();
+			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
+			String fileName = fileNameNode.getTextContent() + '.' + fileExtension;
+			return fileName;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
