@@ -10,6 +10,8 @@ public class TaActionException extends ActionException {
 	
 	private List<LogEntry> logEntries;
 	
+	private String trace;
+	
 	public TaActionException() {
 		super();
 	}
@@ -38,6 +40,14 @@ public class TaActionException extends ActionException {
 
 	public List<LogEntry> getLogEntries() {
 		return logEntries;
+	}
+
+	public String getTrace() {
+		return trace;
+	}
+
+	public void setTrace(String trace) {
+		this.trace = trace;
 	}	
 
 }
