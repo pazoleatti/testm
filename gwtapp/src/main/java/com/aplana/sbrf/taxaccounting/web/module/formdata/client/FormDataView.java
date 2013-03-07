@@ -18,6 +18,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -26,7 +27,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
-	private SingleSelectionModel<DataRow> selectionModel;
+	private NoSelectionModel<DataRow> selectionModel;
 
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -93,7 +94,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public FormDataView(final Binder binder) {
 		widget = binder.createAndBindUi(this);
 
-		selectionModel = new SingleSelectionModel<DataRow>();
+		selectionModel = new NoSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -206,7 +207,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public DataRow getSelectedRow() {
-		return selectionModel.getSelectedObject();
+		return selectionModel.getLastSelectedObject();
 	}
 
 	@UiHandler("manualInputAnchor")

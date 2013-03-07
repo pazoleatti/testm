@@ -31,9 +31,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -43,7 +41,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
 	private final StyleCellPopup styleCellPopup;
-	private final SingleSelectionModel<DataRow> selectionModel;
+	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
 	private final Widget widget;
 	private List<DataRow> rows;
@@ -74,7 +72,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		factory.setEditOnly(true);
 		styleCellPopup = new StyleCellPopup(this);
 
-		selectionModel = new SingleSelectionModel<DataRow>();
+		selectionModel = new NoSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -246,14 +244,14 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiHandler("removeRowButton")
 	public void onRemoveButton(ClickEvent event){
 		if(getUiHandlers()!=null){
-			getUiHandlers().onRemoveButton(selectionModel.getSelectedObject());
+			getUiHandlers().onRemoveButton(selectionModel.getLastSelectedObject());
 		}
 	}
 
 	@UiHandler("upRowButton")
 	public void onUpRowButton(ClickEvent event){
 		if(getUiHandlers()!=null){
-			DataRow row = selectionModel.getSelectedObject();
+			DataRow row = selectionModel.getLastSelectedObject();
 			int index = rows.indexOf(row);
 			rows.set(index, rows.get(index - 1));
 			rows.set(index - 1, row);
@@ -265,7 +263,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiHandler("downRowButton")
 	public void onDownRowButton(ClickEvent event){
 		if(getUiHandlers()!=null){
-			DataRow row = selectionModel.getSelectedObject();
+			DataRow row = selectionModel.getLastSelectedObject();
 			int index = rows.indexOf(row);
 			rows.set(index, rows.get(index + 1));
 			rows.set(index + 1, row);
@@ -278,7 +276,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		upRowButton.setEnabled(false);
 		downRowButton.setEnabled(false);
 
-		DataRow row = selectionModel.getSelectedObject();
+		DataRow row = selectionModel.getLastSelectedObject();
 		int index = rows.indexOf(row);
 
 		if (index != rows.size() - 1) {

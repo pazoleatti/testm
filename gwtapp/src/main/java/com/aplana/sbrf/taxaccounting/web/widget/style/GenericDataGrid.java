@@ -7,6 +7,5 @@ public class GenericDataGrid<T> extends DataGrid<T>{
 	
 	public GenericDataGrid() {
 		super(15, GWT.<GenericDataGridResources> create(GenericDataGridResources.class));
-		this.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.BOUND_TO_SELECTION);
 	}
 }
