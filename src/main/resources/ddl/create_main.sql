@@ -271,7 +271,7 @@ comment on column form_template.fixed_rows is 'Признак использов
 create table form_style
 (
 	id					number(9) not null,
-	alias				varchar(20) not null,
+	alias				varchar(80) not null,
 	form_template_id	number(9) not null,
 	font_color			number(3) null,
 	back_color			number(3) null,
@@ -281,8 +281,8 @@ create table form_style
 
 alter table form_style add constraint FORM_STYLE_PK primary key (ID);
 alter table form_style add constraint FORM_STYLE_FK_FORM_TEMPLATE_ID foreign key (FORM_TEMPLATE_ID) references FORM_TEMPLATE (ID);
-alter table form_style add constraint FORM_STYLE_CHK_FONT_COLOR check (font_color in (0,1,2,3,4));
-alter table form_style add constraint FORM_STYLE_CHK_BACK_COLOR check (back_color in (0,1,2,3,4));
+alter table form_style add constraint FORM_STYLE_CHK_FONT_COLOR check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
+alter table form_style add constraint FORM_STYLE_CHK_BACK_COLOR check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
 alter table form_style add constraint FORM_STYLE_CHK_ITALIC check (italic in (0,1));
 alter table form_style add constraint FORM_STYLE_CHK_BOLD check (bold in (0,1));
 alter table form_style add constraint FORM_STYLE_UNIQ_ALIAS unique (form_template_id, alias);

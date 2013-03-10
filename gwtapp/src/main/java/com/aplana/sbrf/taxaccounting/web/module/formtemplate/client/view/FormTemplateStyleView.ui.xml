@@ -44,7 +44,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px">
-                        <g:Label width="150px">Цвет штрифта</g:Label>
+                        <g:Label width="150px">Цвет шрифта</g:Label>
                         <g:ValueListBox width="200px" ui:field="fontColor"/>
                     </g:HorizontalPanel>
 

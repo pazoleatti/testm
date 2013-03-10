@@ -23,13 +23,13 @@ public class ColorTest {
 	
 	@Test
 	public void testFromId() {
-		Color color = Color.fromId(3);
-		assert(color == Color.BLUE);
+		Color color = Color.getById(3);
+		assert(color == Color.LIGHT_BLUE);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testFromIdWrong() {
-		Color.fromId(999);		
+		Color.getById(999);
 	}
 	
 

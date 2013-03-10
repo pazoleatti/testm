@@ -45,8 +45,8 @@ public class CellStyleDaoTest {
 		cellStyleDao.fillCellStyle(1l, rowIdMap, styles);
 
 		Assert.assertEquals("alias 1", rowIdMap.get(1l).getCell("alias 1").getStyle().getAlias());
-		Assert.assertEquals(Color.BLUE, rowIdMap.get(1l).getCell("alias 1").getStyle().getFontColor());
-		Assert.assertEquals(Color.GREEN, rowIdMap.get(1l).getCell("alias 1").getStyle().getBackColor());
+		Assert.assertEquals(Color.LIGHT_BLUE, rowIdMap.get(1l).getCell("alias 1").getStyle().getFontColor());
+		Assert.assertEquals(Color.LIGHT_BROWN, rowIdMap.get(1l).getCell("alias 1").getStyle().getBackColor());
 		Assert.assertEquals(true, rowIdMap.get(1l).getCell("alias 1").getStyle().isItalic());
 		Assert.assertEquals(false, rowIdMap.get(1l).getCell("alias 1").getStyle().isBold());
 		Assert.assertEquals(null, rowIdMap.get(1l).getCell("alias 2").getStyle());
@@ -83,8 +83,8 @@ public class CellStyleDaoTest {
 		cellStyleDao.fillCellStyle(1l, rowIdMap, styles);
 
 		Assert.assertEquals("alias 1", rowIdMap.get(3l).getCell("alias 3").getStyle().getAlias());
-		Assert.assertEquals(Color.BLUE, rowIdMap.get(3l).getCell("alias 3").getStyle().getFontColor());
-		Assert.assertEquals(Color.GREEN, rowIdMap.get(3l).getCell("alias 3").getStyle().getBackColor());
+		Assert.assertEquals(Color.LIGHT_BLUE, rowIdMap.get(3l).getCell("alias 3").getStyle().getFontColor());
+		Assert.assertEquals(Color.LIGHT_BROWN, rowIdMap.get(3l).getCell("alias 3").getStyle().getBackColor());
 		Assert.assertEquals(true, rowIdMap.get(3l).getCell("alias 3").getStyle().isItalic());
 		Assert.assertEquals(false, rowIdMap.get(3l).getCell("alias 3").getStyle().isBold());
 		Assert.assertEquals("alias 3", rowIdMap.get(3l).getCell("alias 4").getStyle().getAlias());

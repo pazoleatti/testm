@@ -19,6 +19,9 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
 
+/**
+ * Представление для правки набора стилей
+ */
 public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleUiHandlers>
 		implements FormTemplateStylePresenter.MyView, Editor<FormStyle> {
 

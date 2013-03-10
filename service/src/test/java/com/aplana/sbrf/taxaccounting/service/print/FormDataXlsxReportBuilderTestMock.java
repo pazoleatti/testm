@@ -160,8 +160,8 @@ public class FormDataXlsxReportBuilderTestMock {
 		DataRow dataRow = mock(DataRow.class);
 		Cell cell = mock(Cell.class);
 		FormStyle formStyle = new FormStyle();
-		formStyle.setBackColor(Color.BLUE);
-		formStyle.setFontColor(Color.GREEN);
+		formStyle.setBackColor(Color.LIGHT_BLUE);
+		formStyle.setFontColor(Color.LIGHT_BROWN);
 		
 		when(dataRow.getCell("Number")).thenReturn(cell);
 		when(dataRow.getCell("Number1")).thenReturn(cell);

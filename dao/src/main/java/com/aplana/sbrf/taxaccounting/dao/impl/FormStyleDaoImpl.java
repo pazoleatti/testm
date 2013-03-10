@@ -26,8 +26,8 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 			final FormStyle result = new FormStyle();
 			result.setId(rs.getInt("id"));
 			result.setAlias(rs.getString("alias"));
-			result.setFontColor(Color.fromId(rs.getInt("font_color")));
-			result.setBackColor(Color.fromId(rs.getInt("back_color")));
+			result.setFontColor(Color.getById(rs.getInt("font_color")));
+			result.setBackColor(Color.getById(rs.getInt("back_color")));
 			result.setItalic(rs.getBoolean("italic"));
 			result.setBold(rs.getBoolean("bold"));
 			return result;
