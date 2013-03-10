@@ -6,7 +6,14 @@ import static org.mockito.Mockito.when;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-public class FormTypeMockUtils {
+public final class FormTypeMockUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private FormTypeMockUtils() {
+	}
+
 	public static FormType mockFormType(int id, TaxType taxType, String name) {
 		FormType ft = mock(FormType.class);
 		when(ft.getId()).thenReturn(id);

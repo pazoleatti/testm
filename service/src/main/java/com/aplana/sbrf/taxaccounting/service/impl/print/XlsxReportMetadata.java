@@ -2,7 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl.print;
 
 import java.text.SimpleDateFormat;
 
-public class XlsxReportMetadata {
+public final class XlsxReportMetadata {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private XlsxReportMetadata() {
+	}
 	
 	public static final String DATE_CREATE = "« %s » %s 20%s г.";
 	public static final String REPORT_PERIOD = "за %s ";

@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl.sandbox;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.FilePermission;
 import java.io.Reader;
 import java.lang.reflect.ReflectPermission;
@@ -23,7 +26,9 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
 
 public class ScriptSecureSandBoxWrapper implements ScriptEngine {
-	
+
+	private static final Log logger = LogFactory.getLog(ScriptSecureSandBoxWrapper.class);
+
 	private ScriptEngine scriptEngine;
 	private AccessControlContext accessControlContext;
 	
@@ -48,7 +53,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		AccessControlContext acc = null;
 		if(sm!=null){
 			acc = (AccessControlContext)sm.getSecurityContext();
-			System.out.println(acc);
+			logger.debug(acc);
 		}
 		return AccessController.doPrivileged(new PrivilegedAction<Object>() {
 
@@ -57,7 +62,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 				try {
 					return scriptEngine.eval(script);
 				} catch (ScriptException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 				}
 				return null;
 				//AccessControlContext acc = (AccessControlContext) sm.getSecurityContext();

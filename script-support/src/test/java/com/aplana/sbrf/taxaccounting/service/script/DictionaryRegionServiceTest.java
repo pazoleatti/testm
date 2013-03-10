@@ -21,12 +21,29 @@ import static org.mockito.Mockito.when;
  */
 public class DictionaryRegionServiceTest {
     private static DictionaryRegionService service = new DictionaryRegionServiceImpl();
-    private static DictionaryRegion regionTulsk = new DictionaryRegion(72, "Тюменская область", "71000000000", "71");
-    private static DictionaryRegion regionHant = new DictionaryRegion(86, "Ханты-Мансийский автономный округ - Югра", "71000000000", "71100");
-    private static DictionaryRegion regionDefault = new DictionaryRegion(99, "Иные территории, включая город и космодром Байконур", null, null);
+
+    private static DictionaryRegion regionTulsk;
+    private static DictionaryRegion regionHant;
+    private static DictionaryRegion regionDefault;
 
     @BeforeClass
     public static void tearUp() {
+		regionTulsk = new DictionaryRegion();
+		regionTulsk.setCode(72);
+		regionTulsk.setName("Тюменская область");
+		regionTulsk.setOkato("71000000000");
+		regionTulsk.setOkatoDefinition("71");
+
+		regionHant = new DictionaryRegion();
+		regionHant.setCode(86);
+		regionHant.setName("Ханты-Мансийский автономный округ - Югра");
+		regionHant.setOkato("71000000000");
+		regionHant.setOkatoDefinition("71100");
+
+		regionDefault = new DictionaryRegion();
+		regionDefault.setCode(99);
+		regionDefault.setName("Иные территории, включая город и космодром Байконур");
+
         DictionaryRegionDao dictionaryRegionDao = mock(DictionaryRegionDao.class);
         List<DictionaryRegion> values = new ArrayList<DictionaryRegion>();
         values.add(regionTulsk);

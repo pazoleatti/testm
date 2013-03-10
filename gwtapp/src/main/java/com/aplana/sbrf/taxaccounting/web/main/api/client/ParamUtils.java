@@ -8,8 +8,11 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
  * @author sgoryachkin
  *
  */
-public class ParamUtils {
-	
+public final class ParamUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
 	private ParamUtils() {
 	}
 

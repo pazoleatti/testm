@@ -198,9 +198,9 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	}
 
     private void initSavedFilterDataMap(){
-        for(TaxType taxType : TaxType.values()){
-            savedFilterData.put(taxType, null);
-	        savedDepartmentsMap.put(taxType, new HashMap<String, Integer>());
+        for(TaxType value : TaxType.values()){
+            savedFilterData.put(value, null);
+	        savedDepartmentsMap.put(value, new HashMap<String, Integer>());
         }
     }
 }

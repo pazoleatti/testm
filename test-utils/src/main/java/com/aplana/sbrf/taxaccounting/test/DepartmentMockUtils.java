@@ -9,7 +9,14 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
-public class DepartmentMockUtils {
+public final class DepartmentMockUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private DepartmentMockUtils() {
+	}
+
 	public static Department mockDepartment(int id, DepartmentType type) {
 		Department department = mock(Department.class);
 		when(department.getId()).thenReturn(id);

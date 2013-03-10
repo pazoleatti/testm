@@ -9,12 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.Dictiona
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Базовый класс хандлера для получения значений справочника.
@@ -25,8 +22,6 @@ import java.util.List;
  */
 public abstract class DictionaryHandler<A extends DictionaryAction<T>, T extends Serializable>
 		extends AbstractActionHandler<A, DictionaryResult<T>> {
-	@SuppressWarnings("UnusedDeclaration")
-	private final Log log = LogFactory.getLog(DictionaryHandler.class);
 
 	public DictionaryHandler(Class<A> actionType) {
 		super(actionType);

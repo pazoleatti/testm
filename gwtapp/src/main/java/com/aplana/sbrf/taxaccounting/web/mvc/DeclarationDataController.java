@@ -15,7 +15,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 
-
 @Controller
 public class DeclarationDataController {
 
@@ -27,12 +26,6 @@ public class DeclarationDataController {
 
 	@Autowired
 	private SecurityService securityService;
-
-	@Autowired
-	private DeclarationTemplateService declarationTemplateService;
-
-	@Autowired
-	private DepartmentService departmentService;
 
 	@RequestMapping(value = "/downloadExcel/{declarationId}",method = RequestMethod.GET)
 	public void processDownloadExcel(@PathVariable int declarationId, HttpServletResponse resp)
@@ -97,8 +90,7 @@ public class DeclarationDataController {
 			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
-			String fileName = fileNameNode.getTextContent() + '.' + fileExtension;
-			return fileName;
+			return fileNameNode.getTextContent() + '.' + fileExtension;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

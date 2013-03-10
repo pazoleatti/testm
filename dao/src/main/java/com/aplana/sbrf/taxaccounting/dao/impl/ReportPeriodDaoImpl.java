@@ -36,8 +36,7 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 	@Override
 	public ReportPeriod getCurrentPeriod(TaxType taxType) {
 		try{
-			ReportPeriod reportPeriod = reportPeriodMapper.getCurrentPeriod(taxType.getCode());
-			return reportPeriod;
+			return reportPeriodMapper.getCurrentPeriod(taxType.getCode());
 		} catch (MyBatisSystemException e) {
 			/* Nested exception is TooManyResultsException */
 			if(e.getCause() instanceof TooManyResultsException){

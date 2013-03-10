@@ -30,7 +30,10 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
-	private Log logger = LogFactory.getLog(getClass());	
+
+	private Log logger = LogFactory.getLog(getClass());
+
+	private final static String FORMDATA_KIND_STATE_ERROR = "Bank-level formData with \"%s\" kind, couldn't be in \"%s\" state!";
 	
 	@Autowired
 	private TAUserDao userDao;
@@ -44,8 +47,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
-	
-	
+
 	@Override
 	public boolean canRead(int userId, long formDataId) {
 		TAUser user = userDao.getUser(userId);
@@ -154,8 +156,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:
-					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -177,8 +178,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:
-					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -205,8 +205,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:
-					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		}
 		// TODO: (mfayzullin) возможно имеет смысл выкидывать исключительные ситуации, если обнаружился непредусмотренный вариант
@@ -309,8 +308,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -328,8 +326,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn("Bank-level formData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -353,8 +350,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn("FormData with " + formData.getKind().getName() + " kind, couldn't be in "
-							+ state.getName() +" state!");
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
 		}
 		return result;

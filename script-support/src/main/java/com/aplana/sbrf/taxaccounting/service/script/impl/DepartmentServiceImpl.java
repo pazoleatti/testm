@@ -36,22 +36,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 	@Override
 	public Boolean issetSbrfCode(String sbrfCode) {
-		if (departmentDao.getDepartmentBySbrfCode(sbrfCode) != null){
-			return true;
-		}
-		else{
-			return false;
-		}
+		return departmentDao.getDepartmentBySbrfCode(sbrfCode) != null;
 	}
 	
 	@Override
 	public Boolean issetName(String name) {
-		if (departmentDao.getDepartmentByName(name) != null){
-			return true;
-		}
-		else{
-			return false;
-		}
+		return departmentDao.getDepartmentByName(name) != null;
 	}
 }
 

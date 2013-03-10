@@ -4,13 +4,13 @@ import com.google.gwt.user.datepicker.client.CalendarModel;
 
 public class CalendarModelRussian extends CalendarModel{
 
-    private String[] daysOfWeek = {"Вск","Пн","Вт","Ср","Чт","Пт","Сб"};
-    private String[] monthsOfYearRus = {"Янв","Фев","Март","Апр","Май","Июнь","Июль","Авг","Сен","Окт","Нояб","Дек"};
-    private String[] monthsOfYearEng = {"Jan","Feb","Mar", "Apr","May","Jun", "Jul", "Aug","Sep","Oct","Nov", "Dec"};
+    private final static String[] DAYS_OF_WEEK = {"Вск","Пн","Вт","Ср","Чт","Пт","Сб"};
+    private final static String[] MONTHS_OF_YEAR_RUS = {"Янв","Фев","Март","Апр","Май","Июнь","Июль","Авг","Сен","Окт","Нояб","Дек"};
+    private final static String[] MONTHS_OF_YEAR_ENG = {"Jan","Feb","Mar", "Apr","May","Jun", "Jul", "Aug","Sep","Oct","Nov", "Dec"};
 
     @Override
     public String formatDayOfWeek(int dayInWeek) {
-        return daysOfWeek[dayInWeek];
+        return DAYS_OF_WEEK[dayInWeek];
     }
 
     @Override
@@ -20,11 +20,11 @@ public class CalendarModelRussian extends CalendarModel{
         final int MONTH_BEGIN_POSITION = 5;
         final int MONTH_END_POSITION = super.formatCurrentMonth().length();
 
-        for(int i = 0; i < monthsOfYearEng.length; i++){
-            if(monthsOfYearEng[i].equals(super.formatCurrentMonth().substring(MONTH_BEGIN_POSITION,
+        for(int i = 0; i < MONTHS_OF_YEAR_ENG.length; i++){
+            if(MONTHS_OF_YEAR_ENG[i].equals(super.formatCurrentMonth().substring(MONTH_BEGIN_POSITION,
                     MONTH_END_POSITION))){
                 return (super.formatCurrentMonth().substring(YEAR_BEGIN_POSITION, YEAR_END_POSITION) +
-                        " " + monthsOfYearRus[i]);
+                        " " + MONTHS_OF_YEAR_RUS[i]);
             }
         }
         return "Неопр";

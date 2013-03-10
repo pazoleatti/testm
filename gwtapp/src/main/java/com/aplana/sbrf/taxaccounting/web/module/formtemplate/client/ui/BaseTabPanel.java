@@ -122,8 +122,7 @@ public abstract class BaseTabPanel extends Composite implements TabPanel {
    * @param tab The {@link BaseTab} to check.
    */
   private void setTabVisibility(BaseTab tab) {
-    boolean visible = (tab == currentActiveTab) || tab.canUserAccess();
-    tab.setVisible(visible);
+    tab.setVisible(tab.equals(currentActiveTab) || tab.canUserAccess());
   }
 
   /**

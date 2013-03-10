@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -36,12 +38,13 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
-
 /**
  * 
  * @author avanteev
  */
 public class FormDataXlsxReportBuilder {
+
+	private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
 
 	private static final int cellWidth = 10;
 	
@@ -79,7 +82,7 @@ public class FormDataXlsxReportBuilder {
 
 	private int skip = 0;
 	
-	private class CellStyleBuilder{
+	private final class CellStyleBuilder{
 		public CellStyle cellStyle;
 		
 		private CellStyleBuilder(){
@@ -96,47 +99,47 @@ public class FormDataXlsxReportBuilder {
 		}
 		
 		public CellStyle createCellStyle(CellType value){
-			CellStyle cellStyle = workBook.createCellStyle();
-			cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+			CellStyle style = workBook.createCellStyle();
+			style.setAlignment(CellStyle.ALIGN_CENTER);
 			
 			switch (value) {
 			case STRING:
-				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-				cellStyle.setWrapText(true);
-				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setWrapText(true);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
 				
 				break;
 			case DATE: 
-				cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
-				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				style.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
 				
 			case DATE_TABLE:
-				cellStyle.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
+				style.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
 				
 				
 				break;
 			case BIGDECIMAL:
-				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-				cellStyle.setWrapText(true);
-				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setWrapText(true);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
 				
 				break;
 				
 			case EMPTY:
-				cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-				cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
-				cellStyle.setBorderTop(CellStyle.BORDER_THIN);
-				cellStyle.setBorderRight(CellStyle.BORDER_THIN);
-				cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
 				
 				break;
 
@@ -145,28 +148,28 @@ public class FormDataXlsxReportBuilder {
 				break;
 			}
 			
-			return cellStyle;
+			return style;
 		}
 		
-		public CellStyle createCellStyle(CellType value,FormStyle style){
-			CellStyle cellStyle = createCellStyle(value);
-			if(style != null){
-				((XSSFCellStyle)cellStyle).setFillForegroundColor(new XSSFColor(new java.awt.Color(
-						style.getBackColor().getRed(),
-						style.getBackColor().getGreen(),
-						style.getBackColor().getBlue()))
+		public CellStyle createCellStyle(CellType value, FormStyle formStyle){
+			CellStyle style = createCellStyle(value);
+			if(formStyle != null){
+				((XSSFCellStyle)style).setFillForegroundColor(new XSSFColor(new java.awt.Color(
+						formStyle.getBackColor().getRed(),
+						formStyle.getBackColor().getGreen(),
+						formStyle.getBackColor().getBlue()))
 				);
 				
-				((XSSFCellStyle)cellStyle).setFillBackgroundColor(
+				((XSSFCellStyle)style).setFillBackgroundColor(
 						new XSSFColor(new java.awt.Color(
-								style.getFontColor().getRed(),
-								style.getFontColor().getGreen(),
-								style.getFontColor().getBlue()))
+								formStyle.getFontColor().getRed(),
+								formStyle.getFontColor().getGreen(),
+								formStyle.getFontColor().getBlue()))
 						);
-				cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			}
 			
-			return cellStyle;
+			return style;
 		}
 	}
 	
@@ -397,14 +400,14 @@ public class FormDataXlsxReportBuilder {
 			}
 			
 		}
-		for (Map.Entry<Integer, Integer> cellWidth : widthCellsMap.entrySet()) {
-			//System.out.println("----n" + cellWidth.getKey() + ":" + cellWidth.getValue());
-			sheet.setColumnWidth(cellWidth.getKey(), cellWidth.getValue().intValue()*256);
+		for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
+			//logger.debug("----n" + width.getKey() + ":" + width.getValue());
+			sheet.setColumnWidth(width.getKey(), width.getValue().intValue()*256);
 		}
 	}
 	
 	private void fillHeader(){
-		System.out.println(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
+		logger.debug(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
 		StringBuilder sb;
 		AreaReference ar;
 		Row r;
@@ -463,15 +466,15 @@ public class FormDataXlsxReportBuilder {
 
 		for (int i = 0;i < data.getSigners().size(); i++) {
 			Row rs = sheet.createRow(rowNumber);
-			Cell crs_p = rs.createCell(XlsxReportMetadata.CELL_POS);
-			crs_p.setCellValue(data.getSigners().get(i).getPosition());
-			Cell crs_s = rs.createCell(XlsxReportMetadata.CELL_SIGN);
-			crs_s.setCellValue("_______");
-			Cell crs_fio = rs.createCell(XlsxReportMetadata.CELL_FIO);
-			crs_fio.setCellValue(data.getSigners().get(i).getName());
-			crs_p.setCellStyle(cs);
-			crs_s.setCellStyle(cs);
-			crs_fio.setCellStyle(cs);
+			Cell crsP = rs.createCell(XlsxReportMetadata.CELL_POS);
+			crsP.setCellValue(data.getSigners().get(i).getPosition());
+			Cell crsS = rs.createCell(XlsxReportMetadata.CELL_SIGN);
+			crsS.setCellValue("_______");
+			Cell crsFio = rs.createCell(XlsxReportMetadata.CELL_FIO);
+			crsFio.setCellValue(data.getSigners().get(i).getName());
+			crsP.setCellStyle(cs);
+			crsS.setCellStyle(cs);
+			crsFio.setCellStyle(cs);
 			rowNumber++;
 			sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);
 		}

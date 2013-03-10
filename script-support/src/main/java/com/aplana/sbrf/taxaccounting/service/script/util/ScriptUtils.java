@@ -19,7 +19,7 @@ import java.util.List;
  * @since 22.01.13 16:34
  */
 
-public class ScriptUtils {
+public final class ScriptUtils {
 
 	private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне столбцов \"%s\" - \"%s\" должны " +
 			"быть только столбцы численного типа. Столбец \"%s\" имеет неверный тип.";
@@ -27,6 +27,12 @@ public class ScriptUtils {
 	private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
 
 	private static final String CELL_NOT_FOUND = "Ячейка (\"%s\"; \"%s\") не найдена";
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private ScriptUtils() {
+	}
 
 	/**
 	 * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0.
@@ -128,26 +134,26 @@ public class ScriptUtils {
 	/**
 	 * Вычисляет сумму значений двух ячеек
 	 *
-	 * @param A первая ячейка
-	 * @param B вторая ячейка
+	 * @param cellA первая ячейка
+	 * @param cellB вторая ячейка
 	 * @return сумма значений
 	 */
-	public static double summ(Cell A, Cell B) {
-		double a = A.getNumericValue() == null ? 0 : A.getNumericValue().doubleValue();
-		double b = B.getNumericValue() == null ? 0 : B.getNumericValue().doubleValue();
+	public static double summ(Cell cellA, Cell cellB) {
+		double a = cellA.getNumericValue() == null ? 0 : cellA.getNumericValue().doubleValue();
+		double b = cellB.getNumericValue() == null ? 0 : cellB.getNumericValue().doubleValue();
 		return a+b;
 	}
 
 	/**
 	 * Вычисляет разность между значениями двух ячеек
 	 *
-	 * @param A первая ячейка
-	 * @param B вторая ячейка
+	 * @param cellA первая ячейка
+	 * @param cellB вторая ячейка
 	 * @return разность
 	 */
-	public static double substract(Cell A, Cell B) {
-		double a = A.getValue() == null ? 0.0 : A.getNumericValue().doubleValue();
-		double b = B.getValue() == null ? 0.0 : B.getNumericValue().doubleValue();
+	public static double substract(Cell cellA, Cell cellB) {
+		double a = cellA.getValue() == null ? 0.0 : cellA.getNumericValue().doubleValue();
+		double b = cellB.getValue() == null ? 0.0 : cellB.getNumericValue().doubleValue();
 		return a-b;
 	}
 

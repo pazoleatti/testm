@@ -65,8 +65,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	public DeclarationData get(long declarationId, int userId) {
 		if (declarationDataAccessService.canRead(userId, declarationId)) {
-			DeclarationData declaration = declarationDataDao.get(declarationId);
-			return declaration;
+			return declarationDataDao.get(declarationId);
 		} else {
 			throw new AccessDeniedException("Недостаточно прав на просмотр данных декларации");
 		}
@@ -99,8 +98,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	public String getXmlData(long declarationId, int userId) {
 		if (declarationDataAccessService.canDownloadXml(userId, declarationId)) {
-			String xmlData = declarationDataDao.getXmlData(declarationId);
-			return xmlData;
+			return declarationDataDao.getXmlData(declarationId);
 		} else {
 			throw new AccessDeniedException("Невозможно получить xml");
 		}

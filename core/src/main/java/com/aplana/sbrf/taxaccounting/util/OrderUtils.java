@@ -5,7 +5,14 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Ordered;
 
-public class OrderUtils {
+public final class OrderUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private OrderUtils() {
+	}
+
 	/**
 	 * Сортирует коллекцию по возрастанию значения поля order,
 	 * после чего обновляет у всех элементов коллекции значение поля order, приравнивая его номеру

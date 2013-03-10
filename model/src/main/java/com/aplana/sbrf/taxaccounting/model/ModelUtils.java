@@ -10,8 +10,11 @@ import java.util.Collection;
  * @author sgoryachkin
  *
  */
-public class ModelUtils {
+public final class ModelUtils {
 
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
 	private ModelUtils() {}
 	
 	public static interface GetPropertiesFunc<T, V>{

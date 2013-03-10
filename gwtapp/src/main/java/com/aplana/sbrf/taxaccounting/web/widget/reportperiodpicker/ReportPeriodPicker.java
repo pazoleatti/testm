@@ -92,19 +92,19 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
-		Map<Integer, String> selectedReportPeriods = new HashMap<Integer, String>();
+		Map<Integer, String> periods = new HashMap<Integer, String>();
 		for(ReportPeriod item : reportPeriodList){
-			selectedReportPeriods.put(item.getId(), item.getName());
+			periods.put(item.getId(), item.getName());
 		}
-		setSelectedReportPeriods(selectedReportPeriods);
+		setSelectedReportPeriods(periods);
 	}
 
 	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
 		for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
-			result.append(item.getValue()).append(";");
-			tooltipTitle.append(item.getValue()).append("\n");
+			result.append(item.getValue()).append(';');
+			tooltipTitle.append(item.getValue()).append('\n');
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());
@@ -156,15 +156,15 @@ public class ReportPeriodPicker extends Composite{
 				.format(taxPeriod.getStartDate());
 		final String DATE_SHORT_END = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
 				.format(taxPeriod.getEndDate());
-		int startDayIndex = DATE_SHORT_START.lastIndexOf("-");
-		int startMonthIndex = DATE_SHORT_START.indexOf("-");
-		int endDayIndex = DATE_SHORT_END.lastIndexOf("-");
-		int enMonthIndex = DATE_SHORT_END.indexOf("-");
-		String startDate =  DATE_SHORT_START.substring(startDayIndex + 1, DATE_SHORT_START.length()) + "." +
-							DATE_SHORT_START.substring(startMonthIndex + 1, startDayIndex) + "." +
+		int startDayIndex = DATE_SHORT_START.lastIndexOf('-');
+		int startMonthIndex = DATE_SHORT_START.indexOf('-');
+		int endDayIndex = DATE_SHORT_END.lastIndexOf('-');
+		int enMonthIndex = DATE_SHORT_END.indexOf('-');
+		String startDate =  DATE_SHORT_START.substring(startDayIndex + 1, DATE_SHORT_START.length()) + '.' +
+							DATE_SHORT_START.substring(startMonthIndex + 1, startDayIndex) + '.' +
 							DATE_SHORT_START.substring(0, startMonthIndex);
-		String endDate =DATE_SHORT_END.substring(endDayIndex + 1, DATE_SHORT_END.length()) + "." +
-						DATE_SHORT_END.substring(enMonthIndex + 1, endDayIndex) + "." +
+		String endDate =DATE_SHORT_END.substring(endDayIndex + 1, DATE_SHORT_END.length()) + '.' +
+						DATE_SHORT_END.substring(enMonthIndex + 1, endDayIndex) + '.' +
 						DATE_SHORT_END.substring(0, enMonthIndex);
 		return (startDate + " - " + endDate);
 	}
@@ -190,7 +190,7 @@ public class ReportPeriodPicker extends Composite{
 		panelWithTree.add(tree);
 	}
 
-	private class TaxPeriodItem extends TreeItem{
+	private final class TaxPeriodItem extends TreeItem{
 		private TaxPeriodItem(Widget widget) {
 			super(widget);
 		}
@@ -203,7 +203,7 @@ public class ReportPeriodPicker extends Composite{
 		}
 	}
 
-	private class ReportPeriodItem extends TreeItem{
+	private final class ReportPeriodItem extends TreeItem{
 		private ReportPeriodItem(Widget widget){
 			super(widget);
 		}

@@ -7,9 +7,16 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class FormatUtils {
+public final class FormatUtils {
+
 	private static ThreadLocal<DateFormat> shortDateFormat = new ThreadLocal<DateFormat>();
 	private static ThreadLocal<NumberFormat> simpleNumberFormat = new ThreadLocal<NumberFormat>();
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private FormatUtils() {
+	}
 
 	/**
 	 * Форматирует строку в строку, содержащую информацию только о дате, без времени и тайм-зоны

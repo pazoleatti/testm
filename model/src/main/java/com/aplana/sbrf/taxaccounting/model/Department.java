@@ -27,7 +27,7 @@ public class Department implements Serializable {
 	private DepartmentType type;
 	private Integer dictRegionId;
 	private String tbIndex;
-	private String SBRFCode;
+	private String sbrfCode;
 	private List<DepartmentFormType> departmentFormTypes;
 	private List<DepartmentDeclarationType> departmentDeclarationTypes;
 
@@ -187,14 +187,14 @@ public class Department implements Serializable {
 	/**
 	 * Получить код подразделения в нотации Сбербанка
 	 */
-	public String getSBRFCode() {
-		return SBRFCode;
+	public String getSbrfCode() {
+		return sbrfCode;
 	}
 
 	/**
 	 * Установить код подразделения в нотации Сбербанка
 	 */
-	public void setSBRFCode(String SBRFCode) {
-		this.SBRFCode = SBRFCode;
+	public void setSbrfCode(String sbrfCode) {
+		this.sbrfCode = sbrfCode;
 	}
 }

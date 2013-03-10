@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.treepicker;
 
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.google.gwt.core.client.*;
 import com.google.gwt.dom.client.*;
@@ -13,15 +12,12 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
-
 public class TreePicker extends Composite{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, TreePicker> {
 	}
 
 	private static SelectionUiBinder uiBinder = GWT.create(SelectionUiBinder.class);
-
-	private HandlerManager handlerManager;
 
 	@UiField
 	TextBox selected;

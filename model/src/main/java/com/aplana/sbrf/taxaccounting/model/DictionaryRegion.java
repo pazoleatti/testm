@@ -6,16 +6,6 @@ public class DictionaryRegion {
     private String okato;
     private String okatoDefinition;
 
-    public DictionaryRegion(Integer code, String name, String okato, String okatoDefinition) {
-        setCode(code);
-        setName(name);
-        setOkato(okato);
-        setOkatoDefinition(okatoDefinition);
-    }
-
-    public DictionaryRegion() {
-    }
-
     public String getOkatoDefinition() {
         return okatoDefinition;
     }

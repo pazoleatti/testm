@@ -131,6 +131,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 						spanCells(td, absRowIndex, curColumn, rowSpan, colSpan);
 					} else {
 						//Exception
+						//TODO (Marat Fayzullin) забыли выкинуть исключение?
 					}
 				}
 
@@ -144,6 +145,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 						applyOurCustomStyles(td, currentCellStyle);
 					} else {
 						// Error
+						//TODO (Marat Fayzullin) забыли выкинуть исключение?
 					}
 				}
 

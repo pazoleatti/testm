@@ -8,7 +8,14 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class FormDataMockUtils {
+public final class FormDataMockUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private FormDataMockUtils() {
+	}
+
 	public static FormData mockFormData(long id, int departmentId, WorkflowState state, FormDataKind kind, int reportPeriodId) {
 		FormData formData = mock(FormData.class);
 		when(formData.getId()).thenReturn(id);

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.script.dictionary;
 
 import com.aplana.sbrf.taxaccounting.model.DictionaryRegion;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,27 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DictionaryRegionDaoTest.xml"})
 public class DictionaryRegionDaoTest {
+
     @Autowired
     private DictionaryRegionDao dao;
-    private static DictionaryRegion regionTulsk = new DictionaryRegion(72, "Тюменская область", "71000000000", "71");
-    private static DictionaryRegion regionHant = new DictionaryRegion(86, "Ханты-Мансийский автономный округ - Югра", "71000000000", "71100");
+
+    private static DictionaryRegion regionTulsk;
+    private static DictionaryRegion regionHant;
+
+	@BeforeClass
+	public static void init() {
+		regionTulsk = new DictionaryRegion();
+		regionTulsk.setCode(72);
+		regionTulsk.setName("Тюменская область");
+		regionTulsk.setOkato("71000000000");
+		regionTulsk.setOkatoDefinition("71");
+
+		regionHant = new DictionaryRegion();
+		regionHant.setCode(86);
+		regionHant.setName("Ханты-Мансийский автономный округ - Югра");
+		regionHant.setOkato("71000000000");
+		regionHant.setOkatoDefinition("71100");
+	}
 
     @Test
     public void testSimple(){

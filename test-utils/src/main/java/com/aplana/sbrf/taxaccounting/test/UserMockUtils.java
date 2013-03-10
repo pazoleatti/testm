@@ -5,7 +5,14 @@ import static org.mockito.Mockito.when;
 
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
-public class UserMockUtils {
+public final class UserMockUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private UserMockUtils() {
+	}
+
 	public static TAUser mockUser(int id, int departmentId, String roleCode) {
 		TAUser user = mock(TAUser.class);
 		when(user.getId()).thenReturn(id);

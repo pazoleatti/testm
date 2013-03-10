@@ -53,7 +53,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	}
 
-	static class MapEntry implements Map.Entry<String, Object> {
+	private static final class MapEntry implements Map.Entry<String, Object> {
 
 		private Cell cell;
 

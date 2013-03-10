@@ -7,7 +7,14 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-public class FormTemplateMockUtils {
+public final class FormTemplateMockUtils {
+
+	/**
+	 * Запрещаем создавать экземляры класса
+	 */
+	private FormTemplateMockUtils() {
+	}
+
 	public static FormTemplate mockFormTemplate(int formTemplateId, FormType formType) {
 		FormTemplate ft = mock(FormTemplate.class);
 		when(ft.getId()).thenReturn(formTemplateId);
