@@ -34,7 +34,6 @@ public class Income101DaoImpl extends AbstractDao implements Income101Dao {
 					income101Data.setDebetRate(rs.getDouble("DEBET_RATE"));
 					income101Data.setOutcomeCreditRemains(rs.getDouble("OUTCOME_CREDIT_REMAINS"));
 					income101Data.setOutcomeDebetRemains(rs.getDouble("OUTCOME_DEBET_REMAINS"));
-					income101Data.setId(rs.getInt("ID"));
 					return income101Data;
 				}
 			}

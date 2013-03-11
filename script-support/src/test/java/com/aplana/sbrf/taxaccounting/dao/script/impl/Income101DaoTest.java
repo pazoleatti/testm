@@ -26,7 +26,7 @@ public class Income101DaoTest {
 	
 	@Test
 	public void testValid(){
-		assertTrue(income101Dao.getIncome101(1, "2").size() == 2);
+		assertTrue(income101Dao.getIncome101(1, "2").size() == 1);
 	}
 }
 
