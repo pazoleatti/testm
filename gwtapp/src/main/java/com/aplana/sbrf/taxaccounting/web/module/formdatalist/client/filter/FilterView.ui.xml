@@ -4,7 +4,7 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
     <g:VerticalPanel>
-        <g:cell height="45px">
+        <g:cell height="50px">
             <g:HorizontalPanel>
                 <g:cell width="250px">
                     <g:VerticalPanel ui:field="reportPeriodPanel">
@@ -31,14 +31,14 @@
                 </g:cell>
             </g:HorizontalPanel>
         </g:cell>
-        <g:cell height="45px">
+        <g:cell height="50px">
             <g:HorizontalPanel>
-                <g:cell width="250px">
+                <g:cell width="250px" verticalAlignment="bottom">
                     <g:FlowPanel ui:field="departmentSelectionTreePanel">
                         <g:Label width="200px" text="Подразделение" />
                     </g:FlowPanel>
                 </g:cell>
-                <g:cell verticalAlignment="middle">
+                <g:cell verticalAlignment="bottom">
                     <style:Bar>
                         <style:LeftBar>
                             <g:Button ui:field="create">Создать</g:Button>

@@ -28,10 +28,10 @@
                     </g:VerticalPanel>
                 </g:cell>
                 <g:VerticalPanel>
-                    <g:cell height="45px">
+                    <g:cell height="50px">
                         <g:FlowPanel width="100%" ui:field="filterContentPanel" />
                     </g:cell>
-                    <g:cell height="45px" verticalAlignment="middle">
+                    <g:cell height="50px" verticalAlignment="middle">
                         <style:Bar>
                             <style:LeftBar>
                                 <g:Button ui:field="create">Создать</g:Button>
