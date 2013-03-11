@@ -1,33 +1,30 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
-
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
+import com.aplana.sbrf.taxaccounting.dao.script.Income102Dao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.aplana.sbrf.taxaccounting.dao.script.Income101Dao;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"Income101DaoTest.xml"})
-public class Income101DaoTest {
+@ContextConfiguration({"Income102DaoTest.xml"})
+public class Income102DaoTest {
 	@Autowired
-	private Income101Dao income101Dao;
+	private Income102Dao income102Dao;
 	
 	@Test
 	public void testSimple(){
-		assertNotNull(income101Dao);
+		assertNotNull(income102Dao);
 	}
 	
 	@Test
 	public void testValid(){
-		assertEquals(income101Dao.getIncome101(1, "2").getIncomeDebetRemains(), 3, 1e-5);
+		assertEquals(income102Dao.getIncome102(1, "2").getTotalSum(), 666, 1e-5);
 	}
 }
 

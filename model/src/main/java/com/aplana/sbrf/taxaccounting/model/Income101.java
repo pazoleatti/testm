@@ -4,12 +4,11 @@ package com.aplana.sbrf.taxaccounting.model;
  * Оборотная ведомость (Форма 0409101-СБ)
  */
 public class Income101 {
-	// id
-	private Integer id;
+
 	// Идентификатор отчетного периода
 	private Integer reportPeriodId;
 	// Номер счета
-	private String Account;
+	private String account;
 	// Входящие остатки по дебету
 	private Double incomeDebetRemains;
 	// Входящие остатки по кредиту
@@ -30,18 +29,12 @@ public class Income101 {
 		this.reportPeriodId = reportPeriodId;
 	}
 	public String getAccount() {
-		return Account;
+		return account;
 	}
 	public void setAccount(String account) {
-		Account = account;
+		this.account = account;
 	}
 	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
 	public Double getIncomeDebetRemains() {
 		return incomeDebetRemains;
 	}
