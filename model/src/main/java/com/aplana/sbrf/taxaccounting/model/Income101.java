@@ -11,17 +11,17 @@ public class Income101 {
 	// Номер счета
 	private String Account;
 	// Входящие остатки по дебету
-	private Double IncomeDebetRemains;
+	private Double incomeDebetRemains;
 	// Входящие остатки по кредиту
-	private Double IncomeCreditRemains;
+	private Double incomeCreditRemains;
 	// Обороты по дебету
-	private Double DebetRate;
+	private Double debetRate;
 	// Обороты по кредиту
-	private Double CreditRate;
+	private Double creditRate;
 	// Исходящие остатки по дебету
-	private Double OutcomeDebetRemains;
+	private Double outcomeDebetRemains;
 	// Исходящие остатки по кредиту
-	private Double OutcomeCreditRemains;
+	private Double outcomeCreditRemains;
 	
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
@@ -35,46 +35,47 @@ public class Income101 {
 	public void setAccount(String account) {
 		Account = account;
 	}
-	public Double getIncomeDebetRemains() {
-		return IncomeDebetRemains;
-	}
-	public void setIncomeDebetRemains(Double incomeDebetRemains) {
-		IncomeDebetRemains = incomeDebetRemains;
-	}
-	public Double getIncomeCreditRemains() {
-		return IncomeCreditRemains;
-	}
-	public void setIncomeCreditRemains(Double incomeCreditRemains) {
-		IncomeCreditRemains = incomeCreditRemains;
-	}
-	public Double getDebetRate() {
-		return DebetRate;
-	}
-	public void setDebetRate(Double debetRate) {
-		DebetRate = debetRate;
-	}
-	public Double getCreditRate() {
-		return CreditRate;
-	}
-	public void setCreditRate(Double creditRate) {
-		CreditRate = creditRate;
-	}
-	public Double getOutcomeDebetRemains() {
-		return OutcomeDebetRemains;
-	}
-	public void setOutcomeDebetRemains(Double outcomeDebetRemains) {
-		OutcomeDebetRemains = outcomeDebetRemains;
-	}
-	public Double getOutcomeCreditRemains() {
-		return OutcomeCreditRemains;
-	}
-	public void setOutcomeCreditRemains(Double outcomeCreditRemains) {
-		OutcomeCreditRemains = outcomeCreditRemains;
-	}
+	
 	public Integer getId() {
 		return id;
 	}
 	public void setId(Integer id) {
 		this.id = id;
+	}
+	public Double getIncomeDebetRemains() {
+		return incomeDebetRemains;
+	}
+	public void setIncomeDebetRemains(Double incomeDebetRemains) {
+		this.incomeDebetRemains = incomeDebetRemains;
+	}
+	public Double getIncomeCreditRemains() {
+		return incomeCreditRemains;
+	}
+	public void setIncomeCreditRemains(Double incomeCreditRemains) {
+		this.incomeCreditRemains = incomeCreditRemains;
+	}
+	public Double getDebetRate() {
+		return debetRate;
+	}
+	public void setDebetRate(Double debetRate) {
+		this.debetRate = debetRate;
+	}
+	public Double getCreditRate() {
+		return creditRate;
+	}
+	public void setCreditRate(Double creditRate) {
+		this.creditRate = creditRate;
+	}
+	public Double getOutcomeDebetRemains() {
+		return outcomeDebetRemains;
+	}
+	public void setOutcomeDebetRemains(Double outcomeDebetRemains) {
+		this.outcomeDebetRemains = outcomeDebetRemains;
+	}
+	public Double getOutcomeCreditRemains() {
+		return outcomeCreditRemains;
+	}
+	public void setOutcomeCreditRemains(Double outcomeCreditRemains) {
+		this.outcomeCreditRemains = outcomeCreditRemains;
 	}
 }
