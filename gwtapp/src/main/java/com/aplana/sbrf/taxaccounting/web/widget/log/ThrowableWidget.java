@@ -31,14 +31,15 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 
 	@Override
 	public void setThrowable(Throwable throwable) {
+		text.setText("");
+		text.setVisible(false);
 		if (throwable != null) {
 			if (throwable instanceof TaActionException) {
 				if (((TaActionException) throwable).getTrace() != null){
 					text.setText(((TaActionException) throwable).getTrace());
+					showTextLabel.setVisible(true);
 				} else {
 					showTextLabel.setVisible(false);
-					text.setVisible(false);
-					text.setText("");
 				}
 			} else {
 				StackTraceElement[] trace = throwable.getStackTrace();
@@ -47,15 +48,10 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 					sb.append(stackTraceElement.toString()).append("\n");
 				}
 				text.setText(sb.toString());
+				showTextLabel.setVisible(true);
 			}
-
-			text.setVisible(false);
-			showTextLabel.setVisible(true);
-
 		} else {
-			showTextLabel.setVisible(false);
-			text.setVisible(false);
-			text.setText("");
+			showTextLabel.setVisible(false);	
 		}
 	}
 
