@@ -273,7 +273,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@Override
 	public void setColumnList(List<Column> columnList) {
 		columns = columnList;
-		setupColumns(0);
+		if (columnListBox.getSelectedIndex() >= 0) {
+			setupColumns(columnListBox.getSelectedIndex());
+		} else {
+			setupColumns(0);
+		}
 	}
 
 	@Override

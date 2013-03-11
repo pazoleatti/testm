@@ -24,6 +24,7 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 
 	private final Widget widget;
 	private List<Script> scriptList;
+	private int lastSelectedScriptIndex = 0;
 
 	// Элементы управления редактирования скриптов
 	@UiField
@@ -65,7 +66,7 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 		for (Script script : scriptList) {
 			scriptListBox.addItem(script.getName(), String.valueOf(i++));
 		}
-		scriptListBox.setSelectedIndex(0);
+		scriptListBox.setSelectedIndex(lastSelectedScriptIndex);
 		selectScript();
 	}
 
@@ -81,9 +82,9 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 
 	private Script getSelectedScript(List<Script> scriptList) {
 		Script script = null;
-		int selInd = scriptListBox.getSelectedIndex();
-		if (selInd >= 0) {
-			String str = scriptListBox.getValue(selInd);
+		lastSelectedScriptIndex = scriptListBox.getSelectedIndex();
+		if (lastSelectedScriptIndex >= 0) {
+			String str = scriptListBox.getValue(lastSelectedScriptIndex);
 			int scrInd = Integer.valueOf(str);
 			script = scriptList.get(scrInd);
 		}

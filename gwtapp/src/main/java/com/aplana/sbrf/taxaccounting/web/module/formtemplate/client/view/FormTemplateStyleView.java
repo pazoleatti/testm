@@ -95,7 +95,9 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	public void setViewData(List<FormStyle> styles) {
 		if (styles != null) {
 			this.styles = styles;
-			if (styles.size() > 0) {
+			if (styleListBox.getSelectedIndex() >= 0) {
+				setupStyles(styleListBox.getSelectedIndex());
+			} else if (styles.size() > 0){
 				setupStyles(0);
 			}
 		}
