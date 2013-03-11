@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.log;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,9 +20,6 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 	HTMLPanel htmlPanel;
 
 	@UiField
-	Label message;
-
-	@UiField
 	Label showTextLabel;
 
 	@UiField
@@ -35,27 +33,30 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 	@Override
 	public void setThrowable(Throwable throwable) {
 		if (throwable != null) {
-
-			StackTraceElement[] trace = throwable.getStackTrace();
-			StringBuilder sb = new StringBuilder();
-			for (StackTraceElement stackTraceElement : trace) {
-				sb.append(stackTraceElement.toString()).append("\n");
+			if (throwable instanceof TaActionException
+					&& ((TaActionException) throwable).getTrace() != null) {
+				text.setText(((TaActionException) throwable).getTrace());
+			} else {
+				StackTraceElement[] trace = throwable.getStackTrace();
+				StringBuilder sb = new StringBuilder();
+				for (StackTraceElement stackTraceElement : trace) {
+					sb.append(stackTraceElement.toString()).append("\n");
+				}
+				text.setText(sb.toString());
 			}
-			text.setText(sb.toString());
+
 			text.setVisible(false);
 			showTextLabel.setVisible(true);
-			message.setText(throwable.getLocalizedMessage());
 
 		} else {
 			showTextLabel.setVisible(false);
 			text.setVisible(false);
 			text.setText("");
-			message.setText("");
 		}
 	}
 
 	@UiHandler("showTextLabel")
-	void onShowTextLabelClicked(ClickEvent event){
+	void onShowTextLabelClicked(ClickEvent event) {
 		showTextLabel.setVisible(false);
 		text.setVisible(true);
 	}

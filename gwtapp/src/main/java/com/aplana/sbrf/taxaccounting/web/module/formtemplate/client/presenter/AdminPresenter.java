@@ -40,7 +40,7 @@ public class AdminPresenter extends
 	@Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.adminPage)
-	public interface MyProxy extends Proxy<AdminPresenter>, Place {
+	public interface MyProxy extends ProxyPlace<AdminPresenter> {
 	}
 
 	/**
@@ -63,6 +63,11 @@ public class AdminPresenter extends
 		getView().setUiHandlers(this);
 	}
 
+	@Override
+	public boolean useManualReveal() {
+		return true;
+	}
+
 	/**
 	 * Здесь происходит подготовка формы администрирования.
 	 * 
@@ -74,17 +79,19 @@ public class AdminPresenter extends
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		dispatcher
-				.execute(
-						new GetFormTemplateListAction(),
-						CallbackUtils
-								.defaultCallback(new AbstractCallback<GetFormTemplateListResult>() {
-									@Override
-									public void onSuccess(
-											GetFormTemplateListResult result) {
-										getView().setFormTemplateTable(result.getForms());
-									}
-								}));
+		dispatcher.execute(
+				new GetFormTemplateListAction(),
+				CallbackUtils.defaultCallback(
+						new AbstractCallback<GetFormTemplateListResult>() {
+							@Override
+							public void onSuccess(
+									GetFormTemplateListResult result) {
+								getView().setFormTemplateTable(
+										result.getForms());
+							}
+						}).addCallback(
+						new ManualRevealCallback<GetFormTemplateListResult>(
+								AdminPresenter.this)));
 	}
 
 	/**

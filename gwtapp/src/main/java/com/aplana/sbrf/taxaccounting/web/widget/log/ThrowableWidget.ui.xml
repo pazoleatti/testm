@@ -10,8 +10,7 @@
     </ui:style>
 
 	<g:HTMLPanel ui:field="htmlPanel">
-		<g:Label ui:field="message"/>
-		<g:Label ui:field="showTextLabel" visible="true" text="Показать детали ошибки" addStyleNames="{style.showTextLabelStyle}"/>
-        <g:TextArea ui:field="text" readOnly="true" width="100%" height="100px"/>
+		<g:Label ui:field="showTextLabel" visible="true" text="Показать технические детали ошибки" addStyleNames="{style.showTextLabelStyle}"/>
+        <g:TextArea ui:field="text" readOnly="true" width="100%" height="100%"/>
 	</g:HTMLPanel>
 </ui:UiBinder> 

@@ -44,9 +44,7 @@ public class ExceptionHandlerAspect {
 			}
 		}
 
-		if (e instanceof ActionException) {
-			throw new ActionException(getErrorMessage(actionName), e);
-		} else if (e instanceof ServiceLoggerException) {
+		if (e instanceof ServiceLoggerException) {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ (e.getLocalizedMessage() != null ? e.getLocalizedMessage()

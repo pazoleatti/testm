@@ -55,7 +55,7 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 
 		}
 		if (!showLogOnly) {
-			MessageEvent.fire(this, caught.getLocalizedMessage());
+			MessageEvent.fire(this, caught.getLocalizedMessage(), caught);
 		}
 	}
 
