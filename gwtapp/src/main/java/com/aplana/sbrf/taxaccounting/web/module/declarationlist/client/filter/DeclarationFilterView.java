@@ -8,8 +8,8 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -25,10 +25,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     private final Widget widget;
 
 	@UiField
-	VerticalPanel reportPeriodPanel;
+	Panel reportPeriodPanel;
 
 	@UiField
-	VerticalPanel departmentSelectionTreePanel;
+	Panel departmentSelectionTreePanel;
 
 	@UiField(provided = true)
 	ValueListBox<Integer> declarationType;

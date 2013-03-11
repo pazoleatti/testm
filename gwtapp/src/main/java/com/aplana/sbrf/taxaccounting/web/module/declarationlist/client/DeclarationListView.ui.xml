@@ -3,62 +3,49 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 <ui:style>
-
-    .filterElementsMargin{
-        margin-left: 25px;
-    }
-
-    .topPanel{
-        height: 100px;
-    }
-
     .titlePanel{
-        width: 310px;
+        padding-left: 10px
     }
 
     .titleText{
-        margin-left: 5px;
-        margin-top: 5px;
-        font-size: 25px;
+        font-size: 26px;
     }
 
     .titleDesc{
-        margin-left: 5px;
-        margin-top: 5px;
-        font-size: 15px;
-    }
-    .createButtonStyle{
-        margin-left: 25px;
-        margin-top: 10px;
-    }
-
-    .searchButtonStyle{
-        margin-top: 10px;
-        margin-left: 10px;
+        font-size: 16px;
     }
 </ui:style>
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
-
         <g:north size="100">
-            <g:HorizontalPanel addStyleNames="{style.topPanel}">
-                <g:VerticalPanel addStyleNames="{style.titlePanel}">
-                    <g:Label addStyleNames="{style.titleText}">Список деклараций</g:Label>
-                    <g:Label ui:field="titleDesc" addStyleNames="{style.titleDesc}"/>
+            <g:HorizontalPanel height="100px">
+                <g:cell width="335px">
+                    <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
+                        <g:cell height="45px">
+                            <g:Label addStyleNames="{style.titleText}">Список деклараций</g:Label>
+                        </g:cell>
+                        <g:Label ui:field="titleDesc" addStyleNames="{style.titleDesc}"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:VerticalPanel>
+                    <g:cell height="45px">
+                        <g:FlowPanel width="100%" ui:field="filterContentPanel" />
+                    </g:cell>
+                    <g:cell height="45px" verticalAlignment="middle">
+                        <style:Bar>
+                            <style:LeftBar>
+                                <g:Button ui:field="create">Создать</g:Button>
+                                <g:Button ui:field="apply">Поиск</g:Button>
+                            </style:LeftBar>
+                        </style:Bar>
+                    </g:cell>
                 </g:VerticalPanel>
-                <g:FlowPanel>
-                    <g:FlowPanel width="100%" ui:field="filterContentPanel" addStyleNames="{style.filterElementsMargin}"/>
-                    <g:HorizontalPanel>
-                        <g:Button addStyleNames="{style.createButtonStyle}" ui:field="create">Создать</g:Button>
-                        <g:Button addStyleNames="{style.searchButtonStyle}" ui:field="apply">Поиск</g:Button>
-                    </g:HorizontalPanel>
-                </g:FlowPanel>
             </g:HorizontalPanel>
         </g:north>
 
         <g:center>
             <g:ScrollPanel>
-                <g:VerticalPanel ui:field="verticalPanelWithTable" width="100%">
+                <g:VerticalPanel ui:field="tablePanel" width="100%">
                     <style:GenericCellTable ui:field="declarationTable" width="100%" height="100%"/>
                 </g:VerticalPanel>
             </g:ScrollPanel>

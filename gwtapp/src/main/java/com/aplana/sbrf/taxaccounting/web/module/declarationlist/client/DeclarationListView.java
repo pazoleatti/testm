@@ -38,7 +38,7 @@ public class DeclarationListView extends
 	CellTable<DeclarationDataSearchResultItem> declarationTable;
 
 	@UiField
-	VerticalPanel verticalPanelWithTable;
+	Panel tablePanel;
 
 	@UiField
 	Label titleDesc;
@@ -108,7 +108,7 @@ public class DeclarationListView extends
 
 		FlexiblePager pager = createFlexiblePager();
 		pager.setDisplay(declarationTable);
-		verticalPanelWithTable.add(pager);
+		tablePanel.add(pager);
 	}
 
 	@Override

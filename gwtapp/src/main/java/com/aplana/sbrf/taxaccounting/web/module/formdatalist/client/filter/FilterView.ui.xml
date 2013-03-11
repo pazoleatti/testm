@@ -1,57 +1,53 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-        >
-	<ui:style>
-		.important {
-			font-weight: bold;
-		}
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
-        .filterElementsMargin{
-            margin-left: 25px;
-        }
-        .createButton{
-            margin-left: 25px;
-            margin-top: 17px;
-        }
-        .searchButton{
-            margin-left: 25px;
-            margin-top: 17px;
-            margin-left: 10px;
-        }
-	</ui:style>
-
-
-        <g:FlowPanel>
+    <g:VerticalPanel>
+        <g:cell height="45px">
             <g:HorizontalPanel>
-                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}" ui:field="reportPeriodPanel">
-                    <g:Label width="200px" text="Отчетный период" />
-                </g:VerticalPanel>
-
-                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
-                    <g:Label width="200px" text="Тип налоговой формы"/>
-                    <g:ValueListBox width="200px" ui:field="formDataKind" />
-                </g:VerticalPanel>
-
-                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
-                    <g:Label width="200px" text="Вид налоговой формы"/>
-                    <g:ValueListBox width="200px" ui:field="formTypeId" />
-                </g:VerticalPanel>
-
-                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}">
-                    <g:Label width="200px" text="Состояние"/>
-                    <g:ValueListBox width="200px" ui:field="formState"/>
-                </g:VerticalPanel>
+                <g:cell width="250px">
+                    <g:VerticalPanel ui:field="reportPeriodPanel">
+                        <g:Label width="200px" text="Отчетный период" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Тип налоговой формы"/>
+                        <g:ValueListBox width="200px" ui:field="formDataKind" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Вид налоговой формы"/>
+                        <g:ValueListBox width="200px" ui:field="formTypeId" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Состояние"/>
+                        <g:ValueListBox width="200px" ui:field="formState"/>
+                    </g:VerticalPanel>
+                </g:cell>
             </g:HorizontalPanel>
+        </g:cell>
+        <g:cell height="45px">
             <g:HorizontalPanel>
-                <g:VerticalPanel addStyleNames="{style.filterElementsMargin}" ui:field="departmentSelectionTreePanel">
-                    <g:Label width="200px" text="Подразделение" />
-                </g:VerticalPanel>
-                <g:Button addStyleNames="{style.createButton}" ui:field="create">Создать</g:Button>
-                <g:Button addStyleNames="{style.searchButton}" ui:field="apply">Поиск</g:Button>
+                <g:cell width="250px">
+                    <g:FlowPanel ui:field="departmentSelectionTreePanel">
+                        <g:Label width="200px" text="Подразделение" />
+                    </g:FlowPanel>
+                </g:cell>
+                <g:cell verticalAlignment="middle">
+                    <style:Bar>
+                        <style:LeftBar>
+                            <g:Button ui:field="create">Создать</g:Button>
+                            <g:Button ui:field="apply">Поиск</g:Button>
+                        </style:LeftBar>
+                    </style:Bar>
+                </g:cell>
             </g:HorizontalPanel>
-
-        </g:FlowPanel>
-
+        </g:cell>
+    </g:VerticalPanel>
 
 </ui:UiBinder> 

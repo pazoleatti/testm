@@ -36,7 +36,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	ValueListBox<WorkflowState> formState;
 
 	@UiField
-	VerticalPanel departmentSelectionTreePanel;
+	Panel departmentSelectionTreePanel;
 
 	@UiField
 	VerticalPanel reportPeriodPanel;
