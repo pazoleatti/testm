@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
@@ -43,18 +43,24 @@ public class ExceptionHandlerAspect {
 				actionName = "\"" + actionName + "\"";
 			}
 		}
-
-		if (e instanceof ServiceLoggerException) {
+		
+		if (e instanceof TaActionException) {
+			throw (TaActionException)e;
+		} else if (e instanceof ServiceLoggerException) {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ (e.getLocalizedMessage() != null ? e.getLocalizedMessage()
 									: ""),
 					((ServiceLoggerException) e).getLogEntries());
-		} else if (e instanceof ServiceException) {
+		} else if (e instanceof AccessDeniedException) {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ (e.getLocalizedMessage() != null ? e
 									.getLocalizedMessage() : ""));
+		} else if (e instanceof org.springframework.security.access.AccessDeniedException) {
+			throw new TaActionException(
+					getErrorMessage(actionName)
+							+ "Доступ запрещен");
 		} else {
 			throw new TaActionException(
 					getErrorMessage(actionName)

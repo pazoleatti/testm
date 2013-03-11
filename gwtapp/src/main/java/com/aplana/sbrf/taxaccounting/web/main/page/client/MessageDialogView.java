@@ -17,7 +17,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,7 +25,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -49,9 +47,6 @@ public class MessageDialogView extends PopupViewImpl implements
 	DialogBox dialogBox;
 
 	@UiField
-	VerticalPanel htmlPanel;
-
-	@UiField
 	HasText message;
 
 	@UiField
@@ -66,12 +61,6 @@ public class MessageDialogView extends PopupViewImpl implements
 	public MessageDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
-		dialogBox.setText("Сообщение");
-
-		htmlPanel.setWidth("70em");
-	    htmlPanel.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-		htmlPanel.getElement().getStyle().setMargin(1, Style.Unit.EM);
-
 	}
 
 	@Override

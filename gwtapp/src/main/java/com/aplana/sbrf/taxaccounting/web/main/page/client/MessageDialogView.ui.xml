@@ -11,11 +11,11 @@
         }
     </ui:style>
 
-	<g:DialogBox ui:field="dialogBox" modal="false">
-		<g:VerticalPanel ui:field="htmlPanel">
+	<g:DialogBox ui:field="dialogBox" modal="false" text="Сообщение">
+		<g:VerticalPanel spacing="5" width="600px">
 			<g:Label ui:field="message" />
-			<log:ThrowableWidget ui:field="throwableView" />
-            <g:cell horizontalAlignment="ALIGN_CENTER">
+			<log:ThrowableWidget ui:field="throwableView" height="100%" width="100%"/>
+            <g:cell horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
 			    <g:Button width="50%" ui:field="okButton">Закрыть сообщение</g:Button>
             </g:cell>
 		</g:VerticalPanel>

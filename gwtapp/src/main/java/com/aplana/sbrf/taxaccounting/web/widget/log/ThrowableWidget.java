@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.widget.log;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
 
 public class ThrowableWidget extends Composite implements ThrowableView {
 
@@ -17,9 +19,6 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 	}
 
 	@UiField
-	HTMLPanel htmlPanel;
-
-	@UiField
 	Label showTextLabel;
 
 	@UiField
@@ -27,15 +26,20 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 
 	public ThrowableWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
-		htmlPanel.getElement().getStyle().setMargin(1, Style.Unit.EM);
+		text.getElement().setAttribute("wrap","off");
 	}
 
 	@Override
 	public void setThrowable(Throwable throwable) {
 		if (throwable != null) {
-			if (throwable instanceof TaActionException
-					&& ((TaActionException) throwable).getTrace() != null) {
-				text.setText(((TaActionException) throwable).getTrace());
+			if (throwable instanceof TaActionException) {
+				if (((TaActionException) throwable).getTrace() != null){
+					text.setText(((TaActionException) throwable).getTrace());
+				} else {
+					showTextLabel.setVisible(false);
+					text.setVisible(false);
+					text.setText("");
+				}
 			} else {
 				StackTraceElement[] trace = throwable.getStackTrace();
 				StringBuilder sb = new StringBuilder();
@@ -61,4 +65,6 @@ public class ThrowableWidget extends Composite implements ThrowableView {
 		text.setVisible(true);
 	}
 
+	
 }
+
