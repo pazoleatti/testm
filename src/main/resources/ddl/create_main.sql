@@ -204,7 +204,8 @@ comment on column report_period.ord is 'Номер отчетного перио
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101
-(report_period_id number(9) not null,
+(id number(9) not null,
+ report_period_id number(9) not null,
  account varchar2(255),
  income_debet_remains number(22,4),
  income_credit_remains number(22,4),
@@ -214,10 +215,11 @@ create table income_101
  outcome_credit_remains number(22,4)
 );
 
-alter table income_101 add constraint income_101_pk primary key(report_period_id);
+alter table income_101 add constraint income_101_pk primary key(id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
+comment on column income_101.id is 'Первичный ключ';
 comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_101.account is 'Номер счета';
 comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
