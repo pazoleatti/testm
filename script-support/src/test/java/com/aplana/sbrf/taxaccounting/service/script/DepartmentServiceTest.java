@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +13,9 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Тест для сервиса работы с подразделениями
  * @author auldanov
@@ -21,10 +23,17 @@ import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
 public class DepartmentServiceTest {
 	
 	 private static DepartmentService service = new DepartmentServiceImpl();
+     private static Department valid = new Department();
 
 	@BeforeClass
     public static void tearUp() {
 	 	DepartmentDao departmentDao = mock(DepartmentDao.class);
+
+        valid.setId(1);
+        valid.setName("Банк");
+        List<Department> temp = new ArrayList<Department>();
+        temp.add(valid);
+        when(departmentDao.listDepartments()).thenReturn(temp);
 	 	
         when(departmentDao.getDepartmentByName("Банк1")).thenReturn(new Department());
 	 	when(departmentDao.getDepartmentByName("")).thenReturn(null);
@@ -46,6 +55,18 @@ public class DepartmentServiceTest {
 	public void issetSbrfCode() {
 		assertTrue(service.issetSbrfCode("123"));
 		assertFalse(service.issetSbrfCode("321"));
+    }
+
+    @Test
+    public void getDepartment() {
+        assertEquals(service.get(valid.getName()).getId(), valid.getId());
+        Boolean exception = new Boolean(false);
+        try {
+            service.get("NOT VALID NAME");
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        assertTrue(exception);
     }
 
 }

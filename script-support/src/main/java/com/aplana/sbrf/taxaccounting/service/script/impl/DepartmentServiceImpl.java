@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
+
+import java.util.List;
 
 @Service("departmentService")
 public class DepartmentServiceImpl implements DepartmentService {
@@ -43,5 +46,16 @@ public class DepartmentServiceImpl implements DepartmentService {
 	public Boolean issetName(String name) {
 		return departmentDao.getDepartmentByName(name) != null;
 	}
+
+    @Override
+    public Department get(String name) throws IllegalArgumentException {
+        List<Department> departaments = departmentDao.listDepartments();
+        for (Department department : departaments) {
+            if (department != null && department.getName() != null && department.getName().equals(name)) {
+                return department;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
 }
 

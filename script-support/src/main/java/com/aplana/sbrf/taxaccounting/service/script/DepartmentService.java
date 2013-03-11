@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
@@ -41,4 +42,13 @@ public interface DepartmentService {
      * Проверка по НСИ. Проверка существования записи со значением ««Наименование подразделения»» 
      */
     Boolean issetName(String name);
+
+    /**
+     * Этот метод рождеённый deprecated, потому что не будет одназначного соответсвия между именем подразделения и его id (имя не уникально)
+     * Получает department по его имени
+     * @deprecated
+     * @param name
+     * @return
+     */
+    Department get(String name) throws IllegalArgumentException;
 }
