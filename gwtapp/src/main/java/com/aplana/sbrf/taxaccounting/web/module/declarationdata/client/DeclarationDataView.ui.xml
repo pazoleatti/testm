@@ -5,21 +5,10 @@
     .titleLabel {
         font-family: Tahoma;
         font-size: 16px;
-        float: left;
-        margin-top: 3px;
-        margin-left: 25px;
-        text-align: left;
-    }
-
-    .headerLeft {
-        float: left;
-        top: 0;
     }
 
     .headerRight {
         float: right;
-        top: 0;
-        width: 790px;
     }
 
     .headerAttr {
@@ -36,30 +25,28 @@
         font-family: Tahoma;
     }
 
-    .paddingTop7 {
-        padding-top: 7px;
-    }
-
-    .marginLeft15 {
-        margin-left: 15px;
-    }
 </ui:style>
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
+
         <g:north size="100">
-            <g:HTMLPanel height="100" width="100%">
-                <div class="{style.headerLeft}">
-                    <g:HorizontalPanel height="35px">
-                        <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
-                        <g:Label ui:field="title" styleName="{style.titleLabel}"/>
+            <g:HorizontalPanel height="100px" width="100%">
+                <g:VerticalPanel>
+                    <g:HorizontalPanel height="28px">
+                        <g:cell width="25px">
+                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
+                        </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
-                        <g:SimplePanel styleName="{style.paddingTop7}">
+                        <g:cell width="140px" verticalAlignment="middle">
                             <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton"/>
-                        </g:SimplePanel>
-                        <g:SimplePanel styleName="{style.marginLeft15} {style.paddingTop7}">
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
                             <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton"/>
-                        </g:SimplePanel>
+                        </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
                         <style:LeftBar>
@@ -69,35 +56,35 @@
                             <g:Button text="Отменить принятие" ui:field="cancelButton" />
                         </style:LeftBar>
                     </style:Bar>
-                </div>
-                <div class="{style.headerRight}">
+                </g:VerticalPanel>
+                <g:VerticalPanel width="790px" addStyleNames="{style.headerRight}">
                     <g:HorizontalPanel>
-                        <g:Label width="150px" styleName="{style.headerAttrName}">Вид налога:</g:Label>
-                        <g:Label ui:field="taxType" styleName="{style.headerAttr}"/>
+                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Подразделение:</g:Label>
+                        <g:Label ui:field="department" addStyleNames="{style.headerAttr}"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <g:Label width="150px" styleName="{style.headerAttrName}">Отчётный период:</g:Label>
-                        <g:Label ui:field="reportPeriod" styleName="{style.headerAttr}"/>
+                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Тип:</g:Label>
+                        <g:Label ui:field="type" addStyleNames="{style.headerAttr}"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <g:Label width="150px" styleName="{style.headerAttrName}">Подразделение:</g:Label>
-                        <g:Label ui:field="department" styleName="{style.headerAttr}"/>
+                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Период:</g:Label>
+                        <g:Label ui:field="reportPeriod" addStyleNames="{style.headerAttr}"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <g:Label width="150px" styleName="{style.headerAttrName}">Декларация принята:</g:Label>
-                        <g:CheckBox enabled="false" ui:field="accepted"/>
+                        <g:Label width="100px" addStyleNames="{style.headerAttrName}">Состояние:</g:Label>
+                        <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
                     </g:HorizontalPanel>
-
-                </div>
-            </g:HTMLPanel>
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
         </g:north>
+
         <g:center>
-            <g:HTMLPanel height="100%" width="100%" ui:field="pdfContent">
-            </g:HTMLPanel>
+            <g:HTMLPanel height="100%" width="100%" ui:field="pdfContent" />
         </g:center>
+
     </g:DockLayoutPanel>
 
 

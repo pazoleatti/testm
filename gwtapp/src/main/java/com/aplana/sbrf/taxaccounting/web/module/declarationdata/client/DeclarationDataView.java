@@ -35,7 +35,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button deleteButton;
 
 	@UiField
-	Label taxType;
+	Label type;
 
 	@UiField
 	Label reportPeriod;
@@ -44,7 +44,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Label department;
 
 	@UiField
-	CheckBox accepted;
+	Label stateLabel;
 
 	@UiField
 	Label title;
@@ -64,14 +64,15 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setDeclarationData(DeclarationData declaration) {
 		if (declaration.isAccepted()) {
+			stateLabel.setText("Принята");
 			acceptButton.setVisible(false);
 			cancelButton.setVisible(true);
 		}
 		else {
+			stateLabel.setText("Создана");
 			acceptButton.setVisible(true);
 			cancelButton.setVisible(false);
 		}
-		accepted.setValue(declaration.isAccepted());
 	}
 
 	@Override
@@ -95,8 +96,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setTaxType(String taxType) {
-		this.taxType.setText(taxType);
+	public void setType(String type) {
+		this.type.setText(type);
 	}
 
 	@Override

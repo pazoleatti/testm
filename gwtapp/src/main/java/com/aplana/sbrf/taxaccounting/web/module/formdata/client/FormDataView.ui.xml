@@ -39,16 +39,17 @@
             text-align: right;
         }
 
-        .marginTop5 {
+        .manualInput {
             margin-top: 5px;
         }
 
         .showCheckedColumns {
+            margin-top: 5px;
             font-size: 12px;
             font-family: Tahoma;
         }
 
-        .floatRight {
+        .attrPanel {
             float: right;
         }
     </ui:style>
@@ -85,7 +86,7 @@
                         <style:LeftBar ui:field="workflowButtons" />
                     </style:Bar>
                 </g:VerticalPanel>
-                <g:VerticalPanel width="790px" addStyleNames="{style.floatRight}">
+                <g:VerticalPanel width="790px" addStyleNames="{style.attrPanel}">
                     <g:VerticalPanel height="63px">
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Подразделение:" addStyleNames="{style.headerAttrName}" />
@@ -105,7 +106,7 @@
                         </g:HorizontalPanel>
                     </g:VerticalPanel>
                     <g:HorizontalPanel height="30px">
-                        <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.marginTop5}">
+                        <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.manualInput}">
                             <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
                         </g:SimplePanel>
                         <style:Bar width="245px" ui:field="saveCancelBar">
@@ -114,7 +115,7 @@
                                 <style:Button ui:field="cancelButton" text="Отмена" />
                             </style:LeftBar>
                         </style:Bar>
-                        <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns} {style.marginTop5}"
+                        <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
                                 text="Показывать контрольные поля"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

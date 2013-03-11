@@ -28,7 +28,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setCannotReject();
 		void setCannotDownloadXml();
 		void setCannotDelete();
-		void setTaxType(String taxType);
+		void setType(String type);
 		void setTitle(String title);
 		void setDepartment(String department);
 		void setReportPeriod(String reportPeriod);
@@ -173,7 +173,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						declaration = result.getDeclarationData();
 						taxName = result.getTaxType().name();
 						getView().setDeclarationData(declaration);
-						getView().setTaxType(result.getTaxType().getName());
+						getView().setType("Декларация");
 						getView().setReportPeriod(result.getReportPeriod());
 						getView().setDepartment(result.getDepartment());
 						getView().setBackButton(result.getTaxType());
