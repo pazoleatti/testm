@@ -313,6 +313,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
+	public void setBackButton(String link) {
+		returnAnchor.setHref(link);
+	}
+
+	@Override
 	public void showOriginalVersionButton(boolean show) {
 		originalVersionButton.setVisible(show);
 	}

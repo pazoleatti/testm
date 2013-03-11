@@ -32,7 +32,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setTitle(String title);
 		void setDepartment(String department);
 		void setReportPeriod(String reportPeriod);
-		void setBackButton(TaxType taxType);
+		void setBackButton(String link);
 		void setPdfFile(String fileUrl);
 	}
 
@@ -176,7 +176,8 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						getView().setType("Декларация");
 						getView().setReportPeriod(result.getReportPeriod());
 						getView().setDepartment(result.getDepartment());
-						getView().setBackButton(result.getTaxType());
+						getView().setBackButton("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
+								+ String.valueOf(result.getTaxType()));
 						getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
 						updateTitle(result.getDeclarationType());
 						loadPdfFile();

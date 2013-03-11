@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
@@ -117,6 +118,9 @@ public class FormDataPresenter extends
 											result.getReportPeriod(),
 											result.getFormData().getState()
 													.getName());
+
+									getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
+											+ String.valueOf(result.getFormData().getFormType().getTaxType()));
 
 									getView().setColumnsData(
 											formData.getFormColumns(),

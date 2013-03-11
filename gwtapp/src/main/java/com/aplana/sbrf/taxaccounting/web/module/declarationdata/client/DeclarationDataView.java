@@ -121,9 +121,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setBackButton(TaxType taxType){
-		returnAnchor.setHref("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
-				+ String.valueOf(taxType));
+	public void setBackButton(String link){
+		returnAnchor.setHref(link);
 	}
 
 	@Override

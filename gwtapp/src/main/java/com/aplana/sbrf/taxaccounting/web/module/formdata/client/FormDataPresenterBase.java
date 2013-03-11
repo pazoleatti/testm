@@ -52,6 +52,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
 
+		void setBackButton(String link);
+
 		void showOriginalVersionButton(boolean show);
 
 		void showSaveCancelBar(boolean show);
