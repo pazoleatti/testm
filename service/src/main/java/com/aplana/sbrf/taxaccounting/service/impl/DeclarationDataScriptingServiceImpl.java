@@ -107,6 +107,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		StringWriter writer = new StringWriter();
 		MarkupBuilder xml = new MarkupBuilder(writer);
 		b.put("xml", xml);
+		b.put("logger", logger);
 		try {
 			scriptEngine.eval(declarationTemplate.getCreateScript(), b);
 		} catch (ScriptException e) {

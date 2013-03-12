@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -18,24 +19,29 @@ public class Income101DaoImpl extends AbstractDao implements Income101Dao {
 
 	@Override
 	public Income101 getIncome101(int reportPeriodId, String account) {
-		return getJdbcTemplate().queryForObject(
-				"SELECT * FROM income_101 WHERE REPORT_PERIOD_ID= ? and ACCOUNT = ?",
-				new Object[]{reportPeriodId, account},
-			new RowMapper<Income101>(){
-				@Override
-				public Income101 mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Income101 income101Data = new Income101();
-					income101Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
-					income101Data.setAccount(rs.getString("ACCOUNT"));
-					income101Data.setIncomeDebetRemains(rs.getDouble("INCOME_DEBET_REMAINS"));
-					income101Data.setIncomeCreditRemains(rs.getDouble("INCOME_CREDIT_REMAINS"));
-					income101Data.setDebetRate(rs.getDouble("DEBET_RATE"));
-					income101Data.setCreditRate(rs.getDouble("CREDIT_RATE"));
-					income101Data.setOutcomeCreditRemains(rs.getDouble("OUTCOME_CREDIT_REMAINS"));
-					income101Data.setOutcomeDebetRemains(rs.getDouble("OUTCOME_DEBET_REMAINS"));
-					return income101Data;
+		try{
+			return getJdbcTemplate().queryForObject(
+					"SELECT * FROM income_101 WHERE REPORT_PERIOD_ID= ? and ACCOUNT = ?",
+					new Object[]{reportPeriodId, account},
+				new RowMapper<Income101>(){
+					@Override
+					public Income101 mapRow(ResultSet rs, int rowNum) throws SQLException {
+						Income101 income101Data = new Income101();
+						income101Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
+						income101Data.setAccount(rs.getString("ACCOUNT"));
+						income101Data.setIncomeDebetRemains(rs.getDouble("INCOME_DEBET_REMAINS"));
+						income101Data.setIncomeCreditRemains(rs.getDouble("INCOME_CREDIT_REMAINS"));
+						income101Data.setDebetRate(rs.getDouble("DEBET_RATE"));
+						income101Data.setCreditRate(rs.getDouble("CREDIT_RATE"));
+						income101Data.setOutcomeCreditRemains(rs.getDouble("OUTCOME_CREDIT_REMAINS"));
+						income101Data.setOutcomeDebetRemains(rs.getDouble("OUTCOME_DEBET_REMAINS"));
+						return income101Data;
+					}
 				}
-			}
-		);
+			);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+		
 	}
 }
