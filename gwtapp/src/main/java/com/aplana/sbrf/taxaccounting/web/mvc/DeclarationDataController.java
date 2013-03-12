@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.*;
@@ -23,6 +24,9 @@ public class DeclarationDataController {
 
 	@Autowired
 	DeclarationDataService declarationService;
+	
+	@Autowired
+	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
 	private SecurityService securityService;
@@ -81,9 +85,11 @@ public class DeclarationDataController {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
-
+	
+	
+	//TODO: Получение имени должно быть в сервисе.
 	protected String getFileName(int declarationId, int userId, String fileExtension) {
-		String xml = declarationService.getXmlData(declarationId, userId);
+		String xml = declarationDataDao.getXmlData(declarationId);
 		InputSource inputSource = new InputSource(new StringReader(xml));
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
