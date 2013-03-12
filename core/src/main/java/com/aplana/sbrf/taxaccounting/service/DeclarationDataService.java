@@ -82,4 +82,12 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	byte[] getPdfData(long declarationId, int userId);
+	/**
+	 * Получить имя файла в формате законодателя
+	 * @param declarationDataId идентификатор декларации
+	 * @param userId идентификатор пользователя, выполняющего операцию
+	 * @return имя файла взятого из xml данных
+	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+	 */
+	String getXmlDataFileName(int declarationDataId, int userId);
 }

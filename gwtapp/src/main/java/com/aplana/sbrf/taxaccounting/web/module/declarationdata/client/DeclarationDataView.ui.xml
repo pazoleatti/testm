@@ -24,7 +24,6 @@
         font-size: 12px;
         font-family: Tahoma;
     }
-
 </ui:style>
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
@@ -41,8 +40,10 @@
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
-                        <g:cell width="140px" verticalAlignment="middle">
-                            <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton"/>
+                        <g:cell verticalAlignment="middle">
+                            <g:SimplePanel width="140px" ui:field="downloadXml">
+                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton"/>
+                            </g:SimplePanel>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton"/>
@@ -82,7 +83,7 @@
         </g:north>
 
         <g:center>
-            <g:HTMLPanel height="100%" width="100%" ui:field="pdfContent" />
+            <g:FlowPanel height="100%" width="100%" ui:field="pdfContent" />
         </g:center>
 
     </g:DockLayoutPanel>

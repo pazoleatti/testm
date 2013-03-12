@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
 import com.google.gwt.core.client.*;
@@ -59,82 +60,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		setDeclaration();
-	}
-
-	@Override
-	public boolean useManualReveal() {
-		return true;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
-	}
-
-	@Override
-	public void refreshDeclaration(){
-		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
-		action.setRefresh(true);
-		action.setDeclarationData(declaration);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
-					@Override
-					public void onSuccess(UpdateDeclarationDataResult result) {
-						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация обновлена");
-						setDeclaration();
-					}
-				}));
-	}
-
-	@Override
-	public void setAccepted(boolean accepted) {
-		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
-		declaration.setAccepted(accepted);
-		action.setDeclarationData(declaration);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
-					@Override
-					public void onSuccess(UpdateDeclarationDataResult result) {
-						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация сохранена");
-						setDeclaration();
-					}
-				}));
-	}
-
-	@Override
-	public void delete() {
-		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
-		action.setDelete(true);
-		action.setDeclarationData(declaration);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
-					@Override
-					public void onSuccess(UpdateDeclarationDataResult result) {
-						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация удалена");
-						placeManager
-								.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
-					}
-				}));
-	}
-
-	@Override
-	public void downloadExcel() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declaration.getId(), null, null);
-	}
-
-	@Override
-	public void downloadXml() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
-	}
-
-	@Override
-	public void loadPdfFile() {
-		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declaration.getId());
-	}
-
-	private void setDeclaration() {
-		final long declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationDataTokens.declarationId, "0"));
+		final long declarationId = Integer.valueOf(request.getParameter(DeclarationDataTokens.declarationId, "0"));
 		if (declarationId != 0) {
 			GetDeclarationDataAction action = new GetDeclarationDataAction();
 			action.setId(declarationId);
@@ -176,6 +102,83 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 						}
 					}));
 		}
+	}
+
+	@Override
+	public boolean useManualReveal() {
+		return true;
+	}
+
+	@Override
+	protected void revealInParent() {
+		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
+	}
+
+	@Override
+	public void refreshDeclaration(){
+		LogCleanEvent.fire(this);
+		RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
+		action.setDeclarationId(declaration.getId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<RefreshDeclarationDataResult>() {
+					@Override
+					public void onSuccess(RefreshDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация обновлена");
+						revealPlaceRequest();
+					}
+				}));
+	}
+
+	@Override
+	public void accept(boolean accepted) {
+		LogCleanEvent.fire(this);
+		AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+		action.setAccepted(accepted);
+		action.setDeclarationId(declaration.getId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+					@Override
+					public void onSuccess(AcceptDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация сохранена");
+						revealPlaceRequest();
+					}
+				}));
+	}
+
+	@Override
+	public void delete() {
+		LogCleanEvent.fire(this);
+		DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
+		action.setDeclarationId(declaration.getId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<DeleteDeclarationDataResult>() {
+					@Override
+					public void onSuccess(DeleteDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация удалена");
+						placeManager
+								.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
+					}
+				}));
+	}
+
+	@Override
+	public void downloadExcel() {
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declaration.getId(), null, null);
+	}
+
+	@Override
+	public void downloadXml() {
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
+	}
+
+	@Override
+	public void loadPdfFile() {
+		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declaration.getId());
+	}
+
+	private void revealPlaceRequest() {
+		placeManager.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+				.with(DeclarationDataTokens.declarationId, String.valueOf(declaration.getId())));
 	}
 
 	private void updateTitle(String declarationType){

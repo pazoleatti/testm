@@ -10,7 +10,8 @@
     
     <inherits name="com.aplana.sbrf.taxaccounting.Model"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
-    
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
+
     <source path='client'/>
     <source path='shared'/>
 </module>

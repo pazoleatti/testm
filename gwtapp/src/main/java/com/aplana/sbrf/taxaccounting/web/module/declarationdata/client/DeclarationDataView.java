@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
@@ -53,7 +52,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Anchor returnAnchor;
 
 	@UiField
-	HTMLPanel pdfContent;
+	Panel pdfContent;
+
+	@UiField
+	Panel downloadXml;
 
 	@Inject
 	@UiConstructor
@@ -73,6 +75,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 			acceptButton.setVisible(true);
 			cancelButton.setVisible(false);
 		}
+		deleteButton.setVisible(true);
+		downloadXml.setVisible(true);
 	}
 
 	@Override
@@ -87,7 +91,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setCannotDownloadXml() {
-		downloadXmlButton.setVisible(false);
+		downloadXml.setVisible(false);
 	}
 
 	@Override
@@ -143,12 +147,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("acceptButton")
 	public void onAccept(ClickEvent event){
-		getUiHandlers().setAccepted(true);
+		getUiHandlers().accept(true);
 	}
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().setAccepted(false);
+		getUiHandlers().accept(false);
 	}
 
 	@UiHandler("deleteButton")
