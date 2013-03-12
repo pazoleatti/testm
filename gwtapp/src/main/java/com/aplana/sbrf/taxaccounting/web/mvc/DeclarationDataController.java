@@ -1,20 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.stereotype.*;
-import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 
 @Controller
 public class DeclarationDataController {
@@ -24,9 +31,6 @@ public class DeclarationDataController {
 
 	@Autowired
 	DeclarationDataService declarationService;
-	
-	@Autowired
-	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
 	private SecurityService securityService;
@@ -39,7 +43,7 @@ public class DeclarationDataController {
 
 		if (declarationService.getXlsxData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
-			String fileName = getFileName(declarationId, userId, "xlsx");
+			String fileName = "declaration_" + declarationId + ".xlsx";
 			resp.setContentType("application/octet-stream");
 			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			respOut.write(declarationService.getXlsxData(declarationId, userId));
@@ -89,7 +93,7 @@ public class DeclarationDataController {
 	
 	//TODO: Получение имени должно быть в сервисе.
 	protected String getFileName(int declarationId, int userId, String fileExtension) {
-		String xml = declarationDataDao.getXmlData(declarationId);
+		String xml = declarationService.getXmlData(declarationId, userId);
 		InputSource inputSource = new InputSource(new StringReader(xml));
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
