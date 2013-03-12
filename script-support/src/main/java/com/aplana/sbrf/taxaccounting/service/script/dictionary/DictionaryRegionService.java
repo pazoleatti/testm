@@ -26,4 +26,11 @@ public interface DictionaryRegionService {
      * @return
      */
     public DictionaryRegion getRegionByName(String name);
+
+    /**
+     *
+     * @param code
+     * @return
+     */
+    public DictionaryRegion getRegionById(Integer code) throws IllegalArgumentException;
 }

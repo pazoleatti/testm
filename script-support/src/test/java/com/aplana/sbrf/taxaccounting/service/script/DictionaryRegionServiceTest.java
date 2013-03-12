@@ -73,4 +73,16 @@ public class DictionaryRegionServiceTest {
         assertNull(service.getRegionByName(null));
         assertEquals(regionHant, service.getRegionByName(regionHant.getName()));
     }
+
+    @Test
+    public void testGetRegionById () {
+        assertEquals(regionHant, service.getRegionById(regionHant.getCode()));
+        Boolean exception = false;
+        try {
+            service.getRegionById(21321312); // code must be invalid
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        assertTrue(exception);
+    }
 }
