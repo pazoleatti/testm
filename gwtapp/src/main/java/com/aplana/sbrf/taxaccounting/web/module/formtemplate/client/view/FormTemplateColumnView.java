@@ -46,6 +46,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		stringDictionaryCodeMap.put("transportTypeCode", "ТН - Коды видов ТС");
 		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
 		stringDictionaryCodeMap.put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
+		stringDictionaryCodeMap.put("departmentNameList", "Подразделения");
 
 		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
 		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
