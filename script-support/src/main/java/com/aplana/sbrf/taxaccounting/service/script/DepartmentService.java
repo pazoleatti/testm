@@ -51,4 +51,12 @@ public interface DepartmentService {
      * @return
      */
     Department get(String name) throws IllegalArgumentException;
+
+    /**
+     * Получает Department по его id
+     * @param id
+     * @return
+     * @throws IllegalArgumentException
+     */
+    Department get(Integer id) throws IllegalArgumentException;
 }

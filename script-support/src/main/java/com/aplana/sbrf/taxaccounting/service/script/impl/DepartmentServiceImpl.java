@@ -57,5 +57,16 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         throw new IllegalArgumentException();
     }
+
+    @Override
+    public Department get(Integer id) throws IllegalArgumentException {
+        List<Department> departments = departmentDao.listDepartments();
+        for(Department department : departments) {
+            if (department != null && id.equals(department.getId())) {
+                return department;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
 }
 

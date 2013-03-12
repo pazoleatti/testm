@@ -60,9 +60,17 @@ public class DepartmentServiceTest {
     @Test
     public void getDepartment() {
         assertEquals(service.get(valid.getName()).getId(), valid.getId());
-        Boolean exception = new Boolean(false);
+        Boolean exception = false;
         try {
             service.get("NOT VALID NAME");
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        assertTrue(exception);
+        assertEquals(service.get(valid.getId()).getName(), valid.getName());
+        exception = false;
+        try {
+            service.get(32134244);  // Must be invalid ID
         } catch (IllegalArgumentException e) {
             exception = true;
         }
