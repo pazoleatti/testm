@@ -1,29 +1,40 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.log.*;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.*;
-import com.aplana.sbrf.taxaccounting.service.*;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.*;
-import net.sf.jasperreports.engine.export.*;
-import net.sf.jasperreports.engine.export.ooxml.*;
-import org.apache.commons.logging.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.stereotype.*;
-import org.springframework.transaction.annotation.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.util.HashMap;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRXmlDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import java.io.*;
-import java.util.*;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 
 /**
  * Сервис для работы с декларациями
@@ -34,7 +45,7 @@ import java.util.*;
 @Service
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
-	private static final Log logger = LogFactory
+	private static final Log log = LogFactory
 			.getLog(DeclarationDataServiceImpl.class);
 
 	@Autowired
@@ -62,7 +73,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 			long declarationId = declarationDataDao.saveNew(newDeclaration);
 
-			this.logger.debug("New declaration saved, id = " + declarationId);
+			log.debug("New declaration saved, id = " + declarationId);
 			String xml = declarationDataScriptingService.create(logger,
 					departmentId, declarationTemplateId, reportPeriodId);
 			declarationDataDao.setXmlData(declarationId, xml);
@@ -169,7 +180,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			try {
 				exporter.exportReport();
 			} catch (JRException e) {
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 				throw new ServiceException("Невозможно экспортировать отчет");
 			}
 			return xls.toByteArray();
@@ -194,7 +205,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			try {
 				exporter.exportReport();
 			} catch (JRException e) {
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 				throw new ServiceException("Невозможно экспортировать отчет");
 			}
 			return pdf.toByteArray();
@@ -208,7 +219,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public void refreshDeclaration(Logger logger, long declarationDataId,
 			int userId) {
 		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
-			this.logger.debug("Refreshing declaration with id = "
+			log.debug("Refreshing declaration with id = "
 					+ declarationDataId);
 			DeclarationData declarationData = declarationDataDao
 					.get(declarationDataId);
@@ -232,7 +243,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			return JasperFillManager.fillReport(new ByteArrayInputStream(
 					jasperTemplate), new HashMap<String, Object>(), dataSource);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			throw new ServiceException("Невозможно заполнить отчет");
 		}
 	}
