@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -25,6 +26,11 @@ public class Income102DaoTest {
 	@Test
 	public void testValid(){
 		assertEquals(income102Dao.getIncome102(1, "2").getTotalSum(), 666, 1e-5);
+	}
+
+	@Test
+	public void testNotFound(){
+		assertNull(income102Dao.getIncome102(1, "not exists"));
 	}
 }
 

@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -28,6 +29,11 @@ public class Income101DaoTest {
 	@Test
 	public void testValid(){
 		assertEquals(income101Dao.getIncome101(1, "2").getIncomeDebetRemains(), 3, 1e-5);
+	}
+
+	@Test
+	public void testNotFound(){
+		assertNull(income101Dao.getIncome101(1, "not exists"));
 	}
 }
 
