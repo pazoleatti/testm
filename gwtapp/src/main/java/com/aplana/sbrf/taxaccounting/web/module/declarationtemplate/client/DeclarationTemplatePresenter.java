@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
@@ -82,24 +83,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void save() {
 		UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplate(declarationTemplate);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationResult>() {
-			@Override
-			public void onReqSuccess(UpdateDeclarationResult result) {
-				MessageEvent.fire(this, "Декларация сохранена");
-				setDeclarationTemplate();
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				MessageEvent.fire(this, "Request Failure", throwable);
-				setDeclarationTemplate();
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
+					@Override
+					public void onSuccess(UpdateDeclarationResult result) {
+						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+						setDeclarationTemplate();
+					}
+				}));
 	}
 
 	/**
@@ -134,21 +125,27 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 			GetDeclarationAction action = new GetDeclarationAction();
 			action.setId(declarationId);
-			dispatcher.execute(action, new AbstractCallback<GetDeclarationResult>() {
-				@Override
-				public void onReqSuccess(GetDeclarationResult result) {
-					declarationTemplate = result.getDeclarationTemplate();
-					getView().setDeclarationTemplate(declarationTemplate);
-					TitleUpdateEvent.fire(this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
-					getProxy().manualReveal(DeclarationTemplatePresenter.this);
-				}
-			});
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<GetDeclarationResult>() {
+						@Override
+						public void onSuccess(GetDeclarationResult result) {
+							declarationTemplate = result.getDeclarationTemplate();
+							getView().setDeclarationTemplate(declarationTemplate);
+							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
+						}
+					}).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
 		}
 	}
 
 	private void unlockForm(int declarationId){
 		UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
-		dispatcher.execute(action, new AbstractCallback<UnlockDeclarationResult>() {});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UnlockDeclarationResult>() {
+					@Override
+					public void onSuccess(UnlockDeclarationResult result) {
+						//nothing
+					}
+				}));
 	}
 }

@@ -2,11 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.*;
 import com.google.inject.*;
 import com.google.web.bindery.event.shared.*;
@@ -81,16 +86,16 @@ public class DeclarationListPresenter extends
 			command.setDeclarationTypeId(filter.getDeclarationTypeId());
 			command.setDepartmentId(filter.getDepartmentIds().iterator().next());
 			command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-			dispatcher.execute(command, new AbstractCallback<CreateDeclarationResult>() {
-				@Override
-				public void onReqSuccess(CreateDeclarationResult result) {
-					placeManager
-							.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-							.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
-							);
-
-				}
-			});
+			dispatcher.execute(command, CallbackUtils
+				.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+					@Override
+					public void onSuccess(CreateDeclarationResult result) {
+						placeManager
+								.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+										.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
+								);
+					}
+				}));
 		}
 
 	}
@@ -157,10 +162,10 @@ public class DeclarationListPresenter extends
 		protected void onRangeChanged(HasData<DeclarationDataSearchResultItem> display) {
 			final Range range = display.getVisibleRange();
 			GetDeclarationList requestData = createRequestData(range);
-			dispatcher.execute(requestData,
-					new AbstractCallback<GetDeclarationListResult>() {
+			dispatcher.execute(requestData, CallbackUtils
+					.defaultCallback(new AbstractCallback<GetDeclarationListResult>() {
 						@Override
-						public void onReqSuccess(GetDeclarationListResult result) {
+						public void onSuccess(GetDeclarationListResult result) {
 							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
 								getView().setDeclarationsList(range.getStart(), ZERO_RECORDS_COUNT,
 										new ArrayList<DeclarationDataSearchResultItem>());
@@ -168,7 +173,7 @@ public class DeclarationListPresenter extends
 								handleResponse(result, range);
 							}
 						}
-					});
+					}));
 		}
 
 		private GetDeclarationList createRequestData(Range range) {

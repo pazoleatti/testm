@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.events.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
@@ -81,38 +81,38 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 
 		GetFilterData action = new GetFilterData();
         action.setTaxType(taxType);
-        dispatchAsync.execute(action,
-                new AbstractCallback<GetFilterDataResult>() {
-                    @Override
-                    public void onReqSuccess(GetFilterDataResult result) {
-	                    FormDataFilterAvailableValues filterValues = result.getFilterValues();
-	                    if(filterValues.getDepartmentIds() == null){
-		                    //Контролер УНП
-		                    getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
-	                    } else {
-		                    getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
-	                    }
-	                    getView().setKindList(fillFormKindList(filterValues.getKinds()));
-                        getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
-	                    getView().setTaxPeriods(result.getTaxPeriods());
-	                    getView().setFormStateList(fillFormStateList());
-                        getView().setDataFilter(prepareFormDataFilter(result));
-                        FilterReadyEvent.fire(FilterPresenter.this);
-                    }
-                });
+        dispatchAsync.execute(action, CallbackUtils
+		        .defaultCallback(new AbstractCallback<GetFilterDataResult>() {
+			        @Override
+			        public void onSuccess(GetFilterDataResult result) {
+					        FormDataFilterAvailableValues filterValues = result.getFilterValues();
+					        if(filterValues.getDepartmentIds() == null){
+						        //Контролер УНП
+						        getView().setDepartmentsList(result.getDepartments(), convertDepartmentsToIds(result.getDepartments()));
+					        } else {
+						        getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
+					        }
+					        getView().setKindList(fillFormKindList(filterValues.getKinds()));
+					        getView().setFormTypesMap(fillFormTypesMap(filterValues.getFormTypes()));
+					        getView().setTaxPeriods(result.getTaxPeriods());
+					        getView().setFormStateList(fillFormStateList());
+					        getView().setDataFilter(prepareFormDataFilter(result));
+					        FilterReadyEvent.fire(FilterPresenter.this);
+				        }
+		        }));
 	}
 
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
 		GetReportPeriods action = new GetReportPeriods();
 		action.setTaxPeriod(taxPeriod);
-		dispatchAsync.execute(action,
-				new AbstractCallback<GetReportPeriodsResult>() {
+		dispatchAsync.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
-					public void onReqSuccess(GetReportPeriodsResult result) {
+					public void onSuccess(GetReportPeriodsResult result) {
 						getView().setReportPeriods(result.getReportPeriods());
 					}
-				});
+				}));
 	}
 
 	@Override

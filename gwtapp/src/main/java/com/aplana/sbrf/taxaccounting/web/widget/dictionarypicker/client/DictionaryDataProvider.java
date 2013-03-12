@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult;
@@ -57,13 +58,14 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 		action.setOffset(offset);
 		action.setMax(max);
 		action.setDictionaryCode(dictionaryCode);
-		dispatcher.execute(action, new AbstractCallback<DictionaryResult<T>>() {
-			@Override
-			public void onReqSuccess(DictionaryResult<T> result) {
-				updateRowData(offset, result.getDictionaryItems());
-				updateRowCount(result.getSize().intValue(), true);
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+			.defaultCallback(new AbstractCallback<DictionaryResult<T>>() {
+				@Override
+				public void onSuccess(DictionaryResult<T> result) {
+					updateRowData(offset, result.getDictionaryItems());
+					updateRowCount(result.getSize().intValue(), true);
+				}
+			}));
 	}
 
 	/**

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.*;
@@ -161,10 +163,10 @@ public class FormDataListPresenter extends
 		protected void onRangeChanged(HasData<FormDataSearchResultItem> display) {
 			final Range range = display.getVisibleRange();
 			GetFormDataList requestData = createRequestData(range);
-			dispatcher.execute(requestData,
-					new AbstractCallback<GetFormDataListResult>() {
+			dispatcher.execute(requestData, CallbackUtils
+					.defaultCallback(new AbstractCallback<GetFormDataListResult>() {
 						@Override
-						public void onReqSuccess(GetFormDataListResult result) {
+						public void onSuccess(GetFormDataListResult result) {
 							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
 								getView().setFormDataList(range.getStart(), ZERO_RECORDS_COUNT,
 										new ArrayList<FormDataSearchResultItem>());
@@ -172,7 +174,7 @@ public class FormDataListPresenter extends
 								handleResponse(result, range);
 							}
 						}
-					});
+					}));
 		}
 
 		private GetFormDataList createRequestData(Range range) {

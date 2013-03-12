@@ -2,7 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
@@ -31,16 +32,14 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 		
 		GetMainMenuAction action = new GetMainMenuAction();
 		
-		dispatchAsync.execute(action, new AbstractCallback<GetMainMenuResult>(){
+		dispatchAsync.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetMainMenuResult>() {
+					@Override
+					public void onSuccess(GetMainMenuResult result) {
+						getView().setMenuItems(result.getMenuItems());
+					}
+				}));
 
-			@Override
-			public void onReqSuccess(GetMainMenuResult result) {
-				getView().setMenuItems(result.getMenuItems());
-				super.onReqSuccess(result);
-			}
-			
-		});
-				
 		super.onReveal();
 		
 	}

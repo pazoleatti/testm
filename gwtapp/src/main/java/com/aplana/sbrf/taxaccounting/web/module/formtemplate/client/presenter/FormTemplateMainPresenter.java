@@ -2,8 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
@@ -127,52 +128,48 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				}
 			});
 
-			dispatcher.execute(action, new AbstractCallback<GetFormResult>() {
-				@Override
-				public void onReqSuccess(GetFormResult result) {
-					formTemplate = result.getForm();
-					getView().setLogMessages(null);
-					getView().setFormId(formTemplate.getId());
-					TitleUpdateEvent.fire(this, "Шаблон налоговой формы", formTemplate.getType().getName());
-					RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-					FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
-				}
-			});
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<GetFormResult>() {
+						@Override
+						public void onSuccess(GetFormResult result) {
+							formTemplate = result.getForm();
+							getView().setLogMessages(null);
+							getView().setFormId(formTemplate.getId());
+							TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
+							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
+							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
+						}
+					}));
 		}
 	}
 
 	private void unlockForm(int formId){
 		UnlockFormAction action = new UnlockFormAction();
 		action.setFormId(formId);
-		dispatcher.execute(action, new AbstractCallback<UnlockFormResult>() {});
+		dispatcher.execute(action, CallbackUtils
+		.defaultCallback(new AbstractCallback<UnlockFormResult>() {
+			@Override
+			public void onSuccess(UnlockFormResult result) {
+				// nothing
+			}
+		}));
 	}
 
 	private void saveAfterFlush() {
 		UpdateFormAction action = new UpdateFormAction();
 		action.setForm(formTemplate);
-		dispatcher.execute(action, new AbstractCallback<UpdateFormResult>() {
-			@Override
-			public void onReqSuccess(UpdateFormResult result) {
-				if (!result.getLogEntries().isEmpty()) {
-					getView().setLogMessages(result.getLogEntries());
-				}
-				else {
-					MessageEvent.fire(this, "Форма сохранена");
-					setFormTemplate();
-				}
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				MessageEvent.fire(this, "Request Failure", throwable);
-				setFormTemplate();
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateFormResult>() {
+					@Override
+					public void onSuccess(UpdateFormResult result) {
+						if (!result.getLogEntries().isEmpty()) {
+							getView().setLogMessages(result.getLogEntries());
+						} else {
+							MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+							setFormTemplate();
+						}
+					}
+				}));
 	}
 
 }

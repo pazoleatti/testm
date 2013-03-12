@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
 import com.google.inject.Inject;
@@ -29,17 +30,15 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 		
 		GetUserInfoAction action = new GetUserInfoAction();
 		
-		dispatchAsync.execute(action, new AbstractCallback<GetUserInfoResult>(){
+		dispatchAsync.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetUserInfoResult>() {
+					@Override
+					public void onSuccess(GetUserInfoResult result) {
+						getView().setUserName(result.getUserName());
+						getView().setRoleAndDepartment(result.getRoleAnddepartment());
+					}
+				}));
 
-			@Override
-			public void onReqSuccess(GetUserInfoResult result) {
-				getView().setUserName(result.getUserName());
-				getView().setRoleAndDepartment(result.getRoleAnddepartment());
-				super.onReqSuccess(result);
-			}
-			
-		});
-				
 		super.onReveal();
 		
 	}
