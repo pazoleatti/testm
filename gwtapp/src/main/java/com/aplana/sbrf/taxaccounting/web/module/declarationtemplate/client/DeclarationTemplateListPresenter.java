@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Decla
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
@@ -26,8 +25,7 @@ import com.gwtplatform.mvp.client.proxy.*;
  *     <li>Переходит к редактированию выбранной декларации</li>
  * </ol>
  */
-public class DeclarationTemplateListPresenter extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy>
-		implements DeclarationTemplateListUiHandlers {
+public class DeclarationTemplateListPresenter extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy> {
 
 	@Title("Шаблоны деклараций")
 	@ProxyCodeSplit
@@ -38,19 +36,16 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	/**
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
 	 */
-	public interface MyView extends View, HasUiHandlers<DeclarationTemplateListUiHandlers> {
+	public interface MyView extends View {
 		void setDeclarationTemplateRows(List<DeclarationTemplate> result);
 	}
 
 	private final DispatchAsync dispatcher;
-	private final PlaceManager placeManager;
 
 	@Inject
-	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher) {
+	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
-		this.placeManager = placeManager;
-		getView().setUiHandlers(this);
 	}
 
 	/**
@@ -75,20 +70,6 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 						}).addCallback(
 						new ManualRevealCallback<DeclarationListResult>(
 								DeclarationTemplateListPresenter.this)));
-	}
-
-	/**
-	 * Когда пользователь выбирает какой-нибудь шаблон декларации, он переходит на страницу редактирования шаблона декарации.
-	 *
-	 * @param id идентификатор шаблона формы
-	 */
-	@Override
-	public void selectDeclaration(Integer id) {
-			placeManager.revealPlace(
-					new PlaceRequest(DeclarationTemplateTokens.declarationTemplate).with(
-							DeclarationTemplateTokens.declarationTemplateId, String.valueOf(id)
-					)
-			);
 	}
 
 	@Override

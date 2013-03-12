@@ -7,13 +7,11 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.AdminUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
@@ -31,8 +29,7 @@ import com.gwtplatform.mvp.client.proxy.*;
  * @author Vitalii Samolovskikh
  */
 public class AdminPresenter extends
-		Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> implements
-		AdminUiHandlers {
+		Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy> {
 
 	/**
 	 * {@link AdminPresenter}'s proxy.
@@ -47,20 +44,16 @@ public class AdminPresenter extends
 	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его
 	 * Presenter.
 	 */
-	public interface MyView extends View, HasUiHandlers<AdminUiHandlers> {
+	public interface MyView extends View {
 		void setFormTemplateTable(List<FormTemplate> formTemplates);
 	}
 
 	private final DispatchAsync dispatcher;
-	private final PlaceManager placeManager;
 
 	@Inject
-	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher) {
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
-		this.placeManager = placeManager;
-		getView().setUiHandlers(this);
 	}
 
 	@Override
@@ -92,20 +85,6 @@ public class AdminPresenter extends
 						}).addCallback(
 						new ManualRevealCallback<GetFormTemplateListResult>(
 								AdminPresenter.this)));
-	}
-
-	/**
-	 * Когда пользователь выбирает какой-нибудь шаблон формы, он переходит на
-	 * страницу редактирования шаблона формы. Это происходит в этом методе.
-	 * 
-	 * @param id
-	 *            идентификатор шаблона формы
-	 */
-	@Override
-	public void selectForm(Integer id) {
-		placeManager.revealPlace(new PlaceRequest(
-				AdminConstants.NameTokens.formTemplateInfoPage).with(
-				AdminConstants.NameTokens.formTemplateId, String.valueOf(id)));
 	}
 
 	@Override

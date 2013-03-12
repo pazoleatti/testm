@@ -11,7 +11,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.gwtplatform.mvp.client.ViewImpl;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * Представление для страницы администрирования деклараций.
  *
  */
-public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationTemplateListUiHandlers>
+public class DeclarationTemplateListView extends ViewImpl
 		implements DeclarationTemplateListPresenter.MyView {
 	interface Binder extends UiBinder<Widget, DeclarationTemplateListView> {
 	}
