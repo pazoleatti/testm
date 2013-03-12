@@ -67,8 +67,7 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 				new CheckboxCell()) {
 			@Override
 			public Boolean getValue(FormTemplate formTemplate) {
-				return true;
-				//return formTemplate.isActive();
+				return formTemplate.isActive();
 			}
 		}, "Активен");
 
