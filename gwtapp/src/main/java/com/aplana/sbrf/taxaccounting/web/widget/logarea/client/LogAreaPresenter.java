@@ -74,7 +74,7 @@ public class LogAreaPresenter extends
 				info++;
 			}
 		}
-		getView().setLogSize(logEntries.size(), error, warn, info);
+		getView().setLogSize(error + warn, error, warn, info);
 	}
 
 	@Override
