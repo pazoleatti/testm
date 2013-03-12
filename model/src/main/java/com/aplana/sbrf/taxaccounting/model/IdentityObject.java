@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author dsultanbekov
  */
 public abstract class IdentityObject<IdType extends Number> implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3614498773660756556L;
 	
 	protected IdType id;	
 	
