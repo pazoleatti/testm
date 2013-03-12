@@ -92,10 +92,10 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	}
 
 	@Override
-	public void setViewData(List<FormStyle> styles) {
+	public void setViewData(List<FormStyle> styles, boolean isFormChanged) {
 		if (styles != null) {
 			this.styles = styles;
-			if (styleListBox.getSelectedIndex() >= 0) {
+			if (styleListBox.getSelectedIndex() >= 0 && !isFormChanged) {
 				setupStyles(styleListBox.getSelectedIndex());
 			} else if (styles.size() > 0){
 				setupStyles(0);

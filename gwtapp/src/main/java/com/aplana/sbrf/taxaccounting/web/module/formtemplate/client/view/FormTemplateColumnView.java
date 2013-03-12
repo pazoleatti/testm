@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -272,9 +271,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	@Override
-	public void setColumnList(List<Column> columnList) {
+	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
 		columns = columnList;
-		if (columnListBox.getSelectedIndex() >= 0) {
+		if (columnListBox.getSelectedIndex() >= 0 && !isFormChanged) {
 			setupColumns(columnListBox.getSelectedIndex());
 		} else {
 			setupColumns(0);

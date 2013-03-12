@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
@@ -38,7 +37,7 @@ public class FormTemplateColumnPresenter
 
 	public interface MyView extends View,
 			HasUiHandlers<FormTemplateColumnUiHandlers> {
-		void setColumnList(List<Column> columnList);
+		void setColumnList(List<Column> columnList, boolean isFormChanged);
 
 		void setColumn(Column column);
 
@@ -57,8 +56,12 @@ public class FormTemplateColumnPresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
+		boolean isFormChanged = true;
+		if (formTemplate != null) {
+			isFormChanged = !formTemplate.getId().equals(event.getFormTemplate().getId());
+		}
 		formTemplate = event.getFormTemplate();
-		getView().setColumnList(formTemplate.getColumns());
+		getView().setColumnList(formTemplate.getColumns(), isFormChanged);
 	}
 
 	@ProxyEvent

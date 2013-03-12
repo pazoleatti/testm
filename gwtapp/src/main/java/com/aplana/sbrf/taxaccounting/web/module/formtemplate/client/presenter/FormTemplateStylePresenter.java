@@ -32,9 +32,11 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateStyleUiHandlers> {
-		void setViewData(List<FormStyle> styles);
+		void setViewData(List<FormStyle> styles, boolean isFormChanged);
 		void onFlush();
 	}
+
+	private int formTemplateId;
 
 	@Inject
 	public FormTemplateStylePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
@@ -45,7 +47,9 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		getView().setViewData(event.getFormTemplate().getStyles());
+		boolean isFormChanged = formTemplateId != event.getFormTemplate().getId();
+		formTemplateId = event.getFormTemplate().getId();
+		getView().setViewData(event.getFormTemplate().getStyles(), isFormChanged);
 	}
 
 	@ProxyEvent

@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Script;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateScriptPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.ScriptEditor;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.ListBox;
@@ -59,13 +56,18 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 	}
 
 	@Override
-	public void bindScripts(List<Script> scriptList) {
+	public void bindScripts(List<Script> scriptList, boolean isFormChanged) {
 		this.scriptList = scriptList;
 		int i = 0;
 		scriptListBox.clear();
 		for (Script script : scriptList) {
 			scriptListBox.addItem(script.getName(), String.valueOf(i++));
 		}
+
+		if (isFormChanged) {
+			lastSelectedScriptIndex = 0;
+		}
+
 		scriptListBox.setSelectedIndex(lastSelectedScriptIndex);
 		selectScript();
 	}

@@ -31,7 +31,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateScriptUiHandlers>{
-		void bindScripts(List<Script> scriptList);
+		void bindScripts(List<Script> scriptList, boolean isFormChanged);
 		void flush();
 	}
 
@@ -46,8 +46,12 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
+		boolean isFormChanged = true;
+		if (formTemplate != null) {
+			isFormChanged = !formTemplate.getId().equals(event.getFormTemplate().getId());
+		}
 		formTemplate = event.getFormTemplate();
-		getView().bindScripts(formTemplate.getScripts());
+		getView().bindScripts(formTemplate.getScripts(), isFormChanged);
 	}
 
 	@ProxyEvent
@@ -61,7 +65,7 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 
 		if(formTemplate != null) {
-			getView().bindScripts(formTemplate.getScripts());
+			getView().bindScripts(formTemplate.getScripts(), false);
 		}
 	}
 
@@ -70,12 +74,12 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 		Script script = new Script();
 		script.setName("Новый");
 		formTemplate.addScript(script);
-		getView().bindScripts(formTemplate.getScripts());
+		getView().bindScripts(formTemplate.getScripts(), false);
 	}
 
 	@Override
 	public void deleteScript(Script selectedScript) {
 		formTemplate.removeScript(selectedScript);
-		getView().bindScripts(formTemplate.getScripts());
+		getView().bindScripts(formTemplate.getScripts(), false);
 	}
 }
