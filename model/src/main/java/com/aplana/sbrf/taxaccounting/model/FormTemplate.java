@@ -11,8 +11,8 @@ import java.util.Map;
  * @author dsultanbekov
  */
 public class FormTemplate extends IdentityObject<Integer> {
-	private static final long serialVersionUID = 1L;
-
+	private static final long serialVersionUID = -8304772615983231523L;
+	
 	private FormType type;
 	private String version;
 	private Integer edition;
