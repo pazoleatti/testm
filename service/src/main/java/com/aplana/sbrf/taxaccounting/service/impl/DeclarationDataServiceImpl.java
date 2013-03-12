@@ -14,28 +14,35 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.*;
 import java.util.*;
 
 /**
  * Сервис для работы с декларациями
+ * 
  * @author Eugene Stetsenko
  * @author dsultanbekov
  */
 @Service
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
-	private static final Log logger = LogFactory.getLog(DeclarationDataServiceImpl.class);
+	private static final Log logger = LogFactory
+			.getLog(DeclarationDataServiceImpl.class);
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
-	private DeclarationDataAccessService declarationDataAccessService ;
-	
+	private DeclarationDataAccessService declarationDataAccessService;
+
 	@Autowired
 	private DeclarationDataScriptingService declarationDataScriptingService;
 
@@ -43,22 +50,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private DeclarationTemplateService declarationTemplateService;
 
 	@Override
-	public long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId) {
-		if (declarationDataAccessService.canCreate(userId, declarationTemplateId, departmentId, reportPeriodId)) {
+	public long createDeclaration(Logger logger, int declarationTemplateId,
+			int departmentId, int userId, int reportPeriodId) {
+		if (declarationDataAccessService.canCreate(userId,
+				declarationTemplateId, departmentId, reportPeriodId)) {
 			DeclarationData newDeclaration = new DeclarationData();
 			newDeclaration.setDepartmentId(departmentId);
 			newDeclaration.setReportPeriodId(reportPeriodId);
 			newDeclaration.setAccepted(false);
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-			
+
 			long declarationId = declarationDataDao.saveNew(newDeclaration);
-			
+
 			this.logger.debug("New declaration saved, id = " + declarationId);
-			String xml = declarationDataScriptingService.create(logger, departmentId, declarationTemplateId, reportPeriodId);
+			String xml = declarationDataScriptingService.create(logger,
+					departmentId, declarationTemplateId, reportPeriodId);
 			declarationDataDao.setXmlData(declarationId, xml);
 			return declarationId;
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для создания декларации с указанными параметрами");
+			throw new AccessDeniedException(
+					"Недостаточно прав для создания декларации с указанными параметрами");
 		}
 	}
 
@@ -67,7 +78,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (declarationDataAccessService.canRead(userId, declarationId)) {
 			return declarationDataDao.get(declarationId);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав на просмотр данных декларации");
+			throw new AccessDeniedException(
+					"Недостаточно прав на просмотр данных декларации");
 		}
 	}
 
@@ -77,7 +89,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (declarationDataAccessService.canDelete(userId, declarationId)) {
 			declarationDataDao.delete(declarationId);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав на удаление декларации");
+			throw new AccessDeniedException(
+					"Недостаточно прав на удаление декларации");
 		}
 	}
 
@@ -89,7 +102,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			}
 		} else {
 			if (!declarationDataAccessService.canReject(userId, declarationId)) {
-				throw new AccessDeniedException("Невозможно отменить принятие декларации");
+				throw new AccessDeniedException(
+						"Невозможно отменить принятие декларации");
 			}
 		}
 		declarationDataDao.setAccepted(declarationId, accepted);
@@ -105,20 +119,53 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
+	public String getXmlDataFileName(int declarationDataId, int userId) {
+
+		final String ATTR_FILE_ID = "ИдФайл";
+		final String TAG_FILE = "Файл";
+
+		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
+			String xml = declarationDataDao.getXmlData(declarationDataId);
+			InputSource inputSource = new InputSource(new StringReader(xml));
+			Document document;
+			try {
+				document = DocumentBuilderFactory.newInstance()
+						.newDocumentBuilder().parse(inputSource);
+			} catch (Exception e) {
+				throw new ServiceException(
+						"Неудалось распарсить документ в формате законодателя");
+			}
+			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
+			NamedNodeMap attributes = fileNode.getAttributes();
+			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
+			return fileNameNode.getTextContent();
+		} else {
+			throw new AccessDeniedException("Невозможно получить xml");
+		}
+	}
+
+	@Override
 	public byte[] getXlsxData(long declarationId, int userId) {
 		if (declarationDataAccessService.canRead(userId, declarationId)) {
 			DeclarationData declaration = declarationDataDao.get(declarationId);
-			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
+			byte[] jasperTemplate = declarationTemplateService
+					.getJasper(declaration.getDeclarationTemplateId());
 			String xmlData = declarationDataDao.getXmlData(declarationId);
 			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
 			JRXlsxExporter exporter = new JRXlsxExporter();
 			ByteArrayOutputStream xls = new ByteArrayOutputStream();
 			exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT, print);
 			exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, xls);
-			exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.TRUE);
-			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE, Boolean.TRUE);
-			exporter.setParameter(JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
-			exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+			exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
+					Boolean.TRUE);
+			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
+					Boolean.TRUE);
+			exporter.setParameter(
+					JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
+					Boolean.FALSE);
+			exporter.setParameter(
+					JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS,
+					Boolean.TRUE);
 			try {
 				exporter.exportReport();
 			} catch (JRException e) {
@@ -127,15 +174,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			}
 			return xls.toByteArray();
 		} else {
-			throw new AccessDeniedException("Невозможно получить xlsx, так как у пользователя нет прав на просмотр декларации");
+			throw new AccessDeniedException(
+					"Невозможно получить xlsx, так как у пользователя нет прав на просмотр декларации");
 		}
 	}
 
 	@Override
-	public byte[] getPdfData(long declarationId, int userId){
+	public byte[] getPdfData(long declarationId, int userId) {
 		if (declarationDataAccessService.canRead(userId, declarationId)) {
 			DeclarationData declaration = declarationDataDao.get(declarationId);
-			byte[] jasperTemplate = declarationTemplateService.getJasper(declaration.getDeclarationTemplateId());
+			byte[] jasperTemplate = declarationTemplateService
+					.getJasper(declaration.getDeclarationTemplateId());
 			String xmlData = declarationDataDao.getXmlData(declarationId);
 			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
 			JRPdfExporter exporter = new JRPdfExporter();
@@ -150,36 +199,42 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			}
 			return pdf.toByteArray();
 		} else {
-			throw new AccessDeniedException("Невозможно получить pdf, так как у пользователя нет прав на просмотр декларации");
+			throw new AccessDeniedException(
+					"Невозможно получить pdf, так как у пользователя нет прав на просмотр декларации");
 		}
 	}
 
 	@Override
-	public void refreshDeclaration(Logger logger, long declarationDataId, int userId) {
+	public void refreshDeclaration(Logger logger, long declarationDataId,
+			int userId) {
 		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
-			this.logger.debug("Refreshing declaration with id = " + declarationDataId);
-			DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-			String xml = declarationDataScriptingService.create(
-				logger,
-				declarationData.getDepartmentId(),
-				declarationData.getDeclarationTemplateId(),
-				declarationData.getReportPeriodId()
-			);
+			this.logger.debug("Refreshing declaration with id = "
+					+ declarationDataId);
+			DeclarationData declarationData = declarationDataDao
+					.get(declarationDataId);
+			String xml = declarationDataScriptingService.create(logger,
+					declarationData.getDepartmentId(),
+					declarationData.getDeclarationTemplateId(),
+					declarationData.getReportPeriodId());
 			declarationDataDao.setXmlData(declarationDataId, xml);
 		} else {
-			throw new AccessDeniedException("Недостаточно прав для обновления указанной декларации");
+			throw new AccessDeniedException(
+					"Недостаточно прав для обновления указанной декларации");
 		}
 	}
 
 	private JasperPrint getJasperPrint(String xml, byte[] jasperTemplate) {
 		try {
 			InputSource inputSource = new InputSource(new StringReader(xml));
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
+			Document document = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().parse(inputSource);
 			JRXmlDataSource dataSource = new JRXmlDataSource(document);
-			return JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
+			return JasperFillManager.fillReport(new ByteArrayInputStream(
+					jasperTemplate), new HashMap<String, Object>(), dataSource);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new ServiceException("Невозможно заполнить отчет");
 		}
 	}
+
 }
