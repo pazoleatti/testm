@@ -3,8 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.google.inject.Inject;
@@ -16,11 +17,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.Title;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.gwtplatform.mvp.client.proxy.*;
 
 /**
  * Presenter для страницы администрирования деклараций. Выполняет следующие действия:
@@ -35,7 +32,7 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	@Title("Шаблоны деклараций")
 	@ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplateList)
-	public interface MyProxy extends Proxy<DeclarationTemplateListPresenter>, Place {
+	public interface MyProxy extends ProxyPlace<DeclarationTemplateListPresenter> {
 	}
 
 	/**
@@ -66,15 +63,18 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-
-		dispatcher.execute(new DeclarationListAction(), new AbstractCallback<DeclarationListResult>() {
-			@Override
-			public void onReqSuccess(DeclarationListResult result) {
-				if (result.getDeclarations() != null && !result.getDeclarations().isEmpty()) {
-					getView().setDeclarationTemplateRows(result.getDeclarations());
-				}
-			}
-		});
+		dispatcher.execute(new DeclarationListAction(),	CallbackUtils.defaultCallback(
+						new AbstractCallback<DeclarationListResult>() {
+							@Override
+							public void onSuccess(
+									DeclarationListResult result) {
+								if (result.getDeclarations() != null && !result.getDeclarations().isEmpty()) {
+									getView().setDeclarationTemplateRows(result.getDeclarations());
+								}
+							}
+						}).addCallback(
+						new ManualRevealCallback<DeclarationListResult>(
+								DeclarationTemplateListPresenter.this)));
 	}
 
 	/**
@@ -96,4 +96,8 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
 
+	@Override
+	public boolean useManualReveal() {
+		return true;
+	}
 }
