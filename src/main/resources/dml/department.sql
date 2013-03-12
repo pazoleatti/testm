@@ -23,8 +23,6 @@ values (77, 'Калмыцкое ОСБ №8579 (Северо-Кавказски�
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (78, 'Карачаево-Черкесское ОСБ №8585 (Северо-Кавказский банк)', 72, 2, null, 9, '60', null);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
-values (79, 'Северо-Кавказский банк', 72, 2, null, 26, '60', null);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (80, 'Северо-Осетинское ОСБ №8632 (Северо-Кавказский банк)', 72, 2, null, 15, '60', null);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (81, 'Чеченское ОСБ №8643 (Северо-Кавказский банк)', 72, 2, null, 20, '60', null);

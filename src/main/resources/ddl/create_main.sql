@@ -9,7 +9,7 @@ comment on column dict_tax_period.code is 'код';
 comment on column dict_tax_period.name is 'наименование';
 ---------------------------------------------------------------------------------------------
 create table dict_region(
-	code number(2) not null,
+	code varchar2(2) not null,
 	name varchar2(510) not null,
 	okato varchar2(11),
 	okato_definition varchar2(11)
@@ -48,7 +48,7 @@ create table transport_tax_rate (
 	min_power number(9),
 	max_power number(9),
 	value number(9) not null,
-	dict_region_id number(2)
+	dict_region_id varchar2(2)
 );
 alter table transport_tax_rate add constraint transport_tax_rate_pk primary key (id);
 alter table transport_tax_rate add constraint transport_tax_rate_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
@@ -125,7 +125,7 @@ create index I_TRANSPORT_TAX_RATE_CODE on TRANSPORT_TAX_RATE (CODE);
 create table dict_tax_benefit_param
 (
 id               number(9) not null,
-dict_region_id   number(2) not null,
+dict_region_id   varchar(2) not null,
 tax_benefit_id   varchar2(5) not null,
 section          varchar2(4),
 item             varchar2(4),
@@ -135,7 +135,6 @@ rate             number(15,2)
 );
 
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
-
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_param_pk primary key (id);
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_chk_perc check ((percent>=0) and (percent<=100));
 
@@ -158,7 +157,6 @@ alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
 
 comment on table form_type is 'Типы налоговых форм (названия)';
-
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
@@ -366,7 +364,7 @@ name varchar2(260) not null,
 parent_id number(9) null,
 type number(9) not null,
 shortname      varchar2(255),
-dict_region_id number(2),
+dict_region_id varchar2(2),
 tb_index       varchar2(3),
 sbrf_code      varchar2(255)
 );
@@ -378,7 +376,7 @@ comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
 comment on column department.name is 'Наименование подразделения';
 comment on column department.parent_id is 'Идентификатор родительского подразделения';
-comment on column department.type is 'Тип подразделения';
+comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ГОСБ, 4- ОСБ, 5- ВСП, 6-ПВСП)';
 comment on column department.shortname is 'Сокращенное наименование подразделения';
 comment on column department.dict_region_id is 'Код субъекта РФ';
 comment on column department.tb_index is 'Индекс территориального банка';
@@ -773,7 +771,7 @@ comment on column cell_span_info.rowspan is 'Число ячеек, которы
 ----------------------------------------------------------------------------------------------------
 create table department_param 
 ( department_id number(9) not null,
-dict_region_id number(2) not null, 
+dict_region_id varchar2(2) not null,
 okato varchar2(11) not null, 
 inn varchar2(10) not null, 
 kpp varchar2(9) not null, 
