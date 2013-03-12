@@ -174,11 +174,11 @@ public class FormDataXlsxReportBuilder {
 	}
 	
 	public FormDataXlsxReportBuilder() throws IOException {
-		templeteInputStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream(TEMPLATE);
+		templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
 		try {
 			workBook = WorkbookFactory.create(templeteInputStream);
 		} catch (InvalidFormatException e) {
+			logger.error(e.getMessage(), e);
 			throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
 		}
 		sheet = workBook.getSheet("Учет налогов");

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.mapper.ReportPeriodMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import java.util.List;
 @Repository
 @Transactional(readOnly = true)
 public class ReportPeriodDaoImpl implements ReportPeriodDao {
+
+	private static final Log logger = LogFactory.getLog(ReportPeriodDaoImpl.class);
 
 	@Autowired
 	ReportPeriodMapper reportPeriodMapper;
@@ -38,6 +42,7 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 		try{
 			return reportPeriodMapper.getCurrentPeriod(taxType.getCode());
 		} catch (MyBatisSystemException e) {
+			logger.error(e.getMessage(), e);
 			/* Nested exception is TooManyResultsException */
 			if(e.getCause() instanceof TooManyResultsException){
 				throw new DaoException("Существует несколько открытых периодов по виду налога " + taxType);

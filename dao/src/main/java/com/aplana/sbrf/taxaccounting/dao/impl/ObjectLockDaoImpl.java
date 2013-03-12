@@ -133,6 +133,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 					userId
 				);
 			} catch (DataIntegrityViolationException e) {
+				logger.error(e.getMessage(), e);
 				// Такое возможно если другая транзакция вставит запись в таблицу сразу же после того,
 				// как мы проверим отсутствие записи в таблице (вероятность такого события очень низка)
 				throw new LockException("Не удалось заблокировать объект типа " + clazz.getName() + " с идентификатором " + id);

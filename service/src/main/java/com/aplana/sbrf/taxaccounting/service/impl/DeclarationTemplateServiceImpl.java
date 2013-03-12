@@ -11,6 +11,8 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,8 @@ import java.util.List;
 @Service
 @Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
+
+	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -60,8 +64,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 			jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes("UTF-8")));
 			JasperCompileManager.compileReportToStream(jasperDesign, xlsReport);
 		} catch (JRException e) {
+			logger.error(e.getMessage(), e);
 			throw new ServiceException("Некорректный файл шаблона");
 		} catch (UnsupportedEncodingException e2) {
+			logger.error(e2.getMessage(), e2);
 			throw new ServiceException("Некорректный файл шаблона");
 		}
 

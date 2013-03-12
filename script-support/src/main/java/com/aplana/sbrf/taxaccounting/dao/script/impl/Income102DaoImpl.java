@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Income102;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -38,8 +39,8 @@ public class Income102DaoImpl extends AbstractDao implements Income102Dao {
 				);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException("Must be one instance of \"102 account form\" for \"reportPeriodId\" and \"opuCode\" params");
 		}
-		
-		
 	}
 }

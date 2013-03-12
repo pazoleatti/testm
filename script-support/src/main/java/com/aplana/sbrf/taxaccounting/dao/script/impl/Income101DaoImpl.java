@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -41,7 +43,8 @@ public class Income101DaoImpl extends AbstractDao implements Income101Dao {
 			);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			throw new DaoException("Must be one instance of \"101 account form\" for \"reportPeriodId\" and \"account\" params");
 		}
-		
 	}
 }

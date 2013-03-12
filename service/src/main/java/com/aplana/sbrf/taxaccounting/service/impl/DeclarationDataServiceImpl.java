@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
-	private Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(DeclarationDataServiceImpl.class);
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
@@ -122,6 +122,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			try {
 				exporter.exportReport();
 			} catch (JRException e) {
+				logger.error(e.getMessage(), e);
 				throw new ServiceException("Невозможно экспортировать отчет");
 			}
 			return xls.toByteArray();
@@ -144,6 +145,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			try {
 				exporter.exportReport();
 			} catch (JRException e) {
+				logger.error(e.getMessage(), e);
 				throw new ServiceException("Невозможно экспортировать отчет");
 			}
 			return pdf.toByteArray();
@@ -176,6 +178,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			JRXmlDataSource dataSource = new JRXmlDataSource(document);
 			return JasperFillManager.fillReport(new ByteArrayInputStream(jasperTemplate), new HashMap<String, Object>(), dataSource);
 		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 			throw new ServiceException("Невозможно заполнить отчет");
 		}
 	}

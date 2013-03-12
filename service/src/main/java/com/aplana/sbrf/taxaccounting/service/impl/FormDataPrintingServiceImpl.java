@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilde
 
 @Service
 public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
+
+	private static final Log logger = LogFactory.getLog(FormDataPrintingServiceImpl.class);
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -51,6 +55,7 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked);
 				return builder.createReport();
 			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
 				throw new ServiceException("Ошибка при создании печатной формы.");
 			}
 		}else{
