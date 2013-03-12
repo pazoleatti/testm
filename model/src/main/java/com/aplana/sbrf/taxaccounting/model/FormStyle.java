@@ -7,14 +7,14 @@ import java.io.Serializable;
  * @author dsultanbekov
  */
 public class FormStyle implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7152539133796468066L;
 	
-	Integer id;
-	String alias;
-	Color fontColor;
-	Color backColor;
-	boolean italic = false;
-	boolean bold = false;
+	private Integer id;
+	private String alias;
+	private Color fontColor;
+	private Color backColor;
+	private boolean italic = false;
+	private boolean bold = false;
 
 	/**
 	 * Идентификатор записи в БД, если null, то стиль еще не был сохранён в БД
