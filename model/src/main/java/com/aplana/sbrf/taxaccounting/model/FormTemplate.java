@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +32,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется
 	 * <code>java.util.List</code>.
 	 */
-	private Map<FormDataEvent, List<Script>> eventScripts = new EnumMap<FormDataEvent, List<Script>>(FormDataEvent.class);
+	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
 
 	/**
 	 * Возвращает список {@link Column столбцов}, образующих налоговую форму.
