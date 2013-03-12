@@ -7,9 +7,9 @@ import java.io.Serializable;
  * Скрипт 
  */
 public class Script implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3790380395037387737L;
 	
-	private Integer id = null;
+	private Integer id;
 	private String body;
 
 	/**
