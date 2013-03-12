@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
@@ -75,24 +77,14 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		action.setRefresh(true);
 		action.setDeclarationData(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
-			@Override
-			public void onReqSuccess(UpdateDeclarationDataResult result) {
-				MessageEvent.fire(this, "Декларация обновлена");
-				setDeclaration();
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				MessageEvent.fire(this, "Запрос не выполнен", throwable);
-				setDeclaration();
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
+					@Override
+					public void onSuccess(UpdateDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация обновлена");
+						setDeclaration();
+					}
+				}));
 	}
 
 	@Override
@@ -100,24 +92,14 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		declaration.setAccepted(accepted);
 		action.setDeclarationData(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
-			@Override
-			public void onReqSuccess(UpdateDeclarationDataResult result) {
-				MessageEvent.fire(this, "Декларация сохранена");
-				setDeclaration();
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				MessageEvent.fire(this, "Request Failure", throwable);
-				setDeclaration();
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
+					@Override
+					public void onSuccess(UpdateDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация сохранена");
+						setDeclaration();
+					}
+				}));
 	}
 
 	@Override
@@ -125,25 +107,15 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		UpdateDeclarationDataAction action = new UpdateDeclarationDataAction();
 		action.setDelete(true);
 		action.setDeclarationData(declaration);
-		dispatcher.execute(action, new AbstractCallback<UpdateDeclarationDataResult>() {
-			@Override
-			public void onReqSuccess(UpdateDeclarationDataResult result) {
-				MessageEvent.fire(this, "Декларация удалена");
-				placeManager
-						.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
-			}
-
-			@Override
-			protected boolean needErrorOnFailure() {
-				return false;
-			}
-
-			@Override
-			protected void onReqFailure(Throwable throwable) {
-				MessageEvent.fire(this, "Запрос не выполнен", throwable);
-				setDeclaration();
-			}
-		});
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateDeclarationDataResult>() {
+					@Override
+					public void onSuccess(UpdateDeclarationDataResult result) {
+						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация удалена");
+						placeManager
+								.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
+					}
+				}));
 	}
 
 	@Override
@@ -166,42 +138,43 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		if (declarationId != 0) {
 			GetDeclarationDataAction action = new GetDeclarationDataAction();
 			action.setId(declarationId);
-			dispatcher.execute(action, new AbstractCallback<GetDeclarationDataResult>() {
-				@Override
-				public void onReqSuccess(GetDeclarationDataResult result) {
-					if (result.isCanRead()) {
-						declaration = result.getDeclarationData();
-						taxName = result.getTaxType().name();
-						getView().setDeclarationData(declaration);
-						getView().setType("Декларация");
-						getView().setReportPeriod(result.getReportPeriod());
-						getView().setDepartment(result.getDepartment());
-						getView().setBackButton("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
-								+ String.valueOf(result.getTaxType()));
-						getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
-						updateTitle(result.getDeclarationType());
-						loadPdfFile();
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<GetDeclarationDataResult>() {
+						@Override
+						public void onSuccess(GetDeclarationDataResult result) {
+							if (result.isCanRead()) {
+								declaration = result.getDeclarationData();
+								taxName = result.getTaxType().name();
+								getView().setDeclarationData(declaration);
+								getView().setType("Декларация");
+								getView().setReportPeriod(result.getReportPeriod());
+								getView().setDepartment(result.getDepartment());
+								getView().setBackButton("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
+										+ String.valueOf(result.getTaxType()));
+								getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
+								updateTitle(result.getDeclarationType());
+								loadPdfFile();
 
-						if (!result.isCanAccept()) {
-							getView().setCannotAccept();
-						}
-						if (!result.isCanReject()) {
-							getView().setCannotReject();
-						}
-						if (!result.isCanDownload()) {
-							getView().setCannotDownloadXml();
-						}
-						if (!result.isCanDelete()) {
-							getView().setCannotDelete();
-						}
+								if (!result.isCanAccept()) {
+									getView().setCannotAccept();
+								}
+								if (!result.isCanReject()) {
+									getView().setCannotReject();
+								}
+								if (!result.isCanDownload()) {
+									getView().setCannotDownloadXml();
+								}
+								if (!result.isCanDelete()) {
+									getView().setCannotDelete();
+								}
 
-						getProxy().manualReveal(DeclarationDataPresenter.this);
-					}
-					else {
-						MessageEvent.fire(this, "Недостаточно прав на просмотр данных декларации");
-					}
-				}
-			});
+								getProxy().manualReveal(DeclarationDataPresenter.this);
+							}
+							else {
+								MessageEvent.fire(DeclarationDataPresenter.this, "Недостаточно прав на просмотр данных декларации");
+							}
+						}
+					}));
 		}
 	}
 
