@@ -83,7 +83,7 @@
         </g:north>
 
         <g:center>
-            <g:FlowPanel height="100%" width="100%" ui:field="pdfContent" />
+            <g:Frame height="100%" width="100%" ui:field="pdfContent" />
         </g:center>
 
     </g:DockLayoutPanel>

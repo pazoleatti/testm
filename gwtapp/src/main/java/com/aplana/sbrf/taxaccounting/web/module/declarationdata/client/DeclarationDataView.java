@@ -52,7 +52,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Anchor returnAnchor;
 
 	@UiField
-	Panel pdfContent;
+	Frame pdfContent;
 
 	@UiField
 	Panel downloadXml;
@@ -126,10 +126,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setPdfFile(String fileUrl) {
-		Frame pdf = new Frame(fileUrl);
-		pdf.setWidth("100%");
-		pdf.setHeight("100%");
-		pdfContent.add(pdf);
+		pdfContent.setUrl(fileUrl);
 	}
 
 
