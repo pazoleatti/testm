@@ -102,6 +102,12 @@ public class FormTemplateColumnPresenter
 	}
 
 	@Override
+	public void addColumn(int position, Column column) {
+		fixAlias(column);
+		formTemplate.addColumn(position, column);
+	}
+
+	@Override
 	public void addColumn(Column column) {
 		fixAlias(column);
 		formTemplate.addColumn(column);

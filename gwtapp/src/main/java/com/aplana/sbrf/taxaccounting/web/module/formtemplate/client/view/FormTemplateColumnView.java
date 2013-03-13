@@ -381,26 +381,23 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			StringColumn stringColumn = new StringColumn();
 			copyMainColumnAttributes(column, stringColumn);
-			columns.set(index, stringColumn);
 
 			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(stringColumn);
+			getUiHandlers().addColumn(index, stringColumn);
 		}
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			NumericColumn numericColumn = new NumericColumn();
 			copyMainColumnAttributes(column, numericColumn);
-			columns.set(index, numericColumn);
 
 			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(numericColumn);
+			getUiHandlers().addColumn(index, numericColumn);
 		}
 		else {
 			DateColumn dateColumn = new DateColumn();
 			copyMainColumnAttributes(column, dateColumn);
-			columns.set(index, dateColumn);
 
 			getUiHandlers().removeColumn(column);
-			getUiHandlers().addColumn(dateColumn);
+			getUiHandlers().addColumn(index, dateColumn);
 		}
 
 		populateUniqueParameters();

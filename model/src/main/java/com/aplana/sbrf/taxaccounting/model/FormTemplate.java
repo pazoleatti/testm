@@ -305,8 +305,20 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Удаляет колонку из шаблона формы.
-	 * @param column удаляемая колонка
+	 * Добавляет колонку в шаблон формы.
+	 * @param position позиция для вставки
+	 * @param column добавляемая колонка
+	 */
+	public void addColumn(int position, Column column) {
+		columns.add(position, column);
+		for (DataRow row : rows) {
+			row.addColumn(position, column);
+		}
+	}
+
+	/**
+	 * Добавляет колонку в шаблон формы.
+	 * @param column добавляемая колонка
 	 */
 	public void addColumn(Column column) {
 		columns.add(column);
@@ -347,8 +359,8 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Добавляет колонку в шаблон формы.
-	 * @param column добавляемая колонка
+	 * Удаляет колонку из шаблона формы.
+	 * @param column удаляемая колонка
 	 */
 	public void removeColumn(Column column) {
 		for (DataRow row : rows) {
