@@ -4,17 +4,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
+import net.sf.jasperreports.engine.util.JRXmlUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -237,11 +239,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private JasperPrint getJasperPrint(String xml, byte[] jasperTemplate) {
 		try {
 			InputSource inputSource = new InputSource(new StringReader(xml));
-			Document document = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder().parse(inputSource);
-			JRXmlDataSource dataSource = new JRXmlDataSource(document);
+			Document document = JRXmlUtils.parse(inputSource);
+	
+			Map<String, Object> params = new HashMap<String, Object>();		
+			params.put(JRXPathQueryExecuterFactory.PARAMETER_XML_DATA_DOCUMENT, document);
+			
 			return JasperFillManager.fillReport(new ByteArrayInputStream(
-					jasperTemplate), new HashMap<String, Object>(), dataSource);
+					jasperTemplate), params);
+			
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new ServiceException("Невозможно заполнить отчет");
