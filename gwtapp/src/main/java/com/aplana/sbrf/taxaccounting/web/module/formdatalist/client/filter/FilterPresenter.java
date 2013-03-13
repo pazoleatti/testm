@@ -82,7 +82,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 		GetFilterData action = new GetFilterData();
         action.setTaxType(taxType);
         dispatchAsync.execute(action, CallbackUtils
-		        .defaultCallback(new AbstractCallback<GetFilterDataResult>() {
+		        .wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
 			        @Override
 			        public void onSuccess(GetFilterDataResult result) {
 					        FormDataFilterAvailableValues filterValues = result.getFilterValues();

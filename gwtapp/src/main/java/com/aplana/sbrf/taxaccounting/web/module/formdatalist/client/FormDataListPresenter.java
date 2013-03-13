@@ -164,7 +164,7 @@ public class FormDataListPresenter extends
 			final Range range = display.getVisibleRange();
 			GetFormDataList requestData = createRequestData(range);
 			dispatcher.execute(requestData, CallbackUtils
-					.defaultCallback(new AbstractCallback<GetFormDataListResult>() {
+					.wrongStateCallback(new AbstractCallback<GetFormDataListResult>() {
 						@Override
 						public void onSuccess(GetFormDataListResult result) {
 							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){

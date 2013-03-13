@@ -64,39 +64,34 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setDeclarationData(DeclarationData declaration) {
-		if (declaration.isAccepted()) {
-			stateLabel.setText("Принята");
-			acceptButton.setVisible(false);
-			cancelButton.setVisible(true);
-		}
-		else {
+	public void setShowAccept(boolean show) {
+		if (show) {
 			stateLabel.setText("Создана");
-			acceptButton.setVisible(true);
-			cancelButton.setVisible(false);
 		}
-		deleteButton.setVisible(true);
-		downloadXml.setVisible(true);
+		acceptButton.setVisible(show);
 	}
 
 	@Override
-	public void setCannotAccept() {
-		acceptButton.setVisible(false);
+	public void setShowReject(boolean show) {
+		if (show) {
+			stateLabel.setText("Принята");
+		}
+		cancelButton.setVisible(show);
 	}
 
 	@Override
-	public void setCannotReject() {
-		cancelButton.setVisible(false);
+	public void setShowRefresh(boolean show) {
+		refreshButton.setVisible(show);
 	}
 
 	@Override
-	public void setCannotDownloadXml() {
-		downloadXml.setVisible(false);
+	public void setShowDownloadXml(boolean show) {
+		downloadXml.setVisible(show);
 	}
 
 	@Override
-	public void setCannotDelete() {
-		deleteButton.setVisible(false);
+	public void setShowDelete(boolean show) {
+		deleteButton.setVisible(show);
 	}
 
 	@Override

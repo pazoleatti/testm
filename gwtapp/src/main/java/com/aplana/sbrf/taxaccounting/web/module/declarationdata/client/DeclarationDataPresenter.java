@@ -26,11 +26,11 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationDataUiHandlers> {
-		void setDeclarationData(DeclarationData declaration);
-		void setCannotAccept();
-		void setCannotReject();
-		void setCannotDownloadXml();
-		void setCannotDelete();
+		void setShowAccept(boolean show);
+		void setShowReject(boolean show);
+		void setShowRefresh(boolean show);
+		void setShowDownloadXml(boolean show);
+		void setShowDelete(boolean show);
 		void setType(String type);
 		void setTitle(String title);
 		void setDepartment(String department);
@@ -41,7 +41,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
-	private DeclarationData declaration;
+	private long declarationId;
 	private String taxName;
 
 	@Inject
@@ -62,15 +62,14 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		super.prepareFromRequest(request);
 		final long declarationId = Integer.valueOf(request.getParameter(DeclarationDataTokens.declarationId, "0"));
 		if (declarationId != 0) {
+			this.declarationId = declarationId;
 			GetDeclarationDataAction action = new GetDeclarationDataAction();
 			action.setId(declarationId);
 			dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<GetDeclarationDataResult>() {
 						@Override
 						public void onSuccess(GetDeclarationDataResult result) {
-							declaration = result.getDeclarationData();
 							taxName = result.getTaxType().name();
-							getView().setDeclarationData(declaration);
 							getView().setType("Декларация");
 							getView().setReportPeriod(result.getReportPeriod());
 							getView().setDepartment(result.getDepartment());
@@ -80,22 +79,15 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 							updateTitle(result.getDeclarationType());
 							loadPdfFile();
 
-							if (!result.isCanAccept()) {
-								getView().setCannotAccept();
-							}
-							if (!result.isCanReject()) {
-								getView().setCannotReject();
-							}
-							if (!result.isCanDownload()) {
-								getView().setCannotDownloadXml();
-							}
-							if (!result.isCanDelete()) {
-								getView().setCannotDelete();
-							}
+							getView().setShowAccept(result.isCanAccept());
+							getView().setShowReject(result.isCanReject());
+							getView().setShowDownloadXml(result.isCanDownload());
+							getView().setShowDelete(result.isCanDelete());
+							getView().setShowRefresh(result.isCanDelete());
 						}
 					}).addCallback(
-					new ManualRevealCallback<DeclarationDataPresenter>(
-							DeclarationDataPresenter.this)));
+							new ManualRevealCallback<DeclarationDataPresenter>(
+									DeclarationDataPresenter.this)));
 		}
 	}
 
@@ -113,7 +105,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	public void refreshDeclaration(){
 		LogCleanEvent.fire(this);
 		RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
-		action.setDeclarationId(declaration.getId());
+		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<RefreshDeclarationDataResult>() {
 					@Override
@@ -129,7 +121,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		LogCleanEvent.fire(this);
 		AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 		action.setAccepted(accepted);
-		action.setDeclarationId(declaration.getId());
+		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
 					@Override
@@ -144,7 +136,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 	public void delete() {
 		LogCleanEvent.fire(this);
 		DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
-		action.setDeclarationId(declaration.getId());
+		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<DeleteDeclarationDataResult>() {
 					@Override
@@ -158,22 +150,22 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void downloadExcel() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declaration.getId(), null, null);
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadExcel/" + declarationId, null, null);
 	}
 
 	@Override
 	public void downloadXml() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declaration.getId(), null, null);
+		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declarationId, null, null);
 	}
 
 	@Override
 	public void loadPdfFile() {
-		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declaration.getId());
+		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declarationId);
 	}
 
 	private void revealPlaceRequest() {
 		placeManager.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-				.with(DeclarationDataTokens.declarationId, String.valueOf(declaration.getId())));
+				.with(DeclarationDataTokens.declarationId, String.valueOf(declarationId)));
 	}
 
 	private void updateTitle(String declarationType){
