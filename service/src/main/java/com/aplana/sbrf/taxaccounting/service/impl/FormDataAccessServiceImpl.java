@@ -312,7 +312,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			}
 		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК, НФ по транспортному налогу)*/
 			switch (state){
 				case CREATED:
 					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()

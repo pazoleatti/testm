@@ -57,7 +57,7 @@ public class DictionaryRegionServiceImpl implements DictionaryRegionService {
     }
 
     @Override
-    public DictionaryRegion getRegionById(Integer code) throws IllegalArgumentException{
+    public DictionaryRegion getRegionByCode(String code) throws IllegalArgumentException{
         List<DictionaryRegion> regions = dictionaryRegionDao.getListRegions();
         for (DictionaryRegion region : regions) {
             if (region != null && region.getCode() != null && region.getCode().equals(code)) {

@@ -30,13 +30,13 @@ public class DictionaryRegionDaoTest {
 	@BeforeClass
 	public static void init() {
 		regionTulsk = new DictionaryRegion();
-		regionTulsk.setCode(72);
+		regionTulsk.setCode("72");
 		regionTulsk.setName("Тюменская область");
 		regionTulsk.setOkato("71000000000");
 		regionTulsk.setOkatoDefinition("71");
 
 		regionHant = new DictionaryRegion();
-		regionHant.setCode(86);
+		regionHant.setCode("86");
 		regionHant.setName("Ханты-Мансийский автономный округ - Югра");
 		regionHant.setOkato("71000000000");
 		regionHant.setOkatoDefinition("71100");

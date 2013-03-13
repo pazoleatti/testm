@@ -29,19 +29,19 @@ public class DictionaryRegionServiceTest {
     @BeforeClass
     public static void tearUp() {
 		regionTulsk = new DictionaryRegion();
-		regionTulsk.setCode(72);
+		regionTulsk.setCode("72");
 		regionTulsk.setName("Тюменская область");
 		regionTulsk.setOkato("71000000000");
 		regionTulsk.setOkatoDefinition("71");
 
 		regionHant = new DictionaryRegion();
-		regionHant.setCode(86);
+		regionHant.setCode("86");
 		regionHant.setName("Ханты-Мансийский автономный округ - Югра");
 		regionHant.setOkato("71000000000");
 		regionHant.setOkatoDefinition("71100");
 
 		regionDefault = new DictionaryRegion();
-		regionDefault.setCode(99);
+		regionDefault.setCode("99");
 		regionDefault.setName("Иные территории, включая город и космодром Байконур");
 
         DictionaryRegionDao dictionaryRegionDao = mock(DictionaryRegionDao.class);
@@ -76,10 +76,10 @@ public class DictionaryRegionServiceTest {
 
     @Test
     public void testGetRegionById () {
-        assertEquals(regionHant, service.getRegionById(regionHant.getCode()));
+        assertEquals(regionHant, service.getRegionByCode(regionHant.getCode()));
         Boolean exception = false;
         try {
-            service.getRegionById(21321312); // code must be invalid
+            service.getRegionByCode("not exists");
         } catch (IllegalArgumentException e) {
             exception = true;
         }

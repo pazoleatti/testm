@@ -32,5 +32,5 @@ public interface DictionaryRegionService {
      * @param code
      * @return
      */
-    public DictionaryRegion getRegionById(Integer code) throws IllegalArgumentException;
+    public DictionaryRegion getRegionByCode(String code) throws IllegalArgumentException;
 }

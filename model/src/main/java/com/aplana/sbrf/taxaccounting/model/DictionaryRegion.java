@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 public class DictionaryRegion {
-    private Integer code;
+    private String code;
     private String name;
     private String okato;
     private String okatoDefinition;
@@ -30,11 +30,11 @@ public class DictionaryRegion {
         this.name = name;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
