@@ -59,4 +59,6 @@ public interface DepartmentService {
      * @throws IllegalArgumentException
      */
     Department get(Integer id) throws IllegalArgumentException;
+
+    Department getTB (String tbIndex) throws IllegalArgumentException;
 }

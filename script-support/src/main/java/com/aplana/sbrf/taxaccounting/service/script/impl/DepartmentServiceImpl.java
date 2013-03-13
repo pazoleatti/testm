@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
 
 import java.util.List;
@@ -63,6 +60,17 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Department> departments = departmentDao.listDepartments();
         for(Department department : departments) {
             if (department != null && id.equals(department.getId())) {
+                return department;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
+
+    @Override
+    public Department getTB(String tbIndex) throws IllegalArgumentException {
+        List<Department> departments = departmentDao.listDepartments();
+        for(Department department : departments) {
+            if (department != null && tbIndex.equals(department.getTbIndex()) && department.getType() == DepartmentType.TERBANK) {
                 return department;
             }
         }
