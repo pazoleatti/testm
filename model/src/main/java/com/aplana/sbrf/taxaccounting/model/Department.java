@@ -25,7 +25,7 @@ public class Department implements Serializable {
 	private String shortName;
 	private Integer parentId;
 	private DepartmentType type;
-	private Integer dictRegionId;
+	private String dictRegionId;
 	private String tbIndex;
 	private String sbrfCode;
 	private List<DepartmentFormType> departmentFormTypes;
@@ -145,14 +145,14 @@ public class Department implements Serializable {
 	/**
 	 *  Получить код субъекта РФ
 	 */
-	public Integer getDictRegionId() {
+	public String getDictRegionId() {
 		return dictRegionId;
 	}
 
 	/**
 	 *  Установить код субъекта РФ
 	 */
-	public void setDictRegionId(Integer dictRegionId) {
+	public void setDictRegionId(String dictRegionId) {
 		this.dictRegionId = dictRegionId;
 	}
 

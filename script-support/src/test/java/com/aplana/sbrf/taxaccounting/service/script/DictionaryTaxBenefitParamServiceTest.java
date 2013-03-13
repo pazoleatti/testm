@@ -19,8 +19,8 @@ import com.aplana.sbrf.taxaccounting.service.script.dictionary.impl.DictionaryTa
 public class DictionaryTaxBenefitParamServiceTest {
 	
 	private static DictionaryTaxBenefitParamService service = new DictionaryTaxBenefitParamServiceImpl();
-	private static DictionaryTaxBenefitParam benefitParam1 = new DictionaryTaxBenefitParam(2, "20200", null, null, null, 0d, 0d);
-    private static DictionaryTaxBenefitParam benefitParam2 = new DictionaryTaxBenefitParam(2, "20210", null, null, null, 0d, 0d);
+	private static DictionaryTaxBenefitParam benefitParam1 = new DictionaryTaxBenefitParam("02", "20200", null, null, null, 0d, 0d);
+    private static DictionaryTaxBenefitParam benefitParam2 = new DictionaryTaxBenefitParam("02", "20210", null, null, null, 0d, 0d);
     
     @BeforeClass
     public static void tearUp() {
@@ -40,7 +40,7 @@ public class DictionaryTaxBenefitParamServiceTest {
 	 */
 	@Test
 	public void TestDeclarationData(){
-		assertTrue(service.get(2, "20210").equals(benefitParam2));
+		assertTrue(service.get("02", "20210").equals(benefitParam2));
 	}
 
 }

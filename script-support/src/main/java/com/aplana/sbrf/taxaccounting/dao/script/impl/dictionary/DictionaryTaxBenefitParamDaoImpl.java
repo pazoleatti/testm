@@ -28,7 +28,7 @@ public class DictionaryTaxBenefitParamDaoImpl extends AbstractDictionaryDaoImpl 
 			@Override
 			public DictionaryTaxBenefitParam mapRow(ResultSet rs, int rowNum) throws SQLException {
 				DictionaryTaxBenefitParam param = new DictionaryTaxBenefitParam();
-				param.setDictRegionId(rs.getInt("DICT_REGION_ID"));
+				param.setDictRegionId(rs.getString("DICT_REGION_ID"));
 				param.setItem(rs.getString("ITEM"));
 				param.setPercent(rs.getDouble("PERCENT"));
 				param.setRate(rs.getDouble("RATE"));

@@ -10,7 +10,7 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class DictionaryTaxBenefitParam {
 	// код региона 
-	private Integer dictRegionId;
+	private String dictRegionId;
 	//Код налоговой льготы
 	private String taxBenefitId ;
 	//Основание - статья
@@ -28,7 +28,7 @@ public class DictionaryTaxBenefitParam {
 	
 	}
 	
-	public DictionaryTaxBenefitParam(Integer dictRegionId, String taxBenefitId,
+	public DictionaryTaxBenefitParam(String dictRegionId, String taxBenefitId,
 			String section, String item, String subitem, Double percent,
 			Double rate) {
 		super();
@@ -42,11 +42,11 @@ public class DictionaryTaxBenefitParam {
 	}
 
 	
-	public Integer getDictRegionId() {
+	public String getDictRegionId() {
 		return dictRegionId;
 	}
 	
-	public void setDictRegionId(Integer dictRegionId) {
+	public void setDictRegionId(String dictRegionId) {
 		this.dictRegionId = dictRegionId;
 	}
 	

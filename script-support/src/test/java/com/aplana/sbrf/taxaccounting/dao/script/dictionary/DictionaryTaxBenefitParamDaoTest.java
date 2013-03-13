@@ -23,8 +23,8 @@ public class DictionaryTaxBenefitParamDaoTest {
 	@Autowired
     private DictionaryTaxBenefitParamDao dao;
 	
-	private static DictionaryTaxBenefitParam benefitParam1 = new DictionaryTaxBenefitParam(2, "20200", null, null, null, 0d, 0d);
-    private static DictionaryTaxBenefitParam benefitParam2 = new DictionaryTaxBenefitParam(2,"20210", null, null, null, 0d, 0d);
+	private static DictionaryTaxBenefitParam benefitParam1 = new DictionaryTaxBenefitParam("02", "20200", null, null, null, 0d, 0d);
+    private static DictionaryTaxBenefitParam benefitParam2 = new DictionaryTaxBenefitParam("02","20210", null, null, null, 0d, 0d);
 
 	@Test
     public void testSimple(){

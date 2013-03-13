@@ -8,5 +8,5 @@ public interface DictionaryTaxBenefitParamService {
 	/*
 	 * Функция для получения в справочнике «Параметры налоговых льгот» записи, соответствующей значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
 	 */
-	public  DictionaryTaxBenefitParam get(Integer dictRegionId, String  taxBenefitId);
+	public  DictionaryTaxBenefitParam get(String dictRegionId, String  taxBenefitId);
 }

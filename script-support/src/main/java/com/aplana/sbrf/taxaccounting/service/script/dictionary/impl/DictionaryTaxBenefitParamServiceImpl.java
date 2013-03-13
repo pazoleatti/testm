@@ -16,7 +16,7 @@ public class DictionaryTaxBenefitParamServiceImpl implements DictionaryTaxBenefi
 	DictionaryTaxBenefitParamDao dictionaryTaxBenefitParamDao;
 	
 	@Override
-	public DictionaryTaxBenefitParam get(Integer dictRegionId, String  taxBenefitId) {
+	public DictionaryTaxBenefitParam get(String dictRegionId, String  taxBenefitId) {
 			
 		List<DictionaryTaxBenefitParam> privilegeParams = dictionaryTaxBenefitParamDao.getListParams();
 		for (DictionaryTaxBenefitParam param: privilegeParams){
