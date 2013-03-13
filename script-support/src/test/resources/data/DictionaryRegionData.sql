@@ -1,2 +1,2 @@
-Insert into dict_region (code, name, okato, okato_definition) values ("72", 'Тюменская область', '71000000000', '71');
-Insert into dict_region (code, name, okato, okato_definition) values ("86", 'Ханты-Мансийский автономный округ - Югра', '71000000000', '71100');
+Insert into dict_region (code, name, okato, okato_definition) values ('72', 'Тюменская область', '71000000000', '71');
+Insert into dict_region (code, name, okato, okato_definition) values ('86', 'Ханты-Мансийский автономный округ - Югра', '71000000000', '71100');

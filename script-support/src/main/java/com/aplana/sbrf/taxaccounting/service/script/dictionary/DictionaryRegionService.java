@@ -11,7 +11,7 @@ public interface DictionaryRegionService {
      * @param code
      * @return
      */
-    public Boolean isValidCode(Integer code);
+    public Boolean isValidCode(String code);
 
     /**
      * Получает регион по  полному коду ОКАТО органищации

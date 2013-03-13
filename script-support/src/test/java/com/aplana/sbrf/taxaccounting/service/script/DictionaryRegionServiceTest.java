@@ -64,8 +64,8 @@ public class DictionaryRegionServiceTest {
 
     @Test
     public void testIsValidCode() {
-        assertFalse(service.isValidCode(98313));
-        assertTrue(service.isValidCode(72));
+        assertFalse(service.isValidCode("not exists"));
+        assertTrue(service.isValidCode("72"));
     }
 
     @Test

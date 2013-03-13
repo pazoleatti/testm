@@ -14,15 +14,13 @@ public class DictionaryRegionServiceImpl implements DictionaryRegionService {
     DictionaryRegionDao dictionaryRegionDao;
 
     @Override
-    public Boolean isValidCode(Integer code) {
-        List<DictionaryRegion> regions = dictionaryRegionDao.getListRegions();
-        Boolean result = false;
-        for (DictionaryRegion region : regions) {
+    public Boolean isValidCode(String code) {
+        for (DictionaryRegion region : dictionaryRegionDao.getListRegions()) {
             if (region.getCode() != null && region.getCode().equals(code)) {
-                result = true;
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     @Override
