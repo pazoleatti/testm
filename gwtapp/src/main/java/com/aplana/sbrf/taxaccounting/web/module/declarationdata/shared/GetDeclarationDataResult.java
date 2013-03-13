@@ -11,7 +11,6 @@ public class GetDeclarationDataResult implements Result {
 	private String reportPeriod;
 	private String declarationType;
 
-	private boolean canRead;
 	private boolean canAccept;
 	private boolean canReject;
 	private boolean canDownload;
@@ -24,14 +23,6 @@ public class GetDeclarationDataResult implements Result {
     public void setDeclarationData(DeclarationData declarationData) {
         this.declarationData = declarationData;
     }
-
-	public boolean isCanRead() {
-		return canRead;
-	}
-
-	public void setCanRead(boolean canRead) {
-		this.canRead = canRead;
-	}
 
 	public boolean isCanAccept() {
 		return canAccept;

@@ -68,39 +68,34 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 					.defaultCallback(new AbstractCallback<GetDeclarationDataResult>() {
 						@Override
 						public void onSuccess(GetDeclarationDataResult result) {
-							if (result.isCanRead()) {
-								declaration = result.getDeclarationData();
-								taxName = result.getTaxType().name();
-								getView().setDeclarationData(declaration);
-								getView().setType("Декларация");
-								getView().setReportPeriod(result.getReportPeriod());
-								getView().setDepartment(result.getDepartment());
-								getView().setBackButton("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
-										+ String.valueOf(result.getTaxType()));
-								getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
-								updateTitle(result.getDeclarationType());
-								loadPdfFile();
+							declaration = result.getDeclarationData();
+							taxName = result.getTaxType().name();
+							getView().setDeclarationData(declaration);
+							getView().setType("Декларация");
+							getView().setReportPeriod(result.getReportPeriod());
+							getView().setDepartment(result.getDepartment());
+							getView().setBackButton("#" + DeclarationListNameTokens.DECLARATION_LIST + ";nType="
+									+ String.valueOf(result.getTaxType()));
+							getView().setTitle(result.getTaxType().getName() + " / " + result.getDeclarationType());
+							updateTitle(result.getDeclarationType());
+							loadPdfFile();
 
-								if (!result.isCanAccept()) {
-									getView().setCannotAccept();
-								}
-								if (!result.isCanReject()) {
-									getView().setCannotReject();
-								}
-								if (!result.isCanDownload()) {
-									getView().setCannotDownloadXml();
-								}
-								if (!result.isCanDelete()) {
-									getView().setCannotDelete();
-								}
-
-								getProxy().manualReveal(DeclarationDataPresenter.this);
+							if (!result.isCanAccept()) {
+								getView().setCannotAccept();
 							}
-							else {
-								MessageEvent.fire(DeclarationDataPresenter.this, "Недостаточно прав на просмотр данных декларации");
+							if (!result.isCanReject()) {
+								getView().setCannotReject();
+							}
+							if (!result.isCanDownload()) {
+								getView().setCannotDownloadXml();
+							}
+							if (!result.isCanDelete()) {
+								getView().setCannotDelete();
 							}
 						}
-					}));
+					}).addCallback(
+					new ManualRevealCallback<DeclarationDataPresenter>(
+							DeclarationDataPresenter.this)));
 		}
 	}
 

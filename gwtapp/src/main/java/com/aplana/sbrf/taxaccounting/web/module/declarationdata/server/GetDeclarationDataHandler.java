@@ -50,7 +50,6 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 		GetDeclarationDataResult result = new GetDeclarationDataResult();
 		DeclarationData declaration = declarationDataService.get(action.getId(), userId);
 		result.setDeclarationData(declaration);
-		result.setCanRead(declarationAccessService.canRead(userId, action.getId()));
 		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));
 		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
 		result.setCanDownload(declarationAccessService.canDownloadXml(userId, action.getId()));
