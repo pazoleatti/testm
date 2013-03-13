@@ -48,6 +48,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	Button downloadJrxmlButton;
 
 	@UiField
+	@Editor.Ignore
+	Label title;
+
+	@UiField
 	TextBox version;
 
 	@UiField
@@ -68,6 +72,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
+				title.setText(declaration.getDeclarationType().getName());
 				driver.edit(declaration);
 				addFileUploader();
 				form.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());

@@ -36,6 +36,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	Widget logPanel;
 
 	@UiField
+	Label title;
+
+	@UiField
 	SimpleTabPanel tabPanel;
 
 	@UiField
@@ -147,5 +150,10 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 			loggerList.setRowData(new ArrayList<LogEntry>(0));
 		}
 		loggerList.redraw();
+	}
+
+	@Override
+	public void setTitle(String title) {
+		this.title.setText(title);
 	}
 }

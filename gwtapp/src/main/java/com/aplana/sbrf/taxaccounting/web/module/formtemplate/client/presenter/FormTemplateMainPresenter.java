@@ -55,6 +55,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	public interface MyView extends TabView, HasUiHandlers<FormTemplateMainUiHandlers> {
 		void setFormId(int formId);
 		void setLogMessages(List<LogEntry> entries);
+		void setTitle(String title);
 	}
 
 	@RequestTabs
@@ -135,6 +136,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							formTemplate = result.getForm();
 							getView().setLogMessages(null);
 							getView().setFormId(formTemplate.getId());
+							getView().setTitle(formTemplate.getType().getName());
 							TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
 							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
 							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);

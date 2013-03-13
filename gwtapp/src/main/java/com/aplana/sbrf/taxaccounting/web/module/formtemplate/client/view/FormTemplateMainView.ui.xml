@@ -4,13 +4,27 @@
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:c="urn:import:com.google.gwt.user.cellview.client">
 
+<ui:style>
+    .title {
+        font-family: Tahoma;
+        font-size: 16px;
+        padding: 10px;
+    }
+</ui:style>
+
 <g:DockLayoutPanel unit='PX' height="100%" width="100%" ui:field="dockPanel">
+    <g:north size="40">
+        <g:Label styleName="{style.title}" ui:field="title" />
+    </g:north>
+
     <g:north size="30">
-        <t:LeftBar>
-            <g:Button text="Сохранить" ui:field="saveButton"/>
-            <g:Button text="Сбросить" ui:field="resetButton"/>
-            <g:Button text="Отмена" ui:field="cancelButton"/>
-        </t:LeftBar>
+        <t:Bar>
+            <t:LeftBar>
+                <g:Button text="Сохранить" ui:field="saveButton"/>
+                <g:Button text="Сбросить" ui:field="resetButton"/>
+                <g:Button text="Отмена" ui:field="cancelButton"/>
+            </t:LeftBar>
+        </t:Bar>
     </g:north>
 
     <g:north size="80">

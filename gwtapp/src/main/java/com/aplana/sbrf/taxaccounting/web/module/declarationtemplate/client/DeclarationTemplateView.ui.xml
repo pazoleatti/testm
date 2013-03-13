@@ -13,14 +13,23 @@
     .CodeMirror-gutter {
         border-right: 1px solid #92C1F0;
     }
+    .title {
+        font-family: Tahoma;
+        font-size: 16px;
+        margin: 10px;
+    }
 </ui:style>
 
-<g:HTMLPanel height="100%" width="100%">
-    <t:LeftBar height="50px">
-        <g:Button text="Сохранить" ui:field="saveButton"/>
-        <g:Button text="Сбросить" ui:field="resetButton"/>
-        <g:Button text="Отмена" ui:field="cancelButton"/>
-    </t:LeftBar>
+<g:FlowPanel>
+    <g:Label styleName="{style.title}" ui:field="title" text="Декларация" />
+
+    <t:Bar>
+        <t:LeftBar>
+            <g:Button text="Сохранить" ui:field="saveButton" />
+            <g:Button text="Сбросить" ui:field="resetButton" />
+            <g:Button text="Отмена" ui:field="cancelButton" />
+        </t:LeftBar>
+    </t:Bar>
 
     <g:Label height="30px" text="Список атрибутов:"/>
 
@@ -45,5 +54,5 @@
     <g:Label width="150px">Создать скрипт</g:Label>
     <c:CodeMirror ui:field="createScript"/>
 
-</g:HTMLPanel>
+</g:FlowPanel>
 </ui:UiBinder>
