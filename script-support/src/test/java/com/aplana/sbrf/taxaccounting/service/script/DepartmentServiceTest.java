@@ -87,6 +87,7 @@ public class DepartmentServiceTest {
         assertTrue(exception);
     }
 
+    @Test
     public void testGetTB() {
         assertEquals(service.getTB(valid.getTbIndex()).getId(), validTB.getId());   // Должен находить валидный ТерБанк
         Boolean exception = false;
