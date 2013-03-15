@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.KeyPressableTextInputCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -69,6 +69,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	private FormDataPerformer performer;
 	private boolean readOnlyMode;
 	private final SingleSelectionModel<FormDataSigner> selectionModel = new SingleSelectionModel<FormDataSigner>();
+	private static final int NAME_AND_POSITION_MAX_LENGHT = 100;
 
 	@Inject
 	public SignersView(Binder uiBinder, EventBus eventBus) {
@@ -252,13 +253,13 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
 		AbstractCell nameCell;
 		AbstractCell positionCell;
+
 		if (readOnlyMode) {
 			nameCell = new TextCell();
 			positionCell = new TextCell();
-		}
-		else {
-			nameCell = new KeyPressableTextInputCell();
-			positionCell = new KeyPressableTextInputCell();
+		} else {
+			nameCell = new TextInputCell();
+			positionCell = new TextInputCell();
 		}
 
 		Column<FormDataSigner, String> nameColumn = new Column<FormDataSigner, String>(nameCell) {
@@ -270,7 +271,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		nameColumn.setFieldUpdater(new FieldUpdater<FormDataSigner, String>() {
 			@Override
 			public void update(int index, FormDataSigner signer, String value) {
-				signer.setName(value);
+				if (value.length() <= NAME_AND_POSITION_MAX_LENGHT) {
+					signer.setName(value);
+				} else {
+					signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGHT));
+					Window.alert("Количество символов для ФИО подписанта превысило допустимое значение 100");
+				}
 			}
 		});
 		signersTable.addColumn(nameColumn, "ФИО подписанта");
@@ -284,7 +290,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		positionColumn.setFieldUpdater(new FieldUpdater<FormDataSigner, String>() {
 			@Override
 			public void update(int index, FormDataSigner signer, String value) {
-				signer.setPosition(value);
+				if (value.length() <= NAME_AND_POSITION_MAX_LENGHT) {
+					signer.setPosition(value);
+				} else {
+					signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGHT));
+					Window.alert("Количество символов для должности подписанта превысило допустимое значение 100");
+				}
 			}
 		});
 		signersTable.addColumn(positionColumn, "Должность");

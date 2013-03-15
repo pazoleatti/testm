@@ -46,10 +46,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
 		stringDictionaryCodeMap.put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
 		stringDictionaryCodeMap.put("departmentNameList", "Подразделения");
+		stringDictionaryCodeMap.put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
 
 		numericDictionaryCodeMap.put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
 		numericDictionaryCodeMap.put("transportEcoClass", "ТН - Коды классов экологических стандартов");
-        numericDictionaryCodeMap.put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
 
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
 			precisionList.add(i);

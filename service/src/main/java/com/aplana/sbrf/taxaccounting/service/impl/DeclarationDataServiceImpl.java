@@ -1,13 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -17,7 +20,6 @@ import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +30,12 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Сервис для работы с декларациями
@@ -45,6 +44,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
  * @author dsultanbekov
  */
 @Service
+@Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private static final Log log = LogFactory
@@ -63,6 +63,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private DeclarationTemplateService declarationTemplateService;
 
 	@Override
+	@Transactional(readOnly = false)
 	public long createDeclaration(Logger logger, int declarationTemplateId,
 			int departmentId, int userId, int reportPeriodId) {
 		if (declarationDataAccessService.canCreate(userId,
@@ -78,6 +79,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			log.debug("New declaration saved, id = " + declarationId);
 			String xml = declarationDataScriptingService.create(logger,
 					departmentId, declarationTemplateId, reportPeriodId);
+			if(logger.containsLevel(LogLevel.ERROR)){
+				throw new ServiceLoggerException("Есть ошибки в скрипте создания декларации", logger.getEntries());
+			}
 			declarationDataDao.setXmlData(declarationId, xml);
 			return declarationId;
 		} else {
@@ -97,7 +101,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = false)
 	public void delete(long declarationId, int userId) {
 		if (declarationDataAccessService.canDelete(userId, declarationId)) {
 			declarationDataDao.delete(declarationId);
@@ -108,6 +112,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void setAccepted(long declarationId, boolean accepted, int userId) {
 		if (accepted) {
 			if (!declarationDataAccessService.canAccept(userId, declarationId)) {
@@ -218,6 +223,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void refreshDeclaration(Logger logger, long declarationDataId,
 			int userId) {
 		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
@@ -229,6 +235,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					declarationData.getDepartmentId(),
 					declarationData.getDeclarationTemplateId(),
 					declarationData.getReportPeriodId());
+			if(logger.containsLevel(LogLevel.ERROR)){
+				throw new ServiceLoggerException("Есть ошибки в скрипте создания декларации", logger.getEntries());
+			}
 			declarationDataDao.setXmlData(declarationDataId, xml);
 		} else {
 			throw new AccessDeniedException(

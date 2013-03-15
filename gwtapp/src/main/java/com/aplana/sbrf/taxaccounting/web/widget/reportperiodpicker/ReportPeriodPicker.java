@@ -40,6 +40,8 @@ public class ReportPeriodPicker extends Composite{
 	private final Button applyButton = new Button("ОК");
 
 	private List<TaxPeriod> taxPeriods = new ArrayList<TaxPeriod>();
+	private final Map<String, Integer> allReportPeriodsNameToId = new HashMap<String, Integer>();
+	private final Map<Integer, String> allReportPeriodsIdToName = new HashMap<Integer, String>();
 	private final Map<TaxPeriod, TreeItem> taxPeriodNodes = new HashMap<TaxPeriod, TreeItem>();
 	private final Map<Integer, String> selectedReportPeriods = new HashMap<Integer, String>();
 	private TaxPeriod lastTimeSelectedTaxPeriod = new TaxPeriod();
@@ -52,13 +54,13 @@ public class ReportPeriodPicker extends Composite{
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
-				setSelectedReportPeriods(selectedReportPeriods);
+				setSelectedReportPeriods();
 			}
 		});
 		applyButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				setSelectedReportPeriods(selectedReportPeriods);
+				setSelectedReportPeriods();
 				popup.hide();
 			}
 		});
@@ -71,19 +73,7 @@ public class ReportPeriodPicker extends Composite{
 				}
 			}
 		});
-		tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
-			@Override
-			public void onSelection(SelectionEvent<TreeItem> event) {
-				if(event.getSelectedItem() instanceof ReportPeriodItem){
-					ReportPeriodItem selectedItem = (ReportPeriodItem)event.getSelectedItem();
-					if(!selectedReportPeriods.containsKey(selectedItem.getReportPeriod().getId())){
-						selectedReportPeriods.put(selectedItem.getReportPeriod().getId(), selectedItem.getReportPeriod().getName());
-					} else {
-						selectedReportPeriods.remove(selectedItem.getReportPeriod().getId());
-					}
-				}
-			}
-		});
+
 		setupUI();
 	}
 
@@ -99,10 +89,23 @@ public class ReportPeriodPicker extends Composite{
 		setSelectedReportPeriods(periods);
 	}
 
-	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){
+	private void setSelectedReportPeriods(){
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
 		for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
+			result.append(item.getValue()).append(';');
+			tooltipTitle.append(item.getValue()).append('\n');
+		}
+		selected.setText(result.toString());
+		selected.setTitle(tooltipTitle.toString());
+	}
+
+	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){
+		StringBuilder result = new StringBuilder();
+		StringBuilder tooltipTitle = new StringBuilder();
+		this.selectedReportPeriods.clear();
+		this.selectedReportPeriods.putAll(selectedReportPeriods);
+		for(Map.Entry<Integer, String> item : this.selectedReportPeriods.entrySet()){
 			result.append(item.getValue()).append(';');
 			tooltipTitle.append(item.getValue()).append('\n');
 		}
@@ -117,11 +120,13 @@ public class ReportPeriodPicker extends Composite{
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){
 		for(ReportPeriod reportPeriod : reportPeriods){
 			CheckBox checkBox = new CheckBox(reportPeriod.getName());
+			addValueChangeHandler(checkBox);
 			ReportPeriodItem treeItem = new ReportPeriodItem(checkBox);
 			treeItem.setReportPeriod(reportPeriod);
 			taxPeriodNodes.get(lastTimeSelectedTaxPeriod).addItem(treeItem);
+			allReportPeriodsNameToId.put(reportPeriod.getName(), reportPeriod.getId());
+			allReportPeriodsIdToName.put(reportPeriod.getId(), reportPeriod.getName());
 		}
-
 	}
 
 	@UiHandler("selectButton")
@@ -214,5 +219,20 @@ public class ReportPeriodPicker extends Composite{
 		public void setReportPeriod(ReportPeriod reportPeriod) {
 			this.reportPeriod = reportPeriod;
 		}
+	}
+
+	private void addValueChangeHandler(final CheckBox checkBox){
+		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				CheckBox selectedItem = (CheckBox)event.getSource();
+				Integer selectedItemId = allReportPeriodsNameToId.get(selectedItem.getText());
+				if(checkBox.getValue()){
+					selectedReportPeriods.put(selectedItemId, allReportPeriodsIdToName.get(selectedItemId));
+				} else if (!checkBox.getValue()) {
+					selectedReportPeriods.remove(selectedItemId);
+				}
+			}
+		});
 	}
 }

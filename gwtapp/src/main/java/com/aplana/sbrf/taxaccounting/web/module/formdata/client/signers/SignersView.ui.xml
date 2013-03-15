@@ -16,12 +16,12 @@
         <g:VerticalPanel height="100%">
             <g:HorizontalPanel height="30px">
                 <g:Label width="100px">Исполнитель:</g:Label>
-                <g:TextBox width="300px" ui:field="name"/>
+                <g:TextBox maxLength="256" width="300px" ui:field="name"/>
             </g:HorizontalPanel>
 
             <g:HorizontalPanel height="30px">
                 <g:Label width="100px">Телефон:</g:Label>
-                <g:TextBox width="300px" ui:field="phone"/>
+                <g:TextBox maxLength="30" width="300px" ui:field="phone"/>
             </g:HorizontalPanel>
 
             <t:GenericDataGrid ui:field="signersTable" height="250px"/>

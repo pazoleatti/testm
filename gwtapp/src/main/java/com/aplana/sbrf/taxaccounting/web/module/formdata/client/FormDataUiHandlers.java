@@ -5,31 +5,33 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormDataUiHandlers extends UiHandlers{
 	
-	public void onCancelClicked();
-	
-	public void onSaveClicked();
+	void onReturnClicked();
 
-	public void onAddRowClicked();
+	void onCancelClicked();
 
-	public void onRemoveRowClicked();
+	void onSaveClicked();
 
-	public void onManualInputClicked(boolean readOnlyMode);
+	void onAddRowClicked();
 
-	public void onOriginalVersionClicked();
-	
-	public void onRecalculateClicked();
+	void onRemoveRowClicked();
 
-	public void onCheckClicked();
-	
-	public void onPrintClicked();
+	void onManualInputClicked(boolean readOnlyMode);
 
-	public void onSignersClicked();
-	
-	public void onDeleteFormClicked();
-	
-	public void onWorkflowMove(WorkflowMove wfMove);
+	void onOriginalVersionClicked();
 
-	public void onSelectRow();
+	void onRecalculateClicked();
 
-	public void onShowCheckedColumns();
+	void onCheckClicked();
+
+	void onPrintClicked();
+
+	void onSignersClicked();
+
+	void onDeleteFormClicked();
+
+	void onWorkflowMove(WorkflowMove wfMove);
+
+	void onSelectRow();
+
+	void onShowCheckedColumns();
 }

@@ -60,7 +60,7 @@
                 <g:VerticalPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink ui:field="returnAnchor" img="img/btn-l.gif"/>
+                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="img/btn-l.gif"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>

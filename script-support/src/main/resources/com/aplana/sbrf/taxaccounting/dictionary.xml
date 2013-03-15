@@ -32,6 +32,12 @@
                           p:sqlQuery="select name as value, sbrf_code as name from department order by sbrf_code"
                             />
                 </entry>
+                <entry key="dictionaryRegionCode">
+                    <bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider"
+                          p:dictionaryName="Коды субъектов Российской Федерации"
+                          p:sqlQuery="select code as value, name from dict_region order by code"
+                            />
+                </entry>
             </map>
         </property>
     </bean>
@@ -49,12 +55,6 @@
                     <bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
                           p:dictionaryName="ТН - Коды классов экологических стандартов"
                           p:sqlQuery="select code as value, name from transport_eco_class order by code"
-                            />
-                </entry>
-                <entry key="dictionaryRegionCode">
-                    <bean class="com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.NumericDictionaryDataProvider"
-                          p:dictionaryName="Коды субъектов Российской Федерации"
-                          p:sqlQuery="select code as value, name from dict_region order by code"
                             />
                 </entry>
             </map>

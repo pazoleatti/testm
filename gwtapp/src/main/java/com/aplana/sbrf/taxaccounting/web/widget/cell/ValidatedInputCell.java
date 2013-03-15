@@ -31,7 +31,7 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 
 	@Override
 	public void onBrowserEvent(Context context, Element parent, String value,
-		NativeEvent event, ValueUpdater<String> valueUpdater) {
+							   NativeEvent event, ValueUpdater<String> valueUpdater) {
 
 		DataRow dataRow = (DataRow)context.getKey();
 		if ((columnContext.getMode() == ColumnContext.Mode.EDIT_MODE)

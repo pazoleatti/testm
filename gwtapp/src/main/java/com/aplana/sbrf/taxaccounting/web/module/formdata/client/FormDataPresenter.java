@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
@@ -195,16 +194,24 @@ public class FormDataPresenter extends
 	}
 
 	@Override
-	public void onCancelClicked() {
-		if (readOnlyMode || (formData.getId() == null)) {
+	public void onReturnClicked() {
+		if (readOnlyMode ||
+				Window.confirm("Вы уверены, что хотите прекратить редактирование данных" +
+						" и перейти к списку налоговых форм?")) {
+			unlockForm(formData.getId());
 			goToFormDataList();
-		} else {
-			boolean isOK = Window
-					.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
-			if (isOK) {
-				unlockForm(formData.getId());
-				revealForm(true);
-			}
+		}
+	}
+
+	@Override
+	public void onCancelClicked() {
+		// SBRFACCTAX-1646: Пользователь создал НФ, еще не сохранил ее и нажал кнопку Отмена.
+		if(formData.getId() == null){
+			goToFormDataList();
+		}
+		if (Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?")){
+			unlockForm(formData.getId());
+			revealForm(true);
 		}
 	}
 

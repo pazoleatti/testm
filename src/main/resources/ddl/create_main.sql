@@ -506,7 +506,7 @@ create table form_data_signer
  ord          number(3) not null);
 
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
-alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id);  
+alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;  
 
 comment on table form_data_signer is 'подписанты налоговых форм';
 comment on column form_data_signer.id is 'идентфикатор записи (первичный ключ)';
@@ -524,7 +524,7 @@ name varchar2(200) not null,
 phone varchar2(20));
 
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
-alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id);  
+alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;  
 
 comment on table form_data_performer is 'исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';

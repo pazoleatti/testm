@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -180,7 +179,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onManualInputClicked(true);
+			getUiHandlers().onCancelClicked();
 		}
 	}
 
@@ -255,7 +254,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("returnAnchor")
 	void onReturnAnchorClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onCancelClicked();
+			getUiHandlers().onReturnClicked();
+			event.preventDefault();
+			event.stopPropagation();
 		}
 	}
 
