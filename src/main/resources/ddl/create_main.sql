@@ -150,7 +150,7 @@ comment on column dict_tax_benefit_param.rate is 'Пониженная став�
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
 	id number(9) not null,
-	name varchar(200) not null,
+	name varchar(600) not null,
 	tax_type char(1) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
