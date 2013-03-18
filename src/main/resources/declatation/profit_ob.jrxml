@@ -1117,42 +1117,36 @@
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage}).processString() )]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement uuid="c7d57484-74f1-442c-ba1d-b033d3f0b2c8" x="480" y="68" width="120" height="12"/>
+				<reportElement uuid="c7d57484-74f1-442c-ba1d-b033d3f0b2c8" x="0" y="58" width="600" height="12"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Форма по КНД 1151006]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="2eb8798b-ef42-4cc9-bf27-a90b8c2a5cf0" x="480" y="80" width="120" height="12"/>
+				<reportElement uuid="2eb8798b-ef42-4cc9-bf27-a90b8c2a5cf0" x="0" y="70" width="600" height="12"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Лист 01]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="34a3baf9-6978-465e-9043-73b53117f80f" x="0" y="92" width="595" height="15">
+				<reportElement uuid="34a3baf9-6978-465e-9043-73b53117f80f" x="0" y="83" width="595" height="30">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.1_Лист01"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.12f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="11" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Налоговая декларация]]></text>
+				<text><![CDATA[Налоговая декларация
+по налогу на прибыль организаций]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="699b294d-2a91-4d0b-81db-f4d5a9d98471" x="0" y="110" width="595" height="15"/>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="Arial" size="11" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[по налогу на прибыль организаций]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="9511f20c-92f4-4191-9eb8-a2d10e02a92d" x="390" y="148" width="165" height="20"/>
-				<textElement verticalAlignment="Middle">
+				<reportElement uuid="9511f20c-92f4-4191-9eb8-a2d10e02a92d" x="384" y="148" width="140" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[по месту нахождения (учета) (код)]]></text>
+				<text><![CDATA[по месту нахождения (учета)]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="f0538a14-9c92-4071-8a32-aa660c2b59f8" x="555" y="148" width="15" height="19"/>
@@ -1190,11 +1184,11 @@
 				<textFieldExpression><![CDATA[$V{КодНО}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="6d491f75-389a-4e64-8c57-5b04d67f22d6" x="0" y="148" width="225" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement uuid="6d491f75-389a-4e64-8c57-5b04d67f22d6" x="18" y="148" width="200" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Представляется в налоговый орган (код)]]></text>
+				<text><![CDATA[Представляется в налоговый орган]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="c0cf726c-20eb-48dc-8328-fb354682c597" x="585" y="125" width="15" height="19"/>
@@ -1231,11 +1225,11 @@
 				<textFieldExpression><![CDATA[$V{Период}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="06038e30-e6fc-4a91-b440-db709d248b07" x="180" y="125" width="175" height="20"/>
-				<textElement verticalAlignment="Middle">
+				<reportElement uuid="06038e30-e6fc-4a91-b440-db709d248b07" x="165" y="125" width="160" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Налоговый (отчетный) период (код)]]></text>
+				<text><![CDATA[Налоговый (отчетный) период]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="b4446d1b-bf40-4337-8421-077d0ab12780" x="109" y="125" width="15" height="19"/>
@@ -3839,12 +3833,12 @@
 				<text><![CDATA[ ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="9d8a074f-7725-46c3-8427-152b559da9cf" x="0" y="306" width="110" height="35"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<reportElement uuid="9d8a074f-7725-46c3-8427-152b559da9cf" x="0" y="306" width="110" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Форма реорганизации,
-ликвидация (код)]]></text>
+]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="40b258c4-84bb-42be-b249-9afa5f6a7088" x="510" y="375" width="15" height="19"/>
@@ -4942,7 +4936,7 @@
 			<staticText>
 				<reportElement uuid="5df7bc44-902d-474a-85f6-f94c57b81a14" x="76" y="430" width="224" height="30"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="8" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[1 - налогоплательщик, налоговый агент,
 2 - представитель налогоплательщика]]></text>
@@ -4955,7 +4949,7 @@
 				<text><![CDATA[в настоящей декларации, подтверждаю:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="5e55a64f-2587-41b2-9876-816144de80ad" x="50" y="726" width="70" height="12"/>
+				<reportElement uuid="5e55a64f-2587-41b2-9876-816144de80ad" x="32" y="726" width="88" height="12"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -5011,7 +5005,7 @@
 				<textElement>
 					<font fontName="Arial" size="8" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[* Отчество при наличии.]]></text>
+				<text><![CDATA[* - отчество при наличии.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="552f3af2-8a21-432b-a625-0afa933968e8" x="2" y="706" width="48" height="20"/>
@@ -8599,6 +8593,41 @@
 				</textElement>
 				<text><![CDATA[.]]></text>
 			</staticText>
+			<staticText>
+				<reportElement uuid="4b95afa8-0c4c-4a4a-ab2e-03277787b679" x="325" y="125" width="30" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[(код)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="04f0d4d3-3583-474d-908a-085c4e3db9ca" x="219" y="148" width="30" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[(код)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="27bfbd76-f088-46c5-be1c-ed28b0031c92" x="525" y="148" width="30" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[(код)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="564cb566-f2a2-4d35-9df2-9f95144f4422" x="1" y="322" width="79" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[ликвидация]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d6fe4d4e-5a53-45f7-ba64-a39774e4713f" x="80" y="322" width="30" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" pdfFontName="arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[(код)]]></text>
+			</staticText>
 		</band>
 		<band height="842" splitType="Stretch">
 			<textField isBlankWhenNull="true">
@@ -8978,7 +9007,9 @@
 								<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
 								<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
 							</box>
-							<textElement textAlignment="Center" verticalAlignment="Middle"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+							</textElement>
 							<textFieldExpression><![CDATA[$F{ТипНП}]]></textFieldExpression>
 						</textField>
 						<staticText>
@@ -9014,7 +9045,7 @@
 						<staticText>
 							<reportElement uuid="851fdc9b-9425-47d3-be0a-57b7f5e58dcb" x="12" y="42" width="205" height="20"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font fontName="Arial" size="8" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+								<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
 							<text><![CDATA[Признак налогоплательщика (код)]]></text>
 						</staticText>
@@ -9026,7 +9057,7 @@
 							<text><![CDATA[Код по ОКАТО]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="1987201c-38e2-426c-b0b5-9625e0b39fa2" x="0" y="133" width="263" height="20"/>
+							<reportElement uuid="1987201c-38e2-426c-b0b5-9625e0b39fa2" x="0" y="141" width="263" height="14"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
@@ -9054,7 +9085,7 @@
 							<text><![CDATA[Сумма налога к уменьшению]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="8a9e0bbc-1cc9-4bb8-b242-a819285fdeb4" x="0" y="235" width="263" height="20"/>
+							<reportElement uuid="8a9e0bbc-1cc9-4bb8-b242-a819285fdeb4" x="0" y="243" width="263" height="14"/>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
@@ -13393,7 +13424,7 @@
 			<line>
 				<reportElement uuid="fa66506c-9ea0-4ccb-921a-2674e17a9408" x="147" y="840" width="80" height="1"/>
 				<graphicElement>
-					<pen lineWidth="0.5"/>
+					<pen lineWidth="0.25"/>
 				</graphicElement>
 			</line>
 			<line>
@@ -15222,7 +15253,7 @@
 							<text><![CDATA[Признак налогоплательщика (код)]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="39f0ba7c-cf6e-472b-b076-56bb1bf41492" x="5" y="160" width="88" height="20"/>
+							<reportElement uuid="39f0ba7c-cf6e-472b-b076-56bb1bf41492" x="5" y="160" width="100" height="20"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
@@ -15257,7 +15288,7 @@
 							<textFieldExpression><![CDATA[$F{ОбязУплНалОП}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="065811a7-ae66-431d-bffd-8751235a52ae" x="2" y="304" width="127" height="17"/>
+							<reportElement uuid="065811a7-ae66-431d-bffd-8751235a52ae" x="2" y="312" width="127" height="17"/>
 							<textElement verticalAlignment="Top">
 								<font fontName="Times New Roman" size="8" pdfFontName="Times.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
@@ -15271,9 +15302,10 @@
 							<text><![CDATA[КПП]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="0ffc28e4-dc76-4e2b-b28d-7ae7fb712cce" x="2" y="254" width="127" height="50"/>
+							<reportElement uuid="0ffc28e4-dc76-4e2b-b28d-7ae7fb712cce" x="2" y="266" width="127" height="45"/>
 							<textElement verticalAlignment="Middle">
-								<font fontName="Times New Roman" size="10" pdfFontName="Times.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+								<font fontName="Times New Roman" size="9" pdfFontName="Times.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[возложение обязанности по уплате налога
 на обособленное подразделение]]></text>
