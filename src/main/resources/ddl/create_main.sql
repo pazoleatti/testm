@@ -489,7 +489,7 @@ alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4
 
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
-comment on column form_data.form_template_id is 'Èäåíòèôèêàòîð øàáëîíà ôîðìû';
+comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы';
