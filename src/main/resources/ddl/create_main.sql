@@ -361,7 +361,7 @@ create table income_101
 );
 
 alter table income_101 add constraint income_101_pk primary key (report_period_id, account,department_id);
-alter table income_101 add constraint income_101_fk_department_id foreign key (department_id)references department (id);
+alter table income_101 add constraint income_101_fk_department_id foreign key (department_id)references department(id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
@@ -382,7 +382,7 @@ create table income_102
  department_id number(15) not null);
  
 alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
-alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department (id);
+alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department(id);
 alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
 
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
@@ -390,7 +390,6 @@ comment on column income_102.report_period_id is 'Идентификатор о�
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.department_id is 'подразделение';
-
 ---------------------------------------------------------------------------------------------------
 create table declaration_type
 (
