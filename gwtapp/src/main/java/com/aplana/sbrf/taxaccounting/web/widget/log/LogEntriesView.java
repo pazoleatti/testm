@@ -7,5 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 public interface LogEntriesView{
 	
 	void setLogEntries(List<LogEntry> entries);
+	void setTableElementId(String id);
 
 }

@@ -25,6 +25,7 @@
         .floatLeft {
             float: left;
         }
+
     </ui:style>
 
 	<g:DockLayoutPanel unit="PX" height="100%" width="100%">
@@ -34,7 +35,8 @@
                 <g:cell width="100%">
 				    <g:HTML ui:field="title" addStyleNames="{style.title}"/>
                 </g:cell>
-                <g:HTMLPanel width="110px" addStyleNames="{style.floatRight}">
+                <g:HTMLPanel width="110px" addStyleNames="{style.floatRight}" ui:field="htmlPanel">
+                	
                     <div class="{style.floatLeft}">
                         <style:ButtonLink text="Печать" img="img/print.png" ui:field="printButton"/>
                     </div>
@@ -46,7 +48,7 @@
 		</g:north>
 		<g:center>
 			<g:ScrollPanel width="100%" ui:field="logPanel" height="100%">
-				<log:LogEntriesWidget ui:field="logEntries" />
+				<log:LogEntriesWidget ui:field="logEntries" tableElementId="logCellTable"/>
 			</g:ScrollPanel>
 		</g:center>
 

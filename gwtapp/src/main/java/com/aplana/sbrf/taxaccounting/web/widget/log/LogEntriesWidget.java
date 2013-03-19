@@ -22,6 +22,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 	interface LogEntryWidgetUiBinder extends UiBinder<Widget, LogEntriesWidget> {
 	}
 
+
 	@UiField
 	CellTable<LogEntry> logCellTable;
 
@@ -69,6 +70,11 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 			logCellTable.setRowCount(0);
 		}
 		logCellTable.redraw();
+	}
+
+	@Override
+	public void setTableElementId(String id) {
+		this.getElement().setId(id);
 	}
 
 }
