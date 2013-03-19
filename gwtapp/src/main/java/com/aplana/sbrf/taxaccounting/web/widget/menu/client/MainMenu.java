@@ -8,7 +8,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.InlineHyperlink;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -54,7 +53,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 					sb.appendHtmlConstant("<a href=\"#"
 							+ subMenu.getLink()
 							+ (menuItem.getLink().isEmpty() ? "" :";nType=" + menuItem.getLink())
-							+ "\" style=\"color:#000000; font-family: Tahoma; text-decoration:none;\"><div>"
+							+ "\" style=\"color:#000000; text-decoration:none;\"><div>"
 							+ subMenu.getName() + "</div></a>");
 					com.google.gwt.user.client.ui.MenuItem subMenuItem =
 							new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml());
@@ -71,7 +70,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 						+ menuItem.getLink() + ";"
 						+ "nType="
 						+ menuItem.getLink()
-						+ "\" style=\"color:white; font-family: Tahoma; text-decoration:none;\">"
+						+ "\" style=\"color:white; text-decoration:none;\">"
 						+ menuItem.getName() + "</a>");
 				menu.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
 				menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);

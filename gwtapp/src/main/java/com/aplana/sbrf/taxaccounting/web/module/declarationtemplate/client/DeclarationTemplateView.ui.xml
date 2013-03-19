@@ -14,7 +14,6 @@
         border-right: 1px solid #92C1F0;
     }
     .title {
-        font-family: Tahoma;
         font-size: 16px;
         margin: 10px;
     }

@@ -46,7 +46,7 @@ public class FormDataXlsxReportBuilder {
 
 	private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
 
-	private static final int cellWidth = 10;
+	private static final int cellWidth = 20;
 	
 	private int rowNumber = 9;
 	private int cellNumber = 0;
@@ -311,7 +311,7 @@ public class FormDataXlsxReportBuilder {
 						fillWidth(startCell,data.getFormColumns().get(realCell).getWidth());
 					}
 					aliasMap.put(cellNumber, data.getFormColumns().get((i - startCell) + realCell).getAlias());
-					//fillWidth(i,data.getFormColumns().get(i).getName().length());
+					fillWidth(i,data.getFormColumns().get(i).getName().length());
 					Cell cell1 = row2.createCell(cellNumber);
 					cell1.setCellStyle(cellStyleBuilder.cellStyle);
 					cell1.setCellValue(data.getFormColumns().get((i - startCell) + realCell).getName());
@@ -336,10 +336,10 @@ public class FormDataXlsxReportBuilder {
 		Cell cell = row1.createCell(startCell);
 		cell.setCellStyle(cellStyleBuilder.cellStyle);
 		cell.setCellValue(data.getFormColumns().get(startCell).getGroupName());
-		fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
+		//fillWidth(startCell,data.getFormColumns().get(startCell).getWidth());
 		for(int i = startCell;i<=endCell;i++){
 			aliasMap.put(cellNumber, data.getFormColumns().get(i).getAlias());
-			//fillWidth(i,data.getFormColumns().get(i).getName().length());
+			fillWidth(i,data.getFormColumns().get(i).getName().length());
 			Cell cell1 = row2.createCell(cellNumber);
 			cell1.setCellStyle(cellStyleBuilder.cellStyle);
 			cell1.setCellValue(data.getFormColumns().get(i).getName());
@@ -430,7 +430,13 @@ public class FormDataXlsxReportBuilder {
 		if(data.getState() == WorkflowState.ACCEPTED && data.getAcceptanceDate()!=null){
 			//Просто склонение
 			char[] arr = XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().toCharArray();
-			arr[arr.length - 1] = 'я';
+			if(XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().equals("март") || 
+					XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().equals("август"))
+			{
+				String mounth = new String(XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase() + "а");
+				arr = mounth.toCharArray();
+			}else
+				arr[arr.length - 1] = 'я';
 			
 			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(data.getAcceptanceDate()),
 					new String(arr), 
@@ -440,14 +446,18 @@ public class FormDataXlsxReportBuilder {
 			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "__", "_______", "__"));
 		c.setCellValue(sb.toString());
 		
+		//Fill report name
+		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
+		r = sheet.getRow(ar.getFirstCell().getRow());
+		c = r.getCell(ar.getFirstCell().getCol());
+		c.setCellValue(data.getFormType().getName());
+		
 		//Fill period
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
-		if(data.getFormType().getTaxType() == TaxType.TRANSPORT)
-			sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
-		else if(data.getFormType().getTaxType() == TaxType.INCOME)
+		if(data.getFormType().getTaxType() == TaxType.TRANSPORT || data.getFormType().getTaxType() == TaxType.INCOME)
 			sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
 		c.setCellValue(sb.toString());
 	}
@@ -493,12 +503,14 @@ public class FormDataXlsxReportBuilder {
 	 * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
 	 */
 	private void fillWidth(Integer cellNumber,Integer length){
-		if(widthCellsMap.get(cellNumber) == null && length >= cellWidth)
+		if(widthCellsMap.get(cellNumber) == null && length <= cellWidth)
 			widthCellsMap.put(cellNumber, length);
 		else if(widthCellsMap.get(cellNumber) != null){
 			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 )
 				widthCellsMap.put(cellNumber, length);
 		}
+		else
+			widthCellsMap.put(cellNumber, cellWidth);
 	}
 	
 	/*

@@ -1,16 +1,37 @@
 package com.aplana.sbrf.taxaccounting.web.widget.treepicker;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.google.gwt.core.client.*;
-import com.google.gwt.dom.client.*;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.*;
-import com.google.gwt.event.shared.*;
-import com.google.gwt.uibinder.client.*;
-import com.google.gwt.user.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TreePicker extends Composite{
 
@@ -189,7 +210,7 @@ public class TreePicker extends Composite{
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
 		for(Map.Entry<String, Integer> selectedItem : selectedItems.entrySet()){
-			result.append(selectedItem.getKey()).append(";");
+			result.append(selectedItem.getKey()).append("; ");
 			tooltipTitle.append(selectedItem.getKey()).append("\n");
 		}
 		selected.setText(result.toString());

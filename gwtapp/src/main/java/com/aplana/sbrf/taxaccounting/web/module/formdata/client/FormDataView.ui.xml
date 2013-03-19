@@ -17,12 +17,10 @@
             margin-bottom: 5px;
             padding-top: 10px;
             font-size: 16px;
-            font-family: Tahoma;
             border: 1px solid #DBDBDB;
         }
 
         .titleLabel {
-            font-family: Tahoma;
             font-size: 16px;
         }
 
@@ -30,12 +28,10 @@
             margin-left: 5px;
             font-size: 12px;
             font-weight: bold;
-            font-family: Tahoma;
         }
 
         .headerAttrName {
             font-size: 12px;
-            font-family: Tahoma;
             text-align: right;
         }
 
@@ -46,7 +42,6 @@
         .showCheckedColumns {
             margin-top: 5px;
             font-size: 12px;
-            font-family: Tahoma;
         }
 
         .attrPanel {

@@ -17,6 +17,10 @@
 	
 }
 
+a, a:visited, a:hover {
+    color: #0000FF;
+}
+
 .cellTableFooter {
 	border-bottom: 1px solid #9CC2EF;
 	font-size: 12px;

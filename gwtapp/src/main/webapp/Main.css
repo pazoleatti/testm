@@ -1,6 +1,13 @@
 @CHARSET "UTF-8";
 
-html,body {height:100%}
+html,body{
+    height:100%;
+    font-family: Tahoma, helvetica, arial, sans-serif !important;
+}
+
+body, table td, select {
+    font-family: Tahoma, helvetica, arial, sans-serif !important;
+}
 
 h2{
 	color: #777777;
@@ -26,7 +33,6 @@ h3{
     border-style: none solid solid;
     border-width: 0 2px 2px;
     color: #000000;
-    font-family: arial,sans-serif;
     font-weight: bold;
     left: 45%;
     margin-left: -40px;

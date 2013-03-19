@@ -25,7 +25,7 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	}
 
 	@Override
-	public int getTaxRate(String code, BigDecimal age, BigDecimal power, int regionId) {
+	public int getTaxRate(String code, BigDecimal age, BigDecimal power, String regionId) {
 		List<Integer> list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue(), regionId);
 
 		if (list.size() <= 0 && code.length() == 5) {

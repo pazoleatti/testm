@@ -25,7 +25,7 @@ public interface TransportTaxDao {
 	 * 
 	 * @return значение ставки налога в рублях
 	 */
-	int getTaxRate(String code, BigDecimal age, BigDecimal power, int regionId);
+	int getTaxRate(String code, BigDecimal age, BigDecimal power, String regionId);
 
 	/**
 	 * Возвращает название вида транспортного средства

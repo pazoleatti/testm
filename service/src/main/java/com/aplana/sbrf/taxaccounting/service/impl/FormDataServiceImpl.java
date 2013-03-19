@@ -209,19 +209,16 @@ public class FormDataServiceImpl implements FormDataService {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData,
 					FormDataEvent.CALCULATE, logger);
-			
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				logger.error("Рассчет завершен, обнаружены ошибки");
-			} else {
-				logger.info("Рассчет завершен, ошибок не обнаружено");
-			}
-			
+
 			// Проверяем ошибки при пересчете
 			if (logger.containsLevel(LogLevel.ERROR)) {
 				throw new ServiceLoggerException(
-						"Найдены ошибки при выполнении рассчета формы",
+						"Найдены ошибки при выполнении расчета формы",
 						logger.getEntries());
+			} else {
+				logger.info("Расчет завершен, ошибок не обнаружено");
 			}
+
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для выполенения расчёта по налоговой форме");
@@ -234,18 +231,15 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScripts(user, formData,
 				FormDataEvent.CHECK, logger);
 
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			logger.error("Проверка завершена, обнаружены ошибки");
-		} else {
-			logger.info("Проверка завершена, ошибок не обнаружено");
-		}
-		
 		// Проверяем ошибки при пересчете
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Найдены ошибки при выполнении проверки формы",
 					logger.getEntries());
+		} else {
+			logger.info("Проверка завершена, ошибок не обнаружено");
 		}
+
 	}
 
 	/**
@@ -422,7 +416,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean lock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if (objectLock != null && objectLock.getUserId() != userId) {
@@ -434,7 +428,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean unlock(long formDataId, int userId) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
 		if (objectLock != null && objectLock.getUserId() != userId) {
@@ -447,14 +441,14 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean unlockAllByUserId(int userId) {
 		lockDao.unlockAllObjectByUserId(userId);
 		return true;// TODO обработать возможные ошибки
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ObjectLock<Long> getObjectLock(long formDataId) {
 		return lockDao.getObjectLock(formDataId, FormData.class);
 	}

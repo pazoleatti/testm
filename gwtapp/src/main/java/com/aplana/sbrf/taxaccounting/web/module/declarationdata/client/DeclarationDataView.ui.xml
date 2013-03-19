@@ -3,7 +3,6 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 <ui:style>
     .titleLabel {
-        font-family: Tahoma;
         font-size: 16px;
     }
 
@@ -16,13 +15,11 @@
         text-align: right;
         font-size: 12px;
         font-weight: bold;
-        font-family: Tahoma;
     }
 
     .headerAttrName {
         text-align: right;
         font-size: 12px;
-        font-family: Tahoma;
     }
 </ui:style>
 

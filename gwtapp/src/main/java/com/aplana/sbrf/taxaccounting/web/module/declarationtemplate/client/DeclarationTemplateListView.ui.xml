@@ -4,7 +4,6 @@
 			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
         .title {
-            font-family: Tahoma;
             font-size: 16px;
             margin: 10px;
         }

@@ -19,7 +19,7 @@ public interface TransportTaxMapper {
 		"and (min_age is null or min_age < #{age}) and (max_age is null or max_age >= #{age})",
 		"and (min_power is null or min_power < #{power}) and (max_power is null or max_power >= #{power})"
 	})
-	List<Integer> getTransportTaxRate(@Param("transportCode") String transportCode, @Param("age") int age, @Param("power") int power, @Param("regionId") int regionId);
+	List<Integer> getTransportTaxRate(@Param("transportCode") String transportCode, @Param("age") int age, @Param("power") int power, @Param("regionId") String regionId);
 
 	/**
 	 * В БД есть уникальность по коду типа транспортного средства.

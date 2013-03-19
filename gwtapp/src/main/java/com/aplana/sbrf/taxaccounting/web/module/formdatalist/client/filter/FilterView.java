@@ -3,8 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.*;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.*;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.editor.client.*;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.*;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
@@ -80,6 +84,13 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 				return formTypesMap.get(object);
 			}
 		});
+
+	    formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+		    @Override
+		    public void onValueChange(ValueChangeEvent<Integer> event) {
+			    formTypeId.setTitle(formTypesMap.get(event.getValue()));
+		    }
+	    });
 
         widget = binder.createAndBindUi(this);
         this.driver = driver;
@@ -171,6 +182,11 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
 		formTypeId.setValue(null);
 		formTypeId.setAcceptableValues(formTypesMap.keySet());
+		int i = 0;
+		for (String value : formTypesMap.values()) {
+			Node child = formTypeId.getElement().getChild(i++);
+			Element.as(child).setTitle(value);
+		}
 	}
 
 	@Override

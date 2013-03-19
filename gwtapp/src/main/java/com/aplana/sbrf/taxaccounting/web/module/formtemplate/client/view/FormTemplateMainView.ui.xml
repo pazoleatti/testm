@@ -6,7 +6,6 @@
 
 <ui:style>
     .title {
-        font-family: Tahoma;
         font-size: 16px;
         padding: 10px;
     }

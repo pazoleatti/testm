@@ -3,6 +3,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,12 +22,6 @@ import java.sql.Types;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -169,6 +169,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		if (id != null) {
 			throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию");
 		}
+
+		int countOfExisted = jt.queryForInt("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
+				" AND report_period_id = ? AND department_id = ?",
+				new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getReportPeriodId(), declarationData.getDepartmentId()},
+				new int[] {Types.INTEGER, Types.INTEGER, Types.INTEGER});
+
+		if(countOfExisted != 0){
+			throw new DaoException("Декларация с указанными параметрами уже существует");
+		}
+
 		id = generateId("seq_declaration_data", Long.class);
 		jt.update(
 			"insert into declaration_data (id, declaration_template_id, report_period_id, department_id, is_accepted) values (?, ?, ?, ?, ?)",

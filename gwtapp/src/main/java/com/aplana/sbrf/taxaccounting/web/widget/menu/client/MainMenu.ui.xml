@@ -7,7 +7,6 @@
         .gwt-MenuBar-horizontal .gwt-MenuItem {
             color: white;
             font-size: 14px;
-            font-family: Tahoma;
             font-weight: normal;
             height: 30px;
             vertical-align: middle;
@@ -17,7 +16,6 @@
         .gwt-MenuBar .gwt-MenuItem-selected {
             cursor: pointer;
             color: #000000;
-            font-family: Tahoma;
             background-color: #FFFFFF;
         }
 
@@ -26,7 +24,6 @@
             margin-left: 15px !important;
             width: 150px;
             width: 135px;
-            font-family: Tahoma;
             font-size: 12px;
             padding: 3px 5px 3px 14px;
         }

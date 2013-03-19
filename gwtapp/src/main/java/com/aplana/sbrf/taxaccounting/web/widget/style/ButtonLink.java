@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Anchor;
 public class ButtonLink extends Anchor{
 
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
-		@Template("<div style=\"text-decoration: underline; font-family: Tahoma;"+
+		@Template("<div style=\"text-decoration: underline;"+
 				"color: #004276; font-size: 12px; margin-left: 20px;\">{0}</div>")
 		SafeHtml text(String text);
 
