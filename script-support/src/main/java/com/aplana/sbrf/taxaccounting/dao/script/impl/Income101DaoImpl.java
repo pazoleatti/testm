@@ -20,11 +20,11 @@ import com.aplana.sbrf.taxaccounting.model.Income101;
 public class Income101DaoImpl extends AbstractDao implements Income101Dao {
 
 	@Override
-	public Income101 getIncome101(int reportPeriodId, String account) {
+	public Income101 getIncome101(int reportPeriodId, String account, int departmentId) {
 		try{
 			return getJdbcTemplate().queryForObject(
-					"SELECT * FROM income_101 WHERE REPORT_PERIOD_ID= ? and ACCOUNT = ?",
-					new Object[]{reportPeriodId, account},
+					"SELECT * FROM income_101 WHERE REPORT_PERIOD_ID= ? and ACCOUNT = ? and DEPARTMENT_ID = ?",
+					new Object[]{reportPeriodId, account, departmentId},
 				new RowMapper<Income101>(){
 					@Override
 					public Income101 mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -36,7 +36,8 @@ public class Income101DaoImpl extends AbstractDao implements Income101Dao {
 						income101Data.setDebetRate(rs.getDouble("DEBET_RATE"));
 						income101Data.setCreditRate(rs.getDouble("CREDIT_RATE"));
 						income101Data.setOutcomeCreditRemains(rs.getDouble("OUTCOME_CREDIT_REMAINS"));
-						income101Data.setOutcomeDebetRemains(rs.getDouble("OUTCOME_DEBET_REMAINS"));
+                        income101Data.setOutcomeDebetRemains(rs.getDouble("OUTCOME_DEBET_REMAINS"));
+                        income101Data.setDepartmentId(rs.getInt("DEPARTMENT_ID"));
 						return income101Data;
 					}
 				}

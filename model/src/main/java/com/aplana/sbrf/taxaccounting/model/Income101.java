@@ -21,6 +21,8 @@ public class Income101 {
 	private Double outcomeDebetRemains;
 	// Исходящие остатки по кредиту
 	private Double outcomeCreditRemains;
+    // подразделение
+    private Integer departmentId;
 	
 	public Integer getReportPeriodId() {
 		return reportPeriodId;
@@ -71,4 +73,10 @@ public class Income101 {
 	public void setOutcomeCreditRemains(Double outcomeCreditRemains) {
 		this.outcomeCreditRemains = outcomeCreditRemains;
 	}
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
 }

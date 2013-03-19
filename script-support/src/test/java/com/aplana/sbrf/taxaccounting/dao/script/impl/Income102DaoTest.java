@@ -24,12 +24,12 @@ public class Income102DaoTest {
 	
 	@Test
 	public void testValid(){
-		assertEquals(income102Dao.getIncome102(1, "2").getTotalSum(), 666, 1e-5);
+		assertEquals(income102Dao.getIncome102(1, "2", 1).getTotalSum(), 666, 1e-5);
 	}
 
 	@Test
 	public void testNotFound(){
-		assertNull(income102Dao.getIncome102(1, "not exists"));
+		assertNull(income102Dao.getIncome102(1, "not exists", 1));
 	}
 }
 

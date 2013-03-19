@@ -21,18 +21,19 @@ import java.sql.Types;
 public class Income102DaoImpl extends AbstractDao implements Income102Dao {
 
 	@Override
-	public Income102 getIncome102(int reportPeriodId, String opuCode) {
+	public Income102 getIncome102(int reportPeriodId, String opuCode, int departmentId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"SELECT * FROM income_102 WHERE REPORT_PERIOD_ID= ? and OPU_CODE = ?",
-					new Object[]{reportPeriodId, opuCode},
+					"SELECT * FROM income_102 WHERE REPORT_PERIOD_ID= ? and OPU_CODE = ? and DEPARTMENT_ID = ?",
+					new Object[]{reportPeriodId, opuCode, departmentId},
 					new RowMapper<Income102>(){
 						@Override
 						public Income102 mapRow(ResultSet rs, int rowNum) throws SQLException {
 							Income102 income102Data = new Income102();
 							income102Data.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
 							income102Data.setOpuCode(rs.getString("OPU_CODE"));
-							income102Data.setTotalSum(rs.getDouble("TOTAL_SUM"));
+                            income102Data.setTotalSum(rs.getDouble("TOTAL_SUM"));
+                            income102Data.setDepartmentId(rs.getInt("DEPARTMENT_ID"));
 							return income102Data;
 						}
 					}

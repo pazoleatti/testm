@@ -17,20 +17,20 @@ import com.aplana.sbrf.taxaccounting.dao.script.Income101Dao;
 public class Income101DaoTest {
 	@Autowired
 	private Income101Dao income101Dao;
-	
+
 	@Test
 	public void testSimple(){
 		assertNotNull(income101Dao);
 	}
-	
+
 	@Test
 	public void testValid(){
-		assertEquals(income101Dao.getIncome101(1, "2").getIncomeDebetRemains(), 3, 1e-5);
+		assertEquals(income101Dao.getIncome101(1, "2", 1).getIncomeDebetRemains(), 3, 1e-5);
 	}
 
 	@Test
 	public void testNotFound(){
-		assertNull(income101Dao.getIncome101(1, "not exists"));
+		assertNull(income101Dao.getIncome101(1, "not exists", 1));
 	}
 }
 
