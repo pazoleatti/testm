@@ -201,50 +201,6 @@ comment on column report_period.ord is 'Номер отчетного перио
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
-create table income_101
-(report_period_id number(9) not null,
- account varchar2(255) not null,
- income_debet_remains number(22,4),
- income_credit_remains number(22,4),
- debet_rate number(22,4),
- credit_rate number(22,4),
- outcome_debet_remains number(22,4),
- outcome_credit_remains number(22,4),
- department_id number(15) not null
-);
-
-alter table income_101 add constraint income_101_pk primary key (report_period_id, account,department_id);
-alter table income_101 add constraint income_101_fk_department_id foreign key (department_id)references department (id);
-alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
-
-comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
-comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
-comment on column income_101.account is 'Номер счета';
-comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
-comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
-comment on column income_101.debet_rate is 'Обороты по дебету';
-comment on column income_101.credit_rate is 'Обороты по кредиту';
-comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
-comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
-comment on column income_101.department_id is 'подразделение';
--------------------------------------------------------------------------------------------------------------------------------------------
-create table income_102
-(report_period_id number(9) not null,
- opu_code varchar2(25) not null,
- total_sum number(22,4),
- department_id number(15) not null);
- 
-alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
-alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department (id);
-alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
-
-comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
-comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
-comment on column income_102.opu_code is 'Код ОПУ';
-comment on column income_102.total_sum is 'Сумма';
-comment on column income_102.department_id is 'подразделение';
-
----------------------------------------------------------------------------------------------------
 create table form_template (
 	id number(9) not null,
 	type_id number(9) not null,
@@ -390,6 +346,50 @@ comment on column department.sbrf_code is 'Код подразделения в 
 
 alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
+
+---------------------------------------------------------------------------------------------------
+create table income_101
+(report_period_id number(9) not null,
+ account varchar2(255) not null,
+ income_debet_remains number(22,4),
+ income_credit_remains number(22,4),
+ debet_rate number(22,4),
+ credit_rate number(22,4),
+ outcome_debet_remains number(22,4),
+ outcome_credit_remains number(22,4),
+ department_id number(15) not null
+);
+
+alter table income_101 add constraint income_101_pk primary key (report_period_id, account,department_id);
+alter table income_101 add constraint income_101_fk_department_id foreign key (department_id)references department (id);
+alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
+
+comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
+comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
+comment on column income_101.account is 'Номер счета';
+comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
+comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
+comment on column income_101.debet_rate is 'Обороты по дебету';
+comment on column income_101.credit_rate is 'Обороты по кредиту';
+comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
+comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
+comment on column income_101.department_id is 'подразделение';
+-------------------------------------------------------------------------------------------------------------------------------------------
+create table income_102
+(report_period_id number(9) not null,
+ opu_code varchar2(25) not null,
+ total_sum number(22,4),
+ department_id number(15) not null);
+ 
+alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
+alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department (id);
+alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
+
+comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
+comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
+comment on column income_102.opu_code is 'Код ОПУ';
+comment on column income_102.total_sum is 'Сумма';
+comment on column income_102.department_id is 'подразделение';
 
 ---------------------------------------------------------------------------------------------------
 create table declaration_type
