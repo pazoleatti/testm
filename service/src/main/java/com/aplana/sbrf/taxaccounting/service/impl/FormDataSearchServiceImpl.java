@@ -1,17 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
@@ -35,6 +23,17 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class FormDataSearchServiceImpl implements FormDataSearchService {
@@ -175,6 +174,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		List<FormDataKind> kindsList = new ArrayList<FormDataKind>(kinds);
 		Collections.sort(kindsList);
 		result.setKinds(kindsList);
+
+		result.setDefaultDepartmentId(user.getDepartmentId());
 		return result;
 	}
 }

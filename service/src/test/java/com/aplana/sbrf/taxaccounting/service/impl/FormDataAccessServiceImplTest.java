@@ -289,8 +289,7 @@ public class FormDataAccessServiceImplTest {
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
 
 		//Никто не может редактировать налоговые формы данного жизненного цикла
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID)); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
 		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));

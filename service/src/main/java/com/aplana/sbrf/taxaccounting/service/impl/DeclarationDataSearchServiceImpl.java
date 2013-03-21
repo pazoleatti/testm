@@ -65,6 +65,8 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 		} else {
 			throw new AccessDeniedException("Недостаточно прав для поиска деклараций");
 		}
+
+		result.setDefaultDepartmentId(user.getDepartmentId());
 		Collections.sort(result.getDeclarationTypes(), new DeclarationTypeAlphanumericComparator());
 		return result;
 	}

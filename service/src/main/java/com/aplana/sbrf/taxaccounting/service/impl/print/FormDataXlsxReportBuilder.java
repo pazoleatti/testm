@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -29,11 +30,13 @@ import org.springframework.util.ClassUtils;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataReport;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
@@ -46,13 +49,14 @@ public class FormDataXlsxReportBuilder {
 
 	private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
 
-	private static final int cellWidth = 20;
+	private static final int cellWidthMin = 20;
+	private static final int cellWidthMax = 50;
 	
 	private int rowNumber = 9;
 	private int cellNumber = 0;
 	private boolean isShowChecked;
 	
-	private String dateFormater = "dd.MM.yyyy";
+	private static String dateFormater = "dd.MM.yyyy";
 	
 	private Workbook workBook;
 	private Sheet sheet;
@@ -64,12 +68,64 @@ public class FormDataXlsxReportBuilder {
 			+ "/acctax.xlsx";
 	
 	private enum CellType{
-		DATE,
-		DATE_TABLE,
-		STRING,
-		BIGDECIMAL,
-		EMPTY,
-		DEFAULT
+		DATE {
+			@Override
+			public CellStyle createCellStyle(CellStyle style) {
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				return style;
+			}
+		},
+		STRING {
+			@Override
+			public CellStyle createCellStyle(CellStyle style) {
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setWrapText(true);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				return style;
+			}
+		},
+		BIGDECIMAL {
+			@Override
+			public CellStyle createCellStyle(CellStyle style) {
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setWrapText(true);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				return style;
+			}
+		},
+		EMPTY {
+			@Override
+			public CellStyle createCellStyle(CellStyle style) {
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setBorderBottom(CellStyle.BORDER_THIN);
+				style.setBorderTop(CellStyle.BORDER_THIN);
+				style.setBorderRight(CellStyle.BORDER_THIN);
+				style.setBorderLeft(CellStyle.BORDER_THIN);
+				
+				return style;
+			}
+		},
+		DEFAULT {
+			@Override
+			public CellStyle createCellStyle(CellStyle style) {
+				return null;
+			}
+		};
+		
+		public abstract CellStyle createCellStyle(CellStyle style);
 	}
 	
 	private FormData data;
@@ -98,61 +154,10 @@ public class FormDataXlsxReportBuilder {
 			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
 		}
 		
-		public CellStyle createCellStyle(CellType value){
-			CellStyle style = workBook.createCellStyle();
-			style.setAlignment(CellStyle.ALIGN_CENTER);
-			
-			switch (value) {
-			case STRING:
-				style.setAlignment(CellStyle.ALIGN_CENTER);
-				style.setWrapText(true);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-				
-				break;
-			case DATE: 
-				style.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-				
-			case DATE_TABLE:
-				style.setDataFormat(workBook.createDataFormat().getFormat(dateFormater));
-				
-				
-				break;
-			case BIGDECIMAL:
-				style.setAlignment(CellStyle.ALIGN_CENTER);
-				style.setWrapText(true);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-				
-				break;
-				
-			case EMPTY:
-				style.setAlignment(CellStyle.ALIGN_CENTER);
-				style.setBorderBottom(CellStyle.BORDER_THIN);
-				style.setBorderTop(CellStyle.BORDER_THIN);
-				style.setBorderRight(CellStyle.BORDER_THIN);
-				style.setBorderLeft(CellStyle.BORDER_THIN);
-				
-				break;
-
-			default:
-			
-				break;
-			}
-			
-			return style;
-		}
 		
-		public CellStyle createCellStyle(CellType value, FormStyle formStyle){
-			CellStyle style = createCellStyle(value);
+		public CellStyle createCellStyle(CellType value, FormStyle formStyle,Column currColumn){
+			DataFormat dataFormat = workBook.createDataFormat();
+			CellStyle style = value.createCellStyle(workBook.createCellStyle());
 			if(formStyle != null){
 				((XSSFCellStyle)style).setFillForegroundColor(new XSSFColor(new java.awt.Color(
 						formStyle.getBackColor().getRed(),
@@ -167,6 +172,13 @@ public class FormDataXlsxReportBuilder {
 								formStyle.getFontColor().getBlue()))
 						);
 				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			}
+			if(currColumn instanceof NumericColumn){
+				NumericColumn nc = (NumericColumn)currColumn;
+				System.out.println("precision: " + nc.getPrecision());
+				style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(nc.getPrecision())));
+			}else if(currColumn instanceof DateColumn){
+				style.setDataFormat(dataFormat.getFormat(dateFormater));
 			}
 			
 			return style;
@@ -265,6 +277,7 @@ public class FormDataXlsxReportBuilder {
 					continue;
 				}
 				aliasMap.put(cellNumber, el.getAlias());
+				fillWidth(cellNumber, el.getWidth());
 				Cell cell = row.createCell(cellNumber++);
 				cell.setCellStyle(cellStyleBuilder.cellStyle);
 				cell.setCellValue(el.getName());
@@ -308,10 +321,10 @@ public class FormDataXlsxReportBuilder {
 						Cell cell = row1.createCell(startCell);
 						cell.setCellStyle(cellStyleBuilder.cellStyle);
 						cell.setCellValue(data.getFormColumns().get(realCell).getGroupName());
-						fillWidth(startCell,data.getFormColumns().get(realCell).getWidth());
+						//fillWidth(startCell,data.getFormColumns().get(realCell).getWidth());
 					}
 					aliasMap.put(cellNumber, data.getFormColumns().get((i - startCell) + realCell).getAlias());
-					fillWidth(i,data.getFormColumns().get(i).getName().length());
+					fillWidth(i,data.getFormColumns().get(i).getName().length() / (endCell - startCell));
 					Cell cell1 = row2.createCell(cellNumber);
 					cell1.setCellStyle(cellStyleBuilder.cellStyle);
 					cell1.setCellValue(data.getFormColumns().get((i - startCell) + realCell).getName());
@@ -376,25 +389,29 @@ public class FormDataXlsxReportBuilder {
 				
 				if(obj instanceof String){
 					String str = (String)obj;
-					
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(alias.getValue()).getStyle()));
+					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(alias.getValue()).getStyle(),
+							dataRow.getCell(alias.getValue()).getColumn());
+					cell.setCellStyle(cellStyle);
 					cell.setCellValue(str);
 					//fillWidth(alias.getKey(),str.length());
 				}
 				else if(obj instanceof Date){
 					Date date = (Date)obj;
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE,dataRow.getCell(alias.getValue()).getStyle()));
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE,dataRow.getCell(alias.getValue()).getStyle(),
+							dataRow.getCell(alias.getValue()).getColumn()));
 					cell.setCellValue(date);
 					//fillWidth(alias.getKey(),String.valueOf(date).length());
 				}
 				else if(obj instanceof BigDecimal){
 					BigDecimal bd = (BigDecimal)obj;
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(alias.getValue()).getStyle()));
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL,dataRow.getCell(alias.getValue()).getStyle(),
+							dataRow.getCell(alias.getValue()).getColumn()));
 					cell.setCellValue(bd.doubleValue());
 					//fillWidth(alias.getKey(),String.valueOf(bd.doubleValue()).length());
 				}
 				else if(obj == null){
-					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY,dataRow.getCell(alias.getValue()).getStyle()));
+					cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY,dataRow.getCell(alias.getValue()).getStyle(),
+							dataRow.getCell(alias.getValue()).getColumn()));
 					cell.setCellValue("");
 				}
 			}
@@ -503,14 +520,22 @@ public class FormDataXlsxReportBuilder {
 	 * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
 	 */
 	private void fillWidth(Integer cellNumber,Integer length){
-		if(widthCellsMap.get(cellNumber) == null && length <= cellWidth)
+
+		if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMin && length <= cellWidthMax)
 			widthCellsMap.put(cellNumber, length);
+		else if(widthCellsMap.get(cellNumber) == null && length <= cellWidthMin){
+			widthCellsMap.put(cellNumber, cellWidthMin);
+		}
+		else if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMax){
+			widthCellsMap.put(cellNumber, cellWidthMax);
+		}
 		else if(widthCellsMap.get(cellNumber) != null){
-			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 )
+			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 && widthCellsMap.get(cellNumber).compareTo(cellWidthMin) > 0 )
 				widthCellsMap.put(cellNumber, length);
 		}
 		else
-			widthCellsMap.put(cellNumber, cellWidth);
+			widthCellsMap.put(cellNumber, cellWidthMin);
+
 	}
 	
 	/*

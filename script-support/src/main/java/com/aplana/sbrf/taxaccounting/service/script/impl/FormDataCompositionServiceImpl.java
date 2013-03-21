@@ -5,12 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
@@ -89,4 +84,16 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			logger.error("Невозможно принять форму. Сводная форма вышестоящего уровня уже принята.");
 		}
 	}
+
+    @Override
+    public void decompose(int departmentId, int formTypeId, FormDataKind kind){
+        TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
+        ReportPeriod currentPeriod = reportPeriodDao.getCurrentPeriod(taxType);
+
+        // Find form data.
+        FormData formData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
+        if (formData != null){
+            formDataDao.delete(formData.getId());
+        }
+    }
 }

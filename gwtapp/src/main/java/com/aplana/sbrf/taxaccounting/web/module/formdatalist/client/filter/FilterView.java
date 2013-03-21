@@ -2,9 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.*;
+import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.*;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.editor.client.*;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,7 +30,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
     private final MyDriver driver;
 
     @UiField(provided = true)
-	ValueListBox<Integer> formTypeId;
+    ListBoxWithTooltip<Integer> formTypeId;
 
     @UiField(provided = true)
 	ValueListBox<FormDataKind> formDataKind;
@@ -75,7 +74,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 			}
 		});
 
-		formTypeId = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
+		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
 			@Override
 			public String render(Integer object) {
 				if (object == null) {
@@ -176,17 +175,11 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	@Override
 	public void setFormTypesMap(Map<Integer, String> formTypesMap){
-		formTypesMap.put(null, "");
 		this.formTypesMap = formTypesMap;
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
 		formTypeId.setValue(null);
 		formTypeId.setAcceptableValues(formTypesMap.keySet());
-		int i = 0;
-		for (String value : formTypesMap.values()) {
-			Node child = formTypeId.getElement().getChild(i++);
-			Element.as(child).setTitle(value);
-		}
 	}
 
 	@Override

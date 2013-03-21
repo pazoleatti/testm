@@ -1,21 +1,10 @@
-/* Условие. */
-
-/* Конец условия. */
-
 /**
  * Проверка обязательных полей (checkRequiredFields.groovy).
  * Форма "Сводная форма начисленных доходов (доходы сложные)".
  *
  * @author rtimerbaev
- * @since 22.02.2013 11:00
+ * @since 20.03.2013 18:30
  */
-
-/**
- * Получить разделить между названиями разделов.
- */
-def getSectionSeparator(def value1, def value2) {
-    return ((!''.equals(value1)) && !''.equals(value2) ? ', ' : '')
-}
 
 // 6, 7, 9 графы
 [
@@ -36,47 +25,85 @@ def getSectionSeparator(def value1, def value2) {
         if (row.getCell(colAlias) != null && (row.getCell(colAlias).getValue() == null || ''.equals(row.getCell(colAlias).getValue()))) {
             switch (item) {
                 case (3..21) :
-                    sectionA1 = '"А1"'
+                    sectionA1 += getEmptyCellIncomeType(row)
                     break
                 case (24..39) :
-                    sectionB1 = '"Б1"'
+                    sectionB1 += getEmptyCellIncomeType(row)
                     break
                 case (43..89) :
-                    sectionA2 = '"А2"'
+                    sectionA2 += getEmptyCellIncomeType(row)
                     break
                 case (82..95) :
-                    sectionB2 = '"Б2"'
+                    sectionB2 += getEmptyCellIncomeType(row)
                     break
                 case (98..103) :
-                    sectionV = '"В"'
+                    sectionV += getEmptyCellIncomeType(row)
                 case (106..19) :
-                    sectionG = '"Г"'
+                    sectionG += getEmptyCellIncomeType(row)
                 case (112..116) :
-                    sectionD = '"Д"'
+                    sectionD += getEmptyCellIncomeType(row)
                     break
                 case 119 :
-                    sectionE = '"Е"'
+                    sectionE += getEmptyCellIncomeType(row)
                     break
                 case (122..127) :
-                    sectionJ = '"Ж"'
+                    sectionJ += getEmptyCellIncomeType(row)
                     break
                 case (130..131) :
-                    sectionS = '"специфичная информация"'
+                    sectionS += getEmptyCellIncomeType(row)
                     break
             }
         }
     }
-    errorMsg = sectionA1
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionB1) + sectionB1
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionA2) + sectionA2
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionB2) + sectionB2
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionV) + sectionV
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionG) + sectionG
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionD) + sectionD
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionE) + sectionE
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionJ) + sectionJ
-    errorMsg = errorMsg + getSectionSeparator(errorMsg, sectionS) + sectionS
+
+    errorMsg += addSector(errorMsg, sectionA1, '"А1"')
+    errorMsg += addSector(errorMsg, sectionB1, '"Б1"')
+    errorMsg += addSector(errorMsg, sectionA2, '"А2"')
+    errorMsg += addSector(errorMsg, sectionB2, '"Б2"')
+    errorMsg += addSector(errorMsg, sectionV, '"В"')
+    errorMsg += addSector(errorMsg, sectionG, '"Г"')
+    errorMsg += addSector(errorMsg, sectionD, '"Д"')
+    errorMsg += addSector(errorMsg, sectionE, '"Е"')
+    errorMsg += addSector(errorMsg, sectionJ, '"Ж"')
+    errorMsg += addSector(errorMsg, sectionS, '"специфичная информация"')
+
     if (!''.equals(errorMsg)) {
         logger.error("Не заполнены ячейки колонки \"$colName\" в разделе: $errorMsg.")
+    }
+}
+
+/**
+ * Получить разделить между названиями разделов.
+ */
+def getSectionSeparator(def value1, def value2) {
+    return ((!''.equals(value1)) && !''.equals(value2) ? ', ' : '')
+}
+
+/**
+ * Получить код строки в которой есть незаполненная ячейка.
+ */
+def getEmptyCellIncomeType(def row) {
+    return (row.incomeTypeId != null ? row.incomeTypeId : 'пусто') + ', '
+}
+
+/**
+ * Удалить последнюю запятую.
+ */
+def deleteLastSeparator(String values) {
+    return values.substring(0, values.length() - 2)
+}
+
+/**
+ * Добавить в сообщение коды незаполненных ячеек.
+ *
+ * @param errorMsg сообщение
+ * @param values список незаполненных полей в виде строки (перечислены через запятую)
+ * @param sectorName название раздела
+ */
+def addSector(def errorMsg, def values, def sectorName) {
+    if (values != null && !''.equals(values)) {
+        return getSectionSeparator(errorMsg, values) + sectorName + ' (' + deleteLastSeparator(values) + ')'
+    } else {
+        return ''
     }
 }

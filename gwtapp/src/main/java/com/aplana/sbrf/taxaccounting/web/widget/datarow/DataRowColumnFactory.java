@@ -37,7 +37,7 @@ public class DataRowColumnFactory {
 			if(dictionaryCode !=null && !dictionaryCode.trim().isEmpty()) {
 				tableCol = new EditNumericDictionaryColumn(numericColumn, columnContext);
 			}else{
-				tableCol = new EditNumericColumn(numericColumn, cellTable, columnContext);
+				tableCol = new EditNumericColumn(numericColumn, columnContext);
 			}
 		} else if (col instanceof DateColumn) {
 			DateColumn dateColumn = (DateColumn) col;

@@ -2,8 +2,13 @@
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения (declarationOP.groovy).
  *
  * @author rtimerbaev
- * @since 14.03.2013 16:00
+ * @since 19.03.2013 16:30
  */
+
+if (formDataCollection == null || formDataCollection.records.isEmpty()) {
+    logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
+    return
+}
 
 /*
 * Константы.

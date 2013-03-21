@@ -1,13 +1,22 @@
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.model.script.range.Range
+import com.aplana.sbrf.taxaccounting.model.script.range.Rect
+
+//com.aplana.sbrf.taxaccounting.model.FormData formData
+//com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
+//com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
+
 /**
  * Расчет (контрольные графы) (calculationControlGraphs.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
- * TODO:
- *		1. 15 графа
- *
  * @author auldanov
  * @author rtimerbaev
- * @since 22.02.2013 12:40
+ * @since 20.03.2013 12:00
  */
 
 /**
@@ -25,6 +34,7 @@
 double summ(FormData formData, Range summRange, filter) {
     Rect summRect = summRange.getRangeRect(formData)
     Rect condRange = summRange.getRangeRect(formData)
+    //noinspection GroovyAssignabilityCheck
     if (!summRect.isSameSize(condRange))
         throw new IllegalArgumentException(NOT_SAME_RANGES)
 
@@ -259,9 +269,9 @@ def formDataSimpleConsumption = FormDataService.find(304, formData.kind, formDat
     )
 
     /*
-     графа 13» = сумма значений «графы 8» формы «Сводная форма 'Расшифровка видов расходов, учитываемых в простых РНУ' уровня обособленного подразделения»
-     (см. раздел 6.1.4) для тех строк, для которых значение «графы 4»  равно значению «графы 4» текущей строки текущей формы.
-     */
+    графа 13» = сумма значений «графы 8» формы «Сводная форма 'Расшифровка видов расходов, учитываемых в простых РНУ' уровня обособленного подразделения»
+    (см. раздел 6.1.4) для тех строк, для которых значение «графы 4»  равно значению «графы 4» текущей строки текущей формы.
+    */
     if (formDataSimpleConsumption != null) {
         getCell('R' + it, 'opuSumByTableP').setValue(
                 summ(formDataSimpleConsumption, new ColumnRange('rnu5Field5Accepted', 0, formDataSimpleConsumption.getDataRows().size() - 1), {condRange ->
@@ -275,13 +285,14 @@ def formDataSimpleConsumption = FormDataService.find(304, formData.kind, formDat
     //«графа 14» = «графа12» + «графа13»
     getCell('R' + it, 'opuSumByOpu').setValue(getCellValue('R' + it, 'opuSumByEnclosure3') + getCellValue('R' + it, 'opuSumByTableP'))
 
-    /*
-     * «графа15» = сумма значений А для всех записей Отчета о прибылях и убытках  для которых выполняются следующие условия:
-     *  •	Выбираются данные отчета за текущий период (отчетный или налоговый)
-     *  •	Значение статьи  совпадает со значением «графы 4» текущей строки текущей формы.
-     * А = Сумма в рублях + Сумма в валюте.
-     * TODO: Какой это отчет о прибылях и убытках?
-     */
+    // «графа15»
+    def tmpValue15 = income102Dao.getIncome102(formData.reportPeriodId, getCell('R' + it, 'consumptionBuhSumAccountNumber').toString().substring(8), formData.departmentId)
+    if (tmpValue15 == null) {
+        logger.info("Нет информации в отчётах о прибылях и убытках")
+        getCell('R' + it, 'opuSumByOpu').setValue(0)
+    } else {
+        getCell('R' + it, 'opuSumByOpu').setValue(tmpValue15.totalSum)
+    }
 
     // «графа 16» = «графа14» - «графа15»
     getCell('R' + it, 'difference').setValue(

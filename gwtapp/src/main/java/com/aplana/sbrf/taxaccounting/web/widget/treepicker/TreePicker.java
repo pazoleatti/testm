@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,13 +52,13 @@ public class TreePicker extends Composite{
 	private static final String PANEL_WITH_TREE_WIDTH   = "250px";
 	private static final String PANEL_WITH_TREE_HEIGHT  = "250px";
 	private static final String APPLY_BUTTON_WIDTH      = "50px";
-	private boolean isCreated = false;
+	private boolean isTreeCreated = false;
 
 	private final List<Department> sourceList = new ArrayList<Department>();
 	private final List<Integer> availableForUserDepartmentIds = new ArrayList<Integer>();
 	private final Map<String, Integer> allTreeItems = new HashMap<String, Integer>();
 	private final Map<String, Integer> selectedItems = new HashMap<String, Integer>();
-	private final Map<Integer,  Pair<Integer, TreeItem>> nodes = new HashMap<Integer, Pair<Integer, TreeItem>>();
+	private final Map<Integer,  Pair<Integer, DepartmentItem>> nodes = new HashMap<Integer, Pair<Integer, DepartmentItem>>();
 
 	private final Label popupPanelLabel = new Label();
 	private final Tree tree = new Tree();
@@ -86,8 +87,21 @@ public class TreePicker extends Composite{
 	}
 
 	public void setSelectedItems(Map<String, Integer> values){
+		if(!isTreeCreated){
+			if(!handleTreeCreation()){
+				return;
+			}
+		}
+
 		selectedItems.clear();
+		uncheckAll();
 		selectedItems.putAll(values);
+		for(Map.Entry<String, Integer> entry : values.entrySet()){
+			Pair<Integer, DepartmentItem> pair = nodes.get(entry.getValue());
+			if (pair != null){
+				pair.getB().getCheckBox().setValue(true);
+			}
+		}
 		processSelectedElements();
 	}
 
@@ -108,15 +122,16 @@ public class TreePicker extends Composite{
 		//имя подразделения.
 		for(final Department department : sourceList){
 			if(availableForUserDepartmentIds.contains(department.getId())){
-				CheckBox treeElement = new CheckBox(department.getName());
-				addValueChangeHandler(treeElement);
-				Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
-						new TreeItem(treeElement));
+				CheckBox checkbox = new CheckBox(department.getName());
+				addValueChangeHandler(checkbox);
+				DepartmentItem departmentItem = new DepartmentItem(checkbox);
+				departmentItem.setCheckBox(checkbox);
+				Pair<Integer, DepartmentItem> treeItemPair = new Pair<Integer, DepartmentItem>(department.getParentId(), departmentItem);
 				nodes.put(department.getId(), treeItemPair);
 			} else {
 				Label treeElement = new Label(department.getName());
-				Pair<Integer, TreeItem> treeItemPair = new Pair<Integer, TreeItem>(department.getParentId() ,
-						new TreeItem(treeElement));
+				Pair<Integer, DepartmentItem> treeItemPair = new Pair<Integer, DepartmentItem>(department.getParentId() ,
+						new DepartmentItem(treeElement));
 				nodes.put(department.getId(), treeItemPair);
 			}
 			allTreeItems.put(department.getName(), department.getId());
@@ -124,7 +139,7 @@ public class TreePicker extends Composite{
 
 		//После того, как мы имеем сфомрированную структуру, нам нужно пробежаться по ней (по всем значениям Map'ки)
 		// и "связать" элементы дерева друг с другом.
-		for(Map.Entry<Integer, Pair<Integer, TreeItem>> node : nodes.entrySet()){
+		for(Map.Entry<Integer, Pair<Integer, DepartmentItem>> node : nodes.entrySet()){
 			if(nodes.get(node.getValue().getA()) != null){
 				//Если у элемента есть родитель - добавляем связь с родителем
 				nodes.get(node.getValue().getA()).getB().addItem(node.getValue().getB());
@@ -135,8 +150,8 @@ public class TreePicker extends Composite{
 		}
 
 		tree.addItem(rootNode);
-		isCreated = true;
-		return isCreated;
+		isTreeCreated = true;
+		return isTreeCreated;
 	}
 
 	private void setupUI(String popupPanelLabelText){
@@ -176,12 +191,9 @@ public class TreePicker extends Composite{
 		selectButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if(!isCreated){
-					if(createTree()){
-						selectedItems.clear();
+				if(!isTreeCreated){
+					if(handleTreeCreation()){
 						popup.show();
-					} else {
-						Window.alert("Нету доступных подразделений");
 					}
 				} else {
 					popup.setPopupPosition(getPopupLeftOffset(), getPopupTopOffset());
@@ -189,6 +201,21 @@ public class TreePicker extends Composite{
 				}
 			}
 		});
+	}
+
+	private final class DepartmentItem extends TreeItem{
+		private DepartmentItem(Widget widget){
+			super(widget);
+		}
+		private CheckBox checkBox;
+
+		public CheckBox getCheckBox() {
+			return checkBox;
+		}
+
+		public void setCheckBox(CheckBox checkBox) {
+			this.checkBox = checkBox;
+		}
 	}
 
 	private void addValueChangeHandler(CheckBox checkBox){
@@ -204,6 +231,15 @@ public class TreePicker extends Composite{
 				}
 			}
 		});
+	}
+
+	private void uncheckAll(){
+		for(Map.Entry<Integer,  Pair<Integer, DepartmentItem>> item : nodes.entrySet()){
+			CheckBox checkBox = item.getValue().getB().getCheckBox();
+			if(checkBox != null){
+				checkBox.setValue(false);
+			}
+		}
 	}
 
 	private void processSelectedElements(){
@@ -223,6 +259,16 @@ public class TreePicker extends Composite{
 
 	private int getPopupTopOffset(){
 		return (Window.getClientHeight() / 2) - 125;
+	}
+
+	private boolean handleTreeCreation(){
+		if(createTree()){
+			selectedItems.clear();
+			return true;
+		} else {
+			Window.alert("Нету доступных подразделений");
+			return false;
+		}
 	}
 
 	private final class Pair<A, B> {

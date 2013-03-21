@@ -167,14 +167,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              |  Состояние   |-------------------------------------------------|
              |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
              ------------------------------------------------------------------
-             | Создана      |   -    |     -      |      -      |      -      |
+             | Создана      |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
              | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
 			 */
 			switch (state){
 				case CREATED:
-					return false;
+					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP(); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 				default:

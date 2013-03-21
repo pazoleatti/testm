@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResult> {
+public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResult> implements ActionName {
 
 	public CreateDeclaration() {
 	}
@@ -35,5 +36,10 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
 	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
+	}
+
+	@Override
+	public String getName() {
+		return "Создание декларации";
 	}
 }

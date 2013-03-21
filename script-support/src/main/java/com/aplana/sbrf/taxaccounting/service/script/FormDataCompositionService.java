@@ -41,4 +41,11 @@ public interface FormDataCompositionService {
 	 * @param logger       логгер для сохранения результатов работы скриптов
 	 */
 	public void compose(int departmentId, int formTypeId, FormDataKind kind, Logger logger);
+
+    /**
+     * Метод обработки события переаода статуса источника из "Принята" (отмена принятия)
+     * Консолидированная форма - потребитель, автоматически удаляется в случае
+     * отмены принятия последней формы источника
+     */
+    public void decompose(int departmentId, int formTypeId, FormDataKind kind);
 }

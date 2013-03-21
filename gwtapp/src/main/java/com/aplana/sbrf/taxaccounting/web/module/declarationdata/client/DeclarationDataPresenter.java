@@ -125,7 +125,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 				.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
 					@Override
 					public void onSuccess(AcceptDeclarationDataResult result) {
-						MessageEvent.fire(DeclarationDataPresenter.this, "Декларация сохранена");
+						//MessageEvent.fire(DeclarationDataPresenter.this, "Декларация изменена");
 						revealPlaceRequest();
 					}
 				}));

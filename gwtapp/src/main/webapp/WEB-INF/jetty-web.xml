@@ -5,21 +5,34 @@
 	<Get name="securityHandler">
 		<Set name="userRealm">
 			<New class="org.mortbay.jetty.security.HashUserRealm">
-				<Set name="name">defaultWIMFileBasedRealm</Set><!-- TODO: Указать такое же имя realm, как будет в WebSphere -->
+				<!-- TODO: Указать такое же имя realm, как будет в WebSphere -->
+				<Set name="name">defaultWIMFileBasedRealm</Set>
 				<Set name="config">
-				<SystemProperty name="jetty.home" default="."/>/src/test/config/jetty-realm.properties</Set>
+					<SystemProperty name="jetty.home" default="." />/src/test/config/jetty-realm.properties
+				</Set>
 			</New>
 		</Set>
 	</Get>
 
+
 	<New id="ds" class="org.mortbay.jetty.plus.naming.Resource">
 		<Arg>java:comp/env/jdbc/TaxAccDS</Arg>
 		<Arg>
-			<New class="org.apache.commons.dbcp.BasicDataSource">
-				<Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
-				<Set name="url">jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL</Set>
-				<Set name="username">TAX</Set>
-				<Set name="password">TAX</Set>
+			<New class="bitronix.tm.resource.jdbc.PoolingDataSource">
+				<Set name="className">bitronix.tm.resource.jdbc.lrc.LrcXADataSource</Set>
+				<Set name="uniqueName">TaxAccDS</Set>
+				<Set name="allowLocalTransactions">true</Set>
+				<Set name="minPoolSize">0</Set>
+				<Set name="maxPoolSize">5</Set>
+				<Get name="driverProperties">
+					<Put name="driverClassName">oracle.jdbc.OracleDriver</Put>
+					<Put name="url">
+						jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
+					</Put>
+					<Put name="user">TAX</Put>
+					<Put name="password">TAX</Put>
+				</Get>
+				<Call name="init" />
 			</New>
 		</Arg>
 	</New>

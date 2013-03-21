@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
@@ -52,7 +51,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Anchor returnAnchor;
 
 	@UiField
-	Frame pdfContent;
+	SimplePanel pdfPanel;
 
 	@UiField
 	Panel downloadXml;
@@ -126,7 +125,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setPdfFile(String fileUrl) {
+		pdfPanel.clear();
+		Frame pdfContent = new Frame();
+		pdfContent.setWidth("100%");
+		pdfContent.setHeight("100%");
 		pdfContent.setUrl(fileUrl);
+		pdfPanel.add(pdfContent);
 	}
 
 

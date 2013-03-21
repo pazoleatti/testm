@@ -80,7 +80,7 @@
         </g:north>
 
         <g:center>
-            <g:Frame height="100%" width="100%" ui:field="pdfContent" />
+            <g:SimplePanel ui:field="pdfPanel" height="100%" width="100%"/>
         </g:center>
 
     </g:DockLayoutPanel>

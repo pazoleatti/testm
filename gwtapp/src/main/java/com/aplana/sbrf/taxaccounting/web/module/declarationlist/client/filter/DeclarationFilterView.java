@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,7 +32,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	Panel departmentSelectionTreePanel;
 
 	@UiField(provided = true)
-	ValueListBox<Integer> declarationType;
+	ListBoxWithTooltip<Integer> declarationType;
 
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
 	private final Map<TaxType, TreePicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, TreePicker>();
@@ -47,7 +48,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 		    taxTypeDepartmentSelectionTree.put(taxType, new TreePicker("Выберите подразделение"));
 	    }
 
-	    declarationType = new ValueListBox<Integer>(new AbstractRenderer<Integer>() {
+	    declarationType = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
 		    @Override
 		    public String render(Integer object) {
 			    if (object == null) {
@@ -139,7 +140,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap){
-		declarationTypeMap.put(null, "");
 		this.declarationTypeMap = declarationTypeMap;
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/

@@ -164,7 +164,7 @@ public class GetFormDataHandler extends
 		String errorMessage = "";
 		if (action.getFormDataId() == Long.MAX_VALUE) {
 			if (action.getFormDataTypeId() == null) {
-				errorMessage += "не указан вид формы";
+				errorMessage += " не указан вид формы";
 			}
 			if (action.getFormDataKind() == null) {
 				errorMessage += ", не указан тип формы";

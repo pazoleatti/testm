@@ -21,6 +21,7 @@ public class FormDataFilterAvailableValues implements Serializable {
 	private Set<Integer> departmentIds;
 	private List<FormType> formTypes;
 	private List<FormDataKind> kinds;
+	private Integer defaultDepartmentId;
 
 	/**
 	 * Получить набор подразделений
@@ -71,5 +72,13 @@ public class FormDataFilterAvailableValues implements Serializable {
 	 */
 	public void setKinds(List<FormDataKind> kinds) {
 		this.kinds = kinds;
+	}
+
+	public Integer getDefaultDepartmentId() {
+		return defaultDepartmentId;
+	}
+
+	public void setDefaultDepartmentId(Integer defaultDepartmentId) {
+		this.defaultDepartmentId = defaultDepartmentId;
 	}
 }

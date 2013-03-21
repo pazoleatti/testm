@@ -11,9 +11,6 @@
 
 	<!-- Spring слишком много пишет в лог на уровне info -->
 	<logger name="org.springframework" level="warn"/>
-
-	<!-- битрониксовский менеджер транзакций пишет слишком много варнингов по поводу пустых транзакций -->
-	<logger name="bitronix.tm.twopc.Preparer" level="error"/>
 	
 	<!-- Логгеры проекта пишут с уровнем debug -->
 	<logger name="com.aplana.sbrf.taxaccounting" level="debug"/>

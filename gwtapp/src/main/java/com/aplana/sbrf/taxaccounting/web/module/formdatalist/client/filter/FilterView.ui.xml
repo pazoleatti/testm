@@ -20,7 +20,7 @@
                 <g:cell width="250px">
                     <g:VerticalPanel>
                         <g:Label width="200px" text="Вид налоговой формы"/>
-                        <g:ValueListBox width="200px" ui:field="formTypeId" />
+                        <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell width="250px">

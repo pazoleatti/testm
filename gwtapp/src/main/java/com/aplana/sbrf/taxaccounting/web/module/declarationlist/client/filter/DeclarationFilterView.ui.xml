@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<g:HorizontalPanel>
         <g:cell width="250px">
@@ -16,7 +17,7 @@
 
         <g:VerticalPanel>
             <g:Label width="200px" text="Вид декларации" />
-            <g:ValueListBox width="200px" ui:field="declarationType" />
+            <style:ListBoxWithTooltip width="200px" ui:field="declarationType" showTooltip="true"/>
         </g:VerticalPanel>
     </g:HorizontalPanel>
 

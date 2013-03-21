@@ -25,10 +25,14 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Component
 public class ExceptionHandlerAspect {
 
-	private static final String ERROR_MESSAGE = "Операция %s не выполнена. ";
+	private static final String ERROR_MESSAGE = "Операция%s%s не выполнена. ";
 
 	private String getErrorMessage(String errName) {
-		return String.format(ERROR_MESSAGE, errName);
+		if(errName.equals("")){
+			return String.format(ERROR_MESSAGE,"",errName);
+		}
+		errName = "\"" + errName + "\"";
+		return String.format(ERROR_MESSAGE," ", errName);
 	}
 
 	@AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) &&"
@@ -37,12 +41,8 @@ public class ExceptionHandlerAspect {
 			Exception e) throws ActionException {
 		String actionName = "";
 		
-		if (action instanceof ActionName) {
+		if (action instanceof ActionName)
 			actionName = ((ActionName) action).getName();
-			if (actionName != null && !actionName.isEmpty()) {
-				actionName = "\"" + actionName + "\"";
-			}
-		}
 		
 		if (e instanceof TaActionException) {
 			throw (TaActionException)e;

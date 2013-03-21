@@ -18,6 +18,8 @@ public class DeclarationDataFilterAvailableValues implements Serializable {
 
 	private Set<Integer> departmentIds;
 	private List<DeclarationType> declarationTypes;
+
+	private Integer defaultDepartmentId;
 	
 	/**
 	 * Получить набор подразделений
@@ -49,5 +51,13 @@ public class DeclarationDataFilterAvailableValues implements Serializable {
 	 */
 	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
 		this.declarationTypes = declarationTypes;
+	}
+
+	public Integer getDefaultDepartmentId() {
+		return defaultDepartmentId;
+	}
+
+	public void setDefaultDepartmentId(Integer defaultDepartmentId) {
+		this.defaultDepartmentId = defaultDepartmentId;
 	}
 }

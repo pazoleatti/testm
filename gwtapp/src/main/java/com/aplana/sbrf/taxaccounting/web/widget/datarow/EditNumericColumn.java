@@ -18,11 +18,10 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
  * Числовая колонка С возможностью редактирования 
  **/
 public class EditNumericColumn extends DataRowColumn<String> {
-	private static Logger logger = Logger.getLogger(EditNumericColumn.class.getName());
-	
+
 	private NumberFormat numberFormat;
 
-	public EditNumericColumn(NumericColumn column, final AbstractCellTable<DataRow> cellTable, ColumnContext columnContext) {
+	public EditNumericColumn(NumericColumn column, ColumnContext columnContext) {
 		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision()), columnContext), column);
 		this.setHorizontalAlignment(ALIGN_RIGHT);
 		StringBuffer mask = new StringBuffer("#");
@@ -40,10 +39,8 @@ public class EditNumericColumn extends DataRowColumn<String> {
 				try {
 					dataRow.put(getAlias(), numberFormat.parse(s));
 				} catch (NumberFormatException e) {
-					logger.log(Level.WARNING, "Failed to convert inputed value '" + s + "' to number. Reseting value of cell to null");
 					dataRow.put(getAlias(), null);
 				}
-				cellTable.redraw();
 			}
 		});
 	}

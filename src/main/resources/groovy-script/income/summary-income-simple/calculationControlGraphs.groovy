@@ -141,6 +141,8 @@ if (formData302 != null) {
     def bVal = new StringBuffer(getCell('R'+it, 'accountNo').value)
     bVal.delete(1,8)
     def data = income102Dao.getIncome102(formData.reportPeriodId, bVal.toString(), formData.departmentId)
+    if (data == null)
+        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках")
     getCell('R'+it, 'opuSumByOpu').setValue(data ? data.creditRate: 0)
 
 
@@ -156,6 +158,8 @@ if (formData302 != null) {
     def bVal = new StringBuffer(getCell('R'+it, 'accountNo').value)
     bVal.delete(4,5)
     def data = income101Dao.getIncome101(formData.reportPeriodId, bVal.toString(), formData.departmentId)
+    if (data == null)
+        logger.warn("Не найдены соответствующие данные в оборотной ведомости")
     getCell('R'+it, 'opuSumByOpu').setValue(data ? data.incomeDebetRemains : 0)
     // графа 16
     getCell('R' + it, 'difference').setValue(
@@ -168,6 +172,8 @@ if (formData302 != null) {
 bVal = new StringBuffer(getCell('R209', 'accountNo').value)
 bVal.delete(4,5)
 def data209x15 = income101Dao.getIncome101(formData.reportPeriodId, bVal.toString(), formData.departmentId)
+if (data209x15 == null)
+    logger.warn("Не найдены соответствующие данные в оборотной ведомости")
 getCell('R209', 'opuSumByOpu').setValue(data209x15 ? data209x15.debetRate : 0)
 // Графа 16  Строка 209 («графа 16» = «графа 15» - «графа 7»)
 getCell('R209', 'difference').setValue(
@@ -179,6 +185,8 @@ getCell('R209', 'difference').setValue(
 bVal = new StringBuffer(getCell('R220', 'accountNo').value)
 bVal.delete(4,5)
 def data220x15 = income101Dao.getIncome101(formData.reportPeriodId, bVal.toString(), formData.departmentId)
+if (data220x15 == null)
+    logger.warn("Не найдены соответствующие данные в оборотной ведомости")
 getCell('R220', 'opuSumByOpu').setValue(data220x15 ? data220x15.debetRate : 0)
 /*
  * Графа 16 строка 220

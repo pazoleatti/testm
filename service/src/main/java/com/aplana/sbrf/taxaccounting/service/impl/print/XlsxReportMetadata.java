@@ -28,5 +28,99 @@ public final class XlsxReportMetadata {
 	public static final SimpleDateFormat sdf_m = new SimpleDateFormat("MMMMMM");
 	public static final SimpleDateFormat sdf_d = new SimpleDateFormat("dd");
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd,MMMMMM,yyyy");
+	
+	public enum Presision{
+		DEFAULT {
+			@Override
+			public String pattern() {
+				return "#.##";
+			}
+		},
+		UNUM {
+			@Override
+			protected String pattern() {
+				return "0.0";
+			}
+		},
+		DUO {
+			@Override
+			protected String pattern() {
+				return "0.00";
+			}
+		},
+		TRES {
+			@Override
+			protected String pattern() {
+				return "0.000";
+			}
+		},
+		QUATTUOR {
+
+			@Override
+			protected String pattern() {
+				return "0.0000";
+			}
+		},
+		QUINQUE {
+			@Override
+			protected String pattern() {
+				return "0.00000";
+			}
+		},
+		SEX {
+			@Override
+			protected String pattern() {
+				return "0.000000";
+			}
+		},
+		SEPTEM {
+			@Override
+			protected String pattern() {
+				return "0.0000000";
+			}
+		},
+		OCTO {
+			@Override
+			protected String pattern() {
+				return "0.0000000";
+			}
+		};
+		
+		protected abstract String pattern();
+		public static String getPresision(int number){
+			Presision presision = null;
+			switch (number) {
+			case 1:
+				presision = UNUM;
+				break;
+			case 2:
+				presision = DUO;
+				break;
+			case 3:
+				presision = TRES;
+				break;
+			case 4:
+				presision = QUATTUOR;
+				break;
+			case 5:
+				presision = QUINQUE;
+				break;
+			case 6:
+				presision = SEX;
+				break;
+			case 7:
+				presision = SEPTEM;
+				break;
+			case 8:
+				presision = OCTO;
+				break;
+			default:
+				presision = DEFAULT;
+				break;
+			}
+			return presision.pattern();
+			
+		}
+	}
 
 }

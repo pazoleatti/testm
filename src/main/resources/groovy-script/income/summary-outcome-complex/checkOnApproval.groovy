@@ -14,13 +14,13 @@ return isTerBank
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
  * @author auldanov
- * @since 22.02.2013 13:00
+ * @since 20.03.2013 16:00
  */
 
 departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
     if (department.formTypeId == formData.getFormType().getId()) {
         def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-        if (form != null && form.getState() != WorkflowState.CREATED) {
+        if (form != null && form.getState() != WorkflowState.ACCEPTED) {
             /*
                 * 1.	Система должна выдать Пользователю сообщение  о том,
                 *		что Утверждение сводной налоговой формы невозможно, т.к. уже подготовлена сводная налоговая форма Банка.

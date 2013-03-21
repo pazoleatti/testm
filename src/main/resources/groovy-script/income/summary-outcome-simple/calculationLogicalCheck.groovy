@@ -27,9 +27,7 @@ boolean isEquals(Double value1, Double value2) {
 void setColumn9Equals0(def row) {
     if (row != null && row.rnu5Field5PrevTaxPeriod != null) {
         def result = round(row.rnu5Field5PrevTaxPeriod, 2)
-        row.logicalCheck = isEquals(result, 0) ? result : 'Требуется объяснение'
-    } else {
-        row.logicalCheck = null
+        row.logicalCheck = isEquals(result, 0) ? result.toString() : 'Требуется объяснение'
     }
 }
 
@@ -41,9 +39,7 @@ void setColumn9Equals0(def row) {
 void setColumn9Less0(def row) {
     if (row != null && row.rnu5Field5Accepted != null && row.rnu7Field12Accepted != null) {
         def result = round(row.rnu5Field5Accepted - row.rnu7Field12Accepted, 2)
-        row.logicalCheck = result < 0 ? 'Требуется объяснение' : result
-    } else {
-        row.logicalCheck = null
+        row.logicalCheck = result < 0 ? 'Требуется объяснение' : result.toString()
     }
 }
 

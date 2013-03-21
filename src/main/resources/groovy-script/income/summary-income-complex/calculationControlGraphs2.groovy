@@ -17,8 +17,8 @@ import com.aplana.sbrf.taxaccounting.model.script.range.Rect
  * Форма "Сводная форма начисленных доходов (доходы сложные)".
  *
  * TODO
- *		1. графа 15 не реализована, так как в ЧТЗ пока не ясность с этим
- *		2. добавить расчет по строкам а) 54-59 б) 3-53, 60-131 (добавились в обновленном ЧТЗ)
+ * 		1. графа 15 не реализована, так как в ЧТЗ пока не ясность с этим
+ * 		2. добавить расчет по строкам а) 54-59 б) 3-53, 60-131 (добавились в обновленном ЧТЗ)
  *
  * @author auldanov
  * @since 19.03.2013 12:00
@@ -49,17 +49,17 @@ Cell getCell(String row, String column) {
  * Обертка предназначенная для прямых вызовов функции без formData.
  */
 BigDecimal summ(ColumnRange cr) {
-    return summ(formData, cr, cr, {return true;})
+    return summ(formData, cr, cr, { return true; })
 }
 
 /**
  * Прямое получения значения ячейки по столбцу и колонке, значение Null воспринимается как 0.
  */
 BigDecimal getCellValue(String row, String column) {
-    if (getDataRow(row).getCell(column)==null) {
+    if (getDataRow(row).getCell(column) == null) {
         throw new Exception('Не найдена ячейка')
     }
-    return getDataRow(row).getCell(column).getValue() ?:0;
+    return getDataRow(row).getCell(column).getValue() ?: 0;
 }
 
 def specialNotation = 'Требуется объяснение'
@@ -102,12 +102,6 @@ double summ(FormData formData, Range conditionRange, Range summRange, filter) {
     return sum
 }
 
-
-
-
-
-
-
 // ----Раздел А1
 // графа 11
 getCell('R22', 'logicalCheck').setValue(
@@ -127,8 +121,6 @@ getCell('R22', 'difference').setValue(
         substract(getCell('R22', 'opuSumByEnclosure2'), getCell('R22', 'incomeTaxSumS'))
 )
 
-
-
 // Раздел Б1
 // графа 11
 getCell('R40', 'logicalCheck').setValue(((BigDecimal) getCell('R39', 'logicalCheck').getValue()).setScale(2, BigDecimal.ROUND_HALF_UP))
@@ -145,7 +137,6 @@ getCell('R40', 'opuSumByTableD').setValue(
 getCell('R40', 'difference').setValue(
         substract(getCell('R40', 'opuSumByEnclosure2'), getCell('R40', 'incomeTaxSumS'))
 )
-
 
 // --Раздел А2
 // графа 11
@@ -166,8 +157,6 @@ getCell('R80', 'difference').setValue(
         substract(getCell('R80', 'opuSumByEnclosure2'), getCell('R80', 'incomeTaxSumS'))
 )
 
-
-
 // --- Раздел Б2
 // графа 12
 getCell('R96', 'opuSumByEnclosure2').setValue(
@@ -177,8 +166,6 @@ getCell('R96', 'opuSumByEnclosure2').setValue(
 getCell('R96', 'difference').setValue(
         substract(getCell('R96', 'opuSumByEnclosure2'), getCell('R96', 'incomeTaxSumS'))
 )
-
-
 
 // Раздел В
 // графа 11
@@ -198,8 +185,6 @@ getCell('R104', 'difference').setValue(
         substract(getCell('R104', 'opuSumByEnclosure2'), getCell('R104', 'incomeTaxSumS'))
 )
 
-
-
 // --- Раздел Г
 // графа 11
 getCell('R110', 'logicalCheck').setValue(
@@ -218,8 +203,6 @@ getCell('R110', 'difference').setValue(
         substract(getCell('R110', 'opuSumByEnclosure2'), getCell('R110', 'incomeTaxSumS'))
 )
 
-
-
 // --Раздел Д
 // графа 12
 getCell('R117', 'opuSumByEnclosure2').setValue(
@@ -230,7 +213,6 @@ getCell('R117', 'difference').setValue(
         substract(getCell('R117', 'opuSumByEnclosure2'), getCell('R117', 'incomeTaxSumS'))
 )
 
-
 // --Раздел Е
 // графа 12
 getCell('R120', 'opuSumByEnclosure2').setValue(
@@ -240,7 +222,6 @@ getCell('R120', 'opuSumByEnclosure2').setValue(
 getCell('R120', 'difference').setValue(
         substract(getCell('R120', 'opuSumByEnclosure2'), getCell('R120', 'incomeTaxSumS'))
 )
-
 
 // Раздел Ж
 // графа 11
@@ -260,17 +241,15 @@ getCell('R128', 'difference').setValue(
         substract(getCell('R128', 'opuSumByEnclosure2'), getCell('R128', 'incomeTaxSumS'))
 )
 
-
-
 // раздел где много строк для графы 11
-['R4', 'R5', 'R7', 'R19', 'R43', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R64', 'R70', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R98', 'R106', 'R122'].each{
+['R4', 'R5', 'R7', 'R19', 'R43', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R64', 'R70', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R98', 'R106', 'R122'].each {
 
     ColumnRange columnRange6 = new ColumnRange('incomeBuhSumAccepted', 0, formData.getDataRows().size() - 1)
     Double sum6column = summ(formData, columnRange6, columnRange6, { condRange ->
         return getCell(it, 'incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue() && condRange.getCell('incomeBuhSumAccountNumber').getValue() != null
     })
 
-    ColumnRange columnRange7 = new ColumnRange('incomeBuhSumPrevTaxPeriod', 0, formData.getDataRows().size() -1)
+    ColumnRange columnRange7 = new ColumnRange('incomeBuhSumPrevTaxPeriod', 0, formData.getDataRows().size() - 1)
     Double sum7column = summ(formData, columnRange7, columnRange7, { condRange ->
         return getCell(it, 'incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue() && condRange.getCell('incomeBuhSumAccountNumber').getValue() != null
     })
@@ -282,33 +261,30 @@ getCell('R128', 'difference').setValue(
     //val = round(val, 2)
 
     getCell(it, 'logicalCheck').setValue(
-            val >= 0 ? val: specialNotation
+            val >= 0 ? val : specialNotation
     )
 }
-
 
 // получение данных из расходов сложных
 def formDataComplexConsumption = FormDataService.find(303, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
 if (formDataComplexConsumption != null) {
     // строка 9 графа 11
     getCell('R9', 'logicalCheck').setValue(
-            (BigDecimal)(getCellValue('R9', 'incomeTaxSumS')
-                    - (getCellValue('R10', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue() ?:0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue() ?:0))
+            (BigDecimal) (getCellValue('R9', 'incomeTaxSumS')
+                    - (getCellValue('R10', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue() ?: 0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue() ?: 0))
             ).setScale(2, BigDecimal.ROUND_HALF_UP)
     )
 
-
     // строка 10 графа 11
     getCell('R10', 'logicalCheck').setValue(
-            (BigDecimal)(getCellValue('R10', 'incomeTaxSumS')
-                    - (getCellValue('R9', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue()?:0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue()?:0))
+            (BigDecimal) (getCellValue('R10', 'incomeTaxSumS')
+                    - (getCellValue('R9', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue() ?: 0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue() ?: 0))
             ).setScale(2, BigDecimal.ROUND_HALF_UP)
     )
 } else {
     getCell('R9', 'logicalCheck').setValue(0)
     getCell('R10', 'logicalCheck').setValue(0)
 }
-
 
 /**
  * Все оставшиеся строки, не описанные выше в этой таблице.
@@ -317,7 +293,7 @@ if (formDataComplexConsumption != null) {
 def formDataSimpleIncome = FormDataService.find(301, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
 
 List<DataRow> dataRows = formData.getDataRows()
-for (DataRow row: dataRows) {
+for (DataRow row : dataRows) {
     // проверка что строка не описана выше
     if (['R20', 'R21', 'R38', 'R39', 'R78', 'R79', 'R95', 'R116', 'R119', 'R22',
             'R40', 'R80', 'R96', 'R104', 'R110', 'R117', 'R120', 'R128', 'R4', 'R5', 'R7', 'R19', 'R43',
@@ -332,31 +308,42 @@ for (DataRow row: dataRows) {
                 })
         )
         // графа 15
-        row.getCell('opuSumByOpu').setValue(income102Dao.getIncome102(
-                formData.reportPeriodId, row.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId
-        ).getTotalSum())
+        def temp = income102Dao.getIncome102(formData.reportPeriodId, row.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId)
+        if (temp == null) {
+            logger.info("Нет информации о в отчётах о прибылях и убытках")
+            row.getCell('opuSumByOpu').setValue(0)
+        } else {
+            row.getCell('opuSumByOpu').setValue(temp.totalSum)
+        }
         // графа 16
         row.getCell('difference').setValue(getCellValue(row.getAlias(), 'opuSumTotal') - getCellValue(row.getAlias(), 'opuSumByOpu'))
     }
 }
 
 // строки 54-59, графы 13,14
-['R54', 'R55', 'R56'. 'R57', 'R58', 'R59'].each {
+['R54', 'R55', 'R56'.'R57', 'R58', 'R59'].each {
     value = getCell(it, 'incomeBuhSumAccountNumber').toString()
     account = value.substring(0, 3) + value.substring(4)
-    getCell(it, 'opuSumByTableD').setValue(income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId).incomeDebetRemains)
-    getCell(it, 'opuSumTotal').setValue(income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId).outcomeDebetRemains)
+    temp = income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId)
+    if (temp == null) {
+        logger.info("Нет данных о оборотной ведомости")
+        getCell(it, 'opuSumByTableD').setValue(0)
+        getCell(it, 'opuSumTotal').setValue(0)
+    } else {
+        getCell(it, 'opuSumByTableD').setValue(temp.incomeDebetRemains)
+        getCell(it, 'opuSumTotal').setValue(temp.outcomeDebetRemains)
+    }
 }
 
 // строки 3-53, 60-131
 ((3..53) + (60..131)).each {
-    def thisRow = formData.getDataRow("R"+it)
+    def thisRow = formData.getDataRow("R" + it)
 
     if (formDataSimpleIncome != null) {
         // графа 13
         columnRange9 = new ColumnRange('rnu4Field5Accepted', 0, formDataSimpleIncome.getDataRows().size() - 1)
         thisRow.opuSumByTableD = summ(formDataSimpleIncome, columnRange9, columnRange9, { condRange ->
-            return  thisRow.incomeBuhSumAccountNumber == condRange.getCell('accountNo').getValue()
+            return thisRow.incomeBuhSumAccountNumber == condRange.getCell('accountNo').getValue()
         })
     } else {
         thisRow.opuSumByTableD = 0

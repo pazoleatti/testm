@@ -1,8 +1,20 @@
+/**
+ * Формирование XML для декларации по транспортному налогу.
+ *
+ * @author auldanov
+ * @since 19.03.2013 16:30
+ */
+
 // Форма настроек обособленного подразделения: значение атрибута 11
 
 /*
 *
 */
+
+if (formDataCollection == null || formDataCollection.records.isEmpty()) {
+    logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
+    return
+}
 
 // получить настройки обособленного подразделения
 def departmentParam = departmentService.getDepartmentParam(departmentId)

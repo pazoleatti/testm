@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 /*
- * Оборотная ведомость (Форма 0409102-СБ)
+ * Отчет о прибылях и убытках  (Форма 0409102-СБ)
  */
 public class Income102 {
 

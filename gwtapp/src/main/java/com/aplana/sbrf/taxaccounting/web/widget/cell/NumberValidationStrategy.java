@@ -18,7 +18,7 @@ public class NumberValidationStrategy implements ValidatedInputCell.ValidationSt
 			return false;
 		} else if (valueToCheck.contains(".") && valueToCheck.substring(valueToCheck.indexOf('.')).length() > precision + 1) {
 			return false;
-		} else if (valueToCheck.equals('-')) {
+		} else if (valueToCheck.equals("-")) {
 			return true;
 		} else {
 			try {

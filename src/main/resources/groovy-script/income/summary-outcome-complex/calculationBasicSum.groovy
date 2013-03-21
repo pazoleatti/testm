@@ -2,13 +2,12 @@
  * Расчет (основные графы) (calculationBasicSum.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
- * @since ??.02.2013 00:00
+ * @since 19.03.2013 14:00
  */
 
 /**
  * Функция суммирует диапазон строк определенного столбца и вставляет указаную сумму в последнюю ячейку.
  */
-
 def setSum(String rowFromAlias, String rowToAlias, String columnAlias) {
     int rowFrom = formData.getDataRowIndex(rowFromAlias)
     int rowTo = formData.getDataRowIndex(rowToAlias)
@@ -28,7 +27,7 @@ def setSum(String rowFromAlias, String rowToAlias, String columnAlias) {
 }
 
 // А2
-['consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
+['consumptionBuhSumAccepted', 'consumptionTaxSumS'].each {
     setSum('R113', 'R142', it)
 }
 

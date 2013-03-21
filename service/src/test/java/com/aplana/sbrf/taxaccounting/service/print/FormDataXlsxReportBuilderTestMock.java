@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.print;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +83,8 @@ public class FormDataXlsxReportBuilderTestMock {
 		colDate13.setGroupName("Сумма символа ОПУ. Налоговый учёт");
 		colDate14.setGroupName(null);
 		colDate15.setGroupName(null);
+		
+		((NumericColumn)colNum).setPrecision(3);
 		
 		colNum.setAlias("Number");
 		colNum1.setAlias("Number2");
@@ -180,7 +185,9 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(dataRow.getCell("Date1")).thenReturn(cell);
 		when(dataRow.getCell("Date2")).thenReturn(cell);
 		when(cell.getStyle()).thenReturn(formStyle);
-		when(dataRow.get("Number")).thenReturn("777");
+		BigDecimal bd = new BigDecimal(777.178, new MathContext(6,RoundingMode.HALF_UP));
+		bd.setScale(3);
+		when(dataRow.get("Number")).thenReturn(bd);
 		when(dataRow.get("Number1")).thenReturn("777");
 		when(dataRow.get("Number2")).thenReturn("777");
 		

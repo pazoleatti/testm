@@ -47,6 +47,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	private TaxType taxType;
 	private static Map<TaxType, DeclarationDataFilter> savedFilterData = new HashMap<TaxType, DeclarationDataFilter>();
 	private static Map<TaxType, Map<String, Integer>> savedDepartmentsMap = new HashMap<TaxType, Map<String, Integer>>();
+	private List<TARole> userRoles = null;
 
 
 	@Inject
@@ -55,6 +56,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		super(eventBus, view);
 		this.dispatchAsync = dispatchAsync;
 		getView().setUiHandlers(this);
+		detectUserRoles();
 	}
 
 	public DeclarationDataFilter getFilterData() {
@@ -116,7 +118,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	}
 
 	private Map<Integer, String> fillDeclarationTypesMap(DeclarationDataFilterAvailableValues source){
-		Map<Integer, String> declarationTypeMap = new HashMap<Integer, String>();
+		Map<Integer, String> declarationTypeMap = new LinkedHashMap<Integer, String>();
+		declarationTypeMap.put(null, "");
 		for(DeclarationType declarationType : source.getDeclarationTypes()){
 			declarationTypeMap.put(declarationType.getId(), declarationType.getName());
 		}
@@ -125,9 +128,11 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 	private DeclarationDataFilter prepareFormDataFilter(GetDeclarationFilterDataResult result){
 		DeclarationDataFilter formDataFilter = new DeclarationDataFilter();
+
 		if(savedFilterData.get(taxType) == null){
-			if(result.getFilterValues().getDepartmentIds() != null && !result.getFilterValues().getDepartmentIds().isEmpty()){
-				Integer departmentId = result.getFilterValues().getDepartmentIds().iterator().next();
+			if(result.getFilterValues().getDepartmentIds() != null && !result.getFilterValues().getDepartmentIds().isEmpty()
+					&& !isControlOfUnp() ){
+				Integer departmentId = result.getFilterValues().getDefaultDepartmentId();
 				String departmentName = getDepartmentNameById(result.getDepartments(), departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
 				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
@@ -157,6 +162,28 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			}
 		}
 		return null;
+	}
+
+	private boolean isControlOfUnp(){
+		if(userRoles != null){
+			for(TARole taRole : userRoles){
+				if(taRole.getAlias().equals(TARole.ROLE_CONTROL_UNP)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void detectUserRoles(){
+		DetectUserRoleAction action = new DetectUserRoleAction();
+		dispatchAsync.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<DetectUserRoleResult>() {
+					@Override
+					public void onSuccess(DetectUserRoleResult result) {
+						userRoles = result.getUserRole();
+					}
+				}));
 	}
 
 }
