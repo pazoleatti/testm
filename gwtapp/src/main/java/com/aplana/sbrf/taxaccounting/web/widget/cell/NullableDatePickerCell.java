@@ -25,6 +25,10 @@ import java.util.Date;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+/**
+ * Класс больше не исользуется, вместо него {@link DateInputCell}
+ */
+@Deprecated
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 	private static final int ESCAPE = 27;

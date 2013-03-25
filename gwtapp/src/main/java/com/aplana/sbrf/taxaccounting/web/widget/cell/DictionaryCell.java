@@ -48,18 +48,13 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 	private PopupPanel panel;
 	protected final SafeHtmlRenderer<String> renderer;
 	private ValueUpdater<ValueType> valueUpdater;
-	private final DictionaryPickerWidget<ValueType> selectWidget;
-
-	private static int firstEditedColumn = -1;
-	private static int firstEditedIndex = -1;
-	private static boolean isValueInCellWasChanged = false;
+	private DictionaryPickerWidget<ValueType> selectWidget;
+	private String dictionaryCode;
 
 	public DictionaryCell(String dictionaryCode) {
 		super(CLICK, KEYDOWN);
+		this.dictionaryCode = dictionaryCode;
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
-
-		// Create selectWidget
-		selectWidget = createWidget(dictionaryCode);
 
 		// Create popup panel
 		this.panel = new PopupPanel(true, true) {
@@ -90,15 +85,39 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 				selectWidget.clear();
 			}
 		});
+	}
 
+	protected abstract DictionaryPickerWidget<ValueType> createWidget(String dictionaryCode);
+
+	protected abstract String valueToString(ValueType value);
+
+	@Override
+	public boolean isEditing(Context context, Element parent, ValueType value) {
+		return lastKey != null && lastKey.equals(context.getKey());
+	}
+
+	@Override
+	public void onBrowserEvent(Context context, Element parent, ValueType value,
+							   NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
+		super.onBrowserEvent(context, parent, value, event, valueUpdater);
+		if (CLICK.equals(event.getType())) {
+			createSelectWidget();
+			onEnterKeyDown(context, parent, value, event, valueUpdater);
+		}
+	}
+
+	private void createSelectWidget() {
+		if (selectWidget != null) {
+			return;
+		}
+
+		selectWidget = createWidget(dictionaryCode);
 		// Put selectWidget on panel
 		panel.add(selectWidget);
-
 		selectWidget.addValueChangeHandler(
 				new ValueChangeHandler<ValueType>() {
 					@Override
 					public void onValueChange(ValueChangeEvent<ValueType> event) {
-						isValueInCellWasChanged = true;
 						// Remember the values before hiding the popup.
 						Element cellParent = lastParent;
 						ValueType oldValue = lastValue;
@@ -120,37 +139,9 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 		);
 	}
 
-	protected abstract DictionaryPickerWidget<ValueType> createWidget(String dictionaryCode);
-
-	protected abstract String valueToString(ValueType value);
-
-	@Override
-	public boolean isEditing(Context context, Element parent, ValueType value) {
-		return lastKey != null && lastKey.equals(context.getKey());
-	}
-
-	@Override
-	public void onBrowserEvent(Context context, Element parent, ValueType value,
-							   NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
-		super.onBrowserEvent(context, parent, value, event, valueUpdater);
-		if (CLICK.equals(event.getType())) {
-			onEnterKeyDown(context, parent, value, event, valueUpdater);
-		}
-	}
-
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, ValueType value,
 								  NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
-		/* Исправление ошибки (SBRFACCTAX-613 Рендеринг ячеек с попапами.)
-		* На данный момент это больше как work around, пока не найдена главная причина проблемы.
-		* TODO: разобраться, почему при первом вызове любой функции у lastParent решает данную проблему и придумать
-		* наиболее 'красивый' способ решения.*/
-		if(!isValueInCellWasChanged && (!(firstEditedColumn == context.getColumn())
-				|| !(firstEditedIndex == context.getIndex()))){
-			firstEditedColumn = context.getColumn();
-			firstEditedIndex = context.getIndex();
-			lastParent.getAbsoluteLeft();
-		}
 		this.lastKey = context.getKey();
 		this.lastParent = parent;
 		this.lastValue = value;
