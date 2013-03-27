@@ -256,7 +256,7 @@
 	</subDataset>
 	<subDataset name="str14" uuid="28a18d84-8f9a-4f0b-929e-3c796dd65148">
 		<queryString language="xPath">
-			<![CDATA[/Файл/Документ/Прибыль/РасчНал/РаспрНалСубРФ]]>
+			<![CDATA[/Файл/Документ/Прибыль/РаспрНалСубРФ]]>
 		</queryString>
 		<field name="ДоляНалБаз" class="java.lang.String">
 			<fieldDescription><![CDATA[@ДоляНалБаз]]></fieldDescription>
@@ -13802,8 +13802,8 @@
 			<componentElement>
 				<reportElement uuid="f83e81f0-adab-458d-b884-402863d99835" x="0" y="65" width="600" height="710"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="str14" uuid="e8c98cb8-6bd9-42af-9c49-bd796f58d7e4">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/РасчНал/РаспрНалСубРФ")]]></dataSourceExpression>
+					<datasetRun subDataset="str14" uuid="2be8830e-b51b-4d8c-becc-a65d5ebf39d7">
+						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/РаспрНалСубРФ")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="710" width="600">
 						<staticText>

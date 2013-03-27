@@ -148,13 +148,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	private void unlockForm(int formId){
 		UnlockFormAction action = new UnlockFormAction();
 		action.setFormId(formId);
-		dispatcher.execute(action, CallbackUtils
-		.defaultCallback(new AbstractCallback<UnlockFormResult>() {
-			@Override
-			public void onSuccess(UnlockFormResult result) {
-				// nothing
-			}
-		}));
+		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
 	private void saveAfterFlush() {

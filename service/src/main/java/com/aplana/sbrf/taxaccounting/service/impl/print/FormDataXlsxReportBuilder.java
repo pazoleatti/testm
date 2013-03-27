@@ -83,7 +83,7 @@ public class FormDataXlsxReportBuilder {
 		STRING {
 			@Override
 			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setAlignment(CellStyle.ALIGN_LEFT);
 				style.setWrapText(true);
 				style.setBorderBottom(CellStyle.BORDER_THIN);
 				style.setBorderTop(CellStyle.BORDER_THIN);
@@ -96,7 +96,7 @@ public class FormDataXlsxReportBuilder {
 		BIGDECIMAL {
 			@Override
 			public CellStyle createCellStyle(CellStyle style) {
-				style.setAlignment(CellStyle.ALIGN_CENTER);
+				style.setAlignment(CellStyle.ALIGN_RIGHT);
 				style.setWrapText(true);
 				style.setBorderBottom(CellStyle.BORDER_THIN);
 				style.setBorderTop(CellStyle.BORDER_THIN);
@@ -173,11 +173,7 @@ public class FormDataXlsxReportBuilder {
 						);
 				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			}
-			if(currColumn instanceof NumericColumn){
-				NumericColumn nc = (NumericColumn)currColumn;
-				System.out.println("precision: " + nc.getPrecision());
-				style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(nc.getPrecision())));
-			}else if(currColumn instanceof DateColumn){
+			if(currColumn instanceof DateColumn){
 				style.setDataFormat(dataFormat.getFormat(dateFormater));
 			}
 			
@@ -498,7 +494,7 @@ public class FormDataXlsxReportBuilder {
 			Cell crsS = rs.createCell(XlsxReportMetadata.CELL_SIGN);
 			crsS.setCellValue("_______");
 			Cell crsFio = rs.createCell(XlsxReportMetadata.CELL_FIO);
-			crsFio.setCellValue(data.getSigners().get(i).getName());
+			crsFio.setCellValue("(" + data.getSigners().get(i).getName() + ")");
 			crsP.setCellStyle(cs);
 			crsS.setCellStyle(cs);
 			crsFio.setCellStyle(cs);

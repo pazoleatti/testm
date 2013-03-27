@@ -81,8 +81,8 @@ public class DeclarationDataSearchServiceImplTest {
 		ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
 		
 		DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
-		DeclarationType incomeDeclarationType1 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_1);
-		DeclarationType incomeDeclarationType2 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_2);
+		DeclarationType incomeDeclarationType1 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_1, TaxType.INCOME);
+		DeclarationType incomeDeclarationType2 = mockDeclarationType(INCOME_DECLARATION_TYPE_ID_2, TaxType.INCOME);
 		when(declarationTypeDao.get(INCOME_DECLARATION_TYPE_ID_1)).thenReturn(incomeDeclarationType1);
 		when(declarationTypeDao.get(INCOME_DECLARATION_TYPE_ID_2)).thenReturn(incomeDeclarationType2);
 		List<DeclarationType> incomeDeclarationTypes = new ArrayList<DeclarationType>(2);		

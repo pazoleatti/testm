@@ -1,3 +1,33 @@
+create table dict_declaration_presentation
+(code varchar2(3) not null,
+ name varchar2(510) not null);
+ 
+alter table dict_declaration_presentation add constraint dict_decl_present_pk primary key (code); 
+
+comment on table dict_declaration_presentation is 'Коды представления налоговой по месту нахождения (учёта)';
+comment on column dict_declaration_presentation.code is 'код';
+comment on column dict_declaration_presentation.name is 'наименование';
+-----------------------------------------------------------------------------------------------------------
+create table dict_reorganization_form
+(code varchar2(1) not null,
+ name varchar2(255) not null);
+ 
+alter table dict_reorganization_form add constraint dict_reorg_form_pk primary key (code);
+
+comment on table dict_reorganization_form is 'Коды форм реорганизации и ликвидации организации';
+comment on column dict_reorganization_form.code is 'код';
+comment on column dict_reorganization_form.name is 'наименование';
+-------------------------------------------------------------------------------------------------------------
+create table dict_declaration_present_way
+(code varchar2(2) not null,
+ name varchar2(255) not null);
+ 
+alter table dict_declaration_present_way add constraint dict_decl_way_pk primary key (code);
+
+comment on table dict_declaration_present_way is 'Коды, определяющие способ представления налоговой декларации в налоговый орган';
+comment on column dict_declaration_present_way.code is 'код';
+comment on column dict_declaration_present_way.name is 'наименование';
+-----------------------------------------------------------------------------------------------------------
 create table dict_tax_period(
   code varchar2(2) not null,
   name varchar2(510) not null
@@ -689,7 +719,7 @@ comment on column event_script.event_code is 'Тип события';
 comment on column event_script.script_id is 'Идентификатор скрипта';
 comment on column event_script.ord is 'Порядок выполнения скрипта';
 
-alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302));
+alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
 
 alter table event_script add constraint event_script_pk primary key (event_code, script_id);
 alter table event_script add constraint event_script_fk_script_id foreign key (script_id) references form_script (ID);

@@ -8,12 +8,20 @@
 				<!-- TODO: Указать такое же имя realm, как будет в WebSphere -->
 				<Set name="name">defaultWIMFileBasedRealm</Set>
 				<Set name="config">
-					<SystemProperty name="jetty.home" default="." />/src/test/config/jetty-realm.properties
+					<Call name="format" class="java.lang.String">
+						<Arg>%s/src/test/config/jetty-realm.properties</Arg>
+						<Arg>
+							<Array type="java.lang.Object">
+								<Item>
+									<SystemProperty name="jetty.home" default="." />
+								</Item>
+							</Array>
+						</Arg>
+					</Call>
 				</Set>
 			</New>
 		</Set>
 	</Get>
-
 
 	<New id="ds" class="org.mortbay.jetty.plus.naming.Resource">
 		<Arg>java:comp/env/jdbc/TaxAccDS</Arg>
@@ -43,5 +51,54 @@
 			<Call name="getTransactionManager" class="bitronix.tm.TransactionManagerServices" />
 		</Arg>
 	</New>
+
+	<!-- Хранилища для кэшей -->
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/FormType</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/FormTemplate
+		</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/DeclarationType
+		</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/DeclarationTemplate
+		</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/Department
+		</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
+	<New class="org.mortbay.jetty.plus.naming.Resource">
+		<Arg>java:comp/env/services/cache/aplana/taxaccounting/User</Arg>
+		<Arg>
+			<New class="java.util.concurrent.ConcurrentHashMap" />
+		</Arg>
+	</New>
+
 
 </Configure>

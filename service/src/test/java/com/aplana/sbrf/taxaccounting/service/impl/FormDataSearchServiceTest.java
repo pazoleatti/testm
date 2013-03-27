@@ -1,20 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
-import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
@@ -25,6 +10,21 @@ import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FormDataSearchServiceTest {
 	private static FormDataSearchServiceImpl service;
@@ -79,8 +79,8 @@ public class FormDataSearchServiceTest {
 	public void testGetAvailableFilterValuesForOperator() {
 		FormDataFilterAvailableValues values = service.getAvailableFilterValues(OPERATOR_USER_ID, TaxType.TRANSPORT);
 		assertEquals(2, values.getFormTypes().size());
-		assertEquals(1, values.getKinds().size());
-		assertTrue(values.getKinds().contains(FormDataKind.SUMMARY));
+		assertEquals(0, values.getKinds().size());
+		assertFalse(values.getKinds().contains(FormDataKind.SUMMARY));
 		assertEquals(1, values.getDepartmentIds().size());
 		assertTrue(values.getDepartmentIds().contains(1));
 	}

@@ -54,6 +54,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
+
+    private final String xmlHeader = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 	
 	@Override
 	public String create(Logger logger, int departmentId, int declarationTemplateId, int reportPeriodId) {
@@ -120,7 +122,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			return null;
 		} else {
 			logger.info("Декларация успешно создана");
-			return writer.toString();
+            return xmlHeader.concat(writer.toString());
 		}
 		
 	}

@@ -31,6 +31,7 @@ public enum FormDataEvent implements Serializable {
 	AFTER_MOVE_ACCEPTED_TO_CREATED(206, "После вернуть из \"Принята\" в \"Создана\""),
 
 	ADD_ROW(301, "Добавить строку"),
+	DELETE_ROW(303, "Удалить строку"),
 	AFTER_LOAD(302, "Загрузка");	/* Вызывается после того как форма была получена из БД. */
 
 	private String title;

@@ -14,12 +14,12 @@ return isBank
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
  * @author rtimerbaev
- * @since 20.03.2013 13:30
+ * @since 21.03.2013 11:00
  */
 
 departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
     def bank = declarationService.find(1, department.departmentId, formData.reportPeriodId)
-    if (bank != null && bank.getState() != WorkflowState.ACCEPTED) {
+    if (bank != null && bank.getState() == WorkflowState.ACCEPTED) {
         logger.error('Принятие налоговой формы невозможно, т.к. уже принята декларация Банка.')
     }
 }

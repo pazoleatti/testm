@@ -50,7 +50,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 				MenuBar subMenuBar = new MenuBar(true);
 				for (MenuItem subMenu : menuItem.getSubMenu()) {
 					SafeHtmlBuilder sb = new SafeHtmlBuilder();
-					sb.appendHtmlConstant("<a href=\"#"
+					sb.appendHtmlConstant("<a href=\""
 							+ subMenu.getLink()
 							+ (menuItem.getLink().isEmpty() ? "" :";nType=" + menuItem.getLink())
 							+ "\" style=\"color:#000000; text-decoration:none;\"><div>"
@@ -66,7 +66,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			else {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
 				sb.appendHtmlConstant("<style>a:hover {color: #000000 !important}</style>");
-				sb.appendHtmlConstant("<a href=\"#"
+				sb.appendHtmlConstant("<a href=\""
 						+ menuItem.getLink() + ";"
 						+ "nType="
 						+ menuItem.getLink()

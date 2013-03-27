@@ -17,8 +17,9 @@ public interface FormDataScriptingService {
 	 * @param formData данные налоговой формы
 	 * @param event    событие формы
 	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
+	 * @param additionalParameter	дополнительные параметры, если нет то null
 	 */
-	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger);
+	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger,Object additionalParameter);
 
 	/**
 	 * Проверяет, есть ли скрипты для события формы

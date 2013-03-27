@@ -2,10 +2,9 @@
  * Расчет контрольных граф НФ (calculationControlGraphs.groovy).
  * Форма "Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)".
  *
- *
  * @author auldanov
  * @author rtimerbaev
- * @since 19.03.2013 12:00
+ * @since 20.03.2013 19:10
  * @version 14 (05.03.2013)
  */
 
@@ -86,22 +85,22 @@ def specialNotation = 'Требуется объяснение'
 // графа 11 [1]
 ([3, 4, 7, 8, 9, 10, 12] + (13..30) + (33..36) + [38, 40, 44, 47, 62, 63, 85, 92, 93, 104, 114, 115, 197, 200, 201, 202, 204, 205]).each {
     summ = ((BigDecimal)(getCellValue('R' + it, 'rnu6Field10Sum') - (getCellValue('R'+it, 'rnu6Field12Accepted') - getCellValue('R' + it, 'rnu6Field12PrevTaxPeriod')))).setScale(2, BigDecimal.ROUND_HALF_UP)
-    getCell('R' + it, 'logicalCheck').setValue(summ > 0 ? summ : specialNotation)
+    getCell('R' + it, 'logicalCheck').setValue(summ >= 0 ? summ.toString() : specialNotation)
 }
 
 // графа 11 [2]
-([31,32, 37, 56, 61] + (64..70) + (78..84) + [90, 91] + (98..103) + (105..109) + [111, 112, 113] + (116..164) + (170..199) + [203, 213, 214, 217]).each {
+([31,32, 37, 56, 61] + (64..70) + (78..84) + [90, 91] + (98..103) + (105..109) + [111, 112, 113] + (116..164) + (170..196) + [198, 199] + [203, 213, 214, 217]).each {
     summ = ((BigDecimal)(getCellValue('R' + it, 'rnu4Field5PrevTaxPeriod'))).setScale(2, BigDecimal.ROUND_HALF_UP)
-    getCell('R' + it, 'logicalCheck').setValue(summ > 0 ? summ : specialNotation)
+    getCell('R' + it, 'logicalCheck').setValue(summ > 0 ? summ.toString() : specialNotation)
 }
 
 // графа 11 [3]
 ([5,6, 11, 39, 41, 42, 43, 45, 46] + (48..55) + (57..77) + [86, 110, 206, 207, 208]).each {
     summ = ((BigDecimal)(getCellValue('R' + it, 'rnu6Field10Sum') - getCellValue('R' + it, 'rnu4Field5PrevTaxPeriod'))).setScale(2, BigDecimal.ROUND_HALF_UP)
-    getCell('R' + it, 'logicalCheck').setValue(summ > 0 ? summ : specialNotation)
+    getCell('R' + it, 'logicalCheck').setValue(summ >= 0 ? summ.toString() : specialNotation)
 }
 
-// получение данных из доходов сложных (302) для вычисления 12 и 13 графы
+// получение данных из доходов сложных (302) для вычисления 12 графы
 def formData302 = FormDataService.find(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
 if (formData302 != null) {
     ((3..86) + (90..93) + (98..164) + (170..208) + [213, 214, 217]).each {
@@ -112,26 +111,26 @@ if (formData302 != null) {
         })
         getCell('R' + it, 'opuSumByEnclosure2').setValue(sum6column)
 
-        // графа 13
-        columnRange9 = new ColumnRange('incomeTaxSumS', 0, formData302.getDataRows().size() - 1)
-        Double sum9column = summ(formData302, columnRange6, columnRange6, { condRange ->
-            return getCell('R' + it, 'accountNo').getValue() == condRange.getCell('incomeBuhSumAccountNumber').getValue()
-        })
-        getCell('R' + it, 'opuSumByTableD').setValue(sum9column)
+
     }
 } else {
     // если источников нет то зануляем поля в которые должны были перетянуться данные
     ((3..86) + (90..93) + (98..164) + (170..208) + [213, 214, 217]).each {
         // графа 12
         getCell('R' + it, 'opuSumByEnclosure2').setValue(0)
-
-        // графа 13
-        getCell('R' + it, 'opuSumByTableD').setValue(0)
     }
 }
 
-// графы 12, 13, 14, 15, 16
+
+// графы 13, 14, 15, 16
 ((3..86) + (90..93) + (98..164) + (170..208) + [213, 214, 217]).each {
+    // графа 13
+    columnRange9 = new ColumnRange('rnu4Field5Accepted', 0, formData.getDataRows().size() - 1)
+    Double sum9column = summ(formData, columnRange9, columnRange9, { condRange ->
+        return getCell('R' + it, 'accountNo').getValue() == condRange.getCell('accountNo').getValue()
+    })
+    getCell('R' + it, 'opuSumByTableD').setValue(sum9column)
+
     // графа 14
     getCell('R' + it, 'opuSumTotal').setValue(
             getCellValue('R' + it, 'opuSumByEnclosure2') + getCellValue('R' + it, 'opuSumByTableD')
@@ -139,16 +138,16 @@ if (formData302 != null) {
 
     // графа 15
     def bVal = new StringBuffer(getCell('R'+it, 'accountNo').value)
-    bVal.delete(1,8)
+    bVal.delete(1, 8)
     def data = income102Dao.getIncome102(formData.reportPeriodId, bVal.toString(), formData.departmentId)
     if (data == null)
         logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках")
-    getCell('R'+it, 'opuSumByOpu').setValue(data ? data.creditRate: 0)
+    getCell('R'+it, 'opuSumByOpu').setValue(data ? data.creditRate : 0)
 
 
     // графа 16
     getCell('R' + it, 'difference').setValue(
-            getCellValue('R' + it, 'opuSumByOpu') - getCellValue('R' + it, 'rnu4Field5Accepted')
+            getCellValue('R' + it, 'opuSumTotal') - getCellValue('R' + it, 'opuSumByOpu')
     )
 }
 
@@ -160,7 +159,7 @@ if (formData302 != null) {
     def data = income101Dao.getIncome101(formData.reportPeriodId, bVal.toString(), formData.departmentId)
     if (data == null)
         logger.warn("Не найдены соответствующие данные в оборотной ведомости")
-    getCell('R'+it, 'opuSumByOpu').setValue(data ? data.incomeDebetRemains : 0)
+    getCell('R'+it, 'opuSumByOpu').setValue(data ? data.debetRate : 0)
     // графа 16
     getCell('R' + it, 'difference').setValue(
             getCellValue('R' + it, 'opuSumByOpu') - getCellValue('R' + it, 'rnu4Field5Accepted')
@@ -180,14 +179,13 @@ getCell('R209', 'difference').setValue(
         getCellValue('R209', 'opuSumByOpu') - getCellValue('R209', 'rnu6Field12Accepted')
 )
 
-
 // Графа 15 (Строка 220)
 bVal = new StringBuffer(getCell('R220', 'accountNo').value)
-bVal.delete(4,5)
+bVal.delete(4, 5)
 def data220x15 = income101Dao.getIncome101(formData.reportPeriodId, bVal.toString(), formData.departmentId)
 if (data220x15 == null)
     logger.warn("Не найдены соответствующие данные в оборотной ведомости")
-getCell('R220', 'opuSumByOpu').setValue(data220x15 ? data220x15.debetRate : 0)
+getCell('R220', 'opuSumByOpu').setValue(data220x15 ? data220x15.creditRate : 0)
 /*
  * Графа 16 строка 220
  * «графа 16» = «графа 15» - ( А+ Б)
@@ -197,4 +195,3 @@ getCell('R220', 'opuSumByOpu').setValue(data220x15 ? data220x15.debetRate : 0)
 getCell('R220', 'difference').setValue(
         getCellValue('R220', 'rnu4Field5Accepted') - getCellValue('R221', 'rnu4Field5Accepted')
 )
-

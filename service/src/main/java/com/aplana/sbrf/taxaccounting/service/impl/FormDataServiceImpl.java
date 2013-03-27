@@ -134,7 +134,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScripts(user, result,
-				FormDataEvent.CREATE, logger);
+				FormDataEvent.CREATE, logger,null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
@@ -169,7 +169,7 @@ public class FormDataServiceImpl implements FormDataService {
 					FormDataEvent.ADD_ROW)) {
 				TAUser user = userDao.getUser(userId);
 				formDataScriptingService.executeScripts(user, formData,
-						FormDataEvent.ADD_ROW, logger);
+						FormDataEvent.ADD_ROW, logger, null);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте добавления новой строки",
@@ -208,7 +208,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (canDo) {
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScripts(user, formData,
-					FormDataEvent.CALCULATE, logger);
+					FormDataEvent.CALCULATE, logger, null);
 
 			// Проверяем ошибки при пересчете
 			if (logger.containsLevel(LogLevel.ERROR)) {
@@ -229,7 +229,7 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCheck(Logger logger, int userId, FormData formData) {
 		TAUser user = userDao.getUser(userId);
 		formDataScriptingService.executeScripts(user, formData,
-				FormDataEvent.CHECK, logger);
+				FormDataEvent.CHECK, logger, null);
 
 		// Проверяем ошибки при пересчете
 		if (logger.containsLevel(LogLevel.ERROR)) {
@@ -292,8 +292,8 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            идентификатор пользователя, выполняющего операцию
 	 * @param formDataId
 	 *            идентификатор записи, которую необходимо считать
-	 * @param tryLock
-	 *            выполнить попытку блокировки
+	 * @param logger
+	 *            логгер-объект для фиксации диагностических сообщений
 	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав просматривать налоговую форму с
@@ -307,11 +307,11 @@ public class FormDataServiceImpl implements FormDataService {
 			FormData formData = formDataDao.get(formDataId);
 
 			formDataScriptingService.executeScripts(userDao.getUser(userId),
-					formData, FormDataEvent.AFTER_LOAD, logger);
+					formData, FormDataEvent.AFTER_LOAD, logger, null);
 
 			if (logger.containsLevel(LogLevel.ERROR)) {
 				throw new ServiceLoggerException(
-						"Произошли ошибки при в скрипте который выполняется после загрузки формы",
+						"Произошли ошибки в скрипте, который выполняется после загрузки формы",
 						logger.getEntries());
 			}
 
@@ -372,7 +372,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		FormData formData = formDataDao.get(formDataId);
 		formDataScriptingService.executeScripts(userDao.getUser(userId),
-				formData, workflowMove.getEvent(), logger);
+				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao
 					.changeFormDataState(
@@ -384,17 +384,17 @@ public class FormDataServiceImpl implements FormDataService {
 			if (workflowMove.getAfterEvent() != null) {
 				formDataScriptingService.executeScripts(
 						userDao.getUser(userId), formData,
-						workflowMove.getAfterEvent(), logger);
+						workflowMove.getAfterEvent(), logger, null);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
-							"Произошли ошибки при в скрипте который выполняется после перехода",
+							"Произошли ошибки в скрипте, который выполняется после перехода",
 							logger.getEntries());
 				}
 			}
 
 		} else {
 			throw new ServiceLoggerException(
-					"Произошли ошибки при в скрипте который выполняется перед переходом",
+					"Произошли ошибки в скрипте, который выполняется перед переходом",
 					logger.getEntries());
 		}
 	}
@@ -451,6 +451,38 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ObjectLock<Long> getObjectLock(long formDataId) {
 		return lockDao.getObjectLock(formDataId, FormData.class);
+	}
+
+	@Override
+	public void deleteRow(Logger logger, int userId, FormData formData, DataRow deleteRow) {
+		boolean canDo;
+		if (formData.getId() == null) {
+			canDo = formDataAccessService.canCreate(userId,
+					formData.getFormTemplateId(), formData.getKind(),
+					formData.getDepartmentId());
+		} else {
+			canDo = formDataAccessService.canDelete(userId, formData.getId());
+		}
+		
+		if (canDo) {
+			if (formDataScriptingService.hasScripts(formData,
+					FormDataEvent.DELETE_ROW)) {
+				TAUser user = userDao.getUser(userId);
+				formDataScriptingService.executeScripts(user, formData,
+						FormDataEvent.DELETE_ROW, logger, deleteRow);
+				if (logger.containsLevel(LogLevel.ERROR)) {
+					throw new ServiceLoggerException(
+							"Произошли ошибки в скрипте удаление строки",
+							logger.getEntries());
+				}
+				
+			}else{
+				formData.deleteDataRow(deleteRow);
+			}
+		}else {
+				throw new AccessDeniedException(
+					"Недостаточно прав для удаления строки из налоговой формы");
+		}
 	}
 
 }

@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -205,13 +206,13 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCancelClicked() {
-		// SBRFACCTAX-1646: Пользователь создал НФ, еще не сохранил ее и нажал кнопку Отмена.
-		if(formData.getId() == null){
-			goToFormDataList();
-		}
 		if (Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?")){
-			unlockForm(formData.getId());
-			revealForm(true);
+			if(formData.getId() == null){
+				goToFormDataList();
+			} else {
+				unlockForm(formData.getId());
+				revealForm(true);
+			}
 		}
 	}
 
@@ -253,11 +254,22 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onRemoveRowClicked() {
+		LogCleanEvent.fire(this);
 		DataRow dataRow = getView().getSelectedRow();
+		DeleteRowAction action = new DeleteRowAction();
+		action.setDeletedDataRow(dataRow);
+		action.setFormData(formData);
 		if (dataRow != null) {
 			// TODO: сделать проверку, что строку можно удалять
 			// возможно сделать отдельное событие и проверять скриптом
-			formData.getDataRows().remove(dataRow);
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<FormDataResult>() {
+						@Override
+						public void onSuccess(FormDataResult result) {
+							processFormDataResult(result);
+						}
+
+					}));
 			getView().setRowsData(formData.getDataRows());
 		}
 	}

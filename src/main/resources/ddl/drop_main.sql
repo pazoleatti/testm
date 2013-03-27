@@ -60,3 +60,10 @@ drop table transport_eco_class;
 drop table dict_tax_benefit_param;
 drop table dict_region;
 drop table dict_tax_period;
+drop table dict_declaration_presentation;
+drop table dict_reorganization_form;
+drop table dict_declaration_present_way;
+
+
+
+

@@ -12,6 +12,7 @@ return isTerBank
 /**
  * Получения данных из простых расходов (консолидация) (consolidationCalc.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
+ * 6.1.3.8.4	Алгоритмы консолидации данных.
  *
  * @author auldanov
  * @author rtimerbaev
@@ -52,6 +53,16 @@ void copyFor700x(String fromRowA, String toRowA, def fromForm) {
     toRow.consumptionBuhSumAccepted = summ(toRow.getCell('consumptionBuhSumAccepted'), fromRow.getCell('rnu7Field12Accepted'))
     // 9 графа
     toRow.consumptionTaxSumS = summ(toRow.getCell('consumptionTaxSumS'), fromRow.getCell('rnu7Field10Sum'))
+}
+
+// очищаем данные
+[93, 110, 140].each {
+    formData.getDataRow('R' + it).consumptionBuhSumPrevTaxPeriod = null
+    formData.getDataRow('R' + it).consumptionTaxSumS = null
+}
+[94, 141].each {
+    formData.getDataRow('R' + it).consumptionBuhSumAccepted = null
+    formData.getDataRow('R' + it).consumptionTaxSumS = null
 }
 
 // получение нф расходов простых

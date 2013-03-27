@@ -24,6 +24,9 @@ public class SecurityService {
 	 */
 	public TAUser currentUser(){
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) {
+			return null;
+		}
 		String login = auth.getName();
 		return userDao.getUser(login);
 	}

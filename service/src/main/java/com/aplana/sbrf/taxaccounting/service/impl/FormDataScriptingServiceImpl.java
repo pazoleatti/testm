@@ -50,14 +50,16 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
 	 */
 	@Override
-	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger) {
+	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Object additionalParameter) {
 
 		Bindings b = scriptEngine.createBindings();
 		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));
 		
 		// predefined script variables
-		b.put("logger", logger);
+        b.put("formDataEvent", event);
+        b.put("logger", logger);
 		b.put("formData", formData);
+		b.put("additionalParameter", additionalParameter);
 		if (user != null) {
 			b.put("user", user);
 			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));

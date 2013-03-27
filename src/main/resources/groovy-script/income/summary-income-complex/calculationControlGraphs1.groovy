@@ -1,23 +1,33 @@
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.model.script.range.Range
+import com.aplana.sbrf.taxaccounting.model.script.range.Rect
+
+import java.text.DecimalFormat
+
+com.aplana.sbrf.taxaccounting.model.FormData formData
+com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
+com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
 /**
  * (calculationControlGraphs1.groovy)
- * Расчет контрольных граф (строки с КВД 400* и 600*) выполнена всоответствии с
+ * Расчет контрольных граф (строки с КВД 400* и 600*) выполнена всоответствии с 
  * Табл. 8 Расчет контрольных граф Сводной формы начисленных доходов.
  * Вызыватеся при логических проверках
  * Форма 'Сводная форма начисленных доходов (доходы сложные)'.
  *
- * TODO:
- *		1. индексы строк не использовать, переписать на алиасы
- *
  * @author auldanov
- * @since 22.02.2013 11:10
+ * @since 21.03.2013 12:10
  */
 
 // formData для Сводная форма 'Расшифровка видов доходов, учитываемых в простых РНУ' уровня обособленного подразделения
 FormData fromFormData = FormDataService.find(301, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
 
 /**
- * Так как заполнение строк с КВД 400* идентичны,
- * они только отличаются небольшим количеством изменяемых параметров,
+ * Так как заполнение строк с КВД 400* идентичны, 
+ * они только отличаются небольшим количеством изменяемых параметров, 
  * решено было выделить в отдельную функцию.
  *
  * @param kvd поле КВД с таблицы, является алиасом для строки
@@ -39,8 +49,8 @@ def fill400xRow = {kvd, rowFrom, rowTo->
 }
 
 /**
- * Так как заполнение строк с КВД 600* идентичны,
- * они только отличаются небольшим количеством изменяемых параметров,
+ * Так как заполнение строк с КВД 600* идентичны, 
+ * они только отличаются небольшим количеством изменяемых параметров, 
  * решено было выделить в отдельную функцию.
  *
  * @param kvd поле КВД с таблицы, является алиасом для строки
@@ -52,11 +62,12 @@ def fill600xRow = {kvd, rowFrom, rowTo ->
     def row = formData.getDataRow(kvd)
     def sourceRow = fromFormData.getDataRow(kvd)
     // графа 11
-    row.logicalCheck = ((BigDecimal) summ(fromFormData, new ColumnRange('rnu6Field12Accepted', rowFrom, rowTo))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    def tmp = ((BigDecimal) summ(fromFormData, new ColumnRange('rnu6Field12Accepted', rowFrom, rowTo))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    row.logicalCheck = tmp.toString()
     // графа 12
     row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu6Field10Sum', rowFrom, rowTo))
     // графа 13
-    row.opuSumByTableD = (row.logicalCheck?:0) - (row.incomeBuhSumAccepted?:0)
+    row.opuSumByTableD = (tmp ?: 0) - (row.incomeBuhSumAccepted?:0)
     // графа 16
     row.opuSumTotal = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
 }
@@ -111,7 +122,7 @@ if (fromFormData != null) {
     ['R21', 'R39', 'R79'].each {
         def row = formData.getDataRow(it)
         // графа 11
-        row.logicalCheck = 0
+        row.logicalCheck = '0'
         // графа 12
         row.opuSumByEnclosure2 = 0
         // графа 13

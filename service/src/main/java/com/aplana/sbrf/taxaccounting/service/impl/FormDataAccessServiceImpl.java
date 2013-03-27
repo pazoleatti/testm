@@ -246,13 +246,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (уровень Банка) */
-			return false;
+			return formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+			//return false; //TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (уровень ТБ) */
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
-			//return false; //TODO: (mfayzullin) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
+			//return false; //TODO: (Marat Fayzullin 19.02.2013) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
 		}
 		return false;
 	}
@@ -316,13 +318,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК, НФ по транспортному налогу)*/
 			switch (state){
 				case CREATED:
-					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
-							|| formDataAccess.isControllerOfUNP()){
+					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.CREATED_TO_ACCEPTED);
 					}
 					break;
 				case ACCEPTED:
-					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
+					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP()){
 						result.add(WorkflowMove.ACCEPTED_TO_CREATED);
 					}
 					break;

@@ -54,7 +54,10 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 			for (DepartmentDeclarationType ddt: ddts) {
 				int declarationTypeId = ddt.getDeclarationTypeId();
 				if (!dtMap.containsKey(declarationTypeId)) {
-					dtMap.put(declarationTypeId, declarationTypeDao.get(declarationTypeId));
+					DeclarationType declarationType = declarationTypeDao.get(declarationTypeId);
+					if (declarationType.getTaxType() == taxType) {
+						dtMap.put(declarationTypeId, declarationType);
+					}
 				}
 			}
 			result.setDeclarationTypes(new ArrayList<DeclarationType>(dtMap.values()));

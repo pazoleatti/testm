@@ -24,6 +24,9 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class GetMainMenuActionHandler extends
 		AbstractActionHandler<GetMainMenuAction, GetMainMenuResult> {
 
+	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
+	private static final String NUMBER_SIGN = "#";
+
 	public GetMainMenuActionHandler() {
 		super(GetMainMenuAction.class);
 	}
@@ -49,9 +52,9 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(new MenuItem(TaxType.TRANSPORT.getName(), TaxType.TRANSPORT.name()));
 
 			for (MenuItem menu : menuItems) {
-				menu.getSubMenu().add(new MenuItem("Налоговые формы", FormDataListNameTokens.FORM_DATA_LIST));
+				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST));
 				if (!securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)) {
-					menu.getSubMenu().add(new MenuItem("Декларации", DeclarationListNameTokens.DECLARATION_LIST));
+					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST));
 				}
 			}
 
@@ -62,8 +65,9 @@ public class GetMainMenuActionHandler extends
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки", "");
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", AdminConstants.NameTokens.adminPage));
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", DeclarationTemplateTokens.declarationTemplateList));
+			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
+			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
+			settingMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
 			menuItems.add(settingMenuItem);
 		}
 

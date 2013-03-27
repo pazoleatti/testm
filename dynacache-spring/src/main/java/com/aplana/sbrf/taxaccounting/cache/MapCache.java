@@ -1,12 +1,16 @@
-package com.aplana.taxaccounting.cache;
+package com.aplana.sbrf.taxaccounting.cache;
 
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 
 public class MapCache implements Cache {
+
+	final Log log = LogFactory.getLog(getClass());
 
 	private static final Object NULL_HOLDER = new NullHolder();
 
@@ -16,30 +20,30 @@ public class MapCache implements Cache {
 
 	private final boolean allowNullValues;
 
-	/**
-	 * Create a new ConcurrentMapCache with the specified name and the given
-	 * internal ConcurrentMap to use.
-	 * 
-	 * @param name
-	 *            the name of the cache
-	 * @param store
-	 *            the ConcurrentMap to use as an internal store
-	 * @param allowNullValues
-	 *            whether to allow <code>null</code> values (adapting them to an
-	 *            internal null holder value)
-	 */
-	public MapCache(String name, Map<Object, Object> store,
-			boolean allowNullValues) {
+	@SuppressWarnings("unchecked")
+	public MapCache(String name, Object store,
+			boolean allowNullValues, boolean needClear) {
 		this.name = name;
-		this.store = store;
+		this.store = (Map<Object, Object>) store;
 		this.allowNullValues = allowNullValues;
+		if (needClear) {
+			this.store.clear();
+		}
+		log.info("Cache '" + name + "' is created, store: " + this.store.getClass()
+				+ ", store size: " + this.store.size());
+	}
+
+	public MapCache(String name, Object store) {
+		this(name, store, true, true);
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.springframework.cache.Cache#getNativeCache()
 	 */
 	@Override
@@ -52,31 +56,45 @@ public class MapCache implements Cache {
 	}
 
 	public ValueWrapper get(Object key) {
+		if (log.isDebugEnabled()) {
+			log.debug("Get element with key = " + key + " from cache '" + name
+					+ "'");
+		}
 		Object value = this.store.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value))
 				: null);
 	}
 
 	public void put(Object key, Object value) {
+		if (log.isDebugEnabled()) {
+			log.debug("Put element with key = " + key + " to cache '" + name
+					+ "'");
+		}
 		this.store.put(key, toStoreValue(value));
 	}
 
 	@Override
 	public void evict(Object key) {
+		if (log.isDebugEnabled()) {
+			log.debug("Remove element with key = " + key + " from cache '"
+					+ name + "'");
+		}
 		this.store.remove(key);
 	}
 
 	@Override
 	public void clear() {
+		if (log.isDebugEnabled()) {
+			log.debug("Clear cache '" + name + "'");
+		}
 		this.store.clear();
 	}
 
 	/**
-	 * Convert the given value from the internal store to a user value returned
-	 * from the get method (adapting <code>null</code>).
+	 * Конвертирует полученое из хранилища значение для использования
 	 * 
 	 * @param storeValue
-	 *            the store value
+	 *            значение из хранилища
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {
@@ -85,7 +103,6 @@ public class MapCache implements Cache {
 		}
 		return storeValue;
 	}
-
 
 	protected Object toStoreValue(Object userValue) {
 		if (this.allowNullValues && userValue == null) {

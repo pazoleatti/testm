@@ -1,3 +1,7 @@
+//com.aplana.sbrf.taxaccounting.model.FormData formData
+//com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
+//com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
+
 /**
  * Проверка обязательных полей (checkRequiredFields.groovy).
  * Форма "Сводная форма начисленных доходов (доходы сложные)".

@@ -14,8 +14,15 @@ return isBank
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
  * @author rtimerbaev
- * @since 22.02.2013 13:00
+ * @since 22.02.2013 15:30
  */
+
+// очистить форму
+formData.getDataRows().each{ row ->
+    ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { it ->
+        row.getCell(it).setValue(null)
+    }
+}
 
 // получить консолидированные формы из источников
 departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
@@ -24,8 +31,7 @@ departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplat
             && child.formType.id == 303) {
         child.getDataRows().eachWithIndex() { row, i ->
             def rowResult = formData.getDataRows().get(i)
-            ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod',
-                    'consumptionTaxSumRnuSource', 'consumptionTaxSumS'].each {
+            ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                 if (row.getCell(it).getValue() != null) {
                     rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
                 }

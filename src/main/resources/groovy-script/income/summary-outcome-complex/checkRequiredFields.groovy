@@ -1,3 +1,6 @@
+// условие
+return formDataEvent != FormDataEvent.COMPOSE
+
 /**
  * Проверка обязательных полей (checkRequiredFields.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".

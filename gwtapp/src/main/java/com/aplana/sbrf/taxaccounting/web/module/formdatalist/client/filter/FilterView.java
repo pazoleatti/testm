@@ -84,13 +84,6 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 			}
 		});
 
-	    formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-		    @Override
-		    public void onValueChange(ValueChangeEvent<Integer> event) {
-			    formTypeId.setTitle(formTypesMap.get(event.getValue()));
-		    }
-	    });
-
         widget = binder.createAndBindUi(this);
         this.driver = driver;
         this.driver.initialize(this);

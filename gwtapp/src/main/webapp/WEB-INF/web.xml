@@ -37,6 +37,7 @@
   	<servlet-mapping>
 		<servlet-name>mvc-dispatcher</servlet-name>
 		<url-pattern>/download/*</url-pattern>
+        <url-pattern>/cache/*</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>dispatch</servlet-name>
@@ -165,6 +166,7 @@
 		<web-resource-collection>
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
+            <url-pattern>/logout</url-pattern>
 			<url-pattern>/favicon.ico</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
 		</web-resource-collection>

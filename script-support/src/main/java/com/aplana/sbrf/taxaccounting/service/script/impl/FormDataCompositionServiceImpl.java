@@ -74,26 +74,13 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			formData = formDataService.createFormDataWithoutCheck(logger, null, formTemplateId, departmentId, kind);
 		}
 
-		if(formData.getState() == WorkflowState.CREATED){
+		if(formData.getState() != WorkflowState.ACCEPTED){
 			// Execute composition scripts
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
-			formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger);
-			formDataScriptingService.executeScripts(null, formData, FormDataEvent.CALCULATE, logger);
+			formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger, null);
 			formDataDao.save(formData);
 		} else {
 			logger.error("Невозможно принять форму. Сводная форма вышестоящего уровня уже принята.");
 		}
 	}
-
-    @Override
-    public void decompose(int departmentId, int formTypeId, FormDataKind kind){
-        TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
-        ReportPeriod currentPeriod = reportPeriodDao.getCurrentPeriod(taxType);
-
-        // Find form data.
-        FormData formData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
-        if (formData != null){
-            formDataDao.delete(formData.getId());
-        }
-    }
 }

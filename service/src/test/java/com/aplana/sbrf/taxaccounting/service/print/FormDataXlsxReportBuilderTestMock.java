@@ -84,11 +84,13 @@ public class FormDataXlsxReportBuilderTestMock {
 		colDate14.setGroupName(null);
 		colDate15.setGroupName(null);
 		
-		((NumericColumn)colNum).setPrecision(3);
+		((NumericColumn)colNum).setPrecision(0);
+		((NumericColumn)colNum1).setPrecision(1);
+		((NumericColumn)colNum2).setPrecision(2);
 		
 		colNum.setAlias("Number");
-		colNum1.setAlias("Number2");
-		colNum2.setAlias("Number1");
+		colNum1.setAlias("Number1");
+		colNum2.setAlias("Number2");
 		colNum3.setAlias("Number3");
 		colNum4.setAlias("Number4");
 		colNum5.setAlias("Number5");
@@ -169,8 +171,11 @@ public class FormDataXlsxReportBuilderTestMock {
 		formStyle.setFontColor(Color.LIGHT_BROWN);
 		
 		when(dataRow.getCell("Number")).thenReturn(cell);
+		when(dataRow.getCell("Number").getColumn()).thenReturn(colNum);
 		when(dataRow.getCell("Number1")).thenReturn(cell);
+		when(dataRow.getCell("Number1").getColumn()).thenReturn(colNum1);
 		when(dataRow.getCell("Number2")).thenReturn(cell);
+		when(dataRow.getCell("Number2").getColumn()).thenReturn(colNum2);
 		when(dataRow.getCell("Number3")).thenReturn(cell);
 		when(dataRow.getCell("Number4")).thenReturn(cell);
 		when(dataRow.getCell("Number5")).thenReturn(cell);
@@ -185,11 +190,11 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(dataRow.getCell("Date1")).thenReturn(cell);
 		when(dataRow.getCell("Date2")).thenReturn(cell);
 		when(cell.getStyle()).thenReturn(formStyle);
-		BigDecimal bd = new BigDecimal(777.178, new MathContext(6,RoundingMode.HALF_UP));
-		bd.setScale(3);
+		BigDecimal bd = new BigDecimal(999.00, new MathContext(7));
+		bd.setScale(2,RoundingMode.HALF_UP);
 		when(dataRow.get("Number")).thenReturn(bd);
-		when(dataRow.get("Number1")).thenReturn("777");
-		when(dataRow.get("Number2")).thenReturn("777");
+		when(dataRow.get("Number1")).thenReturn(bd);
+		when(dataRow.get("Number2")).thenReturn(bd);
 		
 		FormData formData;
 		FormTemplate formTemplate;

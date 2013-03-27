@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
+
+	<cache:annotation-driven />
+
+	<jee:jndi-lookup id="formTypeCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/FormType"/>
+
+	<jee:jndi-lookup id="formTemplateCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/FormTemplate"/>
+
+	<jee:jndi-lookup id="declarationTypeCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/DeclarationType"/>
+
+	<jee:jndi-lookup id="declarationTemplateCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/DeclarationTemplate"/>
+
+	<jee:jndi-lookup id="departmentCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/Department"/>
+
+	<jee:jndi-lookup id="userCacheStore"
+		jndi-name="services/cache/aplana/taxaccounting/User"/>
+
+
+	<bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="FormType" />
+					<constructor-arg ref="formTypeCacheStore" />
+				</bean>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="FormTemplate" />
+					<constructor-arg ref="formTemplateCacheStore" />
+				</bean>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="DeclarationType" />
+					<constructor-arg ref="declarationTypeCacheStore" />
+				</bean>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="DeclarationTemplate" />
+					<constructor-arg ref="declarationTemplateCacheStore" />
+				</bean>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="Department" />
+					<constructor-arg ref="departmentCacheStore" />
+				</bean>
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="User" />
+					<constructor-arg ref="userCacheStore" />
+				</bean>
+			</set>
+		</property>
+	</bean>
+</beans>

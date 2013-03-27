@@ -51,6 +51,11 @@ public class Cell implements Serializable {
 	}
 
 	public Object setValue(Object value) {
+		if ( (value != null) && !(value instanceof Number && column instanceof NumericColumn
+				|| value instanceof String && column instanceof StringColumn
+				|| value instanceof Date && column instanceof DateColumn)) {
+			throw new IllegalArgumentException("Несовместимые типы колонки и значения");
+		}
 		if (value instanceof Integer) {
 			value = new BigDecimal((Integer) value);
 		} else if (value instanceof Double) {

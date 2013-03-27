@@ -8,8 +8,6 @@ import java.util.List;
  * Данные по отчётной форме
  * 
  * @author dsultanbekov
- */
-/**
  * @author sgoryachkin
  *
  */
@@ -21,7 +19,6 @@ public class FormData extends IdentityObject<Long> {
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
-
 
 	private int formTemplateId;
 	private List<Column> formColumns;
@@ -177,6 +174,19 @@ public class FormData extends IdentityObject<Long> {
 
 	public DataRow appendDataRow() {
 		return appendDataRow(null);
+	}
+	
+	public boolean deleteDataRow(DataRow dataRow){
+		System.out.println("----до " + dataRows.size());
+		for (DataRow iterable_element : dataRows) {
+			System.out.println("----до" + iterable_element);
+		}
+		System.out.println(dataRows.remove(dataRow));
+		System.out.println("----после " + dataRows.size());
+		for (DataRow iterable_element : dataRows) {
+			System.out.println("----после" + iterable_element);
+		}
+		return true;
 	}
 
 	public DataRow getDataRow(String rowAlias) {

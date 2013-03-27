@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,27 +46,29 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 */
 	private boolean checkRolesForReading(int userId, int declarationDepartmentId) {
 		TAUser user = userDao.getUser(userId);
-		return checkRolesForReading(user, declarationDepartmentId);
+		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
+		return checkRolesForReading(user, declarationDepartment);
 	}
 	
 	/**
 	 * Перегруженный вариант {@link #checkRolesForReading(int, int)}, принимающий
-	 * объект пользователя, вместо его идентификатора
+	 * объекты вместо идентификаторов
 	 * 
 	 * В сущности функция проверка проверяет наличие прав на просмотр декларации, логика вынесена в отдельный метод,
 	 * так как используется в нескольких местах данного сервиса
 	 * @param user пользователь системы
-	 * @param declarationDepartmentId идентификатор подразделения, к которому относится декларация
+	 * @param declarationDepartment подразделение, к которому относится декларация
 	 * @return true, если пользователь является контролёром УНП или контролёром текущего уровня для декларации
 	 */
-	private boolean checkRolesForReading(TAUser user, int declarationDepartmentId) {
-		// Контролёр УНП может просматривать декларации в своём подарзделении
+	private boolean checkRolesForReading(TAUser user, Department declarationDepartment) {
+		// Контролёр УНП может просматривать все декларации
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
 			return true;
 		}
-		
-		// Обычный контролёр может просматривать декларации только в своём подразделении
-		if (user.hasRole(TARole.ROLE_CONTROL) && user.getDepartmentId() == declarationDepartmentId) {
+
+		// Обычный контролёр может просматривать декларации только в своём обособленном подразделении
+		if (user.hasRole(TARole.ROLE_CONTROL) && user.getDepartmentId() == declarationDepartment.getId() &&
+				!DepartmentType.ROOT_BANK.equals(declarationDepartment.getType())) {
 			return true;
 		}
 		return false;		
@@ -74,7 +77,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	@Override
 	public boolean canRead(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
-		// Просматривать декларацию может только контролёр УНП и контролёр текущего уровня
+		// Просматривать декларацию может только контролёр УНП и контролёр текущего уровня для обособленных подразделений
 		return checkRolesForReading(userId, declaration.getDepartmentId());
 	}
 
@@ -96,7 +99,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (!found) {
 			return false;
 		}
-		// Создавать декларацию могут только контролёры УНП и контролёры текущего уровня
+		// Создавать декларацию могут только контролёры УНП и контролёры текущего уровня обособленного подразделения
 		return checkRolesForReading(userId, departmentId);
 	}
 
@@ -107,7 +110,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (declaration.isAccepted()) {
 			return false;
 		}
-		// Принять декларацию могут только контолёр текущего уровня и контролёр УНП
+		// Принять декларацию могут только контолёр текущего уровня обособленного подразделения и контролёр УНП
 		return checkRolesForReading(userId, declaration.getDepartmentId());
 	}
 

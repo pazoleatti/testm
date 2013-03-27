@@ -1,10 +1,22 @@
+/* Условие. */
+// проверка на террбанк
+boolean isTerBank = false
+departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    if (it.departmentId != formData.departmentId) {
+        isTerBank = true
+    }
+}
+return isTerBank
+/* Конец условия. */
+
 /**
  * Получения данных из простых расходов (getDataFromSimpleOutcome.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
+ * 6.1.3.8.3.1	Логические проверки.
  *
  * @author auldanov
  * @author rtimerbaev
- * @since 22.02.2013 12:20
+ * @since 21.03.2013 13:30
  */
 
 /**
@@ -67,21 +79,21 @@ void copyFor700x(String fromRowA, String toRowA, String fromRowSum, String toRow
         fromRow = fromForm.getDataRow(fromRowA)
 
         // 11 графа
-        toRow.logicalCheck = summ(fromForm, new ColumnRange('rnu7Field12Accepted',
-                fromForm.getDataRowIndex(fromRowSum), fromForm.getDataRowIndex(toRowSum)))
+        def tmp = (BigDecimal) summ(fromForm, new ColumnRange('rnu7Field12Accepted', fromForm.getDataRowIndex(fromRowSum), fromForm.getDataRowIndex(toRowSum)))
+        toRow.logicalCheck = tmp.toString()
         // 12 графа
         toRow.opuSumByEnclosure3 = summ(fromForm, new ColumnRange('rnu7Field10Sum',
                 fromForm.getDataRowIndex(fromRowSum), fromForm.getDataRowIndex(toRowSum)))
     } else {
         // 11 графа
-        toRow.logicalCheck = 0
+        toRow.logicalCheck = '0'
         // 12 графа
         toRow.opuSumByEnclosure3 = 0
     }
 
     // 13 графа = графа 11 - графа 6
     if (toRow.logicalCheck != null && toRow.consumptionBuhSumAccepted != null) {
-        toRow.opuSumByTableP = toRow.logicalCheck - toRow.consumptionBuhSumAccepted
+        toRow.opuSumByTableP = toBigDecimal(toRow.logicalCheck) - toRow.consumptionBuhSumAccepted
     } else {
         toRow.opuSumByTableP = null
     }
@@ -108,3 +120,16 @@ copyFor500x('R194', 'R140', 'R92', 'R193', fromForm)
 copyFor700x('R86', 'R94', 'R3', 'R84', fromForm)
 // 70011 - 141 строка
 copyFor700x('R195', 'R141', 'R92', 'R193', fromForm)
+
+/**
+ * Получить число из строки.
+ */
+def toBigDecimal(String value) {
+    def result
+    try {
+        result = Double.parseDouble(value)
+    } catch (NumberFormatException e){
+        result = new BigDecimal(0)
+    }
+    return result
+}

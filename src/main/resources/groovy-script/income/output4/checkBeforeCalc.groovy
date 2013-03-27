@@ -38,10 +38,10 @@ for (row in formData.dataRows) {
                 setError(row.getCell(alias).column.name)
             }
         }
-        if ( ![1,2,3,4].contains(row.stringCode.intValue())) {
+        if ( row.stringCode == null || ![1,2,3,4].contains(row.stringCode.intValue())) {
             logger.error("Код строки 002 неверный!")
         }
-        if ( ![1,0].contains(row.labalAboutPaymentTax.intValue()) ) {
+        if ( row.labalAboutPaymentTax == null || ![1,0].contains(row.labalAboutPaymentTax.intValue()) ) {
             logger.error("Код строки «Отметка о возложении обязанности по уплате налога» неверный!")
         }
     }

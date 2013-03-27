@@ -2,7 +2,6 @@
  * Формирование XML для декларации налога на прибыль (declarationBank.groovy).
  *
  * @author rtimerbaev
- * @since 19.03.2013 16:30
  */
 
 if (formDataCollection == null || formDataCollection.records.isEmpty()) {
@@ -69,7 +68,7 @@ logger.info('===== formDataComplexConsumption = ' + getTmp(formDataComplexConsum
 def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
 logger.info('===== formDataSimpleConsumption = ' + getTmp(formDataSimpleConsumption))
 /** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-def formDataAdvance = formDataCollection.find(departmentId, 305, FormDataKind.ADDITIONAL)
+def formDataAdvance = formDataCollection.find(departmentId, 309, FormDataKind.ADDITIONAL)
 logger.info('===== formDataAdvance = ' + getTmp(formDataAdvance))
 /** Сведения для расчёта налога с доходов в виде дивидендов. */
 def formDataDividend = formDataCollection.find(departmentId, 306, FormDataKind.ADDITIONAL)
@@ -188,7 +187,7 @@ def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
 /** НалИсчислФБ. */
 def nalIschislFB = getNalIschislFB(nalBazaIsch, departmentParamIncome.taxRate)
 /** НалИсчислСуб. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-def nalIschislSub = getFormDataSumByColName(formDataAdvance, 'taxAmount')
+def nalIschislSub = getFormDataSumByColName(formDataAdvance, 'subjectTaxSum')
 /** НалИсчисл. */
 def nalIschisl = nalIschislFB + nalIschislSub
 /** НалВыпл311. */
@@ -294,7 +293,7 @@ def nalBazaIschOld = getNalBazaIsch(nalBazaOld, 0)
 /** НалИсчислФБ. */
 def nalIschislFBOld = getNalIschislFB(nalBazaIschOld, departmentParamIncome.taxRate)
 /** НалИсчислСуб. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-def nalIschislSubOld = getFormDataSumByColName(formDataAdvanceOld, 'taxAmount')
+def nalIschislSubOld = getFormDataSumByColName(formDataAdvanceOld, 'subjectTaxSum')
 /** НалИсчисл. */
 def nalIschislOld = nalIschislFBOld + nalIschislSubOld
 
@@ -461,7 +460,6 @@ if (formDataSimpleConsumption != null) {
  */
 
 xml.Файл(
-        //ИдФайл : '182',
         ИдФайл : declarationService.generateXmlFileId(2, departmentId),
         ВерсПрог : departmentParamIncome.appVersion,
         ВерсФорм : departmentParamIncome.formatVersion) {
@@ -469,7 +467,7 @@ xml.Файл(
     // Титульный лист
     Документ(
             КНД :  knd,
-            ДатаДок : new Date().format('MM.dd.yy'),
+            ДатаДок : new Date().format('dd.MM.yyyy'),
             Период : period,
             ОтчетГод : (taxPeriod != null ? taxPeriod.startDate.getYear() : empty),
             КодНО : departmentParam.taxOrganCode,
@@ -523,7 +521,7 @@ xml.Файл(
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
                     def rowForNalPu = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                     logger.info('===== nalIschislSub = ' + nalIschislSub + ', avNachislSub = ' + avNachislSub + ' nalVipl311Sub = ' + nalVipl311Sub)
-                    tmpValue2 = (rowForNalPu != null ? rowForNalPu.taxSurchargeAmount : 0)
+                    tmpValue2 = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
                     nalPu = isBank ? tmpValue : tmpValue2
                     // 0..1
                     СубБдж(
@@ -568,11 +566,11 @@ xml.Файл(
                         avPlat1 = empty
                         avPlat2 = empty
                         avPlat3 = empty
-                        if (isBank && !isTaxPeriod) {
+                        if (!isTaxPeriod) {
                             def appl5List02Row120 = 0
                             // при формировании декларации банка надо брать appl5List02Row120 относящегося к ЦА (как определять пока не ясно, толи по id, толи по id сбербанка, толи по КПП = 775001001), при формировании декларации подразделения надо брать строку appl5List02Row120 относящегося к этому подразделению
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
-                            appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.monthlyAdvancePaymentsForQuarter : 0)
+                            appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat3 = (int) appl5List02Row120 / 3
                             avPlat2 = avPlat1
                             avPlat1 = avPlat1 + getTail(appl5List02Row120, 3)
@@ -598,7 +596,7 @@ xml.Файл(
 
                             // 0..n
                             УплСрок(
-                                    Срок : row.dateOfPayment,
+                                    Срок : (row.dateOfPayment != null ? row.dateOfPayment.format('dd.MM.yyyy') : empty),
                                     НалПУ : row.sumTax)
                         }
                     }
@@ -794,31 +792,31 @@ xml.Файл(
                     if (formDataAdvance != null) {
                         formDataAdvance.dataRows.each { row ->
                             /** ОбРасч. Столбец «Код строки 002». */
-                            def obRasch = row.stringCode
+                            obRasch = row.stringCode
                             /** НаимОП. Столбец «Наименование подразделения». */
-                            def naimOP = row.unitName
+                            naimOP = row.divisionName
                             /** КППОП. Столбец «КПП». */
-                            def kppop = row.kpp
+                            kppop = row.kpp
                             /** ОбязУплНалОП. Столбец «Отметка о возложении обязанности по уплате налога». */
-                            def obazUplNalOP = row.markOnImposingDuties
+                            obazUplNalOP = row.labalAboutPaymentTax
                             /** ДоляНалБаз. Столбец «Доля налоговой базы (%) [040]». */
-                            def dolaNalBaz = row.taxBasePart
+                            dolaNalBaz = row.baseTaxOf
                             /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.) [050]». */
-                            def nalBazaDola = row.taxBase
+                            nalBazaDola = row.baseTaxOfRub
                             /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта РФ [060]». */
-                            def stavNalSubRF = row.taxRate
+                            stavNalSubRF = row.subjectTaxStavka
                             /** СумНал. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-                            def sumNal = row.taxAmount
+                            sumNal = row.subjectTaxSum
                             /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта РФ. Расчётный [080]». */
-                            def nalNachislSubRF = row.accruedTax
+                            nalNachislSubRF = row.subjectTaxCredit
                             /** СумНалП. Столбец «Сумма налога к доплате [100]». */
-                            def sumNalP = row.taxSurchargeAmount
+                            sumNalP = row.taxSumToPay
                             /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами РФ [090]». */
-                            def nalViplVneRF = row.taxAmountPaidOutsideRussia
+                            nalViplVneRF = row.taxSumOutside
                             /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом [120]». */
-                            def mesAvPlat = row.monthlyAdvancePaymentsForQuarter
+                            mesAvPlat = row.everyMontherPaymentAfterPeriod
                             /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на 1 квартал следующего налогового периода [121]». */
-                            def mesAvPlat1CvSled = row.monthlyAdvancePaymentsForOneQuarter
+                            mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
 
                             // 0..n
                             РаспрНалСубРФ(
@@ -877,44 +875,45 @@ xml.Файл(
                 def tmpRow = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                 if (tmpRow != null) {
                     obRasch = tmpRow.stringCode
-                    naimOP = tmpRow.unitName
+                    naimOP = tmpRow.divisionName
                     kppop = tmpRow.kpp
-                    obazUplNalOP = tmpRow.markOnImposingDuties
-                    dolaNalBaz = tmpRow.taxBasePart
-                    nalBazaDola = tmpRow.taxBase
-                    stavNalSubRF = tmpRow.taxRate
-                    sumNal = tmpRow.taxAmount
-                    nalNachislSubRF = tmpRow.accruedTax
-                    sumNalP = tmpRow.taxSurchargeAmount
-                    nalViplVneRF = tmpRow.taxAmountPaidOutsideRussia
-                    mesAvPlat = tmpRow.monthlyAdvancePaymentsForQuarter
-                    mesAvPlat1CvSled = tmpRow.monthlyAdvancePaymentsForOneQuarter
+                    obazUplNalOP = tmpRow.labalAboutPaymentTax
+                    dolaNalBaz = tmpRow.baseTaxOf
+                    nalBazaDola = tmpRow.baseTaxOfRub
+                    stavNalSubRF = tmpRow.subjectTaxStavka
+                    sumNal = tmpRow.subjectTaxSum
+                    nalNachislSubRF = tmpRow.subjectTaxCredit
+                    sumNalP = tmpRow.taxSumToPay
+                    nalViplVneRF = tmpRow.taxSumOutside
+                    mesAvPlat = tmpRow.everyMontherPaymentAfterPeriod
+                    mesAvPlat1CvSled = tmpRow.everyMonthForKvartalNextPeriod
+
+                    // 0..n - всегда один
+                    РаспрНалСубРФ(
+                            ТипНП : typeNP,
+                            ОбРасч : obRasch,
+                            НаимОП : naimOP,
+                            КППОП : kppop,
+                            ОбязУплНалОП : obazUplNalOP,
+                            НалБазаОрг : nalBazaIsch,
+                            НалБазаБезЛиквОП : empty,
+                            ДоляНалБаз : dolaNalBaz,
+                            НалБазаДоля : nalBazaDola,
+                            СтавНалСубРФ : stavNalSubRF,
+                            СумНал : sumNal,
+                            НалНачислСубРФ : nalNachislSubRF,
+                            НалВыплВнеРФ : nalViplVneRF,
+                            СумНалП : sumNalP,
+                            МесАвПлат : mesAvPlat,
+                            МесАвПлат1КвСлед : mesAvPlat1CvSled)
+                    // Приложение № 5 к Листу 02 - конец
                 }
-                // 0..n - всегда один
-                РаспрНалСубРФ(
-                        ТипНП : typeNP,
-                        ОбРасч : obRasch,
-                        НаимОП : naimOP,
-                        КППОП : kppop,
-                        ОбязУплНалОП : obazUplNalOP,
-                        НалБазаОрг : nalBazaIsch,
-                        НалБазаБезЛиквОП : empty,
-                        ДоляНалБаз : dolaNalBaz,
-                        НалБазаДоля : nalBazaDola,
-                        СтавНалСубРФ : stavNalSubRF,
-                        СумНал : sumNal,
-                        НалНачислСубРФ : nalNachislSubRF,
-                        НалВыплВнеРФ : nalViplVneRF,
-                        СумНалП : sumNalP,
-                        МесАвПлат : mesAvPlat,
-                        МесАвПлат1КвСлед : mesAvPlat1CvSled)
-                // Приложение № 5 к Листу 02 - конец
             }
             // 0..1
             НалУдНА() {
-                // Лист 03 А
                 if (formDataDividend != null) {
                     formDataDividend.dataRows.each { row ->
+                        // Лист 03 А
                         // 0..n
                         НалДохДив(
                                 ВидДив : row.dividendType,
@@ -950,27 +949,27 @@ xml.Файл(
                                     ДивНал9 : row.dividendSumForTaxStavka9,
                                     ДивНал0 : row.dividendSumForTaxStavka0)
                         }
+                        // Лист 03 А - конец
+
+                        // Лист 03 Б
+                        // 0..n
+                        НалДохЦБ(
+                                ВидДоход : '1',
+                                НалБаза : empty,
+                                СтавНал : empty,
+                                НалИсчисл : empty,
+                                НалНачислПред : empty,
+                                НалНачислПосл : empty)
+                        // Лист 03 Б - конец
                     }
                 }
-                // Лист 03 А - конец
-
-                // Лист 03 Б
-                // 0..n
-                НалДохЦБ(
-                        ВидДоход : '1',
-                        НалБаза : empty,
-                        СтавНал : empty,
-                        НалИсчисл : empty,
-                        НалНачислПред : empty,
-                        НалНачислПосл : empty)
-                // Лист 03 Б - конец
 
                 // Лист 03 В
                 if (formDataTaxAgent != null) {
                     formDataTaxAgent.dataRows.each { row ->
                         // 0..n
                         РеестрСумДив(
-                                ДатаПерДив : row.dividendDate,
+                                ДатаПерДив : (row.dividendDate != null ? row.dividendDate.format('dd.MM.yyyy') : empty),
                                 СумДив : row.sumDividend,
                                 СумНал : row.sumTax) {
 
@@ -1113,7 +1112,7 @@ def getValue(def value) {
 def getFormDataSumByColName(def form, def colName) {
     def result = 0.0
     if (form != null) {
-        result = summ(form, new ColumnRange(colName, 0, form.dataRows.size()))
+        result = summ(form, new ColumnRange(colName, 0, form.dataRows.size() - 1))
     }
     return getInt(result)
 }
@@ -1275,7 +1274,7 @@ def getDohIsklPrib(def formSimple) {
 
     if (formSimple != null) {
         // Код вида дохода = 14000
-        def row	= formSimple.getDataRow('R220' + it)
+        def row	= formSimple.getDataRow('R220')
         result += getValue(row.rnu4Field5Accepted)
     }
 
@@ -1437,7 +1436,8 @@ def getRowAdvanceForCurrentDepartment(def form, def kpp) {
         return null
     }
     for (row in form.dataRows) {
-        if (row.kpp == kpp) {
+        def tmp = new BigDecimal(kpp)
+        if (tmp == row.kpp) {
             return row
         }
     }

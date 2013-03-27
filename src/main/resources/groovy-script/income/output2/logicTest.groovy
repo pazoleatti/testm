@@ -23,10 +23,10 @@ for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sum
 
 String zipCode = (String) row.zipCode;
 if (zipCode == null || zipCode.length() != 6 || !zipCode.matches('[0-9]*')) {
-    logger.error('Неправильно указан почтовый индекс (формат: ××××××)!')
+    logger.error('Неправильно указан почтовый индекс!')
 }
 if (!logger.containsLevel(LogLevel.ERROR)) {
-    if (!dictionaryRegionService.isValidCode(row.subdivisionRF.intValue())) {
+    if (!dictionaryRegionService.isValidCode(row.subdivisionRF)) {
         logger.error('Неверное наименование субъекта РФ!')
     }
 }

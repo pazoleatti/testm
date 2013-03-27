@@ -9,6 +9,7 @@ import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.view.client.SelectionModel;
@@ -18,6 +19,8 @@ import java.util.*;
 public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 	public static final String TD_ATTRIBUTE = "colInd";
+	private static final String USER_AGENT_IE8 = "MSIE 8.0";
+	private static final String STRIPE_ICON_PROPERTY = "url(img/stripe.ico)";
 
 	private final String evenRowStyle;
 	private final String oddRowStyle;
@@ -78,6 +81,11 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		TableRowBuilder tr = startRow();
 		tr.className(trClasses.toString());
 
+		// Issue 7131: DataGrid horizontal Scrollbar overlaps the last row on IE8
+		if (Window.Navigator.getUserAgent().contains(USER_AGENT_IE8) && cellTable.getRowCount() == absRowIndex + 1) {
+			tr.style().height(35, Style.Unit.PX).verticalAlign(Style.VerticalAlign.TEXT_TOP);
+		}
+
 		// Build the columns.
 		int columnCount = cellTable.getColumnCount();
 		int rowCount = cellTable.getRowCount();
@@ -136,7 +144,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				}
 
 				if (isStriped && currentCell != null && currentCell.isEditable()) {
-					td.style().trustedBackgroundImage("url(img/stripe.ico)");
+					td.style().trustedBackgroundImage(STRIPE_ICON_PROPERTY);
 				}
 
 				if (currentCell != null) {

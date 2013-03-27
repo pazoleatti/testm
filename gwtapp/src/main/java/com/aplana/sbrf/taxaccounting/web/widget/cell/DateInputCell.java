@@ -434,7 +434,7 @@ public class DateInputCell extends
 	                              boolean isEditing) {
 		InputElement input = (InputElement) parent.getFirstChild();
 		String value = input.getValue();
-		viewData.setText(new Date(convertInputToLocalDateFormat(value)));
+		viewData.setText(DateTimeFormat.getFormat("dd.MM.yy").parse(value));
 		viewData.setEditing(isEditing);
 		return value;
 	}

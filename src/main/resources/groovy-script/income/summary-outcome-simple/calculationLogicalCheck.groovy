@@ -2,12 +2,11 @@
  * Скрипт для заполнения контрольных полей (calculationLogicalCheck.groovy).
  * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
  *
- *
  * В текущей таблице нет 10й графы, следственно
  * нужно учесть что графы > 10 считаются "-1"
  *
  * @author rtimerbaev
- * @since 19.03.2013 12:00
+ * @since 21.03.2013 13:00
  * @version 14 05.03.2013
  */
 
@@ -26,8 +25,10 @@ boolean isEquals(Double value1, Double value2) {
  */
 void setColumn9Equals0(def row) {
     if (row != null && row.rnu5Field5PrevTaxPeriod != null) {
-        def result = round(row.rnu5Field5PrevTaxPeriod, 2)
+        def result = (Double) round(row.rnu5Field5PrevTaxPeriod, 2)
         row.logicalCheck = isEquals(result, 0) ? result.toString() : 'Требуется объяснение'
+    } else {
+        row.logicalCheck = null
     }
 }
 
@@ -38,8 +39,10 @@ void setColumn9Equals0(def row) {
  */
 void setColumn9Less0(def row) {
     if (row != null && row.rnu5Field5Accepted != null && row.rnu7Field12Accepted != null) {
-        def result = round(row.rnu5Field5Accepted - row.rnu7Field12Accepted, 2)
+        def result = (Double) round(row.rnu5Field5Accepted - row.rnu7Field12Accepted, 2)
         row.logicalCheck = result < 0 ? 'Требуется объяснение' : result.toString()
+    } else {
+        row.logicalCheck = null
     }
 }
 
@@ -82,6 +85,8 @@ def row193 = formData.getDataRow('R193')
 def bVal15 = new StringBuffer(row193.consumptionAccountNumber)
 bVal15.delete(4,5)
 def data193 = income101Dao.getIncome101(formData.reportPeriodId, bVal15.toString(), formData.departmentId)
+if (data193 == null)
+    logger.warn("Не найдены соответствующие данные в оборотной ведомости")
 row193.opuSumByOpu = data193 ? data193.creditRate: 0
 // строка 193 графа 16 («графа 16»= «графа 15»-«графа 6»)
 row193.difference = (row193.opuSumByOpu ?:0) - (row193.rnu7Field12Accepted ?:0)
@@ -110,6 +115,8 @@ row193.difference = (row193.opuSumByOpu ?:0) - (row193.rnu7Field12Accepted ?:0)
     def bVal = new StringBuffer(row.consumptionAccountNumber)
     bVal.delete(1,8)
     def dataThisRow = income102Dao.getIncome102(formData.reportPeriodId, bVal.toString(), formData.departmentId)
+    if (dataThisRow == null)
+        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках")
     row.opuSumByOpu = dataThisRow ? dataThisRow.creditRate : 0
 
     // графа 15

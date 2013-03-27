@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.*;
 import com.google.inject.*;
 import com.google.web.bindery.event.shared.*;
@@ -80,20 +77,48 @@ public class DeclarationListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-		DeclarationDataFilter filter = filterPresenter.getFilterData();
+		final DeclarationDataFilter filter = filterPresenter.getFilterData();
 		if(isFilterDataCorrect(filter)){
-			CreateDeclaration command = new CreateDeclaration();
-			command.setDeclarationTypeId(filter.getDeclarationTypeId());
-			command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-			command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-			dispatcher.execute(command, CallbackUtils
-				.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+			CheckExistenceDeclaration checkCommand = new CheckExistenceDeclaration();
+			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
+			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
+			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+			dispatcher.execute(checkCommand, CallbackUtils
+				.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
 					@Override
-					public void onSuccess(CreateDeclarationResult result) {
-						placeManager
-								.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-										.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
-								);
+					public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
+						if (checkResult.isExist()) {
+							if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
+								RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
+								refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
+								dispatcher.execute(refreshDeclarationCommand, CallbackUtils
+									.defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
+										@Override
+										public void onSuccess(RefreshDeclarationResult result) {
+											placeManager
+													.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+															.with(DeclarationDataTokens.declarationId,
+																	String.valueOf(checkResult.getDeclarationDataId()))
+													);
+										}
+									}));
+							}
+						} else {
+							CreateDeclaration command = new CreateDeclaration();
+							command.setDeclarationTypeId(filter.getDeclarationTypeId());
+							command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+							command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+							dispatcher.execute(command, CallbackUtils
+									.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+										@Override
+										public void onSuccess(CreateDeclarationResult result) {
+											placeManager
+													.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
+															.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
+													);
+										}
+							}));
+						}
 					}
 				}));
 		}

@@ -1,12 +1,12 @@
-/* Условие. */
-// проверка на банк
-boolean isBank = true
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-    if (it.departmentId != formData.departmentId) {
-        isBank = false
-    }
-}
-return isBank
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService
+
+//com.aplana.sbrf.taxaccounting.log.Logger logger
+//com.aplana.sbrf.taxaccounting.service.script.FormDataService FormDataService
+//com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService reportPeriodService
+//com.aplana.sbrf.taxaccounting.model.FormData formData
+//com.aplana.sbrf.taxaccounting.service.script.DepartmentService departmentService
+//com.aplana.sbrf.taxaccounting.service.script.dictionary.DictionaryRegionService dictionaryRegionService
 /* Конец условия. */
 
 /*
@@ -20,6 +20,14 @@ return isBank
  * В цикле по всем формам-источникам с типом «Сводная форма "Расшифровка видов доходов, учитываемых в простых РНУ" уровня обособленного подразделения»
  * расчитать данные для текущей формы путем складывания значений редактируемых ячеек.
  */
+
+// Обнулим данные в связи http://jira.aplana.com/browse/SBRFACCTAX-1861
+for(row in formData.dataRows ) {
+    ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each {
+        row.getCell(it).setValue(null);
+    }
+}
+
 departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
     if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 302) {
@@ -28,9 +36,9 @@ departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplat
             /*
                 *	Для каждой ячейки граф с 1 по 10, обозначенной либо как редактируемая,
                 *	либо как расчетная, Система должна выполнять консолидацию данных из форм-источников.
-                *	(5, 6, 7, 9, 10)
+                *	(6, 7, 9)
                 */
-            ['incomeBuhSumRnuSource', 'incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumRnuSource', 'incomeTaxSumS'].each {
+            ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each {
                 if (row.getCell(it).getValue() != null) {
                     rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
                 }

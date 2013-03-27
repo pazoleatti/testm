@@ -140,12 +140,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	private void unlockForm(int declarationId){
 		UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UnlockDeclarationResult>() {
-					@Override
-					public void onSuccess(UnlockDeclarationResult result) {
-						//nothing
-					}
-				}));
+		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 }

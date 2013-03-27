@@ -164,18 +164,26 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			kinds.add(dft.getKind());
 			departmentIds.add(dft.getDepartmentId());
 		}
-		
+
 		result.setDepartmentIds(departmentIds);
 		
 		List<FormType> formTypesList = new ArrayList<FormType>(formTypes.values());
 		Collections.sort(formTypesList, new FormTypeAlphanumericComparator());
 		result.setFormTypeIds(formTypesList);
 		
+		processKindListForCurrentUser(user, kinds);
+
 		List<FormDataKind> kindsList = new ArrayList<FormDataKind>(kinds);
 		Collections.sort(kindsList);
 		result.setKinds(kindsList);
-
 		result.setDefaultDepartmentId(user.getDepartmentId());
+
 		return result;
+	}
+
+	private void processKindListForCurrentUser(TAUser user, Set<FormDataKind> kindList){
+		if(user.hasRole(TARole.ROLE_OPERATOR)){
+			kindList.remove(FormDataKind.SUMMARY);
+		}
 	}
 }

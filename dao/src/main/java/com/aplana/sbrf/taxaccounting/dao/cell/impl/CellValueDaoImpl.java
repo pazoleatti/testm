@@ -44,19 +44,6 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 													((java.sql.Date) value)
 															.getTime());
 										}
-
-										boolean typeOk = checkValueType(value,
-												col.getClass());
-										if (!typeOk) {
-											logger.warn("Cannot assign value '"
-													+ value + "'("
-													+ value.getClass().getName()
-													+ ") to column '" + alias
-													+ "'("
-													+ col.getClass().getName()
-													+ ")");
-											value = null;
-										}
 										rowId.getValue().put(alias, value);
 									}
 								}
@@ -90,6 +77,8 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 				} else if (val instanceof Date) {
 					dateValues.add(new ValueRecord<Date>((Date) val,
 							rowId.getKey(), col.getId()));
+				} else {
+					throw new IllegalArgumentException("Несовместимые типы колонки и значения");
 				}
 			}
 		}
@@ -135,19 +124,6 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 		getJdbcTemplate().batchUpdate(
 				"insert into " + tableName
 						+ " (row_id, column_id, value) values (?, ?, ?)", bpss);
-	}
-
-	private boolean checkValueType(Object value, Class<? extends Column> columnType) {
-		if (value == null) {
-			return true;
-		} else {
-			return value instanceof BigDecimal
-					&& NumericColumn.class.equals(columnType)
-					|| value instanceof String
-					&& StringColumn.class.equals(columnType)
-					|| value instanceof Date
-					&& DateColumn.class.equals(columnType);
-		}
 	}
 
 	/**

@@ -101,6 +101,15 @@ public interface FormDataService {
 	 * @param formData данные формы
 	 */
 	void addRow(Logger logger, int userId, FormData formData);
+	
+	/**
+	 * Удаляет строку из формы и выполняет соответствующие скрипты.
+	 *
+	 * @param logger логгер для регистрации ошибок
+	 * @param userId идентификатор пользователя
+	 * @param formData данные формы
+	 */
+	void deleteRow(Logger logger, int userId, FormData formData,DataRow deleteRow);
 
 	
 	/**

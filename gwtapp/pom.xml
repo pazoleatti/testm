@@ -120,6 +120,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>dynacache-spring</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>2.2.2</version>
@@ -337,12 +342,6 @@
 							<include>**/*</include>
 						</includes>
 					</resource>
-					<resource>
-						<directory>src/main/resources-development</directory>
-						<includes>
-							<include>**/*</include>
-						</includes>
-					</resource>
 				</resources>
 				<plugins>
 					<plugin>
@@ -357,11 +356,6 @@
 				</plugins>
 			</build>
 			<dependencies>
-				<dependency>
-					<groupId>commons-dbcp</groupId>
-					<artifactId>commons-dbcp</artifactId>
-					<version>1.4</version>
-				</dependency>
 				<dependency>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-plus</artifactId>
@@ -399,12 +393,6 @@
 							<include>**/*</include>
 						</includes>
 					</resource>
-					<resource>
-						<directory>src/main/resources-production</directory>
-						<includes>
-							<include>**/*</include>
-						</includes>
-					</resource>
 				</resources>
 				<plugins>
 					<plugin>
@@ -426,12 +414,7 @@
 				</plugins>
 			</build>
 			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>dynacache-spring</artifactId>
-					<version>${project.version}</version>
-					<scope>runtime</scope>
-				</dependency>
+
 			</dependencies>
 		</profile>
 	</profiles>

@@ -1,0 +1,15 @@
+insert into dict_declaration_presentation(code, name) values('213', 'По месту учета в качестве крупнейшего налогоплательщика');
+insert into dict_declaration_presentation(code, name) values('214', 'По месту нахождения российской организации, не являющейся крупнейшим налогоплательщиком');
+insert into dict_declaration_presentation(code, name) values('215', 'По месту нахождения правопреемника, не являющегося крупнейшим налогоплательщиком');
+insert into dict_declaration_presentation(code, name) values('216', 'По месту учета правопреемника, являющегося крупнейшим налогоплательщиком');
+insert into dict_declaration_presentation(code, name) values('218', 'Ответственным участником консолидированной группы налогоплательщиков');
+insert into dict_declaration_presentation(code, name) values('220', 'По месту нахождения обособленного подразделения российской организации');
+insert into dict_declaration_presentation(code, name) values('221', 'По месту нахождения обособленного подразделения российской организации, имеющего отдельный баланс');
+insert into dict_declaration_presentation(code, name) values('223', 'По месту нахождения (учета) российской организации при представлении декларации по закрытому обособленному подразделению');
+insert into dict_declaration_presentation(code, name) values('225', 'По месту учета организации, получившей статус участника проекта по осуществлению исследований, разработок и коммерциализации их результатов в соответствии с Федеральным законом "Об инновационном центре "Сколково"');
+insert into dict_declaration_presentation(code, name) values('226', 'По месту учета организации, осуществляющей образовательную и (или) медицинскую деятельность');
+insert into dict_declaration_presentation(code, name) values('231', 'По месту нахождения налогового агента - организации');
+insert into dict_declaration_presentation(code, name) values('245', 'По месту постановки на учет в налоговом органе иностранной организации');
+insert into dict_declaration_presentation(code, name) values('260', 'По месту нахождения транспортных средств');
+insert into dict_declaration_presentation(code, name) values('281', 'По месту нахождения объекта недвижимого имущества (в отношении которого установлен отдельный порядок исчисления и уплаты налога)');
+commit;

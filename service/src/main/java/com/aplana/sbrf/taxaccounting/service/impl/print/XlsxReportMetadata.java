@@ -14,6 +14,8 @@ public final class XlsxReportMetadata {
 	public static final String REPORT_PERIOD = "за %s ";
 	
 	public static final String RANGE_DATE_CREATE = "date_create";
+	public static final String RANGE_REPORT_TABLE_NUMBER = "report_table_namber";
+	public static final String RANGE_REPORT_META = "report_meta";
 	public static final String RANGE_REPORT_PERIOD = "report_period";
 	public static final String RANGE_REPORT_NAME = "report_name";
 	public static final String RANGE_SUBDIVISION = "subdivision";
@@ -29,60 +31,63 @@ public final class XlsxReportMetadata {
 	public static final SimpleDateFormat sdf_d = new SimpleDateFormat("dd");
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("dd,MMMMMM,yyyy");
 	
+	/*
+	 * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
+	 */
 	public enum Presision{
 		DEFAULT {
 			@Override
 			public String pattern() {
-				return "#.##";
+				return "0";
 			}
 		},
 		UNUM {
 			@Override
 			protected String pattern() {
-				return "0.0";
+				return "###,0.0";
 			}
 		},
 		DUO {
 			@Override
 			protected String pattern() {
-				return "0.00";
+				return "###,0.00";
 			}
 		},
 		TRES {
 			@Override
 			protected String pattern() {
-				return "0.000";
+				return "###,0.000";
 			}
 		},
 		QUATTUOR {
 
 			@Override
 			protected String pattern() {
-				return "0.0000";
+				return "###,0.0000";
 			}
 		},
 		QUINQUE {
 			@Override
 			protected String pattern() {
-				return "0.00000";
+				return "###,0.00000";
 			}
 		},
 		SEX {
 			@Override
 			protected String pattern() {
-				return "0.000000";
+				return "###,0.000000";
 			}
 		},
 		SEPTEM {
 			@Override
 			protected String pattern() {
-				return "0.0000000";
+				return "###,0.0000000";
 			}
 		},
 		OCTO {
 			@Override
 			protected String pattern() {
-				return "0.0000000";
+				return "###,0.00000000";
 			}
 		};
 		
