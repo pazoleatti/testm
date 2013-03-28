@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
@@ -40,6 +41,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
 
+    @Autowired
+    private DepartmentDao departmentDao;
+
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
 	 * <ol>
@@ -60,27 +64,30 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	 * @param kind         тип формы-потребителя: консолидированная, сводная.
 	 */
 	@Override
-	public void compose(int departmentId, int formTypeId, FormDataKind kind, Logger logger) {
+	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind, Logger logger) {
 		TaxType taxType = formTypeDao.getType(formTypeId).getTaxType();
 		ReportPeriod currentPeriod = reportPeriodDao.getCurrentPeriod(taxType);
 
 		// Find form data.
-		FormData formData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
+		FormData dformData = formDataDao.find(formTypeId, kind, departmentId, currentPeriod.getId());
 
 		// Create form data if doesn't exist.
-		if (formData == null) {
+		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
-			formData = formDataService.createFormDataWithoutCheck(logger, null, formTemplateId, departmentId, kind);
+			dformData = formDataService.createFormDataWithoutCheck(logger, null, formTemplateId, departmentId, kind);
 		}
 
-		if(formData.getState() != WorkflowState.ACCEPTED){
+		if(dformData.getState() != WorkflowState.ACCEPTED){
 			// Execute composition scripts
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
-			formDataScriptingService.executeScripts(null, formData, FormDataEvent.COMPOSE, logger, null);
-			formDataDao.save(formData);
+			formDataScriptingService.executeScripts(null, dformData, FormDataEvent.COMPOSE, logger, null);
+			formDataDao.save(dformData);
 		} else {
-			logger.error("Невозможно принять форму. Сводная форма вышестоящего уровня уже принята.");
+            FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
+            FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
+            Department sformDepartment =  departmentDao.getDepartment(dformData.getDepartmentId());
+            logger.error("Невозможно принять \""+sformTemplate.getType().getName()+"\", поскольку уже принята форма: "+dformData.getKind().getName()+" \""+dformTemplate.getType().getName()+"\" ("+sformDepartment.getName()+").");
 		}
 	}
 }

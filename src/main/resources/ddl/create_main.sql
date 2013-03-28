@@ -10,7 +10,7 @@ comment on column dict_declaration_presentation.name is 'наименовани�
 -----------------------------------------------------------------------------------------------------------
 create table dict_reorganization_form
 (code varchar2(1) not null,
- name varchar2(255) not null);
+ name varchar2(510) not null);
  
 alter table dict_reorganization_form add constraint dict_reorg_form_pk primary key (code);
 
@@ -20,7 +20,7 @@ comment on column dict_reorganization_form.name is 'наименование';
 -------------------------------------------------------------------------------------------------------------
 create table dict_declaration_present_way
 (code varchar2(2) not null,
- name varchar2(255) not null);
+ name varchar2(510) not null);
  
 alter table dict_declaration_present_way add constraint dict_decl_way_pk primary key (code);
 
@@ -57,7 +57,7 @@ create table transport_okato (
   id number(9) not null,
   parent_id number(9),
   okato varchar(11) not null,
-  name varchar(100) not null
+  name varchar(510) not null
 );
 alter table transport_okato add constraint transport_okato_ok primary key(id);
 alter table transport_okato add constraint transport_okato_unique_okato unique (okato);
@@ -97,7 +97,7 @@ create table transport_type_code (
   id number(9) not null,
   parent_id number(9) null,
   code varchar(5) not null,
-  name varchar(500) not null
+  name varchar(510) not null
 );
 alter table transport_type_code add constraint transport_type_code_pk primary key(id);
 alter table transport_type_code add constraint transport_type_code_un_code unique (code);
@@ -114,8 +114,8 @@ comment on column transport_type_code.name is 'Наименование';
 create table transport_unit_code
 (
   code number(9) not null,
-  name varchar2(128) not null,
-  convention varchar2(16) not null
+  name varchar2(510) not null,
+  convention varchar2(510) not null
 );
 
 comment on table transport_unit_code is 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)';
@@ -141,7 +141,7 @@ comment on column transport_tax_benefit_code.regulation is 'Основание';
 create table transport_eco_class
 (
   code number(9) not null,
-  name varchar2(20) not null
+  name varchar2(510) not null
 );
 
 alter table transport_eco_class add constraint transport_eco_class_pk primary key (code);
@@ -352,10 +352,10 @@ comment on column form_script.per_row is 'Признак строкового с
 create table department
 (
   id number(9) not null,
-  name varchar2(260) not null,
+  name varchar2(510) not null,
   parent_id number(9) null,
   type number(9) not null,
-  shortname      varchar2(255),
+  shortname      varchar2(510),
   dict_region_id varchar2(2),
   tb_index       varchar2(3),
   sbrf_code      varchar2(255)
@@ -843,7 +843,7 @@ create table department_param_income
   signatory_firstname varchar2(120),
   signatory_lastname  varchar2(120),
   approve_doc_name    varchar2(240),
-  approve_org_name    varchar2(240),
+  approve_org_name    varchar2(2000),
   tax_place_type_code varchar2(3) not null,
   tax_rate            number(4,2),
   external_tax_sum    number(15),
@@ -879,7 +879,7 @@ create table department_param_transport
   signatory_firstname varchar2(120),
   signatory_lastname  varchar2(120),
   approve_doc_name    varchar2(240),
-  approve_org_name    varchar2(240),
+  approve_org_name    varchar2(2000),
   tax_place_type_code varchar2(3) not null,
   app_version         varchar2(40),
   format_version      varchar2(5)

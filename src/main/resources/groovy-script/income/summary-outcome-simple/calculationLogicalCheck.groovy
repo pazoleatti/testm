@@ -1,3 +1,5 @@
+import java.text.DecimalFormat
+
 /**
  * Скрипт для заполнения контрольных полей (calculationLogicalCheck.groovy).
  * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
@@ -38,11 +40,9 @@ void setColumn9Equals0(def row) {
  * @param row строка
  */
 void setColumn9Less0(def row) {
-    if (row != null && row.rnu5Field5Accepted != null && row.rnu7Field12Accepted != null) {
-        def result = (Double) round(row.rnu5Field5Accepted - row.rnu7Field12Accepted, 2)
-        row.logicalCheck = result < 0 ? 'Требуется объяснение' : result.toString()
-    } else {
-        row.logicalCheck = null
+    if (row != null) {
+        def result = round((row.rnu5Field5Accepted?:0) - (row.rnu7Field12Accepted?:0), 2)
+        row.logicalCheck = result < 0 ? 'Требуется объяснение' : (new DecimalFormat("#0.##").format(result)).toString().replace(",", ".")
     }
 }
 

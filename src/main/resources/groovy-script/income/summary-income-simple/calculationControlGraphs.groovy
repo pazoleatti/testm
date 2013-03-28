@@ -84,18 +84,21 @@ def specialNotation = 'Требуется объяснение'
 
 // графа 11 [1]
 ([3, 4, 7, 8, 9, 10, 12] + (13..30) + (33..36) + [38, 40, 44, 47, 62, 63, 85, 92, 93, 104, 114, 115, 197, 200, 201, 202, 204, 205]).each {
-    summ = ((BigDecimal)(getCellValue('R' + it, 'rnu6Field10Sum') - (getCellValue('R'+it, 'rnu6Field12Accepted') - getCellValue('R' + it, 'rnu6Field12PrevTaxPeriod')))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    def column5 = getCellValue('R' + it, 'rnu6Field10Sum')
+    def column7 = getCellValue('R' + it, 'rnu6Field12Accepted')
+    def column8 = getCellValue('R' + it, 'rnu6Field12PrevTaxPeriod')
+    summ = ((BigDecimal)(column5 - (column7 - column8))).setScale(2, BigDecimal.ROUND_HALF_UP)
     getCell('R' + it, 'logicalCheck').setValue(summ >= 0 ? summ.toString() : specialNotation)
 }
 
 // графа 11 [2]
 ([31,32, 37, 56, 61] + (64..70) + (78..84) + [90, 91] + (98..103) + (105..109) + [111, 112, 113] + (116..164) + (170..196) + [198, 199] + [203, 213, 214, 217]).each {
     summ = ((BigDecimal)(getCellValue('R' + it, 'rnu4Field5PrevTaxPeriod'))).setScale(2, BigDecimal.ROUND_HALF_UP)
-    getCell('R' + it, 'logicalCheck').setValue(summ > 0 ? summ.toString() : specialNotation)
+    getCell('R' + it, 'logicalCheck').setValue(summ != 0 ? specialNotation : summ.toString())
 }
 
 // графа 11 [3]
-([5,6, 11, 39, 41, 42, 43, 45, 46] + (48..55) + (57..77) + [86, 110, 206, 207, 208]).each {
+([5,6, 11, 39, 41, 42, 43, 45, 46] + (48..55) + (57..60) + (71..77) + [86, 110, 206, 207, 208]).each {
     summ = ((BigDecimal)(getCellValue('R' + it, 'rnu6Field10Sum') - getCellValue('R' + it, 'rnu4Field5PrevTaxPeriod'))).setScale(2, BigDecimal.ROUND_HALF_UP)
     getCell('R' + it, 'logicalCheck').setValue(summ >= 0 ? summ.toString() : specialNotation)
 }
@@ -188,10 +191,11 @@ if (data220x15 == null)
 getCell('R220', 'opuSumByOpu').setValue(data220x15 ? data220x15.creditRate : 0)
 /*
  * Графа 16 строка 220
- * «графа 16» = «графа 15» - ( А+ Б)
+ * «графа 16» = «графа 15» - (А + Б)
  * А – значение «графы 9» для строки 220
  * Б – значение «графы 9» для строки 221
-*/
-getCell('R220', 'difference').setValue(
-        getCellValue('R220', 'rnu4Field5Accepted') - getCellValue('R221', 'rnu4Field5Accepted')
-)
+ */
+def column15 = getCellValue('R220', 'opuSumByOpu')
+def a = getCellValue('R220', 'rnu4Field5Accepted')
+def b = getCellValue('R221', 'rnu4Field5Accepted')
+getCell('R220', 'difference').setValue(column15 - (a + b))

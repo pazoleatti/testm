@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -40,5 +41,5 @@ public interface FormDataCompositionService {
 	 * @param kind         тип формы-потребителя: консолидированная, сводная.
 	 * @param logger       логгер для сохранения результатов работы скриптов
 	 */
-	public void compose(int departmentId, int formTypeId, FormDataKind kind, Logger logger);
+	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind, Logger logger);
 }

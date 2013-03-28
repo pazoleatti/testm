@@ -11,7 +11,7 @@ departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.g
         def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
         // если форма существует и статус "принята"
         if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-            logger.error('Принятие сводной налоговой формы невозможно, т.к. уже подготовлена сводная налоговая форма Банка.')
+            logger.error('Принятие сводной налоговой формы "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)" невозможно, т.к. уже подготовлена сводная налоговая форма Банка.')
         }
     }
 }

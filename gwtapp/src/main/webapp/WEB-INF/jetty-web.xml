@@ -45,6 +45,10 @@
 		</Arg>
 	</New>
 
+	<Call name="getConfiguration" class="bitronix.tm.TransactionManagerServices">
+		<Set name="journal">null</Set>
+	</Call>
+
 	<New id="tx" class="org.mortbay.jetty.plus.naming.Resource">
 		<Arg>java:comp/UserTransaction</Arg>
 		<Arg>

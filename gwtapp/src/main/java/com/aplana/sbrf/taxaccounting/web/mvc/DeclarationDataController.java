@@ -71,8 +71,11 @@ public class DeclarationDataController {
 
 		if (declarationService.getPdfData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
+			resp.addHeader("Cache-Control", "private, max-age=0, must-revalidate");
 			resp.setContentType("application/pdf");
-			respOut.write(declarationService.getPdfData(declarationId, userId));
+			byte[] pdf = declarationService.getPdfData(declarationId, userId);
+			resp.setContentLength(pdf.length);
+			respOut.write(pdf);
 			respOut.close();
 		} else {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);

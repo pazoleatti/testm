@@ -68,7 +68,7 @@ void copyFor700x(String fromRowA, String toRowA, def fromForm) {
 // получение нф расходов простых
 departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-    if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
+    if (child != null && child.state != WorkflowState.CREATED && child.formType.id == 304) {
         // 50001 - 93 строка
         copyFor500x('R85', 'R93', child)
         // 50002 - 110 строка

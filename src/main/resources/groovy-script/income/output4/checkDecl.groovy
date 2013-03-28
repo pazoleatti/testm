@@ -4,7 +4,7 @@
  */
 
 declarationType = 2;    // Тип декларации которую проверяем
-declaration = DeclarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
+declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
 if (declaration == null || !declaration.isAccepted()) {
     logger.error("Декларация по налогу на прибыль не принята")
 }

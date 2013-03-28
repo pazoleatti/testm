@@ -52,4 +52,3 @@ departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplat
         }
     }
 }
-logger.info('Формирование сводной формы уровня Банка прошло успешно.')

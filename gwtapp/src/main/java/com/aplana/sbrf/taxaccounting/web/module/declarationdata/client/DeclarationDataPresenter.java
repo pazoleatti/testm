@@ -157,8 +157,7 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadXml/" + declarationId, null, null);
 	}
 
-	@Override
-	public void loadPdfFile() {
+	private void loadPdfFile() {
 		getView().setPdfFile(GWT.getHostPageBaseURL() + "download/downloadPDF/" + declarationId);
 	}
 

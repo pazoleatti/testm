@@ -124,8 +124,8 @@ double summ(FormData formData, Range conditionRange, Range summRange, filter) {
 // --Раздел А2
 // графа 6, 9
 ['incomeBuhSumAccepted', 'incomeTaxSumS'].each {
-    getCell('R79', it).setValue(
-            summ(new ColumnRange(it, getDataRowIndex('R42') + 1, getDataRowIndex('R79') - 1))
+    getCell('R80', it).setValue(
+            summ(new ColumnRange(it, getDataRowIndex('R42') + 1, getDataRowIndex('R80') - 1))
     );
 }
 

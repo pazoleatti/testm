@@ -175,6 +175,9 @@ public class FormDataXlsxReportBuilder {
 			}
 			if(currColumn instanceof DateColumn){
 				style.setDataFormat(dataFormat.getFormat(dateFormater));
+			}else if(currColumn instanceof NumericColumn){
+				NumericColumn nc = (NumericColumn)currColumn;
+				style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(nc.getPrecision())));
 			}
 			
 			return style;

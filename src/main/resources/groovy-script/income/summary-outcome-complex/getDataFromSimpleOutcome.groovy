@@ -1,14 +1,3 @@
-/* Условие. */
-// проверка на террбанк
-boolean isTerBank = false
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-    if (it.departmentId != formData.departmentId) {
-        isTerBank = true
-    }
-}
-return isTerBank
-/* Конец условия. */
-
 /**
  * Получения данных из простых расходов (getDataFromSimpleOutcome.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
@@ -18,6 +7,8 @@ return isTerBank
  * @author rtimerbaev
  * @since 21.03.2013 13:30
  */
+
+import java.text.DecimalFormat
 
 /**
  * Копирует данные для строк 500x.
@@ -80,7 +71,7 @@ void copyFor700x(String fromRowA, String toRowA, String fromRowSum, String toRow
 
         // 11 графа
         def tmp = (BigDecimal) summ(fromForm, new ColumnRange('rnu7Field12Accepted', fromForm.getDataRowIndex(fromRowSum), fromForm.getDataRowIndex(toRowSum)))
-        toRow.logicalCheck = tmp.toString()
+        toRow.logicalCheck = new DecimalFormat("#0.##").format(tmp).replace(',', '.')
         // 12 графа
         toRow.opuSumByEnclosure3 = summ(fromForm, new ColumnRange('rnu7Field10Sum',
                 fromForm.getDataRowIndex(fromRowSum), fromForm.getDataRowIndex(toRowSum)))

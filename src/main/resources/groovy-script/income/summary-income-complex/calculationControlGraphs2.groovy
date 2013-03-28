@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.model.script.range.Range
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect
 
-import java.text.DecimalFormat
-
 //com.aplana.sbrf.taxaccounting.model.FormData formData
 //com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
 //com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
@@ -123,7 +121,7 @@ def toBigDecimal(String value) {
 // графа 11
 def tmpLogicalCheck = toBigDecimal(getCell('R21', 'logicalCheck').getValue())
 def tmpValue = ((BigDecimal) summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R3'), getDataRowIndex('R19'))) + tmpLogicalCheck).setScale(2, BigDecimal.ROUND_HALF_UP)
-getCell('R22', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R22', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R22', 'opuSumByEnclosure2').setValue(
@@ -141,7 +139,7 @@ getCell('R22', 'difference').setValue(
 // Раздел Б1
 // графа 11
 tmpValue = toBigDecimal(getCell('R39', 'logicalCheck').getValue()).setScale(2, BigDecimal.ROUND_HALF_UP)
-getCell('R40', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R40', 'logicalCheck').setValue(tmpValue.toString())
 // графа 12
 getCell('R40', 'opuSumByEnclosure2').setValue(
         summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R24'), getDataRowIndex('R37'))) + getCellValue('R38', 'opuSumByEnclosure2')
@@ -159,7 +157,7 @@ getCell('R40', 'difference').setValue(
 // графа 11
 tmpLogicalCheck = toBigDecimal(getCell('R79', 'logicalCheck').getValue())
 tmpValue = ((BigDecimal) summ(new ColumnRange('logicalCheck', getDataRowIndex('R43'), getDataRowIndex('R77'))) + tmpLogicalCheck).setScale(2, BigDecimal.ROUND_HALF_UP)
-getCell('R80', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R80', 'logicalCheck').setValue(tmpValue.toString())
 // графа 12
 getCell('R80', 'opuSumByEnclosure2').setValue(
         summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R43'), getDataRowIndex('R77'))) + getCellValue('R78', 'opuSumByEnclosure2')
@@ -186,7 +184,7 @@ getCell('R96', 'difference').setValue(
 // Раздел В
 // графа 11
 tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R98'), getDataRowIndex('R103')))
-getCell('R104', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R104', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R104', 'opuSumByEnclosure2').setValue(
@@ -203,7 +201,7 @@ getCell('R104', 'difference').setValue(
 // --- Раздел Г
 // графа 11
 tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R106'), getDataRowIndex('R109')))
-getCell('R110', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R110', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R110', 'opuSumByEnclosure2').setValue(
@@ -240,7 +238,7 @@ getCell('R120', 'difference').setValue(
 // Раздел Ж
 // графа 11
 tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R122'), getDataRowIndex('R127')))
-getCell('R128', 'logicalCheck').setValue(new DecimalFormat("#0.##").format(tmpValue))
+getCell('R128', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R128', 'opuSumByEnclosure2').setValue(
@@ -255,49 +253,80 @@ getCell('R128', 'difference').setValue(
 )
 
 // раздел где много строк для графы 11
-['R4', 'R5', 'R7', 'R19', 'R43', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R64', 'R70', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R98', 'R106', 'R122'].each {
+for (row in ['R4', 'R5', 'R7', 'R19', 'R43', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R64', 'R70', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R98', 'R106', 'R122']) {
 
-    ColumnRange columnRange6 = new ColumnRange('incomeBuhSumAccepted', 0, formData.getDataRows().size() - 1)
+    // Очень ритуальный подсчёт суммы из за возможности объединения ячеек и проблемы сущетсвующий что у колонки с которой объединяем значение null
+    sum6column = 0
+    prev = 'not use null please :)'
+    for (rowForSumm in formData.dataRows) {
+        if (rowForSumm.incomeBuhSumAccountNumber != null
+                && rowForSumm.incomeBuhSumAccepted != null
+                && ((rowForSumm.incomeTypeId != null && rowForSumm.incomeTypeId == getCell(row, 'incomeTypeId').getValue())
+                || (rowForSumm.incomeTypeId == null && prev == getCell(row, 'incomeTypeId').getValue()))) {
+            prev = getCell(row, 'incomeTypeId').getValue()
+            sum6column += rowForSumm.incomeBuhSumAccepted
+        } else {
+            prev = 'not use null please :)'
+        }
+    }
+
+    // тот же магический подсчёт
+    sum7column = 0
+    prev = 'not use null please :)'
+    for (rowForSumm in formData.dataRows) {
+        if (rowForSumm.incomeBuhSumAccountNumber != null
+                && rowForSumm.incomeBuhSumPrevTaxPeriod != null
+                && ((rowForSumm.incomeTypeId != null && rowForSumm.incomeTypeId == getCell(row, 'incomeTypeId').getValue())
+                || (rowForSumm.incomeTypeId == null && prev == getCell(row, 'incomeTypeId').getValue()))) {
+            prev = getCell(row, 'incomeTypeId').getValue()
+            sum7column += rowForSumm.incomeBuhSumPrevTaxPeriod
+        } else {
+            prev = 'not use null please :)'
+        }
+    }
+
+    /*ColumnRange columnRange6 = new ColumnRange('incomeBuhSumAccepted', 0, formData.getDataRows().size() - 1)
     Double sum6column = summ(formData, columnRange6, columnRange6, { condRange ->
         return getCell(it, 'incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue() && condRange.getCell('incomeBuhSumAccountNumber').getValue() != null
-    })
+    })*/
 
-    ColumnRange columnRange7 = new ColumnRange('incomeBuhSumPrevTaxPeriod', 0, formData.getDataRows().size() - 1)
+    /*ColumnRange columnRange7 = new ColumnRange('incomeBuhSumPrevTaxPeriod', 0, formData.getDataRows().size() - 1)
     Double sum7column = summ(formData, columnRange7, columnRange7, { condRange ->
-        return getCell(it, 'incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue() && condRange.getCell('incomeBuhSumAccountNumber').getValue() != null
-    })
+        return getCell(row, 'incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue() && condRange.getCell('incomeBuhSumAccountNumber').getValue() != null
+    })  */
 
-    def val = getCellValue(it, 'incomeTaxSumS') - (sum6column - sum7column)
+    //logger.info(String.valueOf(row + " sum6 = " + sum6column))
+    //logger.info(row + " sum6 = " + sum7column)
+    def val = getCellValue(row, 'incomeTaxSumS') - (sum6column - sum7column)
 
     // другой вариант округления
     val = ((BigDecimal) val).setScale(2, BigDecimal.ROUND_HALF_UP)
     //val = round(val, 2)
 
-    getCell(it, 'logicalCheck').setValue(
-            val >= 0 ? new DecimalFormat("#0.##").format(val) : specialNotation
+    getCell(row, 'logicalCheck').setValue(
+            val >= 0 ? val.toString() : specialNotation
     )
 }
 
 // получение данных из расходов сложных
 def formDataComplexConsumption = FormDataService.find(303, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
+temp2 = 0
+temp3 = 0
 if (formDataComplexConsumption != null) {
-    // строка 9 графа 11
-    getCell('R9', 'logicalCheck').setValue(
-            new DecimalFormat("#0.##").format(((BigDecimal) (getCellValue('R9', 'incomeTaxSumS')
-                    - (getCellValue('R10', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue() ?: 0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue() ?: 0))
-            ).setScale(2, BigDecimal.ROUND_HALF_UP)))
-    )
-
-    // строка 10 графа 11
-    getCell('R10', 'logicalCheck').setValue(
-            new DecimalFormat("#0.##").format(((BigDecimal) (getCellValue('R10', 'incomeTaxSumS')
-                    - (getCellValue('R9', 'incomeTaxSumS') - (formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue() ?: 0) + (formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue() ?: 0))
-            ).setScale(2, BigDecimal.ROUND_HALF_UP)))
-    )
-} else {
-    getCell('R9', 'logicalCheck').setValue('0')
-    getCell('R10', 'logicalCheck').setValue('0')
+    temp2 = formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue()
+    temp3 = formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue()
 }
+// строка 9 графа 11
+temp = ((BigDecimal) (getCellValue('R9', 'incomeTaxSumS')
+        - (getCellValue('R10', 'incomeTaxSumS') - temp3 + temp2)
+).setScale(2, BigDecimal.ROUND_HALF_UP))
+getCell('R9', 'logicalCheck').setValue(temp == 0 ? '0' : 'Требуется объяснение')
+
+// строка 10 графа 11
+temp = ((BigDecimal) (getCellValue('R10', 'incomeTaxSumS')
+        - (getCellValue('R9', 'incomeTaxSumS') - temp2 + temp3)
+).setScale(2, BigDecimal.ROUND_HALF_UP))
+getCell('R10', 'logicalCheck').setValue(temp == 0 ? '0' : 'Требуется объяснение')
 
 /**
  * Все оставшиеся строки, не описанные выше в этой таблице.
@@ -310,27 +339,36 @@ for (DataRow row : dataRows) {
     // проверка что строка не описана выше
     if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R20', 'R21', 'R22', 'R38', 'R39', 'R40', 'R43',
             'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R10', 'R10', 'R10', 'R10', 'R10',
-            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80',
+            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R64',
             'R95', 'R96', 'R97',
             'R98', 'R99', 'R100', 'R104', 'R106', 'R107', 'R110', 'R116', 'R117', 'R118', 'R119', 'R120',
             'R122', 'R123', 'R124', 'R128'
     ].contains(row.getAlias())) {
 
         // графа 12
-        ColumnRange columnRange6 = new ColumnRange('incomeBuhSumAccepted', 0, formData.getFormColumns().size() - 1)
+        summ = 0
+        for(rowData in formData.dataRows) {
+            if (rowData.incomeBuhSumAccepted != null && row.incomeBuhSumAccountNumber == rowData.incomeBuhSumAccountNumber) {
+                summ += rowData.incomeBuhSumAccepted
+            }
+        }
+
+        row.getCell('opuSumByEnclosure2').setValue(summ);
+
+        /*ColumnRange columnRange6 = new ColumnRange('incomeBuhSumAccepted', 0, formData.getFormColumns().size() - 1)
         row.getCell('opuSumByEnclosure2').setValue(
                 summ(formData, columnRange6, columnRange6, { condRange ->
                     return row.getCell('incomeTypeId').getValue() == condRange.getCell('incomeTypeId').getValue()
                 })
-        )
+        )*/
     }
-    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43',
+    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43', 'R64',
             'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R54', 'R55', 'R56', 'R57', 'R58', 'R59',
             'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77',
             'R98', 'R99', 'R100', 'R106', 'R107', 'R122', 'R123', 'R124'
     ].contains(row.getAlias())) {
         // графа 15
-        def temp = income102Dao.getIncome102(formData.reportPeriodId, row.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId)
+        temp = income102Dao.getIncome102(formData.reportPeriodId, row.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId)
         if (temp == null) {
             logger.info("Нет информации о в отчётах о прибылях и убытках")
             row.getCell('opuSumByOpu').setValue(0)
@@ -338,7 +376,7 @@ for (DataRow row : dataRows) {
             row.getCell('opuSumByOpu').setValue(temp.totalSum)
         }
     }
-    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R20', 'R21', 'R22', 'R38', 'R39', 'R40', 'R43',
+    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R20', 'R21', 'R22', 'R38', 'R39', 'R40', 'R43', 'R64',
             'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R54', 'R55', 'R56', 'R57', 'R58', 'R59',
             'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R95', 'R96', 'R128',
             'R98', 'R99', 'R100', 'R104', 'R106', 'R107', 'R110', 'R116', 'R117', 'R119', 'R120', 'R122', 'R123', 'R124'
@@ -361,8 +399,8 @@ for (DataRow row : dataRows) {
         getCell(it, 'opuSumByTableD').setValue(temp.incomeDebetRemains)
         getCell(it, 'opuSumTotal').setValue(temp.outcomeDebetRemains)
     }
-    getCell(it, 'opuSumByOpu').setValue((BigDecimal)getCell(it, 'opuSumByTableD').getValue() - (BigDecimal) getCell(it, 'opuSumTotal').getValue())
-    getCell(it, 'difference').setValue( (getCell(it, 'opuSumByOpu').getValue() ?: 0) - (getCell(it, 'incomeTaxSumS').getValue() ?:0))
+    getCell(it, 'opuSumByOpu').setValue((BigDecimal) getCell(it, 'opuSumByTableD').getValue() - (BigDecimal) getCell(it, 'opuSumTotal').getValue())
+    getCell(it, 'difference').setValue((getCell(it, 'opuSumByOpu').getValue() ?: 0) - (getCell(it, 'incomeTaxSumS').getValue() ?: 0))
 
 }
 

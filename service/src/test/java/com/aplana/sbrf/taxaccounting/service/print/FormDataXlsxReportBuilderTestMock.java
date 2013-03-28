@@ -86,7 +86,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		
 		((NumericColumn)colNum).setPrecision(0);
 		((NumericColumn)colNum1).setPrecision(1);
-		((NumericColumn)colNum2).setPrecision(2);
+		((NumericColumn)colNum2).setPrecision(3);
 		
 		colNum.setAlias("Number");
 		colNum1.setAlias("Number1");
@@ -190,8 +190,8 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(dataRow.getCell("Date1")).thenReturn(cell);
 		when(dataRow.getCell("Date2")).thenReturn(cell);
 		when(cell.getStyle()).thenReturn(formStyle);
-		BigDecimal bd = new BigDecimal(999.00, new MathContext(7));
-		bd.setScale(2,RoundingMode.HALF_UP);
+		BigDecimal bd = new BigDecimal(1234567891234567.011, new MathContext(19));
+		bd.setScale(3,RoundingMode.HALF_UP);
 		when(dataRow.get("Number")).thenReturn(bd);
 		when(dataRow.get("Number1")).thenReturn(bd);
 		when(dataRow.get("Number2")).thenReturn(bd);

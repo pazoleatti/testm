@@ -87,7 +87,7 @@ public class DeclarationListPresenter extends
 				.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
 					@Override
 					public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
-						if (checkResult.isExist()) {
+						if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
 							if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
 								RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
 								refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
@@ -103,6 +103,8 @@ public class DeclarationListPresenter extends
 										}
 									}));
 							}
+						}else if(checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
+							MessageEvent.fire(DeclarationListPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
 						} else {
 							CreateDeclaration command = new CreateDeclaration();
 							command.setDeclarationTypeId(filter.getDeclarationTypeId());

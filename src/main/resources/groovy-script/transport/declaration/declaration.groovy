@@ -33,7 +33,7 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
     Документ(
             КНД:"1152004",
             // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
-            ДатаДок: new Date().format("MM.dd.yyyy"),
+            ДатаДок: new Date().format("dd.MM.yyyy"),
             Период: 34,
             ОтчетГод: taxPeriodService.get(reportPeriodService.get(reportPeriodId).taxPeriodId).startDate.year,
             КодНО: departmentParam.taxOrganCode,
@@ -42,7 +42,7 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
             ПоМесту: departmentParam.taxOrganCode
     ){
 
-        def formReorg = departmentParam.reorgFormCode ?: "";
+        Integer formReorg = departmentParam.reorgFormCode != null ? Integer.parseInt(departmentParam.reorgFormCode):0;
         def svnp = [ОКВЭД: departmentParam.okvedCode]
         if (departmentParam.okvedCode) {
             svnp.Тлф = departmentParam.phone
@@ -50,8 +50,8 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
         СвНП(svnp){
             НПЮЛ(
                     НаимОрг: departmentParam.name,
-                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParam.reorgInn: 0),
-                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParam.reorgKpp: 0)){
+                    ИННЮЛ: (departmentParam.inn),
+                    КПП: (departmentParam.kpp)){
 
 
                 if (departmentParam.reorgFormCode){

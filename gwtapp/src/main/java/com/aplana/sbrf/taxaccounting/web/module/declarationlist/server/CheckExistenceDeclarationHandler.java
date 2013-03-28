@@ -26,11 +26,15 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
 	public CheckExistenceDeclarationResult execute(CheckExistenceDeclaration command, ExecutionContext executionContext) throws ActionException {
 		DeclarationData declarationData = declarationService.find(command.getDeclarationTypeId(), command.getDepartmentId(), command.getReportPeriodId());
 		CheckExistenceDeclarationResult result = new CheckExistenceDeclarationResult();
-		if ((declarationData != null) && !declarationData.isAccepted()) {
-			result.setExist(true);
+		if ((declarationData != null)) {
+			if (declarationData.isAccepted()) {
+				result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED);
+			} else {
+				result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED);
+			}
 			result.setDeclarationDataId(declarationData.getId());
 		} else {
-			result.setExist(false);
+			result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.NOT_EXIST);
 			result.setDeclarationDataId(null);
 		}
 

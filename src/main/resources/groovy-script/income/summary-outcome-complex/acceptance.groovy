@@ -7,5 +7,5 @@
  */
 
 departmentFormTypeService.getDestinations(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each() {
-    formDataCompositionService.compose(it.departmentId, it.formTypeId, it.kind, logger)
+    formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
 }
