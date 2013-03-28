@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>taxaccounting</artifactId>
 		<groupId>com.aplana.taxaccounting</groupId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>taxaccounting-ear</artifactId>
@@ -30,13 +30,12 @@
 				<configuration>
 					<version>5</version>
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
-					<finalName>taxaccounting</finalName>
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>gwtapp</artifactId>
 							<bundleFileName>gwtapp.war</bundleFileName>
-							<contextRoot>/taxaccounting/gwtapp</contextRoot>
+							<contextRoot>/taxaccounting-0.2.1/gwtapp</contextRoot>
 						</webModule>
 					</modules>
 				</configuration>
