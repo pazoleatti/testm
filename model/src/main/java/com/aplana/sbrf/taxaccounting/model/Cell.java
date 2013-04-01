@@ -67,6 +67,10 @@ public class Cell implements Serializable {
 			int precision = ((NumericColumn) column).getPrecision();
 			value = ((BigDecimal) value).setScale(precision,
 					RoundingMode.HALF_UP);
+			if (((BigDecimal) value).precision() > ((NumericColumn) column).getMaxLength()) {
+				throw new IllegalArgumentException("Число " + ((BigDecimal) value).toPlainString() +
+						" длинее " + ((NumericColumn) column).getMaxLength());
+			}
 		}
 
 		if (value == null) {

@@ -29,6 +29,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				result = new NumericColumn();
 				((NumericColumn)result).setPrecision(rs.getInt("precision"));
 				((NumericColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
+				((NumericColumn) result).setMaxLength(rs.getInt("max_length"));
 			} else if ("D".equals(type)) {
 				result = new DateColumn();
 			} else if ("S".equals(type)) {
@@ -138,7 +139,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							ps.setInt(9, ((StringColumn) col).getMaxLength());
 						} else if (col instanceof NumericColumn) {
 							ps.setString(6, ((NumericColumn) col).getDictionaryCode());
-							ps.setNull(9, Types.INTEGER);
+							if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
+								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
+							}
+							ps.setInt(9, ((NumericColumn) col).getMaxLength());
 						} else {
 							ps.setNull(6, Types.VARCHAR);
 							ps.setNull(9, Types.INTEGER);
@@ -182,7 +186,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								ps.setInt(9, ((StringColumn) col).getMaxLength());
 							} else if(col instanceof NumericColumn){
 								ps.setString(6, ((NumericColumn)col).getDictionaryCode());
-								ps.setNull(9, Types.INTEGER);
+								System.out.println(((NumericColumn) col).getMaxLength());
+								ps.setInt(9, ((NumericColumn) col).getMaxLength());
 							} else {
 								ps.setNull(6, Types.VARCHAR);
 								ps.setNull(9, Types.INTEGER);

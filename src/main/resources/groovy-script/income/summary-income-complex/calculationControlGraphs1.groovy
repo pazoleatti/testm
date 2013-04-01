@@ -8,12 +8,12 @@ import com.aplana.sbrf.taxaccounting.model.script.range.Rect
 
 import java.text.DecimalFormat
 
-com.aplana.sbrf.taxaccounting.model.FormData formData
-com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
-com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
+//com.aplana.sbrf.taxaccounting.model.FormData formData
+//com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
+//com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
 /**
  * (calculationControlGraphs1.groovy)
- * Расчет контрольных граф (строки с КВД 400* и 600*) выполнена всоответствии с 
+ * Расчет контрольных граф (строки с КВД 400* и 600*) выполнена всоответствии с
  * Табл. 8 Расчет контрольных граф Сводной формы начисленных доходов.
  * Вызыватеся при логических проверках
  * Форма 'Сводная форма начисленных доходов (доходы сложные)'.
@@ -26,8 +26,8 @@ com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
 FormData fromFormData = FormDataService.find(301, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
 
 /**
- * Так как заполнение строк с КВД 400* идентичны, 
- * они только отличаются небольшим количеством изменяемых параметров, 
+ * Так как заполнение строк с КВД 400* идентичны,
+ * они только отличаются небольшим количеством изменяемых параметров,
  * решено было выделить в отдельную функцию.
  *
  * @param kvd поле КВД с таблицы, является алиасом для строки
@@ -39,18 +39,18 @@ def fill400xRow = {kvd, rowFrom, rowTo->
     def sourceRow = fromFormData.getDataRow(kvd)
     //---40001---
     // графа 12
-    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu4Field5Accepted', rowFrom, rowTo))
+    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu4Field5Accepted', rowFrom - 1, rowTo - 1))
     // графа 13
-    row.opuSumByTableD = summ(fromFormData, new ColumnRange('rnu4Field5PrevTaxPeriod', rowFrom, rowTo))
+    row.opuSumByTableD = summ(fromFormData, new ColumnRange('rnu4Field5PrevTaxPeriod', rowFrom -1, rowTo -1))
     // графа 14
     row.opuSumTotal = (row.opuSumByTableD?:0) - (row.incomeBuhSumPrevTaxPeriod?:0)
     // графа 16
-    row.opuSumTotal = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
+    row.difference = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
 }
 
 /**
- * Так как заполнение строк с КВД 600* идентичны, 
- * они только отличаются небольшим количеством изменяемых параметров, 
+ * Так как заполнение строк с КВД 600* идентичны,
+ * они только отличаются небольшим количеством изменяемых параметров,
  * решено было выделить в отдельную функцию.
  *
  * @param kvd поле КВД с таблицы, является алиасом для строки
@@ -62,14 +62,14 @@ def fill600xRow = {kvd, rowFrom, rowTo ->
     def row = formData.getDataRow(kvd)
     def sourceRow = fromFormData.getDataRow(kvd)
     // графа 11
-    def tmp = ((BigDecimal) summ(fromFormData, new ColumnRange('rnu6Field12Accepted', rowFrom, rowTo))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    def tmp = ((BigDecimal) summ(fromFormData, new ColumnRange('rnu6Field12Accepted', rowFrom - 1, rowTo - 1 ))).setScale(2, BigDecimal.ROUND_HALF_UP)
     row.logicalCheck = tmp.toString()
     // графа 12
-    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu6Field10Sum', rowFrom, rowTo))
+    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu6Field10Sum', rowFrom - 1, rowTo - 1))
     // графа 13
     row.opuSumByTableD = (tmp ?: 0) - (row.incomeBuhSumAccepted?:0)
     // графа 16
-    row.opuSumTotal = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
+    row.difference = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
 }
 
 
@@ -90,7 +90,7 @@ if (fromFormData != null) {
     //---60011---
     fill600xRow('R79', 98, 209)
     //---40012---
-    fill400xRow('R95', 214, 214)
+    fill400xRow('R95', 213, 214)
     //---40015---
     fill400xRow('R116', 217, 217)
 
@@ -99,9 +99,9 @@ if (fromFormData != null) {
     def row = formData.getDataRow('R119')
     def sourceRow = fromFormData.getDataRow('R119')
     // графа 12
-    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu4Field5Accepted', 220, 221))
+    row.opuSumByEnclosure2 = summ(fromFormData, new ColumnRange('rnu4Field5Accepted', 220 - 1, 221 - 1))
     // графа 16
-    row.opuSumTotal = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
+    row.difference = (row.opuSumByEnclosure2?:0) - (row.incomeTaxSumS?:0)
 } else {
     // если дохода простого нет, то зануляем поля в которые должны были перетянуться данные
 

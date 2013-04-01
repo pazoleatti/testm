@@ -11,5 +11,5 @@ public interface FormTemplateColumnUiHandlers extends UiHandlers {
 
 	void removeColumn(Column column);
 
-	void flashColumn(Column column);
+	void flushColumn(Column column);
 }

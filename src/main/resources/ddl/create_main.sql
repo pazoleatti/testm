@@ -239,7 +239,10 @@ create table form_template (
   is_active number(9) default 1 not null,
   edition number(9) not null,
   numbered_columns NUMBER(1) not null,
-  fixed_rows number(1) not null
+  fixed_rows number(1) not null,
+  name varchar2(600) not null,
+  fullname varchar2(600) not null,
+  code varchar2(600) not null
 );
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
@@ -257,6 +260,9 @@ comment on column form_template.version is 'Версия формы (уника�
 comment on column form_template.edition is 'Номер редакции записи';
 comment on column form_template.numbered_columns is 'Признак того, что столбцы должны быть пронумерованы';
 comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
+comment on column form_template.name is 'Наименование формы';
+comment on column form_template.fullname is 'Полное наименование формы';
+comment on column form_template.code is 'Номер формы';
 ---------------------------------------------------------------------------------------------------
 create table form_style
 (
@@ -309,7 +315,8 @@ alter table form_column add constraint form_column_fk_form_templ_id foreign key 
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
-alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type <> 'S' and max_length is null));
+alter table form_column add constraint form_column_chk_max_length 
+check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 15) or (type ='D' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
 comment on table form_column is 'Описания столбцов налоговых форм';
@@ -726,19 +733,27 @@ alter table event_script add constraint event_script_fk_script_id foreign key (s
 ---------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,
-  login varchar(50) not null,
+  login varchar(260) not null,
   name varchar(50) not null,
-  department_id number(9) not null
+  department_id number(9) not null,
+  is_active number(1) not null,
+  email varchar2(128),
+  uuid varchar2(36) not null
 );
 
 alter table sec_user add constraint sec_user_pk primary key (id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
+alter table sec_user add constraint sec_user_uniq_uuid unique (uuid);
+alter table sec_user add constraint sec_user_uniq_login_active unique (login, is_active);
 
 comment on table sec_user is 'Пользователи системы';
 comment on column sec_user.id is 'Первичный ключ';
 comment on column sec_user.login is 'Логин пользователя';
 comment on column sec_user.name is 'Полное имя пользователя';
 comment on column sec_user.department_id is 'Идентификатор подразделения';
+comment on column sec_user.is_active is 'Признак активностии пользователя';
+comment on column sec_user.email is 'Адрес электронной почты';
+comment on column sec_user.uuid is 'UUID';
 ---------------------------------------------------------------------------------------------------
 create table object_lock
 (

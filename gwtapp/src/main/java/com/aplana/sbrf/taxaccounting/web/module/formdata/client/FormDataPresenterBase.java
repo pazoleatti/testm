@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -14,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -26,6 +24,9 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+
+import java.util.List;
+import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
@@ -101,6 +102,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;
 	protected final SignersPresenter signersPresenter;
+	protected final DialogPresenter dialogPresenter;
 
 	protected FormData formData;
 	
@@ -113,11 +115,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter) {
+			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.signersPresenter = signersPresenter;
+		this.dialogPresenter = dialogPresenter;
 	}
 
 	@Override

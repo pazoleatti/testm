@@ -125,12 +125,24 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setPdfFile(String fileUrl) {
-		pdfPanel.clear();
+		clearPdfFile();
 		Frame pdfContent = new Frame();
 		pdfContent.setWidth("100%");
 		pdfContent.setHeight("100%");
 		pdfContent.setUrl(fileUrl);
 		pdfPanel.add(pdfContent);
+	}
+
+	@Override
+	public void setVisiblePdfFile(boolean visible) {
+		if (pdfPanel != null) {
+			pdfPanel.setVisible(visible);
+		}
+	}
+
+	@Override
+	public void clearPdfFile() {
+		pdfPanel.clear();
 	}
 
 

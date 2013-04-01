@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 public class NumberValidationStrategy implements ValidatedInputCell.ValidationStrategy {
+
 	int precision;
-	public NumberValidationStrategy(int precision) {
+
+	int maxLength;
+	public NumberValidationStrategy(int precision, int maxLength) {
 		this.precision = precision;
+		this.maxLength = maxLength;
 	}
 	@Override
 	public boolean matches(String valueToCheck) {
@@ -17,6 +21,8 @@ public class NumberValidationStrategy implements ValidatedInputCell.ValidationSt
 		} else if ((precision == 0) && valueToCheck.contains(".")) {
 			return false;
 		} else if (valueToCheck.contains(".") && valueToCheck.substring(valueToCheck.indexOf('.')).length() > precision + 1) {
+			return false;
+		} else if ((valueToCheck.contains(".") ? valueToCheck.length()-1 : valueToCheck.length()) > maxLength) {
 			return false;
 		} else if (valueToCheck.equals("-")) {
 			return true;

@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implements ActionName {
 	
 	private Long formDataId;
-
-	private WorkflowMove workFlowMove;
 
 	private Long formDataTypeId;
 
@@ -48,14 +45,6 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 
 	public void setFormDataTypeId(Long formDataTypeId) {
 		this.formDataTypeId = formDataTypeId;
-	}
-
-	public WorkflowMove getWorkFlowMove() {
-		return workFlowMove;
-	}
-
-	public void setWorkFlowMove(WorkflowMove workFlowMove) {
-		this.workFlowMove = workFlowMove;
 	}
 
 	public boolean isReadOnly() {

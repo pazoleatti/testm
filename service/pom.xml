@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -11,28 +12,12 @@
 	<artifactId>service</artifactId>
 	<description>АС "Учёт налогов" - Реализация сервисов</description>
 
-	<properties>
-		<groovy.version>2.0.6</groovy.version>
-        <jasperreports.version>5.0.1</jasperreports.version>
-	</properties>
-
 	<dependencies>
-        <dependency>
-            <groupId>net.sf.jasperreports</groupId>
-            <artifactId>jasperreports</artifactId>
-            <version>${jasperreports.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jdtcore</artifactId>
-                    <groupId>eclipse</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>model</artifactId>
 			<version>${project.version}</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
@@ -47,33 +32,39 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>fonts</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>script-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>script-support</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${springframework.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+		</dependency>
+		<dependency>
+			<!-- TODO: Нужно исправить. Реализация сервисного слоя не должна зависеть 
+				от spring-security spring-security - это WEB сторона -->
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>${springsecurity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>${groovy.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.8</version>
 		</dependency>
-            
+
 		<!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -82,15 +73,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>xmlunit</groupId>
 			<artifactId>xmlunit</artifactId>
-			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

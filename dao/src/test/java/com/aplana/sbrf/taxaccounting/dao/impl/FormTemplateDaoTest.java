@@ -31,6 +31,9 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals(true, ft1.isActive());
 		Assert.assertFalse(ft1.isNumberedColumns());
 		Assert.assertTrue(ft1.isFixedRows());
+		Assert.assertEquals("name_1", ft1.getName());
+		Assert.assertEquals("fullname_1", ft1.getFullName());
+		Assert.assertEquals("code_1", ft1.getCode());
 
 		FormTemplate ft2 = formTemplateDao.get(2);
 		Assert.assertEquals(2, ft2.getId().intValue());
@@ -38,6 +41,9 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals(false, ft2.isActive());
 		Assert.assertTrue(ft2.isNumberedColumns());
 		Assert.assertFalse(ft2.isFixedRows());
+		Assert.assertEquals("name_2", ft2.getName());
+		Assert.assertEquals("fullname_2", ft2.getFullName());
+		Assert.assertEquals("code_2", ft2.getCode());
 	}
 	
 	@Test(expected=DaoException.class)
@@ -60,6 +66,9 @@ public class FormTemplateDaoTest {
 		Assert.assertFalse(formTemplate.isFixedRows());
 		Assert.assertEquals("321", formTemplate.getVersion());
 		Assert.assertEquals(true, formTemplate.isActive());
+		Assert.assertEquals("name_1", formTemplate.getName());
+		Assert.assertEquals("fullname_1", formTemplate.getFullName());
+		Assert.assertEquals("code_1", formTemplate.getCode());
 	}
 
 }

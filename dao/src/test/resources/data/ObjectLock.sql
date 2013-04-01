@@ -2,11 +2,11 @@ insert into tax_period(id, tax_type, start_date, end_date) values (1, 'T', date 
 
 insert into department (id, name, parent_id, type) values (1, 'А - департамент', null, 1);
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
-insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows) values (1, 1, null, '0.1', 1, 1, 1, 1);
-insert into report_period (id, name, is_active, months, tax_period_id, ord) values (1, '1 - период', 1, 3, 1, 1)
+insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code) values (1, 1, null, '0.1', 1, 1, 1, 1, 'name', 'fullname', 'code');
+insert into report_period (id, name, is_active, months, tax_period_id, ord) values (1, '1 - период', 1, 3, 1, 1);
 
-insert into sec_user (id, name, login, department_id) values (1, 'user1', 'user1', 1);
-insert into sec_user (id, name, login, department_id) values (2, 'user2', 'user2', 1);
+insert into sec_user (id, name, login, department_id, is_active, email, uuid) values (1, 'user1', 'user1', 1, 1, 'user1@bank.ru', 'F32C1F04-7860-43CA-884F-39CC1D740064');
+insert into sec_user (id, name, login, department_id, is_active, email, uuid) values (2, 'user2', 'user2', 1, 1, 'user2@bank.ru', '4054E57F-6CE9-4C31-848D-57E4653DD25E');
 
 -- Данные для проверки блокировки
 insert into form_data (id, form_template_id, department_id, state, kind, report_period_id) values (1, 1, 1, 1, 1, 1);

@@ -1,9 +1,7 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>dao</artifactId>
-	<name>dao</name>
-	<description>АС "Учёт налогов" - Реализация DAO</description>
 
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
@@ -11,8 +9,13 @@
         <version>0.2.2-SNAPSHOT</version>
 	</parent>
 
+	<artifactId>dao</artifactId>
+	<description>АС "Учёт налогов" - Реализация DAO</description>
+
 	<dependencies>
 		<dependency>
+			<!-- TODO: Нужно исправить. Реализация DAO не должна зависеть от модуля 
+				CORE, где находятся интерфейсы сервисов с которыми взаимодействуют пользователи -->
 			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
 			<version>${project.version}</version>
@@ -21,45 +24,38 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>model</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>${springframework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${springframework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis</artifactId>
-			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis-spring</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 
-		<!-- Зависимости для юнит-тестов -->		
+		<!-- Зависимости для юнит-тестов -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>${springframework.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.2.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
-			<version>2.2.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

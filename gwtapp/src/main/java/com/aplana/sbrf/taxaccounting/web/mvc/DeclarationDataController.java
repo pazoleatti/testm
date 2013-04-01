@@ -71,7 +71,6 @@ public class DeclarationDataController {
 
 		if (declarationService.getPdfData(declarationId, userId) != null) {
 			OutputStream respOut = resp.getOutputStream();
-			resp.addHeader("Cache-Control", "private, max-age=0, must-revalidate");
 			resp.setContentType("application/pdf");
 			byte[] pdf = declarationService.getPdfData(declarationId, userId);
 			resp.setContentLength(pdf.length);

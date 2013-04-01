@@ -1,2 +1,2 @@
 version=${project.version}
-revision = ${prefix.revision}
+revision=${prefix.revision}

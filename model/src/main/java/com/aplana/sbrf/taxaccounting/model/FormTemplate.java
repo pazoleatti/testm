@@ -18,7 +18,45 @@ public class FormTemplate extends IdentityObject<Integer> {
 	private boolean active;
 	private Integer edition;
 	private boolean numberedColumns;
-    private boolean fixedRows;	
+    private boolean fixedRows;
+    
+    private String name;
+    private String fullName;
+    private String code;
+
+    /**
+     * @return имя отображаемое на форме
+     */
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * 
+	 * @return полное наименование необходимое для печатной формы.
+	 */
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	/**
+	 * @return идентификатор формы и номер формы
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
 	private List<Column> columns = new ArrayList<Column>();

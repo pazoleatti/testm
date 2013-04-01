@@ -124,10 +124,12 @@ def tmpValue = ((BigDecimal) summ(new ColumnRange('incomeBuhSumAccepted', getDat
 getCell('R22', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
+tmp = summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R3'), getDataRowIndex('R19')))
 getCell('R22', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R3'), getDataRowIndex('R19'))) + getCellValue('R20', 'opuSumByEnclosure2')
+        tmp + getCellValue('R20', 'opuSumByEnclosure2')
                 + getCellValue('R21', 'opuSumByEnclosure2')
 )
+//logger.info ('tmp = ' + tmp.toString() + ' 20 = ' + getCellValue('R20', 'opuSumByEnclosure2').toString() + ' 21 = ' + getCellValue('R21', 'opuSumByEnclosure2').toString())
 // графа 13
 getCell('R22', 'opuSumByTableD').setValue(tmpValue - (getCell('R22', 'incomeBuhSumAccepted').getValue() ?: 0))
 
@@ -142,7 +144,7 @@ tmpValue = toBigDecimal(getCell('R39', 'logicalCheck').getValue()).setScale(2, B
 getCell('R40', 'logicalCheck').setValue(tmpValue.toString())
 // графа 12
 getCell('R40', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R24'), getDataRowIndex('R37'))) + getCellValue('R38', 'opuSumByEnclosure2')
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R24'), getDataRowIndex('R37'))) + getCellValue('R38', 'opuSumByEnclosure2')
                 + getCellValue('R39', 'opuSumByEnclosure2')
 )
 // графа 13
@@ -156,11 +158,11 @@ getCell('R40', 'difference').setValue(
 // --Раздел А2
 // графа 11
 tmpLogicalCheck = toBigDecimal(getCell('R79', 'logicalCheck').getValue())
-tmpValue = ((BigDecimal) summ(new ColumnRange('logicalCheck', getDataRowIndex('R43'), getDataRowIndex('R77'))) + tmpLogicalCheck).setScale(2, BigDecimal.ROUND_HALF_UP)
+tmpValue = ((BigDecimal) summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R43'), getDataRowIndex('R77'))) + tmpLogicalCheck).setScale(2, BigDecimal.ROUND_HALF_UP)
 getCell('R80', 'logicalCheck').setValue(tmpValue.toString())
 // графа 12
 getCell('R80', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R43'), getDataRowIndex('R77'))) + getCellValue('R78', 'opuSumByEnclosure2')
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R43'), getDataRowIndex('R77'))) + getCellValue('R78', 'opuSumByEnclosure2')
                 + getCellValue('R79', 'opuSumByEnclosure2')
 )
 // графа 13
@@ -174,7 +176,7 @@ getCell('R80', 'difference').setValue(
 // --- Раздел Б2
 // графа 12
 getCell('R96', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R82'), getDataRowIndex('R94'))) + getCellValue('R95', 'opuSumByEnclosure2')
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R82'), getDataRowIndex('R94'))) + getCellValue('R95', 'opuSumByEnclosure2')
 )
 // графа 16
 getCell('R96', 'difference').setValue(
@@ -183,12 +185,12 @@ getCell('R96', 'difference').setValue(
 
 // Раздел В
 // графа 11
-tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R98'), getDataRowIndex('R103')))
+tmpValue = summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R98'), getDataRowIndex('R103')))
 getCell('R104', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R104', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R98'), getDataRowIndex('R103')))
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R98'), getDataRowIndex('R103')))
 )
 // графа 13
 getCell('R104', 'opuSumByTableD').setValue(tmpValue - (getCell('R104', 'incomeBuhSumAccepted').getValue() ?: 0))
@@ -200,12 +202,12 @@ getCell('R104', 'difference').setValue(
 
 // --- Раздел Г
 // графа 11
-tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R106'), getDataRowIndex('R109')))
+tmpValue = summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R106'), getDataRowIndex('R109')))
 getCell('R110', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R110', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R106'), getDataRowIndex('R109')))
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R106'), getDataRowIndex('R109')))
 )
 // графа 13
 getCell('R110', 'opuSumByTableD').setValue(tmpValue - (getCell('R110', 'incomeBuhSumAccepted').getValue() ?: 0))
@@ -218,7 +220,7 @@ getCell('R110', 'difference').setValue(
 // --Раздел Д
 // графа 12
 getCell('R117', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R112'), getDataRowIndex('R115'))) + getCellValue('R116', 'opuSumByEnclosure2')
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R112'), getDataRowIndex('R115'))) + getCellValue('R116', 'opuSumByEnclosure2')
 )
 // графа 16
 getCell('R117', 'difference').setValue(
@@ -237,12 +239,12 @@ getCell('R120', 'difference').setValue(
 
 // Раздел Ж
 // графа 11
-tmpValue = summ(new ColumnRange('logicalCheck', getDataRowIndex('R122'), getDataRowIndex('R127')))
+tmpValue = summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R122'), getDataRowIndex('R127')))
 getCell('R128', 'logicalCheck').setValue(tmpValue.toString())
 
 // графа 12
 getCell('R128', 'opuSumByEnclosure2').setValue(
-        summ(new ColumnRange('incomeBuhSumAccepted', getDataRowIndex('R122'), getDataRowIndex('R127')))
+        summ(new ColumnRange('incomeTaxSumS', getDataRowIndex('R122'), getDataRowIndex('R127')))
 )
 // графа 13
 getCell('R128', 'opuSumByTableD').setValue(tmpValue - (getCell('R128', 'incomeBuhSumAccepted').getValue() ?: 0))
@@ -337,12 +339,11 @@ def formDataSimpleIncome = FormDataService.find(301, FormDataKind.SUMMARY, formD
 List<DataRow> dataRows = formData.getDataRows()
 for (DataRow row : dataRows) {
     // проверка что строка не описана выше
-    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R20', 'R21', 'R22', 'R38', 'R39', 'R40', 'R43',
-            'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R10', 'R10', 'R10', 'R10', 'R10',
-            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R64',
-            'R95', 'R96', 'R97',
-            'R98', 'R99', 'R100', 'R104', 'R106', 'R107', 'R110', 'R116', 'R117', 'R118', 'R119', 'R120',
-            'R122', 'R123', 'R124', 'R128'
+    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43',
+            'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51',
+            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R64',
+            'R98', 'R99', 'R100', 'R106', 'R107',
+            'R122', 'R123', 'R124'
     ].contains(row.getAlias())) {
 
         // графа 12
@@ -376,10 +377,10 @@ for (DataRow row : dataRows) {
             row.getCell('opuSumByOpu').setValue(temp.totalSum)
         }
     }
-    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R20', 'R21', 'R22', 'R38', 'R39', 'R40', 'R43', 'R64',
+    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43', 'R64',
             'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R54', 'R55', 'R56', 'R57', 'R58', 'R59',
-            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R95', 'R96', 'R128',
-            'R98', 'R99', 'R100', 'R104', 'R106', 'R107', 'R110', 'R116', 'R117', 'R119', 'R120', 'R122', 'R123', 'R124'
+            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R128',
+            'R98', 'R99', 'R100', 'R106', 'R107', 'R122', 'R123', 'R124'
     ].contains(row.getAlias())) {
         // графа 16
         row.getCell('difference').setValue(getCellValue(row.getAlias(), 'opuSumTotal') - getCellValue(row.getAlias(), 'opuSumByOpu'))

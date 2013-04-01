@@ -22,7 +22,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	private NumberFormat numberFormat;
 
 	public EditNumericColumn(NumericColumn column, ColumnContext columnContext) {
-		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision()), columnContext), column);
+		super(new ValidatedInputCell(new NumberValidationStrategy(column.getPrecision(), column.getMaxLength()), columnContext), column);
 		this.setHorizontalAlignment(ALIGN_RIGHT);
 		StringBuffer mask = new StringBuffer("#");
 		int precision = column.getPrecision();

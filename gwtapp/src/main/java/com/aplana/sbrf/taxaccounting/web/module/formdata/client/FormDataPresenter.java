@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
@@ -50,8 +51,8 @@ public class FormDataPresenter extends
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
-			SignersPresenter signersPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter);
+			SignersPresenter signersPresenter, DialogPresenter dialogPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter);
 		getView().setUiHandlers(this);
 	}
 
@@ -61,9 +62,6 @@ public class FormDataPresenter extends
 			super.prepareFromRequest(request);
 
 			final GetFormData action = new GetFormData();
-			Integer wfId = ParamUtils.getInteger(request, WORK_FLOW_ID);
-			action.setWorkFlowMove(wfId != null ? WorkflowMove.fromId(wfId)
-					: null);
 			// WTF? Почему Long.MAX_VALUE?
 			action.setFormDataId(Long.parseLong(request.getParameter(
 					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
@@ -327,7 +325,10 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onWorkflowMove(WorkflowMove wfMove) {
-		revealForm(true, wfMove.getId());
+		dialogPresenter.setFormData(formData);
+		dialogPresenter.setWorkFlow(wfMove);
+		addToPopupSlot(dialogPresenter);
+		//revealForm(true, wfMove.getId());
 	}
 
 	private void goToFormDataList() {

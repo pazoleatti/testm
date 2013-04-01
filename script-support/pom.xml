@@ -1,68 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>script-support</artifactId>
-    <name>script-support</name>
-    <description>АС "Учёт налогов" - Реализация сервисов и дао налоговых форм для скриптов</description>
+	<parent>
+		<artifactId>taxaccounting</artifactId>
+		<groupId>com.aplana.taxaccounting</groupId>
+		<version>0.2.2-SNAPSHOT</version>
+	</parent>
 
-    <parent>
-        <artifactId>taxaccounting</artifactId>
-        <groupId>com.aplana.taxaccounting</groupId>
-        <version>0.2.2-SNAPSHOT</version>
-    </parent>
+	<artifactId>script-support</artifactId>
+	<description>АС "Учёт налогов" - Реализация сервисов и дао налоговых форм для скриптов</description>
 
-    <properties>
-        <hsqldb.version>2.2.9</hsqldb.version>
-    </properties>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<!-- TODO: Нужно исправить. Скрипты не должны зависеть от модуля CORE, 
+				где находятся интерфейсы сервисов с которыми взаимодействуют пользователи -->
+			<groupId>${project.groupId}</groupId>
+			<artifactId>core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>dao</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>dao</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${springframework.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${springframework.version}</version>
 		</dependency>
-        <!-- Зависимости для юнит-тестов -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${springframework.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>${hsqldb.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+
+		<!-- Зависимости для юнит-тестов -->
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>test-utils</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-    </dependencies>
-
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

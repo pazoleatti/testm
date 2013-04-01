@@ -85,7 +85,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	ValueListBox<String> numericDictionaryCodeBox;
 
 	@UiField
-	IntegerBox maxLengthBox;
+	IntegerBox stringMaxLengthBox;
+
+	@UiField
+	IntegerBox numericMaxLengthBox;
 
 	@UiField
 	TextBox nameBox;
@@ -100,7 +103,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	HorizontalPanel dictionaryCodePanel;
 
 	@UiField
-	HorizontalPanel maxLengthPanel;
+	HorizontalPanel stringMaxLengthPanel;
+
+	@UiField
+	HorizontalPanel numericMaxLengthPanel;
 
 	@Inject
 	@UiConstructor
@@ -266,9 +272,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 	}
 
-	@UiHandler("maxLengthBox")
-	public void onMaxLengthBox(KeyUpEvent event) {
-		((StringColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(maxLengthBox.getValue());
+	@UiHandler("stringMaxLengthBox")
+	public void onStringMaxLengthBox(KeyUpEvent event) {
+		((StringColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(stringMaxLengthBox.getValue());
+	}
+
+	@UiHandler("numericMaxLengthBox")
+	public void onNumericMaxLengthBox(KeyUpEvent event) {
+		((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(numericMaxLengthBox.getValue());
 	}
 
 	@Override
@@ -285,7 +296,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void flush() {
 		Column column = columnAttributeEditor.flush();
 		if (column!=null){
-			getUiHandlers().flashColumn(column);
+			getUiHandlers().flushColumn(column);
 		}
 	}
 
@@ -318,7 +329,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		precisionPanel.setVisible(false);
 		dictionaryCodePanel.setVisible(false);
 		stringDictionaryCodeBox.setVisible(false);
-		maxLengthPanel.setVisible(false);
+		stringMaxLengthPanel.setVisible(false);
+		numericMaxLengthPanel.setVisible(false);
 		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
 
@@ -332,14 +344,16 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			else {
 				stringDictionaryCodeBox.setValue(null);
 			}
-			maxLengthBox.setValue(maxLength);
 
-			maxLengthPanel.setVisible(true);
+			stringMaxLengthBox.setValue(maxLength);
+			stringMaxLengthPanel.setVisible(true);
 			stringDictionaryCodeBox.setVisible(true);
 			dictionaryCodePanel.setVisible(true);
 		}
 		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			String code = ((NumericColumn) column).getDictionaryCode();
+			int maxLength = ((NumericColumn) column).getMaxLength();
+
 			if (numericDictionaryCodeMap.containsKey(code)) {
 				numericDictionaryCodeBox.setValue(code);
 			}
@@ -347,6 +361,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				numericDictionaryCodeBox.setValue(null);
 			}
 
+			numericMaxLengthPanel.setVisible(true);
+			numericMaxLengthBox.setValue(maxLength);
+			numericMaxLengthBox.setVisible(true);
 			numericDictionaryCodeBox.setVisible(true);
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());

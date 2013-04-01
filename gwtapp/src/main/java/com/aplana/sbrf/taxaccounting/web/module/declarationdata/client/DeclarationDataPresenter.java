@@ -17,7 +17,7 @@ import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.*;
 
 public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
-		implements DeclarationDataUiHandlers {
+		implements DeclarationDataUiHandlers, DialogBoxChangeVisibilityEvent.MyHandler {
 
 	@ProxyCodeSplit
 	@NameToken(DeclarationDataTokens.declarationData)
@@ -36,6 +36,8 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 		void setReportPeriod(String reportPeriod);
 		void setBackButton(String link);
 		void setPdfFile(String fileUrl);
+		void setVisiblePdfFile(boolean visible);
+		void clearPdfFile();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -145,6 +147,17 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 								.revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST).with("nType", taxName));
 					}
 				}));
+	}
+
+	@Override
+	@ProxyEvent
+	public void onChangeVisibility(DialogBoxChangeVisibilityEvent event) {
+		getView().setVisiblePdfFile(!event.isVisible());
+	}
+
+	@Override
+	protected void onHide() {
+		getView().clearPdfFile();
 	}
 
 	@Override

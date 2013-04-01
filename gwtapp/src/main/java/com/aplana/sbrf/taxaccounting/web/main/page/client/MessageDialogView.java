@@ -74,7 +74,7 @@ public class MessageDialogView extends PopupViewImpl implements
 	}
 
 	@Override
-	public void setMeassege(String text) {
+	public void setMessage(String text) {
 		message.setText(text);
 	}
 

@@ -1,14 +1,3 @@
-/* Условие. */
-// проверка на террбанк
-boolean isTerBank = false
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-    if (it.departmentId != formData.departmentId) {
-        isTerBank = true
-    }
-}
-return isTerBank
-/* Конец условия. */
-
 /**
  * (calculationFields.groovy)
  * Алгоритмы заполнения полей формы при расчете данных формы
@@ -132,7 +121,7 @@ double summ(FormData formData, Range conditionRange, Range summRange, filter) {
 // --- Раздел Б2
 // графа 9
 getCell('R96', 'incomeTaxSumS').setValue(
-        summ(new ColumnRange("incomeTaxSumS", getDataRowIndex('R81') + 1, getDataRowIndex('R94') - 1))
+        summ(new ColumnRange("incomeTaxSumS", getDataRowIndex('R81') + 1, getDataRowIndex('R94') + 1))
 );
 
 // Раздел В

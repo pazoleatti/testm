@@ -20,16 +20,24 @@ public class NumericColumn extends Column implements Serializable {
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
 	public static final int MAX_PRECISION = 8;
+	
+	/**
+	 * Максимально допустимое колличество значений для числового столбца
+	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
+	 */
+	public static final int MAX_LENGTH = 15;
 
 	private int precision = 0;
 
 	private String dictionaryCode;
+	
+	private int maxLength = MAX_LENGTH;
 
+	
 	/**
-	 * Возвращает значение точности числового столбца
-	 * Точность столбца задаёт количество знаков после запятой, которые допустимы в данном столбце, для целых чисел используентся значение 0
-	 *
-	 * @return значение точности
+	 * Задает точность столбца, т.е. колличество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
+	 * 
+	 * @return возвращает точность
 	 */
 	public int getPrecision() {
 		return precision;
@@ -42,7 +50,7 @@ public class NumericColumn extends Column implements Serializable {
 	 * @param precision желаемое значение точности
 	 */
 	public void setPrecision(int precision) {
-		if (precision < 0 || precision > MAX_PRECISION) {
+		if (precision < 0 || precision > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
 		}
 		this.precision = precision;
@@ -61,5 +69,20 @@ public class NumericColumn extends Column implements Serializable {
 	 */
 	public void setDictionaryCode(String dictionaryCode) {
 		this.dictionaryCode = dictionaryCode;
+	}
+
+	
+	/**
+	 * Возвращает значение точности числового столбца
+	 * Точность столбца задаёт общее количество знаков, которые допустимы в данном столбце.
+	 *
+	 * @return значение точности
+	 */
+	public int getMaxLength() {
+		return maxLength;
+	}
+
+	public void setMaxLength(int maxLength) {
+		this.maxLength = maxLength;
 	}
 }

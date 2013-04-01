@@ -67,7 +67,6 @@ public class GetFormDataHandler extends
 		Logger logger = new Logger();
 
 		fillLockData(action, userId, result);
-		workFlowMove(action, userId, logger);
 		fillFormAndTemplateData(action, userId, logger, result);
 		fillFormDataAccessParams(action, userId, result);
 
@@ -81,21 +80,6 @@ public class GetFormDataHandler extends
 	public void undo(GetFormData action, GetFormDataResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
-	}
-
-	/**
-	 * Выполняет переход по workflow, если это необходимо
-	 * 
-	 * @param action
-	 * @param userId
-	 * @param logger
-	 */
-	private void workFlowMove(GetFormData action, int userId, Logger logger) {
-		if (action.getWorkFlowMove() != null) {
-			// Если необходимо выполнить переход, то выполняем его
-			formDataService.doMove(action.getFormDataId(), userId,
-					action.getWorkFlowMove(), logger);
-		}
 	}
 
 	/**

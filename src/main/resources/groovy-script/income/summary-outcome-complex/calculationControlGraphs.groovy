@@ -1,14 +1,15 @@
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.Column
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
-import com.aplana.sbrf.taxaccounting.model.script.range.Range
-import com.aplana.sbrf.taxaccounting.model.script.range.Rect
+/*
+* Условие
+ */
+// проверка на банк
+boolean isBank = true
+departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    if (it.departmentId != formData.departmentId) {
+        isBank = false
+    }
+}
+return (formDataEvent == FormDataEvent.COMPOSE && isBank) || formDataEvent != FormDataEvent.COMPOSE
 
-//com.aplana.sbrf.taxaccounting.model.FormData formData
-//com.aplana.sbrf.taxaccounting.dao.script.Income102Dao income102Dao
-//com.aplana.sbrf.taxaccounting.dao.script.Income101Dao income101Dao
 
 /**
  * Расчет (контрольные графы) (calculationControlGraphs.groovy).
@@ -94,7 +95,7 @@ row = formData.getDataRow('R95')
 // графа 11
 a = summ('consumptionBuhSumAccepted', 'R3', 'R92')
 b = getCellValue('R94', 'consumptionBuhSumAccepted')
-row.logicalCheck = (String) a + b
+row.logicalCheck = ((BigDecimal) (a + b)).setScale(2, BigDecimal.ROUND_HALF_UP).toString()
 // графа 12
 a = summ('consumptionTaxSumS', 'R3', 'R92')
 b = getCellValue('R94', 'opuSumByEnclosure3')
@@ -119,7 +120,7 @@ row = formData.getDataRow('R111')
 // графа 12
 a = summ('consumptionTaxSumS', 'R97', 'R109')
 b = getCellValue('R110', 'opuSumByEnclosure3')
-row.logicalCheck = (String) a + b
+row.opuSumByEnclosure3 = ((BigDecimal) (a + b)).setScale(2, BigDecimal.ROUND_HALF_UP)
 // графа 13
 row.opuSumByTableP = getCellValue('R110', 'opuSumByTableP')
 // графа 14 = графа 13 - графа 7
@@ -141,7 +142,7 @@ row = formData.getDataRow('R142')
 // графа 11
 a = summ('consumptionBuhSumAccepted', 'R114', 'R139')
 b = toBigDecimal(getCell('R141', 'logicalCheck').getValue())
-row.logicalCheck = (String) a + b
+row.logicalCheck = ((BigDecimal) (a + b)).setScale(2, BigDecimal.ROUND_HALF_UP).toString()
 // графа 12
 a = summ('consumptionTaxSumS', 'R114', 'R139')
 b = getCellValue('R141', 'opuSumByEnclosure3')
@@ -161,7 +162,7 @@ if (row.opuSumByEnclosure3 != null && row.consumptionTaxSumS != null) {
 }
 
 //Для всех строк, для которых графа 11 является редактируемой, за исключением строк: 75 (21514), 76 (21515), 77(21518), 90(21657), 92(21659), 94, 141, 142
-([3, 5] + (8..13) + [16] + (19..24) + (34..38) + (40..42) + [44] + (46..56) + [58] + (65..68) + [70, 80, 81, 83, 86, 87, 95, 114, 116, 122, 123] + (131..134) + [139]).each {
+([3, 5] + (8..13) + [16] + [19,20,21] + (36..38) + (40..42) + [44] + (46..56) + [58] + (65..68) + [70, 80, 81, 83, 86, 87, 114, 116, 122, 123] + (131..134) + [139]).each {
 
     column6Range =  new ColumnRange('consumptionBuhSumAccepted', 0, formData.getDataRows().size() - 1)
     summ6Column = summ(formData, column6Range, {condRange ->
@@ -175,7 +176,28 @@ if (row.opuSumByEnclosure3 != null && row.consumptionTaxSumS != null) {
 
     summResult = ((BigDecimal)(getCellValue('R'+it, 'consumptionTaxSumS') - (summ6Column - summ7Column))).setScale(2, BigDecimal.ROUND_HALF_UP)
     getCell('R'+it, 'logicalCheck').setValue(
-            summResult > 0 ? summResult.toString() : 'Требуется объяснение'
+            summResult >= 0 ? summResult.toString() : 'Требуется объяснение'
+    )
+}
+
+/**
+ * Изменения в ЧТЗ 28.03.13
+ * Строки выделились из вышестоящих
+ */
+((22..24)+[34,35]).each{
+    column6Range =  new ColumnRange('consumptionBuhSumAccepted', 0, formData.getDataRows().size() - 1)
+    summ6Column = summ(formData, column6Range, {condRange ->
+        return getCell('R' + it, 'consumptionTypeId').getValue() == condRange.getCell('consumptionTypeId').getValue() && condRange.getCell('consumptionBuhSumAccountNumber').getValue() != null
+    })
+
+    column7Range =  new ColumnRange('consumptionBuhSumPrevTaxPeriod', 0, formData.getDataRows().size() - 1)
+    summ7Column = summ(formData, column7Range, {condRange ->
+        return getCell('R' + it, 'consumptionTypeId').getValue() == condRange.getCell('consumptionTypeId').getValue()
+    })
+
+    summResult = ((BigDecimal)(getCellValue('R'+it, 'consumptionTaxSumS') - (summ6Column - summ7Column))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    getCell('R'+it, 'logicalCheck').setValue(
+            summResult <= 0 ? summResult.toString() : 'Требуется объяснение'
     )
 }
 

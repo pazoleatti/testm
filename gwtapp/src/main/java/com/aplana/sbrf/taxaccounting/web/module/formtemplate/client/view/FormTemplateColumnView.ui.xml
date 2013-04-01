@@ -51,14 +51,19 @@
                         <g:ValueListBox width="200px" ui:field="numericDictionaryCodeBox"/>
                     </g:HorizontalPanel>
 
-                    <g:HorizontalPanel height="30px" ui:field="maxLengthPanel">
+                    <g:HorizontalPanel height="30px" ui:field="stringMaxLengthPanel">
                         <g:Label width="150px">Максимальный размер строки</g:Label>
-                        <g:IntegerBox width="100px" ui:field="maxLengthBox"/>
+                        <g:IntegerBox width="100px" ui:field="stringMaxLengthBox"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="precisionPanel">
                         <g:Label width="150px">Точность</g:Label>
                         <g:ValueListBox width="200px" ui:field="precisionBox"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel height="30px" ui:field="numericMaxLengthPanel">
+                        <g:Label width="150px">Максимальное количество цифр</g:Label>
+                        <g:IntegerBox width="100px" ui:field="numericMaxLengthBox"/>
                     </g:HorizontalPanel>
                 </g:HTMLPanel>
             </g:cell>

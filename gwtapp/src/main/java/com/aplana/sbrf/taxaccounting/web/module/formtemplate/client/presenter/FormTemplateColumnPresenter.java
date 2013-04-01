@@ -119,7 +119,7 @@ public class FormTemplateColumnPresenter
 	}
 
 	@Override
-	public void flashColumn(Column column) {
+	public void flushColumn(Column column) {
 		fixAlias(column);
 	}
 }

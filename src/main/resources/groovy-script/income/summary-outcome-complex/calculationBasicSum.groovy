@@ -1,4 +1,18 @@
 /**
+ * Условия
+ *
+ */
+// проверка на банк
+boolean isBank = true
+departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    if (it.departmentId != formData.departmentId) {
+        isBank = false
+    }
+}
+return (formDataEvent == FormDataEvent.COMPOSE && isBank) || formDataEvent != FormDataEvent.COMPOSE
+
+
+/**
  * Расчет (основные графы) (calculationBasicSum.groovy).
  * Форма "Сводная форма начисленных расходов (расходы сложные)".
  *
@@ -13,7 +27,7 @@ def setSum(String rowFromAlias, String rowToAlias, String columnAlias) {
     int rowTo = formData.getDataRowIndex(rowToAlias)
     def sumRow = formData.getDataRow(rowToAlias)
 
-    sumRow[columnAlias] = summ(formData, new ColumnRange(columnAlias, rowFrom + 1, rowTo - 1))
+    sumRow[columnAlias] = ((BigDecimal) summ(formData, new ColumnRange(columnAlias, rowFrom + 1, rowTo - 1))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 // A1
