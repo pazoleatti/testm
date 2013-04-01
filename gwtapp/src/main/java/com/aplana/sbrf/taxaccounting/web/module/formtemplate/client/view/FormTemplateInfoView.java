@@ -20,6 +20,15 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 
 	@UiField
 	CheckBox fixedRowsCheckBox;
+	
+	@UiField
+	TextBox nameBox;
+	
+	@UiField
+	TextBox fullnameBox;
+	
+	@UiField
+	TextBox codeBox;
 
 	@Inject
 	public FormTemplateInfoView(Binder uiBinder) {
@@ -27,10 +36,13 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(String version, boolean numberedColumns, boolean fixedRows) {
+	public void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code) {
 		versionBox.setValue(version);
 		numberedColumnsBox.setValue(numberedColumns);
 		fixedRowsCheckBox.setValue(fixedRows);
+		nameBox.setValue(name);
+		fullnameBox.setValue(fullName);
+		codeBox.setValue(code);
 	}
 
 	@Override
@@ -38,6 +50,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setVersion(versionBox.getValue());
 		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
 		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
+		getUiHandlers().setName(nameBox.getValue());
+		getUiHandlers().setFullname(fullnameBox.getValue());
+		getUiHandlers().setCode(codeBox.getValue());
 	}
 
 	@Override

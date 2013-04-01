@@ -28,6 +28,21 @@
                 <g:Label width="300px">Фиксированный набор строк</g:Label>
                 <g:CheckBox ui:field="fixedRowsCheckBox"/>
             </g:HorizontalPanel>
+            
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Наименование формы</g:Label>
+                <g:TextBox width="500px" ui:field="nameBox"/>
+            </g:HorizontalPanel>
+            
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Полное наименование формы</g:Label>
+                <g:TextBox width="500px" ui:field="fullnameBox"/>
+            </g:HorizontalPanel>
+            
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
+                <g:TextBox width="500px" ui:field="codeBox"/>
+            </g:HorizontalPanel>
         </g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -60,15 +60,18 @@ public class FormTemplateDaoTest {
 		formTemplate.setFixedRows(false);
 		formTemplate.setVersion("321");
 		formTemplate.setActive(true);
+		formTemplate.setName("name_3");
+		formTemplate.setFullName("fullname_3");
+		formTemplate.setCode("code_3");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
 		Assert.assertTrue(formTemplate.isNumberedColumns());
 		Assert.assertFalse(formTemplate.isFixedRows());
 		Assert.assertEquals("321", formTemplate.getVersion());
 		Assert.assertEquals(true, formTemplate.isActive());
-		Assert.assertEquals("name_1", formTemplate.getName());
-		Assert.assertEquals("fullname_1", formTemplate.getFullName());
-		Assert.assertEquals("code_1", formTemplate.getCode());
+		Assert.assertEquals("name_3", formTemplate.getName());
+		Assert.assertEquals("fullname_3", formTemplate.getFullName());
+		Assert.assertEquals("code_3", formTemplate.getCode());
 	}
 
 }
