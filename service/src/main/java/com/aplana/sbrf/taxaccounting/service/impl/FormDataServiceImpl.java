@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataService;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
- * 
+ *
  * @author Vitalii Samolovskikh
  */
 @Service("unlockFormData")
@@ -66,7 +67,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 * заданы строки по-умолчанию (начальные данные), то эти строки копируются в
 	 * созданную форму 3) если в объявлении формы задан скрипт создания, то этот
 	 * скрипт выполняется над создаваемой формой
-	 * 
+	 *
 	 * @param logger
 	 *            логгер-объект для фиксации диагностических сообщений
 	 * @param userId
@@ -95,7 +96,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public FormData createFormData(Logger logger, int userId,
-			int formTemplateId, int departmentId, FormDataKind kind) {
+								   int formTemplateId, int departmentId, FormDataKind kind) {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
 				departmentId)) {
 			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
@@ -108,7 +109,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public FormData createFormDataWithoutCheck(Logger logger, TAUser user,
-			int formTemplateId, int departmentId, FormDataKind kind) {
+											   int formTemplateId, int departmentId, FormDataKind kind) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
 
@@ -145,7 +146,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.
-	 * 
+	 *
 	 * @param logger
 	 *            логгер для регистрации ошибок
 	 * @param userId
@@ -154,7 +155,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            данные формы
 	 */
 	@Override
-	public void addRow(Logger logger, int userId, FormData formData) {
+	public void addRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
 		boolean canDo;
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
@@ -168,8 +169,10 @@ public class FormDataServiceImpl implements FormDataService {
 			if (formDataScriptingService.hasScripts(formData,
 					FormDataEvent.ADD_ROW)) {
 				TAUser user = userDao.getUser(userId);
+				Map<String, Object> additionalParameters = new HashMap<String, Object>();
+				additionalParameters.put("currentDataRow", currentDataRow);
 				formDataScriptingService.executeScripts(user, formData,
-						FormDataEvent.ADD_ROW, logger, null);
+						FormDataEvent.ADD_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте добавления новой строки",
@@ -186,7 +189,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Выполнить расчёты по налоговой форме
-	 * 
+	 *
 	 * @param logger
 	 *            логгер-объект для фиксации диагностических сообщений
 	 * @param userId
@@ -244,7 +247,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Сохранить данные по налоговой форме
-	 * 
+	 *
 	 * @param userId
 	 *            идентификатор пользователя, выполняющего операцию
 	 * @param formData
@@ -287,7 +290,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Получить данные по налоговой форме
-	 * 
+	 *
 	 * @param userId
 	 *            идентификатор пользователя, выполняющего операцию
 	 * @param formDataId
@@ -325,7 +328,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Удалить данные по налоговой форме
-	 * 
+	 *
 	 * @param userId
 	 *            идентификатор пользователя, выполняющего операцию
 	 * @param formDataId
@@ -347,7 +350,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Перемещает форму из одного состояния в другое.
-	 * 
+	 *
 	 * @param formDataId
 	 *            идентификатор налоговой формы
 	 * @param userId
@@ -357,7 +360,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void doMove(long formDataId, int userId, WorkflowMove workflowMove,
-			Logger logger) {
+					   Logger logger) {
 		checkLockedByAnotherUser(formDataId, userId);
 		List<WorkflowMove> availableMoves = formDataAccessService
 				.getAvailableMoves(userId, formDataId);
@@ -401,7 +404,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	/**
 	 * Проверяет, не заблокирована ли форма другим пользователем
-	 * 
+	 *
 	 * @param formDataId
 	 * @param userId
 	 */
@@ -454,7 +457,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public void deleteRow(Logger logger, int userId, FormData formData, DataRow deleteRow) {
+	public void deleteRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
 		boolean canDo;
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
@@ -463,24 +466,26 @@ public class FormDataServiceImpl implements FormDataService {
 		} else {
 			canDo = formDataAccessService.canDelete(userId, formData.getId());
 		}
-		
+
 		if (canDo) {
 			if (formDataScriptingService.hasScripts(formData,
 					FormDataEvent.DELETE_ROW)) {
 				TAUser user = userDao.getUser(userId);
+				Map<String, Object> additionalParameters = new HashMap<String, Object>();
+				additionalParameters.put("currentDataRow", currentDataRow);
 				formDataScriptingService.executeScripts(user, formData,
-						FormDataEvent.DELETE_ROW, logger, deleteRow);
+						FormDataEvent.DELETE_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте удаление строки",
 							logger.getEntries());
 				}
-				
+
 			}else{
-				formData.deleteDataRow(deleteRow);
+				formData.deleteDataRow(currentDataRow);
 			}
 		}else {
-				throw new AccessDeniedException(
+			throw new AccessDeniedException(
 					"Недостаточно прав для удаления строки из налоговой формы");
 		}
 	}

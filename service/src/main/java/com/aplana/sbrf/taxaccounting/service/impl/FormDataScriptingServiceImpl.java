@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -32,6 +33,9 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  */
 @Service
 public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements ApplicationContextAware, FormDataScriptingService {
+
+	private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
+
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -39,32 +43,29 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
 	public FormDataScriptingServiceImpl() {
 	}
-	
-	/**
-	 * Выполняет скрипты формы по определенному событию.
-	 *
-	 * @param user     текущий пользователь. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
-	 *                 не должно зависеть от пользователя.
-	 * @param formData данные налоговой формы
-	 * @param event    событие формы
-	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
-	 */
+
 	@Override
-	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Object additionalParameter) {
+	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
 
 		Bindings b = scriptEngine.createBindings();
 		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));
-		
+
 		// predefined script variables
-        b.put("formDataEvent", event);
-        b.put("logger", logger);
+		b.put("formDataEvent", event);
+		b.put("logger", logger);
 		b.put("formData", formData);
-		b.put("additionalParameter", additionalParameter);
 		if (user != null) {
 			b.put("user", user);
 			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));
 		}
 		b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
+		if (additionalParameters != null) {
+			for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
+				if (b.containsKey(entry.getKey()))
+					throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
+				b.put(entry.getKey(), entry.getValue());
+			}
+		}
 
 		try {
 			// execute scripts
@@ -82,6 +83,11 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			b.remove("user");
 			b.remove("userDepartment");
 			b.remove("formDataDepartment");
+			if (additionalParameters != null) {
+				for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
+					b.remove(entry.getKey());
+				}
+			}
 		}
 	}
 
@@ -190,7 +196,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			DataRow row = i.next();
 
 			decorator.setRowIndex(rowIndex + 1); // Для пользователя нумерация строк должна начинаться с 1
-			
+
 			bindings.put("row", row);
 			bindings.put("rowIndex", rowIndex);
 			bindings.put("rowAlias", row.getAlias());

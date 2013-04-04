@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
+import java.util.Map;
+
 /**
  * Интерфейс сервиса, реализующего выполение скриптов над данными налоговых форм.
  */
@@ -17,9 +19,10 @@ public interface FormDataScriptingService {
 	 * @param formData данные налоговой формы
 	 * @param event    событие формы
 	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
-	 * @param additionalParameter	дополнительные параметры, если нет то null
+	 * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
+	 *                             скрипты. Параметр может иметь значение null
 	 */
-	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger,Object additionalParameter);
+	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 
 	/**
 	 * Проверяет, есть ли скрипты для события формы

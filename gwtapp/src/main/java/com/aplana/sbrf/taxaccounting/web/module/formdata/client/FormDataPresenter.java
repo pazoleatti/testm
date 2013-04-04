@@ -238,7 +238,9 @@ public class FormDataPresenter extends
 	@Override
 	public void onAddRowClicked() {
 		LogCleanEvent.fire(this);
+		DataRow dataRow = getView().getSelectedRow();
 		AddRowAction action = new AddRowAction();
+		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
@@ -255,11 +257,9 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		DataRow dataRow = getView().getSelectedRow();
 		DeleteRowAction action = new DeleteRowAction();
-		action.setDeletedDataRow(dataRow);
+		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		if (dataRow != null) {
-			// TODO: сделать проверку, что строку можно удалять
-			// возможно сделать отдельное событие и проверять скриптом
 			dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<FormDataResult>() {
 						@Override

@@ -5,19 +5,19 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 
 public class DeleteRowAction extends AbstractFormDataAction implements ActionName {
 
-	private DataRow deletedDataRow;
+	private DataRow currentDataRow;
 
-	public DataRow getDeletedDataRow() {
-		return deletedDataRow;
+	public DataRow getCurrentDataRow() {
+		return currentDataRow;
 	}
 
-	public void setDeletedDataRow(DataRow deletedDataRow) {
-		this.deletedDataRow = deletedDataRow;
+	public void setCurrentDataRow(DataRow currentDataRow) {
+		this.currentDataRow = currentDataRow;
 	}
 
 	@Override
 	public String getName() {
-		return "Удаление строки на форме";
+		return "Удаление строки из формы";
 	}
 
 }

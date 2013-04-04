@@ -22,7 +22,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class DeleteActionHandler extends AbstractActionHandler<DeleteRowAction, FormDataResult> {
+public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, FormDataResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -30,7 +30,7 @@ public class DeleteActionHandler extends AbstractActionHandler<DeleteRowAction, 
 	@Autowired
 	private SecurityService securityService;
 	
-	public DeleteActionHandler() {
+	public DeleteRowHandler() {
 		super(DeleteRowAction.class);
 	}
 
@@ -39,7 +39,7 @@ public class DeleteActionHandler extends AbstractActionHandler<DeleteRowAction, 
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-		formDataService.deleteRow(logger, securityService.currentUser().getId(), formData,action.getDeletedDataRow());
+		formDataService.deleteRow(logger, securityService.currentUser().getId(), formData, action.getCurrentDataRow());
 		
 		FormDataResult result = new FormDataResult();
 		result.setFormData(formData);
