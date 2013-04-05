@@ -1,10 +1,10 @@
 /**
- * 2. Алгоритмы заполнения полей формы (9.1.1.8.1) Табл. 45.
+ * 2. Алгоритмы заполнения полей формы (9.1.1.8.1) Табл. 45 (fillForm.groovy).
  * Форма "Расчет суммы налога по каждому транспортному средству".
  *
  *
  * @author auldanov
- * @since 18.02.2013 14:00
+ * @since 24.02.2013 14:00
  */
 
 /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
@@ -16,18 +16,24 @@ if (period == null) {
     monthCountInPeriod = period.getMonths()
 }
 
+/** Уменьшающий процент. */
+def reducingPerc
+/** Пониженная ставка. */
+def loweringRates
+
 // получение региона по ОКАТО
 def region = dictionaryRegionService.getRegionByOkatoOrg(row.okato)
+
 // получение параметров региона
-def taxBenefitParam = dictionaryTaxBenefitParamService.get(region.code, row.taxBenefitCode)
-if (taxBenefitParam == null){
-    logger.error("Ошибка при получении параметров региона")
-}
-else{
-    /** Уменьшающий процент. */
-    def reducingPerc = taxBenefitParam.percent
-    /** Пониженная ставка. */
-    def loweringRates = taxBenefitParam.rate
+if (row.taxBenefitCode){
+    def taxBenefitParam = dictionaryTaxBenefitParamService.get(region.code, row.taxBenefitCode)
+    if (taxBenefitParam == null){
+        logger.error('Ошибка при получении параметров региона')
+    }
+    else{
+        reducingPerc = taxBenefitParam.percent
+        loweringRates = taxBenefitParam.rate
+    }
 }
 
 
@@ -71,9 +77,7 @@ if (row.ownMonths != null) {
  */
 row.taxRate = null
 if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-    logger.info("row.tsTypeCode = "+row.tsTypeCode+", row.years= "+row.years+", row.taxBase = "+row.taxBase+", region.code="+region.code)
     row.taxRate = transportTaxDao.getTaxRate(row.tsTypeCode, row.years, row.taxBase, region.code)
-
 } else {
     row.taxRate = null
     def fields = []
