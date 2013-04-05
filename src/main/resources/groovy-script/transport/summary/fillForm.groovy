@@ -136,7 +136,7 @@ if (row.benefitStartDate != null && row.benefitEndDate != null) {
     if (row.benefitEndDate == null) {
         errors.add('"Дата окончания"')
     }
-    logger.error("\"Коэффициент Кл\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
+    //logger.error("\"Коэффициент Кл\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
 }
 
 /*

@@ -34,7 +34,7 @@ if (row.calculatedTaxSum != null && row.benefitSum != null
 }
 
 // 15 графа - Проверка Коэффициент Кв
-logger.info('kv = ' + row.coef362)
+//logger.info('kv = ' + row.coef362)
 if (row.coef362 != null) {
     if (row.coef362 < 0.0) {
         logger.error('Коэффициент Кв меньше нуля.');
@@ -44,7 +44,7 @@ if (row.coef362 != null) {
 }
 
 // 16 графа - Проверка Коэффициент Кл
-logger.info('kl = ' + row.coefKl)
+//logger.info('kl = ' + row.coefKl)
 if (row.coefKl != null) {
     if (row.coefKl < 0.0){
         logger.error('Коэффициент Кл меньше нуля.');

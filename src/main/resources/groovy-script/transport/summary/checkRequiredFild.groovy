@@ -16,7 +16,7 @@ row.getAlias() != 'total'
 def errorMsg = '';
 
 // 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 20 , 21
-['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ecoClass', 'ownMonths','coef362', 'taxRate', 'calculatedTaxSum', 'benefitSum', 'taxSumToPay'].each {
+['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ownMonths','coef362', 'taxRate', 'calculatedTaxSum', 'benefitSum', 'taxSumToPay'].each {
     if (row.getCell(it) != null && (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue()))) {
         errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(it).getColumn().getName() + '"'
     }
