@@ -466,7 +466,13 @@ public class FormDataXlsxReportBuilder {
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
-		c.setCellValue(data.getFormType().getName());
+		c.setCellValue(formTemplate.getFullName());
+		
+		//Fill code
+		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
+		r = sheet.getRow(ar.getFirstCell().getRow());
+		c = r.getCell(ar.getFirstCell().getCol());
+		c.setCellValue(formTemplate.getCode());
 		
 		//Fill period
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());

@@ -18,6 +18,7 @@ public class ReportPeriod implements Serializable {
 	private int months;
 	private int order;
 	private int taxPeriodId;
+	private boolean balancePeriod;
 
 	/**
 	 * Получить идентификатор отчётного периода
@@ -106,5 +107,13 @@ public class ReportPeriod implements Serializable {
 	 */
 	public void setTaxPeriodId(int taxPeriodId) {
 		this.taxPeriodId = taxPeriodId;
+	}
+
+	public boolean isBalancePeriod() {
+		return this.balancePeriod;
+	}
+
+	public void setBalancePeriod(boolean balancePeriod) {
+		this.balancePeriod = balancePeriod;
 	}
 }

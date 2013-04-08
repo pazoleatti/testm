@@ -8,5 +8,5 @@
 
 //noinspection GroovyVariableNotAssigned
 def row = formData.appendDataRow()
-row.taxPeriod = 34
-row.dividendType = 2
+row.taxPeriod = '34'
+row.dividendType = '2'

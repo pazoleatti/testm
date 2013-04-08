@@ -116,6 +116,9 @@ copyFor700x('R195', 'R141', 'R92', 'R193', fromForm)
  * Получить число из строки.
  */
 def toBigDecimal(String value) {
+    if (value == null) {
+        return new BigDecimal(0)
+    }
     def result
     try {
         result = Double.parseDouble(value)

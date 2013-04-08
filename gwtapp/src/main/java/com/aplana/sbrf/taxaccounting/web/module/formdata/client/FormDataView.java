@@ -125,7 +125,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void setColumnsData(List<Column> columnsData, boolean readOnly) {
+	public void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode) {
 
 		// Clean columns
 		while (formDataTable.getColumnCount() > 0) {
@@ -133,6 +133,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 
 		factory.setReadOnly(readOnly);
+		factory.setEditOnly(forceEditMode);
 		boolean hideCheckedColumnsCheckbox = true;
 		for (Column col : columnsData) {
 			if (col.isChecking()) {

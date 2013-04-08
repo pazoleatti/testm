@@ -16,16 +16,22 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.*;
-import com.google.gwt.view.client.*;
-import com.google.web.bindery.event.shared.*;
-import com.gwtplatform.dispatch.shared.*;
-import com.gwtplatform.mvp.client.*;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterPresenter;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.Proxy;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -58,6 +64,7 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	
 	protected final PlaceManager placeManager;
 	protected final DispatchAsync dispatcher;
+	protected final DialogPresenter dialogPresenter;
 
 	protected final FilterPresenter filterPresenter;
 	static final Object TYPE_filterPresenter = new Object();
@@ -65,11 +72,12 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 
 	public FormDataListPresenterBase(EventBus eventBus, MyView view,
 			Proxy_ proxy, PlaceManager placeManager, DispatchAsync dispatcher,
-			FilterPresenter filterPresenter) {
+			FilterPresenter filterPresenter, DialogPresenter dialogPresenter) {
 		super(eventBus, view, proxy);
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.filterPresenter = filterPresenter;
+		this.dialogPresenter = dialogPresenter;
 	}
 	
 	/* (non-Javadoc)

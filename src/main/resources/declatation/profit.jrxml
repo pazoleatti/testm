@@ -7360,45 +7360,6 @@ Arrays.asList(1)]]></variableExpression>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Тлф}.charAt(11)]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement uuid="3ef81548-713e-4653-a6bf-853d9535b00e" x="54" y="375" width="15" height="19"/>
-				<box>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[ ]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="51f25d19-3323-4677-ac1c-463a881ccf69" x="24" y="375" width="15" height="19"/>
-				<box>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[ ]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="7416e88f-1d8b-431b-841c-776074f61518" x="39" y="375" width="15" height="19"/>
-				<box>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[ ]]></text>
-			</staticText>
 			<line>
 				<reportElement uuid="4d07f904-733b-4798-8589-212bd9d80aee" x="0" y="398" width="600" height="1"/>
 				<graphicElement>
@@ -11596,6 +11557,48 @@ Arrays.asList(1)]]></variableExpression>
 				</textElement>
 				<text><![CDATA[(код)]]></text>
 			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement uuid="bacb8daf-90cc-4706-a4cb-aa8a2ded4ca1" x="26" y="375" width="15" height="19"/>
+				<box>
+					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement>
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="0b843545-664b-4f75-a054-b72b5d1c47e7" x="41" y="375" width="15" height="19"/>
+				<box>
+					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement>
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="32f3b394-6c20-4ba7-90c3-7369db4bf626" x="56" y="375" width="15" height="19"/>
+				<box>
+					<pen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<topPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.25" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement>
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(2)]]></textFieldExpression>
+			</textField>
 		</band>
 		<band height="842" splitType="Stretch">
 			<textField isBlankWhenNull="true">

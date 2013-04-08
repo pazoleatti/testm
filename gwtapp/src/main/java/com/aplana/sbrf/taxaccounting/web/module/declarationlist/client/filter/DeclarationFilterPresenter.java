@@ -48,7 +48,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	private static Map<TaxType, DeclarationDataFilter> savedFilterData = new HashMap<TaxType, DeclarationDataFilter>();
 	private static Map<TaxType, Map<String, Integer>> savedDepartmentsMap = new HashMap<TaxType, Map<String, Integer>>();
 	private List<TARole> userRoles = null;
-
+	private List<TaxPeriod> taxPeriods;
+	private List<Department> departments;
+	private ReportPeriod currentReportPeriod;
+	private DeclarationDataFilterAvailableValues filterValues;
 
 	@Inject
 	public DeclarationFilterPresenter(EventBus eventBus, MyView view,
@@ -69,6 +72,22 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return declarationFilter;
 	}
 
+	public DeclarationDataFilterAvailableValues getFilterValues() {
+		return filterValues;
+	}
+
+	public List<TaxPeriod> getTaxPeriods() {
+		return taxPeriods;
+	}
+
+	public List<Department> getDepartments() {
+		return departments;
+	}
+
+	public ReportPeriod getCurrentReportPeriod() {
+		return currentReportPeriod;
+	}
+
 	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
 		savedFilterData.put(this.taxType, declarationFilter);
 		Map<String, Integer> selectedDepartments = new HashMap<String, Integer>();
@@ -87,13 +106,16 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				        .defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
 						@Override
 						public void onSuccess(GetDeclarationFilterDataResult result) {
-							DeclarationDataFilterAvailableValues filterValues = result.getFilterValues();
+							filterValues = result.getFilterValues();
+							taxPeriods = result.getTaxPeriods();
+							departments = result.getDepartments();
+							currentReportPeriod = result.getCurrentReportPeriod();
 
-							getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
-							getView().setTaxPeriods(result.getTaxPeriods());
-							getView().setDeclarationTypeMap(fillDeclarationTypesMap(result.getFilterValues()));
+							getView().setDepartmentsList(departments, filterValues.getDepartmentIds());
+							getView().setTaxPeriods(taxPeriods);
+							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
 
-							getView().setDataFilter(prepareFormDataFilter(result), taxType);
+							getView().setDataFilter(prepareFormDataFilter(), taxType);
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}
 					}));
@@ -126,14 +148,14 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return declarationTypeMap;
 	}
 
-	private DeclarationDataFilter prepareFormDataFilter(GetDeclarationFilterDataResult result){
+	private DeclarationDataFilter prepareFormDataFilter(){
 		DeclarationDataFilter formDataFilter = new DeclarationDataFilter();
 
 		if(savedFilterData.get(taxType) == null){
-			if(result.getFilterValues().getDepartmentIds() != null && !result.getFilterValues().getDepartmentIds().isEmpty()
+			if(filterValues.getDepartmentIds() != null && !filterValues.getDepartmentIds().isEmpty()
 					&& !isControlOfUnp() ){
-				Integer departmentId = result.getFilterValues().getDefaultDepartmentId();
-				String departmentName = getDepartmentNameById(result.getDepartments(), departmentId);
+				Integer departmentId = filterValues.getDefaultDepartmentId();
+				String departmentName = getDepartmentNameById(departments, departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
 				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
 				Map<String, Integer> defaultSelectedDepartment = new HashMap<String, Integer>();
@@ -143,9 +165,9 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			} else {
 				formDataFilter.setDepartmentIds(null);
 			}
-			if (result.getCurrentReportPeriod() != null) {
-				getView().setSelectedReportPeriods(Arrays.asList(result.getCurrentReportPeriod()));
-				formDataFilter.setReportPeriodIds(Arrays.asList(result.getCurrentReportPeriod().getId()));
+			if (currentReportPeriod != null) {
+				getView().setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
+				formDataFilter.setReportPeriodIds(Arrays.asList(currentReportPeriod.getId()));
 			}
 		} else {
 			//В противном случае - заполняем фильтр значениями, по которым делалась фильтрация в последний раз,

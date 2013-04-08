@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 /**
  * Реализация {@link Column}, предназначенная для хранения числовых данных.
@@ -25,7 +26,7 @@ public class NumericColumn extends Column implements Serializable {
 	 * Максимально допустимое колличество значений для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
-	public static final int MAX_LENGTH = 15;
+	public static final int MAX_LENGTH = 25;
 
 	private int precision = 0;
 
@@ -84,5 +85,54 @@ public class NumericColumn extends Column implements Serializable {
 
 	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
+	}
+
+	@Override
+	public Formatter getFormatter() {
+		return new Formatter() {
+			@Override
+			public String format(String valueToFormat) {
+				MathContext mathContext = new MathContext(maxLength);
+				BigDecimal val = new BigDecimal(valueToFormat, mathContext);
+				val = val.setScale(precision);
+				return val.toPlainString();
+			}
+		};
+	}
+
+	@Override
+	public ValidationStrategy getValidationStrategy() {
+		return new ValidationStrategy() {
+			@Override
+			public boolean matches(String valueToCheck) {
+				if (valueToCheck.contains("d")
+						|| valueToCheck.contains("f")
+						|| valueToCheck.contains(" ")) {
+					return false;
+				}
+				if (valueToCheck.isEmpty()) {
+					return true;
+				} else if ((precision == 0) && valueToCheck.contains(".")) {
+					return false;
+				} else if (valueToCheck.contains(".") && valueToCheck.substring(valueToCheck.indexOf('.')).length() > precision + 1) {
+					return false;
+				} else if ((valueToCheck.contains(".") ? valueToCheck.length()-1 : valueToCheck.length()) > maxLength) {
+					return false;
+				} else if ((valueToCheck.contains(".")
+						? valueToCheck.substring(0,valueToCheck.indexOf('.'))
+						: valueToCheck).length() > maxLength - precision) {
+					return false;
+				} else if (valueToCheck.equals("-")) {
+					return true;
+				} else {
+					try {
+						Double.parseDouble(valueToCheck);
+						return true;
+					} catch (NumberFormatException e) {
+						return false;
+					}
+				}
+			}
+		};
 	}
 }

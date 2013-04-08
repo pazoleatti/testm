@@ -41,10 +41,10 @@
 
     </ui:style>
 
-	<g:DialogBox height="100%" glassEnabled="true" text="Напишите комментарий и нажмите 'ОК' для выполнения перехода">
+	<g:DialogBox height="100%" glassEnabled="true" text="Для выполнения перехода необходимо указать причину">
         <g:VerticalPanel addStyleNames="{style.dataLayout}" height="100%">
             <g:HorizontalPanel>
-                <g:Label addStyleNames="{style.captionStyle}">Комментарий:</g:Label>
+                <g:Label addStyleNames="{style.captionStyle}">Причина возврата:</g:Label>
                 <g:TextArea addStyleNames="{style.textArea}" focus="true" ui:field="data"/>
             </g:HorizontalPanel>
 

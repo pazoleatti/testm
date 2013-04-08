@@ -290,8 +290,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return result;
 		}
 		WorkflowState state = formData.getState();
-
-		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+		// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
+		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod() && !formDataAccess.isFormDataHasDestinations()) {
+			switch (state) {
+				case CREATED:
+					result.add(WorkflowMove.CREATED_TO_ACCEPTED);
+					break;
+				case ACCEPTED:
+					result.add(WorkflowMove.APPROVED_TO_CREATED);
+					break;
+			}
+		} else if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
 			switch (state){

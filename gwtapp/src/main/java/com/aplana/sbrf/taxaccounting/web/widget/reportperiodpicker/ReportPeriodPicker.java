@@ -27,6 +27,8 @@ public class ReportPeriodPicker extends Composite{
 	private static final String PANEL_WITH_TREE_WIDTH   = "250px";
 	private static final String PANEL_WITH_TREE_HEIGHT  = "250px";
 	private static final String APPLY_BUTTON_WIDTH      = "50px";
+	private static final String RADIO_BUTTON_GROUP      = "DEPARTMENT_SELECTION";
+	private final boolean MULTISELECT_TREE;
 
 	private static SelectionUiBinder uiBinder = GWT.create(SelectionUiBinder.class);
 	private final ReportPeriodDataProvider dataProvider;
@@ -48,8 +50,14 @@ public class ReportPeriodPicker extends Composite{
 
 	@UiConstructor
 	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider){
+		this(reportPeriodDataProvider, true);
+	}
+
+	@UiConstructor
+	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider, boolean isMultiselect){
 		initWidget(uiBinder.createAndBindUi(this));
 		this.dataProvider = reportPeriodDataProvider;
+		MULTISELECT_TREE = isMultiselect;
 
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
@@ -82,6 +90,10 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	public void setSelectedReportPeriods(List<ReportPeriod> reportPeriodList){
+		if(reportPeriodList == null){
+			clearSelected();
+			return;
+		}
 		Map<Integer, String> periods = new HashMap<Integer, String>();
 		for(ReportPeriod item : reportPeriodList){
 			periods.put(item.getId(), item.getName());
@@ -113,13 +125,28 @@ public class ReportPeriodPicker extends Composite{
 		selected.setTitle(tooltipTitle.toString());
 	}
 
+	private void clearSelected(){
+		selected.setText("");
+		selected.setTitle("");
+		selectedReportPeriods.clear();
+	}
+
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
 		this.taxPeriods = taxPeriods;
 	}
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){
 		for(ReportPeriod reportPeriod : reportPeriods){
-			CheckBox checkBox = new CheckBox(reportPeriod.getName());
+			// Если период для ввода остатков, то добавляем к имени суффикс (ВО)
+			if (reportPeriod.isBalancePeriod()) {
+				reportPeriod.setName(reportPeriod.getName() + " (ВО)");
+			}
+			CheckBox checkBox;
+			if(MULTISELECT_TREE){
+				checkBox = new CheckBox(reportPeriod.getName());
+			} else {
+				checkBox = new RadioButton(RADIO_BUTTON_GROUP, reportPeriod.getName());
+			}
 			addValueChangeHandler(checkBox);
 			ReportPeriodItem treeItem = new ReportPeriodItem(checkBox);
 			treeItem.setReportPeriod(reportPeriod);
@@ -228,6 +255,9 @@ public class ReportPeriodPicker extends Composite{
 				CheckBox selectedItem = (CheckBox)event.getSource();
 				Integer selectedItemId = allReportPeriodsNameToId.get(selectedItem.getText());
 				if(checkBox.getValue()){
+					if(checkBox instanceof RadioButton){
+						selectedReportPeriods.clear();
+					}
 					selectedReportPeriods.put(selectedItemId, allReportPeriodsIdToName.get(selectedItemId));
 				} else if (!checkBox.getValue()) {
 					selectedReportPeriods.remove(selectedItemId);

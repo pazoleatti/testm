@@ -59,7 +59,7 @@ public class StringColumn extends Column  implements Serializable {
 
 	/**
 	 * Задать максимально допустимую длину строки
-	 * Значение должно быть больше нуля и меньше либо равно, чем {@link #MAX_LENGTHЪ -  предел, задаваемый БД
+	 * Значение должно быть больше нуля и меньше либо равно, чем {@link #MAX_LENGTH -  предел, задаваемый БД
 	 * По умолчанию значение равно {@link #MAX_LENGTH}
 	 * @param maxLength максимальная длина строки
 	 * @throws IllegalArgumentException если maxLength меньше или равно нулю, или если оно больше, чем {#link MAX_LENGTH}
@@ -72,5 +72,15 @@ public class StringColumn extends Column  implements Serializable {
 		}		
 		this.maxLength = maxLength;
 	}
-	
+
+	@Override
+	public ValidationStrategy getValidationStrategy() {
+		return new ValidationStrategy() {
+			@Override
+			public boolean matches(String valueToCheck) {
+				return valueToCheck.length() <= maxLength;
+			}
+		};
+
+	}
 }

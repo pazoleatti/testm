@@ -39,6 +39,8 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<!-- GWT -->
 			<dependency>
 				<groupId>com.google.gwt</groupId>
 				<artifactId>gwt-user</artifactId>
@@ -52,6 +54,7 @@
 				<scope>runtime</scope>
 			</dependency>
 
+			<!-- GIN -->
 			<dependency>
 				<groupId>com.google.gwt.inject</groupId>
 				<artifactId>gin</artifactId>
@@ -59,7 +62,7 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<!-- GWTP -->
+			<!-- GWT Platform -->
 			<dependency>
 				<groupId>com.gwtplatform</groupId>
 				<artifactId>gwtp-mvp-client</artifactId>
@@ -106,6 +109,7 @@
 				<version>${jetty.version}</version>
 			</dependency>
 
+			<!-- Spring -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
@@ -176,6 +180,8 @@
 				<artifactId>spring-security-web</artifactId>
 				<version>${springsecurity.version}</version>
 			</dependency>
+
+			<!-- AspectJ -->
 			<dependency>
 				<groupId>org.aspectj</groupId>
 				<artifactId>aspectjrt</artifactId>
@@ -187,6 +193,8 @@
 				<version>${org.aspectj.version}</version>
 				<scope>runtime</scope>
 			</dependency>
+
+			<!-- Misc -->
 			<dependency>
 				<groupId>cglib</groupId>
 				<artifactId>cglib</artifactId>
@@ -353,15 +361,15 @@
 							<goals>
 								<goal>revision</goal>
 							</goals>
+							<configuration>
+								<entries>
+									<entry>
+										<prefix>prefix</prefix>
+									</entry>
+								</entries>
+							</configuration>
 						</execution>
 					</executions>
-					<configuration>
-						<entries>
-							<entry>
-								<prefix>prefix</prefix>
-							</entry>
-						</entries>
-					</configuration>
 				</plugin>
 
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
@@ -389,7 +397,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<execute />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -399,6 +407,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
 	<repositories>
 		<repository>
 			<id>codehaus.repo</id>

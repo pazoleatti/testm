@@ -336,6 +336,9 @@ def formDataSimpleConsumption = FormDataService.find(304, formData.kind, formDat
  * Получить число из строки.
  */
 def toBigDecimal(String value) {
+    if (value == null) {
+        return new BigDecimal(0)
+    }
     def result
     try {
         result = new BigDecimal(Double.parseDouble(value))

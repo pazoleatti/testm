@@ -16,6 +16,7 @@ for (alias in [
         'divisionName', 'stringCode', 'propertyPrice', 'workersCount', 'labalAboutPaymentTax', 'delta21', 'delta28'
 ]) {
     row.getCell(alias).editable = true
+    row.getCell(alias).setStyleAlias('Редактируемая')
 }
 row.number = formData.dataRows.size()
 row.delta21 = 0

@@ -78,7 +78,7 @@ public class FormTemplateColumnPresenter
 
 	private boolean aliasExists(Column column) {
 		for (Column col : formTemplate.getColumns()) {
-			if (col.getAlias().equals(column.getAlias()) && col != column) {
+			if ((col.getAlias() == null)  || col.getAlias().equals(column.getAlias()) && col != column) {
 				return true;
 			}
 		}
@@ -92,7 +92,7 @@ public class FormTemplateColumnPresenter
 	 */
 	private void fixAlias(Column column) {
 		int i = 0;
-		String oldAlias = column.getAlias();
+		String oldAlias = column.getAlias() == null ? "псевдоним" : column.getAlias();
 		while (aliasExists(column)) {
 			column.setAlias(oldAlias + ++i);
 		}

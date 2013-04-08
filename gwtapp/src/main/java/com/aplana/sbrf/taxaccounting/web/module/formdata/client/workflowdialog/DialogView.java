@@ -49,7 +49,6 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiHandler("okButton")
 	public void onSave(ClickEvent event){
 		if(getUiHandlers() != null){
-			hide();
 			getUiHandlers().onConfirm();
 		}
 	}
@@ -57,5 +56,10 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
 		hide();
+	}
+
+	@Override
+	public String getComment(){
+		return data.getText();
 	}
 }

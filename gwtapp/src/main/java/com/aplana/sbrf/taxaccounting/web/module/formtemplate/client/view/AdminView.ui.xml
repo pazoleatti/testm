@@ -8,8 +8,12 @@
             margin: 10px;
         }
     </ui:style>
-    <g:FlowPanel>
+    <g:ScrollPanel>
+    	<g:FlowPanel>
         <g:Label styleName="{style.title}">Список шаблонов форм</g:Label>
-        <style:GenericCellTable ui:field="formTemplateTable" width="100%" />
-    </g:FlowPanel>
+			<g:VerticalPanel width="100%">
+        		<style:GenericCellTable ui:field="formTemplateTable" width="100%" />
+        	</g:VerticalPanel>
+    	</g:FlowPanel>
+    </g:ScrollPanel>
 </ui:UiBinder>

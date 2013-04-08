@@ -39,7 +39,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataUiHandlers> {
 
-		void setColumnsData(List<Column> columnsData, boolean readOnly);
+		void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode);
 
 		void setRowsData(List<DataRow> rowsData);
 
@@ -110,6 +110,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 
 	protected boolean readOnlyMode;
+
+	protected boolean forceEditMode = false;
 	
 	protected boolean fixedRows;
 

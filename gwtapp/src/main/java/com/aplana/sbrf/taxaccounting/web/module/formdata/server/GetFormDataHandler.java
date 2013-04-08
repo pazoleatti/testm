@@ -110,12 +110,13 @@ public class GetFormDataHandler extends
 				.getFormTemplateId());
 
 		result.setReportPeriod(reportPeriodDao
-				.get(formData.getReportPeriodId()).getName());
+				.get(formData.getReportPeriodId()));
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
 		result.setNumberedHeader(formTemplate.isNumberedColumns());
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
+		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
 	}
 
@@ -124,7 +125,6 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
-	 * @param log
 	 * @param result
 	 */
 	private void fillFormDataAccessParams(GetFormData action, int userId,
@@ -156,6 +156,9 @@ public class GetFormDataHandler extends
 			if (action.getDepartmentId() == null) {
 				errorMessage += ", не указано подразделение";
 			}
+			if (action.getReportPeriodId() == null) {
+				errorMessage += ", не указан отчетный период";
+			}
 			if (!errorMessage.isEmpty()) {
 				errorMessage = errorMessage.startsWith(",") ? errorMessage
 						.substring(1) : errorMessage;
@@ -170,9 +173,7 @@ public class GetFormDataHandler extends
 	 * 
 	 * @param action
 	 * @param userId
-	 * @param log
 	 * @param result
-	 * @throws WrongInputDataServiceException
 	 */
 	private void fillLockData(GetFormData action, int userId,
 			GetFormDataResult result) {

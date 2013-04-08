@@ -4,29 +4,33 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 public class ValidatedInputCell extends KeyPressableTextInputCell {
 
 	ColumnContext columnContext;
 
-	public interface ValidationStrategy {
-		public boolean matches(String valueToCheck);
-	}
+	public ValidatedInputCell(final ColumnContext columnContext) {
+		super(new SafeHtmlRenderer<String>() {
+			@Override
+			public SafeHtml render(String s) {
+				SafeHtmlBuilder builder = new SafeHtmlBuilder();
+				return builder.appendEscaped(columnContext.getColumn().getFormatter().format(s)).toSafeHtml();
+			}
 
-	private ValidationStrategy overallFormValidationStrategy;
-
-	public ValidatedInputCell(ValidationStrategy overallFormValidationStrategy, ColumnContext columnContext) {
+			@Override
+			public void render(String s, SafeHtmlBuilder safeHtmlBuilder) {
+					safeHtmlBuilder.appendEscaped(columnContext.getColumn().getFormatter().format(s));
+			}
+		});
 		this.columnContext = columnContext;
-		if (overallFormValidationStrategy != null) {
-			this.overallFormValidationStrategy = overallFormValidationStrategy;
-		} else {
-			this.overallFormValidationStrategy = new DefaultValidationStrategy();
-		}
 	}
 
 	@Override
 	protected boolean checkInputtedValue(String value) {
-		return overallFormValidationStrategy.matches(value);
+		return columnContext.getColumn().getValidationStrategy().matches(value);
 	}
 
 	@Override

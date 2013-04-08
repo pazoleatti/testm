@@ -6,5 +6,8 @@
 		<result property="login"/>		
 		<result property="name"/>
 		<result property="departmentId" column="department_id"/>
+		<result property="email"/>
+		<result property="uuid"/>
+		<result property="active" column="is_active"/>
 	</resultMap>
 </mapper>

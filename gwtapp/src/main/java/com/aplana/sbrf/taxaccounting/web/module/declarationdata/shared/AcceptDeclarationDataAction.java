@@ -5,6 +5,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDeclarationDataResult> {
     private long declarationId;
 	private boolean accepted;
+	private String reasonForReturn;
 
 	public long getDeclarationId() {
 		return declarationId;
@@ -20,5 +21,13 @@ public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDecla
 
 	public void setAccepted(boolean accepted) {
 		this.accepted = accepted;
+	}
+
+	public String getReasonForReturn() {
+		return reasonForReturn;
+	}
+
+	public void setReasonForReturn(String reasonForReturn) {
+		this.reasonForReturn = reasonForReturn;
 	}
 }

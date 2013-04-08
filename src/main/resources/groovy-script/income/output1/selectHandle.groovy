@@ -9,5 +9,6 @@ for (row in formData.dataRows) {
             'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax', 'dividendAgentAll',
             'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll']) {
         row.getCell(alias).editable = true
+        row.getCell(alias).setStyleAlias('Редактируемая')
     }
 }

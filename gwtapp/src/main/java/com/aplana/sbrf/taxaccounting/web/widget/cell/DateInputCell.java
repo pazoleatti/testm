@@ -508,6 +508,7 @@ public class DateInputCell extends
 	private void commitEmptyString(Context context, Element parent){
 		setViewData(context.getKey(), null);
 		cancel(context, parent, null);
+		valueUpdater.update(null);
 		datePickerPanel.hide();
 	}
 

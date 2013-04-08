@@ -108,6 +108,9 @@ double summ(FormData formData, Range conditionRange, Range summRange, filter) {
  * Получить число из строки.
  */
 def toBigDecimal(String value) {
+    if (value == null) {
+        return new BigDecimal(0)
+    }
     def result
     try {
         result = new BigDecimal(Double.parseDouble(value))
@@ -315,8 +318,8 @@ def formDataComplexConsumption = FormDataService.find(303, FormDataKind.SUMMARY,
 temp2 = 0
 temp3 = 0
 if (formDataComplexConsumption != null) {
-    temp2 = formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue()
-    temp3 = formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue()
+    temp2 = formDataComplexConsumption.getDataRow('R90').getCell('consumptionTaxSumS').getValue()?:0
+    temp3 = formDataComplexConsumption.getDataRow('R92').getCell('consumptionTaxSumS').getValue()?:0
 }
 // строка 9 графа 11
 temp = ((BigDecimal) (getCellValue('R9', 'incomeTaxSumS')

@@ -13,6 +13,8 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 
 	private Long formDataKind;
 
+	private Long reportPeriodId;
+
 	private boolean readOnly;
 
 	public Long getFormDataId() {
@@ -53,6 +55,14 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 
 	public void setReadOnly(boolean lockFormData) {
 		this.readOnly = lockFormData;
+	}
+
+	public Long getReportPeriodId() {
+		return reportPeriodId;
+	}
+
+	public void setReportPeriodId(Long reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
 	}
 
 	@Override

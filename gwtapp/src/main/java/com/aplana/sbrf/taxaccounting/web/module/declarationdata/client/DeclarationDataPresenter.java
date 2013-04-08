@@ -3,18 +3,37 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.*;
-import com.google.gwt.core.client.*;
-import com.google.gwt.user.client.*;
-import com.google.inject.*;
-import com.google.web.bindery.event.shared.*;
-import com.gwtplatform.dispatch.shared.*;
-import com.gwtplatform.mvp.client.*;
-import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.DeleteDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.DeleteDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
+import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
 		implements DeclarationDataUiHandlers, DialogBoxChangeVisibilityEvent.MyHandler {
@@ -42,14 +61,17 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
+	private final DialogPresenter dialogPresenter;
 	private long declarationId;
 	private String taxName;
 
 	@Inject
-	public DeclarationDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
+	public DeclarationDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher,
+	                                PlaceManager placeManager, DialogPresenter dialogPresenter) {
 		super(eventBus, view, proxy);
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
+		this.dialogPresenter = dialogPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -119,18 +141,23 @@ public class DeclarationDataPresenter extends Presenter<DeclarationDataPresenter
 
 	@Override
 	public void accept(boolean accepted) {
-		LogCleanEvent.fire(this);
-		AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-		action.setAccepted(accepted);
-		action.setDeclarationId(declarationId);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-					@Override
-					public void onSuccess(AcceptDeclarationDataResult result) {
-						//MessageEvent.fire(DeclarationDataPresenter.this, "Декларация изменена");
-						revealPlaceRequest();
-					}
-				}));
+		if(accepted){
+			LogCleanEvent.fire(this);
+			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+			action.setAccepted(accepted);
+			action.setDeclarationId(declarationId);
+			dispatcher.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+						@Override
+						public void onSuccess(AcceptDeclarationDataResult result) {
+							revealPlaceRequest();
+						}
+					}));
+		} else {
+			dialogPresenter.setDeclarationId(declarationId);
+			addToPopupSlot(dialogPresenter);
+		}
+
 	}
 
 	@Override

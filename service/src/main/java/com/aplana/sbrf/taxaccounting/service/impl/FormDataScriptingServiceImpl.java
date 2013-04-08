@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -18,12 +20,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -40,13 +36,18 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentService departmentService;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 
 	public FormDataScriptingServiceImpl() {
 	}
 
 	@Override
 	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
-
+		// Если отчетный период для ввода остатков, то не выполняем скрипты
+		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
+			return;
+		}
 		Bindings b = scriptEngine.createBindings();
 		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));
 

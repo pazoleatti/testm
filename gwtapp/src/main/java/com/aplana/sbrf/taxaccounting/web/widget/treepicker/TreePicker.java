@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
@@ -52,6 +53,8 @@ public class TreePicker extends Composite{
 	private static final String PANEL_WITH_TREE_WIDTH   = "250px";
 	private static final String PANEL_WITH_TREE_HEIGHT  = "250px";
 	private static final String APPLY_BUTTON_WIDTH      = "50px";
+	private static final String RADIO_BUTTON_GROUP      = "DEPARTMENT_SELECTION";
+	private final boolean MULTISELECT_TREE;
 	private boolean isTreeCreated = false;
 
 	private final List<Department> sourceList = new ArrayList<Department>();
@@ -70,8 +73,14 @@ public class TreePicker extends Composite{
 
 	@UiConstructor
 	public TreePicker(String popupPanelCaption) {
+		this(popupPanelCaption, true);
+	}
+
+	@UiConstructor
+	public TreePicker(String popupPanelCaption, boolean isMultiselect) {
 		initWidget(uiBinder.createAndBindUi(this));
 		setupUI(popupPanelCaption);
+		MULTISELECT_TREE = isMultiselect;
 	}
 
 	public void setTreeValues(List<Department> source, Set<Integer> availableDepartments){
@@ -95,6 +104,10 @@ public class TreePicker extends Composite{
 
 		selectedItems.clear();
 		uncheckAll();
+		if(values == null){
+			processSelectedElements();
+			return;
+		}
 		selectedItems.putAll(values);
 		for(Map.Entry<String, Integer> entry : values.entrySet()){
 			Pair<Integer, DepartmentItem> pair = nodes.get(entry.getValue());
@@ -122,7 +135,12 @@ public class TreePicker extends Composite{
 		//имя подразделения.
 		for(final Department department : sourceList){
 			if(availableForUserDepartmentIds.contains(department.getId())){
-				CheckBox checkbox = new CheckBox(department.getName());
+				CheckBox checkbox;
+				if(MULTISELECT_TREE){
+					checkbox = new CheckBox(department.getName());
+				} else {
+					checkbox = new RadioButton(RADIO_BUTTON_GROUP, department.getName());
+				}
 				addValueChangeHandler(checkbox);
 				DepartmentItem departmentItem = new DepartmentItem(checkbox);
 				departmentItem.setCheckBox(checkbox);
@@ -218,15 +236,18 @@ public class TreePicker extends Composite{
 		}
 	}
 
-	private void addValueChangeHandler(CheckBox checkBox){
+	private void addValueChangeHandler(final CheckBox checkBox){
 		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				CheckBox selectedItem = (CheckBox)event.getSource();
 				Integer selectedItemId = allTreeItems.get(selectedItem.getText());
-				if(!selectedItems.containsKey(selectedItem.getText())){
+				if(checkBox.getValue()){
+					if(checkBox instanceof RadioButton){
+						selectedItems.clear();
+					}
 					selectedItems.put(selectedItem.getText(), selectedItemId);
-				} else {
+				} else if (!checkBox.getValue()) {
 					selectedItems.remove(selectedItem.getText());
 				}
 			}

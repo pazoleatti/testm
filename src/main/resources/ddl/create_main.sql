@@ -214,12 +214,14 @@ create table report_period
   is_active number(1) default 1 not null,
   months    number(2) not null,
   tax_period_id number(9) not null,
-  ord           number(2) not null
+  ord           number(2) not null,
+  is_balance_period number(1) default 0 not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
 alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
+alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
 
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
@@ -228,6 +230,7 @@ comment on column report_period.is_active is 'Признак активност�
 comment on column report_period.months is 'Количество месяцев в периоде';
 comment on column report_period.tax_period_id is 'Налоговый период';
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
+comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
@@ -316,7 +319,7 @@ alter table form_column add constraint form_column_uniq_alias unique(form_templa
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length 
-check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 15) or (type ='D' and max_length is null));
+check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 25) or (type ='D' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
 comment on table form_column is 'Описания столбцов налоговых форм';

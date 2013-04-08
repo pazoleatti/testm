@@ -8,5 +8,6 @@
         <result property="months"/>
         <result property="taxPeriodId" column="tax_period_id"/>
         <result property="order" column="ord"/>
+        <result property="balancePeriod" column="is_balance_period"/>
     </resultMap>
 </mapper>

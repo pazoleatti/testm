@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 
@@ -24,11 +25,13 @@ public class GetFormDataResult implements Result {
 	
 	private FormData formData;
 	
+	private String templateFormName;
+	
 	private List<LogEntry> logEntries;
 	
 	private String departmenName;
 	
-	private String reportPeriod;
+	private ReportPeriod reportPeriod;
 	
 	private FormDataAccessParams formDataAccessParams;
 
@@ -54,6 +57,14 @@ public class GetFormDataResult implements Result {
 		this.formData = formData;
 	}
 	
+	public String getTemplateFormName() {
+		return templateFormName;
+	}
+
+	public void setTemplateFormName(String templateFormName) {
+		this.templateFormName = templateFormName;
+	}
+
 	public String getDepartmenName() {
 		return departmenName;
 	}
@@ -62,11 +73,11 @@ public class GetFormDataResult implements Result {
 		this.departmenName = departmenName;
 	}
 
-	public String getReportPeriod() {
+	public ReportPeriod getReportPeriod() {
 		return reportPeriod;
 	}
 
-	public void setReportPeriod(String reportPeriod) {
+	public void setReportPeriod(ReportPeriod reportPeriod) {
 		this.reportPeriod = reportPeriod;
 	}
 

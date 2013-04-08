@@ -29,6 +29,9 @@ public class TAUserDaoTest {
 		Assert.assertEquals("controlBank", user.getLogin());
 		Assert.assertEquals(Department.ROOT_BANK_ID, user.getDepartmentId());
 		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
+		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
+		Assert.assertEquals("F32C1F04-7860-43CA-884F-39CC1D740064", user.getUuid());
+		Assert.assertTrue(user.isActive());
 	}
 	
 	@Test(expected=DaoException.class)
@@ -43,6 +46,9 @@ public class TAUserDaoTest {
 		Assert.assertEquals("controlBank", user.getLogin());
 		Assert.assertEquals(Department.ROOT_BANK_ID, user.getDepartmentId());
 		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
+		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
+		Assert.assertEquals("F32C1F04-7860-43CA-884F-39CC1D740064", user.getUuid());
+		Assert.assertTrue(user.isActive());
 	}
 	
 	@Test(expected=DaoException.class)

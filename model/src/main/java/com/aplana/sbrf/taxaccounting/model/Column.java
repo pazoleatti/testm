@@ -15,6 +15,13 @@ import java.io.Serializable;
  * @author dsultanbekov
  */
 public abstract class Column implements Ordered, Serializable {
+	public interface ValidationStrategy {
+		public boolean matches(String valueToCheck);
+	}
+
+	public interface Formatter {
+		public String format(String valueToFormat);
+	}
 	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
@@ -143,4 +150,23 @@ public abstract class Column implements Ordered, Serializable {
 	public void setChecking(boolean checking) {
 		this.checking = checking;
 	}
+
+	public Formatter getFormatter() {
+		return new Formatter() {
+			@Override
+			public String format(String valueToFormat) {
+				return valueToFormat;
+			}
+		};
+	}
+
+	public ValidationStrategy getValidationStrategy() {
+		return new ValidationStrategy() {
+			@Override
+			public boolean matches(String valueToCheck) {
+				return true;
+			}
+		};
+	}
+
 }

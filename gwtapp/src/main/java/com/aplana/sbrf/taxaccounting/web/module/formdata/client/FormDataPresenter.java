@@ -19,6 +19,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -71,6 +73,8 @@ public class FormDataPresenter extends
 					FORM_DATA_KIND_ID));
 			action.setFormDataTypeId(ParamUtils.getLong(request,
 					FORM_DATA_TYPE_ID));
+			action.setReportPeriodId(ParamUtils.getLong(request,
+					FORM_DATA_RPERIOD_ID));
 			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
 					READ_ONLY, "true")));
 
@@ -106,23 +110,25 @@ public class FormDataPresenter extends
 									manageDeleteRowButtonEnabled();
 
 									getView().setAdditionalFormInfo(
-											result.getFormData().getFormType()
-													.getName(),
+											result.getTemplateFormName(),
 											result.getFormData().getFormType()
 													.getTaxType(),
 											result.getFormData().getKind()
 													.getName(),
 											result.getDepartmenName(),
-											result.getReportPeriod(),
+											result.getReportPeriod().getName(),
 											result.getFormData().getState()
 													.getName());
-
+									// Если период для ввода остатков, то делаем все ячейки редактируемыми
+									if (result.getReportPeriod().isBalancePeriod()) {
+										forceEditMode = true;
+									}
 									getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
 											+ String.valueOf(result.getFormData().getFormType().getTaxType()));
-
 									getView().setColumnsData(
 											formData.getFormColumns(),
-											readOnlyMode);
+											readOnlyMode,
+											forceEditMode);
 									getView().setRowsData(
 											formData.getDataRows());
 									getView().addCustomHeader(
@@ -156,7 +162,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onShowCheckedColumns() {
-		getView().setColumnsData(formData.getFormColumns(), readOnlyMode);
+		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 	}
 
 	private void manageDeleteRowButtonEnabled() {
@@ -325,16 +331,32 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onWorkflowMove(WorkflowMove wfMove) {
-		dialogPresenter.setFormData(formData);
-		dialogPresenter.setWorkFlow(wfMove);
-		addToPopupSlot(dialogPresenter);
-		//revealForm(true, wfMove.getId());
+		if (wfMove.isReasonToMoveShouldBeSpecified()){
+			dialogPresenter.setFormData(formData);
+			dialogPresenter.setWorkFlow(wfMove);
+			addToPopupSlot(dialogPresenter);
+		} else {
+			goMove(wfMove);
+		}
 	}
 
 	private void goToFormDataList() {
 		placeManager.revealPlace(new PlaceRequest(
 				FormDataListNameTokens.FORM_DATA_LIST).with("nType",
 				String.valueOf(formData.getFormType().getTaxType())));
+	}
+
+	private void goMove(final WorkflowMove wfMove){
+		GoMoveAction action = new GoMoveAction();
+		action.setFormDataId(formData.getId());
+		action.setMove(wfMove);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GoMoveResult>() {
+					@Override
+					public void onSuccess(GoMoveResult result) {
+						revealForm(true, wfMove.getId());
+					}
+				}));
 	}
 
 }

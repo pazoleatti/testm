@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -26,6 +27,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
 		void clearInput();
+		String getComment();
 	}
 
 	@Inject
@@ -44,19 +46,26 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	@Override
 	public void onConfirm() {
-		GoMoveAction action = new GoMoveAction();
-		action.setFormDataId(formData.getId());
-		action.setMove(workflowMove);
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GoMoveResult>() {
-					@Override
-					public void onSuccess(GoMoveResult result) {
-						placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
-								.with(FormDataPresenterBase.READ_ONLY, READ_ONLY).with(
-										FormDataPresenterBase.FORM_DATA_ID,
-										formData.getId().toString()));
-					}
-				}));
+		String reasonForReturn = getView().getComment();
+		if("".equals(reasonForReturn.trim())){
+			Window.alert("Необходимо указать причину возврата");
+		} else {
+			getView().hide();
+			GoMoveAction action = new GoMoveAction();
+			action.setFormDataId(formData.getId());
+			action.setMove(workflowMove);
+			action.setReasonToWorkflowMove(reasonForReturn);
+			dispatchAsync.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<GoMoveResult>() {
+						@Override
+						public void onSuccess(GoMoveResult result) {
+							placeManager.revealPlace(new PlaceRequest(FormDataPresenterBase.NAME_TOKEN)
+									.with(FormDataPresenterBase.READ_ONLY, READ_ONLY).with(
+											FormDataPresenterBase.FORM_DATA_ID,
+											formData.getId().toString()));
+						}
+					}));
+		}
 	}
 
 	public void setFormData(FormData formData) {

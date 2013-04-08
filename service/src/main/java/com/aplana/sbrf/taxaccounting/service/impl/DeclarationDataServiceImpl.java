@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -62,10 +63,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
 
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
+
 	@Override
 	@Transactional(readOnly = false)
 	public long createDeclaration(Logger logger, int declarationTemplateId,
 			int departmentId, int userId, int reportPeriodId) {
+		// Если отчетный период для ввода остатков то кидаем исключение
+		if (reportPeriodDao.get(reportPeriodId).isBalancePeriod()) {
+			throw new IllegalArgumentException("Нельзя создавать декларацию в отчетном периоде для ввода остатков");
+		}
 		if (declarationDataAccessService.canCreate(userId,
 				declarationTemplateId, departmentId, reportPeriodId)) {
 			DeclarationData newDeclaration = new DeclarationData();

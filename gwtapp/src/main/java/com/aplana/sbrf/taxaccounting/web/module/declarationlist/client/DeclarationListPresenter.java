@@ -4,11 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.*;
 import com.google.inject.*;
 import com.google.web.bindery.event.shared.*;
@@ -34,8 +33,8 @@ public class DeclarationListPresenter extends
 	@Inject
 	public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
 	                         PlaceManager placeManager, DispatchAsync dispatcher,
-	                         DeclarationFilterPresenter filterPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter);
+	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(PAGE_SIZE, dataProvider);
 	}
@@ -77,54 +76,12 @@ public class DeclarationListPresenter extends
 
 	@Override
 	public void onCreateClicked() {
-		final DeclarationDataFilter filter = filterPresenter.getFilterData();
-		if(isFilterDataCorrect(filter)){
-			CheckExistenceDeclaration checkCommand = new CheckExistenceDeclaration();
-			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
-			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
-			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-			dispatcher.execute(checkCommand, CallbackUtils
-				.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
-					@Override
-					public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
-						if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
-							if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
-								RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
-								refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
-								dispatcher.execute(refreshDeclarationCommand, CallbackUtils
-									.defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
-										@Override
-										public void onSuccess(RefreshDeclarationResult result) {
-											placeManager
-													.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-															.with(DeclarationDataTokens.declarationId,
-																	String.valueOf(checkResult.getDeclarationDataId()))
-													);
-										}
-									}));
-							}
-						}else if(checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
-							MessageEvent.fire(DeclarationListPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
-						} else {
-							CreateDeclaration command = new CreateDeclaration();
-							command.setDeclarationTypeId(filter.getDeclarationTypeId());
-							command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-							command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-							dispatcher.execute(command, CallbackUtils
-									.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
-										@Override
-										public void onSuccess(CreateDeclarationResult result) {
-											placeManager
-													.revealPlace(new PlaceRequest(DeclarationDataTokens.declarationData)
-															.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
-													);
-										}
-							}));
-						}
-					}
-				}));
-		}
-
+		creationPresenter.setDeclarationFilter(filterPresenter.getFilterData());
+		creationPresenter.setFilterValues(filterPresenter.getFilterValues());
+		creationPresenter.setTaxPeriods(filterPresenter.getTaxPeriods());
+		creationPresenter.setDepartments(filterPresenter.getDepartments());
+		creationPresenter.setCurrentReportPeriod(filterPresenter.getCurrentReportPeriod());
+		addToPopupSlot(creationPresenter);
 	}
 
 
@@ -143,22 +100,6 @@ public class DeclarationListPresenter extends
 	@Override
 	public void onSortingChanged(){
 		refreshTable();
-	}
-
-	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
-		if(filter.getDeclarationTypeId() == null){
-			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать вид декларации");
-			return false;
-		}
-		if(filter.getReportPeriodIds().isEmpty() || filter.getReportPeriodIds().size() > 1){
-			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать один отчетный период");
-			return false;
-		}
-		if(filter.getDepartmentIds().isEmpty() || filter.getDepartmentIds().size() > 1){
-			MessageEvent.fire(DeclarationListPresenter.this, "Для создания декларации необходимо выбрать одно подразделение");
-			return false;
-		}
-		return true;
 	}
 
 	private void updateTitle(TaxType taxType){

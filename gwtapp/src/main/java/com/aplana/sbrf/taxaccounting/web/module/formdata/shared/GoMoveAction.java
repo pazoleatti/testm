@@ -12,7 +12,16 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GoMoveAction extends UnsecuredActionImpl<GoMoveResult> implements ActionName {
 	private long formDataId;
 	private WorkflowMove move;
-	
+	private String reasonToWorkflowMove;
+
+	public String getReasonToWorkflowMove() {
+		return reasonToWorkflowMove;
+	}
+
+	public void setReasonToWorkflowMove(String reasonToWorkflowMove) {
+		this.reasonToWorkflowMove = reasonToWorkflowMove;
+	}
+
 	public long getFormDataId() {
 		return formDataId;
 	}

@@ -14,6 +14,9 @@ public class TAUser implements Serializable {
 	private String name;
 	private List<TARole> roles;
 	private int departmentId;
+	private boolean active;
+	private String email;
+	private String uuid;
 	
 	public int getId() {
 		return id;
@@ -44,6 +47,25 @@ public class TAUser implements Serializable {
 	}
 	public void setRoles(List<TARole> roles) {
 		this.roles = roles;
+	}
+	
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getUuid() {
+		return uuid;
+	}
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	/**
 	 * Проверяет, что у пользователя есть роль с заданным {@link TARole#getAlias() алиасом}

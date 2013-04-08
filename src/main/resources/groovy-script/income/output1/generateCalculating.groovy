@@ -13,8 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 if (!logger.containsLevel(LogLevel.ERROR)) {
 //noinspection GroovyVariableNotAssigned
-    row.dividendType = 2
-    row.taxPeriod = 34
+    row.dividendType = '2'
+    row.taxPeriod = '34'
     row.dividendRussianMembersAll = row.dividendSumRaspredPeriod - row.dividendForgeinOrgAll - row.dividendForgeinPersonalAll
     row.dividendSumForTaxAll = (row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0)
     row.dividendSumForTaxStavka9 = (row.dividendRussianOrgStavka9 ?: 0)
