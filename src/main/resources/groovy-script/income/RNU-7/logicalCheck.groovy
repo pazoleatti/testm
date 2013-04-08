@@ -11,7 +11,7 @@ def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
 
 // графа 3 - Проверка даты совершения операции и границ отчётного периода
-if (formData.dataRows != null) {
+if (!formData.dataRows.isEmpty()) {
     for (def row : formData.dataRows) {
         if (isTotal(row)) {
             continue
@@ -26,7 +26,7 @@ if (formData.dataRows != null) {
 }
 
 // графа 9, 10, 11, 12 - Проверка на нулевые значения
-if (formData.dataRows != null) {
+if (!formData.dataRows.isEmpty()) {
     for (def row : formData.dataRows) {
         if (!isTotal(row) &&
                 row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&

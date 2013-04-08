@@ -25,8 +25,7 @@ formData.dataRows.each { row ->
             columns -= 'rateOfTheBankOfRussia'
         }
 
-        ['balance', 'date', 'outcomeCode', 'docNumber', 'docDate', 'currencyCode',
-                'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency'].each {
+        columns.each {
             if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
                 colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
             }
