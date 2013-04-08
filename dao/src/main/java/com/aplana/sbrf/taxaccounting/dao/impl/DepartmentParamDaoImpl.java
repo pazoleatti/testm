@@ -97,7 +97,7 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 	public DepartmentParamTransport getDepartmentParamTransport(int departmentId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select * from department_param_income where department_id = ?",
+					"select * from department_param_transport where department_id = ?",
 					new Object[] { departmentId },
 					new int[] { Types.NUMERIC },
 					new RowMapper<DepartmentParamTransport>() {
