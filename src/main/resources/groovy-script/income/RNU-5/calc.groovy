@@ -66,11 +66,8 @@ formData.dataRows.eachWithIndex { it, i ->
     if (tmp == null) {
         tmp = it.code
     }
-    if (tmp == it.code) {
-        // если код расхода не изменился то считать сумму итого по коду
-        sum += it.sum
-    } else {
-        // если код расходы поменялся то создать новую строку "итого по коду"
+    // если код расходы поменялся то создать новую строку "итого по коду"
+    if (tmp != it.code) {
         totalRows.put(i, getNewRow(tmp, sum))
         sum = 0
     }
@@ -80,6 +77,8 @@ formData.dataRows.eachWithIndex { it, i ->
         totalRows.put(i + 1, getNewRow(tmp, sum))
         sum = 0
     }
+
+    sum += it.sum
     tmp = it.code
 }
 // добавить "итого по коду" в таблицу
@@ -94,6 +93,11 @@ def row = formData.appendDataRow()
 row.setAlias('total')
 row.code = 'Итого'
 row.sum = total
+
+// поправить значения order
+formData.dataRows.eachWithIndex { it, index ->
+    it.setOrder(index + 1)
+}
 
 /*
  * Вспомогалельные методы.
