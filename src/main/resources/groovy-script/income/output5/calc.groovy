@@ -23,26 +23,26 @@ if (reportPeriodPrev != null) {
 for (row in formData.dataRows) {
     // Графа 2
     temp = 0
-    if (row.getAlias() == 'type1') {
+    if (row.getAlias() == 'type1' && formIncomeComplex != null) {
         for (rowTemp in formIncomeComplex.dataRows) {
             if (rowTemp.incomeTypeId == 13850 && rowTemp.incomeTaxSumS != null) {
                 temp += rowTemp.incomeTaxSumS
             }
         }
-        row.base = temp
-    } else if (row.getAlias() == 'type2') {
+    } else if (row.getAlias() == 'type2' && formIncomeComplex != null) {
         for (rowTemp in formIncomeComplex.dataRows) {
             if (rowTemp.incomeTypeId == 14210 && rowTemp.incomeTaxSumS != null) {
                 temp += rowTemp.incomeTaxSumS
             }
         }
-        row.base = temp
-    } else if (row.getAlias() == 'type3') {
+    } else if (row.getAlias() == 'type3' && formIncomeComplex != null) {
         for (rowTemp in formIncomeComplex.dataRows) {
             if (rowTemp.incomeTypeId == 13880 && rowTemp.incomeTaxSumS != null) {
                 temp += rowTemp.incomeTaxSumS
             }
         }
+    }
+    if (row.getAlias() != 'type4') {
         row.base = temp
     }
 
@@ -61,7 +61,7 @@ for (row in formData.dataRows) {
     }
 
     // Графа 7
-    if (row.type != 4) {
+    if (row.type != '4') {
         row.taxPayment = 0
     }
 

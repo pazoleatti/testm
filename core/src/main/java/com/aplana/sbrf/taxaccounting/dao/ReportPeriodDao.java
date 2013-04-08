@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
  * @author dsultanbekov
  */
 public interface ReportPeriodDao {
+	
 	/**
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param reportPeriodId идентификатор отчётного периода
@@ -17,6 +18,7 @@ public interface ReportPeriodDao {
 	 * @throws DAOException если периода с заданным идентификатором не существует 
 	 */
 	ReportPeriod get(int reportPeriodId);
+	
 	/**
 	 * Получить объект текущего отчётного периода по виду налога
 	 * @param taxType вид налога
@@ -24,14 +26,6 @@ public interface ReportPeriodDao {
 	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
 	 */
 	ReportPeriod getCurrentPeriod(TaxType taxType);
-	
-	/**
-	 * Получить полный список отчётных периодов по виду налога 
-	 * @param taxType вид налога
-	 * @return список всех отчётных периодов
-	 * @deprecated Теперь вид налога задаётся на уровне налоговых периодов
-	 */
-	List<ReportPeriod> listAllPeriodsByTaxType(TaxType taxType);
 	
 	/**
 	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 

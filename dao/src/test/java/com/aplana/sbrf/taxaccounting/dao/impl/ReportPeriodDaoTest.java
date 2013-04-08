@@ -62,19 +62,6 @@ public class ReportPeriodDaoTest {
 		reportPeriodDao.getCurrentPeriod(TaxType.VAT);
 	}
 
-
-	@Test
-	public void listAllPeriodsByTaxTypeSuccessfulTest() {
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.TRANSPORT);
-		assertEquals(2, reportPeriodList.size());
-
-		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.VAT);
-		assertEquals(3, reportPeriodList.size());
-
-		reportPeriodList = reportPeriodDao.listAllPeriodsByTaxType(TaxType.PROPERTY);
-		assertEquals(1, reportPeriodList.size());
-	}
-
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(1);
