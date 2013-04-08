@@ -35,11 +35,11 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
             // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
             ДатаДок: new Date().format("dd.MM.yyyy"),
             Период: 34,
-            ОтчетГод: taxPeriodService.get(reportPeriodService.get(reportPeriodId).taxPeriodId).startDate.year,
+            ОтчетГод: taxPeriodService.get(reportPeriodService.get(reportPeriodId).taxPeriodId).startDate.format('yyyy'),
             КодНО: departmentParam.taxOrganCode,
             // TODO учесть что потом будут корректирующие периоды
             НомКорр: "0",
-            ПоМесту: departmentParam.taxOrganCode
+            ПоМесту: departmentParamTransport.taxPlaceTypeCode
     ){
 
         Integer formReorg = departmentParam.reorgFormCode != null ? Integer.parseInt(departmentParam.reorgFormCode):0;
@@ -114,10 +114,13 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                             resultMap[row.okato].amountOfTheAdvancePayment2 = 0
                             resultMap[row.okato].amountOfTheAdvancePayment3 = 0
                             resultMap[row.okato].amountOfTaxPayable = 0
+                            resultMap[row.okato].taxSumToPay = 0
                         }
 
                         // НалИсчисл = сумма Исчисленная сумма налога, подлежащая уплате в бюджет
                         resultMap[row.okato].calculationOfTaxes += row.taxSumToPay ?:0;
+                        // суммма
+                        resultMap[row.okato].taxSumToPay += row.taxSumToPay ?:0;
                         // вспомогательный taxBase
                         resultMap[row.okato].taxBase += row.taxBase ?: 0
                         // вспомогательный taxRate
@@ -145,34 +148,36 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                     СумПУ(
                             ОКАТО: okato,
                             НалИсчисл:row.taxSumToPay,
-                            АвПУКв1: row.amountOfTheAdvancePayment1,
-                            АвПУКв2: row.amountOfTheAdvancePayment2,
-                            АвПУКв3: row.amountOfTheAdvancePayment3,
+                            АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
+                            АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
+                            АвПУКв3: row.amountOfTheAdvancePayment3.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                             НалПУ: row.amountOfTaxPayable
                     ){
 
                         row.rowData.each{ tRow ->
                             // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                             РасчНалТС(
-                                    КодВидТС: tRow.tsTypeCode,
-                                    ИдНомТС: tRow.vi, //
-                                    МаркаТС: tRow.model, //
-                                    РегЗнакТС: tRow.regNumber,
-                                    НалБаза: tRow.taxBase,
-                                    ОКЕИНалБаза: tRow.taxBaseOkeiUnit,
-                                    ЭкологКл: tRow.ecoClass, //
-                                    ВыпускТС: tRow.years, //
-                                    ВладенТС: tRow.ownMonths,
-                                    КоэфКв: tRow.coef362,
-                                    НалСтавка: tRow.taxRate,
-                                    СумИсчисл: tRow.calculatedTaxSum,
-                                    ЛьготМесТС: (tRow.benefitEndDate && tRow.benefitStartDate) ? TimeCategory.minus(new Date(), new Date()).months: 0,//
-                                    КоэфКл: tRow.coefKl,//
-                                    СумИсчислУпл: tRow.taxSumToPay
+                                    [
+                                        КодВидТС: tRow.tsTypeCode,
+                                        ИдНомТС: tRow.vi, //
+                                        МаркаТС: tRow.model, //
+                                        РегЗнакТС: tRow.regNumber,
+                                        НалБаза: tRow.taxBase,
+                                        ОКЕИНалБаза: tRow.taxBaseOkeiUnit,
+                                        ЭкологКл: tRow.ecoClass, //
+                                        ВыпускТС: tRow.years, //
+                                        ВладенТС: tRow.ownMonths,
+                                        КоэфКв: tRow.coef362,
+                                        НалСтавка: tRow.taxRate,
+                                        СумИсчисл: tRow.calculatedTaxSum,
+                                        ЛьготМесТС: (tRow.benefitEndDate && tRow.benefitStartDate) ? TimeCategory.minus(new Date(), new Date()).months: 0,//
+                                        СумИсчислУпл: tRow.taxSumToPay,
+                                    ]+
+                                    (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                             ){
 
                                 // генерация КодОсвНал
-                                if ((tRow.taxBenefitCode != 20220 && tRow.taxBenefitCode != 20230)){
+                                if ((tRow.taxBenefitCode != 20220 && tRow.taxBenefitCode != 20230 && tRow.taxBenefitCode != null)){
 
                                     def l = tRow.taxBenefitCode;
                                     /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
@@ -204,7 +209,8 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                                 if (tRow.taxBenefitCode != 30200
                                         && tRow.taxBenefitCode != 20200
                                         && tRow.taxBenefitCode != 20210
-                                        && tRow.taxBenefitCode != 20230){
+                                        && tRow.taxBenefitCode != 20230
+                                        && tRow.taxBenefitCode != null){
 
                                     // вычисление КодУменСум
                                     def valL = tRow.taxBenefitCode;
@@ -228,7 +234,8 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                                 if (tRow.taxBenefitCode != 30200
                                         && tRow.taxBenefitCode != 20200
                                         && tRow.taxBenefitCode != 20210
-                                        && tRow.taxBenefitCode != 20220){
+                                        && tRow.taxBenefitCode != 20220
+                                        && tRow.taxBenefitCode != null){
 
                                     // вычисление КодУменСум
                                     def valL = tRow.taxBenefitCode;
