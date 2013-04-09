@@ -28,7 +28,7 @@ for(row in formData.dataRows ) {
     }
 }
 
-departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
     if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 302) {
         child.getDataRows().eachWithIndex() { row, i ->

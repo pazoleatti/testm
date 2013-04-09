@@ -1,7 +1,7 @@
 /* Условие. */
 // проверка на террбанк
 boolean isTerBank = false
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getDestinations(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     if (it.departmentId != formData.departmentId) {
         isTerBank = true
     }
@@ -66,7 +66,7 @@ void copyFor700x(String fromRowA, String toRowA, def fromForm) {
 }
 
 // получение нф расходов простых
-departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
     if (child != null && child.state != WorkflowState.CREATED && child.formType.id == 304) {
         // 50001 - 93 строка

@@ -1,7 +1,7 @@
 /* Условие. */
 // проверка на террбанк
 boolean isTerBank = false
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getDestinations(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     if (it.departmentId != formData.departmentId) {
         isTerBank = true
     }

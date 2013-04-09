@@ -1,7 +1,7 @@
 /* Условие. */
 // проверка на банк
 boolean isBank = true
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getDestinations(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     if (it.departmentId != formData.departmentId) {
         isBank = false
     }

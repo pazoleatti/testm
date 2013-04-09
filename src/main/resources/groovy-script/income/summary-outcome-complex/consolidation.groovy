@@ -1,7 +1,7 @@
 /* Условие. */
 // проверка на банк
 boolean isBank = true
-departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getDestinations(formData.departmentId, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     if (it.departmentId != formData.departmentId) {
         isBank = false
     }
@@ -25,7 +25,7 @@ formData.getDataRows().each{ row ->
 }
 
 // получить консолидированные формы из источников
-departmentFormTypeService.getSources(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each {
+departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
     if (child != null && child.state == WorkflowState.ACCEPTED
             && child.formType.id == 303) {

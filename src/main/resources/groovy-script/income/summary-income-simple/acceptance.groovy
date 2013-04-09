@@ -6,6 +6,6 @@
  * @since 07.02.2013 13:10
  */
 
-departmentFormTypeService.getDestinations(formDataDepartment.id, formData.formTemplateId, FormDataKind.SUMMARY).each{
+departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each{
     formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
 }
