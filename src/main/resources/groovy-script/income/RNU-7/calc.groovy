@@ -34,7 +34,7 @@ formData.dataRows.each { row ->
             hasError = true
             def index = row.number
             def errorMsg = colNames.join(', ')
-            logger.error("В строке \"№ пп\" (равной $index) не заполнены колонки : $errorMsg.")
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         }
     }
 }

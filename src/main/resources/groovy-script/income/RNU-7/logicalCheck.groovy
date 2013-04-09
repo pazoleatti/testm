@@ -1,33 +1,38 @@
 /**
- * Логические проверки. Проверки соответствия НСИ (logicalCheck.groovy).
+ * Логические проверки. (logicalCheck.groovy).
  * Форма "(РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5, учёт которых требует применения метода начисления".
+ *
+ * TODO:
+ *		- разобраться с датами начала и окончания отчетного периода
  *
  * @author rtimerbaev
  */
 
 /** Отчётный период. */
 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
 /** Налоговый период. */
 def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
 
-// графа 3 - Проверка даты совершения операции и границ отчётного периода
+/** Дата начала отчетного периода. */
+def a = (taxPeriod != null ? taxPeriod.getStartDate() : null )
+
+/** Дата окончания отчетного периода. */
+def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
+
 if (!formData.dataRows.isEmpty()) {
     for (def row : formData.dataRows) {
         if (isTotal(row)) {
             continue
         }
-        def a = taxPeriod != null && taxPeriod.getStartDate() != null && taxPeriod.getStartDate() > row.date
-        def b = taxPeriod != null && taxPeriod.getEndDate() != null && taxPeriod.getEndDate() < row.date
-        if (a || b) {
+
+        // графа 3 - Проверка даты совершения операции и границ отчётного периода
+        if (row.date < a || b < row.date) {
             logger.error('Дата совершения операции вне границ отчётного периода!')
             break
         }
-    }
-}
 
-// графа 9, 10, 11, 12 - Проверка на нулевые значения
-if (!formData.dataRows.isEmpty()) {
-    for (def row : formData.dataRows) {
+        // графа 9, 10, 11, 12 - Проверка на нулевые значения
         if (!isTotal(row) &&
                 row.taxAccountingCurrency == 0 && row.taxAccountingRuble == 0 &&
                 row.accountingCurrency == 0 && row.ruble == 0) {

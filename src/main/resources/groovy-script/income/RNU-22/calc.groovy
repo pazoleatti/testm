@@ -112,6 +112,13 @@ totalRow.contractNumber = 'Итого'
  */
 
 /**
+ * Проверка является ли строка итоговой.
+ */
+def isTotal(def row) {
+    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+}
+
+/**
  * Получить значение графа 13 (аналогично для графа 15 и графа 19)
  *
  * @param row строка нф
@@ -119,6 +126,9 @@ totalRow.contractNumber = 'Итого'
  * @param date2 дата окончания
  */
 def getColumn13or15or19(def row, def date1, def date2) {
+    if (date1 == null || date2 == null) {
+        return 0
+    }
     def division = row.basisForCalc * (date2 - date1 + 1)
     if (division == 0) {
         logger.error('Деление на ноль. Возможно неправильно выбраны даты.')
