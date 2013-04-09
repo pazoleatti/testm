@@ -136,7 +136,7 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                         resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
                         )
                         // В случае  если полученное значение отрицательно,  - не заполняется
-                        resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].amountOfTaxPayable < 0 ? 0:resultMap[row.okato].amountOfTaxPayable;
+                        //resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].amountOfTaxPayable < 0 ? 0:resultMap[row.okato].amountOfTaxPayable;
 
                         // Формирование данных для РасчНалТС, собираем строки с текущим значением ОКАТО
                         resultMap[row.okato].rowData.add(row);
@@ -151,29 +151,29 @@ xml.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId)
                             АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                             АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                             АвПУКв3: row.amountOfTheAdvancePayment3.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
-                            НалПУ: row.amountOfTaxPayable
+                            НалПУ: row.amountOfTaxPayable.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                     ){
 
                         row.rowData.each{ tRow ->
                             // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                             РасчНалТС(
                                     [
-                                        КодВидТС: tRow.tsTypeCode,
-                                        ИдНомТС: tRow.vi, //
-                                        МаркаТС: tRow.model, //
-                                        РегЗнакТС: tRow.regNumber,
-                                        НалБаза: tRow.taxBase,
-                                        ОКЕИНалБаза: tRow.taxBaseOkeiUnit,
-                                        ЭкологКл: tRow.ecoClass, //
-                                        ВыпускТС: tRow.years, //
-                                        ВладенТС: tRow.ownMonths,
-                                        КоэфКв: tRow.coef362,
-                                        НалСтавка: tRow.taxRate,
-                                        СумИсчисл: tRow.calculatedTaxSum,
-                                        ЛьготМесТС: (tRow.benefitEndDate && tRow.benefitStartDate) ? TimeCategory.minus(new Date(), new Date()).months: 0,//
-                                        СумИсчислУпл: tRow.taxSumToPay,
+                                            КодВидТС: tRow.tsTypeCode,
+                                            ИдНомТС: tRow.vi, //
+                                            МаркаТС: tRow.model, //
+                                            РегЗнакТС: tRow.regNumber,
+                                            НалБаза: tRow.taxBase,
+                                            ОКЕИНалБаза: tRow.taxBaseOkeiUnit,
+                                            ЭкологКл: tRow.ecoClass, //
+                                            ВыпускТС: tRow.years, //
+                                            ВладенТС: tRow.ownMonths,
+                                            КоэфКв: tRow.coef362,
+                                            НалСтавка: tRow.taxRate,
+                                            СумИсчисл: tRow.calculatedTaxSum,
+                                            ЛьготМесТС: (tRow.benefitEndDate && tRow.benefitStartDate) ? TimeCategory.minus(new Date(), new Date()).months: 0,//
+                                            СумИсчислУпл: tRow.taxSumToPay,
                                     ]+
-                                    (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
+                                            (tRow.coefKl ? [КоэфКл: tRow.coefKl]:[]),
                             ){
 
                                 // генерация КодОсвНал
