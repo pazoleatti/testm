@@ -35,7 +35,7 @@ formData.dataRows.each { row ->
             hasError = true
             def index = row.rowNumber
             def errorMsg = colNames.join(', ')
-            logger.error("В строке \"№ пп\" (равной $index) не заполнены колонки : $errorMsg.")
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         }
     }
 }
@@ -144,6 +144,5 @@ def getSum(def form, def columnAlias) {
     if (form == null) {
         return 0
     }
-    return summ(form, new ColumnRange(columnAlias, 0, form.dataRows.size() - 2));
-
+    return summ(form, new ColumnRange(columnAlias, 0, form.dataRows.size() - 2))
 }

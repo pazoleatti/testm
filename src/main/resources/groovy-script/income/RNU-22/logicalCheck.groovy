@@ -69,10 +69,7 @@ if (!formData.dataRows.isEmpty()) {
         }
 
 
-        // 7. Проверка на заполнение поля «<Наименование поля>»
-        // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
-        // При заполнении граф 11 и 12, графы 9 и 10 должны быть пустыми.	1	Поле «<Наименование поля>» не заполнено!
-
+        // 7. Проверка на заполнение поля «<Наименование поля>». Графа 1..8, 13..20
         def colNames = []
         // Список проверяемых столбцов
         ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
@@ -89,6 +86,7 @@ if (!formData.dataRows.isEmpty()) {
             break
         }
 
+        // 8. Проверка на заполнение поля «<Наименование поля>»
         // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
         def checkColumn9and10 = row.calcPeriodAccountingBeginDate != null && row.calcPeriodAccountingEndDate != null &&
                 (row.calcPeriodBeginDate != null || row.calcPeriodEndDate != null)
@@ -100,7 +98,7 @@ if (!formData.dataRows.isEmpty()) {
             break
         }
 
-        // 8. Проверка на уникальность поля «№ пп» (графа 1)
+        // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (index != row.rowNumber) {
             logger.error('Нарушена уникальность номера по порядку!')
             break

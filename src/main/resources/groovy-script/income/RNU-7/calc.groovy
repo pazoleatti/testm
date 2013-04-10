@@ -110,8 +110,8 @@ formData.dataRows.eachWithIndex { row, i ->
     sum10 += row.taxAccountingRuble
     sum12 += row.ruble
     tmp = row.outcomeCode
-
 }
+
 // добавить "итого по коду" в таблицу
 def i = 0
 totalRows.each { index, row ->
