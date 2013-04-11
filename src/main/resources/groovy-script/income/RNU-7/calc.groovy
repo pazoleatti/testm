@@ -151,6 +151,5 @@ def getNewRow(def alias, def sum10, def sum12) {
     newRow.taxAccountingRuble = sum10
     newRow.ruble = sum12
     newRow.outcomeCode = 'Итого по коду'
-    newRow.docNumber = alias
     return newRow
 }

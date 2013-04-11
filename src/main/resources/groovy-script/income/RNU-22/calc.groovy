@@ -99,7 +99,8 @@ formData.dataRows.eachWithIndex { row, index ->
 // добавить строку "итого"
 def totalRow = formData.appendDataRow()
 totalRow.setAlias('total')
-totalRow.contractNumber = 'Итого'
+totalRow.getCell('contractNumber').setColSpan(11)
+totalRow.getCell('contractNumber').setValue('Итого')
 // графа 13..20
 ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
         'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->

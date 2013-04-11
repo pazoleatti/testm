@@ -14,3 +14,21 @@ def row = formData.appendDataRow()
         'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
     row.getCell(it).editable = true
 }
+
+// графа 1  - rowNumber
+// графа 2  - issuer
+// графа 3  - shareType
+// графа 4  - tradeNumber
+// графа 5  - currency
+// графа 6  - lotSizePrev
+// графа 7  - lotSizeCurrent
+// графа 8  - reserveCalcValuePrev
+// графа 9  - cost
+// графа 10 - signSecurity
+// графа 11 - marketQuotation
+// графа 12 - rubCourse
+// графа 13 - marketQuotationInRub
+// графа 14 - costOnMarketQuotation
+// графа 15 - reserveCalcValue
+// графа 16 - reserveCreation
+// графа 17 - reserveRecovery

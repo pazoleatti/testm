@@ -124,7 +124,9 @@ totalRows.each { index, row ->
 
 // графа 1, + поправить значения order
 formData.dataRows.eachWithIndex { row, index ->
-    row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+    if (!isTotal(row)) {
+        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+    }
     row.setOrder(index + 1)
 }
 
