@@ -5,14 +5,20 @@
  * @author rtimerbaev
  */
 
-def row = formData.appendDataRow()
+def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
 
 // графа 2..14, 16, 18..20
 ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
         'bondsCount','purchaseCost', 'costs', 'redemptionVal', 'exercisePrice',
         'exerciseRuble', 'marketPricePercent', 'marketPriceRuble',
         'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
-    row.getCell(it).editable = true
+    newRow.getCell(it).editable = true
+}
+formData.dataRows.add(currentDataRow.getOrder(), newRow)
+
+// поправить значения order
+formData.dataRows.eachWithIndex { row, index ->
+    row.setOrder(index + 1)
 }
 
 // графа 1  - rowNumber

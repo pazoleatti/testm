@@ -34,7 +34,12 @@ formData.dataRows.each { row ->
             hasError = true
             def index = row.number
             def errorMsg = colNames.join(', ')
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            if (index != null) {
+                logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            } else {
+                index = row.getOrder()
+                logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            }
         }
     }
 }

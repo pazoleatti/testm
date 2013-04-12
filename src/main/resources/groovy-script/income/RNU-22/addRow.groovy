@@ -5,10 +5,17 @@
  * @author rtimerbaev
  */
 
-def row = formData.appendDataRow()
+def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+
 // графа 2..12
 ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
         'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate',
         'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate'].each {
-    row.getCell(it).editable = true
+    newRow.getCell(it).editable = true
+}
+formData.dataRows.add(currentDataRow.getOrder(), newRow)
+
+// поправить значения order
+formData.dataRows.eachWithIndex { row, index ->
+    row.setOrder(index + 1)
 }

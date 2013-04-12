@@ -5,8 +5,14 @@
  * @author rtimerbaev
  */
 
-def row = formData.appendDataRow()
+def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
 ['balance', 'date', 'outcomeCode', 'docNumber', 'docDate', 'currencyCode',
         'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency'].each {
-    row.getCell(it).editable = true
+    newRow.getCell(it).editable = true
+}
+formData.dataRows.add(currentDataRow.getOrder(), newRow)
+
+// поправить значения order
+formData.dataRows.eachWithIndex { row, index ->
+    row.setOrder(index + 1)
 }

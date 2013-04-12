@@ -5,6 +5,7 @@
  * TODO:
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
+ *		- при выводе незаполненных ячейках, выдает ошибку "Conversion = ')'" если в названии колонки есть знак %
  *
  * @author rtimerbaev
  */
@@ -28,6 +29,7 @@ formData.dataRows.each { row ->
 
         columns.each {
             if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
                 colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
             }
         }
@@ -35,7 +37,12 @@ formData.dataRows.each { row ->
             hasError = true
             def index = row.rowNumber
             def errorMsg = colNames.join(', ')
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            if (index != null) {
+                logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            } else {
+                index = row.getOrder()
+                logger.error("В $index строке не заполнены колонки : $errorMsg.")
+            }
         }
     }
 }
@@ -99,14 +106,12 @@ formData.dataRows.eachWithIndex { row, index ->
 // добавить строку "итого"
 def totalRow = formData.appendDataRow()
 totalRow.setAlias('total')
-totalRow.getCell('contractNumber').setColSpan(11)
-totalRow.getCell('contractNumber').setValue('Итого')
+totalRow.contractNumber = 'Итого'
 // графа 13..20
 ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
         'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
     totalRow.getCell(alias).setValue(getSum(formData, alias))
 }
-
 
 /*
  * Вспомогалельные методы.
