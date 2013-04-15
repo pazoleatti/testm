@@ -13,7 +13,7 @@ def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
         'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate'].each {
     newRow.getCell(it).editable = true
 }
-def pos = (currentDataRow != null ? currentDataRow.getOrder() : formData.dataRows.size)
+def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
 formData.dataRows.add(pos, newRow)
 
 // поправить значения order

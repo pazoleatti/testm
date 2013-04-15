@@ -14,7 +14,7 @@ def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPer
 /** Данные формы предыдущего отчетного периода. */
 def formDataOld = null
 if (reportPeriodOld != null) {
-    FormDataService.find(325, FormDataKind.PRIMARY, formData.departmentId, reportPeriodOld.id)
+    formDataOld = FormDataService.find(325, FormDataKind.PRIMARY, formData.departmentId, reportPeriodOld.id)
 }
 
 if (!formData.dataRows.isEmpty()) {
@@ -74,8 +74,8 @@ if (!formData.dataRows.isEmpty()) {
         }
 
         // 10. Проверка на положительные значения при наличии созданного резерва
-        if (row.reserveCreation > 0 && row.lotSizeCurrent > 0 && row.cost > 0 &&
-                row.costOnMarketQuotation > 0 && row.reserveCalcValue > 0) {
+        if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
+                row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
             logger.warn('Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
             break
         }

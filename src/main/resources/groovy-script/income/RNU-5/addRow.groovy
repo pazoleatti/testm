@@ -9,7 +9,7 @@ def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
 ['code', 'balance', 'name', 'sum'].each {
     newRow.getCell(it).editable = true
 }
-def pos = (currentDataRow != null ? currentDataRow.getOrder() : formData.dataRows.size)
+def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
 formData.dataRows.add(pos, newRow)
 
 // поправить значения order
