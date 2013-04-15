@@ -14,7 +14,8 @@ def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
         'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
     newRow.getCell(it).editable = true
 }
-formData.dataRows.add(currentDataRow.getOrder(), newRow)
+def pos = (currentDataRow != null ? currentDataRow.getOrder() : formData.dataRows.size)
+formData.dataRows.add(pos, newRow)
 
 // поправить значения order
 formData.dataRows.eachWithIndex { row, index ->
