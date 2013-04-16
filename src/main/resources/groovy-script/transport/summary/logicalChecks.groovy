@@ -23,7 +23,7 @@ if (period == null) {
 
 
 // 13 графа - Поверка на соответствие дат использования льготы
-if (row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
+if (row.taxBenefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
     logger.error('Дата начала(окончания) использования льготы неверная!')
 }
 
@@ -54,11 +54,19 @@ if (row.coefKl != null) {
 }
 
 // 17 графа - Проверка заполнения полей льгот
-if (
-        (row.taxBenefitCode == null || row.benefitStartDate == null || row.benefitEndDate == null || row.coefKl == null || row.benefitSum == null) &&
-                (row.taxBenefitCode != null || row.benefitStartDate != null || row.benefitEndDate != null || row.coefKl != null || row.benefitSum != null)
-) {
-    logger.warn('Данные о налоговой льготе указаны неполностью.')
+// все ячейки заполнены
+def allCellsFill = true
+// все ячейки пустые
+def allCellsEmpty = true
+['benefitStartDate', 'benefitEndDate', 'coefKl', 'benefitSum', 'taxBenefitCode'].each{
+    if (row[it]){
+        allCellsEmpty = false
+    } else {
+        allCellsFill = false
+    }
+}
+if (!(allCellsFill || allCellsEmpty)) {
+    logger.error("Данные о налоговой льготе указаны не полностью в строке № "+row.rowNumber);
 }
 
 // дополнительная проверка для 12 графы
@@ -66,10 +74,3 @@ if (row.ownMonths != null && row.ownMonths > monthCountInPeriod) {
     logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
 }
 
-// идентификационный номер (не должны содежать: больше чем из 17 символов, символы "I", "O", "Q" (в верхнем и нижнем регистрах);
-if (row.vi != null) {
-    def tmp = row.vi.toLowerCase()
-    if (tmp.length() > 17 || tmp.contains('q') || tmp.contains('i') || tmp.contains('o')) {
-        logger.error('Идентификационный номер не должен содержать больше 17 символов или символы "I", "Q", "O"')
-    }
-}
