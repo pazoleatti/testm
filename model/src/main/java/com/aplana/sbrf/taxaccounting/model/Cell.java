@@ -22,6 +22,13 @@ public class Cell implements Serializable {
 
 	private List<FormStyle> formStyleList;
 	private FormStyle style;
+	
+	/**
+	 * Ссылка на главную ячейку. Не должна быть null если ячейку перекрывает 
+	 * другая ячейка в таблице из-за объединения. (SBRFACCTAX-2082)
+	 * Значение не храниться не в БД не в XML. Вычисляется в соответствии с colSpan rowSpan
+	 */
+	private Cell valueOwner;
 
 	// Значение диапазона (пока используется для объединения ячеек)
 	private int colSpan = 1;
@@ -40,6 +47,11 @@ public class Cell implements Serializable {
 	}
 
 	public Object getValue() {
+		// Получаем значение из главной ячейки (SBRFACCTAX-2082)
+		if (valueOwner != null){
+			return valueOwner.getValue();
+		}
+		
 		if (stringValue != null) {
 			return stringValue;
 		} else if (dateValue != null) {
@@ -51,6 +63,12 @@ public class Cell implements Serializable {
 	}
 
 	public Object setValue(Object value) {
+		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
+		if (valueOwner != null){
+			valueOwner.setValue(value);
+			return valueOwner.getValue();
+		}
+		
 		if ( (value != null) && !(value instanceof Number && column instanceof NumericColumn
 				|| value instanceof String && column instanceof StringColumn
 				|| value instanceof Date && column instanceof DateColumn)) {
@@ -258,5 +276,37 @@ public class Cell implements Serializable {
 				+ dateValue + ", numericValue=" + numericValue + ", column="
 				+ column + ", colSpan=" + colSpan + ", rowSpan=" + rowSpan
 				+ "]";
+	}
+
+	/**
+	 * Получает ячейку которая главная в группе (SBRFACCTAX-2082)
+	 * Не использовать в скриптах!
+	 * 
+	 * @return
+	 */
+	public Cell getValueOwner() {
+		return valueOwner;
+	}
+
+	/**
+	 * Устанавливает ячейку которая главная в группе (SBRFACCTAX-2082)
+	 * Не использовать в скриптах!
+	 * 
+	 * @param valueOwner
+	 */
+	public void setValueOwner(Cell valueOwner) {
+		this.valueOwner = valueOwner;
+	}
+	
+	/**
+	 * Возвращает признак наличия главной ячейки (SBRFACCTAX-2082)
+	 * Для использования в скриптах
+	 * 
+	 * @return 
+	 * true - ячейка принадлежит объединенной группе и является не главной в группе. Её значение это - не её значение
+	 * false - ячейка главная в группе или не состоит в группе
+	 */
+	public boolean hasValueOwner(){
+		return this.valueOwner != null;
 	}
 }

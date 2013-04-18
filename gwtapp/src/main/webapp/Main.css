@@ -34,7 +34,7 @@ h3{
     border-width: 0 2px 2px;
     color: #000000;
     font-weight: bold;
-    left: 45%;
+    left: 50%;
     margin-left: -40px;
     padding: 3px;
     position: absolute;
@@ -47,46 +47,35 @@ h3{
     height: 41px;
 }
 
-.topHeader {
+.topNavigation .topHeader {
 	vertical-align: top;
 	height: 41px;
 }
 
-.topLeftLogo {
+.topNavigation .topLeftLogo {
 	float: left;
 	background: none;
 	border: none;
 }
 
-.topLeftLogo img {
+.topNavigation .topLeftLogo img {
 	margin: 0px;
 	padding: 0px;
 	background: none;
 	border: none;
 }
 
-.topRightLogo {
+.topNavigation .topRightLogo {
     right: 0;
     float: right;
     background: none;
     border: none;
 }
 
-.topRightLogo img {
+.topNavigation .topRightLogo img {
     float: right;
     margin: 0px;
     padding: 0px;
     background: none;
     border: none;
 }
-
-.topLogoMsg {
-	color: #777777;
-	font-size: 22px;
-    font-weight: bold;
-    left: 50%;
-    margin: 10px 0 0 -120px;
-    position: absolute;
-}
-
-

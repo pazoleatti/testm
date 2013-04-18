@@ -67,7 +67,7 @@ public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao 
 	@Override
 	public boolean validateOkato(String okato) {
 		return getJdbcTemplate().queryForInt(
-				"select count(*) from transport_okato where okato=?",
+				"select count(*) from dict_okato where okato=?",
 				new Object[]{okato}, new int[]{Types.VARCHAR}
 		) > 0;
 	}

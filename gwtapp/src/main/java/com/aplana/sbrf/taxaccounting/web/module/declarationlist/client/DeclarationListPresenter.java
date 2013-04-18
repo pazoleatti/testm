@@ -22,7 +22,7 @@ public class DeclarationListPresenter extends
 		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler{
 
 	private static final int PAGE_SIZE = 20;
-	private static boolean IS_FIRST_TIME = false;
+	private static boolean isFirstTime = false;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	@ProxyCodeSplit
@@ -118,7 +118,7 @@ public class DeclarationListPresenter extends
 
 	private class TableDataProvider extends AsyncDataProvider<DeclarationDataSearchResultItem> {
 
-		private int ZERO_RECORDS_COUNT = 0;
+		private int zeroRecordsCount = 0;
 
 		public void update() {
 			for (HasData<DeclarationDataSearchResultItem> display: getDataDisplays()) {
@@ -134,8 +134,8 @@ public class DeclarationListPresenter extends
 					.defaultCallback(new AbstractCallback<GetDeclarationListResult>() {
 						@Override
 						public void onSuccess(GetDeclarationListResult result) {
-							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
-								getView().setDeclarationsList(range.getStart(), ZERO_RECORDS_COUNT,
+							if(result == null || result.getTotalCountOfRecords() == zeroRecordsCount){
+								getView().setDeclarationsList(range.getStart(), zeroRecordsCount,
 										new ArrayList<DeclarationDataSearchResultItem>());
 							} else {
 								handleResponse(result, range);
@@ -145,7 +145,7 @@ public class DeclarationListPresenter extends
 		}
 
 		private GetDeclarationList createRequestData(Range range) {
-			if(IS_FIRST_TIME){
+			if(isFirstTime){
 				DeclarationDataFilter filter = filterPresenter.getFilterData();
 				filter.setCountOfRecords(PAGE_SIZE);
 				filter.setStartIndex(range.getStart());
@@ -156,7 +156,7 @@ public class DeclarationListPresenter extends
 				request.setDeclarationFilter(filter);
 				return request;
 			}
-			IS_FIRST_TIME = true;
+			isFirstTime = true;
 			return (new GetDeclarationList());
 		}
 

@@ -39,7 +39,7 @@ public class FormDataListPresenter extends
 
 
 	private static final int PAGE_SIZE = 20;
-	private static boolean IS_FIRST_TIME = false;
+	private static boolean isFirstTime = false;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	/**
@@ -88,8 +88,8 @@ public class FormDataListPresenter extends
 	 * @param filterFormData
 	 */
 	private void loadFormDataList(final FormDataFilter filterFormData) {
-		final int LOAD_DATA_FROM_FIRST_RECORD = 0;
-		filterFormData.setStartIndex(LOAD_DATA_FROM_FIRST_RECORD);
+		final int loadDataFromFirstRecord = 0;
+		filterFormData.setStartIndex(loadDataFromFirstRecord);
 		filterFormData.setCountOfRecords(PAGE_SIZE);
 
 		GetFormDataList action = new GetFormDataList();
@@ -150,7 +150,7 @@ public class FormDataListPresenter extends
 
 	private class TableDataProvider extends AsyncDataProvider<FormDataSearchResultItem> {
 
-		private int ZERO_RECORDS_COUNT = 0;
+		private int zeroRecordsCount = 0;
 
 		public void update() {
 			for (HasData<FormDataSearchResultItem> display: getDataDisplays()) {
@@ -166,8 +166,8 @@ public class FormDataListPresenter extends
 					.wrongStateCallback(new AbstractCallback<GetFormDataListResult>() {
 						@Override
 						public void onSuccess(GetFormDataListResult result) {
-							if(result == null || result.getTotalCountOfRecords() == ZERO_RECORDS_COUNT){
-								getView().setFormDataList(range.getStart(), ZERO_RECORDS_COUNT,
+							if(result == null || result.getTotalCountOfRecords() == zeroRecordsCount){
+								getView().setFormDataList(range.getStart(), zeroRecordsCount,
 										new ArrayList<FormDataSearchResultItem>());
 							} else {
 								handleResponse(result, range);
@@ -186,7 +186,7 @@ public class FormDataListPresenter extends
 			// Все вышеописанное - абсолютно нормальное поведение, но проблема заключается в том, что SimplePager
 			// инициализируется раньше чем успевает инициализироваться фильтр, и вызов {@code driver.flush()} раньше
 			// чем {@driver.edit()} приводит к зависанию приложения.
-			if(IS_FIRST_TIME){
+			if(isFirstTime){
 				FormDataFilter filter = filterPresenter.getFilterData();
 				filter.setCountOfRecords(PAGE_SIZE);
 				filter.setStartIndex(range.getStart());
@@ -196,7 +196,7 @@ public class FormDataListPresenter extends
 				request.setFormDataFilter(filter);
 				return request;
 			}
-			IS_FIRST_TIME = true;
+			isFirstTime = true;
 			return (new GetFormDataList());
 		}
 

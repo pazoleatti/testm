@@ -12,7 +12,6 @@
 */
 import groovy.time.TimeCategory
 
-
 def departmentId = declarationData.departmentId
 // получить настройки обособленного подразделения
 def departmentParam = departmentService.getDepartmentParam(departmentId)
@@ -31,7 +30,7 @@ if (!declarationData.isAccepted()) {
         Документ(
                 КНД:"1152004",
                 // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
-                ДатаДок: new Date().format("dd.MM.yyyy"),
+                ДатаДок: docDate, //new Date().format("dd.MM.yyyy"),
                 Период: 34,
                 ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
                 КодНО: departmentParam.taxOrganCode,

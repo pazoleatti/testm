@@ -120,7 +120,7 @@ public class FormDataPresenter extends
 											result.getFormData().getState()
 													.getName());
 									// Если период для ввода остатков, то делаем все ячейки редактируемыми
-									if (result.getReportPeriod().isBalancePeriod()) {
+									if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
 										forceEditMode = true;
 									}
 									getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
@@ -310,7 +310,7 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onDeleteFormClicked() {
-		boolean isOK = Window.confirm("Удалить?");
+		boolean isOK = Window.confirm("Вы уверены, что хотите удалить налоговую форму?");
 		if (isOK) {
 			DeleteFormDataAction action = new DeleteFormDataAction();
 			action.setFormDataId(formData.getId());

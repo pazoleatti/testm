@@ -4,11 +4,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
@@ -17,11 +13,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -42,6 +36,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		implements FormTemplateRowPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
+	private static final String SELECTED_CELL_BACKGROUND_COLOR = "#9A9CFF";
 	private final StyleCellPopup styleCellPopup;
 	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
@@ -49,8 +44,11 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private List<DataRow> rows;
 	private List<Column> columns;
 	private List<FormStyle> styles;
-	private int currentRowIndex;
-	private int currentColumnIndex;
+	private List<Cell> selectedCells = new ArrayList<Cell>();
+	private int lastRowIndex;
+	private int lastColumnIndex;
+	private int initialRowIndex;
+	private int initialColumnIndex;
 
 	@UiField
 	DataGrid<DataRow> formDataTable;
@@ -67,6 +65,12 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiField
 	Button downRowButton;
 
+	@UiField
+	Button uniteCellsButton;
+
+	@UiField
+	Button disuniteCellsButton;
+
 	@Inject
 	public FormTemplateRowView(Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
@@ -75,6 +79,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		styleCellPopup = new StyleCellPopup(this);
 
 		selectionModel = new NoSelectionModel<DataRow>();
+
 		formDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -83,64 +88,123 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			}
 		});
 
-		formDataTable.addDomHandler(new ContextMenuHandler() {
+		formDataTable.addDomHandler(new MouseDownHandler() {
 			@Override
-			public void onContextMenu(ContextMenuEvent event) {
-				EventTarget eventTarget = event.getNativeEvent().getEventTarget();
-                if (!Element.is(eventTarget)) {
-					return;
-				}
-
-				com.google.gwt.user.client.Element target = eventTarget.cast();
-
-                if (target == null) {
-					return;
-				}
-
-				Element td;
-
-				if (!target.getAttribute(CustomTableBuilder.TD_ATTRIBUTE).isEmpty()) {
-					td = target;
-				}
-				else {
-					td = DOM.getParent(target);
-				}
-
-				int tdAttr = Integer.valueOf(td.getAttribute(CustomTableBuilder.TD_ATTRIBUTE));
-
-				if (tdAttr > 0) {
-			 		currentColumnIndex = tdAttr - 1;
-
-					event.preventDefault();
-					event.stopPropagation();
-
-			 		Element tr = DOM.getParent(td);
-					Element body = DOM.getParent(tr);
-			 		currentRowIndex = DOM.getChildIndex(body, tr);
-
-			 		DataRow currentRow = rows.get(currentRowIndex);
-			 		Cell cell = currentRow.getCell(columns.get(currentColumnIndex).getAlias());
-					styleCellPopup.setValue(cell);
-
-					int maxPopupX = Window.getClientWidth() - 250;
-					styleCellPopup.show(maxPopupX > event.getNativeEvent().getClientX() ? event.getNativeEvent().getClientX()
-							: maxPopupX, event.getNativeEvent().getClientY());
+			public void onMouseDown(MouseDownEvent event) {
+				if (event.getNativeButton() == NativeEvent.BUTTON_LEFT) {
+					if (!selectedCells.isEmpty()) {
+						// освобождаем выделенные ячейки
+						selectOrClearCells(false);
+					}
+					uniteCellsButton.setVisible(false);
+					disuniteCellsButton.setVisible(false);
 				}
 			}
+		}, MouseDownEvent.getType());
+
+		formDataTable.addDomHandler(new MouseUpHandler() {
+			@Override
+			public void onMouseUp(MouseUpEvent event) {
+				// не знаю как сделать по другому, чтобы ко мне на таблицу начал приходить евент mouseup
+			}
+		}, MouseUpEvent.getType());
+
+		widget.addDomHandler(new ContextMenuHandler() {
+			@Override
+			public void onContextMenu(ContextMenuEvent event) {
+				event.stopPropagation();
+				event.preventDefault();
+
+				int maxPopupX = Window.getClientWidth() - 250;
+				styleCellPopup.setValue(selectedCells);
+				styleCellPopup.show(maxPopupX > event.getNativeEvent().getClientX() ? event.getNativeEvent().getClientX()
+						: maxPopupX, event.getNativeEvent().getClientY());
+			}
 		}, ContextMenuEvent.getType());
+
 		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow>() {
 			@Override
 			public void onCellPreview(CellPreviewEvent<DataRow> event) {
-				if ("mouseover".equals(event.getNativeEvent().getType())) {
-					TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
-					// Не показываем тултип на пкстых ячейках
-					if (cellElement.getInnerText().length() > 1
-							|| !cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+				TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+				// получаем индексы первой ячейки
+				if ("mousedown".equals(event.getNativeEvent().getType())
+						&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
+					initialColumnIndex = Integer.valueOf(cellElement.getId().substring(cellElement.getId().lastIndexOf("_") + 1));
+					if (initialColumnIndex == 0) {
+						initialColumnIndex = 1;
+					}
+					initialRowIndex = event.getIndex();
+				} // запоминаем последнюю ячейку и заполняем ячейки между первой и последней
+				else if("mouseup".equals(event.getNativeEvent().getType())
+						&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
+					lastColumnIndex = Integer.valueOf(cellElement.getId().substring(cellElement.getId().lastIndexOf("_") + 1));
+					if (lastColumnIndex == 0) {
+						lastColumnIndex = 1;
+					}
+					lastRowIndex = event.getIndex();
+					// выделяем ячейки
+					selectOrClearCells(true);
+				}
+				else if ("mouseover".equals(event.getNativeEvent().getType())) {
+					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+						cellElement.removeAttribute("title");
+					} else {
 						cellElement.setTitle(cellElement.getInnerText());
 					}
 				}
 			}
 		});
+	}
+
+	private void selectOrClearCells(boolean select) {
+		int topRowIndex;
+		int bottomRowIndex;
+		int leftColumnIndex;
+		int rightColumnIndex;
+		if (initialRowIndex - lastRowIndex >= 0) {
+			topRowIndex = lastRowIndex;
+			bottomRowIndex = initialRowIndex;
+		} else {
+			topRowIndex = initialRowIndex;
+			bottomRowIndex = lastRowIndex;
+		}
+		if (initialColumnIndex - lastColumnIndex >= 0) {
+			rightColumnIndex = lastColumnIndex;
+			leftColumnIndex = initialColumnIndex;
+		} else {
+			rightColumnIndex = initialColumnIndex;
+			leftColumnIndex = lastColumnIndex;
+		}
+
+		selectedCells.clear();
+		// Проходим по всем елементам выделенного прямоуголника
+		while (topRowIndex <= bottomRowIndex) {
+			for (int colIndex = rightColumnIndex; colIndex <= leftColumnIndex; colIndex++) {
+				Element element = DOM.getElementById(CustomTableBuilder.TD + "_" + topRowIndex + "_" + colIndex);
+				DataRow currentRow = rows.get(topRowIndex);
+				Cell cell = currentRow.getCell(columns.get(colIndex - 1).getAlias());
+
+				if (select) { // выделяем ячейки
+					element.getStyle().setBackgroundColor(SELECTED_CELL_BACKGROUND_COLOR);
+					selectedCells.add(cell);
+				} // выставляем прежний background color
+				else {
+					if (cell.getStyle() != null) {
+						element.getStyle().setBackgroundColor(convertColorToRGBString(cell.getStyle().getBackColor()));
+					} else {
+						element.getStyle().clearBackgroundColor();
+					}
+				}
+			}
+			topRowIndex++;
+		}
+
+		if (selectedCells.size() > 1) {
+			uniteCellsButton.setVisible(true);
+		} else if (selectedCells.size() == 1 &&
+				(selectedCells.get(0).getColSpan() > 1 || selectedCells.get(0).getRowSpan() > 1)) {
+			disuniteCellsButton.setVisible(true);
+		}
 	}
 
 	@Override
@@ -182,31 +246,18 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
 					.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
-			formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+			if (col.getWidth() > 0) {
+				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+			}
 		}
 	}
 
 	public void refresh() {
+		selectedCells.clear();
+		uniteCellsButton.setVisible(false);
+		disuniteCellsButton.setVisible(false);
 		setRowsData(rows);
-	}
-
-	public boolean validateCellsUnionRange(int rowSpan, int colSpan) {
-		if (columns.size() < currentColumnIndex + colSpan || rows.size() < currentRowIndex + rowSpan) {
-			return false;
-		}
-
-		for (int i = currentRowIndex; i < currentRowIndex + rowSpan; i++) {
-			for (int j = currentColumnIndex; j < currentColumnIndex + colSpan; j++) {
-				if (i != currentRowIndex || j != currentColumnIndex) {
-					DataRow currentRow = rows.get(i);
-					Cell cell = currentRow.getCell(columns.get(j).getAlias());
-					if (cell.getRowSpan() > 1 || cell.getColSpan() > 1) {
-						return false;
-					}
-				}
- 			}
-		}
-		return true;
+		formDataTable.redraw();
 	}
 
 	@Override
@@ -235,6 +286,32 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public void addCustomHeader(boolean addNumberedHeader) {
 		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader, true);
 		formDataTable.setHeaderBuilder(builder);
+	}
+
+	@UiHandler("uniteCellsButton")
+	public void onUniteButton(ClickEvent event){
+		if(getUiHandlers()!=null){
+			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
+			Cell cell = currentRow.getCell(columns.
+					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - 1).getAlias());
+			cell.setRowSpan(Math.abs(initialRowIndex - lastRowIndex) + 1);
+			cell.setColSpan(Math.abs(initialColumnIndex - lastColumnIndex) + 1);
+			refresh();
+			uniteCellsButton.setVisible(false);
+		}
+	}
+
+	@UiHandler("disuniteCellsButton")
+	public void onDisuniteButton(ClickEvent event){
+		if(getUiHandlers()!=null){
+			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
+			Cell cell = currentRow.getCell(columns.
+					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - 1).getAlias());
+			cell.setRowSpan(1);
+			cell.setColSpan(1);
+			refresh();
+			disuniteCellsButton.setVisible(false);
+		}
 	}
 
 	@UiHandler("addRowButton")
@@ -287,5 +364,13 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		if (index != 0) {
 			upRowButton.setEnabled(true);
 		}
+	}
+
+	private String convertColorToRGBString(Color color) {
+		return "rgb(" +
+				color.getRed() + "," +
+				color.getGreen() + "," +
+				color.getBlue() +
+				")";
 	}
 }

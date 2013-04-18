@@ -21,15 +21,16 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long createDeclaration(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId);
+	long create(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId);
 	
 	/**
 	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
 	 * @param logger - объект журнала
 	 * @param declarationDataId - идентификатор декларации
+	 * @param docDate - дата обновления декларации
 	 * @param userId - идентификатор пользователя, выполняющего операцию
 	 */
-	void refreshDeclaration(Logger logger, long declarationDataId, int userId);
+	void reCreate(Logger logger, long declarationDataId, int userId, String docDate);
 	
 	/**
 	 * Получить декларацию
@@ -51,12 +52,13 @@ public interface DeclarationDataService {
 
 	/**
 	 * Установить в декларации флаг принятия
+	 * @param logger - объект журнала
 	 * @param declarationDataId идентификатор декларации
 	 * @param accepted значение флага
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(long declarationDataId, boolean accepted, int userId);
+	void setAccepted(Logger logger, long declarationDataId, boolean accepted, int userId);
 	/**
 	 * Получить данные декларации в формате законодателя (XML)
 	 * @param declarationDataId идентификатор декларации
@@ -89,5 +91,13 @@ public interface DeclarationDataService {
 	 * @return имя файла взятого из xml данных
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	String getXmlDataFileName(int declarationDataId, int userId);
+	String getXmlDataFileName(long declarationDataId, int userId);
+	/**
+	 * Получить дату последнего изменения декларации
+	 * @param declarationDataId идентификатор декларации
+	 * @param userId идентификатор пользователя, выполняющего операцию
+	 * @return дату последнего изменения декларации из xml данных
+	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+	 */
+	String getXmlDataDocDate(long declarationDataId, int userId);
 }

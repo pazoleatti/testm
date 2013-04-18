@@ -116,6 +116,11 @@
 			<artifactId>gwtp-processors</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+		</dependency>
+
 		<!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -125,7 +130,7 @@
 	</dependencies>
 
 	<build>
-	    <outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
+		<outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>

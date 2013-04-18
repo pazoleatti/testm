@@ -142,11 +142,9 @@ public class DeclarationListView extends
 
 	@Override
 	public DeclarationDataSearchOrdering getSearchOrdering(){
-		final String DEFAULT_SORTING_BY_ID = "";
-		if (sortByColumn != null){
-			return sortByColumn;
+		if (sortByColumn == null){
+			setSortByColumn("");
 		}
-		setSortByColumn(DEFAULT_SORTING_BY_ID);
 		return sortByColumn;
 	}
 

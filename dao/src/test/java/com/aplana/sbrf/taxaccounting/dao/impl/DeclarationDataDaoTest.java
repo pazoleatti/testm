@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,10 +140,24 @@ public class DeclarationDataDaoTest {
 	
 	
 	@Test
-	public void testSaveData() {
+	public void saveXmlData() {
 		declarationDataDao.setXmlData(7, "test-data-string-2");
 		String data = declarationDataDao.getXmlData(7);
 		assertEquals("test-data-string-2", data);
+	}
+	
+	@Test
+	public void saveReportPdfData() {
+		declarationDataDao.setPdfData(7, "test-data-string-2".getBytes());
+		byte[] data = declarationDataDao.getPdfData(7);
+		Assert.assertArrayEquals("test-data-string-2".getBytes(), data);
+	}
+	
+	@Test
+	public void saveReportXlsxData() {
+		declarationDataDao.setXlsxData(7, "test-data-string-2".getBytes());
+		byte[] data = declarationDataDao.getXlsxData(7);
+		Assert.assertArrayEquals("test-data-string-2".getBytes(), data);
 	}
 
 	@Test

@@ -3,18 +3,10 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
-        @external .gwt-DialogBox .Caption;
-        .gwt-DialogBox .Caption {
-            font-weight: bold;
-            text-align: left;
-            color: white;
-            background: url("img/top_grad.gif") repeat-x scroll center bottom #F1F1F1;
-        }
-
         .content {
             padding: 10px;
             border: 1px solid #949494;
-            border-radius: 5px;
+            border-radius: 3px;
             margin: 10px 0px;
         }
 
@@ -44,8 +36,8 @@
 
             <style:Bar>
                 <style:LeftBar addStyleNames="{style.buttonBar}">
-                    <style:Button ui:field="continueButton" text="Далее"/>
-                    <style:Button ui:field="cancelButton" text="Отмена"/>
+                    <g:Button ui:field="continueButton" text="Далее"/>
+                    <g:Button ui:field="cancelButton" text="Отмена"/>
                 </style:LeftBar>
             </style:Bar>
 

@@ -98,7 +98,8 @@ public class GetFormDataHandler extends
 					formTemplateService.getActiveFormTemplateId(action
 							.getFormDataTypeId().intValue()), action
 							.getDepartmentId(), FormDataKind.fromId(action
-							.getFormDataKind().intValue()));
+							.getFormDataKind().intValue()),
+							reportPeriodDao.get(action.getReportPeriodId().intValue()));
 		} else {
 			if (!action.isReadOnly()) {
 				formDataService.lock(action.getFormDataId(), userId);

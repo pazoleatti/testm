@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -34,7 +35,7 @@ import java.io.Serializable;
  */
 public abstract class DictionaryPickerWidget<ValueType extends Serializable> extends Composite
 		implements HasValue<ValueType> {
-	private final SingleSelectionModel<DictionaryItem<ValueType>> selectionModel;
+	private final NoSelectionModel<DictionaryItem<ValueType>> selectionModel;
 
 	interface MyUiBinder extends UiBinder<Widget, DictionaryPickerWidget> {
 	}
@@ -63,13 +64,13 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		// Table
 		cellTable.addColumn(new NameColumn(), "Имя");
 		cellTable.addColumn(createValueColumn(), "Значение");
-		selectionModel = new SingleSelectionModel<DictionaryItem<ValueType>>();
+		selectionModel = new NoSelectionModel<DictionaryItem<ValueType>>();
 		cellTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(
 				new SelectionChangeEvent.Handler() {
 					@Override
 					public void onSelectionChange(SelectionChangeEvent event) {
-						DictionaryItem<ValueType> selected = selectionModel.getSelectedObject();
+						DictionaryItem<ValueType> selected = selectionModel.getLastSelectedObject();
 						if (selected != null) {
 							setValue(selected.getValue(), true);
 						}

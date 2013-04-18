@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,12 +53,16 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	}
 
-	private static final class MapEntry implements Map.Entry<String, Object> {
+	public static final class MapEntry implements Map.Entry<String, Object> {
 
 		private Cell cell;
 
 		private MapEntry(Cell cell) {
 			this.cell = cell;
+		}
+		
+		public Cell getCell(){
+			return cell;
 		}
 
 		@Override
@@ -169,7 +173,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Set<Map.Entry<String, Object>> entrySet() {
-		Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
+		Set<Map.Entry<String, Object>> entries = new LinkedHashSet<Map.Entry<String, Object>>();
 		if (data != null) {
 			for (Cell cell: data) {
 				entries.add(new MapEntry(cell));
@@ -208,7 +212,7 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 
 	@Override
 	public Set<String> keySet() {
-		Set<String> keySet = new HashSet<String>(data.size());
+		Set<String> keySet = new LinkedHashSet<String>(data.size());
 		for (Cell cell: data) {
 			keySet.add(cell.getColumn().getAlias());
 		}

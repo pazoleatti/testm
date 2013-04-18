@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  * Реализация {@link Column}, предназначенная для хранения числовых данных.
@@ -34,7 +35,8 @@ public class NumericColumn extends Column implements Serializable {
 	
 	private int maxLength = MAX_LENGTH;
 
-	
+	private static Formatter formatter;
+
 	/**
 	 * Задает точность столбца, т.е. колличество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
 	 * 
@@ -72,7 +74,6 @@ public class NumericColumn extends Column implements Serializable {
 		this.dictionaryCode = dictionaryCode;
 	}
 
-	
 	/**
 	 * Возвращает значение точности числового столбца
 	 * Точность столбца задаёт общее количество знаков, которые допустимы в данном столбце.
@@ -89,15 +90,34 @@ public class NumericColumn extends Column implements Serializable {
 
 	@Override
 	public Formatter getFormatter() {
-		return new Formatter() {
-			@Override
-			public String format(String valueToFormat) {
-				MathContext mathContext = new MathContext(maxLength);
-				BigDecimal val = new BigDecimal(valueToFormat, mathContext);
-				val = val.setScale(precision);
-				return val.toPlainString();
-			}
-		};
+		return formatter != null ? formatter :
+			new Formatter() {
+				@Override
+				public String format(String valueToFormat) {
+					valueToFormat = valueToFormat.replace(" ", "");
+					MathContext mathContext = new MathContext(maxLength);
+					BigDecimal val = new BigDecimal(valueToFormat, mathContext);
+					val = val.setScale(precision, RoundingMode.HALF_UP);
+
+					boolean hasSign = (val.signum() == -1);
+					if (hasSign) {
+						val = val.abs();
+					}
+					String intValue = String.valueOf(val.longValue());
+					StringBuilder stringBuilder = new StringBuilder(intValue);
+
+					for (int i=3; i<intValue.length(); i+=3) {
+						if (i<intValue.length()) {
+							stringBuilder.insert(intValue.length()-i, " ");
+						}
+					}
+					stringBuilder.append(val.toPlainString().substring(intValue.length(), val.toPlainString().length()));
+					if (hasSign) {
+						stringBuilder.insert(0, "-");
+					}
+					return stringBuilder.toString();
+				}
+			};
 	}
 
 	@Override

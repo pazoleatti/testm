@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style type='com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar.ButtonStyle'>
         .buttonMarginLeft {
-            margin-left: 10px;
+            margin-right: 15px;
         }
     </ui:style>
 	<g:HorizontalPanel ui:field="placeHolder"/>

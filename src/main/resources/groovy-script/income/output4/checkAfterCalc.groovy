@@ -12,7 +12,7 @@ for (row in formData.dataRows) {
 
     //noinspection GroovyVariableNotAssigned
     if (row.getAlias() != 'total') {
-        if (row.kpp.toString() == row.subjectCode && row.subjectCode.intValue() == 0) {
+        if (row.kpp == row.subjectCode && row.subjectCode == '0') {
             logger.error("Все суммы по операции нулевые!")
         }
     }

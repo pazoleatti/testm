@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDeclaration, RefreshDeclarationResult> {
@@ -33,7 +35,7 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		Logger  logger = new Logger();
-		declarationDataService.refreshDeclaration(logger, command.getDeclarationDataId(), userId);
+		declarationDataService.reCreate(logger, command.getDeclarationDataId(), userId, new Date().toString());
 		RefreshDeclarationResult result = new RefreshDeclarationResult();
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			result.setSuccess(false);

@@ -38,7 +38,7 @@
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/TransortOkato.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/DictOkatoData.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 
     <!-- JDBC-based DAOs -->

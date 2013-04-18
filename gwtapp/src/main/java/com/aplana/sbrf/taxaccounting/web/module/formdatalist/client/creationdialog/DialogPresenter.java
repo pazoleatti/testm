@@ -35,6 +35,11 @@ import java.util.Set;
 
 public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> implements DialogUiHandlers {
 
+	public static final String NEED_TO_SELECT_FORM_DATA_KIND = "Для создания налоговой формы необходимо выбрать тип налоговой формы";
+	public static final String NEED_TO_SELECT_FORM_DATA_TYPE = "Для создания налоговой формы необходимо выбрать вид налоговой формы";
+	public static final String NEED_TO_SELECT_DEPARTMENT = "Для создания налоговой формы необходимо выбрать подразделение";
+	public static final String NEED_TO_SELECT_REPORT_PERIOD = "Для создания налоговой формы необходимо выбрать отчетный период";
+
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
 	private final Map<Integer, FormType> formTypeMap = new HashMap<Integer, FormType>();
@@ -186,27 +191,27 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	private void fillReportPeriodsMap(List<ReportPeriod> source){
 		reportPeriodMap.clear();
 		for(ReportPeriod reportPeriod : source){
-			reportPeriodMap.put(reportPeriod.getId(), reportPeriod);
+			if (reportPeriod != null) {
+				reportPeriodMap.put(reportPeriod.getId(), reportPeriod);
+			}
 		}
 	}
 
 	private boolean isFilterDataCorrect(FormDataFilter filter){
 		if(filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty()){
-			System.out.println(filter.getReportPeriodIds());
-			System.out.println(filter.getReportPeriodIds().isEmpty());
-			MessageEvent.fire(DialogPresenter.this, "Для создания налоговой формы необходимо выбрать отчетный период");
+			MessageEvent.fire(DialogPresenter.this, NEED_TO_SELECT_REPORT_PERIOD);
 			return false;
 		}
 		if(filter.getDepartmentId() == null || filter.getDepartmentId().isEmpty()){
-			MessageEvent.fire(DialogPresenter.this, "Для создания налоговой формы необходимо выбрать подразделение");
+			MessageEvent.fire(DialogPresenter.this, NEED_TO_SELECT_DEPARTMENT);
 			return false;
 		}
 		if(filter.getFormDataKind() == null){
-			MessageEvent.fire(DialogPresenter.this, "Для создания налоговой формы необходимо выбрать тип налоговой формы");
+			MessageEvent.fire(DialogPresenter.this, NEED_TO_SELECT_FORM_DATA_KIND);
 			return false;
 		}
 		if(filter.getFormTypeId() == null){
-			MessageEvent.fire(DialogPresenter.this, "Для создания налоговой формы необходимо выбрать вид налоговой формы");
+			MessageEvent.fire(DialogPresenter.this, NEED_TO_SELECT_FORM_DATA_TYPE);
 			return false;
 		}
 		return true;

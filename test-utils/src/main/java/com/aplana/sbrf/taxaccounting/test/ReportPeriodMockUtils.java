@@ -13,9 +13,19 @@ public final class ReportPeriodMockUtils {
 	private ReportPeriodMockUtils() {
 	}
 
-	public static ReportPeriod mockReportPeriod(boolean isActive) {
+	public static ReportPeriod mockReportPeriod(int id, boolean isActive) {
 		ReportPeriod reportPeriod = mock(ReportPeriod.class);
 		when(reportPeriod.isActive()).thenReturn(isActive);
+		when(reportPeriod.getId()).thenReturn(id);
+		when(reportPeriod.isBalancePeriod()).thenReturn(false);
+		return reportPeriod;
+	}
+
+	public static ReportPeriod mockReportPeriod(int id, boolean isActive, boolean isBalancePeriod) {
+		ReportPeriod reportPeriod = mock(ReportPeriod.class);
+		when(reportPeriod.isActive()).thenReturn(isActive);
+		when(reportPeriod.getId()).thenReturn(id);
+		when(reportPeriod.isBalancePeriod()).thenReturn(isBalancePeriod);
 		return reportPeriod;
 	}
 }

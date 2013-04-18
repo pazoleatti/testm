@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateRowView;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -15,33 +13,26 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
-public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValue<Cell> {
+public class StyleCellPopup extends Composite {
+
 	interface StyleWidgetUiBinder extends UiBinder<HTMLPanel, StyleCellPopup> {
-	}
-	interface MyDriver extends SimpleBeanEditorDriver<Cell, StyleCellPopup> {
 	}
 
 	private static StyleWidgetUiBinder ourUiBinder = GWT.create(StyleWidgetUiBinder.class);
-	private final MyDriver driver = GWT.create(MyDriver.class);
 	private PopupPanel popup = new PopupPanel();
-	private List<String> stylesAlias = new ArrayList<String>();
+	private List<Cell> cells;
 	private final FormTemplateRowView parent;
 
+	@UiField
+	Label title;
+
 	@UiField(provided = true)
-	ValueListBox<String> styleAlias;
-
-	@UiField
-	IntegerBox colSpan;
-
-	@UiField
-	IntegerBox rowSpan;
+	ValueListBox<FormStyle> styleAlias;
 
 	@UiField
 	Button saveButton;
@@ -54,18 +45,17 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 		super();
 		this.parent = parent;
 
-		styleAlias = new ValueListBox<String>(new AbstractRenderer<String>() {
+		styleAlias = new ValueListBox<FormStyle>(new AbstractRenderer<FormStyle>() {
 			@Override
-			public String render(String object) {
+			public String render(FormStyle object) {
 				if (object == null) {
 					return "";
 				}
-				return object;
+				return object.getAlias();
 			}
 		});
 
 		initWidget(ourUiBinder.createAndBindUi(this));
-		driver.initialize(this);
 
 		this.addDomHandler(new KeyPressHandler() {
 			@Override
@@ -81,14 +71,13 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 		popup.setAutoHideEnabled(true);
 	}
 
-	@Override
-	public void setValue(Cell value) {
-		driver.edit(value);
-	}
-
-	@Override
-	public Cell getValue() {
-		return driver.flush();
+	public void setValue(List<Cell> cells) {
+		this.cells = cells;
+		if (cells.size() == 1) {
+			title.setText("Стиль ячейки");
+		} else {
+			title.setText("Стиль ячеек");
+		}
 	}
 
 	@UiHandler("saveButton")
@@ -97,24 +86,34 @@ public class StyleCellPopup extends Composite implements Editor<Cell>, TakesValu
 	}
 
 	public void show(int left, int top) {
-		popup.setPopupPosition(left, top);
-		popup.show();
+		if (!cells.isEmpty()) {
+			editable.setValue(false);
+			styleAlias.setValue(null);
+
+			if (cells.size() == 1) {
+				editable.setValue(cells.get(0).isEditable());
+				styleAlias.setValue(cells.get(0).getStyle());
+			}
+
+			popup.setPopupPosition(left, top);
+			popup.show();
+		}
 	}
 
-	public void setStyleAlias(List<FormStyle> styleAlias) {
-		stylesAlias.clear();
-		for(FormStyle style : styleAlias) {
-			stylesAlias.add(style.getAlias());
-		}
-		this.styleAlias.setAcceptableValues(stylesAlias);
+	public void setStyleAlias(List<FormStyle> styleAliases) {
+		this.styleAlias.setAcceptableValues(styleAliases);
 	}
 
 	private void save() {
-		if (parent.validateCellsUnionRange(rowSpan.getValue(), colSpan.getValue())) {
-			getValue();
-			parent.refresh();
+		for (Cell cell : cells) {
+			cell.setEditable(editable.getValue());
+			if (styleAlias.getValue() != null) {
+				cell.setStyleAlias(styleAlias.getValue().getAlias());
+			} else {
+				cell.setStyleAlias(null);
+			}
 		}
-
+		parent.refresh();
 		popup.hide();
 	}
 }

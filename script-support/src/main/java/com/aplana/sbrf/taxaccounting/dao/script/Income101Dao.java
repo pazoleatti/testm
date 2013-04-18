@@ -12,8 +12,8 @@ public interface Income101Dao {
 	/**
 	 * Получение данных оборотной ведомости
 	 * @param reportPeriodId идентификатор отчетного периода
-	 * @param Account номер счета
+	 * @param account номер счета
 	 */
-	public Income101 getIncome101(int reportPeriodId, String Account, int departmentId);
+	public Income101 getIncome101(int reportPeriodId, String account, int departmentId);
 
 }

@@ -5,7 +5,8 @@
 
 def row = formData.appendDataRow();
 ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ecoClass', 'years', 'ownMonths',
-        'taxRate', 'calculatedTaxSum', 'benefitSum', 'taxSumToPay', 'taxBenefitCode', 'benefitStartDate',
+        'taxRate', 'taxBenefitCode', 'benefitStartDate',
         'benefitEndDate'].each{ alias ->
     row.getCell(alias).editable = true
+    row.getCell(alias).setStyleAlias("Редактируемое поле")
 }

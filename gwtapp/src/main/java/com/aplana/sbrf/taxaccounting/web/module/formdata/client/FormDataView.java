@@ -109,9 +109,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			public void onCellPreview(CellPreviewEvent<DataRow> event) {
 				if ("mouseover".equals(event.getNativeEvent().getType())) {
 					TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
-					// Не показываем тултип на пкстых ячейках
-					if (cellElement.getInnerText().length() > 1
-							|| !cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+						cellElement.removeAttribute("title");
+					} else {
 						cellElement.setTitle(cellElement.getInnerText());
 					}
 				}
@@ -144,7 +144,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
 				formDataTable.addColumn(tableCol, col.getName());
-				formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+				if (col.getWidth() > 0) {
+					formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
+				}
 			}
 		}
 		showCheckedColumns.setVisible(!hideCheckedColumnsCheckbox);
@@ -279,9 +281,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
 			String formKind, String departmentId, String reportPeriod,
-			String state
-	) {
-		title.setText(taxType.getName() + " / " + formType);
+			String state) {
+		String taxFormType = taxType.getName() + " / " + formType;
+		title.setText(taxFormType);
+		title.setTitle(taxFormType);
 		formKindLabel.setText(formKind);
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
@@ -321,7 +324,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showOriginalVersionButton(boolean show) {
-		originalVersionButton.setVisible(show);
+		// http://jira.aplana.com/browse/SBRFACCTAX-2242 В режиме редактирования доступна кнопка "Исходная версия",
+		// при нажатии на которую диалоговое окно "в разработке". Кнопку в версии 0.2.1 необходимо скрыть.
+		originalVersionButton.setVisible(false);
 	}
 
 	@Override

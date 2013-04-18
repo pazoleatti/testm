@@ -26,9 +26,8 @@ public class ReportPeriodPicker extends Composite{
 	private static final String ROOT_PANEL_HEIGHT       = "250px";
 	private static final String PANEL_WITH_TREE_WIDTH   = "250px";
 	private static final String PANEL_WITH_TREE_HEIGHT  = "250px";
-	private static final String APPLY_BUTTON_WIDTH      = "50px";
 	private static final String RADIO_BUTTON_GROUP      = "DEPARTMENT_SELECTION";
-	private final boolean MULTISELECT_TREE;
+	private final boolean multiselectTree;
 
 	private static SelectionUiBinder uiBinder = GWT.create(SelectionUiBinder.class);
 	private final ReportPeriodDataProvider dataProvider;
@@ -39,7 +38,7 @@ public class ReportPeriodPicker extends Composite{
 	private final VerticalPanel rootPanel = new VerticalPanel();
 	private final ScrollPanel panelWithTree = new ScrollPanel();
 	private final HorizontalPanel buttonsPanel = new HorizontalPanel();
-	private final Button applyButton = new Button("ОК");
+	private final Button applyButton = new Button("Выбрать");
 
 	private List<TaxPeriod> taxPeriods = new ArrayList<TaxPeriod>();
 	private final Map<String, Integer> allReportPeriodsNameToId = new HashMap<String, Integer>();
@@ -57,7 +56,7 @@ public class ReportPeriodPicker extends Composite{
 	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider, boolean isMultiselect){
 		initWidget(uiBinder.createAndBindUi(this));
 		this.dataProvider = reportPeriodDataProvider;
-		MULTISELECT_TREE = isMultiselect;
+		multiselectTree = isMultiselect;
 
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
@@ -142,7 +141,7 @@ public class ReportPeriodPicker extends Composite{
 				reportPeriod.setName(reportPeriod.getName() + " (ВО)");
 			}
 			CheckBox checkBox;
-			if(MULTISELECT_TREE){
+			if(multiselectTree){
 				checkBox = new CheckBox(reportPeriod.getName());
 			} else {
 				checkBox = new RadioButton(RADIO_BUTTON_GROUP, reportPeriod.getName());
@@ -184,20 +183,20 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	private String getFormattedTaxPeriodDate(TaxPeriod taxPeriod){
-		final String DATE_SHORT_START = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
+		final String dateShortStart = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
 				.format(taxPeriod.getStartDate());
-		final String DATE_SHORT_END = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
+		final String dateShortEnd = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
 				.format(taxPeriod.getEndDate());
-		int startDayIndex = DATE_SHORT_START.lastIndexOf('-');
-		int startMonthIndex = DATE_SHORT_START.indexOf('-');
-		int endDayIndex = DATE_SHORT_END.lastIndexOf('-');
-		int enMonthIndex = DATE_SHORT_END.indexOf('-');
-		String startDate =  DATE_SHORT_START.substring(startDayIndex + 1, DATE_SHORT_START.length()) + '.' +
-							DATE_SHORT_START.substring(startMonthIndex + 1, startDayIndex) + '.' +
-							DATE_SHORT_START.substring(0, startMonthIndex);
-		String endDate =DATE_SHORT_END.substring(endDayIndex + 1, DATE_SHORT_END.length()) + '.' +
-						DATE_SHORT_END.substring(enMonthIndex + 1, endDayIndex) + '.' +
-						DATE_SHORT_END.substring(0, enMonthIndex);
+		int startDayIndex = dateShortStart.lastIndexOf('-');
+		int startMonthIndex = dateShortStart.indexOf('-');
+		int endDayIndex = dateShortEnd.lastIndexOf('-');
+		int enMonthIndex = dateShortEnd.indexOf('-');
+		String startDate =  dateShortStart.substring(startDayIndex + 1, dateShortStart.length()) + '.' +
+							dateShortStart.substring(startMonthIndex + 1, startDayIndex) + '.' +
+							dateShortStart.substring(0, startMonthIndex);
+		String endDate =dateShortEnd.substring(endDayIndex + 1, dateShortEnd.length()) + '.' +
+						dateShortEnd.substring(enMonthIndex + 1, endDayIndex) + '.' +
+						dateShortEnd.substring(0, enMonthIndex);
 		return (startDate + " - " + endDate);
 	}
 
@@ -206,8 +205,6 @@ public class ReportPeriodPicker extends Composite{
 		rootPanel.setHeight(ROOT_PANEL_HEIGHT);
 		panelWithTree.setWidth(PANEL_WITH_TREE_WIDTH);
 		panelWithTree.setHeight(PANEL_WITH_TREE_HEIGHT);
-		applyButton.setWidth(APPLY_BUTTON_WIDTH);
-		applyButton.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
 		popupPanelLabel.setText("Выберите отчетный период:");
 		popupPanelLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
 

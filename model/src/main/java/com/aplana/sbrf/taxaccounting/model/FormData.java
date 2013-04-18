@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author dsultanbekov
  * @author sgoryachkin
- *
+ * 
  */
 public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
@@ -23,16 +23,16 @@ public class FormData extends IdentityObject<Long> {
 	private int formTemplateId;
 	private List<Column> formColumns;
 	private List<FormStyle> formStyles;
-	
+
 	private List<DataRow> dataRows;
 	private FormType formType;
-	
+
 	private FormDataPerformer performer;
 	private List<FormDataSigner> signers;
 
 	public FormData() {
 	}
-	
+
 	public FormData(FormTemplate form) {
 		initFormTemplateParams(form);
 	}
@@ -40,7 +40,7 @@ public class FormData extends IdentityObject<Long> {
 	public List<FormStyle> getFormStyles() {
 		return formStyles;
 	}
-	
+
 	public WorkflowState getState() {
 		return state;
 	}
@@ -50,8 +50,9 @@ public class FormData extends IdentityObject<Long> {
 	 * вызвать только один раз для каждого инстанса FormData, предполагается,
 	 * что это будет делаться в сервисном слое или в DAO. Для того, чтобы
 	 * изменить стадию у уже существующего объекта нужно использовать методы
+	 * 
 	 * @{link FormDataWorkflowService} и затем перечитать состояние объекта из
-	 * БД при помощи DAO
+	 *        БД при помощи DAO
 	 * 
 	 * @param state
 	 *            объект, задающий стадию жизненного цикла
@@ -154,39 +155,40 @@ public class FormData extends IdentityObject<Long> {
 	}
 
 	/**
-	 * Добавляет строку в таблицу данных. 
-	 * Каждая строка может содержать уникальный алиас, для возможности идентификации её в скриптах
-	 * @param rowAlias значение, задающее алиас.
-	 * в большинстве случае должен быть строкой, но для удобства написания скриптов, принимает Object.
-	 * Значением алиаса будет результат операции <code>rowAlias.toString()</code>
+	 * Добавляет строку в таблицу данных. Каждая строка может содержать
+	 * уникальный алиас, для возможности идентификации её в скриптах
+	 * 
+	 * @param rowAlias
+	 *            значение, задающее алиас. в большинстве случае должен быть
+	 *            строкой, но для удобства написания скриптов, принимает Object.
+	 *            Значением алиаса будет результат операции
+	 *            <code>rowAlias.toString()</code>
 	 * @return добавленная строка с установленным алиасом
 	 */
 	public DataRow appendDataRow(Object rowAlias) {
 		DataRow row = new DataRow(
 				rowAlias == null ? null : rowAlias.toString(), formColumns,
 				formStyles);
-		synchronized (dataRows) {
-			dataRows.add(row);
-			row.setOrder(dataRows.size() + 1);
-		}
+
+		dataRows.add(row);
+		row.setOrder(dataRows.size() + 1);
+
 		return row;
 	}
 
 	public DataRow appendDataRow() {
 		return appendDataRow(null);
 	}
-	
-	public boolean deleteDataRow(DataRow dataRow){
-		System.out.println("----до " + dataRows.size());
-		for (DataRow iterable_element : dataRows) {
-			System.out.println("----до" + iterable_element);
-		}
-		System.out.println(dataRows.remove(dataRow));
-		System.out.println("----после " + dataRows.size());
-		for (DataRow iterable_element : dataRows) {
-			System.out.println("----после" + iterable_element);
-		}
-		return true;
+
+	/**
+	 * Удаляет строку из НФ
+	 * 
+	 * @param dataRow
+	 *            удаляемая строка
+	 * @return true, если удаляемая строка находилась в списке строк
+	 */
+	public boolean deleteDataRow(DataRow dataRow) {
+		return dataRows.remove(dataRow);
 	}
 
 	public DataRow getDataRow(String rowAlias) {
@@ -201,13 +203,17 @@ public class FormData extends IdentityObject<Long> {
 		throw new IllegalArgumentException("Wrong row alias requested: "
 				+ rowAlias);
 	}
-	
+
 	/**
 	 * Возвращает индекс строки, имеющий заданный алиас (с нуля).
-	 * @param rowAlias алиас строки
+	 * 
+	 * @param rowAlias
+	 *            алиас строки
 	 * @return индекс строки
-	 * @throws NullPointerException если rowAlias null
-	 * @throws IllegalArgumentException если такого алиас не существует в объекте FormData
+	 * @throws NullPointerException
+	 *             если rowAlias null
+	 * @throws IllegalArgumentException
+	 *             если такого алиас не существует в объекте FormData
 	 */
 	public int getDataRowIndex(String rowAlias) {
 		if (rowAlias == null) {
@@ -219,12 +225,14 @@ public class FormData extends IdentityObject<Long> {
 				return index;
 			}
 		}
-		throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
+		throw new IllegalArgumentException("Wrong row alias requested: "
+				+ rowAlias);
 	}
-	
 
 	/**
-	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой формы}
+	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой
+	 * формы}
+	 * 
 	 * @return информация об исполнителе налоговой формы
 	 */
 	public FormDataPerformer getPerformer() {
@@ -232,8 +240,11 @@ public class FormData extends IdentityObject<Long> {
 	}
 
 	/**
-	 * Задать информацию об {@link FormDataPerformer исполнителе налоговой формы}
-	 * @param performer информация об исполнителе налоговой формы
+	 * Задать информацию об {@link FormDataPerformer исполнителе налоговой
+	 * формы}
+	 * 
+	 * @param performer
+	 *            информация об исполнителе налоговой формы
 	 */
 	public void setPerformer(FormDataPerformer performer) {
 		this.performer = performer;
@@ -241,6 +252,7 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Получить список подписантов налоговой формы
+	 * 
 	 * @return список {@link FormDataSigner подписантов} налоговой формы
 	 */
 	public List<FormDataSigner> getSigners() {
@@ -249,7 +261,9 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Задать список подписантов налоговой формы
-	 * @param signers список {@link FormDataSigner подписантов} налоговой формы
+	 * 
+	 * @param signers
+	 *            список {@link FormDataSigner подписантов} налоговой формы
 	 */
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
@@ -257,6 +271,7 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Получить дату прехода в состояние ACCEPTED
+	 * 
 	 * @return
 	 */
 	public Date getAcceptanceDate() {
@@ -265,13 +280,14 @@ public class FormData extends IdentityObject<Long> {
 
 	/**
 	 * Установить дату перехода в состояние ACCEPTED
+	 * 
 	 * @param acceptanceDate
 	 */
 	public void setAcceptanceDate(Date acceptanceDate) {
 		this.acceptanceDate = acceptanceDate;
 	}
 
-
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -302,5 +318,5 @@ public class FormData extends IdentityObject<Long> {
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 }

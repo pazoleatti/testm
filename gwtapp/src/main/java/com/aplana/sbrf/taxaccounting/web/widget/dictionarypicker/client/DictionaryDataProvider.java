@@ -59,7 +59,7 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 		action.setMax(max);
 		action.setDictionaryCode(dictionaryCode);
 		dispatcher.execute(action, CallbackUtils
-			.defaultCallback(new AbstractCallback<DictionaryResult<T>>() {
+			.defaultCallbackNoLock(new AbstractCallback<DictionaryResult<T>>() {
 				@Override
 				public void onSuccess(DictionaryResult<T> result) {
 					updateRowData(offset, result.getDictionaryItems());

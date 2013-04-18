@@ -40,7 +40,7 @@ public interface TransportTaxDao {
 	 * @param okato код ОКАТО
 	 * @return true - если код ОКАТО существует, false - если не существует
 	 */
-	public boolean validateOkato(String okato);
+	boolean validateOkato(String okato);
 
 	/**
 	 * Проверяет существование кода транспортного средства
@@ -48,7 +48,7 @@ public interface TransportTaxDao {
 	 * @param code код типа транспортного средства
 	 * @return true - если код существует, false - если не существует
 	 */
-	public boolean validateTransportTypeCode(String code);
+	boolean validateTransportTypeCode(String code);
 
 	/**
 	 * Проверяет существование кода единицы измерения
@@ -56,7 +56,7 @@ public interface TransportTaxDao {
 	 * @param code код
 	 * @return true - если код существует, false - если не существует
 	 */
-	public boolean validateTaxBaseUnit(BigDecimal code);
+	boolean validateTaxBaseUnit(BigDecimal code);
 
 	/**
 	 * Проверяет существование кода экологического класса

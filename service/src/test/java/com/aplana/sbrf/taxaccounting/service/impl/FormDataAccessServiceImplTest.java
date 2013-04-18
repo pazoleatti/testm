@@ -67,6 +67,9 @@ public class FormDataAccessServiceImplTest {
 	private static final long BANK_PREPARED_ADDITIONAL_FORMDATA_ID = 17;
 	private static final long BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID = 18;
 
+	private static final long TB1_CREATED_FORMDATA_BALANCED_ID = 19;
+	private static final long TB1_ACCEPTED_FORMDATA_BALANCED_ID = 20;
+
 	private static final long GOSB_TB1_CREATED_FORMDATA_ID = 13;
 
 	private static final long INACTIVE_FORMDATA_ID = 10;
@@ -82,8 +85,10 @@ public class FormDataAccessServiceImplTest {
 
 	private static final int REPORT_PERIOD_ACTIVE_ID = 1;
 	private static final int REPORT_PERIOD_INACTIVE_ID = 2;
+	private static final int REPORT_PERIOD_BALANCED_ID = 3;
 	private static final boolean REPORT_PERIOD_ACTIVE = true;
 	private static final boolean REPORT_PERIOD_INACTIVE = false;
+	private static final boolean REPORT_PERIOD_BALANCED = true;
 
 	@BeforeClass
 	public static void tearUp() {
@@ -182,6 +187,11 @@ public class FormDataAccessServiceImplTest {
 		when(formDataDao.getWithoutRows(GOSB_TB1_CREATED_FORMDATA_ID)).thenReturn(fd);
 		fd = mockFormData(INACTIVE_FORMDATA_ID, Department.ROOT_BANK_ID, WorkflowState.ACCEPTED, FormDataKind.ADDITIONAL, REPORT_PERIOD_INACTIVE_ID, additionalFormType);
 		when(formDataDao.getWithoutRows(INACTIVE_FORMDATA_ID)).thenReturn(fd);
+
+		fd = mockFormData(TB1_CREATED_FORMDATA_BALANCED_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_BALANCED_ID, summaryFormType1);
+		when(formDataDao.getWithoutRows(TB1_CREATED_FORMDATA_BALANCED_ID)).thenReturn(fd);
+		fd = mockFormData(TB1_ACCEPTED_FORMDATA_BALANCED_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_BALANCED_ID, summaryFormType1);
+		when(formDataDao.getWithoutRows(TB1_ACCEPTED_FORMDATA_BALANCED_ID)).thenReturn(fd);
 		ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
 		
 		TAUserDao userDao = mock(TAUserDao.class);
@@ -203,10 +213,12 @@ public class FormDataAccessServiceImplTest {
 		
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		ReportPeriod rp;
-		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE);
+		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE_ID, REPORT_PERIOD_ACTIVE);
 		when(reportPeriodDao.get(REPORT_PERIOD_ACTIVE_ID)).thenReturn(rp);
-		rp = mockReportPeriod(REPORT_PERIOD_INACTIVE);
+		rp = mockReportPeriod(REPORT_PERIOD_INACTIVE_ID, REPORT_PERIOD_INACTIVE);
 		when(reportPeriodDao.get(REPORT_PERIOD_INACTIVE_ID)).thenReturn(rp);
+		rp = mockReportPeriod(REPORT_PERIOD_BALANCED_ID, REPORT_PERIOD_ACTIVE, REPORT_PERIOD_BALANCED);
+		when(reportPeriodDao.get(REPORT_PERIOD_BALANCED_ID)).thenReturn(rp);
 		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 	}
 
@@ -328,68 +340,78 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canDelete(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
 		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+
+		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID));
+		assertFalse(service.canDelete(BANK_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID));
+		assertFalse(service.canDelete(BANK_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID));
 	}
 	
 	@Test 
 	public void testCanCreateOperator() {
 		// Оператор может создавать первичные и выходные в своём подразделении
-		assertTrue(service.canCreate(BANK_OPERATOR_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_OPERATOR_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать консолидированные и выходные формы даже в своём
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать в чужом подразделении 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать в своём подразделении, если в подразделении не разрешена работа с такой формой
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
 	public void testCanCreateControl() {		
 		// Контролёр может создавать выходные формы
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
+		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Контролёр не может создавать формы, если они не разрешены в подразделении
-		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// TODO: случай, когда форма в чужом подразделении является источником для другой формы в этом же подразделении, а уже эта вторая форма
 		// является источником для одной из форм подразделения, к которому относится контролёр
 		
 		// Во всех остальных случаях контролёр не сможет создавать формы в чужих подразделениях 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
+		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+
+		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
 	public void testCanCreateControlUnp() {
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП может создавать консолидированные и сводные, передающиеся в вышестоящее подразделение
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID));
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
-		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID));
+		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+
+		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}	
 
 	@Test
@@ -407,9 +429,9 @@ public class FormDataAccessServiceImplTest {
 
 		//Перевести из состояния "Подготовлена" в "Создана" и из "Подготовлена" в "Принята" может контролер текущего уровня,
 		// контролер вышестоящего уровня или контролер УНП.
-		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
 				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
 				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
 
@@ -438,6 +460,15 @@ public class FormDataAccessServiceImplTest {
 		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
 				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED},
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
+		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED},
+				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
+		assertArrayEquals(new Object[] { },
+				service.getAvailableMoves(BANK_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
+		assertArrayEquals(new Object[] { },
+				service.getAvailableMoves(BANK_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
 
 	}
 
@@ -494,7 +525,7 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
 		assertArrayEquals(
-			new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
+			new Object[] {WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED},
 			params.getAvailableWorkflowMoves().toArray()
 		);
 

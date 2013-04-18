@@ -5,4 +5,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface DialogUiHandlers extends UiHandlers {
 	void onConfirm();
+	void hide();
 }

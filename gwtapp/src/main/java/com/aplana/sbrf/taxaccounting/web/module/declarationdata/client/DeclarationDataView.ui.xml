@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:pdf='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 <ui:style>
     .titleLabel {
@@ -21,6 +22,10 @@
         text-align: right;
         font-size: 12px;
     }
+
+    .imageStyle {
+        margin-top: 2px;
+    }
 </ui:style>
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
@@ -30,7 +35,7 @@
                 <g:VerticalPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку деклараций" ui:field="returnAnchor" img="img/btn-l.gif"/>
+                            <style:ButtonLink title="Перейти к списку деклараций" ui:field="returnAnchor" img="img/arrow-left-24.png"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
@@ -39,11 +44,28 @@
                     <g:HorizontalPanel height="35px">
                         <g:cell verticalAlignment="middle">
                             <g:SimplePanel width="140px" ui:field="downloadXml">
-                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton"/>
+                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton" img="img/download-xml-16.png"
+                                    title="Скачать декларацию в формате законодателя"/>
                             </g:SimplePanel>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton"/>
+                            <g:SimplePanel width="145px">
+                                <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="img/download-xls-16.png"
+                                    title="Скачать декларацию в формате Excel-документа"/>
+                            </g:SimplePanel>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <g:HorizontalPanel ui:field="datePanel">
+                                <g:cell width="205px" verticalAlignment="middle">
+                                    <g:Label >Дата формирования декларации:</g:Label>
+                                </g:cell>
+                                <g:cell verticalAlignment="middle">
+                                    <g:TextBox width="100px" ui:field="dateBox"/>
+                                </g:cell>
+                                <g:cell verticalAlignment="middle">
+                                    <g:Image ui:field="dateImage" url="img/calendar-16.png" styleName="{style.imageStyle}" />
+                                </g:cell>
+                            </g:HorizontalPanel>
                         </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
@@ -80,7 +102,7 @@
         </g:north>
 
         <g:center>
-            <g:SimplePanel ui:field="pdfPanel" height="100%" width="100%"/>
+            <pdf:PdfViewerWidget ui:field="pdfViewer" />
         </g:center>
 
     </g:DockLayoutPanel>

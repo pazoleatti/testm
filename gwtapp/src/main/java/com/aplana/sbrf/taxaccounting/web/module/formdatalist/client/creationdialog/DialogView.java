@@ -6,22 +6,17 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
-import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -38,33 +33,33 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@UiField
-	VerticalPanel reportPeriodPanel;
+	Panel reportPeriodPanel;
 
 	@UiField
-	VerticalPanel departmentSelectionTreePanel;
+	Panel departmentPanel;
 
 	@UiField(provided = true)
-	ValueListBox<FormDataKind> formDataKind;
+	ValueListBox<FormDataKind> formKind;
 
 	@UiField(provided = true)
 	ListBoxWithTooltip<FormType> formType;
 
 	@UiField
-	Button okButton;
+	Button continueButton;
 
 	@UiField
 	Button cancelButton;
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker reportPeriodPicker;
-	private TreePicker departmentPicker;
+	private DepartmentPicker departmentPicker;
 
 	@Inject
 	@UiConstructor
 	public DialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 
-		formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
+		formKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
 			@Override
 			public String render(FormDataKind object) {
 				if (object == null) {
@@ -95,7 +90,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void createDepartmentFilter(List<Department> list, Set<Integer> availableValues){
-		departmentPicker = new TreePicker("Выберите подразделение", false);
+		departmentPicker = new DepartmentPicker("Выберите подразделение", false);
 		departmentPicker.setTreeValues(list, availableValues);
 	}
 
@@ -108,15 +103,15 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@Override
 	public void setupUI(){
 		reportPeriodPanel.clear();
-		departmentSelectionTreePanel.clear();
+		departmentPanel.clear();
 
 		reportPeriodPanel.add(new Label("Отчетный период"));
 		reportPeriodPanel.add(reportPeriodPicker);
-		departmentSelectionTreePanel.add(new Label("Подразделение"));
-		departmentSelectionTreePanel.add(departmentPicker);
+		departmentPanel.add(new Label("Подразделение"));
+		departmentPanel.add(departmentPicker);
 	}
 
-	@UiHandler("okButton")
+	@UiHandler("continueButton")
 	public void onSave(ClickEvent event){
 		if(getUiHandlers() != null){
 			getUiHandlers().onConfirm();
@@ -131,7 +126,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void setKindList(List<FormDataKind> list) {
-		formDataKind.setAcceptableValues(list);
+		formKind.setAcceptableValues(list);
 	}
 
 	@Override
@@ -142,7 +137,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@Override
 	public FormDataFilter getFilterData(){
 		FormDataFilter formDataFilter = new FormDataFilter();
-		formDataFilter.setFormDataKind(formDataKind.getValue());
+		formDataFilter.setFormDataKind(formKind.getValue());
 		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
 		formDataFilter.setDepartmentId(new ArrayList<Integer>(departmentPicker.getSelectedItems().values()));
 		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(reportPeriodPicker.getSelectedReportPeriods().keySet()));
@@ -156,7 +151,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void setFormKindValue(FormDataKind value){
-		formDataKind.setValue(value);
+		formKind.setValue(value);
 	}
 
 	@Override
@@ -185,7 +180,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	public void clearInput(){
 		reportPeriodPicker.setSelectedReportPeriods(null);
 		departmentPicker.setSelectedItems(null);
-		formDataKind.setValue(null);
+		formKind.setValue(null);
 		formType.setValue(null);
 	}
 

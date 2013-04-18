@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
+
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 	
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации, логика вынесена в отдельный метод,
@@ -42,25 +47,33 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 * 
 	 * @param userId идентификатор пользователя
 	 * @param declarationDepartmentId идентификатор подразделения, к которому относится декларация
-	 * @return true, если пользователь является контролёром УНП или контролёром текущего уровня для декларации
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @return true - права есть, false - прав нет
 	 */
-	private boolean checkRolesForReading(int userId, int declarationDepartmentId) {
+	private boolean checkRolesForReading(int userId, int declarationDepartmentId, int reportPeriodId) {
 		TAUser user = userDao.getUser(userId);
 		Department declarationDepartment = departmentDao.getDepartment(declarationDepartmentId);
-		return checkRolesForReading(user, declarationDepartment);
+		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+		return checkRolesForReading(user, declarationDepartment, reportPeriod);
 	}
 	
 	/**
-	 * Перегруженный вариант {@link #checkRolesForReading(int, int)}, принимающий
+	 * Перегруженный вариант {@link #checkRolesForReading(int, int, int)}, принимающий
 	 * объекты вместо идентификаторов
 	 * 
 	 * В сущности функция проверка проверяет наличие прав на просмотр декларации, логика вынесена в отдельный метод,
 	 * так как используется в нескольких местах данного сервиса
 	 * @param user пользователь системы
 	 * @param declarationDepartment подразделение, к которому относится декларация
-	 * @return true, если пользователь является контролёром УНП или контролёром текущего уровня для декларации
+	 * @param reportPeriod отчетный период
+	 * @return true - права есть, false - прав нет
 	 */
-	private boolean checkRolesForReading(TAUser user, Department declarationDepartment) {
+	private boolean checkRolesForReading(TAUser user, Department declarationDepartment, ReportPeriod reportPeriod) {
+		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
+		if (reportPeriod.isBalancePeriod()) {
+			return false;
+		}
+
 		// Контролёр УНП может просматривать все декларации
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
 			return true;
@@ -77,8 +90,14 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	@Override
 	public boolean canRead(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
+
+		// Если отчетный период для ввода остатков то кидаем исключение
+		if (reportPeriodDao.get(declaration.getReportPeriodId()).isBalancePeriod()) {
+			return false;
+		}
+
 		// Просматривать декларацию может только контролёр УНП и контролёр текущего уровня для обособленных подразделений
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -100,7 +119,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры текущего уровня обособленного подразделения
-		return checkRolesForReading(userId, departmentId);
+		return checkRolesForReading(userId, departmentId, reportPeriodId);
 	}
 
 	@Override
@@ -111,7 +130,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Принять декларацию могут только контолёр текущего уровня обособленного подразделения и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -122,7 +141,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Отменить принятие декларацию могут только контолёр текущего уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -133,7 +152,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Удалять могут только контолёр текущего уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -144,7 +163,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Обновлять декларацию могут только контолёр текущего уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -155,6 +174,6 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return false;
 		}
 		// Скачивать файл в формате законодателя могут только контолёр текущего уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId());
+		return checkRolesForReading(userId, declaration.getDepartmentId(), declaration.getReportPeriodId());
 	}
 }

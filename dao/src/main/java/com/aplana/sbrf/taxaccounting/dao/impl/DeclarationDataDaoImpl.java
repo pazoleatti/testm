@@ -1,5 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
@@ -9,19 +23,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
-
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -73,6 +74,33 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
 		}
 	}
+	
+
+	@Override
+	public byte[] getXlsxData(long id) {
+		try {
+			return getJdbcTemplate().queryForObject(
+				"select data_xlsx from declaration_data where id = ?",
+				new Object[] { id },
+				byte[].class
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Декларация с id = %d не найдена в БД", id);
+		}
+	}
+
+	@Override
+	public byte[] getPdfData(long id) {
+		try {
+			return getJdbcTemplate().queryForObject(
+				"select data_pdf from declaration_data where id = ?",
+				new Object[] { id },
+				byte[].class
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Декларация с id = %d не найдена в БД", id);
+		}
+	}
 
 	@Override
 	public void setXmlData(long declarationDataId, String xmlData) {
@@ -90,6 +118,42 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		if (count == 0) {
 			throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
 		}
+	}
+	
+	@Override
+	public void setXlsxData(long declarationDataId, byte[] xlsxData) {
+		int count = getJdbcTemplate().update(
+				"update declaration_data set data_xlsx = ? where id = ?",
+				new Object[] {
+					xlsxData,
+					declarationDataId
+				},
+				new int[] {
+					Types.BINARY,
+					Types.NUMERIC
+				}
+			);
+			if (count == 0) {
+				throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
+			}
+	}
+
+	@Override
+	public void setPdfData(long declarationDataId, byte[] pdfData) {
+		int count = getJdbcTemplate().update(
+				"update declaration_data set data_pdf = ? where id = ?",
+				new Object[] {
+					pdfData,
+					declarationDataId
+				},
+				new int[] {
+					Types.BINARY,
+					Types.NUMERIC
+				}
+			);
+			if (count == 0) {
+				throw new DaoException("Не удалось сохранить данные в формате законодателя для декларации с id = %d, так как она не существует.");
+			}
 	}
 
 	@Override
@@ -272,4 +336,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			sql.append(" desc");
 		}
 	}
+
+
+
 }

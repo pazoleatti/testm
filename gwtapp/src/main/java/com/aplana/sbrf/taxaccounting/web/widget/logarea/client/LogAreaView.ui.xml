@@ -10,21 +10,17 @@
             padding-bottom: 5px;
             padding-left: 110px;
         }
-
         .title {
             text-align: center;
             color: white;
             font-size: 12px;
         }
-
         .floatRight {
             float: right;
         }
-
         .floatLeft {
             float: left;
         }
-
     </ui:style>
 
 	<g:DockLayoutPanel unit="PX" height="100%" width="100%">
@@ -37,10 +33,10 @@
                 <g:HTMLPanel width="110px" addStyleNames="{style.floatRight}" ui:field="htmlPanel">
                 	
                     <div class="{style.floatLeft}">
-                        <style:ButtonLink text="Печать" img="img/print.png" ui:field="printButton"/>
+                        <style:ButtonLink text="Печать" ui:field="printButton" img="img/printer-black-16.png" title="Отобразить печатное представление документа"/>
                     </div>
                     <div class="{style.floatRight}" style="margin-right: 20px;">
-                        <style:ButtonLink img="img/light_close.gif" ui:field="hideButton"/>
+                        <style:ButtonLink ui:field="hideButton" img="img/close-16.png" title="Закрыть панель"/>
                     </div>
                 </g:HTMLPanel>
 			</g:HorizontalPanel>

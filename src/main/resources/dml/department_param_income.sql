@@ -1,188 +1,176 @@
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (3, 1, 'ninja', 'enter', 'die', 'dollar', 'ssha', '213', null, 182000, null, null, null, null);
+values (3, 1, 'ninja', 'enter', 'die', 'dollar', 'ssha', '213', 2, 182000, null, null, 'XLR_FNP_TAXCOM_5_04', '5.01');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (2, 1, 'landi', 'visser', 'yo', 'scopie', 'fink', '213', 2, 2344, null, null, null, null);
+values (1, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность', 'Открытое акционерное общество «Сбербанк России»', '214', 2, 115886853, 77833550, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (1, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 2, 115886853, 77833550, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (5, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (5, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (6, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (6, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (7, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (7, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (9, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (9, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (10, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (10, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (11, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (11, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (12, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (12, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (13, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (13, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (14, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (14, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (15, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (15, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (17, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (17, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (19, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (19, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (18, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (18, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (21, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (21, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (22, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (22, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (25, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (25, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (24, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (24, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (23, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (23, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (28, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (28, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (31, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (31, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (30, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (30, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (29, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (29, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (33, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 13.5, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (33, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 13.5, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (35, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (35, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (36, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (36, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (45, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (38, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (46, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (43, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (47, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (42, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (48, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (39, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (49, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (40, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (50, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (41, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (51, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (45, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (56, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (46, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (57, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (47, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (53, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (48, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (54, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (49, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (55, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (50, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (58, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (51, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (60, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (56, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (62, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (57, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (63, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (53, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (61, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (54, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (65, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (55, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (71, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (58, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (66, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (60, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (2, 1, 'landi', 'visser', 'yo', 'scopie', 'fink', '213', 2, 2344, null, null, 'XLR_FNP_TAXCOM_5_04', '5.01');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (62, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (67, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (63, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (68, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (61, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (69, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (65, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (70, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (71, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (73, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (66, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (74, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (67, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (75, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (68, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (76, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (69, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (77, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (70, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (78, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (73, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (80, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (74, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (81, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (75, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (83, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (76, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (87, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (77, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (86, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (78, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (84, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (80, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (85, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (81, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (89, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (83, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (96, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (87, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (90, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (86, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (91, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (84, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (92, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (85, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (93, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (89, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (94, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (96, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (95, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (90, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (98, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (91, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (101, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (92, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (100, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (93, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (99, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (94, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (103, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (95, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (104, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (98, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (105, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (101, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (106, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (100, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (107, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (99, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (108, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (103, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (110, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (104, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (112, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (105, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (111, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (106, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (107, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (108, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (110, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (112, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (111, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
-insert into DEPARTMENT_PARAM_INCOME (department_id, signatory_id, signatory_surname, signatory_firstname, signatory_lastname, approve_doc_name, approve_org_name, tax_place_type_code, tax_rate, external_tax_sum, sum_difference, correction_sum, app_version, format_version)
-values (113, 2, 'Рыжих', 'Нина', 'Сергеевна', 'Доверенность от 12.03.2012 №365 Д', null, '214', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
+values (113, 1, 'Рыжих', 'Нина', 'Сергеевна', null, null, '220', 18, null, null, null, 'XLR_FNP_TAXCOM_5_04', '5.04');
 commit;
 

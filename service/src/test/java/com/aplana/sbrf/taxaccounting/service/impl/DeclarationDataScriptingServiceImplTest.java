@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -8,8 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -30,6 +39,12 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 public class DeclarationDataScriptingServiceImplTest {
 	private static DeclarationDataScriptingServiceImpl service;
+
+	private static final int DEPARTMENT_ID = 1;
+	private static final int REPORT_PERIOD_ID = 101;
+
+	private static final int REPORT_TEMPLATE_ID1 = 51;
+	private static final int REPORT_TEMPLATE_ID2 = 52;
 	
 	@BeforeClass
 	public static void tearUp() throws IOException {
@@ -38,13 +53,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
 		service.setApplicationContext(ctx);
-		
-		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
-		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
-		
-		FormDataDao formDataDao = mock(FormDataDao.class);
-		ReflectionTestUtils.setField(service, "formDataDao", formDataDao, FormDataDao.class);
-		
+
 		DeclarationType declarationType = mock(DeclarationType.class);
 		when(declarationType.getId()).thenReturn(1);
 		
@@ -52,26 +61,45 @@ public class DeclarationDataScriptingServiceImplTest {
 		DeclarationTemplate template1 = mock(DeclarationTemplate.class);
 		InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclaration.groovy");
 		String createScript = IOUtils.toString(stream, "UTF-8");
+		when(template1.getId()).thenReturn(REPORT_TEMPLATE_ID1);
 		when(template1.getCreateScript()).thenReturn(createScript);
 		when(template1.getDeclarationType()).thenReturn(declarationType);
-		
+
 		// Этот шаблон содержит ошибку в скрипте
 		DeclarationTemplate template2 = mock(DeclarationTemplate.class);
 		stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclarationException.groovy");
 		createScript = IOUtils.toString(stream, "UTF-8");
+		when(template2.getId()).thenReturn(REPORT_TEMPLATE_ID2);
 		when(template2.getCreateScript()).thenReturn(createScript);
 		when(template2.getDeclarationType()).thenReturn(declarationType);
 
 		DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);		
-		when(declarationTemplateDao.get(1)).thenReturn(template1);
-		when(declarationTemplateDao.get(2)).thenReturn(template2);
+		when(declarationTemplateDao.get(REPORT_TEMPLATE_ID1)).thenReturn(template1);
+		when(declarationTemplateDao.get(REPORT_TEMPLATE_ID2)).thenReturn(template2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao, DeclarationTemplateDao.class);
+
+		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+		List<DepartmentFormType> sourcesInfo = new ArrayList<DepartmentFormType>();
+		DepartmentFormType dft = new DepartmentFormType();
+		dft.setFormTypeId(1);
+		dft.setKind(FormDataKind.SUMMARY);
+		dft.setDepartmentId(DEPARTMENT_ID);
+		sourcesInfo.add(dft);
+		when(departmentFormTypeDao.getDeclarationSources(DEPARTMENT_ID, template1.getDeclarationType().getId())).thenReturn(sourcesInfo);
+		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
+
+		FormDataDao formDataDao = mock(FormDataDao.class);
+		FormData formData = new FormData();
+		formData.setState(WorkflowState.ACCEPTED);
+		when(formDataDao.find(1, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID)).thenReturn(formData);
+		ReflectionTestUtils.setField(service, "formDataDao", formDataDao, FormDataDao.class);
 	}
 	
 	@Test
 	public void testCreate() throws IOException, SAXException {
 		Logger logger = new Logger();
-		String xml = service.create(logger, 1, 1, 1);
+		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID1, REPORT_PERIOD_ID);
+		String xml = service.create(logger, declarationData, new Date().toString());
 
 		String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
 		XMLUnit.setIgnoreWhitespace(true);
@@ -85,7 +113,8 @@ public class DeclarationDataScriptingServiceImplTest {
 	@Test
 	public void testCreateWithException() {
 		Logger logger = new Logger();
-		String xml = service.create(logger, 1, 2, 1);
+		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
+		String xml = service.create(logger, declarationData, new Date().toString());
 		
 		assertNull(xml);
 		assertFalse(logger.getEntries().isEmpty());

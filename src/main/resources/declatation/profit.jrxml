@@ -86,34 +86,34 @@
 ($F{КБКСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="НалПУФедД" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУФед} != null)&&(Integer.parseInt($F{НалПУФед})>0) ?
+			<variableExpression><![CDATA[($F{НалПУФед} != null)&&(Long.parseLong($F{НалПУФед})>0) ?
 ($F{НалПУФед}+"-------------------------").substring(0,25)
 :"-------------------------"]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУФед} != null)&&(Integer.parseInt($F{НалПУФед})>0) ?
+			<initialValueExpression><![CDATA[($F{НалПУФед} != null)&&(Long.parseLong($F{НалПУФед})>0) ?
 ($F{НалПУФед}+"-------------------------").substring(0,25)
 :"-------------------------"]]></initialValueExpression>
 		</variable>
 		<variable name="НалПУСубД" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУСуб} != null)&&(Integer.parseInt($F{НалПУСуб})>0) ?
+			<variableExpression><![CDATA[($F{НалПУСуб} != null)&&(Long.parseLong($F{НалПУСуб})>0) ?
 ($F{НалПУСуб}+"-------------------------").substring(0,25)
 :"-------------------------"]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУСуб} != null)&&(Integer.parseInt($F{НалПУСуб})>0) ?
+			<initialValueExpression><![CDATA[($F{НалПУСуб} != null)&&(Long.parseLong($F{НалПУСуб})>0) ?
 ($F{НалПУСуб}+"-------------------------").substring(0,25)
 :"-------------------------"]]></initialValueExpression>
 		</variable>
 		<variable name="НалПУФедУ" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУФед} != null)&&(Integer.parseInt($F{НалПУФед})<0) ?
+			<variableExpression><![CDATA[($F{НалПУФед} != null)&&(Long.parseLong($F{НалПУФед})<0) ?
 ($F{НалПУФед}+"-------------------------").substring(1,26)
 :"-------------------------"]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУФед} != null)&&(Integer.parseInt($F{НалПУФед})<0) ?
+			<initialValueExpression><![CDATA[($F{НалПУФед} != null)&&(Long.parseLong($F{НалПУФед})<0) ?
 ($F{НалПУФед}+"-------------------------").substring(1,26)
 :"-------------------------"]]></initialValueExpression>
 		</variable>
 		<variable name="НалПУСубУ" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалПУСуб} != null)&&(Integer.parseInt($F{НалПУСуб})<0) ?
+			<variableExpression><![CDATA[($F{НалПУСуб} != null)&&(Long.parseLong($F{НалПУСуб})<0) ?
 ($F{НалПУСуб}+"-------------------------").substring(1,26)
 :"-------------------------"]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалПУСуб} != null)&&(Integer.parseInt($F{НалПУСуб})<0) ?
+			<initialValueExpression><![CDATA[($F{НалПУСуб} != null)&&(Long.parseLong($F{НалПУСуб})<0) ?
 ($F{НалПУСуб}+"-------------------------").substring(1,26)
 :"-------------------------"]]></initialValueExpression>
 		</variable>
@@ -285,7 +285,7 @@
 		<field name="Срок" class="java.lang.String">
 			<fieldDescription><![CDATA[УплСрок/@Срок]]></fieldDescription>
 		</field>
-		<variable name="ВидПлат" class="java.lang.String">
+		<variable name="ВидПлат" class="java.lang.String" resetType="Group" resetGroup="group1">
 			<variableExpression><![CDATA[$F{ВидПлат} == null ?
 "-------------------------"
 :
@@ -295,7 +295,7 @@
 :
 ($F{ВидПлат}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
-		<variable name="КБК" class="java.lang.String">
+		<variable name="КБК" class="java.lang.String" resetType="Group" resetGroup="group1">
 			<variableExpression><![CDATA[$F{КБК} == null ?
 "-------------------------"
 :
@@ -305,7 +305,7 @@
 :
 ($F{КБК}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
-		<variable name="ОКАТО" class="java.lang.String">
+		<variable name="ОКАТО" class="java.lang.String" resetType="Group" resetGroup="group1">
 			<variableExpression><![CDATA[$F{ОКАТО} == null ?
 "-------------------------"
 :
@@ -397,7 +397,7 @@ Arrays.asList(1)]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
 		<group name="group1" isStartNewPage="true">
-			<groupExpression><![CDATA[$F{ВидПлат}.concat($F{ОКАТО}.concat($F{КБК}))]]></groupExpression>
+			<groupExpression><![CDATA[$F{ВидПлат}.concat($F{ОКАТО}).concat($F{КБК})]]></groupExpression>
 		</group>
 	</subDataset>
 	<subDataset name="RashRealVneReal" whenResourceMissingType="Error" uuid="ffc3b3c8-3ce6-4d88-9a4c-3c9f385ef8fc">
@@ -16786,18 +16786,18 @@ Arrays.asList(1)]]></variableExpression>
 										</datasetRun>
 										<jr:listContents height="25" width="600">
 											<staticText>
-												<reportElement uuid="8ab56661-493f-436d-b665-bf6abe88229c" style="KL" x="355" y="3" width="15" height="20"/>
+												<reportElement uuid="8ab56661-493f-436d-b665-bf6abe88229c" style="KL" x="355" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="401225ec-6d34-492c-967c-8d457659c47f" style="KL" x="165" y="3" width="15" height="20"/>
+												<reportElement uuid="401225ec-6d34-492c-967c-8d457659c47f" style="KL" x="165" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
 												<reportElement uuid="881d802a-30de-4c6d-8c49-98cc3be36b17" x="75" y="3" width="15" height="20"/>
@@ -16807,32 +16807,32 @@ Arrays.asList(1)]]></variableExpression>
 												<text><![CDATA[.]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="c1b0dbeb-2c04-4bd1-8dd7-8f79ec1e73ac" style="KL" x="445" y="3" width="15" height="20"/>
+												<reportElement uuid="c1b0dbeb-2c04-4bd1-8dd7-8f79ec1e73ac" style="KL" x="445" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="d9c73c94-eb6a-4e9b-ac45-4a146d33a709" style="KL" x="370" y="3" width="15" height="20"/>
+												<reportElement uuid="d9c73c94-eb6a-4e9b-ac45-4a146d33a709" style="KL" x="370" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="c6dfd82b-c7e9-48d5-a740-d679d1e3c083" style="KL" x="550" y="3" width="15" height="20"/>
+												<reportElement uuid="c6dfd82b-c7e9-48d5-a740-d679d1e3c083" style="KL" x="550" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="401430da-b7c9-4679-9bd5-7d6b21d65a67" style="KL" x="535" y="3" width="15" height="20"/>
+												<reportElement uuid="401430da-b7c9-4679-9bd5-7d6b21d65a67" style="KL" x="535" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
 												<reportElement uuid="a027ecd7-f9c4-4291-be8a-ef0b22ee2376" x="244" y="3" width="55" height="20"/>
@@ -16842,11 +16842,11 @@ Arrays.asList(1)]]></variableExpression>
 												<text><![CDATA[040]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="d31240c1-34db-482a-be93-bc22d782584b" style="KL" x="150" y="3" width="15" height="20"/>
+												<reportElement uuid="d31240c1-34db-482a-be93-bc22d782584b" style="KL" x="150" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
 												<reportElement uuid="13a0d872-7921-4c7c-8863-d74d5f729509" x="120" y="3" width="15" height="20"/>
@@ -16856,116 +16856,116 @@ Arrays.asList(1)]]></variableExpression>
 												<text><![CDATA[.]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="17e74dc3-4ac2-4270-976b-30959465e62d" style="KL" x="385" y="3" width="15" height="20"/>
+												<reportElement uuid="17e74dc3-4ac2-4270-976b-30959465e62d" style="KL" x="385" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="5f85efde-76be-4f61-af1e-5d93eab13002" style="KL" x="520" y="3" width="15" height="20"/>
+												<reportElement uuid="5f85efde-76be-4f61-af1e-5d93eab13002" style="KL" x="520" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="45434d48-5ac0-4e76-83f8-ed783cfcbc8e" style="KL" x="90" y="3" width="15" height="20"/>
+												<reportElement uuid="45434d48-5ac0-4e76-83f8-ed783cfcbc8e" style="KL" x="90" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="64a822e5-e326-434e-af00-dccb0a913b52" style="KL" x="505" y="3" width="15" height="20"/>
+												<reportElement uuid="64a822e5-e326-434e-af00-dccb0a913b52" style="KL" x="505" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="30beabef-5b52-49ac-8327-c74ea953151b" style="KL" x="105" y="3" width="15" height="20"/>
+												<reportElement uuid="30beabef-5b52-49ac-8327-c74ea953151b" style="KL" x="105" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="8bc523ad-36a5-46af-80e2-6e7d3fd98e0b" style="KL" x="45" y="3" width="15" height="20"/>
+												<reportElement uuid="8bc523ad-36a5-46af-80e2-6e7d3fd98e0b" style="KL" x="45" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="ae22057b-690f-4dc8-ac3a-888700cdf571" style="KL" x="430" y="3" width="15" height="20"/>
+												<reportElement uuid="ae22057b-690f-4dc8-ac3a-888700cdf571" style="KL" x="430" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="211d8a72-65b6-4582-8916-fe86b5c11e01" style="KL" x="415" y="3" width="15" height="20"/>
+												<reportElement uuid="211d8a72-65b6-4582-8916-fe86b5c11e01" style="KL" x="415" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="933f5fbc-7584-40f3-8f28-61e950f2d4c8" style="KL" x="490" y="3" width="15" height="20"/>
+												<reportElement uuid="933f5fbc-7584-40f3-8f28-61e950f2d4c8" style="KL" x="490" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="32be9b7b-be19-4746-9378-7628c10f4c2b" style="KL" x="180" y="3" width="15" height="20"/>
+												<reportElement uuid="32be9b7b-be19-4746-9378-7628c10f4c2b" style="KL" x="180" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="1a69a8b9-b320-432c-a7db-67c6c598c4d6" style="KL" x="60" y="3" width="15" height="20"/>
+												<reportElement uuid="1a69a8b9-b320-432c-a7db-67c6c598c4d6" style="KL" x="60" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="d09d398b-8ba6-4319-bed7-10aeec79ae0e" style="KL" x="475" y="3" width="15" height="20"/>
+												<reportElement uuid="d09d398b-8ba6-4319-bed7-10aeec79ae0e" style="KL" x="475" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="617a5268-f625-4e25-9520-4410102c98da" style="KL" x="400" y="3" width="15" height="20"/>
+												<reportElement uuid="617a5268-f625-4e25-9520-4410102c98da" style="KL" x="400" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="c9ba921d-606c-4891-b310-66f334a526db" style="KL" x="460" y="3" width="15" height="20"/>
+												<reportElement uuid="c9ba921d-606c-4891-b310-66f334a526db" style="KL" x="460" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="6de12f38-a965-4283-b716-c1945cb922c7" style="KL" x="340" y="3" width="15" height="20"/>
+												<reportElement uuid="6de12f38-a965-4283-b716-c1945cb922c7" style="KL" x="340" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 											<staticText>
-												<reportElement uuid="39bd15e7-646d-4ef4-a23a-f33a39abcc56" style="KL" x="135" y="3" width="15" height="20"/>
+												<reportElement uuid="39bd15e7-646d-4ef4-a23a-f33a39abcc56" style="KL" x="135" y="3" width="15" height="19"/>
 												<textElement verticalAlignment="Middle">
 													<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 												</textElement>
-												<text><![CDATA[ ]]></text>
+												<text><![CDATA[-]]></text>
 											</staticText>
 										</jr:listContents>
 									</jr:list>

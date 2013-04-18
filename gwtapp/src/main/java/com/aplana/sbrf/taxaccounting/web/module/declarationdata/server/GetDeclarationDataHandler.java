@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -10,6 +15,9 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -19,8 +27,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarationDataAction, GetDeclarationDataResult> {
-    @Autowired
+public class GetDeclarationDataHandler
+		extends
+		AbstractActionHandler<GetDeclarationDataAction, GetDeclarationDataResult> {
+	
+	public static final int DEFAULT_IMAGE_RESOLUTION = 150;
+	
+	@Autowired
 	private DeclarationDataService declarationDataService;
 
 	@Autowired
@@ -38,31 +51,75 @@ public class GetDeclarationDataHandler extends AbstractActionHandler<GetDeclarat
 	@Autowired
 	private SecurityService securityService;
 
-    public GetDeclarationDataHandler() {
-        super(GetDeclarationDataAction.class);
-    }
+	public GetDeclarationDataHandler() {
+		super(GetDeclarationDataAction.class);
+	}
 
-    @Override
-    public GetDeclarationDataResult execute(GetDeclarationDataAction action, ExecutionContext context) throws ActionException {
+	@Override
+	public GetDeclarationDataResult execute(GetDeclarationDataAction action,
+			ExecutionContext context) throws ActionException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
 		GetDeclarationDataResult result = new GetDeclarationDataResult();
-		DeclarationData declaration = declarationDataService.get(action.getId(), userId);
-		result.setCanAccept(declarationAccessService.canAccept(userId, action.getId()));
-		result.setCanReject(declarationAccessService.canReject(userId, action.getId()));
-		result.setCanDownload(declarationAccessService.canDownloadXml(userId, action.getId()));
-		result.setCanDelete(declarationAccessService.canDelete(userId, action.getId()));
-		result.setTaxType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getTaxType());
-		result.setDeclarationType(declarationTemplateService.get(declaration.getDeclarationTemplateId()).getDeclarationType().getName());
-		result.setDepartment(departmentService.getDepartment(declaration.getDepartmentId()).getName());
-		result.setReportPeriod(reportPeriodDao.get(declaration.getReportPeriodId()).getName());
+		DeclarationData declaration = declarationDataService.get(
+				action.getId(), userId);
+		result.setDocDate(declarationDataService.getXmlDataDocDate(
+				action.getId(), userId));
+		result.setCanAccept(declarationAccessService.canAccept(userId,
+				action.getId()));
+		result.setCanReject(declarationAccessService.canReject(userId,
+				action.getId()));
+		result.setCanDownload(declarationAccessService.canDownloadXml(userId,
+				action.getId()));
+		result.setCanDelete(declarationAccessService.canDelete(userId,
+				action.getId()));
+		result.setTaxType(declarationTemplateService
+				.get(declaration.getDeclarationTemplateId())
+				.getDeclarationType().getTaxType());
+		result.setDeclarationType(declarationTemplateService
+				.get(declaration.getDeclarationTemplateId())
+				.getDeclarationType().getName());
+		result.setDepartment(departmentService.getDepartment(
+				declaration.getDepartmentId()).getName());
+		result.setReportPeriod(reportPeriodDao.get(
+				declaration.getReportPeriodId()).getName());
+
+		result.setPdf(generatePdfViewerModel(action, userId));
 
 		return result;
-    }
+	}
 
-    @Override
-    public void undo(GetDeclarationDataAction action, GetDeclarationDataResult result, ExecutionContext context) throws ActionException {
-        // Nothing!
-    }
+	/**
+	 * Формирует модель для PDFViewer
+	 * 
+	 * @param action
+	 * @param userId
+	 * @return
+	 */
+	private Pdf generatePdfViewerModel(GetDeclarationDataAction action,
+									   int userId) {
+		Pdf pdf = new Pdf();
+		pdf.setTitle("Список листов декларации");
+		List<PdfPage> pdfPages = new ArrayList<PdfPage>();
+		InputStream pdfData = new ByteArrayInputStream(
+				declarationDataService.getPdfData(action.getId(), userId));
+		int pageNumber = PDFImageUtils.getPageNumber(pdfData);
+		for (int i = 0; i < pageNumber; i++) {
+			PdfPage pdfPage = new PdfPage();
+			pdfPage.setTitle("Лист " + (i + 1));
+			pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d",
+					action.getId(), i));
+			pdfPages.add(pdfPage);
+		}
+		pdf.setPdfPages(pdfPages);
+		return pdf;
+	}
+
+	@Override
+	public void undo(GetDeclarationDataAction action,
+			GetDeclarationDataResult result, ExecutionContext context)
+			throws ActionException {
+		// Nothing!
+	}
 }

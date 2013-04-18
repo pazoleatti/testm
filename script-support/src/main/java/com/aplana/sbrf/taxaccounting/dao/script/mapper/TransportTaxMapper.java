@@ -9,7 +9,7 @@ public interface TransportTaxMapper {
 	/**
 	 * В БД есть уникальность по коду ОКАТО
 	 */
-	@Select("select name from transport_okato where okato = #{okato}")
+	@Select("select name from dict_okato where okato = #{okato}")
 	String getRegionName(@Param("okato") String okato);
 	
 	@Select({

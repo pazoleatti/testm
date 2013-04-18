@@ -3,8 +3,6 @@
     <fontFamily name="Courier New">
         <normal>courier/cour.ttf</normal>
         <bold>courier/courbd.ttf</bold>
-        <italic>courier/couri.ttf</italic>
-        <boldItalic>courier/courbi.ttf</boldItalic>
         <pdfEncoding>Cp1251</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
         <exportFonts>

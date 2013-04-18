@@ -25,14 +25,10 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Component
 public class ExceptionHandlerAspect {
 
-	private static final String ERROR_MESSAGE = "Операция%s%s не выполнена. ";
+	private static final String ERROR_MESSAGE = "Операция%s не выполнена. ";
 
 	private String getErrorMessage(String errName) {
-		if(errName.equals("")){
-			return String.format(ERROR_MESSAGE,"",errName);
-		}
-		errName = "\"" + errName + "\"";
-		return String.format(ERROR_MESSAGE," ", errName);
+		return String.format(ERROR_MESSAGE, errName.isEmpty() ? "" : " \"" + errName + "\"");
 	}
 
 	@AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) &&"
@@ -71,12 +67,9 @@ public class ExceptionHandlerAspect {
 	}
 
 	/**
-	 * <p>
 	 * Метод преобразующий стек трейс исключения в формат строки.
-	 * </p>
-	 * 
-	 * @param e
-	 *            брошенное исключение
+	 *
+	 * @param e брошенное исключение
 	 * @return строка содержащая в себе стектрейс исключения
 	 */
 	private static String formatException(Throwable e) {

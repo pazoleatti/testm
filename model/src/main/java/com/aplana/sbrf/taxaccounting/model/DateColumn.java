@@ -9,4 +9,15 @@ import java.io.Serializable;
  */
 public class DateColumn extends Column implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	private int formatId;
+
+	public int getFormatId() {
+		return formatId;
+	}
+
+	public void setFormatId(int formatId) {
+		this.formatId = formatId;
+	}
+
 }

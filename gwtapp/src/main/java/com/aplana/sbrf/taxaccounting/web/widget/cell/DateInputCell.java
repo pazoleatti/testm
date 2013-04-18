@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 
+import com.aplana.sbrf.taxaccounting.web.widget.datePicker.DatePickerWithYearSelector;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.core.client.*;
 import com.google.gwt.dom.client.*;
@@ -30,7 +31,7 @@ public class DateInputCell extends
 		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
 		SafeHtml input(String value);
 
-		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"img/calendar_icon.png\"/>")
+		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"img/calendar-16.png\"/>")
 		SafeHtml calendarIcon();
 	}
 
@@ -159,19 +160,19 @@ public class DateInputCell extends
 
 	@Override
 	public boolean isEditing(Context context, Element parent, Date value) {
-		ViewData viewData = getViewData(context.getKey());
-		return viewData == null ? false : viewData.isEditing();
+		ViewData vd = getViewData(context.getKey());
+		return vd == null ? false : vd.isEditing();
 	}
 
 	@Override
 	public void onBrowserEvent(Context context, Element parent, Date value,
 	                           NativeEvent event, ValueUpdater<Date> valueUpdater) {
 		Object key = context.getKey();
-		ViewData viewData = getViewData(key);
+		ViewData vd = getViewData(key);
 		this.context = context;
 		this.parent = parent;
 		this.valueUpdater = valueUpdater;
-		this.viewData = viewData;
+		this.viewData = vd;
 		if (Element.is(event.getEventTarget())) {
 			Element icon = Element.as(event.getEventTarget());
 			if(icon.hasAttribute("imageTypeCalendar")){
@@ -180,9 +181,9 @@ public class DateInputCell extends
 				datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
 				datePickerPanel.show();
 			} else {
-				if (viewData != null && viewData.isEditing()) {
+				if (vd != null && vd.isEditing()) {
 					//Если мы в режиме редактирования
-					editEvent(context, parent, value, viewData, event, valueUpdater);
+					editEvent(context, parent, value, vd, event, valueUpdater);
 				} else {
 					String type = event.getType();
 					int keyCode = event.getKeyCode();
@@ -190,11 +191,11 @@ public class DateInputCell extends
 							&& keyCode == KeyCodes.KEY_ENTER;
 					if (CLICK.equals(type) || enterPressed) {
 						// Перейти в режим редактирования
-						if (viewData == null) {
-							viewData = new ViewData(value);
-							setViewData(key, viewData);
+						if (vd == null) {
+							vd = new ViewData(value);
+							setViewData(key, vd);
 						} else {
-							viewData.setEditing(true);
+							vd.setEditing(true);
 						}
 						edit(context, parent, value);
 					}
@@ -207,17 +208,17 @@ public class DateInputCell extends
 	public void render(Context context, Date value, SafeHtmlBuilder sb) {
 		// Get the view data.
 		Object key = context.getKey();
-		ViewData viewData = getViewData(key);
-		if (viewData != null && !viewData.isEditing() && value != null
-				&& value.equals(viewData.getText())) {
+		ViewData vd = getViewData(key);
+		if (vd != null && !vd.isEditing() && value != null
+				&& value.equals(vd.getText())) {
 			clearViewData(key);
-			viewData = null;
+			vd = null;
 		}
 
 		Date toRender = value;
-		if (viewData != null) {
-			Date text = viewData.getText();
-			if (viewData.isEditing()) {
+		if (vd != null) {
+			Date text = vd.getText();
+			if (vd.isEditing()) {
         /*
          * Do not use the renderer in edit mode because the value of a text
          * input element is always treated as text. SafeHtml isn't valid in the
@@ -523,20 +524,15 @@ public class DateInputCell extends
 		return true;
 	}
 
-	//true - если пользователь поле ввода содержит пустое значение или строку из пробелов
+	/**
+	 * Проверяет наличие значения в поле ввода
+	 * @param parent parent Element
+	 * @return true, если пользователь поле ввода содержит пустое значение или строку из пробелов
+	 */
 	private static boolean isBlank(Element parent) {
 		InputElement input = (InputElement) parent.getFirstChild();
-		String cs = input.getValue();
-		int strLen;
-		if (cs == null || (strLen = cs.length()) == 0) {
-			return true;
-		}
-		for (int i = 0; i < strLen; i++) {
-			if ((" ".equals(cs.charAt(i)) == false)) {
-				return false;
-			}
-		}
-		return true;
+		String text = input.getValue();
+		return text == null || text.trim().isEmpty();
 	}
 
 	private void commitIfValueIsCorrect(Context context, Element parent, Date value, ViewData viewData, ValueUpdater<Date> valueUpdater){

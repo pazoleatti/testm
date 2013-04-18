@@ -32,6 +32,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				((NumericColumn) result).setMaxLength(rs.getInt("max_length"));
 			} else if ("D".equals(type)) {
 				result = new DateColumn();
+				((DateColumn) result).setFormatId(rs.getInt("format"));
 			} else if ("S".equals(type)) {
 				result = new StringColumn();
 				((StringColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
@@ -112,8 +113,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 		if (!newColumns.isEmpty()) {
 			jt.batchUpdate(
-				"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking) " +
-				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking, format) " +
+				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -137,15 +138,22 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
 							}
 							ps.setInt(9, ((StringColumn) col).getMaxLength());
+							ps.setNull(11, Types.INTEGER);
 						} else if (col instanceof NumericColumn) {
 							ps.setString(6, ((NumericColumn) col).getDictionaryCode());
 							if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
 								log.warn("Превышена максимально допустимая длина строки в столбце " + col.getName());
 							}
 							ps.setInt(9, ((NumericColumn) col).getMaxLength());
+							ps.setNull(11, Types.INTEGER);
+						} else if (col instanceof DateColumn) {
+							ps.setInt(11, ((DateColumn)col).getFormatId());
+							ps.setNull(6, Types.VARCHAR);
+							ps.setNull(9, Types.INTEGER);
 						} else {
 							ps.setNull(6, Types.VARCHAR);
 							ps.setNull(9, Types.INTEGER);
+							ps.setNull(11, Types.INTEGER);
 						}
 
 						ps.setInt(7, col.getOrder());
@@ -164,7 +172,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
 					"update form_column set name = ?, alias = ?, type = ?, width = ?, " +
-							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?" +
+							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?, format = ?" +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
@@ -184,19 +192,25 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							if (col instanceof StringColumn) {
 								ps.setString(6, ((StringColumn)col).getDictionaryCode());
 								ps.setInt(9, ((StringColumn) col).getMaxLength());
+								ps.setNull(11, Types.INTEGER);
 							} else if(col instanceof NumericColumn){
 								ps.setString(6, ((NumericColumn)col).getDictionaryCode());
-								System.out.println(((NumericColumn) col).getMaxLength());
 								ps.setInt(9, ((NumericColumn) col).getMaxLength());
+								ps.setNull(11, Types.INTEGER);
+							} else if (col instanceof DateColumn) {
+								ps.setInt(11, ((DateColumn)col).getFormatId());
+								ps.setNull(6, Types.VARCHAR);
+								ps.setNull(9, Types.INTEGER);
 							} else {
 								ps.setNull(6, Types.VARCHAR);
 								ps.setNull(9, Types.INTEGER);
+								ps.setNull(11, Types.INTEGER);
 							}
 
 							ps.setInt(7, col.getOrder());
 							ps.setString(8, col.getGroupName());
 							ps.setBoolean(10, col.isChecking());
-							ps.setInt(11, col.getId());
+							ps.setInt(12, col.getId());
 						}
 
 						@Override

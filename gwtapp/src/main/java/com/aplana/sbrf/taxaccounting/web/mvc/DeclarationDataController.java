@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,77 +15,69 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 
 @Controller
+@RequestMapping(value = "declarationData")
 public class DeclarationDataController {
 
 	@Autowired
-	DeclarationDataService declarationService;
+	private DeclarationDataService declarationService;
 
 	@Autowired
 	private SecurityService securityService;
 
-	@RequestMapping(value = "/downloadExcel/{declarationId}", method = RequestMethod.GET)
-	public void processDownloadExcel(@PathVariable int declarationId,
-			HttpServletResponse resp) throws IOException {
+	
+	@RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
+	public void xlsx(@PathVariable long id, HttpServletResponse response)
+			throws IOException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
-		if (declarationService.getXlsxData(declarationId, userId) != null) {
-			OutputStream respOut = resp.getOutputStream();
-			String fileName = getFileName(declarationId, userId, "xlsx");;
-			resp.setContentType("application/octet-stream");
-			resp.setHeader("Content-Disposition", "attachment; filename=\""
-					+ fileName + "\"");
-			respOut.write(declarationService.getXlsxData(declarationId, userId));
-			respOut.close();
-		} else {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
+		byte[] xlsxData = declarationService.getXlsxData(id, userId);
+		String fileName = getFileName(id, userId, "xlsx");
+
+		response.setContentType("application/octet-stream");
+		response.setHeader("Content-Disposition", "attachment; filename=\""
+				+ fileName + "\"");
+		response.getOutputStream().write(xlsxData);
+
 	}
 
-	@RequestMapping(value = "/downloadXml/{declarationId}", method = RequestMethod.GET)
-	public void processDownloadXml(@PathVariable int declarationId,
-			HttpServletResponse resp) throws IOException {
+	
+	@RequestMapping(value = "/pageImage/{id}/{pageId}", method = RequestMethod.GET)
+	public void pageImage(@PathVariable int id, @PathVariable int pageId,
+			HttpServletResponse response) throws IOException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
-		if (declarationService.getXmlData(declarationId, userId) != null) {
-			String fileName = getFileName(declarationId, userId, "xml");
-			OutputStream respOut = resp.getOutputStream();
-			resp.setContentType("application/octet-stream");
-			resp.setHeader("Content-Disposition", "attachment; filename=\""
-					+ fileName + "\"");
-			respOut.write(declarationService.getXmlData(declarationId, userId)
-					.getBytes());
-			respOut.close();
-		} else {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
+		InputStream pdfData = new ByteArrayInputStream(
+				declarationService.getPdfData(id, userId));
+		PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
+				pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
+		response.setContentType("image/png");
+		pdfData.close();
 	}
 
-	@RequestMapping(value = "/downloadPDF/{declarationId}", method = RequestMethod.GET)
-	public void processDownloadPdf(@PathVariable int declarationId,
-			HttpServletResponse resp) throws IOException {
+	
+	@RequestMapping(value = "/xml/{id}", method = RequestMethod.GET)
+	public void xml(@PathVariable int id, HttpServletResponse response)
+			throws IOException {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 
-		if (declarationService.getPdfData(declarationId, userId) != null) {
-			OutputStream respOut = resp.getOutputStream();
-			resp.setContentType("application/pdf");
-			byte[] pdf = declarationService.getPdfData(declarationId, userId);
-			resp.setContentLength(pdf.length);
-			respOut.write(pdf);
-			respOut.close();
-		} else {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
+		String xmlData = declarationService.getXmlData(id, userId);
+		String fileName = getFileName(id, userId, "xml");
+
+		response.setContentType("application/octet-stream");
+		response.setHeader("Content-Disposition", "attachment; filename=\""
+				+ fileName + "\"");
+		response.getOutputStream().write(xmlData.getBytes("windows-1251"));
 	}
 
-	// TODO: Получение имени должно быть в сервисе.
-	protected String getFileName(int declarationId, int userId,
-			String fileExtension) {
-		return declarationService.getXmlDataFileName(declarationId, userId)
-				+ '.' + fileExtension;
+	private String getFileName(long id, int userId, String fileExtension) {
+		return declarationService.getXmlDataFileName(id, userId) + '.'
+				+ fileExtension;
 	}
 }

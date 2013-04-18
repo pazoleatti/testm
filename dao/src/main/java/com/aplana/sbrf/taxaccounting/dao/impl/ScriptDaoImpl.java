@@ -118,7 +118,6 @@ public class ScriptDaoImpl extends AbstractDao implements ScriptDao {
 				FormDataEvent event = entry.getKey();
 				List<Script> scripts = entry.getValue();
 				for (int i = 0; i < scripts.size(); i++) {
-					System.out.println("event.getCode(): " + event.getCode() + " scripts.get(i).getId(): " + scripts.get(i).getId() + " order:" + i);
 					args.add(new Object[]{event.getCode(), scripts.get(i).getId(), i});
 				}
 			}

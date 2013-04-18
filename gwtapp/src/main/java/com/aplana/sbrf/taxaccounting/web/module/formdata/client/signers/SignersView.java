@@ -69,7 +69,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	private FormDataPerformer performer;
 	private boolean readOnlyMode;
 	private final SingleSelectionModel<FormDataSigner> selectionModel = new SingleSelectionModel<FormDataSigner>();
-	private static final int NAME_AND_POSITION_MAX_LENGHT = 100;
+	private static final int NAME_AND_POSITION_MAX_LENGTH = 100;
 
 	@Inject
 	public SignersView(Binder uiBinder, EventBus eventBus) {
@@ -271,10 +271,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		nameColumn.setFieldUpdater(new FieldUpdater<FormDataSigner, String>() {
 			@Override
 			public void update(int index, FormDataSigner signer, String value) {
-				if (value.length() <= NAME_AND_POSITION_MAX_LENGHT) {
+				if (value.length() <= NAME_AND_POSITION_MAX_LENGTH) {
 					signer.setName(value);
 				} else {
-					signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGHT));
+					signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
 					Window.alert("Количество символов для ФИО подписанта превысило допустимое значение 100");
 				}
 			}
@@ -290,10 +290,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		positionColumn.setFieldUpdater(new FieldUpdater<FormDataSigner, String>() {
 			@Override
 			public void update(int index, FormDataSigner signer, String value) {
-				if (value.length() <= NAME_AND_POSITION_MAX_LENGHT) {
+				if (value.length() <= NAME_AND_POSITION_MAX_LENGTH) {
 					signer.setPosition(value);
 				} else {
-					signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGHT));
+					signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
 					Window.alert("Количество символов для должности подписанта превысило допустимое значение 100");
 				}
 			}

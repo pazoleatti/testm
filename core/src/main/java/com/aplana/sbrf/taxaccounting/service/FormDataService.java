@@ -20,13 +20,14 @@ public interface FormDataService {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}, к которому относится форма
 	 * @param kind {@link FormDataKind тип налоговой формы} (первичная, сводная, и т.д.), это поле необходимо, так как некоторые виды
 	 *		налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
-	 *		- в виде первичной и консолидированной) 
+	 *		- в виде первичной и консолидированной)
+	 * @param reportPeriod отчетный период в котором создается форма
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав создавать налоговую форму с такими параметрами
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
-	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind);
+	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
 	
 	/**
 	 * Выполнить расчёты по налоговой форме

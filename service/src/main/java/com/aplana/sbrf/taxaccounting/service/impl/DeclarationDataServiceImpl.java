@@ -1,18 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import net.sf.jasperreports.engine.JRException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -21,6 +17,7 @@ import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +28,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 
 /**
  * Сервис для работы с декларациями
@@ -63,17 +65,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
 
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+	public static final String TAG_FILE = "Файл";
+	public static final String TAG_DOCUMENT = "Документ";
+	public static final String ATTR_FILE_ID = "ИдФайл";
+	public static final String ATTR_DOC_DATE = "ДатаДок";
 
 	@Override
 	@Transactional(readOnly = false)
-	public long createDeclaration(Logger logger, int declarationTemplateId,
+	public long create(Logger logger, int declarationTemplateId,
 			int departmentId, int userId, int reportPeriodId) {
-		// Если отчетный период для ввода остатков то кидаем исключение
-		if (reportPeriodDao.get(reportPeriodId).isBalancePeriod()) {
-			throw new IllegalArgumentException("Нельзя создавать декларацию в отчетном периоде для ввода остатков");
-		}
 		if (declarationDataAccessService.canCreate(userId,
 				declarationTemplateId, departmentId, reportPeriodId)) {
 			DeclarationData newDeclaration = new DeclarationData();
@@ -82,16 +82,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			newDeclaration.setAccepted(false);
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 
-			long declarationId = declarationDataDao.saveNew(newDeclaration);
-
-			log.debug("New declaration saved, id = " + declarationId);
-			String xml = declarationDataScriptingService.create(logger,
-					departmentId, declarationTemplateId, reportPeriodId);
-			if(logger.containsLevel(LogLevel.ERROR)){
-				throw new ServiceLoggerException("Есть ошибки в скрипте создания декларации", logger.getEntries());
-			}
-			declarationDataDao.setXmlData(declarationId, xml);
-			return declarationId;
+			long id = declarationDataDao.saveNew(newDeclaration);
+			setDeclarationBlobs(logger, newDeclaration, new Date().toString());
+			return id;
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для создания декларации с указанными параметрами");
@@ -99,9 +92,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public DeclarationData get(long declarationId, int userId) {
-		if (declarationDataAccessService.canRead(userId, declarationId)) {
-			return declarationDataDao.get(declarationId);
+	@Transactional(readOnly = false)
+	public void reCreate(Logger logger, long id, int userId,
+			String docDate) {
+		if (declarationDataAccessService.canRefresh(userId, id)) {
+			DeclarationData declarationData = declarationDataDao.get(id);
+			setDeclarationBlobs(logger, declarationData, docDate);
+		} else {
+			throw new AccessDeniedException(
+					"Недостаточно прав для обновления указанной декларации");
+		}
+	}
+
+
+
+	@Override
+	public DeclarationData get(long id, int userId) {
+		if (declarationDataAccessService.canRead(userId, id)) {
+			return declarationDataDao.get(id);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав на просмотр данных декларации");
@@ -110,9 +118,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void delete(long declarationId, int userId) {
-		if (declarationDataAccessService.canDelete(userId, declarationId)) {
-			declarationDataDao.delete(declarationId);
+	public void delete(long id, int userId) {
+		if (declarationDataAccessService.canDelete(userId, id)) {
+			declarationDataDao.delete(id);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав на удаление декларации");
@@ -121,18 +129,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void setAccepted(long declarationId, boolean accepted, int userId) {
+	public void setAccepted(Logger logger, long id, boolean accepted, int userId) {
 		if (accepted) {
-			if (!declarationDataAccessService.canAccept(userId, declarationId)) {
-				throw new AccessDeniedException("Невозможно принять декларацию");
+			if (!declarationDataAccessService.canAccept(userId, id)) {
+				throw new AccessDeniedException(
+						"Недостаточно прав для принятия декларации");
+			}
+			log.debug("Accept declaration, id = " + id);
+			DeclarationData declarationData = declarationDataDao.get(id);
+			declarationData.setAccepted(true);
+			declarationDataScriptingService.accept(logger, declarationData);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Есть ошибки в скрипте принятия декларации",
+						logger.getEntries());
 			}
 		} else {
-			if (!declarationDataAccessService.canReject(userId, declarationId)) {
+			if (!declarationDataAccessService.canReject(userId, id)) {
 				throw new AccessDeniedException(
-						"Невозможно отменить принятие декларации");
+						"Недостаточно прав для отмены принятия декларации");
 			}
 		}
-		declarationDataDao.setAccepted(declarationId, accepted);
+		declarationDataDao.setAccepted(id, accepted);
 	}
 
 	@Override
@@ -140,30 +158,32 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (declarationDataAccessService.canDownloadXml(userId, declarationId)) {
 			return declarationDataDao.getXmlData(declarationId);
 		} else {
-			throw new AccessDeniedException("Невозможно получить xml");
+			throw new AccessDeniedException(
+					"Нет прав на получение декларации в формате законодателя (xml)");
 		}
 	}
 
 	@Override
-	public String getXmlDataFileName(int declarationDataId, int userId) {
-
-		final String ATTR_FILE_ID = "ИдФайл";
-		final String TAG_FILE = "Файл";
-
+	public String getXmlDataFileName(long declarationDataId, int userId) {
 		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
-			String xml = declarationDataDao.getXmlData(declarationDataId);
-			InputSource inputSource = new InputSource(new StringReader(xml));
-			Document document;
-			try {
-				document = DocumentBuilderFactory.newInstance()
-						.newDocumentBuilder().parse(inputSource);
-			} catch (Exception e) {
-				throw new ServiceException(
-						"Неудалось распарсить документ в формате законодателя");
-			}
+			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
+			return fileNameNode.getTextContent();
+		} else {
+			throw new AccessDeniedException(
+					"Недостаточно прав на просмотр данных декларации");
+		}
+	}
+
+	@Override
+	public String getXmlDataDocDate(long declarationDataId, int userId) {
+		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
+			Document document = getDocument(declarationDataId);
+			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
+			NamedNodeMap attributes = fileNode.getAttributes();
+			Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
 			return fileNameNode.getTextContent();
 		} else {
 			throw new AccessDeniedException("Невозможно получить xml");
@@ -171,17 +191,84 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public byte[] getXlsxData(long declarationId, int userId) {
-		if (declarationDataAccessService.canRead(userId, declarationId)) {
-			DeclarationData declaration = declarationDataDao.get(declarationId);
-			byte[] jasperTemplate = declarationTemplateService
-					.getJasper(declaration.getDeclarationTemplateId());
-			String xmlData = declarationDataDao.getXmlData(declarationId);
-			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
+	public byte[] getXlsxData(long id, int userId) {
+		if (declarationDataAccessService.canRead(userId, id)) {
+			return declarationDataDao.getXlsxData(id);
+		} else {
+			throw new AccessDeniedException("Нет прав на просмотр декларации");
+		}
+	}
+
+	@Override
+	public byte[] getPdfData(long id, int userId) {
+		if (declarationDataAccessService.canRead(userId, id)) {
+			return declarationDataDao.getPdfData(id);
+		} else {
+			throw new AccessDeniedException("Нет прав на просмотр декларации");
+		}
+	}
+	
+	private void setDeclarationBlobs(Logger logger,
+			DeclarationData declarationData, String docDate) {
+
+		// Генерация и сохранение XML
+		String xml = declarationDataScriptingService.create(logger,
+				declarationData, docDate);
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			throw new ServiceLoggerException(
+					"Есть ошибки в скрипте создания декларации",
+					logger.getEntries());
+		}
+		declarationDataDao.setXmlData(declarationData.getId(), xml);
+
+		// Заполнение отчета и экспорт в формате PDF и XLSX
+		JasperPrint jasperPrint = fillReport(xml,
+				declarationTemplateService.getJasper(declarationData
+						.getDeclarationTemplateId()));
+		declarationDataDao.setPdfData(declarationData.getId(),
+				exportPDF(jasperPrint));
+		declarationDataDao.setXlsxData(declarationData.getId(),
+				exportXLSX(jasperPrint));
+
+	}
+
+	private static JasperPrint fillReport(String xml, byte[] jasperTemplate) {
+		try {
+			InputSource inputSource = new InputSource(new StringReader(xml));
+			Document document = JRXmlUtils.parse(inputSource);
+
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put(JRXPathQueryExecuterFactory.PARAMETER_XML_DATA_DOCUMENT,
+					document);
+
+			return JasperFillManager.fillReport(new ByteArrayInputStream(
+					jasperTemplate), params);
+
+		} catch (Exception e) {
+			throw new ServiceException("Невозможно заполнить отчет", e);
+		}
+	}
+
+	private Document getDocument(long declarationDataId) {
+		try {
+			String xml = declarationDataDao.getXmlData(declarationDataId);
+			InputSource inputSource = new InputSource(new StringReader(xml));
+
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.parse(inputSource);
+		} catch (Exception e) {
+			throw new ServiceException(
+					"Неудалось получить структуру документа", e);
+		}
+	}
+
+	private static byte[] exportXLSX(JasperPrint jasperPrint) {
+		try {
 			JRXlsxExporter exporter = new JRXlsxExporter();
-			ByteArrayOutputStream xls = new ByteArrayOutputStream();
-			exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT, print);
-			exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, xls);
+			ByteArrayOutputStream data = new ByteArrayOutputStream();
+			exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
+					jasperPrint);
+			exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
 			exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
 					Boolean.TRUE);
 			exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
@@ -192,81 +279,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			exporter.setParameter(
 					JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS,
 					Boolean.TRUE);
-			try {
-				exporter.exportReport();
-			} catch (JRException e) {
-				log.error(e.getMessage(), e);
-				throw new ServiceException("Невозможно экспортировать отчет");
-			}
-			return xls.toByteArray();
-		} else {
-			throw new AccessDeniedException(
-					"Невозможно получить xlsx, так как у пользователя нет прав на просмотр декларации");
-		}
-	}
 
-	@Override
-	public byte[] getPdfData(long declarationId, int userId) {
-		if (declarationDataAccessService.canRead(userId, declarationId)) {
-			DeclarationData declaration = declarationDataDao.get(declarationId);
-			byte[] jasperTemplate = declarationTemplateService
-					.getJasper(declaration.getDeclarationTemplateId());
-			String xmlData = declarationDataDao.getXmlData(declarationId);
-			JasperPrint print = getJasperPrint(xmlData, jasperTemplate);
-			JRPdfExporter exporter = new JRPdfExporter();
-			ByteArrayOutputStream pdf = new ByteArrayOutputStream();
-			exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, print);
-			exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, pdf);
-			try {
-				exporter.exportReport();
-			} catch (JRException e) {
-				log.error(e.getMessage(), e);
-				throw new ServiceException("Невозможно экспортировать отчет");
-			}
-			return pdf.toByteArray();
-		} else {
-			throw new AccessDeniedException(
-					"Невозможно получить pdf, так как у пользователя нет прав на просмотр декларации");
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = false)
-	public void refreshDeclaration(Logger logger, long declarationDataId,
-			int userId) {
-		if (declarationDataAccessService.canRefresh(userId, declarationDataId)) {
-			log.debug("Refreshing declaration with id = "
-					+ declarationDataId);
-			DeclarationData declarationData = declarationDataDao
-					.get(declarationDataId);
-			String xml = declarationDataScriptingService.create(logger,
-					declarationData.getDepartmentId(),
-					declarationData.getDeclarationTemplateId(),
-					declarationData.getReportPeriodId());
-			if(logger.containsLevel(LogLevel.ERROR)){
-				throw new ServiceLoggerException("Есть ошибки в скрипте создания декларации", logger.getEntries());
-			}
-			declarationDataDao.setXmlData(declarationDataId, xml);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав для обновления указанной декларации");
-		}
-	}
-
-	private JasperPrint getJasperPrint(String xml, byte[] jasperTemplate) {
-		try {
-			InputSource inputSource = new InputSource(new StringReader(xml));
-			Document document = JRXmlUtils.parse(inputSource);
-	
-			Map<String, Object> params = new HashMap<String, Object>();		
-			params.put(JRXPathQueryExecuterFactory.PARAMETER_XML_DATA_DOCUMENT, document);
-			
-			return JasperFillManager.fillReport(new ByteArrayInputStream(
-					jasperTemplate), params);
-			
+			exporter.exportReport();
+			return data.toByteArray();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw new ServiceException("Невозможно заполнить отчет");
+			throw new ServiceException(
+					"Невозможно экспортировать отчет в XLSX", e);
+		}
+	}
+
+	private static byte[] exportPDF(JasperPrint jasperPrint) {
+		try {
+			JRPdfExporter exporter = new JRPdfExporter();
+			ByteArrayOutputStream data = new ByteArrayOutputStream();
+			exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT,
+					jasperPrint);
+			exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, data);
+
+			exporter.exportReport();
+			return data.toByteArray();
+		} catch (Exception e) {
+			throw new ServiceException("Невозможно экспортировать отчет в PDF",
+					e);
 		}
 	}
 

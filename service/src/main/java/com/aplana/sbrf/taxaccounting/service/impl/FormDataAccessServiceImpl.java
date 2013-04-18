@@ -128,8 +128,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			//Нельзя редактировать НФ для неактивного налогового периода
 			return false;
 		}
-
-		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+		if (formDataReportPeriod.isBalancePeriod()) {
+			switch (state){
+				case CREATED:
+					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP();
+				case ACCEPTED:
+					return false; //Нельзя редактировать НФ в состоянии "Принята"
+				default:
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
+			}
+		} else if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
              Логика, согласно Бизнес-требованиям:
@@ -215,16 +224,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId) {
+	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
 		TAUser user = userDao.getUser(userId);
 		Department formDataDepartment = departmentService.getDepartment(departmentId);
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		int formTypeId = formTemplate.getType().getId();
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formDataDepartment.getId(), formTypeId, kind);
-		return canCreate(formDataAccess, formTypeId, kind, formDataDepartment);
+		return canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
 	}
 	
-	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment) {
+	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
 		// Проверяем, что в подразделении вообще можно работать с формами такого вида и типа
 		boolean found = false;
 		for (DepartmentFormType dft: formDataDepartment.getDepartmentFormTypes()) {
@@ -236,8 +245,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		if (!found) {
 			return false;
 		}
-
-		if(kind == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+		if (reportPeriod.isBalancePeriod()) {
+			System.out.println("Can create: " + (formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()));
+			return formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+		} else if(kind == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень */
 			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
@@ -291,7 +304,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		}
 		WorkflowState state = formData.getState();
 		// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
-		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod() && !formDataAccess.isFormDataHasDestinations()) {
+		if (formDataReportPeriod.isBalancePeriod()) {
 			switch (state) {
 				case CREATED:
 					result.add(WorkflowMove.CREATED_TO_ACCEPTED);
@@ -310,8 +323,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case PREPARED:
 					if (formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
 							|| formDataAccess.isControllerOfUNP()) {
-						result.add(WorkflowMove.PREPARED_TO_CREATED);
 						result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
+						result.add(WorkflowMove.PREPARED_TO_CREATED);
 					}
 					break;
 				case ACCEPTED:

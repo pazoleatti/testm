@@ -151,6 +151,10 @@ public abstract class Column implements Ordered, Serializable {
 		this.checking = checking;
 	}
 
+	/**
+	 * Возвращает объект, который форматирует значения в ячейках
+	 * @return
+	 */
 	public Formatter getFormatter() {
 		return new Formatter() {
 			@Override

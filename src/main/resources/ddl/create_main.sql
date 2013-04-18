@@ -53,32 +53,33 @@ comment on column dict_region.name is 'наименование';
 comment on column dict_region.okato is 'код ОКАТО';
 comment on column dict_region.okato_definition is 'определяющая часть кода ОКАТО';
 -----------------------------------------------------------------------------------------------------------
-create table transport_okato (
+create table dict_okato (
   id number(9) not null,
   parent_id number(9),
   okato varchar(11) not null,
   name varchar(510) not null
 );
-alter table transport_okato add constraint transport_okato_ok primary key(id);
-alter table transport_okato add constraint transport_okato_unique_okato unique (okato);
-alter table transport_okato add constraint transport_okato_fk_parent_id foreign key (parent_id) references transport_okato(id);
+alter table dict_okato add constraint dict_okato_pk primary key(id);
+alter table dict_okato add constraint dict_okato_unique_okato unique (okato);
+alter table dict_okato add constraint dict_okato_fk_parent_id foreign key (parent_id) references dict_okato(id);
 
-comment on table transport_okato is 'Коды ОКАТО и Муниципальных образований';
-comment on column transport_okato.id is 'Идентификатор записи';
-comment on column transport_okato.parent_id is 'Идентификатор родительской записи';
-comment on column transport_okato.okato is 'Код ОКАТО';
-comment on column transport_okato.name is 'Наименование муниципального образования';
+comment on table dict_okato is 'Коды ОКАТО и Муниципальных образований';
+comment on column dict_okato.id is 'Идентификатор записи';
+comment on column dict_okato.parent_id is 'Идентификатор родительской записи';
+comment on column dict_okato.okato is 'Код ОКАТО';
+comment on column dict_okato.name is 'Наименование муниципального образования';
 ---------------------------------------------------------------------------------------------------
 
 create table transport_tax_rate (
-  id number(9) not null,
+  id number(15) not null,
   code varchar(10) not null,
-  min_age number(9),
-  max_age number(9),
-  min_power number(9),
-  max_power number(9),
-  value number(9) not null,
-  dict_region_id varchar2(2)
+  min_age number(15),
+  max_age number(15),
+  min_power number(15,2),
+  max_power number(15,2),
+  value number(15) not null,
+  dict_region_id varchar2(2),
+  unit_of_power number(5) not null
 );
 alter table transport_tax_rate add constraint transport_tax_rate_pk primary key (id);
 alter table transport_tax_rate add constraint transport_tax_rate_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
@@ -88,9 +89,11 @@ comment on column transport_tax_rate.id is 'Первичный ключ (ном�
 comment on column transport_tax_rate.code is 'Код транспортного средства';
 comment on column transport_tax_rate.min_age is 'Срок использования "От", лет';
 comment on column transport_tax_rate.max_age is 'Срок использования "До", лет';
-comment on column transport_tax_rate.min_power is 'Мощность "От", л.с.';
-comment on column transport_tax_rate.max_power is 'Мощность "До", л.с.';
+comment on column transport_tax_rate.min_power is 'Мощность "От"';
+comment on column transport_tax_rate.max_power is 'Мощность "До"';
 comment on column transport_tax_rate.value is 'Ставка, руб.';
+comment on column transport_tax_rate.dict_region_id is 'Код региона';
+comment on column transport_tax_rate.unit_of_power is 'Ед. измерения мощности';
 ---------------------------------------------------------------------------------------------------
 
 create table transport_type_code (
@@ -123,19 +126,17 @@ comment on column transport_unit_code.code is 'Код единиц измере�
 comment on column transport_unit_code.name is 'Наименование единицы измерения';
 comment on column transport_unit_code.convention is 'Условное обозначение';
 ---------------------------------------------------------------------------------------------------
-create table transport_tax_benefit_code
+create table dict_tax_benefit
 (
-  code varchar2(5) not null,
-  name varchar2(256) not null,
-  regulation varchar(128) not null
+  code varchar2(10) not null,
+  name varchar2(4000) not null
 );
 
-alter table transport_tax_benefit_code add constraint transport_tax_benefit_code_pk primary key (code);
+alter table dict_tax_benefit add constraint dict_tax_benefit_pk primary key (code);
 
-comment on table transport_tax_benefit_code is 'Коды налоговых льгот';
-comment on column transport_tax_benefit_code.code is 'Код налоговых льгот';
-comment on column transport_tax_benefit_code.name is 'Наименование льготы';
-comment on column transport_tax_benefit_code.regulation is 'Основание';
+comment on table dict_tax_benefit is 'Коды налоговых льгот';
+comment on column dict_tax_benefit.code is 'Код налоговых льгот';
+comment on column dict_tax_benefit.name is 'Наименование льготы';
 
 ---------------------------------------------------------------------------------------------------
 create table transport_eco_class
@@ -156,7 +157,7 @@ create table dict_tax_benefit_param
 (
   id               number(9) not null,
   dict_region_id   varchar(2) not null,
-  tax_benefit_id   varchar2(5) not null,
+  tax_benefit_id   varchar2(10) not null,
   section          varchar2(4),
   item             varchar2(4),
   subitem          varchar2(4),
@@ -165,6 +166,7 @@ create table dict_tax_benefit_param
 );
 
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_fk_dict_reg foreign key (dict_region_id) references dict_region(code);
+alter table dict_tax_benefit_param add constraint dict_tax_ben_p_fk_taxben foreign key (tax_benefit_id) references dict_tax_benefit(code);
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_param_pk primary key (id);
 alter table dict_tax_benefit_param add constraint dict_tax_benefit_p_chk_perc check ((percent>=0) and (percent<=100));
 
@@ -309,7 +311,8 @@ create table form_column (
   dictionary_code varchar2(30),
   group_name varchar(1000),
   max_length number(4),
-  checking   number(1) default 0 not null
+  checking   number(1) default 0 not null,
+  format number(2)
 );
 alter table form_column add constraint form_column_pk primary key (id);
 create sequence seq_form_column start with 10000;
@@ -334,7 +337,7 @@ comment on column form_column.precision is 'Количество знаков п
 comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'признак проверочного столбца';
-
+comment on column form_column.format is 'формат';
 ---------------------------------------------------------------------------------------------------
 create table form_script (
   id number(9) not null,
@@ -497,7 +500,9 @@ create table declaration_data
   report_period_id        number(9) not null,
   department_id           number(9) not null,
   data                    clob,
-  is_accepted             number(1) not null
+  is_accepted             number(1) not null,
+  data_pdf                BLOB,
+  data_xlsx               BLOB
 );
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
@@ -513,6 +518,8 @@ comment on column declaration_data.report_period_id is 'Отчётный пер�
 comment on column declaration_data.department_id is 'Подразделение';
 comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML) ';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
+comment on column declaration_data.data_pdf is 'pdf';
+comment on column declaration_data.data_xlsx is 'xlsx';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -736,7 +743,7 @@ alter table event_script add constraint event_script_fk_script_id foreign key (s
 ---------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,
-  login varchar(260) not null,
+  login varchar(255) not null,
   name varchar(50) not null,
   department_id number(9) not null,
   is_active number(1) not null,
@@ -757,6 +764,8 @@ comment on column sec_user.department_id is 'Идентификатор подр
 comment on column sec_user.is_active is 'Признак активностии пользователя';
 comment on column sec_user.email is 'Адрес электронной почты';
 comment on column sec_user.uuid is 'UUID';
+
+create sequence seq_sec_user start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table object_lock
 (
@@ -924,3 +933,21 @@ create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
+
+------------------------------------------------------------------------------------------------------------------
+create or replace view v_department(id, name, parent_id)
+as
+select id, name, parent_id from department;
+--------------------------------------------------------------------------------------------------------------------
+create or replace view v_user(login, is_active, name, email, guid, department_id)
+as
+select login, is_active, name, email, uuid, department_id from sec_user;
+--------------------------------------------------------------------------------------------------------------------
+create or replace view v_user_role(user_guid, role_code)
+as
+select a.uuid,  
+       b.alias  
+  from sec_user a, sec_role b, sec_user_role c 
+ where a.id = c.user_id 
+   and b.id = c.role_id;
+--------------------------------------------------------------------------------------------------------------------

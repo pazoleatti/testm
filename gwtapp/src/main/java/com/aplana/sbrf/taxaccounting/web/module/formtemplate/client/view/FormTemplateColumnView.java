@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private List<Column> columns;
 	private static final List<String> columnTypeNameList = new ArrayList<String>();
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
+	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
 	private static final HashMap<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
 	private static final HashMap<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
 	private static final String STRING_TYPE = "Строка";
@@ -54,6 +56,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
 			precisionList.add(i);
+		}
+
+		for (Formats f : Formats.values()) {
+			if ((f != Formats.NONE) && (f != null)) {
+				dateFormatList.add(f);
+			}
 		}
 	}
 
@@ -97,16 +105,25 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	ValueListBox<Integer> precisionBox;
 
 	@UiField
-	HorizontalPanel precisionPanel;
+	Panel precisionPanel;
 
 	@UiField
-	HorizontalPanel dictionaryCodePanel;
+	Panel attrPanel;
 
 	@UiField
-	HorizontalPanel stringMaxLengthPanel;
+	Panel dictionaryCodePanel;
 
 	@UiField
-	HorizontalPanel numericMaxLengthPanel;
+	Panel stringMaxLengthPanel;
+
+	@UiField
+	Panel numericMaxLengthPanel;
+
+	@UiField
+	Panel dateFormatPanel;
+
+	@UiField(provided = true)
+	ValueListBox<Formats> dateFormat;
 
 	@Inject
 	@UiConstructor
@@ -177,6 +194,20 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(numericDictionaryCodeBox.getValue());
 			}
 		}, ValueChangeEvent.getType());
+
+		dateFormat = new ValueListBox<Formats>(new AbstractRenderer<Formats>() {
+			@Override
+			public String render(Formats format) {
+				return format == null ? "" : format.getFormat();
+			}
+		});
+
+		dateFormat.addValueChangeHandler(new ValueChangeHandler<Formats>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Formats> event) {
+				((DateColumn)columns.get(columnListBox.getSelectedIndex())).setFormatId(dateFormat.getValue().getId());
+			}
+		});
 	}
 
 	@UiHandler("columnListBox")
@@ -285,6 +316,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@Override
 	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
 		columns = columnList;
+		setAttributesPanel();
+
 		if (columnListBox.getSelectedIndex() >= 0 && !isFormChanged) {
 			setupColumns(columnListBox.getSelectedIndex());
 		} else {
@@ -302,9 +335,20 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private void setupColumns(int index) {
 		setColumnList();
-		setColumnAttributeEditor(index);
-		columnListBox.setSelectedIndex(index);
-		setUniqueParameters();
+		setAttributesPanel();
+		if (columns != null && !columns.isEmpty()) {
+			setColumnAttributeEditor(index);
+			columnListBox.setSelectedIndex(index);
+			setUniqueParameters();
+		}
+	}
+
+	private void setAttributesPanel() {
+		if (columns != null && !columns.isEmpty()) {
+			attrPanel.setVisible(true);
+		} else {
+			attrPanel.setVisible(false);
+		}
 	}
 
 	private void setUniqueParameters() {
@@ -333,7 +377,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		numericMaxLengthPanel.setVisible(false);
 		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
-
+		dateFormatPanel.setVisible(false);
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			String code = ((StringColumn) column).getDictionaryCode();
 			int maxLength = ((StringColumn) column).getMaxLength();
@@ -369,6 +413,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
 			precisionBox.setAcceptableValues(precisionList);
 			dictionaryCodePanel.setVisible(true);
+		} else if (typeColumnDropBox.getValue() == DATE_TYPE) {
+			dateFormat.setAcceptableValues(dateFormatList);
+			// Если формата нет, то выставляем по умолчанию DD_MM_YYYY
+			dateFormat.setValue(Formats.getById(((DateColumn) column).getFormatId() == Formats.NONE.getId() ?
+					Formats.DD_MM_YYYY.getId() :
+					((DateColumn) column).getFormatId() ));
+			dateFormatPanel.setVisible(true);
+
 		}
 	}
 

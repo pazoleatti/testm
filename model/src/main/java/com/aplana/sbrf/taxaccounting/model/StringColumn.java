@@ -78,7 +78,7 @@ public class StringColumn extends Column  implements Serializable {
 		return new ValidationStrategy() {
 			@Override
 			public boolean matches(String valueToCheck) {
-				return valueToCheck.length() <= maxLength;
+				return valueToCheck != null ? valueToCheck.length() <= maxLength : true;
 			}
 		};
 

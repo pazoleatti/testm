@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,16 +18,6 @@ import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -85,6 +76,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            том же подразделении могут существовать в нескольких вариантах
 	 *            (например один и тот же РНУ на уровне ТБ - в виде первичной и
 	 *            консолидированной)
+	 * @param reportPeriod отчетный период в котором создается форма
 	 * @return созданный и проинициализированный объект данных.
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав создавать налоговую форму с
@@ -96,9 +88,9 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public FormData createFormData(Logger logger, int userId,
-								   int formTemplateId, int departmentId, FormDataKind kind) {
+			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
-				departmentId)) {
+				departmentId, reportPeriod.getId())) {
 			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
 					formTemplateId, departmentId, kind);
 		} else {
@@ -160,7 +152,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
-					formData.getDepartmentId());
+					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
@@ -204,7 +196,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
-					formData.getDepartmentId());
+					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
@@ -267,7 +259,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
-					formData.getDepartmentId());
+					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
 		}
@@ -463,7 +455,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
-					formData.getDepartmentId());
+					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
 			canDo = formDataAccessService.canDelete(userId, formData.getId());
 		}

@@ -4,60 +4,45 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
         >
     <ui:style>
-        @external .gwt-DialogBox .Caption;
-        .gwt-DialogBox .Caption {
-            font-weight: bold;
-            text-align: left;
-            color: white;
-            background: url("img/top_grad.gif") repeat-x scroll center bottom #F1F1F1;
+        .content {
+            padding: 10px;
+            border: 1px solid #949494;
+            border-radius: 3px;
+            margin: 10px 0px;
         }
 
-        .panelWithFilter {
-            background-color: #ccc9b0;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            border-radius: 1%;
-        }
-
-        .filter {
-            margin: 10px;
-        }
-
-        .buttonLayout {
-            margin: 4px auto;
-        }
-
-        .actionButton {
-            width: 70px;
-            margin-right: 3px;
-            margin-left: 3px;
+        .buttonBar {
+            left: 25%;
         }
     </ui:style>
 
-	<g:DialogBox height="100%" glassEnabled="true" text="Создание налоговой формы">
-        <g:VerticalPanel height="100%">
-            <g:VerticalPanel addStyleNames="{style.panelWithFilter}">
+	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Создание налоговой формы">
+        <g:VerticalPanel height="100%" width="250px">
+            <g:FlowPanel addStyleNames="{style.content}">
 
-                <g:VerticalPanel addStyleNames="{style.filter}" ui:field="reportPeriodPanel"/>
+                <g:FlowPanel height="60px" ui:field="reportPeriodPanel"/>
 
-                <g:VerticalPanel addStyleNames="{style.filter}" ui:field="departmentSelectionTreePanel"/>
+                <g:FlowPanel height="60px" ui:field="departmentPanel"/>
 
-                <g:VerticalPanel addStyleNames="{style.filter}">
-                    <g:Label width="200px" text="Тип налоговой формы"/>
-                    <g:ValueListBox width="200px" ui:field="formDataKind" />
-                </g:VerticalPanel>
+                <g:FlowPanel height="60px">
+                    <g:Label text="Тип налоговой формы"/>
+                    <g:ValueListBox width="205px" ui:field="formKind" />
+                </g:FlowPanel>
 
-                <g:VerticalPanel addStyleNames="{style.filter}">
-                    <g:Label width="200px" text="Вид налоговой формы"/>
-                    <style:ListBoxWithTooltip width="200px" ui:field="formType" showTooltip="true"/>
-                </g:VerticalPanel>
+                <g:FlowPanel height="60px">
+                    <g:Label text="Вид налоговой формы"/>
+                    <style:ListBoxWithTooltip width="205px" ui:field="formType" showTooltip="true"/>
+                </g:FlowPanel>
 
-            </g:VerticalPanel>
+            </g:FlowPanel>
 
-            <g:HorizontalPanel addStyleNames="{style.buttonLayout}">
-                <g:Button addStyleNames="{style.actionButton}" text="Далее" ui:field="okButton"/>
-                <g:Button addStyleNames="{style.actionButton}" text="Отмена" ui:field="cancelButton"/>
-            </g:HorizontalPanel>
+            <style:Bar>
+                <style:LeftBar addStyleNames="{style.buttonBar}">
+                    <g:Button ui:field="continueButton" text="Далее"/>
+                    <g:Button ui:field="cancelButton" text="Отмена"/>
+                </style:LeftBar>
+            </style:Bar>
+
         </g:VerticalPanel>
 	</g:DialogBox>
 

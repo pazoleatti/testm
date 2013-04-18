@@ -2,7 +2,9 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
     <g:HTMLPanel>
-        <h3>Стиль ячейки</h3>
+        <h3>
+            <g:Label ui:field="title" />
+        </h3>
 
         <g:HorizontalPanel height="25px">
             <g:Label width="90px">Стиль</g:Label>
@@ -11,14 +13,6 @@
         <g:HorizontalPanel height="25px">
             <g:Label width="90px">Изменяемая</g:Label>
             <g:CheckBox ui:field="editable"/>
-        </g:HorizontalPanel>
-        <g:HorizontalPanel height="25px">
-            <g:Label width="90px">colSpan</g:Label>
-            <g:IntegerBox width="95px" ui:field="colSpan"/>
-        </g:HorizontalPanel>
-        <g:HorizontalPanel height="25px">
-            <g:Label width="90px">rowSpan</g:Label>
-            <g:IntegerBox width="95px" ui:field="rowSpan"/>
         </g:HorizontalPanel>
         <t:LeftBar>
             <g:Button text="Сохранить" ui:field="saveButton"/>

@@ -5,6 +5,7 @@ import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mo
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -53,7 +56,9 @@ public class DeclarationDataAccessServiceImplTest {
 	private final static int DECLARATION_ACCEPTED_TB1_ID = 122;
 	private final static int DECLARATION_CREATED_TB2_ID = 123;
 	private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
-	
+
+	private final static int REPORT_PERIOD_ID = 1;
+
 	@BeforeClass
 	public static void tearUp() {
 		service = new DeclarationDataAccessServiceImpl();
@@ -97,12 +102,18 @@ public class DeclarationDataAccessServiceImplTest {
 		when(declarationTemplateDao.get(DECLARATION_TEMPLATE_2_ID)).thenReturn(declarationTemplate2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
 
-		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID);
-		DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID);
-		DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID);
+		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID, true, false);
+
+		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
+		when(reportPeriodDao.get(REPORT_PERIOD_ID)).thenReturn(reportPeriod);
+		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
+
+		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
+		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
+		DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, DEPARTMENT_TB1_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
+		DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, DEPARTMENT_TB1_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
+		DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, DEPARTMENT_TB2_ID, false, DECLARATION_TEMPLATE_2_ID, REPORT_PERIOD_ID);
+		DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, DEPARTMENT_TB2_ID, true, DECLARATION_TEMPLATE_2_ID, REPORT_PERIOD_ID);
 		DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
 		when(declarationDataDao.get(DECLARATION_CREATED_BANK_ID)).thenReturn(declarationCreatedBank);
 		when(declarationDataDao.get(DECLARATION_ACCEPTED_BANK_ID)).thenReturn(declarationAcceptedBank);

@@ -27,7 +27,6 @@ for(row in formData.dataRows ) {
         row.getCell(it).setValue(null);
     }
 }
-
 departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
     def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
     if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 302) {
@@ -39,7 +38,7 @@ departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType
                 *	(6, 7, 9)
                 */
             ['incomeBuhSumAccepted', 'incomeBuhSumPrevTaxPeriod', 'incomeTaxSumS'].each {
-                if (row.getCell(it).getValue() != null) {
+                if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
                     rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
                 }
             }

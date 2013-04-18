@@ -5,11 +5,6 @@
  * @since 24.03.2013 11:30
  */
 
-if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-    logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
-    return
-}
-
 /*
  * Константы.
  */
@@ -18,7 +13,11 @@ def empty = 0
 def emptyNull = 0
 def knd = '1151006'
 def kbk = '18210101011011000110'
+def kbk2 = '18210101012021000110'
 def typeNP = '1'
+
+def departmentId = declarationData.departmentId
+def reportPeriodId = declarationData.reportPeriodId
 
 /** Настройки подразделения. */
 def departmentParam = departmentService.getDepartmentParam(departmentId)
@@ -55,6 +54,9 @@ def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormD
 /** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
 def formDataAdvance = formDataCollection.find(departmentId, 309, FormDataKind.ADDITIONAL)
 
+/** Расчет налога на прибыль организаций с доходов, исчисленного по ставкам, личным от ставки, указанной в пункте 1 статьи 284 НК. */
+def formDataCalcTaxIncome = formDataCollection.find(departmentId, 310, FormDataKind.ADDITIONAL)
+
 /*
  * Расчет значений для текущей декларации.
  */
@@ -75,15 +77,15 @@ def virRealImPrav = getComplexIncomeSumRows9(formDataComplexIncome, [15, 17])
 /** ВырРеалИмПроч. Код вида дохода = 10850. */
 def virRealImProch = getComplexIncomeSumRows9(formDataComplexIncome, [11])
 /** ВырРеалВс. */
-def virRealVs = getInt(virRealTovSob + virRealImPrav + virRealImProch)
+def virRealVs = getLong(virRealTovSob + virRealImPrav + virRealImProch)
 /** ВырРеалЦБВс. Код вида дохода = 11271..11280. */
 def virRealCBVs = getComplexIncomeSumRows9(formDataComplexIncome, (24..32))
 /** ВыручОп302Ит. Код вида дохода = 10840, 10860, 10870, 10872. */
 def viruchOp302It = getComplexIncomeSumRows9(formDataComplexIncome, [9, 13, 14, 16])
 /** ДохРеал, ВырРеалИтог. */
-def dohReal = getInt(virRealVs + virRealCBVs + viruchOp302It)
+def dohReal = getLong(virRealVs + virRealCBVs + viruchOp302It)
 /** ДохВнереал. */
-def dohVnereal = getDohVnereal(formDataComplexIncome, formDataSimpleIncome)
+def dohVnereal = getDohVnereal(formDataComplexIncome, formDataSimpleIncome, formDataCalcTaxIncome)
 /** КосвРасхВс. */
 def cosvRashVs = getCosvRashVs(formDataComplexConsumption, formDataSimpleConsumption)
 /** РасхВнереал, РасхВнереалВС. */
@@ -101,16 +103,20 @@ def ubitRealAmIm = getComplexConsumptionSumRows9(formDataComplexConsumption, [78
 /** УбытРеалЗемУч. Код вида расхода = 21397. */
 def ubitRealZemUch = getComplexConsumptionSumRows9(formDataComplexConsumption, [64])
 /** РасхУмРеал, РасхПризнИтого. */
-def rashUmReal = getInt(cosvRashVs + realImushPrav + priobrRealImush +
+def rashUmReal = getLong(cosvRashVs + realImushPrav + priobrRealImush +
         priobrRealCB + rashOper32 + ubitRealAmIm + ubitRealZemUch)
 /** Убытки, УбытОп302. Код вида расхода = 21659, 21515, 21518, 21397. */
 def ubitki = getComplexConsumptionSumRows9(formDataComplexConsumption, [92, 76, 77, 64])
 /** ПрибУб. */
-def pribUb = getInt(dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki)
-def dohIsklPrib = getDohIsklPrib(formDataSimpleIncome)
-def nalBaza = getInt(pribUb - dohIsklPrib - 0 - 0 + 0)
+def pribUb = getLong(dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki)
+def dohIsklPrib = getDohIsklPrib(formDataSimpleIncome, formDataCalcTaxIncome)
+def nalBaza = getLong(pribUb - dohIsklPrib - 0 - 0 + 0)
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
+
+if (xml == null) {
+    return
+}
 
 /*
  * Формирование XML'ки.
@@ -171,14 +177,19 @@ xml.Файл(
                         ТипНП : typeNP,
                         ОКАТО : departmentParam.okato) {
 
+                    // 0..1
+                    ФедБдж(
+                            КБК : kbk,
+                            НалПУ : empty)
+
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
                     def rowForNalPu = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                     tmpValue2 = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
                     def nalPu = tmpValue2
                     // 0..1
                     СубБдж(
-                            КБК : kbk,
-                            НалПУ : getInt(nalPu))
+                            КБК : kbk2,
+                            НалПУ : getLong(nalPu))
                 }
                 // Раздел 1. Подраздел 1.1 - конец
 
@@ -202,18 +213,25 @@ xml.Файл(
                         def avPlat2 = empty
                         def avPlat3 = empty
 
+                        // 0..1
+                        ФедБдж(
+                                КБК : kbk,
+                                АвПлат1 : avPlat1,
+                                АвПлат2 : avPlat2,
+                                АвПлат3 : avPlat3)
+
                         if (!isTaxPeriod) {
                             def appl5List02Row120 = 0
                             // при формировании декларации банка надо брать appl5List02Row120 относящегося к ЦА (как определять пока не ясно, толи по id, толи по id сбербанка, толи по КПП = 775001001), при формировании декларации подразделения надо брать строку appl5List02Row120 относящегося к этому подразделению
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat3 = (int) appl5List02Row120 / 3
+                            avPlat3 = (long) appl5List02Row120 / 3
                             avPlat2 = avPlat1
                             avPlat1 = avPlat1 + getTail(appl5List02Row120, 3)
                         }
                         // 0..1
                         СубБдж(
-                                КБК : kbk,
+                                КБК : kbk2,
                                 АвПлат1 : avPlat1,
                                 АвПлат2 : avPlat2,
                                 АвПлат3 : avPlat3)
@@ -258,14 +276,14 @@ xml.Файл(
                 kppop = tmpRow.kpp
                 obazUplNalOP = tmpRow.labalAboutPaymentTax
                 dolaNalBaz = tmpRow.baseTaxOf
-                nalBazaDola = getInt(tmpRow.baseTaxOfRub)
+                nalBazaDola = getLong(tmpRow.baseTaxOfRub)
                 stavNalSubRF = tmpRow.subjectTaxStavka
-                sumNal = getInt(tmpRow.subjectTaxSum)
-                nalNachislSubRF = getInt(tmpRow.subjectTaxCredit)
-                sumNalP = getInt(tmpRow.taxSumToPay)
-                nalViplVneRF = getInt(tmpRow.taxSumOutside)
-                mesAvPlat = getInt(tmpRow.everyMontherPaymentAfterPeriod)
-                mesAvPlat1CvSled = getInt(tmpRow.everyMonthForKvartalNextPeriod)
+                sumNal = getLong(tmpRow.subjectTaxSum)
+                nalNachislSubRF = getLong(tmpRow.subjectTaxCredit)
+                sumNalP = getLong(tmpRow.taxSumToPay)
+                nalViplVneRF = getLong(tmpRow.taxSumOutside)
+                mesAvPlat = getLong(tmpRow.everyMontherPaymentAfterPeriod)
+                mesAvPlat1CvSled = getLong(tmpRow.everyMonthForKvartalNextPeriod)
             }
 
             // 0..n - всегда один
@@ -298,15 +316,15 @@ xml.Файл(
 /**
  * Получить округленное, целочисленное значение.
  */
-def getInt(def value) {
-    return (int) round(value, 0)
+def getLong(def value) {
+    return (long) round(value, 0)
 }
 
 /**
  * Получить остаток (целое и дробное) от деления вдух чисел (например 16,5 / 3 = 1,5).
  */
 def getTail(def value, def div) {
-    return getInt(value - (int) value + (int) value % div)
+    return getLong(value - (long) value + (long) value % div)
 }
 
 /**
@@ -314,6 +332,20 @@ def getTail(def value, def div) {
  */
 def getValue(def value) {
     return (value != null ? value : 0)
+}
+
+/**
+ * Получить сумму всех строк указанного столбца.
+ *
+ * @param form налоговая форма
+ * @param colName псевдоним столбца
+ */
+def getFormDataSumByColName(def form, def colName) {
+    def result = 0.0
+    if (form != null) {
+        result = summ(form, new ColumnRange(colName, 0, form.dataRows.size() - 1))
+    }
+    return getLong(result)
 }
 
 /**
@@ -331,7 +363,7 @@ def getSumRowsByCol(def form, def rows, def column) {
     rows.each {
         result += getValue(form.getDataRow('R' + it).getCell(column).getValue())
     }
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -370,7 +402,7 @@ def getCalculatedSimpleConsumption(def formSimple, def rows) {
                     getValue(row.rnu5Field5PrevTaxPeriod) -
                     getValue(row.rnu7Field12Accepted)
     }
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -393,7 +425,7 @@ def getVirRealTovSob(def form, def formSimple) {
                     getValue(row.rnu6Field12Accepted) - getValue(row.rnu4Field5PrevTaxPeriod)
         }
     }
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -401,8 +433,9 @@ def getVirRealTovSob(def form, def formSimple) {
  *
  * @param form нф доходы сложные
  * @param formSimple нф доходы простые
+ * @param formCalcTaxIncome 5ая выходная нф "Расчет налога на прибыль организаций с доходов, исчисленного по ставкам, личным от ставки, указанной в пункте 1 статьи 284 НК"
  */
-def getDohVnereal(def form, def formSimple) {
+def getDohVnereal(def form, def formSimple, def formCalcTaxIncome) {
     def result = 0.0
 
     // Код вида дохода = 10874, 11860..13610, 13650..13700, 13920..13961
@@ -419,9 +452,7 @@ def getDohVnereal(def form, def formSimple) {
         }
     }
 
-    // TODO (Ramil Timerbaev) Сумма всех строк 010 по Листам 04 - как будет готова форма 5, сделать правильный подсчет
-    // result += sumList04Rows010
-    result += 0 // костыль
+    result += getFormDataSumByColName(formCalcTaxIncome, 'base')
 
     if (formSimple != null) {
         // Код вида дохода = 13092
@@ -429,7 +460,7 @@ def getDohVnereal(def form, def formSimple) {
         result -= getValue(row.rnu4Field5Accepted)
     }
 
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -450,15 +481,16 @@ def getRashVnereal(def form, def formSimple) {
     // Код вида расхода = 22481 - графа 9
     result -= getComplexConsumptionSumRows9(form, [114])
 
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
  * Получить доходы, исключаемые из прибыли (ДохИсклПриб).
  *
  * @param formSimple нф доходы простые
+ * @param formCalcTaxIncome 5ая выходная нф "Расчет налога на прибыль организаций с доходов, исчисленного по ставкам, личным от ставки, указанной в пункте 1 статьи 284 НК"
  */
-def getDohIsklPrib(def formSimple) {
+def getDohIsklPrib(def formSimple, def formCalcTaxIncome) {
     def result = 0.0
 
     if (formSimple != null) {
@@ -467,11 +499,9 @@ def getDohIsklPrib(def formSimple) {
         result += getValue(row.rnu4Field5Accepted)
     }
 
-    // TODO (Ramil Timerbaev) Сумма всех строк 010 по Листам 04 - как будет готова форма 5, сделать правильный подсчет
-    // result += sumList04Rows010
-    result += 0 // костыль
+    result += getFormDataSumByColName(formCalcTaxIncome, 'base')
 
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -487,7 +517,7 @@ def getNalBazaIsch(def row100, def row110) {
     } else {
         result = row100 - row110
     }
-    return getInt(row100 - row110)
+    return getLong(row100 - row110)
 }
 
 /**
@@ -504,7 +534,7 @@ def getCosvRashVs(def form, def formSimple) {
     // Код вида расхода = 20291..21650, 21660
     result += getCalculatedSimpleConsumption(formSimple, ((3..84) + [88]))
 
-    return getInt(result)
+    return getLong(result)
 }
 
 /**
@@ -518,8 +548,7 @@ def getRowAdvanceForCurrentDepartment(def form, def kpp) {
         return null
     }
     for (row in form.dataRows) {
-        def tmp = new BigDecimal(kpp)
-        if (tmp == row.kpp) {
+        if (kpp == row.kpp) {
             return row
         }
     }

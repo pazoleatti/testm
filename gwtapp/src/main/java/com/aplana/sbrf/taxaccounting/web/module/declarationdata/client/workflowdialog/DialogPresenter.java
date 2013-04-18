@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflow
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
@@ -39,6 +40,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	protected void onReveal() {
 		super.onReveal();
 	    getView().clearInput();
+		DialogBoxChangeVisibilityEvent.fire(this, true);
 	}
 
 	@Override
@@ -47,7 +49,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		if("".equals(comment.trim())){
 			Window.alert("Необходимо указать причину возврата");
 		} else {
-			getView().hide();
+			hide();
 			LogCleanEvent.fire(this);
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 			action.setAccepted(false);
@@ -61,7 +63,12 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						}
 					}));
 		}
+	}
 
+	@Override
+	public void hide() {
+		getView().hide();
+		DialogBoxChangeVisibilityEvent.fire(this, false);
 	}
 
 	public void setDeclarationId(long declarationId) {

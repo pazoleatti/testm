@@ -12,4 +12,8 @@ public class ServiceException extends TAException {
 	public ServiceException(String message, Object... params) {
 		super(message, params);
 	}
+	
+	public ServiceException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -3,13 +3,6 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
     <ui:style>
-        @external .gwt-PopupPanel;
-        .gwt-PopupPanel {
-            border: 2px solid #3dbf0e;
-            padding: 2px;
-            background: white;
-        }
-
         .lockInformation {
             height: 30px;
             background: #FFDC82;
@@ -22,6 +15,17 @@
 
         .titleLabel {
             font-size: 16px;
+            max-height: 28px;
+            overflow: hidden;
+            line-height: 28px;
+        }
+
+        .titleGradient {
+            position: absolute;
+            background: url("img/form_title_gradient.png");
+            width: 64px;
+            height: 32px;
+            right: 790px;
         }
 
         .headerAttr {
@@ -52,21 +56,25 @@
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
         <g:north size="100">
             <g:HorizontalPanel height="100px" width="100%">
-                <g:VerticalPanel>
+                <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="img/btn-l.gif"/>
+                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="img/arrow-left-24.png"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
+                            <g:HorizontalPanel>
+                                <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
+                                <g:SimplePanel styleName="{style.titleGradient}"/>
+                            </g:HorizontalPanel>
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
                         <g:cell width="220px" verticalAlignment="middle">
-                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты" />
+                            <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"
+                                img="img/businessperson-16.png" title="Указать исполнителя и список подписантов налоговой формы"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/print.png" />
+                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/printer-16.png" title="Отобразить печатное представление документа"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
@@ -80,9 +88,9 @@
                         </style:LeftBar>
                         <style:LeftBar ui:field="workflowButtons" />
                     </style:Bar>
-                </g:VerticalPanel>
-                <g:VerticalPanel width="790px" addStyleNames="{style.attrPanel}">
-                    <g:VerticalPanel height="63px">
+                </g:FlowPanel>
+                <g:FlowPanel width="790px" addStyleNames="{style.attrPanel}">
+                    <g:FlowPanel height="63px">
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Подразделение:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="departmentIdLabel" addStyleNames="{style.headerAttr}" />
@@ -99,21 +107,22 @@
                             <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
                         </g:HorizontalPanel>
-                    </g:VerticalPanel>
+                    </g:FlowPanel>
                     <g:HorizontalPanel height="30px">
                         <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.manualInput}">
-                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" />
+                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" img="img/pencil-16.png"
+                                 title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
                         <style:Bar width="245px" ui:field="saveCancelBar">
                             <style:LeftBar>
-                                <style:Button ui:field="saveButton" text="Сохранить" />
-                                <style:Button ui:field="cancelButton" text="Отмена" />
+                                <g:Button ui:field="saveButton" text="Сохранить" />
+                                <g:Button ui:field="cancelButton" text="Отмена" />
                             </style:LeftBar>
                         </style:Bar>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
                                 text="Показывать контрольные поля"/>
                     </g:HorizontalPanel>
-                </g:VerticalPanel>
+                </g:FlowPanel>
             </g:HorizontalPanel>
         </g:north>
 

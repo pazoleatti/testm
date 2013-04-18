@@ -36,7 +36,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 		Integer userId = user.getId();
 
 		CreateDeclarationResult result = new CreateDeclarationResult();
-		result.setDeclarationId(declarationDataService.createDeclaration(new Logger(), declarationTemplateService
+		result.setDeclarationId(declarationDataService.create(new Logger(), declarationTemplateService
 				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(), userId, command.getReportPeriodId()));
 		return result;
 	}

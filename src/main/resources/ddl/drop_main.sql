@@ -1,3 +1,7 @@
+drop view v_department;   
+drop view v_user;
+drop view v_user_role;
+
 drop table string_value;
 drop table numeric_value;
 drop table date_value;
@@ -26,6 +30,7 @@ drop table sec_role;
 
 drop table object_lock;
 drop table sec_user;
+drop sequence seq_sec_user;
 drop table form_data_source;
 drop table declaration_source;
 drop sequence seq_department_form_type;
@@ -51,13 +56,13 @@ drop table department;
 drop sequence seq_report_period;
 drop table report_period;
 drop table tax_period;
-drop table transport_okato;
+drop table dict_okato;
 drop table transport_tax_rate;
 drop table transport_type_code;
-drop table transport_tax_benefit_code;
 drop table transport_unit_code;
 drop table transport_eco_class;
 drop table dict_tax_benefit_param;
+drop table dict_tax_benefit;
 drop table dict_region;
 drop table dict_tax_period;
 drop table dict_declaration_presentation;

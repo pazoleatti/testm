@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import groovy.xml.MarkupBuilder;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +37,11 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 /**
  * Реализация сервиса для запуска скриптов по декларациями
  * @author dsultanbekov
+ * @author mfayzullin
  */
 @Service
 public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements DeclarationDataScriptingService {
+
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
 	
@@ -55,60 +57,55 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
 
-    private final String xmlHeader = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
+    private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 	
 	@Override
-	public String create(Logger logger, int departmentId, int declarationTemplateId, int reportPeriodId) {
+	public String create(Logger logger, DeclarationData declarationData, String docDate) {
 		this.logger.debug("Starting processing request to run create script");
-		
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getDeclarationType().getId());
-		List<FormData> records = new ArrayList<FormData>();
-		Iterator<DepartmentFormType> i = sourcesInfo.iterator(); 
-		while(i.hasNext()) {
-			DepartmentFormType dft = i.next();
-			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько
-			// FormData, в этом случае данный код нужно будет зарефакторить
-			FormData fd = formDataDao.find(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId);
-			if (fd != null) {
-				if (fd.getState() != WorkflowState.ACCEPTED) {
-					Department department = departmentDao.getDepartment(dft.getDepartmentId());
-					FormType formType = formTypeDao.getType(dft.getFormTypeId());
-					logger.warn(
-						"Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-						formType.getName(),
-						dft.getKind().getName(),
-						department.getName()
-					);
-				} else {
-					records.add(fd);				
-					i.remove();
-				}
-			} else {
-				Department department = departmentDao.getDepartment(dft.getDepartmentId());
-				FormType formType = formTypeDao.getType(dft.getFormTypeId());
-				logger.warn(
-					"Не хватает источника данных, вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-					formType.getName(),
-					dft.getKind().getName(),
-					department.getName()
-				);
+		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+
+		// Формирование списка НФ-источников в статусе "Принята"
+		FormDataCollection formDataCollection = getAcceptedFormDataSources(logger, declarationData);
+		// Должна быть хотя бы одна НФ-источник
+		if (formDataCollection.getRecords().isEmpty()) {
+			logger.error("Декларация не может быть сформирована, так как по крайней мере одна сводная или выходная " +
+					"налоговая форма, необходимая для формирования декларации, должна иметь статус «Принята».");
+		} else {
+			Bindings b = scriptEngine.createBindings();
+			b.putAll(getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType()));
+			b.put("formDataCollection", formDataCollection);
+			b.put("declarationData", declarationData);
+			b.put("docDate", docDate);
+			StringWriter writer = new StringWriter();
+			MarkupBuilder xml = new MarkupBuilder(writer);
+			b.put("xml", xml);
+			b.put("logger", logger);
+			try {
+				scriptEngine.eval(declarationTemplate.getCreateScript(), b);
+			} catch (ScriptException e) {
+				logScriptException(e, logger);
+			} catch (Exception e) {
+				logger.error(e);
+			}
+
+			if (!logger.containsLevel(LogLevel.ERROR)) {
+				logger.info("Декларация успешно создана");
+				return XML_HEADER.concat(writer.toString());
 			}
 		}
-		
-		FormDataCollection formDataCollection = new FormDataCollection();
-		formDataCollection.setRecords(records);
-		
+		return null;
+	}
+
+	@Override
+	public void accept(Logger logger, DeclarationData declarationData) {
+		int declarationTemplateId = declarationData.getDeclarationTemplateId();
+		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+
 		Bindings b = scriptEngine.createBindings();
 		b.putAll(getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType()));
-		b.put("formDataCollection", formDataCollection);
-		
-		b.put("departmentId", departmentId);
-		b.put("reportPeriodId", reportPeriodId);
-				
-		StringWriter writer = new StringWriter();
-		MarkupBuilder xml = new MarkupBuilder(writer);
-		b.put("xml", xml);
+		b.put("formDataCollection", getAcceptedFormDataSources(logger, declarationData));
+		b.put("declarationData", declarationData);
+		b.put("xml", null);
 		b.put("logger", logger);
 		try {
 			scriptEngine.eval(declarationTemplate.getCreateScript(), b);
@@ -117,14 +114,10 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		} catch (Exception e) {
 			logger.error(e);
 		}
-		
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			return null;
-		} else {
-			logger.info("Декларация успешно создана");
-            return xmlHeader.concat(writer.toString());
+
+		if (!logger.containsLevel(LogLevel.ERROR)) {
+			logger.info("Декларация успешно принята!");
 		}
-		
 	}
 	
 	/**
@@ -155,5 +148,46 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		}
 		return beans;
 	}
-	
+
+	/**
+	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
+	 * "Создана"
+	 *
+	 * @param logger журнал сообщений
+	 * @param declarationData декларация
+	 * @return список НФ-источников в статусе "Принята"
+	 */
+	private FormDataCollection getAcceptedFormDataSources(Logger logger, DeclarationData declarationData) {
+		int departmentId = declarationData.getDepartmentId();
+		int declarationTemplateId = declarationData.getDeclarationTemplateId();
+		int reportPeriodId = declarationData.getReportPeriodId();
+
+		// Формирование списка НФ-источников в статусе "Принята"
+		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getDeclarationType().getId());
+		List<FormData> records = new ArrayList<FormData>();
+		for (DepartmentFormType dft : sourcesInfo) {
+			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько
+			// FormData, в этом случае данный код нужно будет зарефакторить
+			FormData formData = formDataDao.find(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId);
+			if (formData != null) {
+				if (formData.getState() != WorkflowState.ACCEPTED) {
+					Department department = departmentDao.getDepartment(dft.getDepartmentId());
+					FormType formType = formTypeDao.getType(dft.getFormTypeId());
+					logger.warn(
+							"Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
+							formType.getName(),
+							dft.getKind().getName(),
+							department.getName()
+					);
+				} else {
+					records.add(formData);
+				}
+			}
+		}
+		FormDataCollection formDataCollection = new FormDataCollection();
+		formDataCollection.setRecords(records);
+		return formDataCollection;
+	}
+
 }

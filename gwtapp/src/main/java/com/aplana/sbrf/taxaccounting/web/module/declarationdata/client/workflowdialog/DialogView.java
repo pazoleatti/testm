@@ -26,7 +26,6 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiField
 	Button cancelButton;
 
-
 	private final PopupPanel widget;
 
 	@Inject
@@ -60,6 +59,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		hide();
+		if(getUiHandlers() != null){
+			getUiHandlers().hide();
+		}
 	}
 }

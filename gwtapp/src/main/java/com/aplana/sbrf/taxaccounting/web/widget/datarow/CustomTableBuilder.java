@@ -18,7 +18,7 @@ import java.util.*;
 
 public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
-	public static final String TD_ATTRIBUTE = "colInd";
+	public static final String TD = "td";
 	private static final String USER_AGENT_IE8 = "MSIE 8.0";
 	private static final String STRIPE_ICON_PROPERTY = "url(img/stripe.ico)";
 
@@ -123,7 +123,8 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				HasVerticalAlignment.VerticalAlignmentConstant vAlign = column.getVerticalAlignment();
 
 				TableCellBuilder td = tr.startTD();
-				td.attribute(TD_ATTRIBUTE, curColumn);
+				td.id(TD + "_" + absRowIndex + "_" + curColumn);
+
 				td.className(tdClasses.toString());
 				if (hAlign != null) {
 					td.align(hAlign.getTextAlignString());

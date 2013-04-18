@@ -32,7 +32,7 @@ departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType
         child.getDataRows().eachWithIndex() { row, i ->
             def rowResult = formData.getDataRows().get(i)
             ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
-                if (row.getCell(it).getValue() != null) {
+                if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
                     rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
                 }
             }

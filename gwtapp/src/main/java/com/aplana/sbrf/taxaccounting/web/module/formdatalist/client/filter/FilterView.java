@@ -7,10 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
-import com.aplana.sbrf.taxaccounting.web.widget.treepicker.TreePicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -61,9 +61,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	VerticalPanel reportPeriodPanel;
 
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
-	private final Map<TaxType, TreePicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, TreePicker>();
+	private final Map<TaxType, DepartmentPicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, DepartmentPicker>();
 	private ReportPeriodPicker currentReportPeriod;
-	private TreePicker currentDepartment;
+	private DepartmentPicker currentDepartment;
 
 	private Map<Integer, String> formTypesMap;
 
@@ -106,7 +106,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	    for (TaxType taxType : TaxType.values()){
 		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
-		    taxTypeDepartmentSelectionTree.put(taxType, new TreePicker("Выберите подразделение"));
+		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPicker("Выберите подразделение"));
 	    }
     }
 

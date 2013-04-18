@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -129,6 +131,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		cellSpanInfoDao.fillCellSpanInfo(formDataId, rowIdToAlias);
 		cellEditableDao.fillCellEditable(formDataId, rowIdToAlias);
 		cellValueDao.fillCellValue(formDataId, rowIdToAlias);
+		
+		// SBRFACCTAX-2082
+		FormDataUtils.setValueOners(formData.getDataRows());
+		
 		return formData;
 	}
 
@@ -151,6 +157,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getReportPeriodId() == null) {
 			throw new DaoException("Не указан идентификатор отчётного периода");
 		}
+		
+		// SBRFACCTAX-2201, SBRFACCTAX-2082
+		FormDataUtils.cleanValueOners(formData.getDataRows());
 
 		Long formDataId;
 		JdbcTemplate jt = getJdbcTemplate();

@@ -17,12 +17,9 @@
 	<!-- Module -->
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.Module" />
 
-	<!-- Inherit the default GWT style sheet. You can change -->
-	<!-- the theme of your GWT application by uncommenting -->
-	<!-- any one of the following lines. -->
-	<inherits name='com.google.gwt.user.theme.standard.Standard' />
-	<!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
+	<!-- Theme -->
+	<!--<inherits name='com.google.gwt.user.theme.standard.Standard' />-->
+    <inherits name="com.aplana.sbrf.taxaccounting.theme.sberbank.Sberbank"/>
 
 	<!-- Browser -->
 	<set-property name="user.agent" value="gecko1_8,safari,ie8,ie9"/>

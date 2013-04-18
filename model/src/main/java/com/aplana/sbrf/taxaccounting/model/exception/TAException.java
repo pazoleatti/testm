@@ -19,7 +19,13 @@ public abstract class TAException extends RuntimeException {
 	 * @param message текст ошибки, опционально содержащий плейсхолдеры
 	 * @param params список объектов для подставноки в текст сообщения
 	 */
-	protected TAException(String message, Object... params) {
+	public TAException(String message, Object... params){
 		super(String.format(message, params));
 	}
+	
+	public TAException(String message, Throwable cause){
+		super(message, cause);
+	}
+	
+	
 }

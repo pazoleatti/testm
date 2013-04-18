@@ -59,6 +59,9 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	@UiField(provided = true)
 	ValueListBox<Color> backColor;
 
+	@UiField
+	Panel attrPanel;
+
 	@Inject
 	@UiConstructor
 	public FormTemplateStyleView(final Binder uiBinder, final MyDriver driver) {
@@ -95,6 +98,8 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	public void setViewData(List<FormStyle> styles, boolean isFormChanged) {
 		if (styles != null) {
 			this.styles = styles;
+			setAttributePanel();
+			styleListBox.clear();
 			if (styleListBox.getSelectedIndex() >= 0 && !isFormChanged) {
 				setupStyles(styleListBox.getSelectedIndex());
 			} else if (styles.size() > 0){
@@ -109,6 +114,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	}
 
 	private void setupStyles(int index) {
+		setAttributePanel();
 		setStyleList();
 		setStyleParams(index);
 		styleListBox.setSelectedIndex(index);
@@ -120,6 +126,14 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 			for (FormStyle style : styles) {
 				styleListBox.addItem(style.getAlias(), String.valueOf(styles.indexOf(style)));
 			}
+		}
+	}
+
+	private void setAttributePanel() {
+		if (styles != null && !styles.isEmpty()) {
+			attrPanel.setVisible(true);
+		} else {
+			attrPanel.setVisible(false);
 		}
 	}
 

@@ -20,6 +20,12 @@ public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
 
+	public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
+	public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
+	public static final String DEPARTMENT_TITLE = "Подразделение";
+	public static final String REPORT_PERIOD_TITLE = "Отчетный период";
+	public static final String FORM_DATA_STATE_TITLE = "Состояние";
+
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
 
@@ -96,11 +102,11 @@ public class FormDataListView extends
 			}
 		};
 
-		formDataTable.addColumn(formKindColumn, getHeader("Тип налоговой формы"));
-		formDataTable.addColumn(linkColumn, getHeader("Вид налоговой формы"));
-		formDataTable.addColumn(departmentColumn, getHeader("Подразделение"));
-		formDataTable.addColumn(reportPeriodColumn, getHeader("Отчетный период"));
-		formDataTable.addColumn(stateColumn, getHeader("Состояние"));
+		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE));
+		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
+		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
+		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
+		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
 
 		pager.setDisplay(formDataTable);
 
@@ -137,11 +143,9 @@ public class FormDataListView extends
 
 	@Override
 	public FormDataSearchOrdering getSearchOrdering(){
-		final String DEFAULT_SORTING_BY_ID = "";
-		if (sortByColumn != null){
-			return sortByColumn;
+		if (sortByColumn == null){
+			setSortByColumn("");
 		}
-		setSortByColumn(DEFAULT_SORTING_BY_ID);
 		return sortByColumn;
 	}
 
@@ -177,15 +181,15 @@ public class FormDataListView extends
 	}
 
 	private void setSortByColumn(String sortByColumn){
-		if("Тип налоговой формы".equals(sortByColumn)){
+		if(FORM_DATA_KIND_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.KIND;
-		} else if ("Вид налоговой формы".equals(sortByColumn)){
+		} else if (FORM_DATA_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.FORM_TYPE_NAME;
-		} else if ("Подразделение".equals(sortByColumn)){
+		} else if (DEPARTMENT_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.DEPARTMENT_NAME;
-		} else if ("Отчетный период".equals(sortByColumn)){
+		} else if (REPORT_PERIOD_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.REPORT_PERIOD_NAME;
-		} else if ("Состояние".equals(sortByColumn)){
+		} else if (FORM_DATA_STATE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = FormDataSearchOrdering.STATE;
 		} else {
 			this.sortByColumn = FormDataSearchOrdering.ID;

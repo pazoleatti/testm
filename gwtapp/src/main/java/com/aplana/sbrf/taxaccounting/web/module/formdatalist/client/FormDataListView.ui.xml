@@ -5,13 +5,6 @@
 	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
 
 	<ui:style>
-		@external .gwt-PopupPanel;
-		.gwt-PopupPanel {
-			border: 2px solid #3dbf0e;
-			padding: 2px;
-			background: white;
-		}
-		
 		.pager {
 			margin-right: auto;
 			margin-left: auto;

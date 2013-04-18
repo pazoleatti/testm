@@ -84,7 +84,7 @@ public class CellStyleDaoImpl extends AbstractDao implements CellStyleDao {
 	/**
 	 * Запись в таблице cell_style
 	 */
-	private static class StyleRecord {
+	private static final class StyleRecord {
 		private int columnId;
 		private Long rowId;
 		private Integer id;

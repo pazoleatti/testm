@@ -30,7 +30,7 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
     public RefreshDeclarationDataResult execute(RefreshDeclarationDataAction action, ExecutionContext context) {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		declarationDataService.refreshDeclaration(new Logger(), action.getDeclarationId(), userId);
+		declarationDataService.reCreate(new Logger(), action.getDeclarationId(), userId, action.getDocDate());
 	    return new RefreshDeclarationDataResult();
     }
 

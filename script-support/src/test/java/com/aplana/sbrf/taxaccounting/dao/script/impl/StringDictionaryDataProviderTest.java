@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataP
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
 import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

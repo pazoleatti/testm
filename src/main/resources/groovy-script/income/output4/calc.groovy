@@ -332,11 +332,17 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
                 department = departmentService.get(row.divisionName.toString())
                 departmentParent = departmentService.getTB(department.getTbIndex())
-                row.bankName = departmentParent.name
-                row.bankCode = departmentParent.sbrfCode
+
+                if (department.id == 113) {
+                    row.bankName = 'Центральный аппарат'
+                    row.bankCode = '790000'
+                } else {
+                    row.bankName = departmentParent.name
+                    row.bankCode = departmentParent.sbrfCode
+                }
                 row.divisionCode = department.sbrfCode
                 departmentParam = departmentService.getDepartmentParam((int) department.id)
-                row.kpp = new BigDecimal(departmentParam.kpp)
+                row.kpp = departmentParam.kpp
                 row.subjectCode = department.dictRegionId
                 row.subjectName = dictionaryRegionService.getRegionByCode(department.getDictRegionId()).getName()
                 departmentParamIncome = departmentService.getDepartmentParamIncome(department.id)
@@ -372,7 +378,7 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         //графа14
         for (row in formData.dataRows) {
             if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
-                row.baseTaxOf = (BigDecimal) (row.propertyPrice + row.workersCount / 2).setScale(8, BigDecimal.ROUND_HALF_UP)
+                row.baseTaxOf = (BigDecimal) (row.propertyWeight + row.countWeight / 2).setScale(8, BigDecimal.ROUND_HALF_UP)
             }
         }
 
@@ -457,7 +463,7 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
                 subjectTaxSumPrevItogo = 0  // Может изменится
                 if (formPrev != null) {
-                    subjectTaxSumPrevItogo = formPrev.getDataRow('total').subjectTaxSum
+                    subjectTaxSumPrevItogo = formPrev.dataRows.get(formPrev.dataRows.size() - 1).subjectTaxSum
                 }
 
                 if (reportPeriodService.get(formData.reportPeriodId).order == 1) {
