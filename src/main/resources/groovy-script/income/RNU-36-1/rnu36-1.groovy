@@ -44,9 +44,9 @@ def addNewRow() {
     ['series', 'amount', 'moninal', 'shortPositionDate',
             'balance2', 'averageWeightedPrice', 'termBondsIssued'].each {
         newRow.getCell(it).editable = true
-        newRow.getCell(it).styleAlias = 'Редактируемые'
+        newRow.getCell(it).styleAlias = 'Редактируемая'
     }
-    newRow.getCell('percIncome').styleAlias = 'Вычисляемые'
+    newRow.getCell('percIncome').styleAlias = 'Вычисляемая'
 
     if (currentDataRow == null) {
         row = formData.getDataRow('totalA')
@@ -54,7 +54,7 @@ def addNewRow() {
     } else if (currentDataRow.getAlias() == null) {
         formData.dataRows.add(currentDataRow.getOrder(), newRow)
     } else {
-        def row
+        def row = formData.getDataRow('totalA')
         switch (currentDataRow.getAlias()) {
             case 'A' :
             case 'totalA' :

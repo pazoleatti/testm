@@ -35,6 +35,7 @@ def addNewRow() {
     def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
     ['code', 'balance', 'name', 'sum'].each {
         newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     def pos = (currentDataRow != null ? currentDataRow.getOrder() : formData.dataRows.size)
     formData.dataRows.add(pos, newRow)

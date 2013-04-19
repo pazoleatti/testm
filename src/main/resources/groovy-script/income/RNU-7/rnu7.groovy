@@ -46,6 +46,7 @@ def addNewRow() {
     ['balance', 'date', 'outcomeCode', 'docNumber', 'docDate', 'currencyCode',
             'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency'].each {
         newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
     formData.dataRows.add(pos, newRow)

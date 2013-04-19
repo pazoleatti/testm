@@ -51,6 +51,7 @@ def addNewRow() {
             'costOnMarketQuotation', 'reserveCalcValue',
             'reserveCreation', 'reserveRecovery'].each {
         newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
 
     def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)

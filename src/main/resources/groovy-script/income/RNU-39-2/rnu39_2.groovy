@@ -13,7 +13,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK :
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        // logicalCheck()
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -53,7 +53,7 @@ def addNewRow() {
             'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon',
             'couponIncome', 'totalPercIncome', 'positionType', 'securitiesGroup'].each {
         newRow.getCell(it).editable = true
-        newRow.getCell(it).styleAlias = 'Редактируемые'
+        newRow.getCell(it).styleAlias = 'Редактируемая'
     }
 
     if (currentDataRow == null) {
@@ -63,7 +63,7 @@ def addNewRow() {
         formData.dataRows.add(currentDataRow.getOrder(), newRow)
     } else {
         def alias = currentDataRow.getAlias()
-        def row = null
+        def row = formData.getDataRow('totalA1')
         if (alias == 'A') {
             row = formData.getDataRow('totalA1')
         } else if (alias == 'B') {
@@ -235,7 +235,12 @@ def isSectionA(def row) {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias, def rowStart, def rowEnd) {
-    return summ(formData, new ColumnRange(columnAlias, rowStart.getOrder() - 1, rowEnd.getOrder() - 2))
+    def from = rowStart.getOrder()
+    def to = rowEnd.getOrder() - 2
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
 

@@ -65,6 +65,7 @@ def addNewRow() {
             'exerciseRuble', 'marketPricePercent', 'marketPriceRuble',
             'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
         newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
     formData.dataRows.add(pos, newRow)

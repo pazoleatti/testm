@@ -59,6 +59,7 @@ def addNewRow() {
             'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate',
             'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate'].each {
         newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
     formData.dataRows.add(pos, newRow)
