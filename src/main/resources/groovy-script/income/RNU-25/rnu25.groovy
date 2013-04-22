@@ -210,13 +210,11 @@ void logicalCheck() {
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
             if (row.lotSizeCurrent == 0 && row.reserve != row.reserveRecovery) {
                 logger.warn('Графы 6 и 13 неравны!')
-                break
             }
 
             // 3. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 7, 10, 11)
             if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
                 logger.warn('Графы 7, 10 и 11 ненулевые!')
-                break
             }
 
             // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 4, 6, 13)
@@ -228,7 +226,6 @@ void logicalCheck() {
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
             if (row.signSecurity == 'x' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Облигации необращающиеся, графы 11 и 12 ненулевые!')
-                break
             }
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
@@ -254,7 +251,6 @@ void logicalCheck() {
             if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
                     row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
                 logger.warn('Резерв сформирован. Графы 5, 7, 10 и 11 неположительные!')
-                break
             }
 
             // 10. Проверка корректности формирования резерва (графа 6, 11, 12, 13)
@@ -280,7 +276,6 @@ void logicalCheck() {
                     */
                 if (totalRowOld.reserveCalcValue > 0 && totalRow.tradeNumber != totalRowOld.tradeNumber) {
                     logger.warn('') // TODO (Ramil Timerbaev)
-                    break
                 }
 
                 // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )

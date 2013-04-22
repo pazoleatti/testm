@@ -76,8 +76,8 @@ def deleteRow() {
  */
 void calc() {
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
@@ -227,13 +227,11 @@ void logicalCheck() {
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
             if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
                 logger.warn('Графы 8 и 17 неравны!')
-                break
             }
 
             // 3. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 9, 14, 15)
             if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
                 logger.warn('Графы 9, 14 и 15 ненулевые!')
-                break
             }
 
             // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
@@ -245,7 +243,6 @@ void logicalCheck() {
             // 5. Проверка необращающихся акций (графа 10, 15, 16)
             if (row.signSecurity == 'x' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Акции необращающиеся, графы 15 и 16 ненулевые!')
-                break
             }
 
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
@@ -277,7 +274,6 @@ void logicalCheck() {
             if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
                     row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
                 logger.warn('Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
-                break
             }
 
             if (formDataOld != null) {
@@ -294,7 +290,6 @@ void logicalCheck() {
                        */
                 if (totalRowOld.reserveCalcValue > 0 && totalRow.tradeNumber != totalRowOld.tradeNumber) {
                     logger.warn('') // TODO (Ramil Timerbaev)
-                    break
                 }
 
                 // 11. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
@@ -305,7 +300,6 @@ void logicalCheck() {
                     def prevCol = 4
                     def prevCol2 = 7
                     logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы «Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения» за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы «Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения» за предыдущий отчётный период.")
-                    break
                 }
 
                 // 12. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
@@ -361,7 +355,6 @@ void logicalCheck() {
             index += 1
         }
     }
-
 }
 
 /**
@@ -409,7 +402,6 @@ void setOrder() {
         row.setOrder(index + 1)
     }
 }
-
 
 /**
  * Получить сумму столбца.
