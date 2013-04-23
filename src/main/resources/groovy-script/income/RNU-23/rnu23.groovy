@@ -259,27 +259,6 @@ void logicalCheck() {
                 break
             }
 
-// графа 1  - number
-// графа 2  - contract
-// графа 3  - contractDate
-// графа 4  - amountOfTheGuarantee
-// графа 5  - dateOfTransaction
-// графа 6  - rateOfTheBankOfRussia
-// графа 7  - interestRate
-// графа 8  - baseForCalculation
-// графа 9  - accrualAccountingStartDate
-// графа 10 - accrualAccountingEndDate
-// графа 11 - preAccrualsStartDate
-// графа 12 - preAccrualsEndDate
-// графа 13 - incomeCurrency
-// графа 14 - incomeRuble
-// графа 15 - accountingCurrency
-// графа 16 - accountingRuble
-// графа 17 - preChargeCurrency
-// графа 18 - preChargeRuble
-// графа 19 - taxPeriodCurrency
-// графа 20 - taxPeriodRuble
-
             // 8. Проверка на заполнение поля «<Наименование поля>»
             // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
             def checkColumn9and10 = row.accrualAccountingStartDate != null && row.accrualAccountingEndDate != null &&
