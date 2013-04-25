@@ -10,6 +10,8 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
+        logicalCheck()
+        break
     case FormDataEvent.CALCULATE :
         calc()
         logicalCheck()

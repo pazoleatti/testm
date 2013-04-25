@@ -11,12 +11,10 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logger.info('===== check')
         logicalCheck()
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        logger.info('===== calc')
         calc()
         logicalCheck()
         checkNSI()

@@ -12,9 +12,12 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
+        logicalCheck()
+        checkNSI()
+        break
     case FormDataEvent.CALCULATE :
         calc()
-        // logicalCheck()
+        logicalCheck()
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -54,8 +57,15 @@ def addNewRow() {
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
 
-    def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
-    formData.dataRows.add(pos, newRow)
+    def index = formData.dataRows.indexOf(currentDataRow)
+    if (index == -1) {
+        index = 0
+    }
+    if (index + 1 == formData.dataRows.size()) {
+        formData.dataRows.add(index, newRow)
+    } else {
+        formData.dataRows.add(index + 1, newRow)
+    }
 
     setOrder()
 }
@@ -200,11 +210,58 @@ void logicalCheck() {
         formDataOld = FormDataService.find(325, FormDataKind.PRIMARY, formData.departmentId, reportPeriodOld.id)
     }
 
+    if (formDataOld != null &&
+            !formDataOld.dataRows.isEmpty() && !formData.dataRows.isEmpty()) {
+        // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+        def count
+        def missContract = []
+        def severalContract = []
+        formDataOld.dataRows.each { prevRow ->
+            if (prevRow.reserveCalcValue > 0) {
+                count = 0
+                formDataOld.dataRows.each { row ->
+                    if (row.tradeNumber == prevRow.tradeNumber) {
+                        count += 1
+                    }
+                }
+                if (count == 0) {
+                    missContract.add(prevRow.tradeNumber)
+                } else if (count > 1) {
+                    severalContract.add(prevRow.tradeNumber)
+                }
+            }
+        }
+        if (!missContract.isEmpty()) {
+            def message = missContract.join(', ')
+            logger.warn("Отсутствуют строки с номерами сделок: $message!")
+        }
+        if (!severalContract.isEmpty()) {
+            def message = severalContract.join(', ')
+            logger.warn("Существует несколько строк с номерами сделок: $message!")
+        }
+    }
+
     if (!formData.dataRows.isEmpty()) {
         def index = 1
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 continue
+            }
+
+            // 15. Проверка на заполнение поля «<Наименование поля>». Графа 1..3, 5..13
+            def colNames = []
+            // Список проверяемых столбцов
+            ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve', 'cost',
+                    'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
+                    'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
+                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                }
+            }
+            if (!colNames.isEmpty()) {
+                def errorMsg = colNames.join(', ')
+                logger.error("Поля $errorMsg не заполнены!")
+                break
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
@@ -254,79 +311,56 @@ void logicalCheck() {
             }
 
             // 10. Проверка корректности формирования резерва (графа 6, 11, 12, 13)
-            if (row.reserve + row.reserveCreation == row.reserveCalcValue + row.reserveRecovery) {
+            if (row.reserve + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
                 logger.error('Резерв сформирован неверно!')
                 break
             }
 
-            if (formDataOld != null) {
-                totalRow = formData.getDataRow('total')
-                totalRowOld = formDataOld.getDataRow('total')
-
-                // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
-                /*
-                        Если «графа 11» > 0 формы «Регистр налогового учёта доходов по выданным гарантиям» за предыдущий отчётный период, то
-                        проверяется, есть ли запись с таким же номером сделки (графа 3) в текущем периоде  («графа 3» = «графа 3» для предыдущего отчётного периода)
-                        0
-                        •	Если записи нет:
-                        Отсутствуют строки с номерами сделок : <список номеров сделок>!
-                        •	Если записей несколько:
-                        Существует несколько строк с номерами сделок: <список номеров сделок>!
-                        (сообщения появляются в протоколе ошибок после всех строк)
-                    */
-                if (totalRowOld.reserveCalcValue > 0 && totalRow.tradeNumber != totalRowOld.tradeNumber) {
-                    logger.warn('') // TODO (Ramil Timerbaev)
-                }
-
-                // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-                // TODO (Ramil Timerbaev) про эту проверку Карина уточнит
-                if (totalRow.tradeNumber == totalRowOld.tradeNumber && totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-                    logger.error('РНУ сформирован некорректно!.')
-                    break
-                }
-
-                // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-                // TODO (Ramil Timerbaev) про эту проверку Карина уточнит
-                if (totalRow.tradeNumber == totalRowOld.tradeNumber && totalRow.reserve != totalRowOld.reserveCalcValue) {
-                    logger.error('РНУ сформирован некорректно!')
-                    break
-                }
-
-                // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
-                if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-                    logger.error('РНУ сформирован некорректно!')
-                    break
-                }
-
-                // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
-                if (totalRow.reserve != totalRowOld.reserveCalcValue) {
-                    logger.error('РНУ сформирован некорректно!')
-                    break
-                }
+            // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
+            if (checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', formDataOld)) {
+                def curCol = 3
+                def curCol2 = 4
+                def prevCol = 3
+                def prevCol2 = 5
+                logger.error("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
+                break
             }
 
-            // 15. Проверка на заполнение поля «<Наименование поля>». Графа 1..3, 5..13
-            def colNames = []
-            // Список проверяемых столбцов
-            ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve', 'cost',
-                    'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
-                    'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                def errorMsg = colNames.join(', ')
-                logger.error("Поля $errorMsg не заполнены!")
+            // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
+            if (checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', formDataOld)) {
+                def curCol = 3
+                def curCol2 = 3
+                def prevCol = 6
+                def prevCol2 = 11
+                logger.error("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
                 break
             }
 
             // 16. Проверка на уникальность поля «№ пп» (графа 1)
-            if (index != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')
-                break
+            // if (index != row.rowNumber) {
+            //    logger.error('Нарушена уникальность номера по порядку!')
+            //    break
+            // }
+            // index += 1
+        }
+
+        if (formDataOld != null) {
+            totalRow = formData.getDataRow('total')
+            totalRowOld = formDataOld.getDataRow('total')
+
+            // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
+            if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
+                def curCol = 4
+                def prevCol = 5
+                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
             }
-            index += 1
+
+            // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
+            if (totalRow.reserve != totalRowOld.reserveCalcValue) {
+                def curCol = 6
+                def prevCol = 11
+                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе $curCol = «Общий итог» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
+            }
         }
     }
 }
@@ -378,4 +412,28 @@ def getNewRow(def alias, def totalColumns, def sums) {
         newRow.getCell(it).setValue(sums[it])
     }
     return newRow
+}
+
+/**
+ * Сверить данные с предыдущим периодом.
+ *
+ * @param row строка нф текущего периода
+ * @param likeColumnName псевдоним графы по которому ищутся соответствующиеся строки
+ * @param curColumnName псевдоним графы текущей нф для второго условия
+ * @param prevColumnName псевдоним графы предыдущей нф для второго условия
+ * @param prevForm данные нф предыдущего периода
+ */
+def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName, def prevForm) {
+    if (prevForm == null) {
+        return false
+    }
+    if (row.getCell(likeColumnName).getValue() == null) {
+        return false
+    }
+    for (def prevRow : prevForm.dataRows) {
+        if (row.getCell(likeColumnName).getValue() == prevRow.getCell(likeColumnName).getValue() &&
+                row.getCell(curColumnName).getValue() != prevRow.getCell(prevColumnName).getValue()) {
+            return true
+        }
+    }
 }

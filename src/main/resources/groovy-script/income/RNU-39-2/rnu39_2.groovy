@@ -11,6 +11,9 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
+        // logicalCheck()
+        checkNSI()
+        break
     case FormDataEvent.CALCULATE :
         calc()
         // logicalCheck()
@@ -125,8 +128,8 @@ void calc() {
     }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
     // подразделы
     ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5'].each { section ->
         firstRow = formData.getDataRow(section)

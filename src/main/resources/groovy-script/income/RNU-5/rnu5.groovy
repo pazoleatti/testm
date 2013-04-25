@@ -10,6 +10,8 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
+        checkNSI()
+        break
     case FormDataEvent.CALCULATE :
         calc()
         checkNSI()
