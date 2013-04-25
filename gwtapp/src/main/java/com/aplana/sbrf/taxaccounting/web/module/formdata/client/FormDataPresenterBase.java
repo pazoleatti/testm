@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
@@ -100,7 +101,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	private HandlerRegistration closeFormDataHandlerRegistration;
 
 	protected final DispatchAsync dispatcher;
-	protected final PlaceManager placeManager;
+	protected final TaPlaceManager placeManager;
 	protected final SignersPresenter signersPresenter;
 	protected final DialogPresenter dialogPresenter;
 
@@ -119,7 +120,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter) {
 		super(eventBus, view, proxy);
-		this.placeManager = placeManager;
+		this.placeManager = (TaPlaceManager)placeManager;
 		this.dispatcher = dispatcher;
 		this.signersPresenter = signersPresenter;
 		this.dialogPresenter = dialogPresenter;

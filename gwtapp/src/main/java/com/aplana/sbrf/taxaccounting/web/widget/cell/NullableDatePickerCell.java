@@ -33,7 +33,7 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 public class NullableDatePickerCell extends AbstractEditableCell<Date, Date> {
 
 	private static final int ESCAPE = 27;
-	private static final String CLEAR_IMAGE_SOURCE = "img/cancel_image.png";
+	private static final String CLEAR_IMAGE_SOURCE = "resources/img/cancel_image.png";
 	private static final String CLEAR_IMAGE_WIDTH = "20px";
 	private static final String CLEAR_IMAGE_HEIGHT = "20px";
 	private static final String CLEAR_IMAGE_BACKGROUND = "#FFFBB1";

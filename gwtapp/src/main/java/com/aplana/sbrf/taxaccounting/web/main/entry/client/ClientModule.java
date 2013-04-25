@@ -38,7 +38,7 @@ public class ClientModule extends AbstractPresenterModule {
 				Singleton.class);
 		bind(TaRootPresenter.class).asEagerSingleton();
 		// bind(GoogleAnalytics.class).to(GoogleAnalyticsImpl.class).in(Singleton.class);
-		bind(PlaceManager.class).to(TaPlaceManager.class).in(Singleton.class);
+		bind(PlaceManager.class).to(TaPlaceManagerImpl.class).in(Singleton.class);
 
 		install(new DispatchAsyncModule());
 

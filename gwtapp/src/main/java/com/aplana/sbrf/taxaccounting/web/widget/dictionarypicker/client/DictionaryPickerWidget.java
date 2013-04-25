@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -12,19 +13,13 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.NoSelectionModel;
-import com.google.gwt.view.client.RangeChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 
 import java.io.Serializable;
 
@@ -66,6 +61,15 @@ public abstract class DictionaryPickerWidget<ValueType extends Serializable> ext
 		cellTable.addColumn(createValueColumn(), "Значение");
 		selectionModel = new NoSelectionModel<DictionaryItem<ValueType>>();
 		cellTable.setSelectionModel(selectionModel);
+		cellTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DictionaryItem<ValueType>>() {
+			@Override
+			public void onCellPreview(CellPreviewEvent<DictionaryItem<ValueType>> event) {
+				if ("mouseover".equals(event.getNativeEvent().getType())) {
+					Element cellElement = event.getNativeEvent().getEventTarget().cast();
+					cellElement.setTitle(cellElement.getInnerText());
+				}
+			}
+		});
 		selectionModel.addSelectionChangeHandler(
 				new SelectionChangeEvent.Handler() {
 					@Override

@@ -62,8 +62,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	TextBox dateBox;
 	@UiField
 	Image dateImage;
-	@UiField
-	Panel datePanel;
 
 	@Inject
 	@UiConstructor
@@ -94,8 +92,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void showRefresh(boolean show) {
-		datePanel.setVisible(show);
+		dateImage.setVisible(show);
 		refreshButton.setVisible(show);
+		dateBox.setEnabled(show);
 	}
 
 	@Override
@@ -116,6 +115,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setTitle(String title) {
 		this.title.setText(title);
+		this.title.setTitle(title);
 	}
 
 	@Override

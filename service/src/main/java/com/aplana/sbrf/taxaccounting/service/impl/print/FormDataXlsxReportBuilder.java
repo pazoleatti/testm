@@ -36,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataReport;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -128,16 +129,6 @@ public class FormDataXlsxReportBuilder {
 		public abstract CellStyle createCellStyle(CellStyle style);
 	}
 	
-	private FormData data;
-	private FormTemplate formTemplate;
-	private Department department;
-	private ReportPeriod reportPeriod;
-	
-	private Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
-	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
-
-	private int skip = 0;
-	
 	private final class CellStyleBuilder{
 		public CellStyle cellStyle;
 		
@@ -174,7 +165,11 @@ public class FormDataXlsxReportBuilder {
 				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			}
 			if(currColumn instanceof DateColumn){
-				style.setDataFormat(dataFormat.getFormat(dateFormater));
+				DateColumn dateCurrColumn = (DateColumn)currColumn;
+				if(Formats.getById(dateCurrColumn.getFormatId()).getFormat().equals(""))
+					style.setDataFormat(dataFormat.getFormat(dateFormater));
+				else
+					style.setDataFormat(dataFormat.getFormat(Formats.getById(dateCurrColumn.getFormatId()).getFormat()));
 			}else if(currColumn instanceof NumericColumn){
 				NumericColumn nc = (NumericColumn)currColumn;
 				style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(nc.getPrecision())));
@@ -183,6 +178,17 @@ public class FormDataXlsxReportBuilder {
 			return style;
 		}
 	}
+	
+	private FormData data;
+	private FormTemplate formTemplate;
+	private Department department;
+	private ReportPeriod reportPeriod;
+	
+	private Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
+	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
+
+	private int skip = 0;
+	
 	
 	public FormDataXlsxReportBuilder() throws IOException {
 		templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
@@ -426,6 +432,8 @@ public class FormDataXlsxReportBuilder {
 		logger.debug(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
 		StringBuilder sb;
 		AreaReference ar;
+		char[] arr;
+		Date printDate;
 		Row r;
 		Cell c;
 		
@@ -442,24 +450,23 @@ public class FormDataXlsxReportBuilder {
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
-		
+
 		if(data.getState() == WorkflowState.ACCEPTED && data.getAcceptanceDate()!=null){
-			//Просто склонение
-			char[] arr = XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().toCharArray();
-			if(XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().equals("март") || 
-					XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase().equals("август"))
-			{
-				String mounth = new String(XlsxReportMetadata.sdf_m.format(data.getAcceptanceDate()).toLowerCase() + "а");
-				arr = mounth.toCharArray();
-			}else
-				arr[arr.length - 1] = 'я';
-			
-			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(data.getAcceptanceDate()),
-					new String(arr), 
-					XlsxReportMetadata.sdf_y.format(data.getAcceptanceDate())));
+			printDate = data.getAcceptanceDate();
+		} else {
+			printDate = data.getCreationDate();
 		}
-		else
-			sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "__", "_______", "__"));
+		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
+		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
+				XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))
+		{
+			String month = new String(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а");
+			arr = month.toCharArray();
+		} else {
+			arr[arr.length - 1] = 'я';
+		}
+		sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
+				new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
 		c.setCellValue(sb.toString());
 		
 		//Fill report name

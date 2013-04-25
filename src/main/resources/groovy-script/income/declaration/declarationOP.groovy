@@ -37,8 +37,6 @@ def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
  * Данные налоговых форм.
  */
 
-logger.info('===== formDataCollection = ' + (formDataCollection != null ? formDataCollection.records.size() : 'null'))
-
 /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
 def formDataComplexIncome = formDataCollection.find(departmentId, 302, FormDataKind.SUMMARY)
 
@@ -130,7 +128,7 @@ xml.Файл(
     // Титульный лист
     Документ(
             КНД :  knd,
-            ДатаДок : new Date().format('dd.MM.yyyy'),
+            ДатаДок : docDate != null ? docDate: new Date().format("dd.MM.yyyy"),
             Период : period,
             ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
             КодНО : departmentParam.taxOrganCode,
@@ -157,9 +155,9 @@ xml.Файл(
 
         Подписант(ПрПодп : prPodp) {
             ФИО(
-                    Фамилия : departmentParamIncome.signatoryLastName,
+                    Фамилия : departmentParamIncome.signatorySurname,
                     Имя : departmentParamIncome.signatoryFirstName,
-                    Отчество : departmentParamIncome.signatorySurname)
+                    Отчество : departmentParamIncome.signatoryLastName)
             if (prPodp != 1) {
                 СвПред(
                         [НаимДок : departmentParamIncome.approveDocName] +

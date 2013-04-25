@@ -88,4 +88,13 @@ public interface DepartmentService {
 	 * @return список департаментов, необходимый для построения дерева
 	 */
 	Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
+	
+	/**
+	 * Данная функция возвращает список департаментов Таким образом,
+	 * эта функция возвращает список департаментов, который необходим для построения полноценного дерева.
+	 * @param availableDepartments список доступных пользователю департаментов. Данный список получаем при вызове
+	 *                             FormDataSearchService.getAvailableFilterValues().getDepartmentIds()
+	 * @return список департаментов
+	 */
+	List<Department> listDepartments();
 }

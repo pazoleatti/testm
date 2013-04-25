@@ -29,12 +29,34 @@ public final class CallbackUtils {
 		.addCallback(MessageOnFailureCallback.create())
 		.addCallback(LockScrCallback.create());
 	}
+		
 	
-	
+	/**
+	 * То же что и defaultCallback, но экран не блокируется 
+	 * (только запись в лог панель)
+	 * 
+	 * @param callback
+	 * @return
+	 */
 	public static <T> CompositeCallback<T> defaultCallbackNoLock(AsyncCallback<T> callback){
 		return CompositeCallback
 		.create(callback)
 		.addCallback(MessageOnFailureCallback.create());
+	}
+	
+	
+	/**
+	 * То же что и defaultCallback, но модальный диалог при ошибке не отображается 
+	 * (только запись в лог панель)
+	 * 
+	 * @param callback
+	 * @return
+	 */
+	public static <T> CompositeCallback<T> defaultCallbackNoModalError(AsyncCallback<T> callback){
+		return CompositeCallback
+		.create(callback)
+		.addCallback(MessageOnFailureCallback.create(true))
+		.addCallback(LockScrCallback.create());
 	}
 	
 	/**

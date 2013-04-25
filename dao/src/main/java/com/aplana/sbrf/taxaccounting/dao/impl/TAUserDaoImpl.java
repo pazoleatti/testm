@@ -5,11 +5,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -29,7 +33,9 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	private final Log logger = LogFactory.getLog(getClass());
 	
-	private static final class TARoleMapper implements RowMapper<TARole> {
+	private static final RowMapper<TARole> TA_ROLE_MAPPER = new RowMapper<TARole>() {
+		
+		@Override
 		public TARole mapRow(ResultSet rs, int index) throws SQLException {
 			TARole result = new TARole();
 			result.setId(rs.getInt("id"));
@@ -37,9 +43,11 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			result.setAlias(rs.getString("alias"));
 			return result;
 		}
-	}
+	}; 
 	
-	private static final class TAUserMapper implements RowMapper<TAUser> {
+	private static final RowMapper<TAUser> TA_USER_MAPPER = new RowMapper<TAUser>() {
+		
+		@Override
 		public TAUser mapRow(ResultSet rs, int index) throws SQLException {
 			TAUser result = new TAUser();
 			result.setId(rs.getInt("id"));
@@ -48,30 +56,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setLogin(rs.getString("login"));
 			result.setEmail(rs.getString("email"));
-			result.setUuid(rs.getString("uuid"));
 			return result;
 		}
-	}
-	
-	@Override
-	public TAUser getUser(String login) {
-		TAUser user;
-		if (logger.isDebugEnabled()) {
-			logger.debug("Fetching TAUser with login = " + login);	
-		}
-		try {
-			user = getJdbcTemplate().queryForObject(
-				"select * from sec_user where login = ?",
-				new Object[] { login },
-				new int[] { Types.CHAR },
-				new TAUserMapper()
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Пользователь с логином \"" + login + "\" не найден в БД");
-		}
-		initUser(user);
-		return user;
-	}
+	};
 
 	@Override
 	@Cacheable("User")
@@ -82,7 +69,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				"select * from sec_user where id = ?",
 				new Object[] { userId },
 				new int[] { Types.NUMERIC },
-				new TAUserMapper()
+				TA_USER_MAPPER
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с id = " + userId + " не найден в БД");
@@ -90,6 +77,18 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 		initUser(user);
 		return user;
+	}
+	
+	@Override
+	public int getUsreIdbyLogin(String login) {
+		try {
+			return getJdbcTemplate().queryForInt("select id from sec_user where login = ?", login);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
+		}catch (DataAccessException e){
+			throw new DaoException("Ошибка при получении идентификатора пользователя с login = " + login + " " + e.toString());
+		}
+		
 	}
 	
 	private void initUser(TAUser user) {
@@ -101,25 +100,15 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				"select * from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
 				new Object[] { user.getId() },
 				new int[] { Types.NUMERIC },
-				new TARoleMapper()
+				TA_ROLE_MAPPER
 			);
 			user.setRoles(userRoles);
 		}
 	}
-	
-	@Override
-	public List<TARole> listRolesAll() {
-		return getJdbcTemplate().query(
-				"select * from sec_role",
-				new Object[] {},
-				new int[] {},
-				new TARoleMapper()
-			);
-	}
 
 	@Transactional(readOnly=false)
 	@Override
-	public void addUser(final TAUser user) {
+	public int createUser(final TAUser user) {
 		final KeyHolder keyHolder = new GeneratedKeyHolder();
 		try {
 			PreparedStatementCreator psc = new PreparedStatementCreator() {
@@ -131,26 +120,25 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					//prepareStatement(sql, string_field) Only for ORACLE using
 					PreparedStatement ps = con
 							.prepareStatement(
-									"insert into sec_user (id, name, login, department_id, is_active, email, uuid) values (seq_sec_user.nextval,?,?,?,?,?,?)",
+									"insert into sec_user (id, name, login, department_id, is_active, email) values (seq_sec_user.nextval,?,?,?,?,?)",
 									new String[]{"ID"});
 					ps.setString(1, user.getName());
 					ps.setString(2, user.getLogin());
 					ps.setInt(3, user.getDepartmentId());
 					ps.setBoolean(4, user.isActive());
 					ps.setString(5, user.getEmail());
-					ps.setString(6, user.getUuid());
-
 					return ps;
 				}
 			}; 
 			getJdbcTemplate().update(psc, keyHolder);
-			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) values (?, ?)",new BatchPreparedStatementSetter() {
+			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
+					"select ?, id from sec_role where alias = ?",new BatchPreparedStatementSetter() {
 				
 				@Override
 				public void setValues(PreparedStatement ps, int i) throws SQLException {
 					TARole role = user.getRoles().get(i);
 					ps.setInt(1, keyHolder.getKey().intValue());
-					ps.setInt(2, role.getId());
+					ps.setString(2, role.getAlias());
 				}
 				
 				@Override
@@ -158,54 +146,116 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					return user.getRoles().size();
 				}
 			});
-		} catch (Exception e) {
-			throw new DaoException("Пользователья с uuid = " + user.getUuid() + " не удалось сохранить.");
+			return keyHolder.getKey().intValue();
+		} catch (DataAccessException e) {
+			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить.");
 		}
 		
 	}
 
 	@Transactional(readOnly=false)
 	@Override
-	public void setUserIsActive(TAUser user) {
-		getJdbcTemplate().update("update sec_user set is_active=? where login = ?", 
-				new Object[]{user.isActive(), user.getLogin()},
-				new int[]{Types.BOOLEAN, Types.CHAR});
+	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
+	public void setUserIsActive(int userId, boolean isActive) {
+		int rows = getJdbcTemplate().update("update sec_user set is_active=? where id = ?", 
+				new Object[]{isActive, userId},
+				new int[]{Types.BOOLEAN, Types.INTEGER});
+		if(rows == 0)
+			throw new DaoException("Пользователя с id = " + userId + " не существует. Не удалось выставить флаг active.");
+		
 	}
 
 	@Transactional(readOnly=false)
 	@Override
-	public void updateUserRoles(final TAUser user) {
-		final int userRolesCount = getJdbcTemplate().queryForInt(
-				"select count(*) from sec_user_role ur where ur.user_id = " +
-				"(select id from sec_user where login=?)", user.getLogin()
-			);
-		getJdbcTemplate().batchUpdate("delete from sec_user_role where user_id=" +
-				"(select id from sec_user where login=?)",new BatchPreparedStatementSetter() {
+	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
+	public void updateUser(final TAUser user) throws DaoException {
+		try {
+			List<Object> array = new ArrayList<Object>();
+			StringBuilder sb = new StringBuilder("update sec_user set");
+			if(user.getDepartmentId() != 0){
+				sb.append(" department_id=?,");
+				array.add(user.getDepartmentId());
+			}	
+			if(user.getEmail() != null){
+				sb.append(" email=?,");
+				array.add(user.getEmail());
+			}	
+			if(user.getName() != null){
+				sb.append(" name=?,");
+				array.add(user.getName());
+			}
+			sb.deleteCharAt(sb.toString().trim().length() - 1); //delete separator
+			sb.append(" where login = ?");
+			array.add(user.getLogin());
+			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
+			if(rows == 0)
+				throw new DaoException("Пользователя с login = " + user.getLogin() + " не существует.");
+			logger.debug("Update user meta info " + user);
 			
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				ps.setString(1, user.getLogin());
+			
+		} catch (DataAccessException e) {
+			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin());
+		}
+		if(user.getRoles().size() != 0)
+			updateUserRoles(user);
+		
+	}
+	
+	private void updateUserRoles(final TAUser user) {
+		try {
+			final int userRolesCount = getJdbcTemplate().queryForInt(
+					"select count(*) from sec_user_role ur where ur.user_id = " +
+					"(select id from sec_user where login=?)", user.getLogin()
+				);
+			getJdbcTemplate().batchUpdate("delete from sec_user_role where user_id=" +
+					"(select id from sec_user where login=?)",new BatchPreparedStatementSetter() {
+				
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					ps.setString(1, user.getLogin());
+				}
+				
+				@Override
+				public int getBatchSize() {
+					return userRolesCount;
+				}
+			});
+			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
+					"select ?, id from sec_role where alias = ?",
+					new BatchPreparedStatementSetter() {
+				
+				@Override
+				public void setValues(PreparedStatement ps, int i) throws SQLException {
+					TARole role = user.getRoles().get(i);
+					ps.setInt(1, user.getId());
+					ps.setString(2, role.getAlias());
+				}
+				
+				@Override
+				public int getBatchSize() {
+					return user.getRoles().size();
+				}
+			});
+			logger.debug("User update roles success " + user);
+		} catch (DataAccessException e) {
+			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin());
+		}
+		
+	}
+
+	@Override
+	public List<Integer> getUserIds() {
+		try {
+			List<Integer> taUsersIdList = new ArrayList<Integer>();
+			List<Map<String, Object>> result = getJdbcTemplate().queryForList("select id from sec_user");
+			for (Map<String, Object> map : result) {
+				taUsersIdList.add((Integer)map.get("ID"));
 			}
 			
-			@Override
-			public int getBatchSize() {
-				return userRolesCount;
-			}
-		});
-		getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) values (?, ?)",new BatchPreparedStatementSetter() {
-			
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				TARole role = user.getRoles().get(i);
-				ps.setInt(1, user.getId());
-				ps.setInt(2, role.getId());
-			}
-			
-			@Override
-			public int getBatchSize() {
-				return user.getRoles().size();
-			}
-		});
+			return taUsersIdList;
+		} catch (DataAccessException e) {
+			throw new DaoException("Ошибка при получении пользователей. ");
+		}
 	}
 	
 }

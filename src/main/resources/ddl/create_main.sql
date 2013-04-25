@@ -530,7 +530,8 @@ create table form_data (
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
-  acceptance_date    date
+  acceptance_date date,
+  creation_date date default sysdate not null    
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -546,6 +547,7 @@ comment on column form_data.department_id is 'Идентификатор под�
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
+comment on column form_data.creation_date is 'Дата создания';
 
 create sequence seq_form_data start with 10000;
 
@@ -736,7 +738,7 @@ comment on column event_script.event_code is 'Тип события';
 comment on column event_script.script_id is 'Идентификатор скрипта';
 comment on column event_script.ord is 'Порядок выполнения скрипта';
 
-alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
+alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 5, 6, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
 
 alter table event_script add constraint event_script_pk primary key (event_code, script_id);
 alter table event_script add constraint event_script_fk_script_id foreign key (script_id) references form_script (ID);
@@ -747,14 +749,12 @@ create table sec_user (
   name varchar(50) not null,
   department_id number(9) not null,
   is_active number(1) not null,
-  email varchar2(128),
-  uuid varchar2(36) not null
+  email varchar2(128)
 );
 
 alter table sec_user add constraint sec_user_pk primary key (id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
-alter table sec_user add constraint sec_user_uniq_uuid unique (uuid);
-alter table sec_user add constraint sec_user_uniq_login_active unique (login, is_active);
+alter table sec_user add constraint sec_user_uniq_login_active unique (login);
 
 comment on table sec_user is 'Пользователи системы';
 comment on column sec_user.id is 'Первичный ключ';
@@ -763,7 +763,6 @@ comment on column sec_user.name is 'Полное имя пользователя
 comment on column sec_user.department_id is 'Идентификатор подразделения';
 comment on column sec_user.is_active is 'Признак активностии пользователя';
 comment on column sec_user.email is 'Адрес электронной почты';
-comment on column sec_user.uuid is 'UUID';
 
 create sequence seq_sec_user start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -933,21 +932,3 @@ create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
-
-------------------------------------------------------------------------------------------------------------------
-create or replace view v_department(id, name, parent_id)
-as
-select id, name, parent_id from department;
---------------------------------------------------------------------------------------------------------------------
-create or replace view v_user(login, is_active, name, email, guid, department_id)
-as
-select login, is_active, name, email, uuid, department_id from sec_user;
---------------------------------------------------------------------------------------------------------------------
-create or replace view v_user_role(user_guid, role_code)
-as
-select a.uuid,  
-       b.alias  
-  from sec_user a, sec_role b, sec_user_role c 
- where a.id = c.user_id 
-   and b.id = c.role_id;
---------------------------------------------------------------------------------------------------------------------

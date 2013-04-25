@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
@@ -77,6 +81,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	
 
 	@Override
+	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB_XLSX)
 	public byte[] getXlsxData(long id) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -90,6 +95,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
+	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB_PDF)
 	public byte[] getPdfData(long id) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -103,12 +109,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	public void setXmlData(long declarationDataId, String xmlData) {
+	@Caching(evict = {
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true),
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+	})
+	public void setXmlData(long id, String xmlData) {
 		int count = getJdbcTemplate().update(
 			"update declaration_data set data = ? where id = ?",
 			new Object[] {
 				xmlData,
-				declarationDataId
+				id
 			},
 			new int[] {
 				Types.VARCHAR,
@@ -121,12 +131,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 	
 	@Override
-	public void setXlsxData(long declarationDataId, byte[] xlsxData) {
+	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+	public void setXlsxData(long id, byte[] xlsxData) {
 		int count = getJdbcTemplate().update(
 				"update declaration_data set data_xlsx = ? where id = ?",
 				new Object[] {
 					xlsxData,
-					declarationDataId
+					id
 				},
 				new int[] {
 					Types.BINARY,
@@ -139,12 +150,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	public void setPdfData(long declarationDataId, byte[] pdfData) {
+	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true)
+	public void setPdfData(long id, byte[] pdfData) {
 		int count = getJdbcTemplate().update(
 				"update declaration_data set data_pdf = ? where id = ?",
 				new Object[] {
 					pdfData,
-					declarationDataId
+					id
 				},
 				new int[] {
 					Types.BINARY,
@@ -157,13 +169,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	public void delete(long declarationDataId) {
+	@Caching(evict = {
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true),
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+	})
+	public void delete(long id) {
 		int count = getJdbcTemplate().update(
 			"delete from declaration_data where id = ?",
-			declarationDataId
+			id
 		);
 		if (count == 0) {
-			throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", declarationDataId);
+			throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", id);
 		}
 	}
 

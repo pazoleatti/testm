@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 /**
@@ -10,13 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
  * @author dsultanbekov
  */
 public interface TAUserDao {
-	/**
-	 * Получить информацию о пользователе по логину
-	 * @param login логин пользователя
-	 * @return объект, представляющий пользователя
-	 * @throws DaoException если пользователя с таким логином не существует
-	 */
-	TAUser getUser(String login);
 	/**
 	 * Получить информацию о пользователе по идентификатору
 	 * @param userId идентификатор пользователя
@@ -26,25 +19,34 @@ public interface TAUserDao {
 	TAUser getUser(int userId);
 	
 	/**
-	 * Получить список всех ролей в системе
-	 * @return список {@link TARole ролей}
-	 */
-	List<TARole> listRolesAll();
+	 * Получить id пользователя по логину
+	 * @param login идентификатор пользователя
+	 * @return userId
+	 * @throws DaoException если пользователя с таким логином не существует
+	 */	
+	int getUsreIdbyLogin(String login);
 	
 	/**
 	 * Добавляет нового пользователя
 	 */
-	void addUser(TAUser user);
+	int createUser(TAUser user);
 	
 	/**
-	 * Обновляет существующего пользователя, без ролей
+	 * Активирует/деактивирует существующего пользователя
 	 * @param {@link TAUser} user идентификатор пользователя
 	 */
-	void setUserIsActive(TAUser user);
+	void setUserIsActive(int userId, boolean isActive);
+
+	/**
+	 * Обновляет существующего пользователя. Sql строка формируется в вызывающем сервисе, 
+	 * чтобы определить на какие поля пришел запрос на обновление.
+	 * @param {@link TAUser} user идентификатор пользователя
+	 */
+	void updateUser(TAUser user);
 	
 	/**
-	 * Обновляет роли
-	 * @param {@link TAUser} user идентификатор пользователя
+	 * Возвращает полный список пользователей, включая неактивный.
+	 * @return {@link List<TAUser>}
 	 */
-	void updateUserRoles(TAUser user);
+	List<Integer> getUserIds();
 }

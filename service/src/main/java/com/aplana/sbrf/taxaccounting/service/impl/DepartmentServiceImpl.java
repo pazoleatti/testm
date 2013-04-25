@@ -88,5 +88,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 		}
 		return departmentSet;
 	}
+	
+	@Override
+	public List<Department> listDepartments() {
+		return departmentDao.listDepartments();
+	}
 
 }

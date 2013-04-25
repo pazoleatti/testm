@@ -22,7 +22,7 @@
 
         .titleGradient {
             position: absolute;
-            background: url("img/form_title_gradient.png");
+            background: url("resources/img/form_title_gradient.png");
             width: 64px;
             height: 32px;
             right: 790px;
@@ -59,7 +59,7 @@
                 <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="img/arrow-left-24.png"/>
+                            <style:ButtonLink title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:HorizontalPanel>
@@ -71,10 +71,10 @@
                     <g:HorizontalPanel height="35px">
                         <g:cell width="220px" verticalAlignment="middle">
                             <style:ButtonLink ui:field="signersAnchor" text="Исполнитель и подписанты"
-                                img="img/businessperson-16.png" title="Указать исполнителя и список подписантов налоговой формы"/>
+                                img="resources/img/businessperson-16.png" title="Указать исполнителя и список подписантов налоговой формы"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="img/printer-16.png" title="Отобразить печатное представление документа"/>
+                            <style:ButtonLink ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
@@ -110,7 +110,7 @@
                     </g:FlowPanel>
                     <g:HorizontalPanel height="30px">
                         <g:SimplePanel width="245px" ui:field="manualInputPanel" addStyleNames="{style.manualInput}">
-                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" img="img/pencil-16.png"
+                            <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
                                  title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
                         <style:Bar width="245px" ui:field="saveCancelBar">

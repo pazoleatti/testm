@@ -90,9 +90,11 @@ public interface FormDataService {
 	 * @param formTemplateId идентификатор шаблона формы
 	 * @param departmentId идентификатор подразделения
 	 * @param kind тип налоговой формы
+	 * @param reportPeriodId идентифиуатор отчетного периода
 	 * @return созданный объект FormData (еще не сохранённый в БД)
 	 */
-	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId, int departmentId, FormDataKind kind);
+	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId,
+	                                    int departmentId, FormDataKind kind, int reportPeriodId);
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.

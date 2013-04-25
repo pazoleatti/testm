@@ -32,10 +32,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +84,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		((NumericColumn)colNum1).setPrecision(1);
 		((NumericColumn)colNum2).setPrecision(3);
 		
+		//setting alias
 		colNum.setAlias("Number");
 		colNum1.setAlias("Number1");
 		colNum2.setAlias("Number2");
@@ -104,9 +101,10 @@ public class FormDataXlsxReportBuilderTestMock {
 		colStr12.setAlias("String3");
 		
 		colDate13.setAlias("Date");
-		colDate14.setAlias("Date2");
-		colDate15.setAlias("Date1");
+		colDate14.setAlias("Date1");
+		colDate15.setAlias("Date2");
 		
+		//setting name
 		colNum.setName("Код вида расхода");
 		colNum1.setName("Группа расходов");
 		colNum2.setName("Вид расхода по операции");
@@ -126,6 +124,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		colDate14.setName("Расхождение");
 		colDate15.setName("Расхождение");
 		
+		//setting check
 		colNum.setChecking(false);
 		colNum1.setChecking(false);
 		colNum2.setChecking(false);
@@ -140,10 +139,15 @@ public class FormDataXlsxReportBuilderTestMock {
 		colStr10.setChecking(true);
 		colStr11.setChecking(true);
 		colStr12.setChecking(true);
+	
+		colDate13.setChecking(false);
+		colDate14.setChecking(false);
+		colDate15.setChecking(false);
 		
-		colDate13.setChecking(true);
-		colDate14.setChecking(true);
-		colDate15.setChecking(true);
+		//setting format
+		((DateColumn)colDate13).setFormatId(1);
+		((DateColumn)colDate14).setFormatId(2);
+		((DateColumn)colDate15).setFormatId(2);
 		
 		columns.add(colNum);
 		columns.add(colNum1);
@@ -170,10 +174,10 @@ public class FormDataXlsxReportBuilderTestMock {
 		formStyle.setBackColor(Color.LIGHT_BLUE);
 		formStyle.setFontColor(Color.LIGHT_BROWN);
 		
-		when(dataRow.getCell("Number")).thenReturn(cell);
-		when(dataRow.getCell("Number").getColumn()).thenReturn(colNum);
-		when(dataRow.getCell("Number1")).thenReturn(cell);
-		when(dataRow.getCell("Number1").getColumn()).thenReturn(colNum1);
+		when(dataRow.getCell(colNum.getAlias())).thenReturn(cell);
+		when(dataRow.getCell(colNum.getAlias()).getColumn()).thenReturn(colNum);
+		when(dataRow.getCell(colNum1.getAlias())).thenReturn(cell);
+		when(dataRow.getCell(colNum1.getAlias()).getColumn()).thenReturn(colNum1);
 		when(dataRow.getCell("Number2")).thenReturn(cell);
 		when(dataRow.getCell("Number2").getColumn()).thenReturn(colNum2);
 		when(dataRow.getCell("Number3")).thenReturn(cell);
@@ -186,15 +190,21 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(dataRow.getCell("String1")).thenReturn(cell);
 		when(dataRow.getCell("String2")).thenReturn(cell);
 		when(dataRow.getCell("String3")).thenReturn(cell);
-		when(dataRow.getCell("Date")).thenReturn(cell);
+		when(dataRow.getCell(colDate13.getAlias())).thenReturn(cell);
+		when(dataRow.getCell(colDate13.getAlias()).getColumn()).thenReturn(colDate13);
 		when(dataRow.getCell("Date1")).thenReturn(cell);
+		when(dataRow.getCell("Date1").getColumn()).thenReturn(colDate14);
 		when(dataRow.getCell("Date2")).thenReturn(cell);
+		when(dataRow.getCell("Date2").getColumn()).thenReturn(colDate15);
 		when(cell.getStyle()).thenReturn(formStyle);
 		BigDecimal bd = new BigDecimal(1234567891234567.011, new MathContext(19));
 		bd.setScale(3,RoundingMode.HALF_UP);
 		when(dataRow.get("Number")).thenReturn(bd);
 		when(dataRow.get("Number1")).thenReturn(bd);
 		when(dataRow.get("Number2")).thenReturn(bd);
+		when(dataRow.get("Date")).thenReturn(new Date());
+		when(dataRow.get("Date1")).thenReturn(new Date());
+		when(dataRow.get("Date2")).thenReturn(new Date());
 		
 		FormData formData;
 		FormTemplate formTemplate;

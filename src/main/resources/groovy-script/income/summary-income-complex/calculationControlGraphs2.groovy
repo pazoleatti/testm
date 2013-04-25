@@ -380,14 +380,7 @@ for (DataRow row : dataRows) {
             row.getCell('opuSumByOpu').setValue(temp.totalSum)
         }
     }
-    if (['R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43', 'R64',
-            'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R54', 'R55', 'R56', 'R57', 'R58', 'R59',
-            'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R128',
-            'R98', 'R99', 'R100', 'R106', 'R107', 'R122', 'R123', 'R124'
-    ].contains(row.getAlias())) {
-        // графа 16
-        row.getCell('difference').setValue(getCellValue(row.getAlias(), 'opuSumTotal') - getCellValue(row.getAlias(), 'opuSumByOpu'))
-    }
+
 }
 
 // строки 54-59, графы 13,14, 15, 16
@@ -430,3 +423,14 @@ for (DataRow row : dataRows) {
     }
 }
 
+/**
+ * Все оставшиеся строки, не описанные выше в этой таблице «графа 16» = «графа 14» - «графа 15»
+ */
+[
+    'R4', 'R5', 'R6', 'R7', 'R8', 'R19', 'R43', 'R64',
+    'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R54', 'R55', 'R56', 'R57', 'R58', 'R59',
+    'R70', 'R71', 'R72', 'R73', 'R74', 'R75', 'R76', 'R77', 'R128',
+    'R98', 'R99', 'R100', 'R106', 'R107', 'R122', 'R123', 'R124'].each{
+    // графа 16
+    getCell(it, 'difference').setValue(getCellValue(it, 'opuSumTotal') - getCellValue(it, 'opuSumByOpu'))
+}

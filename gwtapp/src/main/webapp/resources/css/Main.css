@@ -42,7 +42,7 @@ h3{
 }
 
 .topNavigation {
-	background: url("img/top_grad.gif");
+	background: url("../img/top_grad.gif");
     border-bottom: 3px solid #7E7F7F;
     height: 41px;
 }

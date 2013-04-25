@@ -80,6 +80,15 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	private void setDeclarationType() {
 		declarationType.setValue(null);
 		declarationType.setAcceptableValues(filterValues.getDeclarationTypes());
+
+		if (filter.getDeclarationTypeId() != null) {
+			for (DeclarationType availableType : filterValues.getDeclarationTypes()) {
+				if (availableType.getId() == filter.getDeclarationTypeId()) {
+					declarationType.setValue(availableType);
+					return;
+				}
+			}
+		}
 	}
 
 	@Override
@@ -96,6 +105,18 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 		departmentPicker = new DepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
 		departmentPicker.setTreeValues(departments, filterValues.getDepartmentIds());
 		departmentPickerPanel.add(departmentPicker);
+
+		if (!filter.getDepartmentIds().isEmpty()) {
+			Integer departmentId = filter.getDepartmentIds().iterator().next();
+			for (Department department : departments) {
+				if (department.getId() == departmentId) {
+					Map<String, Integer> value = new HashMap<String, Integer>(1);
+					value.put(department.getName(), departmentId);
+					departmentPicker.setSelectedItems(value);
+					return;
+				}
+			}
+		}
 	}
 
 	@Override

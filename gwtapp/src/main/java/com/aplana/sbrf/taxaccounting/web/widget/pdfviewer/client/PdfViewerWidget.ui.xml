@@ -43,9 +43,9 @@
 
     <g:DockLayoutPanel unit="PX" height="100%" width="100%">
         <g:east size="240">
-                <g:SimplePanel width="100%" addStyleNames="{style.pages}">
+                <g:ScrollPanel width="100%" addStyleNames="{style.pages}">
                     <g:Tree ui:field="pages"/>
-                </g:SimplePanel>
+                </g:ScrollPanel>
         </g:east>
         <g:south size="25">
             <g:SimplePanel addStyleNames="{style.toolPanel}">

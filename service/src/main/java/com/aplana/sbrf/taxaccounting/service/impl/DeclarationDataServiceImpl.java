@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 
 			long id = declarationDataDao.saveNew(newDeclaration);
-			setDeclarationBlobs(logger, newDeclaration, new Date().toString());
+			setDeclarationBlobs(logger, newDeclaration, getFormattedDate(new Date()));
 			return id;
 		} else {
 			throw new AccessDeniedException(
@@ -103,8 +104,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					"Недостаточно прав для обновления указанной декларации");
 		}
 	}
-
-
 
 	@Override
 	public DeclarationData get(long id, int userId) {
@@ -302,6 +301,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			throw new ServiceException("Невозможно экспортировать отчет в PDF",
 					e);
 		}
+	}
+
+	private static String getFormattedDate(Date dateToForm) {
+		// Преобразуем Date в строку вида "dd.mm.yyyy"
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+		formatter.format(dateToForm);
+		return (formatter.format(dateToForm));
 	}
 
 }

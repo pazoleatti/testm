@@ -25,6 +25,9 @@ public class TAUserDaoTest {
 	@Autowired
 	private TAUserDao userDao;
 	
+	private static String LOGIN_CONTROL_BANK = "controlBank";
+	private static String LOGIN_TEST_BANK = "testBank";
+	
 	@Test
 	public void testGetById() {
 		TAUser user = userDao.getUser(1);
@@ -33,7 +36,6 @@ public class TAUserDaoTest {
 		Assert.assertEquals(Department.ROOT_BANK_ID, user.getDepartmentId());
 		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
 		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
-		Assert.assertEquals("F32C1F04-7860-43CA-884F-39CC1D740064", user.getUuid());
 		Assert.assertTrue(user.isActive());
 	}
 	
@@ -42,30 +44,14 @@ public class TAUserDaoTest {
 		userDao.getUser(-1);
 	}
 	
+	
 	@Test
-	public void testGetByLogin() {
-		TAUser user = userDao.getUser("controlBank");
-		Assert.assertEquals(1, user.getId());
-		Assert.assertEquals("controlBank", user.getLogin());
-		Assert.assertEquals(Department.ROOT_BANK_ID, user.getDepartmentId());
-		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
-		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
-		Assert.assertEquals("F32C1F04-7860-43CA-884F-39CC1D740064", user.getUuid());
-		Assert.assertTrue(user.isActive());
+	public void testGetUserIdByLogin() {
+		Assert.assertEquals(1, userDao.getUsreIdbyLogin(LOGIN_CONTROL_BANK));
 	}
 
 	@Test
-	public void testListRoles() {
-		Assert.assertEquals(3, userDao.listRolesAll().size());
-	}
-	
-	@Test(expected=DaoException.class)
-	public void testGetByIncorrectLogin() {
-		userDao.getUser("nonexistantUser");
-	}
-	
-	@Test
-	public void testAddUser() {
+	public void testCreateUser() {
 		TARole role = new TARole();
 		role.setId(1);
 		role.setAlias("ROLE_CONTROL");
@@ -79,52 +65,63 @@ public class TAUserDaoTest {
 		user.setName("");
 		user.setLogin("testBank");
 		user.setRoles(roles);
-		user.setUuid("23435");
 		
-		userDao.addUser(user);
-		Assert.assertEquals(user.getUuid(), userDao.getUser("testBank").getUuid());
+		userDao.createUser(user);
+		int userId = userDao.getUsreIdbyLogin(LOGIN_TEST_BANK);
+		Assert.assertEquals(user.getDepartmentId(), userDao.getUser(userId).getDepartmentId());
 	}
 	
 	@Test
-	public void testUpdateUserInfo() {
+	public void testSetUserIsActive() {
 		TAUser user = new TAUser();
+		user.setId(1);
 		user.setActive(false);
 		user.setLogin("controlBank");
 		
-		TAUser userDB = userDao.getUser("controlBank");
+		int userId = userDao.getUsreIdbyLogin(LOGIN_CONTROL_BANK);
+		TAUser userDB = userDao.getUser(userId);
 		Assert.assertEquals(1, userDB.getDepartmentId());
 		
-		userDao.setUserIsActive(user);
-		userDB = userDao.getUser("controlBank");
+		userDao.setUserIsActive(user.getId(),user.isActive());
+		userDB = userDao.getUser(userId);
 		Assert.assertFalse(userDB.isActive());
 	}
 	
 	@Test
-	public void testUpdateUserRoles() {
+	public void testUpdateUser(){
+		TAUser user = new TAUser();
+		user.setId(1);
+		user.setActive(false);
+		user.setDepartmentId(3);
+		user.setEmail("@sard");
+		user.setLogin(LOGIN_CONTROL_BANK);
 		
 		TARole role = new TARole();
-		role.setId(2);
 		role.setAlias("ROLE_OPER");
 		role.setName("Оператор");
 		List<TARole> roles = new ArrayList<TARole>();
 		roles.add(role);
 		TARole role1 = new TARole();
-		role1.setId(3);
 		role1.setAlias("ROLE_CONTROL_UNP");
 		role1.setName("Контролёр УНП");
 		roles.add(role1);
 		
-		TAUser user = new TAUser();
-		user.setId(1);
-		user.setActive(false);
-		user.setDepartmentId(3);
-		user.setLogin("controlBank");
 		user.setRoles(roles);
 		
-		Assert.assertEquals("ROLE_CONTROL",userDao.getUser(user.getLogin()).getRoles().get(0).getAlias());
-		
-		userDao.updateUserRoles(user);
-		Assert.assertEquals("ROLE_OPER",userDao.getUser(user.getLogin()).getRoles().get(0).getAlias());
-		Assert.assertEquals(2,userDao.getUser(user.getLogin()).getRoles().size());
+		Assert.assertEquals(1,userDao.getUser(user.getId()).getDepartmentId());
+		Assert.assertEquals("controlBank@bank.ru",userDao.getUser(user.getId()).getEmail());
+		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
+		Assert.assertEquals("ROLE_CONTROL",userDao.getUser(userDao.getUsreIdbyLogin(user.getLogin())).getRoles().get(0).getAlias());
+		userDao.updateUser(user);
+		Assert.assertEquals(3,userDao.getUser(user.getId()).getDepartmentId());
+		Assert.assertEquals("@sard",userDao.getUser(user.getId()).getEmail());
+		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
+		Assert.assertEquals("ROLE_OPER",userDao.getUser(userDao.getUsreIdbyLogin(user.getLogin())).getRoles().get(0).getAlias());
+		Assert.assertEquals(2,userDao.getUser(userDao.getUsreIdbyLogin(user.getLogin())).getRoles().size());
+	}
+	
+	@Test
+	public void testGetUserIds(){
+		Assert.assertEquals(3, userDao.getUserIds().size());
 	}
 }

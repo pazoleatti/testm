@@ -41,6 +41,7 @@ public class ReportPeriodPicker extends Composite{
 	private final Button applyButton = new Button("Выбрать");
 
 	private List<TaxPeriod> taxPeriods = new ArrayList<TaxPeriod>();
+	private Map<Integer, ReportPeriodItem> reportPeriodItems = new HashMap<Integer, ReportPeriodItem>();
 	private final Map<String, Integer> allReportPeriodsNameToId = new HashMap<String, Integer>();
 	private final Map<Integer, String> allReportPeriodsIdToName = new HashMap<Integer, String>();
 	private final Map<TaxPeriod, TreeItem> taxPeriodNodes = new HashMap<TaxPeriod, TreeItem>();
@@ -93,9 +94,19 @@ public class ReportPeriodPicker extends Composite{
 			clearSelected();
 			return;
 		}
+
+		for(Map.Entry<Integer, ReportPeriodItem> entry : reportPeriodItems.entrySet()) {
+			entry.getValue().getCheckBox().setValue(false);
+		}
+
 		Map<Integer, String> periods = new HashMap<Integer, String>();
 		for(ReportPeriod item : reportPeriodList){
-			periods.put(item.getId(), item.getName());
+			if (item != null) {
+				periods.put(item.getId(), item.getName());
+				if (reportPeriodItems != null && reportPeriodItems.get(item.getId()) != null) {
+					reportPeriodItems.get(item.getId()).getCheckBox().setValue(true);
+				}
+			}
 		}
 		setSelectedReportPeriods(periods);
 	}
@@ -146,9 +157,14 @@ public class ReportPeriodPicker extends Composite{
 			} else {
 				checkBox = new RadioButton(RADIO_BUTTON_GROUP, reportPeriod.getName());
 			}
+			if (selectedReportPeriods.containsKey(reportPeriod.getId())) {
+				checkBox.setValue(true);
+			}
+
 			addValueChangeHandler(checkBox);
 			ReportPeriodItem treeItem = new ReportPeriodItem(checkBox);
 			treeItem.setReportPeriod(reportPeriod);
+			reportPeriodItems.put(reportPeriod.getId(), treeItem);
 			taxPeriodNodes.get(lastTimeSelectedTaxPeriod).addItem(treeItem);
 			allReportPeriodsNameToId.put(reportPeriod.getName(), reportPeriod.getId());
 			allReportPeriodsIdToName.put(reportPeriod.getId(), reportPeriod.getName());
@@ -233,12 +249,17 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	private final class ReportPeriodItem extends TreeItem{
-		private ReportPeriodItem(Widget widget){
-			super(widget);
-		}
 		private ReportPeriod reportPeriod;
+		private CheckBox widget;
+		private ReportPeriodItem(CheckBox widget){
+			super(widget);
+			this.widget = widget;
+		}
 		public ReportPeriod getReportPeriod() {
 			return reportPeriod;
+		}
+		public CheckBox getCheckBox() {
+			return widget;
 		}
 		public void setReportPeriod(ReportPeriod reportPeriod) {
 			this.reportPeriod = reportPeriod;

@@ -68,8 +68,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
-			Date sqlDate = rs.getDate("acceptance_date");
-			fd.setAcceptanceDate(sqlDate!=null ? new Date(sqlDate.getTime()) : null);
+			Date acceptanceDate = rs.getDate("acceptance_date");
+			fd.setAcceptanceDate(acceptanceDate!=null ? new Date(acceptanceDate.getTime()) : null);
+			Date creationDate = rs.getDate("creation_date");
+			fd.setCreationDate(creationDate!=null ? new Date(creationDate.getTime()) : null);
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
@@ -93,6 +95,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			result.setReportPeriodId(rs.getInt("report_period_id"));
 			result.setFormType(formTypeDao.getType(rs.getInt("type_id")));
+			Date creationDate = rs.getDate("creation_date");
+			result.setCreationDate(creationDate!=null ? new Date(creationDate.getTime()) : null);
 			return result;
 		}
 
@@ -166,10 +170,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, acceptance_date) values (?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, acceptance_date, creation_date)" +
+							" values (?, ?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
 					formData.getDepartmentId(), formData.getKind().getId(),
-					formData.getState().getId(), formData.getReportPeriodId(), formData.getAcceptanceDate());
+					formData.getState().getId(), formData.getReportPeriodId(),
+					formData.getAcceptanceDate(), formData.getCreationDate());
 			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();
@@ -316,7 +322,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, " +
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.creation_date, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { formDataId }, new int[] { Types.NUMERIC },

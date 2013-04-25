@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 /**
@@ -14,6 +13,9 @@ public interface TAUserService {
 	
 	TAUser getUser(String login);
 	TAUser getUser(int userId);
-	List<TARole> listRolesAll();
+	void setUserIsActive(String login, boolean isActive);
+	void updateUser(TAUser user);
+	int createUser(TAUser user);
+	List<TAUser> listAllUsers();
 
 }

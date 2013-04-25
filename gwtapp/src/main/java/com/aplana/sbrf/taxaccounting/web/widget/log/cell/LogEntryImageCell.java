@@ -17,7 +17,7 @@ public class LogEntryImageCell extends AbstractCell<LogEntry> {
 		SafeHtml cell(String url);
 	}
 	private static Templates templates = GWT.create(Templates.class);
-	private static final String DEFAULT_URL = "img/error-16.png";
+	private static final String DEFAULT_URL = "resources/img/error-16.png";
 	
 	public LogEntryImageCell(){
 		

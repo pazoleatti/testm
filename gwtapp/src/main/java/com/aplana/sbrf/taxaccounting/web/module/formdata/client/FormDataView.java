@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.dom.client.TableCellElement;
@@ -15,7 +15,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.NoSelectionModel;
@@ -131,6 +131,22 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
 		}
+		//Create order column
+		NumericColumn numericColumn = new NumericColumn();
+
+		ColumnContext columnContext = new ColumnContext();
+		columnContext.setColumn(numericColumn);
+		columnContext.setMode(ColumnContext.Mode.READONLY_MODE);
+		EditNumericColumn editNumericColumn = new EditNumericColumn(numericColumn, columnContext) {
+			@Override
+			public String getValue(DataRow dataRow) {
+				return String.valueOf(dataRow.getOrder());
+			}
+		};
+
+		editNumericColumn.setCellStyleNames("order");
+		formDataTable.addColumn(editNumericColumn, "Индекс строки");
+		formDataTable.setColumnWidth(editNumericColumn, "4em");
 
 		factory.setReadOnly(readOnly);
 		factory.setEditOnly(forceEditMode);

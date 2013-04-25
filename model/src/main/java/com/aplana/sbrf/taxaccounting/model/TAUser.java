@@ -16,8 +16,7 @@ public class TAUser implements Serializable {
 	private int departmentId;
 	private boolean active;
 	private String email;
-	private String uuid;
-	
+
 	public int getId() {
 		return id;
 	}
@@ -60,12 +59,6 @@ public class TAUser implements Serializable {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public String getUuid() {
-		return uuid;
-	}
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
 	}
 	/**
 	 * Проверяет, что у пользователя есть роль с заданным {@link TARole#getAlias() алиасом}

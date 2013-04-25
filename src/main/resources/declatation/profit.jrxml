@@ -797,14 +797,32 @@ Arrays.asList(1)]]></variableExpression>
 ($F{НалБазаИсчСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалФБ} == null?
+"-----"
 :
-($F{СтавНалФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null ?
-"-------------------------"
+($F{СтавНалФБ}.length()==3?
+$F{СтавНалФБ}+"0-"
 :
-($F{СтавНалФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалФБ}.length()==2?
+$F{СтавНалФБ}+"-0-"
+:
+($F{СтавНалФБ}.length()==1?
+$F{СтавНалФБ}+"--0-"
+:
+$F{СтавНалФБ}+"-----".substring(0,5))))]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null?
+"-----"
+:
+($F{СтавНалФБ}.length()==3?
+$F{СтавНалФБ}+"0-"
+:
+($F{СтавНалФБ}.length()==2?
+$F{СтавНалФБ}+"-0-"
+:
+($F{СтавНалФБ}.length()==1?
+$F{СтавНалФБ}+"--0-"
+:
+$F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСуб284" class="java.lang.String">
 			<variableExpression><![CDATA[$F{СтавНалСуб284} == null ?
@@ -2323,7 +2341,7 @@ Arrays.asList(1)]]></variableExpression>
 		<field name="СумНал" class="java.lang.String">
 			<fieldDescription><![CDATA[@СумНал]]></fieldDescription>
 		</field>
-		<field name="СумНалП" class="java.lang.Integer">
+		<field name="СумНалП" class="java.lang.Long">
 			<fieldDescription><![CDATA[@СумНалП]]></fieldDescription>
 		</field>
 		<field name="ТипНП" class="java.lang.String">
@@ -3216,11 +3234,11 @@ Arrays.asList(1)]]></variableExpression>
 			<variableExpression><![CDATA[$F{НаимПолуч} == null ?
 "------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимПолуч}.toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></variableExpression>
+($F{НаимПолуч}.replace(" ","-").toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{НаимПолуч} == null ?
 "------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимПолуч}.toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></initialValueExpression>
+($F{НаимПолуч}.replace(" ","-").toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></initialValueExpression>
 		</variable>
 		<variable name="PostInd" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Индекс} == null || $F{Индекс}.equals( "0" )?
@@ -3246,41 +3264,41 @@ Arrays.asList(1)]]></variableExpression>
 			<variableExpression><![CDATA[$F{Район} == null || $F{Район}.equals( "0" )?
 "------------------------------"
 :
-($F{Район}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
+($F{Район}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Район} == null || $F{Район}.equals( "0" )?
 "------------------------------"
 :
-($F{Район}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{Район}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="Gorod" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Город} == null || $F{Город}.equals( "0" )?
 "------------------------------"
 :
-($F{Город}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
+($F{Город}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Город} == null || $F{Город}.equals( "0" )?
 "------------------------------"
 :
-($F{Город}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{Город}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="NasPoiunt" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НаселПункт} == null || $F{НаселПункт}.equals( "0" )?
 "------------------------------"
 :
-($F{НаселПункт}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
+($F{НаселПункт}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{НаселПункт} == null || $F{НаселПункт}.equals( "0" )?
 "------------------------------"
 :
-($F{НаселПункт}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{НаселПункт}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="Street" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Улица} == null || $F{Улица}.equals( "0" )?
 "------------------------------"
 :
-($F{Улица}.toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
+($F{Улица}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Улица} == null || $F{Улица}.equals( "0" )?
 "------------------------------"
 :
-($F{Улица}.toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
+($F{Улица}.replace(" ","-").toUpperCase()+"------------------------------").substring(0,30)]]></initialValueExpression>
 		</variable>
 		<variable name="house" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Дом} == null || $F{Дом}.equals( "0" )?
@@ -3519,11 +3537,11 @@ Arrays.asList(1)]]></variableExpression>
 		<variableExpression><![CDATA[$F{НаимОрг} == null ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОрг}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+($F{НаимОрг}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{НаимОрг} == null ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОрг}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
+($F{НаимОрг}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
 	</variable>
 	<variable name="ОКВЭД" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ОКВЭД} == null ?
@@ -3569,11 +3587,11 @@ Arrays.asList(1)]]></variableExpression>
 		<variableExpression><![CDATA[$F{Тлф} == null ?
 "-------------------------"
 :
-($F{Тлф}+"-------------------------").substring(0,25)]]></variableExpression>
+($F{Тлф}.replace(" ","-")+"-------------------------").substring(0,25)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{Тлф} == null ?
 "-------------------------"
 :
-($F{Тлф}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Тлф}.replace(" ","-")+"-------------------------").substring(0,25)]]></initialValueExpression>
 	</variable>
 	<variable name="ПрПодп" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ПрПодп} == null ?
@@ -3629,21 +3647,21 @@ Arrays.asList(1)]]></variableExpression>
 		<variableExpression><![CDATA[(($F{НаимДок} == null)||($F{ПрПодп}.equals("1"))) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимДок}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+($F{НаимДок}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 		<initialValueExpression><![CDATA[(($F{НаимДок} == null)||($F{ПрПодп}.equals("1"))) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимДок}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
+($F{НаимДок}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
 	</variable>
 	<variable name="НаимОрг2" class="java.lang.String">
 		<variableExpression><![CDATA[(($F{НаимОрг2} == null)||($F{ПрПодп}.equals("1"))) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОрг2}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+($F{НаимОрг2}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 		<initialValueExpression><![CDATA[(($F{НаимОрг2} == null)||($F{ПрПодп}.equals("1"))) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОрг2}.toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
+($F{НаимОрг2}.replace(" ","-").toUpperCase()+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF AAAAAQQJBAgNCgUCDAgGCQkJAQUSBQ0UBwoZCQ0SCQ4cCREaEQUAEwoDFA4LGg4GGQ0IFBEMGBAG HBEJFBQUERYcHxUQHxgTHBwcCA0gChcmExokCyAxGyAmGiMsGCY1IA0GJRQHJxwTJyAbLCMbNycY IyMjKycjLikkKioqIywzJi84Ki8zLzY7MyojNTEtOjAlPzQqMTIyMTY7Njk+PTg1OTk5HS5AHjBB JzZGLz5SMDlCN0JMM0NTNUVZOEdVPEhTO01dPlJjQjEcRjcpRTwzQT06TT4zUD4sSkM8UUAvWEc3 XlA/YE49YVA/R0dHREhJTU1NQElUSFFcWkxAXlBCW1JJVVVVV1haXFpZRldoTF5wUl9tU19yT2Bw VGV2aFdGZFpSYl5bcF5NamFbcGBNc2NRcGZbeGdWeGdaeWlWe2paZWVlbW1taXR+fnJqdXV1e3t7 XnCBZniJcXqBcH6LfH6Cb4CQeoONd4mafY6gfpChgG1cgXBei3lohnxyjn1wkH5ukYBtlIRzk4l/ moZ3moh3nIt6oI18oZF8hISEgoWJiYmJiYyQl4yFko+LmI6Hl5OPnZKKk5OTmZaSnZ2dgpSjh5mq j5iji5ytj5+xk52ll6KsnaCmnqevnqmvlqi4qZiHo5uUop2asp6NqaKbsaCOuKaUpaWlqqShrq6u o7C8r7e+t7CovbKmvbOpsrKysba7v7q1u7u7na7BnLDBqLjHrr7QsrrCsL/StsLMvsLFvMTLuMjY v8/hv9LkwK6ewrGcx7inxb22z8CvzcCx08Gv08S01ce40si+2Mi13My7wcHBwMTIysXAysrKw8zU wc/awtDb08zG3tLE29TM09PT1dne3NbR3tjR2NjYyNjn09zk1+Dl1eLs3uLm2+Ts3+jv2ujz5dbF 5N3U5N7Y6t7R7+DP6+HT6+Td8+ja5OPj5efq5evv7Ojj6urq5O3z5vL86vH36/P77vn99Ozj8u7q +u7g+fPq8vLy8vb59Pn8+fby/Pr0AAAAAAAA/xhFogAAAQB0Uk5T//////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// ////////////AFP3ByUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAadEVYdFNvZnR3YXJlAFBhaW50 Lk5FVCB2My41LjEwMPRyoQAAC1lJREFUeF7tm3mcFEcVx99mAyviRhHxYA2rKyQaFU3UKAaNB4gJ XhuIRzwA4+1AFo23SVQ0Udx4BOMVL1QM4pEoHlHxIpp4RKMSSFxvQWRZBa/FQZlP+96rq69aZhic 9uPn9/1nXlfN9FR/q+pVde8sJaAyIL9CIL9CIL9CWpJ/w/DwcDbwbOYS4UY92jg8fIMGjoO2erMe bXKBMMLF+22cJOvM+9bZQ8YUpL+P37NDXsdcqQQHJdih77RoleI+kFxuqwT9gMKlV2vAzVb0QHEf 0AbKVTsu12qFj8ZcMCKv0opwRRPQkvwhokkarCXKfXAllwim4acSrdbAsd9WD+nRIFFNA2ETFxs1 wh3M++5sDxlTkP4+fo9e+2ZXeiMHerUb9Z0WrVLcB5ITbJUQ9NyL6CkacLOV0C/uA9pAuWrHCVot HOQjM9I40E6UVmgvHA7Ih3wbQ34cyPdAviuFfAPkQ76gVQrkK5CfBvIh38aQHwfyPZDvSiHfAPmQ L2iVAvkK5KeBfMi3MeTHgXwP5LtSyDdAPuQLWqVAvgL5aSAf8m0M+XEg3wP5rhTyDZAP+YJWKZCv QH4ayId8G0N+HMj3QL4rhXwD5EO+oFUK5CuQnwbyId/GkB8H8j2Q70oh3wD5kC9olQL5CuSngXzI tzHkx4F8D+S7Usg3QD7kC1qlQL4C+WkgH/JtDPlxIN8D+a4U8g2QD/mCVimQr0B+GsiHfBtDfhzI 90C+K4V8A+RDvqBVCuQrkJ8G8iHfxpAfB/I9kO9KId8A+ZAvaJUC+Qrkp4F8yLcx5MeBfA/ku1LI N0A+5AtapUC+AvlpIB/ybQz5cSDfA/muFPINkA/5glYpkK9AfhrIh3wbQ34cyPdAviuFfAPkQ76g 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"]]></variableExpression>
@@ -6757,7 +6775,7 @@ Arrays.asList(1)]]></variableExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ ]]></text>
+				<text><![CDATA[-]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="446f464d-9a7f-4d4e-9eba-917ad4268e6a" x="300" y="312" width="15" height="19"/>
@@ -6798,7 +6816,7 @@ Arrays.asList(1)]]></variableExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ ]]></text>
+				<text><![CDATA[-]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="9d8a074f-7725-46c3-8427-152b559da9cf" x="0" y="306" width="110" height="16"/>
@@ -6819,7 +6837,7 @@ Arrays.asList(1)]]></variableExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[ ]]></text>
+				<text><![CDATA[-]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="99515ba6-4588-46dd-bb90-2094025a277d" x="315" y="312" width="15" height="19"/>

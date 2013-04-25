@@ -109,7 +109,7 @@ public class FormDataListPresenter extends
 	@Override
 	@ProxyEvent
 	public void onFormDataCreateButtonClicked(FormDataListCreateEvent event) {
-		dialogPresenter.setSelectedFilterValues(filterPresenter.getFilterData());
+		dialogPresenter.setSelectedFilterValues(filterPresenter.getFilterData(), filterPresenter.getReportPeriods());
 		addToPopupSlot(dialogPresenter);
 	}
 

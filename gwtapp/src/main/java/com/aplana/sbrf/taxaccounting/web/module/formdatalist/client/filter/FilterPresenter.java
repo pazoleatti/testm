@@ -45,6 +45,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	}
 
 	private final DispatchAsync dispatchAsync;
+	private static Set<ReportPeriod> periods = new HashSet<ReportPeriod>();
 	private static Map<TaxType, FormDataFilter> savedFilterData = new HashMap<TaxType, FormDataFilter>();
 	private static Map<TaxType, Map<String, Integer>> savedDepartmentsMap = new HashMap<TaxType, Map<String, Integer>>();
 
@@ -65,6 +66,10 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 		formDataFilter.setDepartmentId(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
 		formDataFilter.setTaxType(this.taxType);
 		return formDataFilter;
+	}
+
+	public List<ReportPeriod> getReportPeriods() {
+		return new ArrayList<ReportPeriod>(periods);
 	}
 
 	public void updateSavedFilterData(FormDataFilter formDataFilter){
@@ -110,6 +115,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
 					public void onSuccess(GetReportPeriodsResult result) {
+						periods.addAll(result.getReportPeriods());
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				}));

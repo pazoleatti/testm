@@ -22,6 +22,8 @@ if (row.tsTypeCode != null) {
     }
 }
 
+
+
 // Проверка совпадения единицы измерения налоговой базы по ОКЕИ со справочной
 if (row.taxBaseOkeiUnit != null) {
     if (!transportTaxDao.validateTaxBaseUnit(row.taxBaseOkeiUnit)) {

@@ -11,6 +11,7 @@ import java.util.List;
  * @author srybakov
  */
 //TODO (Marat Fayzullin 10.03.2013) оптимизировать бы операции работы со строками. Слишком много явной конкатенации. В циклах лишнего добавления "," можно избежать
+//     (Semyon Goryachkin 19.04.2013) а ещё помоему JDBC поддерживает работу со списками параметров
 public final class SqlUtils {
 
 	/**

@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,10 +15,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 
 /**
  * Реализация Dao для работы с шаблонами деклараций
@@ -57,7 +59,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
-	@Cacheable("DeclarationTemplate")
+	@Cacheable(CacheConstants.DECLARATION_TEMPLATE)
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -91,7 +93,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Override
 	@Transactional(readOnly = false)
-	@CacheEvict(value = "DeclarationTemplate", key = "#declarationTemplate.id", beforeInvocation = true)
+	@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true)
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
 		int declarationTemplateId;

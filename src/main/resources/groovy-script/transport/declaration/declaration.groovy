@@ -30,7 +30,7 @@ if (!declarationData.isAccepted()) {
         Документ(
                 КНД:"1152004",
                 // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
-                ДатаДок: docDate, //new Date().format("dd.MM.yyyy"),
+                ДатаДок: docDate != null ? docDate: new Date().format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                 Период: 34,
                 ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
                 КодНО: departmentParam.taxOrganCode,
@@ -152,6 +152,7 @@ if (!declarationData.isAccepted()) {
                         ){
 
                             row.rowData.each{ tRow ->
+                                def taxBenefitCode = tRow.taxBenefitCode ? Integer.parseInt(tRow.taxBenefitCode):null
                                 // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                 РасчНалТС(
                                         [
@@ -178,7 +179,7 @@ if (!declarationData.isAccepted()) {
                                 ){
 
                                     // генерация КодОсвНал
-                                    if ((tRow.taxBenefitCode != 20220 && tRow.taxBenefitCode != 20230 && tRow.taxBenefitCode != null)){
+                                    if ((taxBenefitCode != 20220 && taxBenefitCode != 20230 && taxBenefitCode != null)){
 
                                         def l = tRow.taxBenefitCode;
                                         /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
@@ -186,32 +187,29 @@ if (!declarationData.isAccepted()) {
                                         dictRegionId
                                         */
                                         def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
-                                        if (param == null) {
-                                            throw new Exception("В справочнике «Параметры налоговых льгот» отсутствует запись с кодом субъекта = "+ region.code+ " и кодом налоговой льготы =" +tRow.taxBenefitCode)
+                                        if (param != null) {
+                                            def x = l == 30200 ? "" : ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
+                                                    + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
+                                                    + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
+
+
+                                            def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
+
+
+                                            ЛьготОсвНал(
+                                                    КодОсвНал: kodOsnNal,
+                                                    СумОсвНал: tRow.benefitSum
+                                            )
                                         }
-
-
-                                        def x = l == 30200 ? "" : ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
-                                                + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
-                                                + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
-
-
-                                        def kodOsnNal = (l != "" ? l.toString():"0000") +"/"+ x
-
-
-                                        ЛьготОсвНал(
-                                                КодОсвНал: kodOsnNal,
-                                                СумОсвНал: tRow.benefitSum
-                                        )
                                     }
 
                                     // вычисление ЛьготУменСум
                                     // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                    if (tRow.taxBenefitCode != 30200
-                                            && tRow.taxBenefitCode != 20200
-                                            && tRow.taxBenefitCode != 20210
-                                            && tRow.taxBenefitCode != 20230
-                                            && tRow.taxBenefitCode != null){
+                                    if (taxBenefitCode != 30200
+                                            && taxBenefitCode != 20200
+                                            && taxBenefitCode != 20210
+                                            && taxBenefitCode != 20230
+                                            && taxBenefitCode != null){
 
                                         // вычисление КодУменСум
                                         def valL = tRow.taxBenefitCode;
@@ -219,24 +217,25 @@ if (!declarationData.isAccepted()) {
                                         *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                         */
                                         def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
+                                        if (param != null) {
+                                            def valX = ((param.section.toString().size() < 4 ? ("0"*(4 - param.section.toString().size())) : param.section.toString())
+                                                    + (param.item.toString().size() < 4 ? ("0"*(4 - param.item.toString().size())) : param.item.toString())
+                                                    + (param.subitem.toString().size() < 4 ? ("0"*(4 - param.subitem.toString().size())) : param.subitem.toString()))
 
-                                        def valX = ((param.section.toString().size() < 4 ? ("0"*(4 - param.section.toString().size())) : param.section.toString())
-                                                + (param.item.toString().size() < 4 ? ("0"*(4 - param.item.toString().size())) : param.item.toString())
-                                                + (param.subitem.toString().size() < 4 ? ("0"*(4 - param.subitem.toString().size())) : param.subitem.toString()))
-
-                                        def kodUmenSum = (valL != "" ? valL.toString():"0000") +"/"+ valX
+                                            def kodUmenSum = (valL != "" ? valL.toString():"0000") +"/"+ valX
 
 
-                                        ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: tRow.benefitSum)
+                                            ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: tRow.benefitSum)
+                                        }
                                     }
 
                                     // ЛьготСнижСтав
                                     // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                    if (tRow.taxBenefitCode != 30200
-                                            && tRow.taxBenefitCode != 20200
-                                            && tRow.taxBenefitCode != 20210
-                                            && tRow.taxBenefitCode != 20220
-                                            && tRow.taxBenefitCode != null){
+                                    if (taxBenefitCode != 30200
+                                            && taxBenefitCode != 20200
+                                            && taxBenefitCode != 20210
+                                            && taxBenefitCode != 20220
+                                            && taxBenefitCode != null){
 
                                         // вычисление КодУменСум
                                         def valL = tRow.taxBenefitCode;
@@ -244,14 +243,15 @@ if (!declarationData.isAccepted()) {
                                         *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                         */
                                         def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
+                                        if (param != null) {
+                                            def valX = ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
+                                                    + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
+                                                    + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
 
-                                        def valX = ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
-                                                + (param.item.toString().size() < 4 ? "0"*(4 - param.item.toString().size()) : param.item.toString())
-                                                + (param.subitem.toString().size() < 4 ? "0"*(4 - param.subitem.toString().size()) : param.subitem.toString()))
+                                            def kodNizhStav = (valL != "" ? valL.toString():"0000") +"/"+ valX
 
-                                        def kodNizhStav = (valL != "" ? valL.toString():"0000") +"/"+ valX
-
-                                        ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: tRow.benefitSum)
+                                            ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: tRow.benefitSum)
+                                        }
                                     }
                                 }
                             }

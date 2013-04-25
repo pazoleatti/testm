@@ -19,8 +19,8 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
 
 	private static final int ESCAPE = 27;
-	private static final String ARROW_ASC_IMAGE_SOURCE = "img/sort_arrow_asc_image.png";
-	private static final String ARROW_DES_IMAGE_SOURCE = "img/sort_arrow_des_image.png";
+	private static final String ARROW_ASC_IMAGE_SOURCE = "resources/img/sort_arrow_asc_image.png";
+	private static final String ARROW_DES_IMAGE_SOURCE = "resources/img/sort_arrow_des_image.png";
 	private static final String ARROW_IMAGE_WIDTH = "10px";
 	private static final String ARROW_IMAGE_HEIGHT = "10px";
 	private static final String HEADER_BACKGROUND_COLOR = "#949494";

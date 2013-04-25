@@ -17,7 +17,7 @@ public class ButtonLink extends Anchor{
 	}
 
 	private static final LocalHtmlTemplates templates = GWT.create(LocalHtmlTemplates.class);
-	private static final String DEFAULT_URL = "img/starfish-16.png";
+	private static final String DEFAULT_URL = "resources/img/starfish-16.png";
 	private String text = "";
 
 	public ButtonLink() {

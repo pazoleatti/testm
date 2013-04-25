@@ -14,6 +14,17 @@
 	font-size: 10px;
 }
 
+.order {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    height: 3em !important;
+    padding: 0 2px !important;
+    text-shadow: none !important;
+    color: white !important;
+    background-color: #959595 !important;
+    text-align: center !important;
+}
+
 .dictionaryPickerTable th{
     height: 1em;
 }
@@ -30,4 +41,8 @@
 }
 .dictionaryPickerTable tr:focus{
     background-color: #4e9661;
+}
+.dictionaryPickerTable tbody tr td div{
+    overflow: hidden;
+    height: 15px;
 }

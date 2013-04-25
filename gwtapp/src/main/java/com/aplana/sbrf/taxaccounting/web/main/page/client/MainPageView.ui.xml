@@ -4,7 +4,7 @@
 
 	<ui:style>
 		.topGradient {
-			background: url("img/body_top_gradient.gif") repeat-x;
+			background: url("resources/img/body_top_gradient.gif") repeat-x;
 			top: 0;
 			height: 32px;
 		}
@@ -16,14 +16,14 @@
 		}
 
 		.footerGradient {
-			background: url("img/footer_gradient.gif") repeat-x;
+			background: url("resources/img/footer_gradient.gif") repeat-x;
 			bottom: 0px;
 			height: 32px;
 			width: 100%;
 		}
 
 		.leftGradient {
-			background: url("img/body_left_gradient.gif") repeat-y;
+			background: url("resources/img/body_left_gradient.gif") repeat-y;
 			float: left;
 			width: 32px;
 			height: 100%;
@@ -39,14 +39,14 @@
 		}
 
 		.rightGradient {
-			background: url("img/body_right_gradient.gif") repeat-y;
+			background: url("resources/img/body_right_gradient.gif") repeat-y;
 			float: right;
 			width: 32px;
 			height: 100%;
 		}
 
 		.footerLeft {
-			background: url("img/footer_left_corner.png") no-repeat;
+			background: url("resources/img/footer_left_corner.png") no-repeat;
 			height: 32px;
 			float: left;
 			width: 32px;
@@ -54,7 +54,7 @@
 		}
 
 		.footerRight {
-			background: url("img/footer_right_corner.png") no-repeat;
+			background: url("resources/img/footer_right_corner.png") no-repeat;
 			height: 32px;
 			float: right;
 			width: 32px;
@@ -62,7 +62,7 @@
 		}
 
 		.bodyTopLeft {
-			background: url("img/body_top_left_corner.gif") no-repeat;
+			background: url("resources/img/body_top_left_corner.gif") no-repeat;
 			height: 32px;
 			float: left;
 			width: 32px;
@@ -70,7 +70,7 @@
 		}
 
 		.bodyTopRight {
-			background: url("img/body_top_right_corner.gif") no-repeat;
+			background: url("resources/img/body_top_right_corner.gif") no-repeat;
 			float: right;
 			width: 32px;
 			height: 32px;
@@ -90,11 +90,11 @@
 					<div class="topHeader">
 						<div class="topLeftLogo">
 							<img style="height: 41x; width:126px;" height="41px" width="126px"
-								src="img/header_left.gif" />
+								src="resources/img/header_left.gif" />
 						</div>
 						<div class="topRightLogo">
 							<img style="height: 41px; width:27px;" height="41px" width="27px"
-								src="img/header_right.gif" />
+								src="resources/img/header_right.gif" />
 						</div>
 
 						<g:HTMLPanel ui:field="signInContentPanel" />

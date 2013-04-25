@@ -35,56 +35,62 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         taxBase = 0
         if (formIncome != null) {
             for (value in formIncome.dataRows) {
+                try {
+                    typeId = Integer.parseInt(value.incomeTypeId);
+                } catch (NumberFormatException nfe) {
+                    // Ловить это исключение надо тут так как мы можем парсить null или строки вида 'A' или 'B'
+                    typeId = 0
+                }
                 //k1
-                if (value.incomeTypeId in [10571, 10640, 10641, 10650, 10920]) {
+                if (typeId in [10571, 10640, 10641, 10650, 10920]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k6
-                if (value.incomeTypeId in [10871, 10873]) {
+                if (typeId in [10871, 10873]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k7
-                if (value.incomeTypeId in [10850]) {
+                if (typeId in [10850]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k8
-                if (value.incomeTypeId in [11271..11280]) {
+                if (typeId in [11271..11280]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k9
-                if (value.incomeTypeId in ((11860..13610) + (13650..13700) + (13920..13961) + [10874])) {
+                if (typeId in ((11860..13610) + (13650..13700) + (13920..13961) + [10874])) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k15
-                if (value.incomeTypeId in [10840]) {
+                if (typeId in [10840]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k17
-                if (value.incomeTypeId in [10860]) {
+                if (typeId in [10860]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k18
-                if (value.incomeTypeId in [10870]) {
+                if (typeId in [10870]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
                 }
                 //k21
-                if (value.incomeTypeId in [10872]) {
+                if (typeId in [10872]) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
@@ -93,62 +99,68 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         }
         if (formIncomePHY != null) {
             for (value in formIncomePHY.dataRows) {
+                try {
+                    typeId = Integer.parseInt(value.incomeTypeId);
+                } catch (NumberFormatException nfe) {
+                    // Ловить это исключение надо тут так как мы можем парсить null или строки вида 'A' или 'B'
+                    typeId = 0
+                }
                 //k2
-                if (value.incomeTypeId in ((10001..10960) + [11140, 11160])) {
+                if (typeId in ((10001..10960) + [11140, 11160])) {
                     if (value.rnu4Field5Accepted != null) {
                         taxBase += value.rnu4Field5Accepted
                     }
                 }
                 //k3
-                if (value.incomeTypeId in ((10001..10960) + [11140, 11160])) {
+                if (typeId in ((10001..10960) + [11140, 11160])) {
                     if (value.rnu6Field10Sum != null) {
                         taxBase += value.rnu6Field10Sum
                     }
                 }
                 //k4
-                if (value.incomeTypeId in ((10001..10960) + [11140, 11160])) {
+                if (typeId in ((10001..10960) + [11140, 11160])) {
                     if (value.rnu4Field5PrevTaxPeriod != null) {
                         taxBase -= value.rnu4Field5PrevTaxPeriod
                     }
                 }
                 //k5
-                if (value.incomeTypeId in ((10001..10960) + [11140, 11160])) {
+                if (typeId in ((10001..10960) + [11140, 11160])) {
                     if (value.rnu6Field12Accepted != null) {
                         taxBase -= value.rnu6Field12Accepted
                     }
                 }
                 //k10
-                if (value.incomeTypeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
+                if (typeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
                     if (value.rnu4Field5Accepted != null) {
                         taxBase += value.rnu4Field5Accepted
                     }
                 }
                 //k11
-                if (value.incomeTypeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
+                if (typeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
                     if (value.rnu6Field10Sum != null) {
                         taxBase += value.rnu6Field10Sum
                     }
                 }
                 //k12
-                if (value.incomeTypeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
+                if (typeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
                     if (value.rnu4Field5PrevTaxPeriod != null) {
                         taxBase -= value.rnu4Field5PrevTaxPeriod
                     }
                 }
                 //k13
-                if (value.incomeTypeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
+                if (typeId in ((11380..13080) + (13100..13639) + [13763, 13930, 14000])) {
                     if (value.rnu6Field12Accepted != null) {
                         taxBase -= value.rnu6Field12Accepted
                     }
                 }
                 //k14
-                if (value.incomeTypeId in [13092]) {
+                if (typeId in [13092]) {
                     if (value.rnu4Field5Accepted != null) {
                         taxBase -= value.rnu4Field5Accepted
                     }
                 }
                 //k23
-                if (value.incomeTypeId in [14000]) {
+                if (typeId in [14000]) {
                     if (value.rnu4Field5Accepted != null) {
                         taxBase -= value.rnu4Field5Accepted
                     }
@@ -157,98 +169,104 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         }
         if (formCost != null) {
             for (value in formCost.dataRows) {
+                try {
+                    typeId = Integer.parseInt(value.consumptionTypeId);
+                } catch (NumberFormatException nfe) {
+                    // Ловить это исключение надо тут так как мы можем парсить null или строки вида 'A' или 'B'
+                    typeId = 0
+                }
                 //k16
-                if (value.consumptionTypeId in [21659]) {
+                if (typeId in [21659]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k19
-                if (value.consumptionTypeId in [21515]) {
+                if (typeId in [21515]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k19
-                if (value.consumptionTypeId in [21518]) {
+                if (typeId in [21518]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k22
-                if (value.consumptionTypeId in [21397]) {
+                if (typeId in [21397]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k24
-                if (value.consumptionTypeId in ((20320..21395) + (21400..21500) + (21530..21652) + (21654..21655))) {
+                if (typeId in ((20320..21395) + (21400..21500) + (21530..21652) + (21654..21655))) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k29
-                if (value.consumptionTypeId in [21653, 21656]) {
+                if (typeId in [21653, 21656]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k30
-                if (value.consumptionTypeId in [21658]) {
+                if (typeId in [21658]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k31
-                if (value.consumptionTypeId in [21662..21675]) {
+                if (typeId in [21662..21675]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k32
-                if (value.consumptionTypeId in [21520, 21525]) {
+                if (typeId in [21520, 21525]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k33
-                if (value.consumptionTypeId in [21397]) {
+                if (typeId in [21397]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k34
-                if (value.consumptionTypeId in ((22482 - 22811) + (23110 - 23141))) {
+                if (typeId in ((22482 - 22811) + (23110 - 23141))) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k39
-                if (value.consumptionTypeId in [22481]) {
+                if (typeId in [22481]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k40
-                if (value.consumptionTypeId in [21657]) {
+                if (typeId in [21657]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k41
-                if (value.consumptionTypeId in [21507]) {
+                if (typeId in [21507]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k42
-                if (value.consumptionTypeId in [21510]) {
+                if (typeId in [21510]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k43
-                if (value.consumptionTypeId in [21396]) {
+                if (typeId in [21396]) {
                     if (value.consumptionTaxSumS != null) {
                         taxBase -= value.consumptionTaxSumS
                     }
@@ -257,50 +275,56 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         }
         if (formCostPHY != null) {
             for (value in formCostPHY.dataRows) {
+                try {
+                    typeId = Integer.parseInt(value.consumptionTypeId);
+                } catch (NumberFormatException nfe) {
+                    // Ловить это исключение надо тут так как мы можем парсить null или строки вида 'A' или 'B'
+                    typeId = 0
+                }
                 //k25
-                if (value.consumptionTypeId in ((20291..21650) + [21660])) {
+                if (typeId in ((20291..21650) + [21660])) {
                     if (value.rnu5Field5Accepted != null) {
                         taxBase -= value.rnu5Field5Accepted
                     }
                 }
                 //k26
-                if (value.consumptionTypeId in ((20291..21650) + [21660])) {
+                if (typeId in ((20291..21650) + [21660])) {
                     if (value.rnu7Field10Sum != null) {
                         taxBase -= value.rnu7Field10Sum
                     }
                 }
                 //k27
-                if (value.consumptionTypeId in ((20291..21650) + [21660])) {
+                if (typeId in ((20291..21650) + [21660])) {
                     if (value.rnu5Field5PrevTaxPeriod != null) {
                         taxBase += value.rnu5Field5PrevTaxPeriod
                     }
                 }
                 //k28
-                if (value.consumptionTypeId in ((20291..21650) + [21660])) {
+                if (typeId in ((20291..21650) + [21660])) {
                     if (value.rnu7Field12Accepted != null) {
                         taxBase += value.rnu7Field12Accepted
                     }
                 }
                 //k35
-                if (value.consumptionTypeId in ((21680..22840) + (23040..23080))) {
+                if (typeId in ((21680..22840) + (23040..23080))) {
                     if (value.rnu5Field5Accepted != null) {
                         taxBase -= value.rnu5Field5Accepted
                     }
                 }
                 //k36
-                if (value.consumptionTypeId in ((21680..22840) + (23040..23080))) {
+                if (typeId in ((21680..22840) + (23040..23080))) {
                     if (value.rnu7Field10Sum != null) {
                         taxBase -= value.rnu7Field10Sum
                     }
                 }
                 //k37
-                if (value.consumptionTypeId in ((21680..22840) + (23040..23080))) {
+                if (typeId in ((21680..22840) + (23040..23080))) {
                     if (value.rnu5Field5PrevTaxPeriod != null) {
                         taxBase += value.rnu5Field5PrevTaxPeriod
                     }
                 }
                 //k38
-                if (value.consumptionTypeId in ((21680..22840) + (23040..23080))) {
+                if (typeId in ((21680..22840) + (23040..23080))) {
                     if (value.rnu7Field12Accepted != null) {
                         taxBase += value.rnu7Field12Accepted
                     }

@@ -50,6 +50,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	private List<TARole> userRoles = null;
 	private List<TaxPeriod> taxPeriods;
 	private List<Department> departments;
+	private Set<ReportPeriod> periods = new HashSet<ReportPeriod>();
 	private ReportPeriod currentReportPeriod;
 	private DeclarationDataFilterAvailableValues filterValues;
 
@@ -85,7 +86,16 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 	}
 
 	public ReportPeriod getCurrentReportPeriod() {
-		return currentReportPeriod;
+		if (getView().getSelectedReportPeriods().size() == 1) {
+			int firstSelectedPeriodId = getView().getSelectedReportPeriods().get(0);
+			for (ReportPeriod period : periods) {
+				if (period.getId() == firstSelectedPeriodId) {
+					return period;
+				}
+			}
+			return currentReportPeriod;
+		}
+		return null;
 	}
 
 	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
@@ -129,6 +139,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
 					@Override
 					public void onSuccess(GetReportPeriodsResult result) {
+						periods.addAll(result.getReportPeriods());
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				}));

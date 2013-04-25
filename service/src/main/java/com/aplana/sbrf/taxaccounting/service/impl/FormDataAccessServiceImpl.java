@@ -33,8 +33,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private Log logger = LogFactory.getLog(getClass());
 
-	private final static String FORMDATA_KIND_STATE_ERROR = "Bank-level formData with \"%s\" kind, couldn't be in \"%s\" state!";
-	
+	private final static String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
+
 	@Autowired
 	private TAUserDao userDao;
 	@Autowired
@@ -58,10 +58,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
-		if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+		if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
+				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
-			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
-			 Логика, согласно Бизнес-требованиям:
+			 и НЕ передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+				 Форма УНП.
+
              ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -75,10 +81,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|--------------------------------------------------
 			 */
 			return true;
-		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+				&& !formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
-			 			 Логика, согласно Бизнес-требованиям:
+			 и НЕ передаваемых на вышестоящий уровень
+
+			 Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения;
+				Сводная налоговая форма Банка.
+
 		     ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -91,10 +103,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			 */
 			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 					formDataAccess.isControllerOfUNP();
-		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+				&& formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
-            Логика, согласно Бизнес-требованиям:
+			и передаваемых на вышестоящий уровень
+
+             Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения.
+
              ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -110,6 +127,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 					formDataAccess.isControllerOfUNP();
 		}
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "READ", formData.getKind().getName(), formData.getState().getName()));
 		return false;
 	}
 
@@ -129,19 +147,25 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return false;
 		}
 		if (formDataReportPeriod.isBalancePeriod()) {
+			/* В отчетных периодах для ввода остатков редактирование возможно только контролерами для
+			 НФ в статусе "Создана" */
 			switch (state){
 				case CREATED:
 					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 							formDataAccess.isControllerOfUNP();
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
-				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
-		} else if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
+				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
-			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)
-             Логика, согласно Бизнес-требованиям:
+			 и НЕ передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+				 Форма УНП.
              ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -164,13 +188,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 							formDataAccess.isControllerOfUNP();
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
-				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
-		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
+				!formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)
-			 Логика, согласно Бизнес-требованиям:
+			 и НЕ передаваемых на вышестоящий уровень
+
+			 Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения;
+				Сводная налоговая форма Банка.
 		     ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -187,13 +215,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 							formDataAccess.isControllerOfUNP(); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
-				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
-		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
+				formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)
-			 Логика, согласно Бизнес-требованиям:
+			и передаваемых на вышестоящий уровень
+
+             Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения.
              ------------------------------------------------------------------
              |              |                Пользователь                     |
              |  Состояние   |-------------------------------------------------|
@@ -214,12 +245,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					return false;
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
-				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
 			}
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
 		}
-		// TODO: (mfayzullin) возможно имеет смысл выкидывать исключительные ситуации, если обнаружился непредусмотренный вариант
-		// как в данной ветке, так и в case выше. В canRead, canCreate сделать аналогично
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
 		return false;
 	}
 
@@ -234,6 +263,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
+		if(!reportPeriod.isActive()){
+			//Нельзя создавать НФ для неактивного налогового периода
+			return false;
+		}
+
 		// Проверяем, что в подразделении вообще можно работать с формами такого вида и типа
 		boolean found = false;
 		for (DepartmentFormType dft: formDataDepartment.getDepartmentFormTypes()) {
@@ -246,29 +280,42 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return false;
 		}
 		if (reportPeriod.isBalancePeriod()) {
-			System.out.println("Can create: " + (formDataAccess.isControllerOfCurrentLevel() ||
-					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()));
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
-		} else if(kind == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
-			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
-			 и не передаваемых на вышестоящий уровень */
+		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY ||
+				kind == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
+			 /* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и НЕ передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+				 Форма УНП.*/
 			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
 				formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
-
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && !formDataAccess.isFormDataHasDestinations()){
-			/* Жизненный цикл налоговых форм, формируемых автоматически
-			 и не передаваемых на вышестоящий уровень (уровень Банка) */
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			 и НЕ передаваемых на вышестоящий уровень
+
+			 Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения;
+				Сводная налоговая форма Банка.*/
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 			//return false; //TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм
 		} else if ((kind == FormDataKind.SUMMARY || kind == FormDataKind.CONSOLIDATED) && formDataAccess.isFormDataHasDestinations()){
-			/* Жизненный цикл налоговых форм, формируемых автоматически
-			и передаваемых на вышестоящий уровень (уровень ТБ) */
+			/*Жизненный цикл налоговых форм, формируемых автоматически
+			и передаваемых на вышестоящий уровень
+
+             Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения.*/
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 			//return false; //TODO: (Marat Fayzullin 19.02.2013) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
 		}
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "CREATE", kind.getName(), WorkflowState.CREATED.getName()));
 		return false;
 	}
 
@@ -303,8 +350,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return result;
 		}
 		WorkflowState state = formData.getState();
-		// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
 		if (formDataReportPeriod.isBalancePeriod()) {
+			// Если отчетный период для ввода остатков, то сокращаем жц до Создана - Принята
 			switch (state) {
 				case CREATED:
 					result.add(WorkflowMove.CREATED_TO_ACCEPTED);
@@ -312,10 +359,18 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					result.add(WorkflowMove.APPROVED_TO_CREATED);
 					break;
+				default:
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
 			}
-		} else if(formData.getKind() == FormDataKind.ADDITIONAL && !formDataAccess.isFormDataHasDestinations()){
+		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
+				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
-			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+			 и НЕ передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+				 Форма УНП.*/
 			switch (state){
 				case CREATED:
 					result.add(WorkflowMove.CREATED_TO_PREPARED);
@@ -333,11 +388,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
 			}
-		} else if (formData.getKind() == FormDataKind.SUMMARY && !formDataAccess.isFormDataHasDestinations()){
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
+				!formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК, НФ по транспортному налогу)*/
+			 и НЕ передаваемых на вышестоящий уровень
+
+			 Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения;
+				Сводная налоговая форма Банка.*/
 			switch (state){
 				case CREATED:
 					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
@@ -352,11 +413,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
 			}
-		} else if (formData.getKind() == FormDataKind.SUMMARY && formDataAccess.isFormDataHasDestinations()){
+		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
+				formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
-			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+			и передаваемых на вышестоящий уровень
+
+             Виды форм:
+             	Консолидированная налоговая форма;
+				Сводная налоговая форма подразделения.*/
 			switch (state){
 				case CREATED:
 					if(formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
@@ -376,9 +442,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
 			}
-		}
+		} else
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
 		return result;
 	}
 

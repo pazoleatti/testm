@@ -92,7 +92,7 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
 				departmentId, reportPeriod.getId())) {
 			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
-					formTemplateId, departmentId, kind);
+					formTemplateId, departmentId, kind, reportPeriod.getId());
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для создания налоговой формы с указанными параметрами");
@@ -101,15 +101,15 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public FormData createFormDataWithoutCheck(Logger logger, TAUser user,
-											   int formTemplateId, int departmentId, FormDataKind kind) {
+			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
 
 		result.setState(WorkflowState.CREATED);
 		result.setDepartmentId(departmentId);
 		result.setKind(kind);
-		result.setReportPeriodId(reportPeriodDao.getCurrentPeriod(
-				form.getType().getTaxType()).getId());
+		result.setReportPeriodId(reportPeriodId);
+		result.setCreationDate(new Date());
 
 		for (DataRow predefinedRow : form.getRows()) {
 			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
@@ -148,13 +148,16 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void addRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
-		boolean canDo;
+		boolean canDo = false;
+		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
 			canDo = formDataAccessService.canEdit(userId, formData.getId());
+		}
 		}
 
 		if (canDo) {
@@ -265,9 +268,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-
-			// Перед сохранением формы всегда делаем её пересчет.
-			doCalc(logger, userId, formData);
+			formDataScriptingService.executeScripts(userDao.getUser(userId), formData,
+					FormDataEvent.SAVE, logger, null);
 
 			boolean needLock = formData.getId() == null;
 			long id = formDataDao.save(formData);
@@ -451,13 +453,16 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public void deleteRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
-		boolean canDo;
+		boolean canDo = false;
+		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы
 		if (formData.getId() == null) {
 			canDo = formDataAccessService.canCreate(userId,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
-			canDo = formDataAccessService.canDelete(userId, formData.getId());
+				canDo = formDataAccessService.canEdit(userId, formData.getId());
+			}
 		}
 
 		if (canDo) {

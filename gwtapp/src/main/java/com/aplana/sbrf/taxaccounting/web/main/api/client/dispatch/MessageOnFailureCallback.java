@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
@@ -30,6 +33,14 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 		return new MessageOnFailureCallback<T>(false, callback);
 	}
 
+	/**
+	 * Флаг showLogOnly актуален только когда ошибка вызвана присутствием
+	 * сообщений об ошибке в логе. В других случаях всё равно нужно отобразить
+	 * диалог.
+	 * 
+	 * @param showLogOnly
+	 * @return
+	 */
 	public static <T> AsyncCallback<T> create(boolean showLogOnly) {
 		return new MessageOnFailureCallback<T>(showLogOnly, null);
 	}
@@ -39,7 +50,8 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 		return new MessageOnFailureCallback<T>(showLogOnly, callback);
 	}
 
-	private MessageOnFailureCallback(boolean showLogOnly, AsyncCallback<T> callback) {
+	private MessageOnFailureCallback(boolean showLogOnly,
+			AsyncCallback<T> callback) {
 		this.callback = callback;
 		this.showLogOnly = showLogOnly;
 	}
@@ -50,11 +62,23 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 			callback.onFailure(caught);
 		}
 		if (caught instanceof TaActionException) {
-			LogAddEvent.fire(this,
-					((TaActionException) caught).getLogEntries());
-
-		}
-		if (!showLogOnly) {
+			List<LogEntry> logEntries = ((TaActionException) caught)
+					.getLogEntries();
+			if (logEntries != null && !logEntries.isEmpty()) {
+				LogAddEvent.fire(this,
+						((TaActionException) caught).getLogEntries());
+				// Флаг showLogOnly актуален только когда ошибка вызвана
+				// присутствием
+				// сообщений об ошибке в логе. В других случаях всё равно нужно
+				// отобразить диалог.
+				if (!showLogOnly) {
+					MessageEvent.fire(this, caught.getLocalizedMessage(),
+							caught);
+				}
+			} else {
+				MessageEvent.fire(this, caught.getLocalizedMessage(), caught);
+			}
+		} else {
 			MessageEvent.fire(this, caught.getLocalizedMessage(), caught);
 		}
 	}

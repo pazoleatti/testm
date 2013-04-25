@@ -20,7 +20,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 	public static final String TD = "td";
 	private static final String USER_AGENT_IE8 = "MSIE 8.0";
-	private static final String STRIPE_ICON_PROPERTY = "url(img/stripe.ico)";
+	private static final String STRIPE_ICON_PROPERTY = "url(resources/img/stripe.ico)";
 
 	private final String evenRowStyle;
 	private final String oddRowStyle;

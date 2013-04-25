@@ -31,7 +31,7 @@ public class DateInputCell extends
 		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
 		SafeHtml input(String value);
 
-		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"img/calendar-16.png\"/>")
+		@Template("<img imageTypeCalendar=\"calendar\" align=\"right\" src=\"resources/img/calendar-16.png\"/>")
 		SafeHtml calendarIcon();
 	}
 
@@ -360,7 +360,7 @@ public class DateInputCell extends
 		clearInput(getInputElement(parent));
 		setValue(context, parent, viewData.getOriginal());
 		if (valueUpdater != null) {
-			valueUpdater.update(new Date(convertInputToLocalDateFormat(value)));
+			valueUpdater.update(DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(value));
 		}
 	}
 
@@ -435,7 +435,11 @@ public class DateInputCell extends
 	                              boolean isEditing) {
 		InputElement input = (InputElement) parent.getFirstChild();
 		String value = input.getValue();
-		viewData.setText(DateTimeFormat.getFormat("dd.MM.yy").parse(value));
+		try {
+			viewData.setText(DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(value));
+		} catch (IllegalArgumentException ex) {
+			viewData.setText(viewData.getOriginal());
+		}
 		viewData.setEditing(isEditing);
 		return value;
 	}
@@ -458,19 +462,6 @@ public class DateInputCell extends
 				DATE_SHORT_START.substring(0, startMonthIndex);
 
 		return startDate;
-	}
-
-	private String convertInputToLocalDateFormat(String input){
-		String result;
-		try {
-			String day = input.substring(0, input.indexOf('.'));
-			String month = input.substring(input.indexOf('.') + 1, input.lastIndexOf('.'));
-			String year = input.substring(input.lastIndexOf('.') + 1, input.length());
-			result = month + "/" + day + "/" + year;
-		} catch (IndexOutOfBoundsException ex){
-			result = input;
-		}
-		return result;
 	}
 
 	private void setupUI(){
@@ -517,7 +508,7 @@ public class DateInputCell extends
 		InputElement input = (InputElement) parent.getFirstChild();
 		String inputted = input.getValue();
 		try{
-			new Date(convertInputToLocalDateFormat(inputted));
+			DateTimeFormat.getFormat("dd.MM.yyyy").parseStrict(inputted);
 		} catch (IllegalArgumentException ex){
 			return false;
 		}

@@ -5,6 +5,23 @@
 <ui:style>
     .titleLabel {
         font-size: 16px;
+        max-height: 28px;
+        overflow: hidden;
+        line-height: 28px;
+    }
+
+    .titleGradient {
+        position: absolute;
+        background: url("resources/img/form_title_gradient.png");
+        width: 64px;
+        height: 32px;
+        right: 790px;
+    }
+
+    .dateDoc {
+        max-height: 28px;
+        overflow: hidden;
+        line-height: 28px;
     }
 
     .headerRight {
@@ -32,38 +49,39 @@
 
         <g:north size="100">
             <g:HorizontalPanel height="100px" width="100%">
-                <g:VerticalPanel>
+                <g:FlowPanel>
                     <g:HorizontalPanel height="28px">
                         <g:cell width="25px">
-                            <style:ButtonLink title="Перейти к списку деклараций" ui:field="returnAnchor" img="img/arrow-left-24.png"/>
+                            <style:ButtonLink title="Перейти к списку деклараций" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
                         </g:cell>
-                        <g:cell verticalAlignment="middle">
+                        <g:HorizontalPanel>
                             <g:Label ui:field="title" addStyleNames="{style.titleLabel}"/>
-                        </g:cell>
+                            <g:SimplePanel styleName="{style.titleGradient}"/>
+                        </g:HorizontalPanel>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="35px">
                         <g:cell verticalAlignment="middle">
                             <g:SimplePanel width="140px" ui:field="downloadXml">
-                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton" img="img/download-xml-16.png"
+                                <style:ButtonLink text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
                                     title="Скачать декларацию в формате законодателя"/>
                             </g:SimplePanel>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:SimplePanel width="145px">
-                                <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="img/download-xls-16.png"
+                                <style:ButtonLink text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
                                     title="Скачать декларацию в формате Excel-документа"/>
                             </g:SimplePanel>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <g:HorizontalPanel ui:field="datePanel">
+                            <g:HorizontalPanel>
                                 <g:cell width="205px" verticalAlignment="middle">
-                                    <g:Label >Дата формирования декларации:</g:Label>
+                                    <g:Label title="Дата формирования декларации" styleName="{style.dateDoc}" text="Дата формирования декларации:" />
                                 </g:cell>
                                 <g:cell verticalAlignment="middle">
                                     <g:TextBox width="100px" ui:field="dateBox"/>
                                 </g:cell>
                                 <g:cell verticalAlignment="middle">
-                                    <g:Image ui:field="dateImage" url="img/calendar-16.png" styleName="{style.imageStyle}" />
+                                    <g:Image ui:field="dateImage" url="resources/img/calendar-16.png" styleName="{style.imageStyle}" />
                                 </g:cell>
                             </g:HorizontalPanel>
                         </g:cell>
@@ -76,8 +94,8 @@
                             <g:Button text="Отменить принятие" ui:field="cancelButton" />
                         </style:LeftBar>
                     </style:Bar>
-                </g:VerticalPanel>
-                <g:VerticalPanel width="790px" addStyleNames="{style.headerRight}">
+                </g:FlowPanel>
+                <g:FlowPanel width="790px" addStyleNames="{style.headerRight}">
                     <g:HorizontalPanel>
                         <g:Label width="100px" addStyleNames="{style.headerAttrName}">Подразделение:</g:Label>
                         <g:Label ui:field="department" addStyleNames="{style.headerAttr}"/>
@@ -97,7 +115,7 @@
                         <g:Label width="100px" addStyleNames="{style.headerAttrName}">Состояние:</g:Label>
                         <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
                     </g:HorizontalPanel>
-                </g:VerticalPanel>
+                </g:FlowPanel>
             </g:HorizontalPanel>
         </g:north>
 

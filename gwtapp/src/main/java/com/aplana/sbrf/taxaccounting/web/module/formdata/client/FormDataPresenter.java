@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -146,9 +147,10 @@ public class FormDataPresenter extends
 								}
 
 							}).addCallback(
-							new ManualRevealCallback<GetFormDataResult>(this)));
+									TaManualRevealCallback.create(this, placeManager)));
 
 		} catch (Exception e) {
+			placeManager.navigateBackQuietly();
 			getProxy().manualRevealFailed();
 			MessageEvent.fire(this,
 					"Не удалось открыть/создать налоговую форму", e);
@@ -299,11 +301,11 @@ public class FormDataPresenter extends
 		CheckFormDataAction checkAction = new CheckFormDataAction();
 		checkAction.setFormData(formData);
 		dispatcher.execute(checkAction, CallbackUtils
-				.defaultCallback(new AbstractCallback<FormDataResult>() {
+				.defaultCallbackNoModalError(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
-						LogAddEvent.fire(FormDataPresenter.this,
-								result.getLogEntries());
+						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
+						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 					}
 				}));
 	}

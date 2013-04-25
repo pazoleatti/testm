@@ -16,6 +16,7 @@ public class FormData extends IdentityObject<Long> {
 
 	private WorkflowState state;
 	private Date acceptanceDate;
+	private Date creationDate;
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
@@ -287,6 +288,23 @@ public class FormData extends IdentityObject<Long> {
 		this.acceptanceDate = acceptanceDate;
 	}
 
+	/**
+	 * Получить дату создания налоговой формы
+	 *
+	 * @return creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * Установить дату создания налоговой формы
+	 *
+	 * @param creationDate
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 	
 	@Override
 	public String toString() {
@@ -318,5 +336,4 @@ public class FormData extends IdentityObject<Long> {
 		builder.append("]");
 		return builder.toString();
 	}
-
 }

@@ -60,7 +60,7 @@ public class MapCache implements Cache {
 			log.debug("Get element with key = " + key + " from cache '" + name
 					+ "'");
 		}
-		Object value = this.store.get(key);
+		Object value = this.store.get(new KeyWrapper(this.name, key));
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value))
 				: null);
 	}
@@ -70,7 +70,7 @@ public class MapCache implements Cache {
 			log.debug("Put element with key = " + key + " to cache '" + name
 					+ "'");
 		}
-		this.store.put(key, toStoreValue(value));
+		this.store.put(new KeyWrapper(this.name, key), toStoreValue(value));
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class MapCache implements Cache {
 			log.debug("Remove element with key = " + key + " from cache '"
 					+ name + "'");
 		}
-		this.store.remove(key);
+		this.store.remove(new KeyWrapper(this.name, key));
 	}
 
 	@Override
@@ -114,5 +114,5 @@ public class MapCache implements Cache {
 	private static class NullHolder implements Serializable {
 		private static final long serialVersionUID = 5124311109167803547L;
 	}
-
+	
 }

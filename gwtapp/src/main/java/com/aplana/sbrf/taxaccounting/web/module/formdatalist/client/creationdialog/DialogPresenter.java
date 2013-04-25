@@ -42,9 +42,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
+	private ReportPeriod currentReportPeriod;
 	private final Map<Integer, FormType> formTypeMap = new HashMap<Integer, FormType>();
 	private final Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
-	private final Map<Integer, ReportPeriod> reportPeriodMap = new HashMap<Integer, ReportPeriod>();
 
 	public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
 		void clearInput();
@@ -133,12 +133,12 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 						fillDepartmentsMap(result.getDepartments());
 						fillFormTypeMap(filterValues.getFormTypes());
-						fillReportPeriodsMap(Arrays.asList(result.getCurrentReportPeriod()));
+						currentReportPeriod = result.getCurrentReportPeriod();
 					}
 				}));
 	}
 
-	public void setSelectedFilterValues(FormDataFilter formDataFilter){
+	public void setSelectedFilterValues(FormDataFilter formDataFilter, List<ReportPeriod> periods){
 		if(formDataFilter.getFormTypeId() != null){
 			getView().setFormTypeValue(formTypeMap.get(formDataFilter.getFormTypeId()));
 		}
@@ -152,11 +152,20 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			value.put(departmentName, departmentId);
 			getView().setDepartmentValue(value);
 		}
-		if(formDataFilter.getReportPeriodIds().size() == 1){
-			List<ReportPeriod> value = new ArrayList<ReportPeriod>();
-			value.add(reportPeriodMap.get(formDataFilter.getReportPeriodIds().iterator().next()));
-			getView().setReportPeriodValue(value);
+
+		List<ReportPeriod> value = new ArrayList<ReportPeriod>();
+		if(formDataFilter.getReportPeriodIds().size() == 1) {
+			for (ReportPeriod period : periods) {
+				if (period.getId() == formDataFilter.getReportPeriodIds().get(0)) {
+					value.add(period);
+				}
+			}
+
+			if (value.isEmpty()) {
+				value.add(currentReportPeriod);
+			}
 		}
+		getView().setReportPeriodValue(value);
 	}
 
 	private Set<Integer> convertDepartmentsToIds(List<Department> source){
@@ -185,15 +194,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		departmentMap.clear();
 		for(Department department : source){
 			departmentMap.put(department.getId(), department);
-		}
-	}
-
-	private void fillReportPeriodsMap(List<ReportPeriod> source){
-		reportPeriodMap.clear();
-		for(ReportPeriod reportPeriod : source){
-			if (reportPeriod != null) {
-				reportPeriodMap.put(reportPeriod.getId(), reportPeriod);
-			}
 		}
 	}
 

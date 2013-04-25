@@ -28,7 +28,8 @@ public class SecurityService {
 			return null;
 		}
 		String login = auth.getName();
-		return userDao.getUser(login);
+		int userId = userDao.getUsreIdbyLogin(login);
+		return userDao.getUser(userId);
 	}
 
 	public TAUser getUserById(int userId){
