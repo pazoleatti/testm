@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
@@ -133,20 +133,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 		//Create order column
 		NumericColumn numericColumn = new NumericColumn();
-
-		ColumnContext columnContext = new ColumnContext();
-		columnContext.setColumn(numericColumn);
-		columnContext.setMode(ColumnContext.Mode.READONLY_MODE);
-		EditNumericColumn editNumericColumn = new EditNumericColumn(numericColumn, columnContext) {
+		DataRowColumn indexColumn = new DataRowColumn(new IndexCell(), numericColumn) {
 			@Override
-			public String getValue(DataRow dataRow) {
-				return String.valueOf(dataRow.getOrder());
+			public Object getValue(Object object) {
+				return object;
 			}
 		};
-
-		editNumericColumn.setCellStyleNames("order");
-		formDataTable.addColumn(editNumericColumn, "Индекс строки");
-		formDataTable.setColumnWidth(editNumericColumn, "4em");
+		indexColumn.setCellStyleNames("order");
+		formDataTable.addColumn(indexColumn, "Индекс строки");
+		formDataTable.setColumnWidth(indexColumn, "4em");
 
 		factory.setReadOnly(readOnly);
 		factory.setEditOnly(forceEditMode);

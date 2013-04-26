@@ -15,15 +15,16 @@ public interface ReportPeriodDao {
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param reportPeriodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DAOException если периода с заданным идентификатором не существует 
+	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
 	
 	/**
-	 * Получить объект текущего отчётного периода по виду налога
+	 * Получить объект текущего отчётного периода по виду налога. Поиск ведется только по обычным периодам, то есть
+	 * периоды для ввода остатков исключены из поиска.
 	 * @param taxType вид налога
 	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
-	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
+	 * @throws com.aplana.sbrf.taxaccounting.exception.DaoException если в БД несколько открытых периодов по заданному виду налога
 	 */
 	ReportPeriod getCurrentPeriod(TaxType taxType);
 	

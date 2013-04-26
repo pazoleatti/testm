@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
-
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
@@ -13,19 +12,19 @@ public interface ReportPeriodMapper {
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param periodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DAOException если периода с заданным идентификатором не существует
 	 */
 	@Select("select * from report_period where id = #{periodId}")
 	@ResultMap("reportPeriodMap")
 	ReportPeriod get(@Param("periodId")int periodId);
 
 	/**
-	 * Получить объект текущего отчётного периода по виду налога
-	 * @param taxTypeCode код вида налога
+	 * Получить объект текущего отчётного периода по виду налога. Поиск ведется только по обычным периодам, то есть
+	 * периоды для ввода остатков исключены из поиска
+	 * @param taxType код вида налога
 	 * @return объект представляющий текущий отчётный период по заданному виду налога, или null, если такого периода нет (еще не открыли)
-	 * @throws DAOException если в БД несколько открытых периодов по заданному виду налога
 	 */
-	@Select("select t1.* from report_period t1 join tax_period t2 on t1.tax_period_id = t2.id where t2.tax_type = #{taxTypeCode} and t1.is_active = 1 ")
+	@Select("select rp.* from report_period rp join tax_period tp on rp.tax_period_id = tp.id where " +
+			"tp.tax_type = #{taxTypeCode} and rp.is_active = 1 and rp.is_balance_period = 0")
 	@ResultMap("reportPeriodMap")
 	ReportPeriod getCurrentPeriod(@Param("taxTypeCode")char taxType);
 
