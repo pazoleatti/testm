@@ -4,15 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -24,8 +19,22 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -119,6 +128,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		}
 
 		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
+		
 		jt.query("select * from data_row where form_data_id = ? order by ord",
 				new Object[] { formDataId }, new int[] { Types.NUMERIC },
 				new RowCallbackHandler() {
@@ -127,7 +137,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						String alias = rs.getString("alias");
 						DataRow row = formData.appendDataRow(alias);
 						rowIdToAlias.put(rowId, row);
-						row.setOrder(rs.getInt("ord"));
 					}
 				});
 
@@ -192,11 +201,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getSigners() != null) {
 			formDataSignerDao.saveSigners(formDataId, formData.getSigners());
 		}
-		insertRows(formData);
+		saveRows(formData);
 		return formDataId;
 	}
 
-	private void insertRows(final FormData formData) {
+	private void saveRows(final FormData formData) {
 		final List<DataRow> dataRows = formData.getDataRows();
 		if (dataRows.isEmpty()) {
 			return;
@@ -204,7 +213,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		final long formDataId = formData.getId();
 
-		OrderUtils.reorder(dataRows);
+		//OrderUtils.reorder(dataRows);
 		// Теперь мы уверены, что order везде заполнен, уникален и идёт, начиная
 		// с 1, возрастая без пропусков.
 		// final Map<String, FormStyle> styleAliasToId =
@@ -212,13 +221,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
-			public void setValues(PreparedStatement ps, int index)
+			public void setValues(PreparedStatement ps, int orderIndex)
 					throws SQLException {
-				DataRow dr = dataRows.get(index);
+				DataRow dr = dataRows.get(orderIndex);
 				String rowAlias = dr.getAlias();
-				int rowOrder = dr.getOrder();
 				ps.setString(1, rowAlias);
-				ps.setInt(2, rowOrder);
+				ps.setInt(2, orderIndex);
 			}
 
 			@Override

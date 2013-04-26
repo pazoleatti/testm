@@ -40,7 +40,6 @@ public final class XmlSerializationUtils {
 	private static final String TAG_ROWS = "rows";
 	private static final String TAG_ROW = "row";
 	private static final String ATTR_ALIAS = "alias";
-	private static final String ATTR_ORDER = "ord";
 	private static final String TAG_CELL = "cell";
 	private static final String ATTR_DATE_VALUE = "dateValue";
 	private static final String ATTR_NUMERIC_VALUE = "numericValue";
@@ -122,7 +121,6 @@ public final class XmlSerializationUtils {
 		if (dataRow.getAlias() != null) {
 			row.setAttribute(ATTR_ALIAS, dataRow.getAlias());
 		}
-		row.setAttribute(ATTR_ORDER, String.valueOf(dataRow.getOrder()));
 
 		for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 			String alias = entry.getKey();
@@ -245,10 +243,6 @@ public final class XmlSerializationUtils {
 		if (aliasNode != null) {
 			dataRow.setAlias(aliasNode.getNodeValue());
 		}
-
-		// Order
-		dataRow.setOrder(Integer.valueOf(element.getAttributes()
-				.getNamedItem(ATTR_ORDER).getNodeValue()));
 
 		// Value
 		NodeList cells = element.getElementsByTagName(TAG_CELL);

@@ -172,7 +172,6 @@ public class FormData extends IdentityObject<Long> {
 				formStyles);
 
 		dataRows.add(row);
-		row.setOrder(dataRows.size() + 1);
 
 		return row;
 	}

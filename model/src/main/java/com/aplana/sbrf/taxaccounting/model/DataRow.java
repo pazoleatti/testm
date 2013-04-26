@@ -39,12 +39,11 @@ import java.util.Set;
  * конструктор по-умолчанию и после этого вызвать метод
  * {@linkplain #setFormColumns}.
  */
-public class DataRow implements Map<String, Object>, Ordered, Serializable {
+public class DataRow implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private List<Cell> data;
 	private String alias;
 	private List<FormStyle> formStyleList;
-	private int order;
 
 	/**
 	 * Конструктор нужен для сериализации
@@ -259,18 +258,9 @@ public class DataRow implements Map<String, Object>, Ordered, Serializable {
 	}
 
 	@Override
-	public int getOrder() {
-		return order;
-	}
-
-	@Override
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
 	public String toString() {
-		return "DataRow{" + "data=" + data + ", alias='" + alias + '\''
-				+ ", order=" + order + '}';
+		return "DataRow [data=" + data + ", alias=" + alias
+				+ ", formStyleList=" + formStyleList + "]";
 	}
+
 }

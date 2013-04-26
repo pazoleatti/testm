@@ -114,7 +114,6 @@ public class XmlSerializationUtilsTest {
 		// Row with alias and order parameter
 		DataRow row = new DataRow(columns, styles);
 		row.setAlias("alias");
-		row.setOrder(1001);
 		rows.add(row);
 
 		row = new DataRow("withColumns", columns, styles);
@@ -196,10 +195,6 @@ public class XmlSerializationUtilsTest {
 
 		if (row1.getAlias() != null ? !row1.getAlias().equals(row2.getAlias())
 				: row2.getAlias() != null) {
-			return false;
-		}
-
-		if (row1.getOrder() != row2.getOrder()) {
 			return false;
 		}
 
