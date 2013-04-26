@@ -141,7 +141,7 @@ void calc() {
     // добавить строку "итого"
     def totalRow = formData.appendDataRow()
     totalRow.setAlias('total')
-    totalRow.regNumber = 'Общий итого'
+    totalRow.regNumber = 'Общий итог'
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
@@ -399,7 +399,12 @@ void setOrder() {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
-    return summ(formData, new ColumnRange(columnAlias, 0, formData.dataRows.size() - 2))
+    def from = 0
+    def to = formData.dataRows.size() - 2
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
 /**

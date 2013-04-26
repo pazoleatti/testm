@@ -40,15 +40,13 @@ def addNewRow() {
     }
 
     def index = formData.dataRows.indexOf(currentDataRow)
-    if (index == -1) {
-        index = 0
-    }
-    if (index + 1 == formData.dataRows.size()) {
-        formData.dataRows.add(index, newRow)
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || index == -1) {
+        formData.dataRows.add(newRow)
     } else {
         formData.dataRows.add(index + 1, newRow)
     }
-
     setOrder()
 }
 
@@ -187,10 +185,12 @@ void logicalCheck(def checkRequiredColumns) {
         // 4. Проверка итоговых значений формы	Заполняется автоматически.
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
-            if (totalRow.lossReportPeriod != getSum('lossReportPeriod') ||
-                    totalRow.lossTaxPeriod != getSum('lossTaxPeriod')) {
-                logger.error('Итоговые значения формы рассчитаны неверно!')
-                return
+            def totalSumColumns = ['lossReportPeriod', 'lossTaxPeriod']
+            for (def alias : totalSumColumns) {
+                if (totalRow.getCell(alias).getValue() != getSum(alias)) {
+                    logger.error('Итоговые значения формы рассчитаны неверно!')
+                    return
+                }
             }
         }
     }
