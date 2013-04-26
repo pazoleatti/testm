@@ -159,6 +159,8 @@ public class FormData extends IdentityObject<Long> {
 	 * Добавляет строку в таблицу данных. Каждая строка может содержать
 	 * уникальный алиас, для возможности идентификации её в скриптах
 	 * 
+	 * @param i 
+	 *            индекс
 	 * @param rowAlias
 	 *            значение, задающее алиас. в большинстве случае должен быть
 	 *            строкой, но для удобства написания скриптов, принимает Object.
@@ -166,20 +168,34 @@ public class FormData extends IdentityObject<Long> {
 	 *            <code>rowAlias.toString()</code>
 	 * @return добавленная строка с установленным алиасом
 	 */
-	public DataRow appendDataRow(Object rowAlias) {
+	public DataRow appendDataRow(int i, Object rowAlias) {
 		DataRow row = new DataRow(
 				rowAlias == null ? null : rowAlias.toString(), formColumns,
 				formStyles);
-
-		dataRows.add(row);
-
+		dataRows.add(i, row);
 		return row;
+	}
+	
+	public DataRow appendDataRow(int i) {
+		return appendDataRow(i, null);
+	}
+	
+	public DataRow appendDataRow(DataRow after, Object rowAlias) {
+		return appendDataRow(dataRows.indexOf(after) + 1, rowAlias);
+	}
+
+    /*	public DataRow appendDataRow(DataRow after) {
+		return appendDataRow(after);
+	}*/
+	
+	public DataRow appendDataRow(Object rowAlias) {
+		return appendDataRow(dataRows.size(), rowAlias);
 	}
 
 	public DataRow appendDataRow() {
 		return appendDataRow(null);
 	}
-
+	
 	/**
 	 * Удаляет строку из НФ
 	 * 
