@@ -22,49 +22,32 @@ a, a:visited, a:hover {
 }
 
 .gwt-Button {
+    position: relative;
     color: #fff;
-    margin: 2px 10px 0 8px;
-    margin-top: 0\0/; /* IE 8 hack */
-    margin-left: 10px\0/; /* IE 8 hack */
     text-decoration: none;
     font-size: small;
     cursor: pointer;
-    padding: 2px 0 3px 7px;
-    border: none;
-    background: url("images/button/sb-btn-background.png") repeat-x 0 0;
-    word-wrap: normal;
-    height: 25px;
-}
+    padding: 2px 4px 2px 5px;
+    border: solid 1px #00940C;
+    border-radius: 11px;
+    margin-left: 0;
 
-.gwt-Button:before {
-    background: url("images/button/sb-btn-left.png") no-repeat 0 0;
-    position: absolute;
-    content: "";
-    width: 10px;
-    height: 25px;
-    margin: -4px 0 0 -15px;
-    margin-left: -17px\0/; /* IE 8 hack */
-}
-
-.gwt-Button:after {
-    background: url("images/button/sb-btn-right.png") no-repeat 0 0;
-    position: absolute;
-    content: "";
-    width: 10px;
-    height: 25px;
-    margin: -4px 0 0 0;
+    background: #00940C; /* Для старых браузеров */
+    background: -moz-linear-gradient(top, #CBE6B8, #00940C); /* Firefox 3.6+ */
+    /* Chrome 10+, Safari 5.1+ */
+    background: -webkit-linear-gradient(top, #CBE6B8, #00940C);
+    background: -o-linear-gradient(top, #CBE6B8, #00940C); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #CBE6B8, #00940C); /* IE10 */
+    background: linear-gradient(top, #CBE6B8, #00940C); /* CSS3 */
+    /* IE8 hack */
+    behavior: url(resources/pie.htc)\0/;
+    -pie-background: linear-gradient(top, #CBE6B8, #00940C)\0/;
 }
 
 @-moz-document url-prefix() {
-  .gwt-Button {
-    margin: 0 10px 0 0;
-  }
-  .gwt-Button:after {
-	margin: -5px 0 0 3px;
-  }
-  .gwt-Button:before {
-	margin: -5px 0 0 -10px;
-  }
+    .gwt-Button {
+       padding: 1px 3px;
+    }
 }
 
 .gwt-Button:active {
@@ -137,68 +120,29 @@ a, a:visited, a:hover {
     overflow: hidden;
 }
 
+.gwt-DialogBox {
+    border: 2px solid #00940C;
+}
+
 .gwt-DialogBox .Caption {
     background: #e3e8f3 url(images/hborder.png) repeat-x 0 -2003px;
     padding: 4px 4px 4px 8px;
     cursor: default;
     text-align: left;
     color: white;
-    border-bottom: 1px solid #00940C;
-    border-top: 5px solid #00940C
 }
 
-.gwt-DialogBox .dialogContent {
+.gwt-DialogBox .dialogTopLeft, .gwt-DialogBox .dialogTopRight {
+    background: #e3e8f3 url(images/hborder.png) repeat-x 0 -2003px;
+}
+
+.gwt-DialogBox .dialogMiddleLeft, .gwt-DialogBox .dialogMiddleRight {
+    background-color: white;
 }
 
 .gwt-DialogBox .dialogMiddleCenter {
     padding: 3px;
     background: white;
-}
-
-.gwt-DialogBox .dialogBottomCenter {
-    background: url(images/hborder.png) repeat-x 0 -4px;
-}
-
-.gwt-DialogBox .dialogMiddleLeft {
-    background: url(images/vborder.png) repeat-y;
-}
-
-.gwt-DialogBox .dialogMiddleRight {
-    background: url(images/vborder.png) repeat-y -4px 0;
-}
-
-.gwt-DialogBox .dialogTopLeftInner {
-    width: 5px;
-}
-
-.gwt-DialogBox .dialogTopRightInner {
-    width: 8px;
-}
-
-.gwt-DialogBox .dialogBottomLeftInner {
-    width: 5px;
-    height: 8px;
-}
-
-.gwt-DialogBox .dialogBottomRightInner {
-    width: 5px;
-    height: 8px;
-}
-
-.gwt-DialogBox .dialogTopLeft {
-    background: url(images/corner.png) no-repeat -13px 0;
-}
-
-.gwt-DialogBox .dialogTopRight {
-    background: url(images/corner.png) no-repeat -18px 0;
-}
-
-.gwt-DialogBox .dialogBottomLeft {
-    background: url(images/corner.png) no-repeat 0 -15px;
-}
-
-.gwt-DialogBox .dialogBottomRight {
-    background: url(images/corner.png) no-repeat -5px -15px;
 }
 
 * html .gwt-DialogBox .dialogTopLeftInner {
@@ -459,7 +403,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-PopupPanel {
-    border: 3px solid #00940C;
+    border: 2px solid #00940C;
     padding: 3px;
     background: white;
 }

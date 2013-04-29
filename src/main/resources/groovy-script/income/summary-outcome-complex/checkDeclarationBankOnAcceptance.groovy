@@ -16,10 +16,9 @@ return isBank
  * @author rtimerbaev
  * @since 21.03.2013 11:00
  */
-
-departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
-    def bank = declarationService.find(1, department.departmentId, formData.reportPeriodId)
-    if (bank != null && bank.getState() == WorkflowState.ACCEPTED) {
+departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
+    def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
+    if (bank != null && bank.accepted) {
         logger.error('Принятие налоговой формы невозможно, т.к. уже принята декларация Банка.')
     }
 }

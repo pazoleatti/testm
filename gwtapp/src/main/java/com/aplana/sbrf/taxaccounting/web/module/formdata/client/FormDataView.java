@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.cell.IndexCell;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
@@ -140,8 +140,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			}
 		};
 		indexColumn.setCellStyleNames("order");
-		formDataTable.addColumn(indexColumn, "Индекс строки");
-		formDataTable.setColumnWidth(indexColumn, "4em");
+		formDataTable.addColumn(indexColumn, "№");
+		formDataTable.setColumnWidth(indexColumn, "3em");
 
 		factory.setReadOnly(readOnly);
 		factory.setEditOnly(forceEditMode);

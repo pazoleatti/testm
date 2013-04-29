@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.TableCellElement;
@@ -37,6 +35,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	public interface Binder extends UiBinder<Widget, FormTemplateRowView> { }
 
 	private static final String SELECTED_CELL_BACKGROUND_COLOR = "#9A9CFF";
+	private static final int COLUMN_OFFSET = 2;
 	private final StyleCellPopup styleCellPopup;
 	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
@@ -182,7 +181,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			for (int colIndex = rightColumnIndex; colIndex <= leftColumnIndex; colIndex++) {
 				Element element = DOM.getElementById(CustomTableBuilder.TD + "_" + topRowIndex + "_" + colIndex);
 				DataRow currentRow = rows.get(topRowIndex);
-				Cell cell = currentRow.getCell(columns.get(colIndex - 1).getAlias());
+				Cell cell = currentRow.getCell(columns.get(colIndex - COLUMN_OFFSET).getAlias());
 
 				if (select) { // выделяем ячейки
 					element.getStyle().setBackgroundColor(SELECTED_CELL_BACKGROUND_COLOR);
@@ -220,6 +219,17 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		while (formDataTable.getColumnCount() > 0) {
 			formDataTable.removeColumn(0);
 		}
+		//Create order column
+		NumericColumn numericColumn = new NumericColumn();
+		DataRowColumn indexColumn = new DataRowColumn(new IndexCell(), numericColumn) {
+			@Override
+			public Object getValue(Object object) {
+				return object;
+			}
+		};
+		indexColumn.setCellStyleNames("order");
+		formDataTable.addColumn(indexColumn, "№");
+		formDataTable.setColumnWidth(indexColumn, "3em");
 
 		//Create alias column
 		StringColumn aliasColumn = new StringColumn();
@@ -293,7 +303,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		if(getUiHandlers()!=null){
 			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
 			Cell cell = currentRow.getCell(columns.
-					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - 1).getAlias());
+					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - COLUMN_OFFSET).getAlias());
 			cell.setRowSpan(Math.abs(initialRowIndex - lastRowIndex) + 1);
 			cell.setColSpan(Math.abs(initialColumnIndex - lastColumnIndex) + 1);
 			refresh();
@@ -306,7 +316,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		if(getUiHandlers()!=null){
 			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
 			Cell cell = currentRow.getCell(columns.
-					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - 1).getAlias());
+					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - COLUMN_OFFSET).getAlias());
 			cell.setRowSpan(1);
 			cell.setColSpan(1);
 			refresh();

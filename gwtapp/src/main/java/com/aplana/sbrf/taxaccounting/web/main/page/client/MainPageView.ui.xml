@@ -2,84 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-	<ui:style>
-		.topGradient {
-			background: url("resources/img/body_top_gradient.gif") repeat-x;
-			top: 0;
-			height: 32px;
-		}
-
-		.versionProjectStyle {
-			position: absolute;
-			left: 30px;
-			bottom: 3px;
-		}
-
-		.footerGradient {
-			background: url("resources/img/footer_gradient.gif") repeat-x;
-			bottom: 0px;
-			height: 32px;
-			width: 100%;
-		}
-
-		.leftGradient {
-			background: url("resources/img/body_left_gradient.gif") repeat-y;
-			float: left;
-			width: 32px;
-			height: 100%;
-		}
-
-		.content {
-			right: 7px;
-			left: 7px;
-			bottom: 17px;
-			position: fixed;
-            top: 45px;
-            padding-top: 7px;
-		}
-
-		.rightGradient {
-			background: url("resources/img/body_right_gradient.gif") repeat-y;
-			float: right;
-			width: 32px;
-			height: 100%;
-		}
-
-		.footerLeft {
-			background: url("resources/img/footer_left_corner.png") no-repeat;
-			height: 32px;
-			float: left;
-			width: 32px;
-			bottom: 0;
-		}
-
-		.footerRight {
-			background: url("resources/img/footer_right_corner.png") no-repeat;
-			height: 32px;
-			float: right;
-			width: 32px;
-			bottom: 0;
-		}
-
-		.bodyTopLeft {
-			background: url("resources/img/body_top_left_corner.gif") no-repeat;
-			height: 32px;
-			float: left;
-			width: 32px;
-			top: 0;
-		}
-
-		.bodyTopRight {
-			background: url("resources/img/body_top_right_corner.gif") no-repeat;
-			float: right;
-			width: 32px;
-			height: 32px;
-			top: 0;
-		}
-	</ui:style>
-
-	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'
-		height="100%" width="100%">
+	<g:DockLayoutPanel ui:field="dockPanel" unit="PX" height="100%" width="100%">
 		<g:north size="44">
 			<g:HTMLPanel>
 				<div ui:field="loadingMessage" class="loadingStatusLabel">
@@ -90,11 +13,11 @@
 					<div class="topHeader">
 						<div class="topLeftLogo">
 							<img style="height: 41x; width:126px;" height="41px" width="126px"
-								src="resources/img/header_left.gif" />
+								src="resources/img/header_left.png" />
 						</div>
 						<div class="topRightLogo">
 							<img style="height: 41px; width:27px;" height="41px" width="27px"
-								src="resources/img/header_right.gif" />
+								src="resources/img/header_right.png" />
 						</div>
 
 						<g:HTMLPanel ui:field="signInContentPanel" />
@@ -106,14 +29,14 @@
 
 		<g:center>
 			<g:HTMLPanel height="100%">
-				<div class="{style.topGradient}">
-					<div class="{style.bodyTopLeft}" />
-					<div class="{style.bodyTopRight}" />
+				<div class="topGradient">
+					<div class="bodyTopLeft" />
+					<div class="bodyTopRight" />
 				</div>
 				<g:HTMLPanel height="100%">
-					<div class="{style.rightGradient}" />
-					<div class="{style.leftGradient}" />
-					<div class="{style.content}">
+					<div class="rightGradient" />
+					<div class="leftGradient" />
+					<div class="bodyContent">
 						<g:SplitLayoutPanel height="100%" ui:field="splitPanel">
 							<g:center>
 								<g:ResizeLayoutPanel ui:field="mainContentPanel" />
@@ -128,10 +51,10 @@
 		</g:center>
 
 		<g:south size="32">
-			<g:HTMLPanel ui:field="footerPanel" styleName="{style.footerGradient}">
-				<div class="{style.footerLeft}" />
-				<div class="{style.footerRight}" />
-				<g:FlowPanel ui:field="projectVersion" styleName="{style.versionProjectStyle}" />
+			<g:HTMLPanel ui:field="footerPanel" styleName="footerGradient">
+				<div class="footerLeft" />
+				<div class="footerRight" />
+				<g:FlowPanel ui:field="projectVersion" styleName="versionProjectStyle" />
 			</g:HTMLPanel>
 		</g:south>
 	</g:DockLayoutPanel>

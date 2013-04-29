@@ -179,4 +179,11 @@
 			<url-pattern>/j_security_check</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
+
+    <!-- Mime types -->
+    <mime-mapping>
+        <extension>htc</extension>
+        <mime-type>text/x-component</mime-type>
+    </mime-mapping>
+
 </web-app>

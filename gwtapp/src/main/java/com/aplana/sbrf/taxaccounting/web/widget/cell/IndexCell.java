@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formdata.client.cell;
+package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.google.gwt.cell.client.AbstractCell;
