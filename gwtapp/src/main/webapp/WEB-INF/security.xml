@@ -12,6 +12,8 @@
     <http pattern="/logout" security="none"/>
 	<http pattern="/favicon.ico" security="none"/>
 	<http pattern="/j_security_check" security="none"/>
+	<http pattern="/GenericAccountManagement/*" security="none"/>
+	<http pattern="/TaxAccountingSupportingData/*" security="none"/>
 
     <http create-session="never" use-expressions="true" auto-config="false" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
         <intercept-url pattern="/**" access="isAuthenticated()"/>

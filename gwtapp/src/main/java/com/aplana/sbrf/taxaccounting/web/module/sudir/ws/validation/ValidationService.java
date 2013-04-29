@@ -1,12 +1,12 @@
-package com.aplana.sbrf.taxaccounting.web.module.sudir.validation;
+package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation;
 
 import java.util.Map;
 
-import com.aplana.sbrf.taxaccounting.web.module.sudir.assembler.FieldNames;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagementException;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagementException_Exception;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAttribute;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.FieldNames;
 
 public class ValidationService {
 	

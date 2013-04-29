@@ -10,4 +10,5 @@
 	<enable-directory-browsing value="false"/>
 	<enable-file-serving value="false"/>
 	<enable-reloading value="true"/>
+	<enable-serving-servlets-by-class-name value="false"/>
 </web-ext>

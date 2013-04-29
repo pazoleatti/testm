@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sudir.assembler;
+package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler;
 
 import java.util.HashMap;
 import java.util.Map;

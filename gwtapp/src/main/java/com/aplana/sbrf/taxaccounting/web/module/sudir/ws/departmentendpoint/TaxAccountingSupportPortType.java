@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.assembler.GenericAccountInfoAssembler;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
 
 
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint.TaxAccountingSupportingData",
 			targetNamespace="http://taxaccounting.sbt.ru/SupportingData/",
-			serviceName="TaxAccountingSupportingData")
+			serviceName="TaxAccountingSupportingData",
+			portName="TaxAccountingSupportingDataSOAP")
 public class TaxAccountingSupportPortType extends SpringBeanAutowiringSupport{
 
 	@Autowired

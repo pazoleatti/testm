@@ -177,6 +177,8 @@
             <url-pattern>/logout</url-pattern>
 			<url-pattern>/favicon.ico</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
+			<url-pattern>/GenericAccountManagement/*</url-pattern>
+			<url-pattern>/TaxAccountingSupportingData/*</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
 

@@ -9,12 +9,14 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.assembler.GenericAccountInfoAssembler;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.validation.SudirErrorCodes;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.validation.ValidationService;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.SudirErrorCodes;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationService;
 
-@WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0",
-			serviceName="GenericAccountManagement")
+@WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",
+			targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0",
+			serviceName="GenericAccountManagementService",
+			portName="GenericAccountManagement")
 public class GenericAccountManagementPortType extends SpringBeanAutowiringSupport{
 	
 	@Autowired
@@ -74,8 +76,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			userService.createUser(user);
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_004.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_004.detailCode());
+			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_005.toString());
+			gam.setDetails(SudirErrorCodes.SUDIR_005.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sudir.validation;
+package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation;
 
 public enum SudirErrorCodes {
 	
@@ -23,7 +23,7 @@ public enum SudirErrorCodes {
 	SUDIR_003("SUDIR-003") {
 		@Override
 		public String detailCode() {
-			return "Account not found";
+			return "Access denied";
 		}
 	},
 	SUDIR_004("SUDIR-004") {

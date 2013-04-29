@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sudir.assembler;
+package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler;
 
 import java.util.ArrayList;
 import java.util.List;
