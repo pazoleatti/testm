@@ -50,7 +50,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public boolean canRead(int userId, long formDataId) {
-		return true;
+		TAUser user = userDao.getUser(userId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canRead(formDataAccess, formData);
 	}
 
 	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
@@ -129,7 +133,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public boolean canEdit(int userId, long formDataId) {
-		return true;
+		TAUser user = userDao.getUser(userId);
+		FormData formData = formDataDao.getWithoutRows(formDataId);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 
 	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
@@ -246,7 +254,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
-		return true;
+		TAUser user = userDao.getUser(userId);
+		Department formDataDepartment = departmentService.getDepartment(departmentId);
+		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+		int formTypeId = formTemplate.getType().getId();
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formDataDepartment.getId(), formTypeId, kind);
+		return canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
@@ -308,7 +321,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	@Override
 	public boolean canDelete(int userId, long formDataId) {
-		return true;
+		FormData formData = formDataDao.getWithoutRows(formDataId);
+		TAUser user = userDao.getUser(userId);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+				formData.getFormType().getId(), formData.getKind());
+		return canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 	}
 	
 	private boolean canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
