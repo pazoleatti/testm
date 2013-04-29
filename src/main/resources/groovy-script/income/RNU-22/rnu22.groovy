@@ -3,7 +3,7 @@
  * Форма "(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования".
  *
  * TODO:
- *      - нет уловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
@@ -14,19 +14,16 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
         break
 }
 
@@ -64,41 +61,36 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
-    formData.dataRows.add(pos, newRow)
-    setOrder()
-}
 
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
+    def index = formData.dataRows.indexOf(currentDataRow)
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || index == -1) {
+        formData.dataRows.add(newRow)
+    } else {
+        formData.dataRows.add(index + 1, newRow)
+    }
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    /** Предыдущий отчётный период. */
-    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-
-    /** (РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования (За предыдущий отчетный период). */
-    def formDataOld = (prevReportPeriod != null ? FormDataService.find(322, FormDataKind.PRIMARY, formDataDepartment.id, prevReportPeriod.id) : null)
+    // РНУ-22 за предыдущий отчетный период
+    def formDataOld = getFormDataOld()
 
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
             def colNames = []
-            // Список проверяемых столбцов
-            def columns = ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
-                    'interestRate', 'basisForCalc']
+            // Список проверяемых столбцов (графа 2..12)
+            def requiredColumns = ['contractNumber', 'contraclData', 'base',
+                    'transactionDate', 'course', 'interestRate', 'basisForCalc']
 
-            columns.each {
+            requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
                     // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
                     colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
@@ -111,8 +103,8 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
         }
@@ -122,8 +114,8 @@ void calc() {
     }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
 
     // удалить строку "итого"
     def total = null
@@ -138,9 +130,15 @@ void calc() {
     if (total != null) {
         formData.dataRows.remove(total)
     }
+    if (formData.dataRows.isEmpty()) {
+        return
+    }
 
-    // графа 13..20
-    formData.dataRows.each { row ->
+    // графа 1, 13..20
+    formData.dataRows.eachWithIndex { row, index ->
+        // графа 1
+        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+
         // графа 13
         row.accruedCommisCurrency = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
 
@@ -169,26 +167,30 @@ void calc() {
         row.reportPeriodRub = round(row.reportPeriodCurrency * row.course, 2)
     }
 
-    // графа 1
-    formData.dataRows.eachWithIndex { row, index ->
-        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
-    }
-
     // добавить строку "итого"
     def totalRow = formData.appendDataRow()
     totalRow.setAlias('total')
     totalRow.contractNumber = 'Итого'
-    // графа 13..20
-    ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
-            'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
+    setTotalStyle(totalRow)
+
+    // графы для которых надо вычислять итого (графа 13..20)
+    def totalColumns = ['accruedCommisCurrency', 'accruedCommisRub',
+            'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency',
+            'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub']
+    totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(formData, alias))
     }
 }
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
+    // РНУ-22 за предыдущий отчетный период
+    def formDataOld = getFormDataOld()
+
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
@@ -202,34 +204,73 @@ void logicalCheck() {
     def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
 
     if (!formData.dataRows.isEmpty()) {
-        def index = 1
+        def i = 1
+        // суммы строки общих итогов
+        def totalSums = [:]
+        // столбцы для которых надо вычислять итого и итого по коду классификации дохода (графа 13..20)
+        def totalColumns = ['accruedCommisCurrency', 'accruedCommisRub',
+                'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency',
+                'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub']
+        // признак наличия итоговых строк
+        def hasTotal = false
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
+                hasTotal = true
                 continue
+            }
+
+            // 7. Проверка на заполнение поля «<Наименование поля>». Графа 1..8, 13..20
+            def colNames = []
+
+            // Список проверяемых столбцов
+            def requiredColumns = ['rowNumber', 'contractNumber', 'contraclData', 'base',
+                    'transactionDate', 'course', 'interestRate', 'basisForCalc',
+                    'accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency',
+                    'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
+                    'reportPeriodCurrency', 'reportPeriodRub']
+            requiredColumns.each {
+                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                }
+            }
+            if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
+                def index = row.rowNumber
+                def errorMsg = colNames.join(', ')
+                if (index != null) {
+                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+                } else {
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
+                }
+                return
             }
 
             // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
             if (a != null && b != null && (
-                    (row.transactionDate != null && (row.transactionDate < a || b < row.transactionDate)) ||
+            (row.transactionDate != null && (row.transactionDate < a || b < row.transactionDate)) ||
                     (row.calcPeriodAccountingEndDate != null && (row.calcPeriodAccountingEndDate < a && b < row.calcPeriodAccountingEndDate)) ||
                     (row.calcPeriodEndDate != null && (row.calcPeriodEndDate < a || b < row.calcPeriodEndDate)))) {
                 logger.error('Дата совершения операции вне границ отчётного периода!')
-                break
+                return
             }
 
             // 2. Проверка на нулевые значения (графа 13..20)
-            def hasNull = true
+            def allNull = true
             ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency',
                     'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
                     'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
                 def tmp = row.getCell(alias).getValue()
                 if (tmp != null && tmp != 0) {
-                    hasNull = false
+                    allNull = false
                 }
             }
-            if (hasNull) {
+            if (allNull) {
                 logger.error('Все суммы по операции нулевые!')
-                break
+                return
             }
 
             // 3. Проверка на сумму платы (графа 4)
@@ -246,25 +287,7 @@ void logicalCheck() {
             // 5. Проверка на корректность даты договора
             if (row.contraclData > b) {
                 logger.error('Дата договора неверная!')
-                break
-            }
-
-
-            // 7. Проверка на заполнение поля «<Наименование поля>». Графа 1..8, 13..20
-            def colNames = []
-            // Список проверяемых столбцов
-            ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
-                    'interestRate', 'basisForCalc', 'accruedCommisCurrency', 'accruedCommisRub',
-                    'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency',
-                    'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                def errorMsg = colNames.join(', ')
-                logger.error("Поля $errorMsg не заполнены!")
-                break
+                return
             }
 
             // 8. Проверка на заполнение поля «<Наименование поля>»
@@ -276,21 +299,97 @@ void logicalCheck() {
                     (row.calcPeriodBeginDate != null || row.calcPeriodEndDate != null)
             if (checkColumn9and10 || checkColumn11and12) {
                 logger.error('Поля в графе 9, 10, 11, 12 заполены неверно!')
-                break
+                return
             }
 
             // 9. Проверка на уникальность поля «№ пп» (графа 1)
-            if (index != row.rowNumber) {
+            if (i != row.rowNumber) {
                 logger.error('Нарушена уникальность номера по порядку!')
-                break
+                return
             }
-            index += 1
+            i += 1
+
+            // 10. Арифметическая проверка графы 13
+            def tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
+            if (row.accruedCommisCurrency != tmp) {
+                logger.error('Неверно рассчитана графа «Сумма начисленной комиссии. Валюта»!')
+                return
+            }
+
+            // 11. Арифметическая проверка графы 14
+            if (row.accruedCommisRub != round(row.accruedCommisCurrency * row.course, 2)) {
+                logger.error('Неверно рассчитана графа «Сумма начисленной комиссии. Рубли»!')
+                return
+            }
+
+            // 12. Арифметическая проверка графы 15
+            tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
+            if (row.commisInAccountingCurrency != tmp) {
+                logger.error('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Валюта»!')
+                return
+            }
+
+            // 13. Арифметическая проверка графы 16
+            if (row.commisInAccountingRub != round(row.commisInAccountingCurrency * row.course, 2)) {
+                logger.error('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Рубли»!')
+                return
+            }
+
+            // 14. Арифметическая проверка графы 17
+            // TODO (Ramil Timerbaev) уточнят
+            tmp = getSum(formDataOld, 'reportPeriodCurrency')
+            if (row.accrualPrevCurrency != tmp) {
+                logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
+                return
+            }
+
+            // 15. Арифметическая проверка графы 18
+            // TODO (Ramil Timerbaev) уточнят
+            tmp = getSum(formDataOld, 'reportPeriodRub')
+            if (row.accrualPrevRub != tmp) {
+                logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
+                return
+            }
+
+            // 16. Арифметическая проверка графы 19
+            tmp = getColumn13or15or19(row, row.calcPeriodBeginDate, row.calcPeriodEndDate)
+            if (row.reportPeriodCurrency != tmp) {
+                logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
+                return
+            }
+
+            // 17. Арифметическая проверка графы 20
+            if (row.reportPeriodRub != round(row.reportPeriodCurrency * row.course, 2)) {
+                logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
+                return
+            }
+
+            // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            totalColumns.each { alias ->
+                if (totalSums[alias] == null) {
+                    totalSums[alias] = 0
+                }
+                totalSums[alias] += row.getCell(alias).getValue()
+            }
         }
 
-        // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
-        def totalRow = formData.getDataRow('total')
-        if (totalRow.commisInAccountingRub > 0 && totalRow.accruedCommisRub >= totalRow.commisInAccountingRub) {
-            logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
+        if (hasTotal) {
+            def totalRow = formData.getDataRow('total')
+
+            // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
+            if (totalRow.commisInAccountingRub > 0 &&
+                    totalRow.accruedCommisRub >= totalRow.commisInAccountingRub) {
+                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
+            }
+
+            // 18. Проверка итогового значений по всей форме (графа 13..20)
+            for (def alias : totalColumns) {
+                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
+                    hindError = true
+                    logger.error('Итоговые значения рассчитаны неверно!')
+                    return
+                }
+            }
         }
     }
 }
@@ -314,15 +413,6 @@ void checkNSI() {
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
 }
 
 /**
@@ -357,4 +447,30 @@ def getSum(def form, def columnAlias) {
         return 0
     }
     return summ(form, new ColumnRange(columnAlias, to, from))
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'contractNumber', 'contraclData', 'base', 'transactionDate',
+            'course', 'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate',
+            'accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency',
+            'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
+            'reportPeriodCurrency', 'reportPeriodRub'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+}
+
+/**
+ * Получить данные за предыдущий отчетный период
+ */
+def getFormDataOld() {
+    // предыдущий отчётный период
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+
+    // (РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования (За предыдущий отчетный период)
+    def formDataOld = (prevReportPeriod != null ? FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, prevReportPeriod.id) : null)
+
+    return formDataOld
 }

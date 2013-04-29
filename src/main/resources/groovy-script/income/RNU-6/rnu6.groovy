@@ -3,7 +3,7 @@
  * Форма "(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления".
  *
  * TODO:
- *      - нет уловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *
@@ -233,6 +233,7 @@ void logicalCheck(def checkRequiredColumns) {
         def hasTotal = false
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 hasTotal = true
@@ -262,7 +263,6 @@ void logicalCheck(def checkRequiredColumns) {
                 if (!checkRequiredColumns) {
                     return
                 }
-                hasError = true
                 def index = row.number
                 def errorMsg = colNames.join(', ')
                 if (index != null) {
@@ -313,7 +313,7 @@ void logicalCheck(def checkRequiredColumns) {
                 totalGroupsName.add(row.code)
             }
 
-            // 9 графа - подсчет сумм для общих итогов
+            // 9. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -323,8 +323,9 @@ void logicalCheck(def checkRequiredColumns) {
         }
 
         if (hasTotal) {
-            // 3. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 10, 12)
             def totalRow = formData.getDataRow('total')
+
+            // 3. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 10, 12)
             if (totalRow.ruble > 0 && totalRow.taxAccountingRuble >= totalRow.ruble) {
                 logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
             }

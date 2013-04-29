@@ -3,7 +3,7 @@
  * Форма "(РНУ-5) Простой регистр налогового учёта «расходы»".
  *
  * TODO:
- *      - нет уловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
  * @author rtimerbaev
  */
@@ -159,6 +159,7 @@ void logicalCheck(def checkRequiredColumns) {
         def totalSum = 0
         def hasTotal = false
         def sums = [:]
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 hasTotal = true
@@ -176,7 +177,6 @@ void logicalCheck(def checkRequiredColumns) {
                 if (!checkRequiredColumns) {
                     return
                 }
-                hasError = true
                 def index = row.rowNumber
                 def errorMsg = colNames.join(', ')
                 if (index != null) {

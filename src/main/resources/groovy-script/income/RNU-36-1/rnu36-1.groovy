@@ -3,7 +3,7 @@
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
  *
  * TODO:
- *      - нет уловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- откуда брать "Отчетная дата" для логических проверок?
  *		- откуда брать последний отчетный день месяца?
  *
@@ -53,9 +53,9 @@ def addNewRow() {
 
     if (currentDataRow == null) {
         row = formData.getDataRow('totalA')
-        formData.dataRows.add(row.getOrder() - 1, newRow)
+        formData.dataRows.add(formData.dataRows.indexOf(row), newRow)
     } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(currentDataRow.getOrder(), newRow)
+        formData.dataRows.add(formData.dataRows.indexOf(currentDataRow), newRow)
     } else {
         def row = formData.getDataRow('totalA')
         switch (currentDataRow.getAlias()) {
@@ -69,10 +69,8 @@ def addNewRow() {
                 row = formData.getDataRow('totalB')
                 break
         }
-        formData.dataRows.add(row.getOrder() - 1, newRow)
+        formData.dataRows.add(formData.dataRows.indexOf(row), newRow)
     }
-
-    setOrder()
 }
 
 /**
@@ -84,8 +82,6 @@ def deleteRow() {
     }
 
     formData.dataRows.remove(currentDataRow)
-
-    setOrder()
 }
 
 /**
@@ -115,7 +111,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"Серия\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -145,9 +141,9 @@ void calc() {
     def aRow = formData.getDataRow('A')
     def bRow = formData.getDataRow('B')
     totalColumns.each { alias ->
-        def tmp = summ(formData, new ColumnRange(alias, aRow.getOrder() - 1, totalARow.getOrder() - 2))
+        def tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(aRow), formData.dataRows.indexOf(totalARow) - 1))
         totalARow.getCell(alias).setValue(tmp)
-        tmp = summ(formData, new ColumnRange(alias, bRow.getOrder() - 1, totalBRow.getOrder() - 2))
+        tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(bRow), formData.dataRows.indexOf(totalBRow) - 1))
         totalBRow.getCell(alias).setValue(tmp)
     }
 
@@ -193,13 +189,4 @@ void checkNSI() {
  */
 def isFixedRow(def row) {
     return row != null && row.getAlias() != null
-}
-
-/**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
 }

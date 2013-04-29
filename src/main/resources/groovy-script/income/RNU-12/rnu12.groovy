@@ -3,7 +3,7 @@
  * Форма "(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам".
  *
  * TODO:
- *      - нет уловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *
@@ -12,12 +12,12 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -43,15 +43,23 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
-    // графа 2..12
+
+    // графа 2..10, 12
     ['code', 'numberFirstRecord', 'opy', 'operationDate',
             'name', 'documentNumber', 'date', 'periodCounts',
-            'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
+            'advancePayment', 'outcomeInBuh'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
-    formData.dataRows.add(pos, newRow)
+
+    def index = formData.dataRows.indexOf(currentDataRow)
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || index == -1) {
+        formData.dataRows.add(newRow)
+    } else {
+        formData.dataRows.add(index + 1, newRow)
+    }
 }
 
 /**
@@ -68,10 +76,10 @@ void calc() {
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
             def colNames = []
-            // Список проверяемых столбцов (графа 2..12)
+            // Список проверяемых столбцов (графа 2..10, 12)
             def requiredColumns = ['code', 'numberFirstRecord', 'opy',
-                    'operationDate', 'name', 'documentNumber', 'date', 'periodCounts',
-                    'advancePayment', 'outcomeInNalog', 'outcomeInBuh']
+                    'operationDate', 'name', 'documentNumber', 'date',
+                    'periodCounts', 'advancePayment', 'outcomeInBuh']
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
@@ -85,7 +93,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder() + 1
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -105,16 +113,22 @@ void calc() {
     delRow.each { row ->
         formData.dataRows.remove(formData.dataRows.indexOf(row))
     }
+    if (formData.dataRows.isEmpty()) {
+        return
+    }
 
     // отсортировать/группировать
     formData.dataRows.sort { it.code }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
 
-    // графа 11
-    formData.dataRows.each { row ->
+    formData.dataRows.eachWithIndex { row, index ->
+        // графа 1
+        row.number = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+
+        // графа 11
         if (row.periodCounts != null) {
             row.outcomeInNalog = round(row.advancePayment / row.periodCounts, 2)
         }
@@ -128,6 +142,7 @@ void calc() {
     def totalRow = formData.appendDataRow()
     totalRow.setAlias('total')
     totalRow.code = 'Итого'
+    setTotalStyle(totalRow)
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
@@ -156,7 +171,7 @@ void calc() {
                 totalColumns.each {
                     sums[it] += row.getCell(it).getValue()
                 }
-                totalRows.put(i + 1, getNewRow(tmp, totalColumns, sums))
+                totalRows.put(i + 1, getNewRow(row.code, totalColumns, sums))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -174,18 +189,14 @@ void calc() {
         formData.dataRows.add(index + i, row)
         i = i + 1
     }
-
-    // графа 1, + поправить значения order
-    formData.dataRows.eachWithIndex { row, index ->
-        row.number = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
-        row.setOrder(index)
-    }
 }
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     // TODO (Ramil Timerbaev) как получить границы отчетного периода?
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -200,45 +211,128 @@ void logicalCheck() {
     def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
 
     if (!formData.dataRows.isEmpty()) {
-        def index = 1
+        def i = 1
+        // суммы строки общих итогов
+        def totalSums = [:]
+        // столбцы для которых надо вычислять итого и итого по коду классификации дохода. Графа 10, 11, 12
+        def totalColumns = ['advancePayment', 'outcomeInNalog', 'outcomeInBuh']
+        // признак наличия итоговых строк
+        def hasTotal = false
+        // список групп кодов классификации для которых надо будет посчитать суммы
+        def totalGroupsName = []
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
+                hasTotal = true
                 continue
+            }
+
+            // 5. Обязательность заполнения поля графы 1-12
+            def colNames = []
+            // Список проверяемых столбцов (графа 1..12)
+            def requiredColumns = ['number', 'code', 'numberFirstRecord', 'opy',
+                    'operationDate', 'name', 'documentNumber', 'date', 'periodCounts',
+                    'advancePayment', 'outcomeInNalog', 'outcomeInBuh']
+
+            requiredColumns.each {
+                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                }
+            }
+            if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
+                def index = row.number
+                def errorMsg = colNames.join(', ')
+                if (index != null) {
+                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+                } else {
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
+                }
+                return
             }
 
             // 1. Проверка даты совершения операции и границ отчетного периода (графа 5)
             if (row.operationDate < a || b < row.operationDate) {
                 logger.error('Дата совершения операции вне границ отчётного периода!')
-                break
+                return
             }
+
             // 2. Проверка количества отчетных периодов при авансовых платежах (графа 9)
             if (row.periodCounts < 1 || 999 < row.periodCounts) {
                 logger.error('Неверное количество отчетных периодов при авансовых платежах!')
-                break
+                return
             }
 
             // 3. Проверка на нулевые значения (графа 11, 12)
             if (row.outcomeInNalog == 0 && row.outcomeInBuh == 0) {
                 logger.error('Все суммы по операции нулевые!')
-                break
+                return
             }
 
-            // 5. Обязательность заполнения поля графы 1-12
-            // проверка объязательных полей перед расчетами
-
             // 6. Проверка на уникальность поля «№ пп» (графа 1)
-            // if (index != row.number) {
-            //     logger.error('Нарушена уникальность номера по порядку!')
-            //     break
-            // }
-            index += 1
-        }
-    }
+            if (i != row.number) {
+                logger.error('Нарушена уникальность номера по порядку!')
+                break
+            }
+            i += 1
 
-    // 4. Проверка на превышение суммы расхода по данным бухгалтерского учёта над суммой начисленного расхода (графа 11, 12)
-    def totalRow = formData.getDataRow('total')
-    if (totalRow.outcomeInNalog <= totalRow.outcomeInBuh && totalRow.outcomeInBuh < 0) {
-        logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
+            // 1. Арифметическая проверка графы 11
+            if (row.periodCounts == 0) {
+                logger.error('Деление на ноль. При проверке значения поля «Сумма расхода, начисленная в налоговом учёте».')
+                return
+            }
+            def tmp = round(row.advancePayment / row.periodCounts, 2)
+            if (row.outcomeInNalog != tmp) {
+                logger.error('Неверное значение поля «Сумма расхода, начисленная в налоговом учёте»!')
+                return
+            }
+
+            // 8. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации расхода
+            if (!totalGroupsName.contains(row.code)) {
+                totalGroupsName.add(row.code)
+            }
+
+            // 9. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            totalColumns.each { alias ->
+                if (totalSums[alias] == null) {
+                    totalSums[alias] = 0
+                }
+                totalSums[alias] += row.getCell(alias).getValue()
+            }
+        }
+
+        if (hasTotal) {
+            def totalRow = formData.getDataRow('total')
+
+            // 4. Проверка на превышение суммы расхода по данным бухгалтерского учёта над суммой начисленного расхода (графа 11, 12)
+            if (totalRow.outcomeInNalog <= totalRow.outcomeInBuh) {
+                logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
+                return
+            }
+
+            // 8. Проверка итоговых значений по кодам классификации расхода
+            for (def codeName : totalGroupsName) {
+                def row = formData.getDataRow('total' + codeName)
+                for (def alias : totalColumns) {
+                    if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
+                        logger.error("Итоговые значения по коду $codeName рассчитаны неверно!")
+                        return
+                    }
+                }
+            }
+
+            // 9. Проверка итогового значений по всей форме
+            for (def alias : totalColumns) {
+                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
+                    hindError = true
+                    logger.error('Итоговые значения рассчитаны неверно!')
+                    return
+                }
+            }
+        }
     }
 }
 
@@ -272,7 +366,12 @@ def isTotal(def row) {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
-    return summ(formData, new ColumnRange(columnAlias, 0, formData.dataRows.size() - 2))
+    def from = 0
+    def to = formData.dataRows.size() - 2
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -281,8 +380,20 @@ def getSum(def columnAlias) {
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
     newRow.code = 'Итого по коду'
+    setTotalStyle(newRow)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
     return newRow
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['number', 'code', 'numberFirstRecord', 'opy', 'operationDate',
+            'name', 'documentNumber', 'date', 'periodCounts',
+            'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }
