@@ -10,25 +10,24 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
-        break
 }
 
-// графа 1  - rowNumber
-// графа 2  - code
-// графа 3  - balance
-// графа 4  - name
-// графа 5  - sum
+// графа 1 - rowNumber
+// графа 2 - code
+// графа 3 - balance
+// графа 4 - name
+// графа 5 - sum
 
 /**
  * Добавить новую строку.
@@ -39,17 +38,15 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def pos = (currentDataRow != null ? currentDataRow.getOrder() : formData.dataRows.size)
-    formData.dataRows.add(pos, newRow)
-    setOrder()
-}
 
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
+    def index = formData.dataRows.indexOf(currentDataRow)
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || index == -1) {
+        formData.dataRows.add(newRow)
+    } else {
+        formData.dataRows.add(index + 1, newRow)
+    }
 }
 
 /**
@@ -57,13 +54,13 @@ def deleteRow() {
  */
 void calc() {
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
             def colNames = []
-            // Список проверяемых столбцов
+            // Список проверяемых столбцов (графа 2..5)
             ['code', 'balance', 'name', 'sum'].each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
                     colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
@@ -76,7 +73,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -87,8 +84,8 @@ void calc() {
     }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
 
     /** Сумма "Итого". */
     def total = 0
@@ -108,33 +105,33 @@ void calc() {
     formData.dataRows.sort { it.code }
 
     // нумерация (графа 1) и посчитать "итого"
-    formData.dataRows.eachWithIndex { it, i ->
-        it.rowNumber = i + 1
-        total += it.sum
+    formData.dataRows.eachWithIndex { row, i ->
+        row.rowNumber = i + 1
+        total += row.sum
     }
 
     // посчитать "итого по коду"
     def totalRows = [:]
     def tmp = null
     def sum = 0
-    formData.dataRows.eachWithIndex { it, i ->
+    formData.dataRows.eachWithIndex { row, i ->
         if (tmp == null) {
-            tmp = it.code
+            tmp = row.code
         }
         // если код расходы поменялся то создать новую строку "итого по коду"
-        if (tmp != it.code) {
+        if (tmp != row.code) {
             totalRows.put(i, getNewRow(tmp, sum))
             sum = 0
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == formData.dataRows.size() - 1) {
-            sum += it.sum
-            totalRows.put(i + 1, getNewRow(tmp, sum))
+            sum += row.sum
+            totalRows.put(i + 1, getNewRow(row.code, sum))
             sum = 0
         }
 
-        sum += it.sum
-        tmp = it.code
+        sum += row.sum
+        tmp = row.code
     }
     // добавить "итого по коду" в таблицу
     def i = 0
@@ -143,13 +140,88 @@ void calc() {
         i = i + 1
     }
 
-    // добавить строки "итого"
-    def row = formData.appendDataRow()
-    row.setAlias('total')
-    row.code = 'Итого'
-    row.sum = total
+    // добавить строку "итого"
+    def totalRow = formData.appendDataRow()
+    totalRow.setAlias('total')
+    totalRow.code = 'Итого'
+    totalRow.sum = total
+    setTotalStyle(totalRow)
+}
 
-    setOrder()
+/**
+ * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
+ */
+void logicalCheck(def checkRequiredColumns) {
+    if (!formData.dataRows.isEmpty()) {
+        def i = 1
+        def totalSum = 0
+        def hasTotal = false
+        def sums = [:]
+        for (def row : formData.dataRows) {
+            if (isTotal(row)) {
+                hasTotal = true
+                continue
+            }
+            // 1. Обязательность заполнения полей (графа 1..5)
+            def colNames = []
+            // Список проверяемых столбцов (графа 1..5)
+            ['rowNumber', 'code', 'balance', 'name', 'sum'].each {
+                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                }
+            }
+            if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
+                hasError = true
+                def index = row.rowNumber
+                def errorMsg = colNames.join(', ')
+                if (index != null) {
+                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+                } else {
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
+                }
+                return
+            }
+
+            // 2. Проверка на уникальность поля «№ пп» (графа 1)
+            if (i != row.rowNumber) {
+                logger.error('Нарушена уникальность номера по порядку!')
+                return
+            }
+            i += 1
+
+            // 3. Проверка итогового значения по коду для графы 5
+            sums[row.code] = (sums[row.code] != null ? sums[row.code] : 0) + row.sum
+
+            totalSum += row.sum
+        }
+
+        if (hasTotal) {
+            // 3. Проверка итогового значения по коду для графы 5
+            def hindError = false
+            sums.each { code, sum ->
+                def row = formData.getDataRow('total' + code)
+                if (row.sum != sum && !hindError) {
+                    hindError = true
+                    logger.error("Неверное итоговое значение по коду $code графы «Сумма расходов за отчётный период (руб.)»!")
+                }
+            }
+            if (hindError) {
+                return
+            }
+
+            // 4. Проверка итогового значения по всем строкам для графы 5
+            def totalRow = formData.getDataRow('total')
+            if (totalRow.sum != totalSum) {
+                logger.error('Неверное итоговое значение графы «Сумма расходов за отчётный период (руб.)»!')
+            }
+        }
+    }
 }
 
 /**
@@ -195,15 +267,6 @@ def isTotal(def row) {
 }
 
 /**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
-}
-
-/**
  * Получить новую строку.
  */
 def getNewRow(def alias, def sum) {
@@ -211,5 +274,15 @@ def getNewRow(def alias, def sum) {
     newRow.sum = sum
     newRow.code = 'Итого по коду'
     newRow.balance = alias
+    setTotalStyle(newRow)
     return newRow
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'code', 'balance', 'name', 'sum'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }

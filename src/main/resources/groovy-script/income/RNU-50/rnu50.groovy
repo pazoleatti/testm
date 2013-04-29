@@ -131,6 +131,8 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
 void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {

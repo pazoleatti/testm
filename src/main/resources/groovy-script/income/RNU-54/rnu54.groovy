@@ -15,12 +15,12 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -67,7 +67,6 @@ def addNewRow() {
     } else {
         formData.dataRows.add(index + 1, newRow)
     }
-    setOrder()
 }
 
 /**
@@ -76,7 +75,6 @@ def addNewRow() {
 def deleteRow() {
     if (!isTotal(currentDataRow)) {
         formData.dataRows.remove(currentDataRow)
-        setOrder()
     }
 }
 
@@ -106,11 +104,11 @@ void calc() {
                 hasError = true
                 def index = row.tadeNumber
                 def errorMsg = colNames.join(', ')
-                if (index != null) {
+                if (!isEmpty(index)) {
                     logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
         }
@@ -214,8 +212,10 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {
 
         /** Отчетная дата. */
@@ -250,13 +250,17 @@ void logicalCheck() {
                     colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
                 }
             }
+            // вывод сообщения
             if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
                 def index = row.tadeNumber
                 def errorMsg = colNames.join(', ')
                 if (index != null) {
                     logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В $index строке не заполнены колонки : $errorMsg.")
                 }
                 break
@@ -292,33 +296,7 @@ void logicalCheck() {
                 logger.warn('Неверно определены расходы')
             }
 
-            // 7. Арифметическая проверка графы 11
-            hasError = false
-            if (((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR == null)) {
-                hasError = false
-            } else if ((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR != null) {
-                hasError = true
-            } else if (row.currencyCode == '810' && true) {
-                // TODO (Ramil Timerbaev) условие: «графа 11» != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-                // row.rateBR != значнеие из справочника
-                hasError = true
-            } else if (row.currencyCode != '810') {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009') && row.rateBR != 22) {
-                    hasError = true
-                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012') && true) {
-                    // TODO (Ramil Timerbaev) условие: графа 11 != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                    // row.rateBR != значнеие из справочника
-                    hasError = true
-                } else if (row.rateBR != 15) {
-                    hasError = true
-                }
-            }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Ставка Банка России (в процентах)»!')
-                break
-            }
-
-            // 8. Арифметическая проверка графы 12
+            // 7. Арифметическая проверка графы 12
             hasError = false
             if (row.outcome > 0 && row.currencyCode == '810') {
                 if (inPeriod(reportDate, '01.09.2008', '31.12.2009') &&
@@ -347,7 +325,7 @@ void logicalCheck() {
                 break
             }
 
-            // 9. Арифметическая проверка графы 13
+            // 8. Арифметическая проверка графы 13
             hasError = false
             if (row.outcome == 0 && row.outcomeTax != 0) {
                 hasError = true
@@ -364,7 +342,7 @@ void logicalCheck() {
             }
         }
 
-        // 10. Проверка итоговых значений формы	Заполняется автоматически (графа 4..6, 9, 10, 12, 13).
+        // 9. Проверка итоговых значений формы	Заполняется автоматически (графа 4..6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
             def totalSumColumns = ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income',
@@ -436,15 +414,6 @@ void checkNSI() {
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
 }
 
 /**
