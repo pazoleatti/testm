@@ -106,7 +106,7 @@ public class DeclarationListView extends
 		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
-		FlexiblePager pager = createFlexiblePager();
+		AbstractPager pager = createFlexiblePager();
 		pager.setDisplay(declarationTable);
 		tablePanel.add(pager);
 	}
@@ -172,11 +172,12 @@ public class DeclarationListView extends
 		}
 	}
 
-	private static FlexiblePager createFlexiblePager(){
+	private static AbstractPager createFlexiblePager(){
 		final boolean showFastForwardButton = false;
 		final int fastForwardRows = 0;
 		final boolean showLastPageButton = true;
-		FlexiblePager pager =  new FlexiblePager(SimplePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
+
+		AbstractPager pager =  new FlexiblePager(FlexiblePager.TextLocation.CENTER, showFastForwardButton, fastForwardRows,
 				showLastPageButton);
 		pager.setRangeLimited(true);
 		pager.getElement().getStyle().setProperty("marginLeft", "auto");

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.*;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.*;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.safehtml.shared.*;
 import com.google.gwt.uibinder.client.*;
@@ -42,7 +41,7 @@ public class FormDataListView extends
 	CellTable<FormDataSearchResultItem> formDataTable;
 	
 	@UiField
-	FlexiblePager pager;
+	AbstractPager pager;
 
 	@UiField
 	Label titleDesc;
