@@ -42,20 +42,11 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
     ['balance', 'date', 'code', 'docNumber', 'docDate', 'currencyCode',
             'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-
-    // если данных еще нет или строка не выбрана
-    if (formData.dataRows.isEmpty() || index == -1) {
-        formData.dataRows.add(newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
     }
 }
 

@@ -52,7 +52,7 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
 
     // графа 2..12
     ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
@@ -60,15 +60,6 @@ def addNewRow() {
             'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-
-    // если данных еще нет или строка не выбрана
-    if (formData.dataRows.isEmpty() || index == -1) {
-        formData.dataRows.add(newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
     }
 }
 
@@ -220,7 +211,7 @@ void logicalCheck(def checkRequiredColumns) {
                 continue
             }
 
-            // 7. Проверка на заполнение поля «<Наименование поля>». Графа 1..8, 13..20
+            // 7. Обязательность заполнения поля графы 1..8, 13..20
             def colNames = []
 
             // Список проверяемых столбцов
@@ -376,9 +367,8 @@ void logicalCheck(def checkRequiredColumns) {
         if (hasTotal) {
             def totalRow = formData.getDataRow('total')
 
-            // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
-            if (totalRow.commisInAccountingRub > 0 &&
-                    totalRow.accruedCommisRub >= totalRow.commisInAccountingRub) {
+            // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 14, 16)
+            if (totalRow.accruedCommisRub < totalRow.commisInAccountingRub) {
                 logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
             }
 

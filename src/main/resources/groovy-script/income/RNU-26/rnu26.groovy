@@ -12,19 +12,16 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
         break
 }
 
@@ -50,7 +47,7 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
 
     // графа 2..17
     ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
@@ -60,26 +57,6 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-    if (index == -1) {
-        index = 0
-    }
-    if (index + 1 == formData.dataRows.size()) {
-        formData.dataRows.add(index, newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
-    }
-
-    setOrder()
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
 }
 
 /**
@@ -115,7 +92,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -139,18 +116,24 @@ void calc() {
     delRow.each { row ->
         formData.dataRows.remove(formData.dataRows.indexOf(row))
     }
+    if (formData.dataRows.isEmpty()) {
+        return
+    }
 
     // отсортировать/группировать
     formData.dataRows.sort { it.issuer }
 
-    // графа 13
-    formData.dataRows.each { row ->
+    formData.dataRows.eachWithIndex { row, index ->
+        // графа 1
+        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+
+        // графа 13
         if (row.marketQuotation != null && row.rubCourse != null) {
             row.marketQuotationInRub = row.marketQuotation * row.rubCourse
         }
     }
 
-    /** Столбцы для которых надо вычислять итого и итого по эмитенту. Графа 6..9, 14..17. */
+    // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
     def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
             'cost', 'costOnMarketQuotation', 'reserveCalcValue',
             'reserveCreation', 'reserveRecovery']
@@ -158,12 +141,12 @@ void calc() {
     def totalRow = formData.appendDataRow()
     totalRow.setAlias('total')
     totalRow.issuer = 'Общий итог'
-
+    setTotalStyle(totalRow)
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
 
-    // посчитать "итого по Эмитента:..."
+    // посчитать "итого по Эмитенту:..."
     def totalRows = [:]
     def sums = [:]
     def tmp = null
@@ -187,7 +170,7 @@ void calc() {
                 totalColumns.each {
                     sums[it] += row.getCell(it).getValue()
                 }
-                totalRows.put(i + 1, getNewRow(tmp, totalColumns, sums))
+                totalRows.put(i + 1, getNewRow(row.issuer, totalColumns, sums))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -198,35 +181,22 @@ void calc() {
             tmp = row.issuer
         }
     }
-    // добавить "итого по Эмитента:..." в таблицу
+    // добавить "итого по Эмитенту:..." в таблицу
     def i = 0
     totalRows.each { index, row ->
         formData.dataRows.add(index + i, row)
         i = i + 1
     }
-
-    // графа 1, + поправить значения order
-    formData.dataRows.eachWithIndex { row, index ->
-        if (!isTotal(row)) {
-            row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
-        }
-        row.setOrder(index + 1)
-    }
-
 }
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
-    /** Предыдущий отчётный период. */
-    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-
-    /** Данные формы предыдущего отчетного периода. */
-    def formDataOld = null
-    if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(325, FormDataKind.PRIMARY, formData.departmentId, reportPeriodOld.id)
-    }
+void logicalCheck(def checkRequiredColumns) {
+    // данные предыдущего отчетного периода
+    def formDataOld = getFormDataOld()
 
     if (formDataOld != null &&
             !formDataOld.dataRows.isEmpty() && !formData.dataRows.isEmpty()) {
@@ -260,13 +230,25 @@ void logicalCheck() {
     }
 
     if (!formData.dataRows.isEmpty()) {
-        def index = 1
+        def i = 1
+        // суммы строки общих итогов
+        def totalSums = [:]
+        // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
+        def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
+                'cost', 'costOnMarketQuotation', 'reserveCalcValue',
+                'reserveCreation', 'reserveRecovery']
+        // признак наличия итоговых строк
+        def hasTotal = false
+        // список групп кодов классификации для которых надо будет посчитать суммы
+        def totalGroupsName = []
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
+                hasTotal = true
                 continue
             }
 
-            // 15. Проверка на заполнение поля «<Наименование поля>». Графа 1..3, 5..10, 13, 14
+            // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
             def colNames = []
             // Список проверяемых столбцов
             ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
@@ -276,9 +258,18 @@ void logicalCheck() {
                 }
             }
             if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
+                def index = row.rowNumber
                 def errorMsg = colNames.join(', ')
-                logger.error("Поля $errorMsg не заполнены!")
-                break
+                if (index != null) {
+                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+                } else {
+                    index = formData.dataRows.indexOf(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
+                }
+                return
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
@@ -294,7 +285,7 @@ void logicalCheck() {
             // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
             if (row.lotSizePrev == 0 && (row.reserveCalcValuePrev != 0 || row.reserveRecovery != 0)) {
                 logger.error('Графы 8 и 17 ненулевые!')
-                break
+                return
             }
 
             // 5. Проверка необращающихся акций (графа 10, 15, 16)
@@ -305,26 +296,26 @@ void logicalCheck() {
             // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
             if (row.signSecurity == '+' && row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.reserveRecovery != 0) {
                 logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                break
+                return
             }
 
             // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
             if (row.signSecurity == '+' && row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
                 logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                break
+                return
             }
 
             // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
             if (row.signSecurity == '+' && row.reserveCalcValue - row.reserveCalcValuePrev == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
                 logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
-                break
+                return
             }
 
             // 9. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
             if (row.reserveCalcValuePrev + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
                 logger.error('Резерв сформирован неверно!')
-                break
+                return
             }
 
             // 10. Проверка на положительные значения при наличии созданного резерва
@@ -349,18 +340,38 @@ void logicalCheck() {
                 def prevCol = 8
                 def prevCol2 = 15
                 logger.error("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
-                break
+                return
             }
 
             // 16. Проверка на уникальность поля «№ пп» (графа 1)
-            if (index != row.rowNumber) {
+            if (i != row.rowNumber) {
                 logger.error('Нарушена уникальность номера по порядку!')
-                break
+                return
             }
-            index += 1
+            i += 1
+
+            // 17. Арифметическая проверка графы 13
+            if (row.marketQuotation != null && row.rubCourse != null &&
+                    row.marketQuotationInRub != row.marketQuotation * row.rubCourse) {
+                logger.error('Неверно рассчитана графа «Рыночная котировка одной ценной бумаги в рублях»!')
+                return
+            }
+
+            // 18. Проверка итоговых значений по эмитентам
+            if (!totalGroupsName.contains(row.issuer)) {
+                totalGroupsName.add(row.issuer)
+            }
+
+            // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            totalColumns.each { alias ->
+                if (totalSums[alias] == null) {
+                    totalSums[alias] = 0
+                }
+                totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
+            }
         }
 
-        if (formDataOld != null) {
+        if (formDataOld != null && hasTotal) {
             totalRow = formData.getDataRow('total')
             totalRowOld = formDataOld.getDataRow('total')
 
@@ -369,14 +380,39 @@ void logicalCheck() {
                 def curCol = 6
                 def prevCol = 7
                 logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе $curCol = «Итого» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
+                return
             }
-
 
             // 14. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
             if (totalRow.cost != totalRowOld.reserveCalcValue) {
                 def curCol = 8
                 def prevCol = 15
                 logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе $curCol = «Итого» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
+                return
+            }
+        }
+
+        if (hasTotal) {
+            def totalRow = formData.getDataRow('total')
+
+            // 18. Проверка итоговых значений по эмитенту
+            for (def codeName : totalGroupsName) {
+                def row = formData.getDataRow('total' + codeName)
+                for (def alias : totalColumns) {
+                    if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
+                        logger.error("Итоговые значения по эмитенту $codeName рассчитаны неверно!")
+                        return
+                    }
+                }
+            }
+
+            // 19. Проверка итогового значений по всей форме
+            for (def alias : totalColumns) {
+                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
+                    hindError = true
+                    logger.error('Итоговые значения рассчитаны неверно!')
+                    return
+                }
             }
         }
     }
@@ -420,15 +456,6 @@ def isTotal(def row) {
 }
 
 /**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
-}
-
-/**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
@@ -446,6 +473,7 @@ def getSum(def columnAlias) {
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
     newRow.issuer = alias + ' итог'
+    setTotalStyle(newRow)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
     }
@@ -473,5 +501,49 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
                 row.getCell(curColumnName).getValue() != prevRow.getCell(prevColumnName).getValue()) {
             return true
         }
+    }
+}
+
+/**
+ * Получить данные за предыдущий отчетный период
+ */
+def getFormDataOld() {
+    // предыдущий отчётный период
+    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+
+    // РНУ-26 за предыдущий отчетный период
+    def formDataOld = null
+    if (reportPeriodOld != null) {
+        formDataOld = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, reportPeriodOld.id)
+    }
+
+    return formDataOld
+}
+
+/**
+ * * Посчитать сумму указанного графа для строк с общим значением
+ *
+ * @param value значение общее для всех строк суммирования
+ * @param alias название графа
+ */
+def calcSumByCode(def value, def alias) {
+    def sum = 0
+    formData.dataRows.each { row ->
+        if (!isTotal(row) && row.issuer == value) {
+            sum += (row.getCell(alias).getValue() ?: 0)
+        }
+    }
+    return sum
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency',
+            'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost', 'signSecurity',
+            'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation',
+            'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
     }
 }
