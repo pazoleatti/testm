@@ -129,16 +129,16 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				if ("mousedown".equals(event.getNativeEvent().getType())
 						&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
 					initialColumnIndex = Integer.valueOf(cellElement.getId().substring(cellElement.getId().lastIndexOf("_") + 1));
-					if (initialColumnIndex == 0) {
-						initialColumnIndex = 1;
+					if (initialColumnIndex < COLUMN_OFFSET) {
+						initialColumnIndex = COLUMN_OFFSET;
 					}
 					initialRowIndex = event.getIndex();
 				} // запоминаем последнюю ячейку и заполняем ячейки между первой и последней
 				else if("mouseup".equals(event.getNativeEvent().getType())
 						&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
 					lastColumnIndex = Integer.valueOf(cellElement.getId().substring(cellElement.getId().lastIndexOf("_") + 1));
-					if (lastColumnIndex == 0) {
-						lastColumnIndex = 1;
+					if (lastColumnIndex < COLUMN_OFFSET) {
+						lastColumnIndex = COLUMN_OFFSET;
 					}
 					lastRowIndex = event.getIndex();
 					// выделяем ячейки
