@@ -178,7 +178,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void addCustomHeader(boolean addNumberedHeader) {
-		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader, false);
+		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader, 1);
 		formDataTable.setHeaderBuilder(builder);
 	}
 

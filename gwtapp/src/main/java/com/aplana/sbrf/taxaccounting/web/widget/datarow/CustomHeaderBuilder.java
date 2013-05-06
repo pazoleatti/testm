@@ -12,8 +12,8 @@ import com.google.gwt.cell.client.Cell.Context;
 
 public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> {
 	private boolean numberedColumns;
-	private boolean offset = false;
-	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns, boolean offset) {
+	private int offset = 0;
+	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns, int offset) {
 		super(table, isFooter);
 		this.offset = offset;
 		this.numberedColumns = numberedColumns;
@@ -94,9 +94,9 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		int columnCount = getTable().getColumnCount();
 		out.startTR();
 
-		if (offset) {
+		columnCount -= offset;
+		for (int i=0; i<offset; i++) {
 			out.startTH().className(style.header()).text("").endTH();
-			columnCount--;
 		}
 
 		for (int col = 1; col <= columnCount; col++) {
