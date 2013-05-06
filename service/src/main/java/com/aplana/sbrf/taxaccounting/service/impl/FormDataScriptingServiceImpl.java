@@ -4,22 +4,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.Script;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -41,9 +45,70 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
 	public FormDataScriptingServiceImpl() {
 	}
-
+	
 	@Override
-	public void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
+	public void executeScript(TAUser user, FormData formData,
+			FormDataEvent event, Logger logger,
+			Map<String, Object> additionalParameters) {
+		
+		// Если отчетный период для ввода остатков, то не выполняем скрипты
+		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
+			return;
+		}
+		
+		// Если скрипт отсутствует, то ничего не делаем
+		String script = formTemplateDao.get(formData.getFormTemplateId()).getScript();
+		if (script == null || script.trim().isEmpty()) {
+			// TODO: Semyon Goryachkin: Нужно будет удалить вызов старого метода, 
+			//       06.05.2013         когда миграция скриптов будет закончена 
+			//                          (SBRFACCTAX-2233, )
+			executeScripts(user, formData, event, logger, additionalParameters);
+			//
+			return;
+		}
+		
+		// Биндим параметры для выполнения скрипта
+		Bindings b = scriptEngine.createBindings();
+		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));		
+		b.put("formDataEvent", event);
+		b.put("logger", logger);
+		b.put("formData", formData);
+		if (user != null) {
+			b.put("user", user);
+			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));
+		}
+		b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
+		if (additionalParameters != null) {
+			for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
+				if (b.containsKey(entry.getKey()))
+					throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
+				b.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		try {
+			ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
+			logger.setMessageDecorator(d);
+			
+			executeScript(b, script, logger, d);
+			
+			logger.setMessageDecorator(null);
+		} finally {
+			b.remove("logger");
+			b.remove("formData");
+			b.remove("user");
+			b.remove("userDepartment");
+			b.remove("formDataDepartment");
+			if (additionalParameters != null) {
+				for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
+					b.remove(entry.getKey());
+				}
+			}
+		}
+	}
+
+	@Deprecated
+	private void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
 		// Если отчетный период для ввода остатков, то не выполняем скрипты
 		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
 			return;
@@ -149,10 +214,12 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	 * @param event    событие
 	 */
 	@Override
+	@Deprecated
 	public boolean hasScripts(FormData formData, FormDataEvent event) {
 		return !getScriptsByEvent(formData, event).isEmpty();
 	}
 
+	@Deprecated
 	private List<Script> getScriptsByEvent(FormData formData, FormDataEvent event) {
 		return formTemplateDao.get(formData.getFormTemplateId()).getScriptsByEvent(event);
 	}
@@ -164,11 +231,12 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	 * @param script скрипт формы
 	 * @param logger логгер
 	 */
+	@Deprecated
 	private void executeFormScript(Bindings bindings, Script script, Logger logger) {
 		ScriptMessageDecorator d = new ScriptMessageDecorator();
 		logger.setMessageDecorator(d);
 
-		executeScript(bindings, script, logger, d);
+		executeScriptOld(bindings, script, logger, d);
 
 		logger.setMessageDecorator(null);
 	}
@@ -181,6 +249,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	 * @param formData данные формы
 	 * @param logger   логгер
 	 */
+	@Deprecated
 	private void executeRowScript(Bindings bindings, Script script, FormData formData, Logger logger) {
 		RowScriptMessageDecorator decorator = new RowScriptMessageDecorator();
 		logger.setMessageDecorator(decorator);
@@ -202,7 +271,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			bindings.put("rowIndex", rowIndex);
 			bindings.put("rowAlias", row.getAlias());
 
-			error = !executeScript(bindings, script, logger, decorator);
+			error = !executeScriptOld(bindings, script, logger, decorator);
 
 			bindings.remove("row");
 			bindings.remove("rowIndex");
@@ -220,7 +289,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	 * @param logger    логгер
 	 * @param decorator декоратор для ошибок
 	 */
-	private boolean executeScript(Bindings bindings, Script script, Logger logger, ScriptMessageDecorator decorator) {
+	@Deprecated
+	private boolean executeScriptOld(Bindings bindings, Script script, Logger logger, ScriptMessageDecorator decorator) {
 		try {
 			boolean executeCondition = true;
 
@@ -245,4 +315,21 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			return false;
 		}
 	}
+	
+	
+	private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
+		try {
+			scriptEngine.eval(script, bindings);
+			return true;
+		} catch (ScriptException e) {
+			logScriptException(e, logger);
+			return false;
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+	}
+	
+
+
 }

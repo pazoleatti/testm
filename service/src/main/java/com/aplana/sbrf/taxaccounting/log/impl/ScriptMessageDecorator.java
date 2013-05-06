@@ -6,6 +6,15 @@ import com.aplana.sbrf.taxaccounting.log.LogMessageDecorator;
 public class ScriptMessageDecorator implements LogMessageDecorator {
 	protected String scriptName;	
 	
+	public ScriptMessageDecorator(){
+		super();
+	}
+	
+	public ScriptMessageDecorator(String scriptName) {
+		super();
+		this.scriptName = scriptName;
+	}
+
 	public String getScriptName() {
 		return scriptName;
 	}

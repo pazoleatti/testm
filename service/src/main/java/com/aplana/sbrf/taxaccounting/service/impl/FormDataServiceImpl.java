@@ -126,7 +126,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		// Execute scripts for the form event CREATE
-		formDataScriptingService.executeScripts(user, result,
+		formDataScriptingService.executeScript(user, result,
 				FormDataEvent.CREATE, logger,null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -167,7 +167,7 @@ public class FormDataServiceImpl implements FormDataService {
 				TAUser user = userDao.getUser(userId);
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScripts(user, formData,
+				formDataScriptingService.executeScript(user, formData,
 						FormDataEvent.ADD_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
@@ -206,7 +206,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		if (canDo) {
 			TAUser user = userDao.getUser(userId);
-			formDataScriptingService.executeScripts(user, formData,
+			formDataScriptingService.executeScript(user, formData,
 					FormDataEvent.CALCULATE, logger, null);
 
 			// Проверяем ошибки при пересчете
@@ -227,7 +227,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCheck(Logger logger, int userId, FormData formData) {
 		TAUser user = userDao.getUser(userId);
-		formDataScriptingService.executeScripts(user, formData,
+		formDataScriptingService.executeScript(user, formData,
 				FormDataEvent.CHECK, logger, null);
 
 		// Проверяем ошибки при пересчете
@@ -268,7 +268,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			formDataScriptingService.executeScripts(userDao.getUser(userId), formData,
+			formDataScriptingService.executeScript(userDao.getUser(userId), formData,
 					FormDataEvent.SAVE, logger, null);
 
 			boolean needLock = formData.getId() == null;
@@ -304,7 +304,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 			FormData formData = formDataDao.get(formDataId);
 
-			formDataScriptingService.executeScripts(userDao.getUser(userId),
+			formDataScriptingService.executeScript(userDao.getUser(userId),
 					formData, FormDataEvent.AFTER_LOAD, logger, null);
 
 			if (logger.containsLevel(LogLevel.ERROR)) {
@@ -369,7 +369,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
-		formDataScriptingService.executeScripts(userDao.getUser(userId),
+		formDataScriptingService.executeScript(userDao.getUser(userId),
 				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao
@@ -380,7 +380,7 @@ public class FormDataServiceImpl implements FormDataService {
 									WorkflowState.ACCEPTED) ? new Date() : null);
 
 			if (workflowMove.getAfterEvent() != null) {
-				formDataScriptingService.executeScripts(
+				formDataScriptingService.executeScript(
 						userDao.getUser(userId), formData,
 						workflowMove.getAfterEvent(), logger, null);
 				if (logger.containsLevel(LogLevel.ERROR)) {
@@ -472,7 +472,7 @@ public class FormDataServiceImpl implements FormDataService {
 				TAUser user = userDao.getUser(userId);
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScripts(user, formData,
+				formDataScriptingService.executeScript(user, formData,
 						FormDataEvent.DELETE_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(

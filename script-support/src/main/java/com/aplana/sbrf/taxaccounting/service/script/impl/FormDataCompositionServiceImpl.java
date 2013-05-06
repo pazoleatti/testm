@@ -81,7 +81,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 		if(dformData.getState() != WorkflowState.ACCEPTED){
 			// Execute composition scripts
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
-			formDataScriptingService.executeScripts(null, dformData, FormDataEvent.COMPOSE, logger, null);
+			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
 			formDataDao.save(dformData);
 		} else {
             FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());

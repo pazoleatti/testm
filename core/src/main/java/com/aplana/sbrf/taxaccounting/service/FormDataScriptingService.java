@@ -11,8 +11,11 @@ import java.util.Map;
  * Интерфейс сервиса, реализующего выполение скриптов над данными налоговых форм.
  */
 public interface FormDataScriptingService {
+
 	/**
-	 * Выполняет скрипты формы по определенному событию.
+	 * Выполняет скрипт формы (FormTemplate.script) по определенному событию.
+	 * (Для временной поддержки старого механизма при отсутствии FormTemplate.script
+	 * отработает старый механизм работы скриптов)
 	 *
 	 * @param user     текущий пользователь. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
 	 *                 не должно зависеть от пользователя.
@@ -22,7 +25,8 @@ public interface FormDataScriptingService {
 	 * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
 	 *                             скрипты. Параметр может иметь значение null
 	 */
-	void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+	void executeScript(TAUser user, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+		
 
 	/**
 	 * Проверяет, есть ли скрипты для события формы
