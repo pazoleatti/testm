@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0" xmlns:intf="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0" xmlns="http://www.w3.org/2001/XMLSchema">
+   <element name="resetPassword">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="resetPasswordResponse">
+    <complexType/>
+   </element>
+   <complexType name="GenericAccountManagementException">
+    <sequence>
+     <element name="causeMessage" nillable="true" type="xsd:string"/>
+     <element name="details" nillable="true" type="xsd:string"/>
+     <element name="genericSudirStatusCode" nillable="true" type="xsd:string"/>
+     <element name="proprietarySystemStatusCode" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="fault" type="impl:GenericAccountManagementException"/>
+   <element name="validatePassword">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+      <element name="password" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="validatePasswordResponse">
+    <complexType>
+     <sequence>
+      <element name="validatePasswordReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPassword">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+      <element name="password" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPasswordResponse">
+    <complexType/>
+   </element>
+   <element name="suspendAccount">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="suspendAccountResponse">
+    <complexType/>
+   </element>
+   <element name="createAccount">
+    <complexType>
+     <sequence>
+      <element name="accountInfo" type="impl:GenericAccountInfo"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="ArrayOf_xsd_string">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="GenericAttribute">
+    <sequence>
+     <element name="name" nillable="true" type="xsd:string"/>
+     <element name="typeId" nillable="true" type="xsd:string"/>
+     <element name="values" nillable="true" type="impl:ArrayOf_xsd_string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfGenericAttribute">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:GenericAttribute"/>
+    </sequence>
+   </complexType>
+   <complexType name="GenericAccountInfo">
+    <sequence>
+     <element name="attributes" nillable="true" type="impl:ArrayOfGenericAttribute"/>
+    </sequence>
+   </complexType>
+   <element name="createAccountResponse">
+    <complexType/>
+   </element>
+   <element name="modifyAccount">
+    <complexType>
+     <sequence>
+      <element name="accountInfo" type="impl:GenericAccountInfo"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="modifyAccountResponse">
+    <complexType/>
+   </element>
+   <element name="restoreAccount">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="restoreAccountResponse">
+    <complexType/>
+   </element>
+   <element name="deleteAccount">
+    <complexType>
+     <sequence>
+      <element name="accountId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteAccountResponse">
+    <complexType/>
+   </element>
+   <element name="getAccountList">
+    <complexType/>
+   </element>
+   <element name="getAccountListResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getAccountListReturn" type="impl:GenericAccountInfo"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getAccountListById">
+   	<complexType>
+   		<sequence>
+
+   			<element name="accountId" type="string"/>
+   		</sequence>
+   	</complexType>
+   </element>
+            
+	<element name="getAccountListByIdResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getAccountListByIdReturn" type="impl:GenericAccountInfo"/>
+     </sequence>
+    </complexType>
+   </element>
+   
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="resetPasswordResponse">
+
+      <wsdl:part element="impl:resetPasswordResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="deleteAccountRequest">
+
+      <wsdl:part element="impl:deleteAccount" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="deleteAccountResponse">
+
+      <wsdl:part element="impl:deleteAccountResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="restoreAccountResponse">
+
+      <wsdl:part element="impl:restoreAccountResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="resetPasswordRequest">
+
+      <wsdl:part element="impl:resetPassword" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAccountListRequest">
+
+      <wsdl:part element="impl:getAccountList" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="validatePasswordRequest">
+
+      <wsdl:part element="impl:validatePassword" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="setPasswordResponse">
+
+      <wsdl:part element="impl:setPasswordResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="suspendAccountRequest">
+
+      <wsdl:part element="impl:suspendAccount" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="createAccountRequest">
+
+      <wsdl:part element="impl:createAccount" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="modifyAccountRequest">
+
+      <wsdl:part element="impl:modifyAccount" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="validatePasswordResponse">
+
+      <wsdl:part element="impl:validatePasswordResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="setPasswordRequest">
+
+      <wsdl:part element="impl:setPassword" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="suspendAccountResponse">
+
+      <wsdl:part element="impl:suspendAccountResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="createAccountResponse">
+
+      <wsdl:part element="impl:createAccountResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="restoreAccountRequest">
+
+      <wsdl:part element="impl:restoreAccount" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAccountListResponse">
+
+      <wsdl:part element="impl:getAccountListResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="GenericAccountManagementException">
+
+      <wsdl:part element="impl:fault" name="fault"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="modifyAccountResponse">
+
+      <wsdl:part element="impl:modifyAccountResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAccountListByIdRequest">
+   	<wsdl:part element="impl:getAccountListById" name="parameters"/>
+   </wsdl:message>
+   <wsdl:message name="getAccountListByIdResponse">
+   	<wsdl:part element="impl:getAccountListByIdResponse" name="getAccountListByIdResponse"/>
+   </wsdl:message>
+   
+   <wsdl:portType name="GenericAccountManagement">
+
+      <wsdl:operation name="resetPassword">
+
+         <wsdl:input message="impl:resetPasswordRequest" name="resetPasswordRequest"/>
+
+         <wsdl:output message="impl:resetPasswordResponse" name="resetPasswordResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="validatePassword">
+
+         <wsdl:input message="impl:validatePasswordRequest" name="validatePasswordRequest"/>
+
+         <wsdl:output message="impl:validatePasswordResponse" name="validatePasswordResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setPassword">
+
+         <wsdl:input message="impl:setPasswordRequest" name="setPasswordRequest"/>
+
+         <wsdl:output message="impl:setPasswordResponse" name="setPasswordResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="suspendAccount">
+
+         <wsdl:input message="impl:suspendAccountRequest" name="suspendAccountRequest"/>
+
+         <wsdl:output message="impl:suspendAccountResponse" name="suspendAccountResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createAccount">
+
+         <wsdl:input message="impl:createAccountRequest" name="createAccountRequest"/>
+
+         <wsdl:output message="impl:createAccountResponse" name="createAccountResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="modifyAccount">
+
+         <wsdl:input message="impl:modifyAccountRequest" name="modifyAccountRequest"/>
+
+         <wsdl:output message="impl:modifyAccountResponse" name="modifyAccountResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="restoreAccount">
+
+         <wsdl:input message="impl:restoreAccountRequest" name="restoreAccountRequest"/>
+
+         <wsdl:output message="impl:restoreAccountResponse" name="restoreAccountResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteAccount">
+
+         <wsdl:input message="impl:deleteAccountRequest" name="deleteAccountRequest"/>
+
+         <wsdl:output message="impl:deleteAccountResponse" name="deleteAccountResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getAccountList">
+
+         <wsdl:input message="impl:getAccountListRequest" name="getAccountListRequest"/>
+
+         <wsdl:output message="impl:getAccountListResponse" name="getAccountListResponse"/>
+
+         <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getAccountListById">
+      
+      	<wsdl:input message="impl:getAccountListByIdRequest" name="getAccountListByIdRequest"/>
+      	
+      	<wsdl:output message="impl:getAccountListByIdResponse" name="getAccountListByIdResponse"/>
+      	
+        <wsdl:fault message="impl:GenericAccountManagementException" name="GenericAccountManagementException"/>
+            
+      </wsdl:operation>
+        
+   </wsdl:portType>
+
+   <wsdl:binding name="GenericAccountManagementSoapBinding" type="impl:GenericAccountManagement">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="resetPassword">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="resetPasswordRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="resetPasswordResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="validatePassword">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="validatePasswordRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="validatePasswordResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setPassword">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setPasswordRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setPasswordResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="suspendAccount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="suspendAccountRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="suspendAccountResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createAccount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createAccountRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createAccountResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="modifyAccount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="modifyAccountRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="modifyAccountResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="restoreAccount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="restoreAccountRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="restoreAccountResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteAccount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="deleteAccountRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="deleteAccountResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getAccountList">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getAccountListRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getAccountListResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+	  <wsdl:operation name="getAccountListById">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getAccountListByIdRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getAccountListByIdResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="GenericAccountManagementException">
+
+            <wsdlsoap:fault name="GenericAccountManagementException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+      
+   </wsdl:binding>
+
+   <wsdl:service name="GenericAccountManagementService">
+
+      <wsdl:port binding="impl:GenericAccountManagementSoapBinding" name="GenericAccountManagement">
+
+         <wsdlsoap:address location="http://localhost:9080/AccountManagementWeb/services/GenericAccountManagement"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

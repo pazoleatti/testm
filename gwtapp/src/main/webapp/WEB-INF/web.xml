@@ -177,8 +177,10 @@
             <url-pattern>/logout</url-pattern>
 			<url-pattern>/favicon.ico</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
-			<url-pattern>/GenericAccountManagement/*</url-pattern>
-			<url-pattern>/TaxAccountingSupportingData/*</url-pattern>
+			<url-pattern>/GenericAccountManagementService</url-pattern>
+			<url-pattern>/GenericAccountManagementService/**</url-pattern>
+			<url-pattern>/TaxAccountingSupportingData</url-pattern>
+			<url-pattern>/TaxAccountingSupportingData/**</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
 
@@ -186,6 +188,10 @@
     <mime-mapping>
         <extension>htc</extension>
         <mime-type>text/x-component</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>wsdl</extension>
+        <mime-type>text/xml;charset=utf-8</mime-type>
     </mime-mapping>
 
 </web-app>

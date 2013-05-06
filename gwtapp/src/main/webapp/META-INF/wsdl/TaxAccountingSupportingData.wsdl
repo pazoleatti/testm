@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions name="TaxAccountingSupportingData" targetNamespace="http://taxaccounting.sbt.ru/SupportingData/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://taxaccounting.sbt.ru/SupportingData/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://taxaccounting.sbt.ru/SupportingData/">
+      <xsd:element name="getDepartments">
+        <xsd:complexType>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getDepartmentsResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="department" type="tns:TaxAccDepartment" minOccurs="0" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    
+      <xsd:complexType name="TaxAccDepartment">
+      	<xsd:sequence>
+      		<xsd:element name="id" type="xsd:string"></xsd:element>
+      		<xsd:element name="parentId" type="xsd:string"></xsd:element>
+      		<xsd:element name="name" type="xsd:string"></xsd:element>
+      	</xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="getDepartmentsRequest">
+    <wsdl:part element="tns:getDepartments" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="getDepartmentsResponse">
+    <wsdl:part element="tns:getDepartmentsResponse" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="TaxAccountingSupportingData">
+    <wsdl:operation name="getDepartments">
+      <wsdl:input message="tns:getDepartmentsRequest"/>
+      <wsdl:output message="tns:getDepartmentsResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TaxAccountingSupportingDataSOAP" type="tns:TaxAccountingSupportingData">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getDepartments">
+      <soap:operation soapAction="http://taxaccounting.sbt.ru/SupportingData/getDepartments"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TaxAccountingSupportingData">
+    <wsdl:port binding="tns:TaxAccountingSupportingDataSOAP" name="TaxAccountingSupportingDataSOAP">
+      <soap:address location="http://www.example.org/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

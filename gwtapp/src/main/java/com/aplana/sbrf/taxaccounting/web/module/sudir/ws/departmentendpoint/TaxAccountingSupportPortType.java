@@ -14,7 +14,8 @@ import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccoun
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint.TaxAccountingSupportingData",
 			targetNamespace="http://taxaccounting.sbt.ru/SupportingData/",
 			serviceName="TaxAccountingSupportingData",
-			portName="TaxAccountingSupportingDataSOAP")
+			portName="TaxAccountingSupportingDataSOAP",
+			wsdlLocation="META-INF/wsdl/TaxAccountingSupportingData.wsdl")
 public class TaxAccountingSupportPortType extends SpringBeanAutowiringSupport{
 
 	@Autowired

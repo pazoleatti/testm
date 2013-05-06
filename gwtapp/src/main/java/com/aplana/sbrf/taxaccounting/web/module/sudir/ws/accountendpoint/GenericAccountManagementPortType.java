@@ -16,7 +16,8 @@ import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationSe
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",
 			targetNamespace="http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0",
 			serviceName="GenericAccountManagementService",
-			portName="GenericAccountManagement")
+			portName="GenericAccountManagement",
+			wsdlLocation="META-INF/wsdl/GenericAccountManagement.wsdl")
 public class GenericAccountManagementPortType extends SpringBeanAutowiringSupport{
 	
 	@Autowired
