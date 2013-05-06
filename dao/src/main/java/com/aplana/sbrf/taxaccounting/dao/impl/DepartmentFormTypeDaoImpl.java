@@ -146,6 +146,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void save(final int departmentId, List<DepartmentFormType> departmentFormTypes) {
 		final List<DepartmentFormType> newLinks= new LinkedList<DepartmentFormType>();
 		final List<DepartmentFormType> oldLinks = new LinkedList<DepartmentFormType>();

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,6 +79,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
 		final List<DepartmentDeclarationType> newLinks= new LinkedList<DepartmentDeclarationType>();
 		final List<DepartmentDeclarationType> oldLinks = new LinkedList<DepartmentDeclarationType>();
