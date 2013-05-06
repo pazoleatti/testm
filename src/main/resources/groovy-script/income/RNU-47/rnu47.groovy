@@ -117,12 +117,12 @@ boolean groupRowsCheck() {
         //2.2	графа 5 = графа 3 + графа 5 за предыдущий месяц;
         // (если текущий отчетный период – январь, то слагаемое «по графе 5 за предыдущий месяц» в формуле считается равным «0.00»)
         if (! row.sumTaxPeriodTotal.equals(row.sumCurrentQuarterTotal + getSumTaxPeriodTotalFromPreviousMonth())) {
-            isValid == false
+            isValid = false
             logger.error(invalidCapitalForm)
         }
         //2.3	графа 5 = ?графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
         if (! row.sumTaxPeriodTotal.equals(getSumCurrentQuarterTotalForAllPeriods())) {
-            isValid == false
+            isValid = false
             logger.error(invalidCapitalForm)
         }
 
