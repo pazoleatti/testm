@@ -15,11 +15,21 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 public interface DepartmentFormTypeDao {
 	/**
 	 * Возвращает информацию о формах по подразделению
-	 * @param departamentId
+	 * @param departmentId
 	 * @return список назначенных подразделению форм (с учётом вида и типа)
 	 */
-	List<DepartmentFormType> get(int departamentId);
-	
+	List<DepartmentFormType> get(int departmentId);
+
+	/**
+	 * Обновляет/добавляет список назначенных подразделению форм (с учётом вида и типа)
+	 * @param departmentId
+	 *            идентификатор подразделения формируемой налоговой формы
+	 *            назначения
+	 * @param departmentFormTypes
+	 *            новые данные для обновления/сохранения
+	 */
+	void save(int departmentId, List<DepartmentFormType> departmentFormTypes);
+
 	/**
 	 * Возвращает информацию он назначенных подразделению формах по заданному виду налога
 	 * @param departmentId идентификатор подразделения

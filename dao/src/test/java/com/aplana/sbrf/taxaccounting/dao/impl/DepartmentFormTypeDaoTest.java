@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import java.util.List;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -60,5 +63,34 @@ public class DepartmentFormTypeDaoTest {
 	@Test
 	public void testGetAllSources() {
 		assertEquals(5, departmentFormTypeDao.getDepartmentSources(2, TaxType.TRANSPORT).size());
+	}
+
+	@Test
+	public void testSave() {
+		List<DepartmentFormType> links = departmentFormTypeDao.get(1);
+		// changing
+		DepartmentFormType link = links.get(0);
+		link.setFormTypeId(2);
+		link.setKind(FormDataKind.PRIMARY);
+		//adding
+		DepartmentFormType newLink = new DepartmentFormType();
+		newLink.setFormTypeId(1);
+		newLink.setKind(FormDataKind.ADDITIONAL);
+		newLink.setDepartmentId(1);
+
+		links.add(newLink);
+
+		departmentFormTypeDao.save(1, links);
+
+		link = departmentFormTypeDao.get(1).get(1);
+		newLink = departmentFormTypeDao.get(1).get(0);
+
+		assertEquals(2, link.getFormTypeId());
+		assertEquals(1, link.getDepartmentId());
+		assertEquals(FormDataKind.PRIMARY, link.getKind());
+
+		assertEquals(1, newLink.getFormTypeId());
+		assertEquals(1, newLink.getDepartmentId());
+		assertEquals(FormDataKind.ADDITIONAL, newLink.getKind());
 	}
 }

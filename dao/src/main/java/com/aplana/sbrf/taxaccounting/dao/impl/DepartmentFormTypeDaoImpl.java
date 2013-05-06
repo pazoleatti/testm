@@ -1,10 +1,18 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+
+import java.util.LinkedList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Iterator;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -136,7 +144,90 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 			DFT_MAPPER
 		);
 	}
-	
+
+	@Override
+	public void save(final int departmentId, List<DepartmentFormType> departmentFormTypes) {
+		final List<DepartmentFormType> newLinks= new LinkedList<DepartmentFormType>();
+		final List<DepartmentFormType> oldLinks = new LinkedList<DepartmentFormType>();
+		final Set<Long> removedLinks = new HashSet<Long>(getJdbcTemplate().queryForList(
+				"select id from department_form_type where department_id = ?",
+				new Object[]{departmentId},
+				new int[]{Types.NUMERIC},
+				Long.class
+		));
+		for (DepartmentFormType link : departmentFormTypes) {
+			if (link.getId() == null) {
+				newLinks.add(link);
+			} else {
+				oldLinks.add(link);
+				removedLinks.remove(link.getId());
+			}
+		}
+
+		if(!removedLinks.isEmpty()){
+			getJdbcTemplate().batchUpdate(
+					"delete from department_form_type where id = ?",
+					new BatchPreparedStatementSetter() {
+
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							ps.setLong(1, iterator.next());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return removedLinks.size();
+						}
+
+						private Iterator<Long> iterator = removedLinks.iterator();
+					}
+			);
+		}
+
+		// create new
+		if (!newLinks.isEmpty()) {
+			getJdbcTemplate().batchUpdate(
+					"insert into department_form_type (department_id, form_type_id, id, kind) " +
+							"values (?, ?, seq_department_form_type.nextval, ?)",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							DepartmentFormType link = newLinks.get(index);
+							ps.setInt(1, link.getDepartmentId());
+							ps.setInt(2, link.getFormTypeId());
+							ps.setInt(3, link.getKind().getId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return newLinks.size();
+						}
+					}
+			);
+		}
+		// update old
+		if (!oldLinks.isEmpty()) {
+			getJdbcTemplate().batchUpdate(
+					"update department_form_type set department_id = ?, form_type_id = ?, kind = ?" +
+							"where id = ?",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							DepartmentFormType links = oldLinks.get(index);
+							ps.setInt(1, links.getDepartmentId());
+							ps.setInt(2, links.getFormTypeId());
+							ps.setInt(3, links.getKind().getId());
+							ps.setLong(4, links.getId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return oldLinks.size();
+						}
+					}
+			);
+		}
+	}
 
 	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = ?" +
 		" and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)";
