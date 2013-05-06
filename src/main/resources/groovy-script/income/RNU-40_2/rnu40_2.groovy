@@ -3,7 +3,6 @@
  * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
  *
  * TODO:
- *      - логические проверки (необходимо получать граничные даты отчетного периода)
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
  * @author rtimerbaev
@@ -46,30 +45,23 @@ def addNewRow() {
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
 
-    def index = formData.dataRows.indexOf(currentDataRow)
-    if (index == -1) {
-        index = 0
-    }
-    if (index + 1 == formData.dataRows.size()) {
-        formData.dataRows.add(newRow)
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+        row = formData.getDataRow('2')
+        formData.dataRows.add(getIndex(row), newRow)
+    } else if (currentDataRow.getAlias() == null) {
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     } else {
-        formData.dataRows.add(index + 1, newRow)
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     }
-
-
-    setOrder()
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    if (isFixedRow(currentDataRow)) {
-        return
+    if (!isFixedRow(currentDataRow)) {
+        formData.dataRows.remove(currentDataRow)
     }
-
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
 }
 
 /**
@@ -103,7 +95,7 @@ void logicalCheck() {
                 if (index != null) {
                     logger.error("В строке \"Номер территориального банка\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = formData.dataRows.indexOf(row) + 1
                     logger.error("В $index строке не заполнены колонки : $errorMsg.")
                 }
             }
@@ -143,10 +135,8 @@ def isFixedRow(def row) {
 }
 
 /**
- * Поправить значания order.
+ * Получить номер строки в таблице.
  */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

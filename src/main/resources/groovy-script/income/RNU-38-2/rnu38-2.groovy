@@ -19,8 +19,6 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
-        break
 }
 
 // графа 1  - amount
@@ -35,34 +33,20 @@ def addNewRow() {
     if (formData.dataRows.size == 0) {
         formData.appendDataRow()
     }
-    setOrder()
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    /** (РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1. */
-    def formDataRNU_38_1 = FormDataService.find(334, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
-    if (formDataRNU_38_1 == null) {
-        /*
-          // TODO (Ramil Timerbaev) костыль, потом убать
-          formData.dataRows.each { row ->
-              row.amount = 1
-              row.incomePrev = 1
-              row.incomeShortPosition = 1
-              row.totalPercIncome = row.incomePrev + row.incomeShortPosition
-          }
-          // конец
-          */
+    def totalRow = getTotalRowFromRNU38_1()
+    if (totalRow == null) {
         return
     }
 
-    def totalRow = formDataRNU_38_1.getDataRow('total')
-
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
 
     formData.dataRows.each { row ->
         // графа 1
@@ -83,22 +67,48 @@ void calc() {
  * Логические проверки.
  */
 void logicalCheck() {
-    /*
-	 * Проверка объязательных полей.
-	 */
-    formData.dataRows.each { row ->
-        def colNames = []
-        // Список проверяемых столбцов (графа 1..4)
-        ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome'].each {
-            if (row.getCell(it).getValue() == null) {
-                colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-            }
+    if (formData.dataRows.isEmpty()) {
+        return
+    }
+    def row = formData.dataRows.get(0)
+
+    // 1. Обязательность заполнения поля графы 1..4
+    def colNames = []
+    // Список проверяемых столбцов (графа 1..4)
+    ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome'].each {
+        if (row.getCell(it).getValue() == null) {
+            colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
         }
-        if (!colNames.isEmpty()) {
-            def errorMsg = colNames.join(', ')
-            def index = row.getOrder()
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
-        }
+    }
+    if (!colNames.isEmpty()) {
+        def errorMsg = colNames.join(', ')
+        def index = formData.dataRows.indexOf(row) + 1
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+    }
+
+    def totalRow = getTotalRowFromRNU38_1()
+    if (totalRow == null) {
+        return
+    }
+
+    // 2. Арифметическая проверка графы 1
+    if (row.amount != totalRow.amount) {
+        logger.error('Неверно рассчитана графа «Количество (шт.)»!')
+    }
+
+    // 3. Арифметическая проверка графы 2
+    if (row.incomePrev != totalRow.incomePrev) {
+        logger.error('Неверно рассчитана графа «Доход с даты погашения предыдущего купона (руб.коп.)»!')
+    }
+
+    // 4. Арифметическая проверка графы 3
+    if (row.incomeShortPosition != totalRow.incomeShortPosition) {
+        logger.error('Неверно рассчитана графа «Доход с даты открытия короткой позиции, (руб.коп.)»!')
+    }
+
+    // 5. Арифметическая проверка графы 4
+    if (row.totalPercIncome != row.incomePrev + row.incomeShortPosition) {
+        logger.error('Неверно рассчитана графа «Всего процентный доход (руб.коп.)»!')
     }
 }
 
@@ -107,10 +117,16 @@ void logicalCheck() {
  */
 
 /**
- * Поправить значания order.
+ * Получить итоговую строку из нф (РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1.
  */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
+def getTotalRowFromRNU38_1() {
+    def formDataRNU_38_1 = FormDataService.find(334, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
+    if (formDataRNU_38_1 != null) {
+        for (def row : formDataRNU_38_1.dataRows) {
+            if (row.getAlias() == 'total') {
+                return row
+            }
+        }
     }
+    return null
 }

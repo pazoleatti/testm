@@ -15,12 +15,12 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -52,7 +52,7 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
 
     // графа 2..7, 9, 17..19
     ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
@@ -60,9 +60,6 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def pos = (currentDataRow != null && !formData.dataRows.isEmpty() ? currentDataRow.getOrder() : formData.dataRows.size)
-    formData.dataRows.add(pos, newRow)
-    setOrder()
 }
 
 /**
@@ -92,7 +89,7 @@ void calc() {
             if (index != null) {
                 logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
             } else {
-                index = row.getOrder()
+                index = getIndex(row) + 1
                 logger.error("В $index строке не заполнены колонки : $errorMsg.")
             }
         }
@@ -102,8 +99,8 @@ void calc() {
     }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
 
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
@@ -170,8 +167,10 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
 
@@ -190,16 +189,18 @@ void logicalCheck() {
             }
         }
         if (!colNames.isEmpty()) {
-            hasError = true
+            if (!checkRequiredColumns) {
+                return
+            }
             def index = row.rowNumber
             def errorMsg = colNames.join(', ')
             if (index != null) {
                 logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
             } else {
-                index = row.getOrder()
-                logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                index = getIndex(row) + 1
+                logger.error("В строке $index не заполнены колонки : $errorMsg.")
             }
-            break
+            return
         }
 
         // 2. Проверка на уникальность поля «инвентарный номер» (графа 2)
@@ -217,7 +218,6 @@ void logicalCheck() {
                 row.amortMonth == 0 &&
                 row.amortTaxPeriod) {
             logger.error('Все суммы по операции нулевые!')
-            break
         }
 
         // 4. Проверка суммы расходов в виде капитальных вложений с начала года (графа 10, 9, 10 (за прошлый месяц), 9 (за предыдущие месяцы текущего года))
@@ -227,7 +227,7 @@ void logicalCheck() {
                 // TODO (Ramil Timerbaev) getFromOld() = сумма графы 9 всех предыдущих месяцев
                 row.cost10perMonth == getFromOld()) {
             logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
-            break
+            return
         }
 
         // 5. Проверка суммы начисленной амортизации с начала года (графа 14, 13, 14 (за прошлый месяц), 13 (за предыдущие месяцы текущего года))
@@ -237,7 +237,7 @@ void logicalCheck() {
                 // TODO (Ramil Timerbaev) getFromOld() = сумма графы 13 всех предыдущих месяцев
                 row.amortMonth != getFromOld()) {
             logger.error('Неверная сумма начисленной амортизации с начала года!')
-            break
+            return
         }
 
         // 6. Арифметическая проверка графы 8
@@ -250,7 +250,7 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
-            break
+            return
         }
 
         // 7. Арифметическая проверка графы 10
@@ -262,7 +262,7 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
-            break
+            return
         }
 
         // 8. Арифметическая проверка графы 11
@@ -276,14 +276,14 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
-            break
+            return
         }
 
         // 9. Арифметическая проверка графы 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
         if (row.cost10perExploitation != getFromOld() + row.cost10perMonth) {
             logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
-            break
+            return
         }
 
         // 10. Арифметическая проверка графы 13
@@ -295,21 +295,26 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
-            break
+            return
         }
 
         // 11. Арифметическая проверка графы 14
         hasError = false
+
+        // TODO (Ramil Timerbaev)
+        // последнее число предыдущего месяца
+        def lastDayPrevMonth = new Date()
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
-        if (row.usefullLifeEnd > lastDay2001) {
-            // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
+        // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
+        def tmp = (row.amortMonth != (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth))
+        if (row.usefullLifeEnd > lastDay2001 && tmp) {
             hasError = true
         } else if (row.usefullLifeEnd <= lastDay2001 && row.amortMonth != row.cost / 84) {
             hasError = true
         }
         if (hasError) {
             logger.error('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
-            break
+            return
         }
 
         // 12. Арифметическая проверка графы 15
@@ -322,7 +327,7 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Сумма начисленной амортизации.с начала налогового периода»!')
-            break
+            return
         }
 
         // 13. Арифметическая проверка графы 16
@@ -335,7 +340,7 @@ void logicalCheck() {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Сумма начисленной амортизации.с даты ввода в эксплуатацию»!')
-            break
+            return
         }
     }
 }
@@ -360,15 +365,6 @@ void checkNSI() {
  */
 
 /**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
-}
-
-/**
  * Получить значение из предыдущего месяца.
  */
 def getFromOld() {
@@ -381,4 +377,11 @@ def getFromOld() {
  */
 def isFirstMonth() {
     return false
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

@@ -17,7 +17,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        // logicalCheck()
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -30,7 +30,7 @@ switch (formDataEvent) {
 
 // графа 1  - series
 // графа 2  - amount
-// графа 3  - moninal
+// графа 3  - nominal
 // графа 4  - shortPositionDate
 // графа 5  - balance2
 // графа 6  - averageWeightedPrice
@@ -44,7 +44,7 @@ def addNewRow() {
     def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
 
     // графа 1..7
-    ['series', 'amount', 'moninal', 'shortPositionDate',
+    ['series', 'amount', 'nominal', 'shortPositionDate',
             'balance2', 'averageWeightedPrice', 'termBondsIssued'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
@@ -77,11 +77,9 @@ def addNewRow() {
  * Удалить строку.
  */
 def deleteRow() {
-    if (isFixedRow(currentDataRow)) {
-        return
+    if (!isFixedRow(currentDataRow)) {
+        formData.dataRows.remove(currentDataRow)
     }
-
-    formData.dataRows.remove(currentDataRow)
 }
 
 /**
@@ -89,14 +87,14 @@ def deleteRow() {
  */
 void calc() {
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isFixedRow(row)) {
             def colNames = []
             // Список проверяемых столбцов (графа 2..7)
-            def requiredColumns = ['series', 'amount', 'moninal', 'shortPositionDate',
+            def requiredColumns = ['series', 'amount', 'nominal', 'shortPositionDate',
                     'balance2', 'averageWeightedPrice', 'termBondsIssued']
 
             requiredColumns.each {
@@ -122,40 +120,48 @@ void calc() {
     }
 
     /*
-      * Расчеты.
-      */
+     * Расчеты.
+     */
+
+    // последний отчетный день месяца
+    // TODO (Ramil Timerbaev) откуда брать
+    def lastDay = new Date()
     formData.dataRows.each { row ->
         if (!isFixedRow(row)) {
-            // последний отчетный день месяца
-            def lastDay = new Date() // TODO (Ramil Timerbaev) откуда брать
             // графа 8
-            def tmp = ((row.moninal - row.averageWeightedPrice) * (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount
-            row.percIncome = round(tmp, 2)
+            row.percIncome = getColumn8(row, lastDay)
         }
     }
 
-    /** Столбцы для которых надо вычислять итого А и Б. Графа 2, 8. */
+    // графы для которых надо вычислять итого А и Б (графа 2, 8)
     def totalColumns = ['amount', 'percIncome']
-    def totalARow = formData.getDataRow('totalA')
-    def totalBRow = formData.getDataRow('totalB')
-    def aRow = formData.getDataRow('A')
-    def bRow = formData.getDataRow('B')
-    totalColumns.each { alias ->
-        def tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(aRow), formData.dataRows.indexOf(totalARow) - 1))
-        totalARow.getCell(alias).setValue(tmp)
-        tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(bRow), formData.dataRows.indexOf(totalBRow) - 1))
-        totalBRow.getCell(alias).setValue(tmp)
+    def tmp
+    def sum = 0
+    ['A', 'B'].each {
+        def row = formData.getDataRow(it)
+        def totalRow = formData.getDataRow('total' + it)
+        totalColumns.each { alias ->
+            tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(row) + 1, formData.dataRows.indexOf(totalRow) - 1))
+            totalRow.getCell(alias).setValue(tmp)
+        }
+        sum += totalRow.percIncome
     }
 
     // посчитать Итого
-    formData.getDataRow('total').percIncome = totalARow.percIncome - totalBRow.percIncome
-
+    formData.getDataRow('total').percIncome = sum
 }
 
 /**
  * Логические проверки.
  */
 void logicalCheck() {
+    // графы для которых надо вычислять итого А и Б (графа 2, 8)
+    def totalColumns = ['amount', 'percIncome']
+
+    // последний день отчетного месяца
+    // TODO (Ramil Timerbaev) откуда брать?
+    def lastDay = new Date()
+    def tmp
     for (def row : formData.dataRows) {
         if (isFixedRow(row)) {
             continue
@@ -165,8 +171,44 @@ void logicalCheck() {
         def reportDay = new Date()
         if (row.shortPositionDate > reportDay) {
             logger.error('Неверно указана дата приобретения (открытия короткой позиции)!')
-            break
+            return
         }
+
+        // 2. Арифметическая проверка графы 8
+        if (row.termBondsIssued != null || row.termBondsIssued != 0) {
+            if (row.percIncome > getColumn8(row, lastDay)) {
+                logger.error('Неверно рассчитана графа «Процентный доход с даты приобретения»!')
+                return
+            }
+        }
+    }
+
+    def hasError = false
+
+    // 3, 4. Проверка итоговых значений по разделу А и B
+    // графы для которых надо вычислять итого А и Б (графа 2, 8)
+    def sum = 0
+    ['A', 'B'].each { section ->
+        def row = formData.getDataRow(section)
+        def totalRow = formData.getDataRow('total' + section)
+        totalColumns.each { alias ->
+            tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(row) + 1, formData.dataRows.indexOf(totalRow) - 1))
+            if (totalRow.getCell(alias).getValue() != tmp) {
+                hasError = true
+                logger.error("Итоговые значений для раздела $section рассчитаны неверно!")
+            }
+        }
+        sum += totalRow.percIncome
+    }
+    if (hasError) {
+        return
+    }
+
+    // 5. Проверка итоговых значений по всей форме
+    def totalRow = formData.getDataRow('total')
+    if (totalRow.percIncome != sum) {
+        logger.error('Итоговые значений рассчитаны неверно!')
+        return
     }
 }
 
@@ -189,4 +231,14 @@ void checkNSI() {
  */
 def isFixedRow(def row) {
     return row != null && row.getAlias() != null
+}
+
+/**
+ *	Посчитать значение графы 8.
+ *
+ * @param row строка
+ * @param lastDay последний день отчетного месяца
+ */
+def getColumn8(def row, def lastDay) {
+    return round(((row.nominal - row.averageWeightedPrice) * (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount, 2)
 }

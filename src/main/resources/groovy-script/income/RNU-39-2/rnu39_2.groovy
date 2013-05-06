@@ -11,12 +11,12 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        // logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        // logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -59,39 +59,37 @@ def addNewRow() {
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
 
-    if (currentDataRow == null) {
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('totalA1')
-        formData.dataRows.add(row.getOrder() - 1, newRow)
+        formData.dataRows.add(getIndex(row), newRow)
     } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(currentDataRow.getOrder(), newRow)
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     } else {
         def alias = currentDataRow.getAlias()
         def row = formData.getDataRow('totalA1')
         if (alias == 'A') {
             row = formData.getDataRow('totalA1')
+            formData.dataRows.add(getIndex(row), newRow)
         } else if (alias == 'B') {
             row = formData.getDataRow('totalB1')
+            formData.dataRows.add(getIndex(row), newRow)
         } else if (alias.contains('total')) {
             row = formData.getDataRow(alias)
+            formData.dataRows.add(getIndex(row), newRow)
         } else {
             row = formData.getDataRow('total' + alias)
+            formData.dataRows.add(getIndex(row), newRow)
         }
-        formData.dataRows.add(row.getOrder() - 1, newRow)
     }
-
-    setOrder()
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    if (currentDataRow.getAlias() != null) {
-        return
+    if (currentDataRow.getAlias() == null) {
+        formData.dataRows.remove(currentDataRow)
     }
-
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
 }
 
 /**
@@ -99,8 +97,8 @@ def deleteRow() {
  */
 void calc() {
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isFixedRow(row)) {
@@ -117,7 +115,7 @@ void calc() {
             }
             if (!colNames.isEmpty()) {
                 hasError = true
-                def index = row.getOrder()
+                def index = getIndex(row) + 1
                 def errorMsg = colNames.join(', ')
                 logger.error("В строке $index не заполнены колонки : $errorMsg.")
             }
@@ -130,6 +128,7 @@ void calc() {
     /*
      * Расчеты.
      */
+
     // подразделы
     ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5'].each { section ->
         firstRow = formData.getDataRow(section)
@@ -143,8 +142,10 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     def reportDateStart = new Date() // TODO (Ramil Timerbaev)
     def reportDateEnd = new Date() // TODO (Ramil Timerbaev)
 
@@ -153,34 +154,75 @@ void logicalCheck() {
             continue
         }
 
+        // 3. Обязательность заполнения поля графы 1-6, 10-13 , 16, 17
+        def colNames = []
+        // Список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
+        def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
+                'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
+                'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
+
+        requiredColumns.each {
+            if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+            }
+        }
+        if (!colNames.isEmpty()) {
+            if (!checkRequiredColumns) {
+                return
+            }
+            def index = getIndex(row) + 1
+            def errorMsg = colNames.join(', ')
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            return
+        }
+
         // 1. Проверка даты первой части сделки
         if (row.shortPositionOpen > reportDateEnd) {
             logger.error('Неверно указана дата первой части сделки!')
-            break
+            return
         }
     }
 
     // 2. Проверка даты второй части сделки
     def hasError = false
+    def needCheck = true
     for (def row : formData.dataRows) {
-        if (!isFixedRow(row)) {
-            if (isSectionA(row) && row.shortPositionClose != null) {
-                hasError = true
-            }
-            // TODO (Ramil Timerbaev) уточнить последнее условие
-            if (!isSectionA(row) &&
-                    (row.shortPositionClose > reportDateEnd || row.shortPositionClose < reportDateStart)) {
-                hasError = true
-            }
-            if (hasError) {
-                logger.error('Неверно указана дата второй части сделки!')
+        if (isFixedRow(row)) {
+            continue
+        }
+        if (isSectionA(row) && row.shortPositionClose != null) {
+            needCheck = false
+            break
+        }
+        // TODO (Ramil Timerbaev) уточнить последнее условие
+        if (!isSectionA(row) &&
+                (row.shortPositionClose > reportDateEnd || row.shortPositionClose < reportDateStart)) {
+            hasError = true
+            break
+        }
+    }
+    if (needCheck && hasError) {
+        logger.error('Неверно указана дата второй части сделки!')
+        return
+    }
+
+    // 4..13. Проверка итоговых значений для подраздела 1..5 раздела А и Б
+    // графа 4, 5, 8, 9, 14, 15
+    sumColumns = ['amount', 'cost', 'pkdSumOpen', 'pkdSumClose', 'couponIncome', 'totalPercIncome']
+    // 10 подразделов
+    ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5'].each { section ->
+        firstRow = formData.getDataRow(section)
+        lastRow = formData.getDataRow('total' + section)
+        // графы для которых считать итого (графа 4, 5, 8, 9, 14, 15)
+        for (def col : sumColumns) {
+            if (lastRow.getCell(col).getValue() != getSum(col, firstRow, lastRow)) {
+                def number = section[1]
+                def sectionName = (section.contains('A') ? 'А' : 'Б')
+                logger.error("Итоговые значения для подраздела $number раздела $sectionName рассчитаны неверно!")
                 break
             }
         }
     }
-
-    // 3. Обязательность заполнения поля графы 1-6, 10-13 , 16, 17
-    // Реализовано перед расчетами (в методе calc())
 }
 
 /**
@@ -207,6 +249,11 @@ void checkNSI() {
     if (false) {
         logger.warn('Группа ценных бумаг с справочнике отсутствует!')
     }
+
+    // 5. Проверка номера государственной регистрации
+    if (false) {
+        logger.warn('Неверный номер государственной регистрации!')
+    }
 }
 
 /*
@@ -231,27 +278,24 @@ def isTotal(def row) {
  * Проверка принадлежит ли строка разделу A.
  */
 def isSectionA(def row) {
-    return row != null && row.getOrder() < formData.getDataRow('B').getOrder()
+    return row != null && getIndex(row) < getIndex(formData.getDataRow('B'))
 }
 
 /**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias, def rowStart, def rowEnd) {
-    def from = rowStart.getOrder()
-    def to = rowEnd.getOrder() - 2
+    def from = getIndex(rowStart) + 1
+    def to = getIndex(rowEnd) - 1
     if (from > to) {
         return 0
     }
     return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
-
 /**
- * Поправить значания order.
+ * Получить номер строки в таблице.
  */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }
