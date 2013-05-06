@@ -19,7 +19,7 @@ public interface DepartmentDeclarationTypeDao {
 	 * 	задаваемом departmentId 
 	 */
 	List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId);
-	
+
 	/**
 	 * Возвращает информацию о декларациях-потребителях, которые должны использовать информацию из данной налоговой формы в качестве источника
 	 * @param sourceDepartmentId идентификатор подразделения формы-источника
@@ -27,7 +27,7 @@ public interface DepartmentDeclarationTypeDao {
 	 * @param sourceKind тип налоговой формы-источника
 	 * @return информация о декларациях-потребителях в виде списка {@link DepartmentDeclarationType}
 	 */
-	List<DepartmentDeclarationType> getDestanations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+	List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**
 	 * Возвращает идентификаторы всех подразделений, в которых есть декларации по данному виду налога.
@@ -35,4 +35,14 @@ public interface DepartmentDeclarationTypeDao {
 	 * @return набор идентификаторов подразделений
 	 */
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
+
+	/**
+	 * Обновляет/добавляет список назначенных подразделению деклараций (с учётом вида и типа)
+	 * @param departmentId
+	 *            идентификатор подразделения формируемой налоговой формы
+	 *            назначения
+	 * @param departmentDeclarationTypes
+	 *            новые данные для обновления/добавления
+	 */
+	void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes);
 }

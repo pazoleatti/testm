@@ -4,15 +4,21 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+
+import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.Iterator;
+
 
 
 /**
@@ -47,7 +53,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	}
 
 	@Override
-	public List<DepartmentDeclarationType> getDestanations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
+	public List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
 		return getJdbcTemplate().query(
 				"select * from department_declaration_type src_ddt where exists (" +
 						"select 1 from department_form_type dft, declaration_source ds " +
@@ -69,5 +75,87 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 				Integer.class
 		));
 		return departmentIds;
+	}
+
+	@Override
+	public void save(int departmentId, List<DepartmentDeclarationType> departmentDeclarationTypes) {
+		final List<DepartmentDeclarationType> newLinks= new LinkedList<DepartmentDeclarationType>();
+		final List<DepartmentDeclarationType> oldLinks = new LinkedList<DepartmentDeclarationType>();
+		final Set<Integer> removedLinks = new HashSet<Integer>(getJdbcTemplate().queryForList(
+				"select id from department_declaration_type where department_id = ?",
+				new Object[]{departmentId},
+				new int[]{Types.NUMERIC},
+				Integer.class
+		));
+		for (DepartmentDeclarationType link : departmentDeclarationTypes) {
+			if (link.getId() == 0) {
+				newLinks.add(link);
+			} else {
+				oldLinks.add(link);
+				removedLinks.remove(link.getId());
+			}
+		}
+
+		if(!removedLinks.isEmpty()){
+			getJdbcTemplate().batchUpdate(
+					"delete from department_declaration_type where id = ?",
+					new BatchPreparedStatementSetter() {
+
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							ps.setInt(1, iterator.next());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return removedLinks.size();
+						}
+
+						private Iterator<Integer> iterator = removedLinks.iterator();
+					}
+			);
+		}
+
+		// create new
+		if (!newLinks.isEmpty()) {
+			getJdbcTemplate().batchUpdate(
+					"insert into department_declaration_type (department_id, declaration_type_id, id) " +
+							"values (?, ?, seq_dept_declaration_type.nextval)",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							DepartmentDeclarationType link = newLinks.get(index);
+							ps.setInt(1, link.getDepartmentId());
+							ps.setInt(2, link.getDeclarationTypeId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return newLinks.size();
+						}
+					}
+			);
+		}
+		// update old
+		if (!oldLinks.isEmpty()) {
+			getJdbcTemplate().batchUpdate(
+					"update department_declaration_type set department_id = ?, declaration_type_id = ? " +
+							"where id = ?",
+					new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int index) throws SQLException {
+							DepartmentDeclarationType links = oldLinks.get(index);
+							ps.setInt(1, links.getDepartmentId());
+							ps.setInt(2, links.getDeclarationTypeId());
+							ps.setLong(3, links.getId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return oldLinks.size();
+						}
+					}
+			);
+		}
 	}
 }
