@@ -29,6 +29,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	
 	@UiField
 	TextBox codeBox;
+	
+	@UiField
+	HasText script;
 
 	@Inject
 	public FormTemplateInfoView(Binder uiBinder) {
@@ -36,13 +39,14 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code) {
+	public void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code, String script) {
 		versionBox.setValue(version);
 		numberedColumnsBox.setValue(numberedColumns);
 		fixedRowsCheckBox.setValue(fixedRows);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
 		codeBox.setValue(code);
+		this.script.setText(script);
 	}
 
 	@Override
@@ -53,6 +57,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setName(nameBox.getValue());
 		getUiHandlers().setFullname(fullnameBox.getValue());
 		getUiHandlers().setCode(codeBox.getValue());
+		getUiHandlers().setScript(script.getText());
 	}
 
 	@Override

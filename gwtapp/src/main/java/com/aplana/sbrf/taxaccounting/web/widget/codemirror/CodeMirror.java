@@ -9,9 +9,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasText;
 
 
-public class CodeMirror extends Composite implements LeafValueEditor<String>, TakesValue<String> {
+public class CodeMirror extends Composite implements LeafValueEditor<String>, TakesValue<String>, HasText {
 	interface CodeMirrorUiBinder extends UiBinder<HTMLPanel, CodeMirror> {
 	}
 
@@ -42,6 +43,8 @@ public class CodeMirror extends Composite implements LeafValueEditor<String>, Ta
 	public String getValue() {
 		return wrapper.getValue();
 	}
+	
+
 
 	public CodeMirror() {
 		initWidget(ourUiBinder.createAndBindUi(this));
@@ -50,6 +53,17 @@ public class CodeMirror extends Composite implements LeafValueEditor<String>, Ta
 
 		//then we bind code mirror to the text area
 		wrapper = CodeMirrorWrapper.createEditor(content.getElement(), config);
+	}
+
+
+	@Override
+	public String getText() {
+		return getValue();
+	}
+	
+	@Override
+	public void setText(String text) {
+		setValue(text);
 	}
 
 }

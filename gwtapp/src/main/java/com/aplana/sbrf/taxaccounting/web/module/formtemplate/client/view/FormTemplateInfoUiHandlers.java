@@ -9,4 +9,5 @@ public interface FormTemplateInfoUiHandlers extends UiHandlers {
 	void setName(String name);
 	void setFullname(String fullName);
 	void setCode(String code);
+	void setScript(String text);
 }

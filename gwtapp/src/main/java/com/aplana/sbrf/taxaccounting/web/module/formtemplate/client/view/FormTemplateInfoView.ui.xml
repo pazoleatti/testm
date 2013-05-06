@@ -1,48 +1,60 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:style>
-        .formStyle {
-            top: 50px;
-            left: 30px;
-            position: absolute;
-            background-color: #949494;
-            padding: 15px;
-            text-decoration-color: white;
-            color: white;
-            border-color: #828282;
-        }
-    </ui:style>
-    <g:HTMLPanel height="100%">
-        <g:HTMLPanel addStyleNames="{style.formStyle}">
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Версия</g:Label>
-                <g:TextBox width="100px" ui:field="versionBox"/>
-            </g:HorizontalPanel>
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:codemirror='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror'>
 
-            <g:HorizontalPanel>
-                <g:Label width="300px">Использовать нумерованные столбцы</g:Label>
-                <g:CheckBox ui:field="numberedColumnsBox"/>
-            </g:HorizontalPanel>
+	<ui:style>
+		.formStyle {
+			background-color: #949494;
+			padding: 15px;
+			margin: 30px;
+			color: white;
+			border-color: #828282;
+		}
+	</ui:style>
 
-            <g:HorizontalPanel>
-                <g:Label width="300px">Фиксированный набор строк</g:Label>
-                <g:CheckBox ui:field="fixedRowsCheckBox"/>
-            </g:HorizontalPanel>
-            
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Наименование формы</g:Label>
-                <g:TextBox width="500px" ui:field="nameBox"/>
-            </g:HorizontalPanel>
-            
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Полное наименование формы</g:Label>
-                <g:TextBox width="500px" ui:field="fullnameBox"/>
-            </g:HorizontalPanel>
-            
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
-                <g:TextBox width="500px" ui:field="codeBox"/>
-            </g:HorizontalPanel>
-        </g:HTMLPanel>
-    </g:HTMLPanel>
+	<g:SimplePanel width="100%" height="100%">
+
+		<g:FlowPanel height="100%" styleName="{style.formStyle}">
+
+			<g:HorizontalPanel>
+				<g:Label width="300px">Версия</g:Label>
+				<g:TextBox width="100px" ui:field="versionBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel>
+				<g:Label width="300px">Использовать нумерованные столбцы</g:Label>
+				<g:CheckBox ui:field="numberedColumnsBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel>
+				<g:Label width="300px">Фиксированный набор строк</g:Label>
+				<g:CheckBox ui:field="fixedRowsCheckBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel height="30px">
+				<g:Label width="300px">Наименование формы</g:Label>
+				<g:TextBox width="500px" ui:field="nameBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel height="30px">
+				<g:Label width="300px">Полное наименование формы</g:Label>
+				<g:TextBox width="500px" ui:field="fullnameBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel height="30px">
+				<g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
+				<g:TextBox width="500px" ui:field="codeBox" />
+			</g:HorizontalPanel>
+
+			<g:HorizontalPanel height="300px">
+				<g:Label width="300px">Скрипт</g:Label>
+				<g:FlowPanel height="100px" width="500px">
+					<codemirror:CodeMirror ui:field="script" height="100%" width="100%"/>
+				</g:FlowPanel>
+			</g:HorizontalPanel>
+
+		</g:FlowPanel>
+	</g:SimplePanel>
+
+
 </ui:UiBinder>
