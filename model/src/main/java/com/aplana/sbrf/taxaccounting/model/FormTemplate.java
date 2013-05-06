@@ -23,6 +23,11 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String name;
     private String fullName;
     private String code;
+    
+    /**
+     * Тело скрипта
+     */
+    private String script;
 
     /**
      * @return имя отображаемое на форме
@@ -56,6 +61,14 @@ public class FormTemplate extends IdentityObject<Integer> {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+	
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
 	}
 
 	private List<DataRow> rows = new ArrayList<DataRow>();
