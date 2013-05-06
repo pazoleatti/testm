@@ -57,6 +57,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
 			formTemplate.setCode(rs.getString("code"));
+			formTemplate.setScript(rs.getString("script"));
 		    formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
@@ -121,7 +122,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		// TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
 			"update form_template set data_rows = ?, edition = ?, numbered_columns = ?, is_active = ?, version = ?, fixed_rows = ?, name = ?, " +
-			"fullname = ?, code = ? where id = ?",
+			"fullname = ?, code = ?, script=? where id = ?",
 			dataRowsXml, 
 			storedEdition + 1,
 			formTemplate.isNumberedColumns(),
@@ -131,6 +132,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.getName(),
 			formTemplate.getFullName(),
 			formTemplate.getCode(),
+			formTemplate.getScript(),
 			formTemplateId
 		);
 		formStyleDao.saveFormStyles(formTemplate);

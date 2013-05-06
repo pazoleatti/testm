@@ -63,6 +63,7 @@ public class FormTemplateDaoTest {
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
 		formTemplate.setCode("code_3");
+		formTemplate.setScript("test_script");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
 		Assert.assertTrue(formTemplate.isNumberedColumns());
@@ -72,6 +73,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
+		Assert.assertEquals("test_script", formTemplate.getScript());
 	}
 
 }
