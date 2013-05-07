@@ -5,7 +5,9 @@
 	xmlns:codemirror='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror'>
 
 	<g:ScrollPanel height="100%" width="100%">
-		<codemirror:CodeMirror ui:field="script"/>
+	 <g:SimplePanel>
+		<codemirror:CodeMirror ui:field="script" width="100%"/>
+		</g:SimplePanel>
 		<!-- <g:TextArea ui:field="script"/>  -->
 	</g:ScrollPanel>
 

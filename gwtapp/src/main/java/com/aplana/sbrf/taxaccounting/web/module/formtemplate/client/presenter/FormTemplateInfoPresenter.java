@@ -37,6 +37,12 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 	}
+	
+	@Override
+	protected void onBind() {
+		super.onBind();
+		addRegisteredHandler(FormTemplateFlushEvent.getType(), this);
+	}
 
 	@ProxyEvent
 	@Override
@@ -46,7 +52,6 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 				formTemplate.getFullName(), formTemplate.getCode());
 	}
 
-	@ProxyEvent
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().onFlush();

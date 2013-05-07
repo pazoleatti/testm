@@ -42,6 +42,12 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 	}
+	
+	@Override
+	protected void onBind() {
+		super.onBind();
+		addRegisteredHandler(FormTemplateFlushEvent.getType(), this);
+	}
 
 	@ProxyEvent
 	@Override
@@ -54,7 +60,6 @@ public class FormTemplateScriptPresenter extends Presenter<FormTemplateScriptPre
 		getView().bindScripts(formTemplate.getScripts(), isFormChanged);
 	}
 
-	@ProxyEvent
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().flush();

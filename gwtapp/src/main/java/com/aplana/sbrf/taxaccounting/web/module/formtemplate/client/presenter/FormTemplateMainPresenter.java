@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -11,8 +13,11 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
-import com.google.gwt.core.client.Scheduler;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormResult;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -35,8 +40,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
-
-import java.util.List;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
@@ -99,12 +102,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void save() {
 		FormTemplateFlushEvent.fire(this);
-		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-			@Override
-			public void execute() {
-				saveAfterFlush();
-			}
-		});
+		saveAfterFlush();
 	}
 
 	/**

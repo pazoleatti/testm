@@ -52,6 +52,12 @@ public class FormTemplateColumnPresenter
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 	}
+	
+	@Override
+	protected void onBind() {
+		super.onBind();
+		addRegisteredHandler(FormTemplateFlushEvent.getType(), this);
+	}
 
 	@ProxyEvent
 	@Override
@@ -64,7 +70,6 @@ public class FormTemplateColumnPresenter
 		getView().setColumnList(formTemplate.getColumns(), isFormChanged);
 	}
 
-	@ProxyEvent
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().flush();

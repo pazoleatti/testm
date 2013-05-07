@@ -48,21 +48,28 @@ public class FormTemplateScriptCodePresenter
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 	}
-
-	@ProxyEvent
+	
 	@Override
-	public void onSet(FormTemplateSetEvent event) {
-		System.out.println("onSet");
-		formTemplate = event.getFormTemplate();
-		getView().setScriptCode(formTemplate.getScript());
+	protected void onBind() {
+		super.onBind();
+		// sgoryachkin
+		// FormTemplateFlushEvent не должен быть ProxyEvent
+		// т.к. 
+		// 1) Нет нужны вызывать обработку если презентер не разу не активный.
+		// 2) ProxyEvent - асинхронный, а нам это ненужно.
+		addRegisteredHandler(FormTemplateFlushEvent.getType(), this);
 	}
 
 	@ProxyEvent
 	@Override
+	public void onSet(FormTemplateSetEvent event) {
+		formTemplate = event.getFormTemplate();
+		getView().setScriptCode(formTemplate.getScript());
+	}
+
+	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
-		System.out.println("onFlush " + event.getSource());
 		if (formTemplate != null) {
-			System.out.println(getView().getScriptCode());
 			formTemplate.setScript(getView().getScriptCode());
 		}
 	}
@@ -71,9 +78,9 @@ public class FormTemplateScriptCodePresenter
 	protected void revealInParent() {
 		RevealContentEvent.fire(this,
 				FormTemplateMainPresenter.TYPE_SetTabContent, this);
-		if (formTemplate!=null){
-			getView().setScriptCode(formTemplate.getScript());
-		}
+		// Workaround
+		// Почему то тупит CodeMirror когда инициализация представления происходит до reveal
+		getView().setScriptCode(getView().getScriptCode());
 	}
 
 }
