@@ -55,6 +55,17 @@ public interface DepartmentFormTypeDao {
 	List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
 	/**
+	 * Обновляет информацию об источниках
+	 *
+	 * @param departmentFormTypeId
+	 *            идентификатор связки для которой нужно обновить источники
+	 * @param sourceDepartmentFormTypeIds
+	 *			  идентификаторы форм-источников в виде списка
+	 *            тип налоговой формы
+	 */
+	void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
+
+	/**
 	 * Возвращает информацию о всех налоговых формах, которые являются источниками
 	 * для налоговых форм или деклараций в заданном подразделении
 	 * Предполагается что метод будет использоваться для заполнения фильтра,

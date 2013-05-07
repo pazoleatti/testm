@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +66,30 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 			},
 			DFT_MAPPER
 		);
+	}
+
+	@Override
+	public void saveFormSources(final Long departmentFormTypeId, final List<Long> sourceDepartmentFormTypeIds) {
+		JdbcTemplate jt = getJdbcTemplate();
+		jt.update("delete from form_data_source where department_form_type_id = ?",
+				new Object[]{departmentFormTypeId});
+
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int orderIndex)
+					throws SQLException {
+				ps.setLong(1, departmentFormTypeId);
+				ps.setLong(2, sourceDepartmentFormTypeIds.get(orderIndex));
+			}
+
+			@Override
+			public int getBatchSize() {
+				return sourceDepartmentFormTypeIds.size();
+			}
+		};
+
+		jt.batchUpdate(
+				"insert into form_data_source (department_form_type_id, src_department_form_type_id) values (?, ?)", bpss);
 	}
 
 	private static final String GET_FORM_DESTINATIONS_SQL = "select * from department_form_type dest_dft where exists "

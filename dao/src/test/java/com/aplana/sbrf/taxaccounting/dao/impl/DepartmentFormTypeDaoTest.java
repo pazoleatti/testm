@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -92,5 +94,37 @@ public class DepartmentFormTypeDaoTest {
 		assertEquals(1, newLink.getFormTypeId());
 		assertEquals(1, newLink.getDepartmentId());
 		assertEquals(FormDataKind.ADDITIONAL, newLink.getKind());
+	}
+
+	@Test
+	public void testSaveSources() {
+		List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
+		List<Long> sourceIds = new ArrayList<Long>();
+
+		for (DepartmentFormType source : sources) {
+			sourceIds.add(source.getId());
+		}
+
+		sourceIds.add(6l);
+
+		assertEquals(3, sourceIds.size());
+		assertTrue(sourceIds.contains(1l));
+		assertTrue(sourceIds.contains(6l));
+		assertTrue(sourceIds.contains(11l));
+
+		sourceIds.remove(1l);
+
+		departmentFormTypeDao.saveFormSources(12l, sourceIds);
+		sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
+		sourceIds.clear();
+
+		for (DepartmentFormType source : sources) {
+			sourceIds.add(source.getId());
+		}
+
+		assertEquals(2, sourceIds.size());
+		assertTrue(sourceIds.contains(6l));
+		assertTrue(sourceIds.contains(11l));
+
 	}
 }
