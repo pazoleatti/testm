@@ -1,0 +1,12 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui"
+	xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+	xmlns:codemirror='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror'>
+
+	<g:ScrollPanel height="100%" width="100%">
+		<codemirror:CodeMirror ui:field="script"/>
+		<!-- <g:TextArea ui:field="script"/>  -->
+	</g:ScrollPanel>
+
+</ui:UiBinder>

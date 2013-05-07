@@ -13,6 +13,7 @@ public final class AdminConstants {
 	public static final class NameTokens {
 		public static final String adminPage = "!admin";
 		public static final String formTemplateScriptPage = "!formTemplateScript";
+		public static final String formTemplateScriptCodePage = "!formTemplateScriptCode";
 		public static final String formTemplateEventPage = "!formTemplateEvent";
 		public static final String formTemplateColumnPage = "!formTemplateColumn";
 		public static final String formTemplateRowPage = "!formTemplateRow";
@@ -27,11 +28,12 @@ public final class AdminConstants {
 	 */
 	public static final class TabPriorities {
 		public static final int formTemplateInfoPriority = 0;
-		public static final int formTemplateScriptPriority = 1;
-		public static final int formTemplateEventPriority = 2;
-		public static final int formTemplateColumnPriority = 3;
-		public static final int formTemplateStylePriority = 4;
-		public static final int formTemplateRowPriority = 5;
+		public static final int formTemplateScriptCodePriority = 1;
+		public static final int formTemplateScriptPriority = 2;
+		public static final int formTemplateEventPriority = 3;
+		public static final int formTemplateColumnPriority = 4;
+		public static final int formTemplateStylePriority = 5;
+		public static final int formTemplateRowPriority = 6;
 	}
 
 	/**
@@ -39,8 +41,9 @@ public final class AdminConstants {
 	 */
 	public static final class TabLabels {
 		public static final String formTemplateInfoLabel = "Основая информация";
-		public static final String formTemplateScriptLabel = "Скрипты";
-		public static final String formTemplateEventLabel = "События";
+		public static final String formTemplateScriptLabel = "@Deprecated Скрипты";
+		public static final String formTemplateScriptCodeLabel = "Скрипт";
+		public static final String formTemplateEventLabel = "@Deprecated События";
 		public static final String formTemplateColumnLabel = "Описание столбцов";
 		public static final String formTemplateStyleLabel = "Наборы стилей";
 		public static final String formTemplateRowLabel = "Начальные данные";

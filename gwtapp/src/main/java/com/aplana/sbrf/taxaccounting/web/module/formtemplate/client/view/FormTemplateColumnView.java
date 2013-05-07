@@ -1,6 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateColumnPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.ColumnAttributeEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -13,14 +21,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.IntegerBox;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>

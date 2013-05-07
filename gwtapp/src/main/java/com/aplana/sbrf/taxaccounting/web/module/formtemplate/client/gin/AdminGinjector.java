@@ -13,6 +13,7 @@ public interface AdminGinjector {
     AsyncProvider<AdminPresenter> getAdminPresenter();
 	AsyncProvider<FormTemplateMainPresenter> getFormTemplateMainPresenter();
 	AsyncProvider<FormTemplateScriptPresenter> getFormTemplateScriptPresenter();
+	AsyncProvider<FormTemplateScriptCodePresenter> getFormTemplateScriptCodePresenter();
 	AsyncProvider<FormTemplateEventPresenter> getFormTemplateEventPresenter();
 	AsyncProvider<FormTemplateColumnPresenter> getFormTemplateColumnPresenter();
 	AsyncProvider<FormTemplateRowPresenter> getFormTemplateRowPresenter();

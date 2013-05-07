@@ -145,6 +145,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void unlockForm(int formId){
 		UnlockFormAction action = new UnlockFormAction();
 		action.setFormId(formId);

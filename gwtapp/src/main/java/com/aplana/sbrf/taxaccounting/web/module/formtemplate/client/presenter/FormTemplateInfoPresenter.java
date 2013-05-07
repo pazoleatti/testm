@@ -26,7 +26,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code, String script);
+		void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code);
 		void onFlush();
 	}
 
@@ -43,7 +43,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	public void onSet(FormTemplateSetEvent event) {
 		formTemplate = event.getFormTemplate();
 		getView().setViewData(formTemplate.getVersion(), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),formTemplate.getName(),
-				formTemplate.getFullName(), formTemplate.getCode(), formTemplate.getScript());
+				formTemplate.getFullName(), formTemplate.getCode());
 	}
 
 	@ProxyEvent
@@ -86,10 +86,5 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void setCode(String code) {
 		formTemplate.setCode(code);
-	}
-
-	@Override
-	public void setScript(String text) {
-		formTemplate.setScript(text);
 	}
 }
