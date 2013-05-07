@@ -55,13 +55,12 @@ public interface DepartmentFormTypeDao {
 	List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
 	/**
-	 * Обновляет информацию об источниках
+	 * Обновляет информацию об источниках формы
 	 *
 	 * @param departmentFormTypeId
 	 *            идентификатор связки для которой нужно обновить источники
 	 * @param sourceDepartmentFormTypeIds
 	 *			  идентификаторы форм-источников в виде списка
-	 *            тип налоговой формы
 	 */
 	void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
 
@@ -122,4 +121,14 @@ public interface DepartmentFormTypeDao {
 	 *         {@link DepartmentFormType}
 	 */
 	List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
+
+	/**
+	 * Обновляет информацию об источниках для декларации
+	 *
+	 * @param declarationTypeId
+	 *            идентификатор связки для которой нужно обновить источники
+	 * @param sourceDeclarationTypeIds
+	 *			  идентификаторы деклараций-источников в виде списка
+	 */
+	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDeclarationTypeIds);
 }

@@ -136,7 +136,32 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 			DFT_MAPPER
 		);
 	}
-	
+
+	@Override
+	public void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds) {
+		JdbcTemplate jt = getJdbcTemplate();
+		jt.update("delete from declaration_source where department_declaration_type_id = ?",
+				new Object[]{declarationTypeId});
+
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int orderIndex)
+					throws SQLException {
+				ps.setLong(1, declarationTypeId);
+				ps.setLong(2, sourceDepartmentFormTypeIds.get(orderIndex));
+			}
+
+			@Override
+			public int getBatchSize() {
+				return sourceDepartmentFormTypeIds.size();
+			}
+		};
+
+		jt.batchUpdate(
+				"insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (?, ?)", bpss);
+	}
+
+
 	private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
 		+ "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
 		+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "

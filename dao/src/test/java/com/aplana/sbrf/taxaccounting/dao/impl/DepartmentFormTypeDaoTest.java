@@ -97,7 +97,7 @@ public class DepartmentFormTypeDaoTest {
 	}
 
 	@Test
-	public void testSaveSources() {
+	public void testSaveFormSources() {
 		List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
 		List<Long> sourceIds = new ArrayList<Long>();
 
@@ -125,6 +125,42 @@ public class DepartmentFormTypeDaoTest {
 		assertEquals(2, sourceIds.size());
 		assertTrue(sourceIds.contains(6l));
 		assertTrue(sourceIds.contains(11l));
+
+	}
+
+	@Test
+	public void testSaveDeclarationSources() {
+		List<DepartmentFormType> sources = departmentFormTypeDao.getDeclarationSources(2, 1);
+		List<Long> sourceIds = new ArrayList<Long>();
+
+		for (DepartmentFormType source : sources) {
+			sourceIds.add(source.getId());
+		}
+
+		sourceIds.add(3l);
+
+		assertEquals(5, sourceIds.size());
+		assertTrue(sourceIds.contains(3l));
+		assertTrue(sourceIds.contains(5l));
+		assertTrue(sourceIds.contains(6l));
+		assertTrue(sourceIds.contains(21l));
+		assertTrue(sourceIds.contains(22l));
+
+		sourceIds.remove(21l);
+
+		departmentFormTypeDao.saveDeclarationSources(1l, sourceIds);
+		sources = departmentFormTypeDao.getDeclarationSources(2, 1);
+		sourceIds.clear();
+
+		for (DepartmentFormType source : sources) {
+			sourceIds.add(source.getId());
+		}
+
+		assertEquals(4, sourceIds.size());
+		assertTrue(sourceIds.contains(3l));
+		assertTrue(sourceIds.contains(5l));
+		assertTrue(sourceIds.contains(6l));
+		assertTrue(sourceIds.contains(22l));
 
 	}
 }
