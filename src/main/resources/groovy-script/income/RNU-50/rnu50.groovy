@@ -31,32 +31,12 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
 
     // графа 2..5
     ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-
-    // если данных еще нет или строка не выбрана
-    if (formData.dataRows.isEmpty() || index == -1) {
-        formData.dataRows.add(newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
-    }
-    setOrder()
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (!isTotal(currentDataRow)) {
-        formData.dataRows.remove(currentDataRow)
-        setOrder()
     }
 }
 
@@ -87,8 +67,8 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = getIndex(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
         }
@@ -98,8 +78,8 @@ void calc() {
     }
 
     /*
-      * Расчеты
-      */
+     * Расчеты
+     */
 
     // удалить строку "итого"
     def delRow = []
@@ -110,6 +90,9 @@ void calc() {
     }
     delRow.each { row ->
         formData.dataRows.remove(formData.dataRows.indexOf(row))
+    }
+    if (formData.dataRows.isEmpty()) {
+        return
     }
 
     formData.dataRows.eachWithIndex { row, i ->
@@ -122,11 +105,7 @@ void calc() {
     totalRow.rnu49rowNumber = 'Итого'
     totalRow.lossReportPeriod = getSum('lossReportPeriod')
     totalRow.lossTaxPeriod = getSum('lossTaxPeriod')
-    ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-
-    setOrder()
+    setTotalStyle(totalRow)
 }
 
 /**
@@ -147,7 +126,8 @@ void logicalCheck(def checkRequiredColumns) {
             def colNames = []
 
             // Список проверяемых столбцов (графа 1..5)
-            def requiredColumns = ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
+            def requiredColumns = ['rowNumber', 'rnu49rowNumber', 'invNumber',
+                    'lossReportPeriod', 'lossTaxPeriod']
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
@@ -164,8 +144,8 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = getIndex(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
             }
@@ -210,15 +190,6 @@ def isTotal(def row) {
 }
 
 /**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
-}
-
-/**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
@@ -235,4 +206,20 @@ def getSum(def columnAlias) {
  */
 def isEmpty(def value) {
     return value == null || value == '' || value == 0
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 }

@@ -11,12 +11,12 @@
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -66,29 +66,31 @@ def addNewRow() {
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
 
-    def index = formData.dataRows.indexOf(currentDataRow)
-    if (index == -1) {
-        index = 0
-    }
-    if (index + 1 == formData.dataRows.size()) {
-        formData.dataRows.add(index, newRow)
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+        row = formData.getDataRow('totalA')
+        formData.dataRows.add(getIndex(row), newRow)
+    } else if (currentDataRow.getAlias() == null) {
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     } else {
-        formData.dataRows.add(index + 1, newRow)
+        def alias = currentDataRow.getAlias()
+        def row = formData.getDataRow('totalA')
+        if (alias.contains('total')) {
+            row = formData.getDataRow(alias)
+            formData.dataRows.add(getIndex(row), newRow)
+        } else {
+            row = formData.getDataRow('total' + alias)
+            formData.dataRows.add(getIndex(row), newRow)
+        }
     }
-
-    setOrder()
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    if (isFixedRow(currentDataRow)) {
-        return
+    if (!isFixedRow(currentDataRow)) {
+        formData.dataRows.remove(currentDataRow)
     }
-
-    formData.dataRows.remove(currentDataRow)
-    setOrder()
 }
 
 /**
@@ -120,7 +122,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
+                    index = getIndex(row) + 1
                     logger.error("В $index строке не заполнены колонки : $errorMsg.")
                 }
             }
@@ -131,14 +133,14 @@ void calc() {
     }
 
     /*
-    * Расчеты.
-    */
+     * Расчеты.
+     */
 
     // графа 1, 15..17, 20
     formData.dataRows.eachWithIndex { row, i ->
         if (!isFixedRow(row)) {
             // графа 1
-            row.rowNumber = (String) i + 1
+            row.rowNumber = i + 1
 
             // графа 15
             if (row.sum - row.marketPrice * 0.8 > 0) {
@@ -178,8 +180,10 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {
         for (def row : formData.dataRows) {
             if (isFixedRow(row)) {
@@ -201,16 +205,18 @@ void logicalCheck() {
                 }
             }
             if (!colNames.isEmpty()) {
-                hasError = true
+                if (!checkRequiredColumns) {
+                    return
+                }
                 def index = row.rowNumber
                 def errorMsg = colNames.join(', ')
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = row.getOrder()
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = getIndex(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
-                break
+                return
             }
 
             // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)
@@ -226,12 +232,12 @@ void logicalCheck() {
                     row.loss == 0 &&
                     row.expensesSum == 0) {
                 logger.error('Все суммы по операции нулевые!')
-                break
+                return
             }
             // 4. Проверка формата номера первой записи	Формат графы 2: ГГ-НННН
             if (!row.firstRecordNumber.matches('\\w{2}-\\w{6}')) {
                 logger.error('Неправильно указан номер предыдущей записи!')
-                break
+                return
             }
 
             // 5. Арифметическая проверка графы 15
@@ -243,25 +249,25 @@ void logicalCheck() {
             }
             if (hasError) {
                 logger.error('Неверное значение графы «Сумма к увеличению прибыли (уменьшению убытка)»!')
-                break
+                return
             }
 
             // 6. Арифметическая проверка графы 16
             if (row.profit != (row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit)) {
                 logger.error('Неверное значение графы «Прибыль от реализации»!')
-                break
+                return
             }
 
             // 7. Арифметическая проверка графы 17
             if (row.loss != row.profit) {
                 logger.error('Неверное значение графы «Убыток от реализации»!')
-                break
+                return
             }
 
             // 8. Арифметическая проверка графы 20
             if (row.monthsLoss != 0 && row.expensesSum != round(row.loss / row.monthsLoss, 2)) {
                 logger.error('Неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
-                break
+                return
             }
 
             // 9. Проверка итоговых значений формы
@@ -283,7 +289,7 @@ void logicalCheck() {
             }
             if (hasError) {
                 logger.error('Итоговые значения рассчитаны неверно!')
-                break
+                return
             }
         }
     }
@@ -381,20 +387,11 @@ def isFixedRow(def row) {
 }
 
 /**
- * Поправить значания order.
- */
-void setOrder() {
-    formData.dataRows.eachWithIndex { row, index ->
-        row.setOrder(index + 1)
-    }
-}
-
-/**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias, def rowStart, def rowEnd) {
-    def from = rowStart.getOrder()
-    def to = rowEnd.getOrder() - 2
+    def from = getIndex(rowStart) + 1
+    def to = getIndex(rowEnd) - 1
     if (from > to) {
         return 0
     }
@@ -404,5 +401,12 @@ def getSum(def columnAlias, def rowStart, def rowEnd) {
 def isSection(def section, def row) {
     def sectionRow = formData.getDataRow(section)
     def totalRow = formData.getDataRow('total' + section)
-    return row.getOrder() > sectionRow.getOrder() && row.getOrder() < totalRow.getOrder()
+    return getIndex(row) > getIndex(sectionRow) && getIndex(row) < getIndex(totalRow)
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

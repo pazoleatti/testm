@@ -26,9 +26,6 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
-        break
 }
 
 // графа 1  - tadeNumber
@@ -49,7 +46,7 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.appendDataRow(currentDataRow, null)
 
     // графа 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
@@ -57,24 +54,6 @@ def addNewRow() {
             'income', 'outcome'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-
-    // если данных еще нет или строка не выбрана
-    if (formData.dataRows.isEmpty() || index == -1) {
-        formData.dataRows.add(newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
-    }
-}
-
-/**
- * Удалить строку.
- */
-def deleteRow() {
-    if (!isTotal(currentDataRow)) {
-        formData.dataRows.remove(currentDataRow)
     }
 }
 
@@ -107,7 +86,7 @@ void calc() {
                 if (!isEmpty(index)) {
                     logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -129,7 +108,7 @@ void calc() {
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(formData.dataRows.indexOf(row))
+        formData.dataRows.remove(getIndex(row))
     }
 
     /** Отчетная дата. */
@@ -199,11 +178,7 @@ void calc() {
     totalRow.setAlias('total')
     totalRow.tadeNumber = 'Итого'
     totalRow.getCell('tadeNumber').colSpan = 2
-    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
-            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate',
-            'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each { alias ->
-        totalRow.getCell(alias).setStyleAlias('Контрольные суммы')
-    }
+    setTotalStyle(totalRow)
     ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income',
             'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
@@ -212,12 +187,9 @@ void calc() {
 
 /**
  * Логические проверки.
- *
- * @param checkRequiredColumns проверять ли обязательные графы
  */
 void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {
-
         /** Отчетная дата. */
         def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
 
@@ -231,7 +203,7 @@ void logicalCheck(def checkRequiredColumns) {
         def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
 
         def hasTotalRow = false
-        def hasError = false
+        def hasError
 
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
@@ -260,21 +232,21 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
+                    index = getIndex(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
-                break
+                return
             }
 
             // 2. Проверка даты первой части РЕПО (графа 7)
             if (row.part1REPODate > reportDate) {
                 logger.error('Неверно указана дата первой части сделки!')
-                break
+                return
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
             if (row.part2REPODate <= reportDate) {
                 logger.error('Неверно указана дата второй части сделки!')
-                break
+                return
             }
 
             // 4. Проверка финансового результата (графа 9, 10, 12, 13)
@@ -282,7 +254,7 @@ void logicalCheck(def checkRequiredColumns) {
                     (row.outcome > 0 && row.income != 0) ||
                     (row.outcome == 0 && (row.outcome269st != 0 || row.outcomeTax != 0))) {
                 logger.error('Задвоение финансового результата!')
-                break
+                return
             }
 
             // 5. Проверка финансового результата
@@ -322,7 +294,7 @@ void logicalCheck(def checkRequiredColumns) {
             }
             if (hasError) {
                 logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.)»!')
-                break
+                return
             }
 
             // 8. Арифметическая проверка графы 13
@@ -338,7 +310,7 @@ void logicalCheck(def checkRequiredColumns) {
             }
             if (hasError) {
                 logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)»!')
-                break
+                return
             }
         }
 
@@ -359,6 +331,8 @@ void logicalCheck(def checkRequiredColumns) {
 
 /**
  * Проверки соответствия НСИ.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
 void checkNSI() {
     if (!formData.dataRows.isEmpty()) {
@@ -470,4 +444,22 @@ def getSum(def columnAlias) {
         return 0
     }
     return summ(formData, new ColumnRange(columnAlias, from, to))
+}
+
+/**
+ * Устаносить стиль для итоговых строк.
+ */
+void setTotalStyle(def row) {
+    ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
+            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate',
+            'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each {
+        row.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }
