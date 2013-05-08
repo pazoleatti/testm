@@ -2,11 +2,10 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'
 	xmlns:u="urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui"
 	xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-	xmlns:codemirror='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'>
+	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'>
 
 
-		<codemirror:CodeMirror ui:field="script" width="100%" height="100%"/>
-		<!-- <g:TextArea ui:field="script"/>  -->
+	<cm:CodeMirror ui:field="script"/>
 
 
 </ui:UiBinder>
