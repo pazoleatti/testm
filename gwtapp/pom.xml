@@ -121,13 +121,6 @@
 			<artifactId>pdfbox</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>codemirror</artifactId>
-			<version>3.11</version>
-		</dependency>
-
-
 		<!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
