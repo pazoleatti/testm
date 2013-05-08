@@ -78,6 +78,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		DataRow getSelectedRow();
 
+		void setSelectedRow(DataRow item, boolean selected);
+
 		void enableRemoveRowButton(boolean enable);
 		
 		boolean getCheckedColumnsClicked();

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
@@ -13,6 +14,7 @@ import com.gwtplatform.dispatch.shared.Result;
 public class FormDataResult implements Result {
 	private List<LogEntry> logEntries;
 	private FormData formData;
+	private DataRow currentRow;
 
 	public List<LogEntry> getLogEntries() {
 		return logEntries;
@@ -28,5 +30,13 @@ public class FormDataResult implements Result {
 
 	public void setFormData(FormData formData) {
 		this.formData = formData;
+	}
+
+	public DataRow getCurrentRow() {
+		return currentRow;
+	}
+
+	public void setCurrentRow(DataRow currentRow) {
+		this.currentRow = currentRow;
 	}
 }

@@ -255,6 +255,7 @@ public class FormDataPresenter extends
 					@Override
 					public void onSuccess(FormDataResult result) {
 						processFormDataResult(result);
+						getView().setSelectedRow(result.getCurrentRow(), true);
 					}
 
 				}));

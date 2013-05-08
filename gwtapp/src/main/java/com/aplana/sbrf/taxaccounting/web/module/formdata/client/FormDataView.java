@@ -223,6 +223,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		return selectionModel.getLastSelectedObject();
 	}
 
+	@Override
+	public void setSelectedRow(DataRow item, boolean selected) {
+		selectionModel.setSelected(item, selected);
+	}
+
 	@UiHandler("manualInputAnchor")
 	void onManualInputButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {

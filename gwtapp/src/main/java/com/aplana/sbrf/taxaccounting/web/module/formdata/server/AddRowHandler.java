@@ -38,16 +38,17 @@ public class AddRowHandler extends
 
 	@Override
 	public FormDataResult execute(AddRowAction action, ExecutionContext context)
-			throws ActionException {
-			FormData formData = action.getFormData();
-			Logger logger = new Logger();
+		throws ActionException {
+		FormData formData = action.getFormData();
+		Logger logger = new Logger();
 		formDataService.addRow(logger, securityService.currentUser()
 				.getId(), formData, action.getCurrentDataRow());
 
-			FormDataResult result = new FormDataResult();
-			result.setFormData(formData);
-			result.setLogEntries(logger.getEntries());
-			return result;
+		FormDataResult result = new FormDataResult();
+		result.setFormData(formData);
+		result.setLogEntries(logger.getEntries());
+		result.setCurrentRow(action.getCurrentDataRow());
+		return result;
 	}
 
 	@Override
