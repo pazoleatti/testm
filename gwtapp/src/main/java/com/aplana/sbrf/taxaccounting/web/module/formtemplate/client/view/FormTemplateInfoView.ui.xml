@@ -1,6 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui'
-	xmlns:codemirror='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror'>
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<ui:style>
 		.formStyle {

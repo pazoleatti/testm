@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui;
 
 import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror;
+import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;

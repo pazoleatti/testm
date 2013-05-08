@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.codemirror;
+package com.aplana.sbrf.taxaccounting.web.widget.codemirror.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

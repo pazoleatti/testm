@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror;
+import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;

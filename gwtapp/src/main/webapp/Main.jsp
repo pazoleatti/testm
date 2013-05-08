@@ -9,11 +9,10 @@
 	<link rel="shortcut icon" href="resources/img/favicon.ico" type="image/vnd.microsoft.icon" />
 
     <link type="text/css" rel="stylesheet" href="resources/css/WidgetCustomization.css">
-    <link type="text/css" rel="stylesheet" href="resources/codemirror-2.36/lib/codemirror.css">
+
     <link type="text/css" rel="stylesheet" href="resources/css/Main.css">
 
-    <script type="text/javascript" src="resources/codemirror-2.36/lib/codemirror.js"></script>
-    <script type="text/javascript" src="resources/codemirror-2.36/mode/groovy/groovy.js"></script>
+   
 	<script type="text/javascript" src="Main/Main.nocache.js"></script>
 </head>
 <body>

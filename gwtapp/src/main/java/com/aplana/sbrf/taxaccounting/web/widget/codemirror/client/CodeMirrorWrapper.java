@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.codemirror;
+package com.aplana.sbrf.taxaccounting.web.widget.codemirror.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
@@ -34,7 +34,7 @@ public final class CodeMirrorWrapper extends JavaScriptObject {
    */
   	public static final native CodeMirrorWrapper createEditor(
       	Element hostElement,
-      	com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirrorConfig config) /*-{
+      	com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirrorConfig config) /*-{
     	return $wnd.CodeMirror(hostElement, config);
   	}-*/;
 
@@ -43,6 +43,13 @@ public final class CodeMirrorWrapper extends JavaScriptObject {
 	 */
 	public native void clearHistory() /*-{
         this.clearHistory();
+    }-*/;
+	
+	/**
+	 * Clears the undo/redo history.
+	 */
+	public native void refresh() /*-{
+        this.refresh();
     }-*/;
 
 }

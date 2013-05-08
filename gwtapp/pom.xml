@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>taxaccounting</artifactId>
-        <version>0.2.2-SNAPSHOT</version>
+		<version>0.2.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>gwtapp</artifactId>
@@ -121,6 +121,13 @@
 			<artifactId>pdfbox</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>codemirror</artifactId>
+			<version>3.11</version>
+		</dependency>
+
+
 		<!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -226,7 +233,7 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>jcl-over-slf4j</artifactId>
 				</dependency>
-            
+
 			</dependencies>
 		</profile>
 		<profile>
