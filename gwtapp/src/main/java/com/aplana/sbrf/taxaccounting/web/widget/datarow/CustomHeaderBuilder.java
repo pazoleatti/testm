@@ -94,13 +94,18 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		int columnCount = getTable().getColumnCount();
 		out.startTR();
 
-		columnCount -= offset;
 		for (int i=0; i<offset; i++) {
-			out.startTH().className(style.header()).text("").endTH();
+			out.startTH().className(style.header()).endTH();
 		}
 
-		for (int col = 1; col <= columnCount; col++) {
-			out.startTH().className(style.header()).text(String.valueOf(col)).endTH();
+		int columnNumber = 1;
+		for (int col = offset; col < columnCount; col++) {
+			if (getTable().getColumnWidth(getTable().getColumn(col)).equals("0em")) {
+				out.startTH().className(style.header()).endTH();
+			} else {
+				out.startTH().className(style.header()).text(String.valueOf(columnNumber++)).endTH();
+
+			}
 		}
 		out.endTR();
 	}
