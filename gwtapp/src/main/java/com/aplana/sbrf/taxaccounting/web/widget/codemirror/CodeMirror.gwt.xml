@@ -6,7 +6,7 @@
 	<inherits name="com.google.gwt.uibinder.UiBinder" />
 
 	<source path='client' />
-	<public path='pub2'/>
+	<public path='pub'/>
  
  	<script src="codemirror-3.12/lib/codemirror.js" />
 	<script src="codemirror-3.12/mode/groovy/groovy.js" />
