@@ -1,5 +1,5 @@
 /**
- * Проверка полей перед расчётом
+ * Проверка полей перед расчётом  (проставим 0 там где это нужно)
  * @author ekuvshinov
  */
 //com.aplana.sbrf.taxaccounting.model.FormData formData
@@ -14,14 +14,15 @@ void setError(String cellName) {
 
 for (row in formData.dataRows) {
     temp = 'incomeDeductible'
-    if (row.getCell(temp).value == null) {
-        setError(row.getCell(temp).column.name)
+    if (row.incomeDeductible == null) {
+        row.incomeDeductible = new BigDecimal(0)
     }
     if (row.getAlias() == 'type4') {
-        for (alias in ['base', 'taxPayment']) {
-            if (row.getCell(alias).value == null) {
-                setError(row.getCell(alias).column.name)
-            }
+        if (row.base == null) {
+            row.base = new BigDecimal(0)
+        }
+        if (row.taxPayment == null) {
+            row.taxPayment = new BigDecimal(0)
         }
     }
 }

@@ -11,6 +11,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 @ScriptExposed
 public interface FormDataService {
 	
-	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
+	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
 }

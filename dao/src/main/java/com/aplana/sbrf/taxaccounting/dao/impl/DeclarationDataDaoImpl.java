@@ -35,6 +35,9 @@ import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 @Repository
 @Transactional
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
+
+	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
+
 	private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
 		@Override
 		public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
@@ -57,7 +60,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				new DeclarationDataRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
+			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
 		}
 	}
 	
@@ -75,7 +78,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				String.class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", declarationDataId);
+			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
 		}
 	}
 	
@@ -90,7 +93,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				byte[].class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", id);
+			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, id);
 		}
 	}
 
@@ -104,7 +107,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				byte[].class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Декларация с id = %d не найдена в БД", id);
+			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, id);
 		}
 	}
 

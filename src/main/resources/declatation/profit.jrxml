@@ -196,70 +196,70 @@
 ($F{КБКСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="КварталИсч" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КварталИсч} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{КварталИсч} == null || $F{КварталИсч}.equals("0")?
+"--"
 :
-($F{КварталИсч}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КварталИсч} == null ?
-"-------------------------"
+($F{КварталИсч}+"--").substring(0,2)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{КварталИсч} == null || $F{КварталИсч}.equals("0")?
+"--"
 :
-($F{КварталИсч}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{КварталИсч}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат1Ф" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат1Ф} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат1Ф} == null || $F{АвПлат1Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат1Ф}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлат1Ф} == null ?
-"-------------------------"
+($F{АвПлат1Ф}+"----------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлат1Ф} == null || $F{АвПлат1Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат1Ф}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлат1Ф}+"----------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат2Ф" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат2Ф} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат2Ф} == null || $F{АвПлат2Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат2Ф}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлат2Ф} == null ?
-"-------------------------"
+($F{АвПлат2Ф}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлат2Ф} == null || $F{АвПлат2Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат2Ф}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлат2Ф}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат3Ф" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат3Ф} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат3Ф} == null || $F{АвПлат3Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат3Ф}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлат3Ф} == null ?
-"-------------------------"
+($F{АвПлат3Ф}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлат3Ф} == null || $F{АвПлат3Ф}.equals("0")?
+"---------------"
 :
-($F{АвПлат3Ф}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлат3Ф}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат1С" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат1С} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат1С} == null || $F{АвПлат1С}.equals("0") ?
+"---------------"
 :
-($F{АвПлат1С}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлат1С} == null ?
-"-------------------------"
+($F{АвПлат1С}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлат1С} == null || $F{АвПлат1С}.equals("0") ?
+"---------------"
 :
-($F{АвПлат1С}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлат1С}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат2С" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат2С} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат2С} == null || $F{АвПлат2С}.equals("0") ?
+"---------------"
 :
-($F{АвПлат2С}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлат2С} == null ?
-"-------------------------"
+($F{АвПлат2С}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлат2С} == null || $F{АвПлат2С}.equals("0") ?
+"---------------"
 :
-($F{АвПлат2С}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлат2С}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлат3С" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлат3С} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлат3С} == null || $F{АвПлат3С}.equals("0") ?
+"---------------"
 :
-($F{АвПлат3С}+"-------------------------").substring(0,25)]]></variableExpression>
+($F{АвПлат3С}+"---------------").substring(0,15)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{АвПлат3С} == null ?
 "-------------------------"
 :
@@ -667,114 +667,114 @@ Arrays.asList(1)]]></variableExpression>
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="ДохРеал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохРеал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ДохРеал} == null || $F{ДохРеал}.equals("0")?
+"---------------"
 :
-($F{ДохРеал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохРеал} == null ?
-"-------------------------"
+($F{ДохРеал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДохРеал} == null || $F{ДохРеал}.equals("0")?
+"---------------"
 :
-($F{ДохРеал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДохРеал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ДохВнереал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохВнереал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ДохВнереал} == null || $F{ДохВнереал}.equals("0")?
+"---------------"
 :
-($F{ДохВнереал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохВнереал} == null ?
-"-------------------------"
+($F{ДохВнереал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДохВнереал} == null || $F{ДохВнереал}.equals("0")?
+"---------------"
 :
-($F{ДохВнереал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДохВнереал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхУмРеал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхУмРеал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхУмРеал} == null || $F{РасхУмРеал}.equals("0")?
+"---------------"
 :
-($F{РасхУмРеал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхУмРеал} == null ?
-"-------------------------"
+($F{РасхУмРеал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхУмРеал} == null || $F{РасхУмРеал}.equals("0")?
+"---------------"
 :
-($F{РасхУмРеал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхУмРеал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхВнереал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхВнереал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхВнереал} == null || $F{РасхВнереал}.equals("0")?
+"---------------"
 :
-($F{РасхВнереал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхВнереал} == null ?
-"-------------------------"
+($F{РасхВнереал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхВнереал} == null || $F{РасхВнереал}.equals("0")?
+"---------------"
 :
-($F{РасхВнереал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхВнереал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Убытки" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Убытки} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Убытки} == null || $F{Убытки}.equals("0")?
+"---------------"
 :
-($F{Убытки}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Убытки} == null ?
-"-------------------------"
+($F{Убытки}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Убытки} == null || $F{Убытки}.equals("0")?
+"---------------"
 :
-($F{Убытки}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Убытки}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПрибУб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПрибУб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПрибУб} == null || $F{ПрибУб}.equals("0")?
+"---------------"
 :
-($F{ПрибУб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПрибУб} == null ?
-"-------------------------"
+($F{ПрибУб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПрибУб} == null || $F{ПрибУб}.equals("0")?
+"---------------"
 :
-($F{ПрибУб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПрибУб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ДохИсклПриб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохИсклПриб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ДохИсклПриб} == null || $F{ДохИсклПриб}.equals("0")?
+"---------------"
 :
-($F{ДохИсклПриб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохИсклПриб} == null ?
-"-------------------------"
+($F{ДохИсклПриб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДохИсклПриб} == null || $F{ДохИсклПриб}.equals("0")?
+"---------------"
 :
-($F{ДохИсклПриб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДохИсклПриб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПрибБРСт0" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПрибБРСт0} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПрибБРСт0} == null || $F{ПрибБРСт0}.equals("0")?
+"---------------"
 :
-($F{ПрибБРСт0}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПрибБРСт0} == null ?
-"-------------------------"
+($F{ПрибБРСт0}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПрибБРСт0} == null || $F{ПрибБРСт0}.equals("0")?
+"---------------"
 :
-($F{ПрибБРСт0}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПрибБРСт0}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумЛьгот" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумЛьгот} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумЛьгот} == null || $F{СумЛьгот}.equals("0")?
+"---------------"
 :
-($F{СумЛьгот}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумЛьгот} == null ?
-"-------------------------"
+($F{СумЛьгот}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумЛьгот} == null || $F{СумЛьгот}.equals("0")?
+"---------------"
 :
-($F{СумЛьгот}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумЛьгот}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБаза" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалБаза} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалБаза} == null || $F{НалБаза}.equals("0")?
+"---------------"
 :
-($F{НалБаза}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалБаза} == null ?
-"-------------------------"
+($F{НалБаза}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалБаза} == null || $F{НалБаза}.equals("0")?
+"---------------"
 :
-($F{НалБаза}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалБаза}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытУмНБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытУмНБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытУмНБ} == null || $F{УбытУмНБ}.equals("0")?
+"---------------"
 :
-($F{УбытУмНБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытУмНБ} == null ?
-"-------------------------"
+($F{УбытУмНБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытУмНБ} == null || $F{УбытУмНБ}.equals("0")?
+"---------------"
 :
-($F{УбытУмНБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытУмНБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБазаИсч" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НалБазаИсч} == null ?
@@ -787,17 +787,17 @@ Arrays.asList(1)]]></variableExpression>
 ($F{НалБазаИсч}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБазаИсчСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалБазаИсчСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалБазаИсчСуб} == null || $F{НалБазаИсчСуб}.equals("0")?
+"---------------"
 :
-($F{НалБазаИсчСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалБазаИсчСуб} == null ?
-"-------------------------"
+($F{НалБазаИсчСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалБазаИсчСуб} == null || $F{НалБазаИсчСуб}.equals("0")?
+"---------------"
 :
-($F{НалБазаИсчСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалБазаИсчСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалФБ} == null?
+			<variableExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
 "-----"
 :
 ($F{СтавНалФБ}.length()==3?
@@ -810,7 +810,7 @@ $F{СтавНалФБ}+"-0-"
 $F{СтавНалФБ}+"--0-"
 :
 $F{СтавНалФБ}+"-----".substring(0,5))))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null?
+			<initialValueExpression><![CDATA[$F{СтавНалФБ} == null || $F{СтавНалФБ}.equals("0")?
 "-----"
 :
 ($F{СтавНалФБ}.length()==3?
@@ -825,224 +825,224 @@ $F{СтавНалФБ}+"--0-"
 $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСуб284" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСуб284} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+"-----"
 :
-($F{СтавНалСуб284}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСуб284} == null ?
-"-------------------------"
+($F{СтавНалСуб284}+"-----").substring(0,5)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСуб284} == null || $F{СтавНалСуб284}.equals("0")?
+"-----"
 :
-($F{СтавНалСуб284}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалСуб284}+"-----").substring(0,5)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+"-----"
 :
-($F{СтавНалСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСуб} == null ?
-"-------------------------"
+($F{СтавНалСуб}+"-----").substring(0,5)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСуб} == null || $F{СтавНалСуб}.equals("0")?
+"-----"
 :
-($F{СтавНалСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалСуб}+"-----").substring(0,5)]]></initialValueExpression>
 		</variable>
 		<variable name="НалИсчисл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалИсчисл} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалИсчисл} == null?
+"---------------"
 :
-($F{НалИсчисл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалИсчисл} == null ?
-"-------------------------"
+($F{НалИсчисл}+"----------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалИсчисл} == null?
+"---------------"
 :
-($F{НалИсчисл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалИсчисл}+"----------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалИсчислФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалИсчислФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалИсчислФБ} == null?
+"---------------"
 :
-($F{НалИсчислФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалИсчислФБ} == null ?
-"-------------------------"
+($F{НалИсчислФБ}+"----------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалИсчислФБ} == null?
+"---------------"
 :
-($F{НалИсчислФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалИсчислФБ}+"----------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалИсчислСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалИсчислСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалИсчислСуб} == null || $F{НалИсчислСуб}.equals("0")?
+"---------------"
 :
-($F{НалИсчислСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалИсчислСуб} == null ?
-"-------------------------"
+($F{НалИсчислСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалИсчислСуб} == null || $F{НалИсчислСуб}.equals("0") ?
+"---------------"
 :
-($F{НалИсчислСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалИсчислСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвНачисл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвНачисл} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвНачисл} == null || $F{АвНачисл}.equals("0")?
+"---------------"
 :
-($F{АвНачисл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвНачисл} == null ?
-"-------------------------"
+($F{АвНачисл}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвНачисл} == null || $F{АвНачисл}.equals("0")?
+"---------------"
 :
-($F{АвНачисл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвНачисл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвНачислФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвНачислФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвНачислФБ} == null || $F{АвНачислФБ}.equals("0")?
+"---------------"
 :
-($F{АвНачислФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвНачислФБ} == null ?
-"-------------------------"
+($F{АвНачислФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвНачислФБ} == null || $F{АвНачислФБ}.equals("0")?
+"---------------"
 :
-($F{АвНачислФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвНачислФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвНачислСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвНачислСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвНачислСуб} == null || $F{АвНачислСуб}.equals("0")?
+"---------------"
 :
-($F{АвНачислСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвНачислСуб} == null ?
-"-------------------------"
+($F{АвНачислСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвНачислСуб} == null || $F{АвНачислСуб}.equals("0")?
+"---------------"
 :
-($F{АвНачислСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвНачислСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалВыпл311" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалВыпл311} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалВыпл311} == null || $F{НалВыпл311}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалВыпл311} == null ?
-"-------------------------"
+($F{НалВыпл311}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалВыпл311} == null || $F{НалВыпл311}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалВыпл311}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалВыпл311ФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалВыпл311ФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалВыпл311ФБ} == null || $F{НалВыпл311ФБ}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311ФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалВыпл311ФБ} == null ?
-"-------------------------"
+($F{НалВыпл311ФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалВыпл311ФБ} == null || $F{НалВыпл311ФБ}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311ФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалВыпл311ФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалВыпл311Суб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалВыпл311Суб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалВыпл311Суб} == null || $F{НалВыпл311Суб}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311Суб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалВыпл311Суб} == null ?
-"-------------------------"
+($F{НалВыпл311Суб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалВыпл311Суб} == null || $F{НалВыпл311Суб}.equals("0")?
+"---------------"
 :
-($F{НалВыпл311Суб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалВыпл311Суб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалДоплФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДоплФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалДоплФБ} == null || $F{НалДоплФБ}.equals("0")?
+"---------------"
 :
-($F{НалДоплФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДоплФБ} == null ?
-"-------------------------"
+($F{НалДоплФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалДоплФБ} == null || $F{НалДоплФБ}.equals("0")?
+"---------------"
 :
-($F{НалДоплФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалДоплФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалДоплСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДоплСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалДоплСуб}== null || $F{НалДоплСуб}.equals("0")?
+"---------------"
 :
-($F{НалДоплСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДоплСуб} == null ?
-"-------------------------"
+($F{НалДоплСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалДоплСуб}== null || $F{НалДоплСуб}.equals("0")?
+"---------------"
 :
-($F{НалДоплСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалДоплСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалУменФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалУменФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалУменФБ}== null || $F{НалУменФБ}.equals("0")?
+"---------------"
 :
-($F{НалУменФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалУменФБ} == null ?
-"-------------------------"
+($F{НалУменФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалУменФБ}== null || $F{НалУменФБ}.equals("0")?
+"---------------"
 :
-($F{НалУменФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалУменФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалУменСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалУменСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалУменСуб} == null || $F{НалУменСуб}.equals("0")?
+"---------------"
 :
-($F{НалУменСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалУменСуб} == null ?
-"-------------------------"
+($F{НалУменСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалУменСуб} == null || $F{НалУменСуб}.equals("0")?
+"---------------"
 :
-($F{НалУменСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалУменСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатМес" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатМес} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатМес} == null || $F{АвПлатМес}.equals("0")?
+"---------------"
 :
-($F{АвПлатМес}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатМес} == null ?
-"-------------------------"
+($F{АвПлатМес}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатМес} == null || $F{АвПлатМес}.equals("0")?
+"---------------"
 :
-($F{АвПлатМес}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатМес}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатМесФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатМесФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатМесФБ} == null || $F{АвПлатМесФБ}.equals("0")?
+"---------------"
 :
-($F{АвПлатМесФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатМесФБ} == null ?
-"-------------------------"
+($F{АвПлатМесФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатМесФБ} == null || $F{АвПлатМесФБ}.equals("0")?
+"---------------"
 :
-($F{АвПлатМесФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатМесФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатМесСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатМесСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатМесСуб} == null || $F{АвПлатМесСуб}.equals("0")?
+"---------------"
 :
-($F{АвПлатМесСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатМесСуб} == null ?
-"-------------------------"
+($F{АвПлатМесСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатМесСуб} == null || $F{АвПлатМесСуб}.equals("0")?
+"---------------"
 :
-($F{АвПлатМесСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатМесСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатУпл1Кв" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатУпл1Кв} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатУпл1Кв} == null || $F{АвПлатУпл1Кв}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1Кв}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатУпл1Кв} == null ?
-"-------------------------"
+($F{АвПлатУпл1Кв}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатУпл1Кв} == null || $F{АвПлатУпл1Кв}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1Кв}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатУпл1Кв}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатУпл1КвФБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатУпл1КвФБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатУпл1КвФБ} == null || $F{АвПлатУпл1КвФБ}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1КвФБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатУпл1КвФБ} == null ?
-"-------------------------"
+($F{АвПлатУпл1КвФБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатУпл1КвФБ} == null || $F{АвПлатУпл1КвФБ}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1КвФБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатУпл1КвФБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="АвПлатУпл1КвСуб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АвПлатУпл1КвСуб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АвПлатУпл1КвСуб} == null || $F{АвПлатУпл1КвСуб}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1КвСуб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АвПлатУпл1КвСуб} == null ?
-"-------------------------"
+($F{АвПлатУпл1КвСуб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АвПлатУпл1КвСуб} == null || $F{АвПлатУпл1КвСуб}.equals("0")?
+"---------------"
 :
-($F{АвПлатУпл1КвСуб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АвПлатУпл1КвСуб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалВсего" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалВсего}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+"-----"
 :
-($F{СтавНалВсего}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалВсего}== null ?
-"-------------------------"
+($F{СтавНалВсего}+"-----").substring(0,5)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалВсего} == null || $F{СтавНалВсего}.equals("0")?
+"-----"
 :
-($F{СтавНалВсего}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалВсего}+"-----").substring(0,5)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="str7" uuid="e0fb394c-8283-4cc0-88e3-ecc0594015eb">
@@ -1120,194 +1120,194 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалПред" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалПред} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалПред} == null || $F{ВырРеалПред}.equals("0")?
+"---------------"
 :
-($F{ВырРеалПред}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалПред} == null ?
-"-------------------------"
+($F{ВырРеалПред}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалПред} == null || $F{ВырРеалПред}.equals("0")?
+"---------------"
 :
-($F{ВырРеалПред}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалОпер32" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалОпер32} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалОпер32} == null || $F{ВырРеалОпер32}.equals("0")?
+"---------------"
 :
-($F{ВырРеалОпер32}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалОпер32} == null ?
-"-------------------------"
+($F{ВырРеалОпер32}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалОпер32} == null || $F{ВырРеалОпер32}.equals("0")?
+"---------------"
 :
-($F{ВырРеалОпер32}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалОпер32}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалИтог" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалИтог} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалИтог} == null || $F{ВырРеалИтог}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИтог}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалИтог} == null ?
-"-------------------------"
+($F{ВырРеалИтог}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалИтог} == null || $F{ВырРеалИтог}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИтог}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалИтог}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалВс} == null || $F{ВырРеалВс}.equals("0")?
+"---------------"
 :
-($F{ВырРеалВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалВс} == null ?
-"-------------------------"
+($F{ВырРеалВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалВс} == null || $F{ВырРеалВс}.equals("0")?
+"---------------"
 :
-($F{ВырРеалВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалТовСоб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалТовСоб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалТовСоб} == null || $F{ВырРеалТовСоб}.equals("0")?
+"---------------"
 :
-($F{ВырРеалТовСоб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалТовСоб} == null ?
-"-------------------------"
+($F{ВырРеалТовСоб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалТовСоб} == null || $F{ВырРеалТовСоб}.equals("0")?
+"---------------"
 :
-($F{ВырРеалТовСоб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалТовСоб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалТовПок" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалТовПок} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалТовПок} == null || $F{ВырРеалТовПок}.equals("0")?
+"---------------"
 :
-($F{ВырРеалТовПок}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалТовПок} == null ?
-"-------------------------"
+($F{ВырРеалТовПок}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалТовПок} == null || $F{ВырРеалТовПок}.equals("0")?
+"---------------"
 :
-($F{ВырРеалТовПок}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалТовПок}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалИмПрав" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалИмПрав}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалИмПрав} == null || $F{ВырРеалИмПрав}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИмПрав}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалИмПрав}== null ?
-"-------------------------"
+($F{ВырРеалИмПрав}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалИмПрав} == null || $F{ВырРеалИмПрав}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИмПрав}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалИмПрав}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалИмПроч" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалИмПроч}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалИмПроч} == null || $F{ВырРеалИмПроч}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИмПроч}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалИмПроч}== null ?
-"-------------------------"
+($F{ВырРеалИмПроч}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалИмПроч} == null || $F{ВырРеалИмПроч}.equals("0")?
+"---------------"
 :
-($F{ВырРеалИмПроч}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалИмПроч}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВырРеалЦБВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВырРеалЦБВс}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВырРеалЦБВс} == null || $F{ВырРеалЦБВс}.equals("0")?
+"---------------"
 :
-($F{ВырРеалЦБВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВырРеалЦБВс}== null ?
-"-------------------------"
+($F{ВырРеалЦБВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВырРеалЦБВс} == null || $F{ВырРеалЦБВс}.equals("0")?
+"---------------"
 :
-($F{ВырРеалЦБВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВырРеалЦБВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ОтклВырЦБМин" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОтклВырЦБМин}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ОтклВырЦБМин} == null || $F{ОтклВырЦБМин}.equals("0")?
+"---------------"
 :
-($F{ОтклВырЦБМин}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОтклВырЦБМин}== null ?
-"-------------------------"
+($F{ОтклВырЦБМин}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОтклВырЦБМин} == null || $F{ОтклВырЦБМин}.equals("0")?
+"---------------"
 :
-($F{ОтклВырЦБМин}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ОтклВырЦБМин}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ОтклВырЦБРасч" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОтклВырЦБРасч}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ОтклВырЦБРасч} == null || $F{ОтклВырЦБРасч}.equals("0")?
+"---------------"
 :
-($F{ОтклВырЦБРасч}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОтклВырЦБРасч}== null ?
-"-------------------------"
+($F{ОтклВырЦБРасч}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОтклВырЦБРасч} == null || $F{ОтклВырЦБРасч}.equals("0")?
+"---------------"
 :
-($F{ОтклВырЦБРасч}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ОтклВырЦБРасч}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохВс}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохВс} == null || $F{ВнеРеалДохВс}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохВс}== null ?
-"-------------------------"
+($F{ВнеРеалДохВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохВс} == null || $F{ВнеРеалДохВс}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохПр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохПр}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохПр} == null || $F{ВнеРеалДохПр}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохПр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохПр}== null ?
-"-------------------------"
+($F{ВнеРеалДохПр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохПр} == null || $F{ВнеРеалДохПр}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохПр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохПр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохСт" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохСт}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохСт} == null || $F{ВнеРеалДохСт}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохСт}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохСт}== null ?
-"-------------------------"
+($F{ВнеРеалДохСт}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохСт} == null || $F{ВнеРеалДохСт}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохСт}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохСт}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохБезв" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохБезв}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохБезв} == null || $F{ВнеРеалДохБезв}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохБезв}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохБезв}== null ?
-"-------------------------"
+($F{ВнеРеалДохБезв}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохБезв} == null || $F{ВнеРеалДохБезв}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохБезв}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохБезв}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохИзл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохИзл}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохИзл} == null || $F{ВнеРеалДохИзл}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохИзл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохИзл}== null ?
-"-------------------------"
+($F{ВнеРеалДохИзл}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохИзл} == null || $F{ВнеРеалДохИзл}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохИзл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохИзл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохВРасх" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохВРасх}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохВРасх} == null || $F{ВнеРеалДохВРасх}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохВРасх}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохВРасх}== null ?
-"-------------------------"
+($F{ВнеРеалДохВРасх}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохВРасх} == null || $F{ВнеРеалДохВРасх}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохВРасх}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохВРасх}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохРынЦБДД" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохРынЦБДД}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохРынЦБДД} == null || $F{ВнеРеалДохРынЦБДД}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохРынЦБДД}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохРынЦБДД}== null ?
-"-------------------------"
+($F{ВнеРеалДохРынЦБДД}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохРынЦБДД} == null || $F{ВнеРеалДохРынЦБДД}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохРынЦБДД}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохРынЦБДД}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВнеРеалДохКор" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВнеРеалДохКор}== null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВнеРеалДохКор} == null || $F{ВнеРеалДохКор}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохКор}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВнеРеалДохКор}== null ?
-"-------------------------"
+($F{ВнеРеалДохКор}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВнеРеалДохКор} == null || $F{ВнеРеалДохКор}.equals("0")?
+"---------------"
 :
-($F{ВнеРеалДохКор}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВнеРеалДохКор}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="str8" uuid="132a50a5-b83b-4772-8657-39e0c707ef17">
@@ -1460,124 +1460,124 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="АктивРеалПред" class="java.lang.String">
-			<variableExpression><![CDATA[$F{АктивРеалПред} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{АктивРеалПред} == null || $F{АктивРеалПред}.equals("0")?
+"---------------"
 :
-($F{АктивРеалПред}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{АктивРеалПред} == null ?
-"-------------------------"
+($F{АктивРеалПред}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{АктивРеалПред} == null || $F{АктивРеалПред}.equals("0")?
+"---------------"
 :
-($F{АктивРеалПред}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{АктивРеалПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НадбПокПред" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НадбПокПред} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НадбПокПред} == null || $F{НадбПокПред}.equals("0")?
+"---------------"
 :
-($F{НадбПокПред}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НадбПокПред} == null ?
-"-------------------------"
+($F{НадбПокПред}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НадбПокПред} == null || $F{НадбПокПред}.equals("0")?
+"---------------"
 :
-($F{НадбПокПред}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НадбПокПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПриобРеалЦБ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПриобРеалЦБ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПриобРеалЦБ} == null || $F{ПриобРеалЦБ}.equals("0")?
+"---------------"
 :
-($F{ПриобРеалЦБ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПриобРеалЦБ} == null ?
-"-------------------------"
+($F{ПриобРеалЦБ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПриобРеалЦБ} == null || $F{ПриобРеалЦБ}.equals("0")?
+"---------------"
 :
-($F{ПриобРеалЦБ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПриобРеалЦБ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПриобрРеалИмущ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПриобрРеалИмущ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПриобрРеалИмущ} == null || $F{ПриобрРеалИмущ}.equals("0")?
+"---------------"
 :
-($F{ПриобрРеалИмущ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПриобрРеалИмущ} == null ?
-"-------------------------"
+($F{ПриобрРеалИмущ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПриобрРеалИмущ} == null || $F{ПриобрРеалИмущ}.equals("0")?
+"---------------"
 :
-($F{ПриобрРеалИмущ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПриобрРеалИмущ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПрямРасхРеал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПрямРасхРеал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПрямРасхРеал} == null || $F{ПрямРасхРеал}.equals("0")?
+"---------------"
 :
-($F{ПрямРасхРеал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПрямРасхРеал} == null ?
-"-------------------------"
+($F{ПрямРасхРеал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПрямРасхРеал} == null || $F{ПрямРасхРеал}.equals("0")?
+"---------------"
 :
-($F{ПрямРасхРеал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПрямРасхРеал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхОпер32" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхОпер32} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхОпер32} == null || $F{РасхОпер32}.equals("0")?
+"---------------"
 :
-($F{РасхОпер32}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхОпер32} == null ?
-"-------------------------"
+($F{РасхОпер32}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхОпер32} == null || $F{РасхОпер32}.equals("0")?
+"---------------"
 :
-($F{РасхОпер32}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхОпер32}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхПризнИтого" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхПризнИтого} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхПризнИтого} == null || $F{РасхПризнИтого}.equals("0")?
+"---------------"
 :
-($F{РасхПризнИтого}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхПризнИтого} == null ?
-"-------------------------"
+($F{РасхПризнИтого}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхПризнИтого} == null || $F{РасхПризнИтого}.equals("0")?
+"---------------"
 :
-($F{РасхПризнИтого}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхПризнИтого}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РеалИмущПрав" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РеалИмущПрав} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РеалИмущПрав} == null || $F{РеалИмущПрав}.equals("0")?
+"---------------"
 :
-($F{РеалИмущПрав}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РеалИмущПрав} == null ?
-"-------------------------"
+($F{РеалИмущПрав}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РеалИмущПрав} == null || $F{РеалИмущПрав}.equals("0")?
+"---------------"
 :
-($F{РеалИмущПрав}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РеалИмущПрав}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумОтклЦен" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумОтклЦен} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумОтклЦен} == null || $F{СумОтклЦен}.equals("0")?
+"---------------"
 :
-($F{СумОтклЦен}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумОтклЦен} == null ?
-"-------------------------"
+($F{СумОтклЦен}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумОтклЦен} == null || $F{СумОтклЦен}.equals("0")?
+"---------------"
 :
-($F{СумОтклЦен}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумОтклЦен}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытПрошОбсл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытПрошОбсл} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытПрошОбсл} == null || $F{УбытПрошОбсл}.equals("0")?
+"---------------"
 :
-($F{УбытПрошОбсл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытПрошОбсл} == null ?
-"-------------------------"
+($F{УбытПрошОбсл}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытПрошОбсл} == null || $F{УбытПрошОбсл}.equals("0")?
+"---------------"
 :
-($F{УбытПрошОбсл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытПрошОбсл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытРеалАмИм" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытРеалАмИм} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытРеалАмИм} == null || $F{УбытРеалАмИм}.equals("0")?
+"---------------"
 :
-($F{УбытРеалАмИм}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытРеалАмИм} == null ?
-"-------------------------"
+($F{УбытРеалАмИм}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытРеалАмИм} == null || $F{УбытРеалАмИм}.equals("0")?
+"---------------"
 :
-($F{УбытРеалАмИм}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытРеалАмИм}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытРеалЗемУч" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытРеалЗемУч} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытРеалЗемУч} == null || $F{УбытРеалЗемУч}.equals("0")?
+"---------------"
 :
-($F{УбытРеалЗемУч}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытРеалЗемУч} == null ?
-"-------------------------"
+($F{УбытРеалЗемУч}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытРеалЗемУч} == null || $F{УбытРеалЗемУч}.equals("0")?
+"---------------"
 :
-($F{УбытРеалЗемУч}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытРеалЗемУч}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="МетодНачАморт" class="java.lang.String">
 			<variableExpression><![CDATA[$F{МетодНачАморт} == null ?
@@ -1590,314 +1590,314 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{МетодНачАморт}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СумАмортПерЛ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумАмортПерЛ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумАмортПерЛ} == null || $F{СумАмортПерЛ}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерЛ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумАмортПерЛ} == null ?
-"-------------------------"
+($F{СумАмортПерЛ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумАмортПерЛ} == null || $F{СумАмортПерЛ}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерЛ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумАмортПерЛ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумАмортПерН" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумАмортПерН} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумАмортПерН} == null || $F{СумАмортПерН}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерН}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумАмортПерН} == null ?
-"-------------------------"
+($F{СумАмортПерН}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумАмортПерН} == null || $F{СумАмортПерН}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерН}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумАмортПерН}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумАмортПерНмАЛ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумАмортПерНмАЛ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумАмортПерНмАЛ} == null || $F{СумАмортПерНмАЛ}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерНмАЛ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумАмортПерНмАЛ} == null ?
-"-------------------------"
+($F{СумАмортПерНмАЛ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумАмортПерНмАЛ} == null || $F{СумАмортПерНмАЛ}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерНмАЛ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумАмортПерНмАЛ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумАмортПерНмАН" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумАмортПерНмАН} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумАмортПерНмАН} == null || $F{СумАмортПерНмАН}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерНмАН}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумАмортПерНмАН} == null ?
-"-------------------------"
+($F{СумАмортПерНмАН}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумАмортПерНмАН} == null || $F{СумАмортПерНмАН}.equals("0")?
+"---------------"
 :
-($F{СумАмортПерНмАН}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумАмортПерНмАН}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхВнеРеалВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхВнеРеалВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхВнеРеалВс} == null || $F{РасхВнеРеалВс}.equals("0")?
+"---------------"
 :
-($F{РасхВнеРеалВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхВнеРеалВс} == null ?
-"-------------------------"
+($F{РасхВнеРеалВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхВнеРеалВс} == null || $F{РасхВнеРеалВс}.equals("0")?
+"---------------"
 :
-($F{РасхВнеРеалВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхВнеРеалВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхВнереалПрДО" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхВнереалПрДО} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхВнереалПрДО} == null || $F{РасхВнереалПрДО}.equals("0")?
+"---------------"
 :
-($F{РасхВнереалПрДО}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхВнереалПрДО} == null ?
-"-------------------------"
+($F{РасхВнереалПрДО}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхВнереалПрДО} == null || $F{РасхВнереалПрДО}.equals("0")?
+"---------------"
 :
-($F{РасхВнереалПрДО}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхВнереалПрДО}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхВнереалРзрв" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхВнереалРзрв} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхВнереалРзрв} == null || $F{РасхВнереалРзрв}.equals("0")?
+"---------------"
 :
-($F{РасхВнереалРзрв}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхВнереалРзрв} == null ?
-"-------------------------"
+($F{РасхВнереалРзрв}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхВнереалРзрв} == null || $F{РасхВнереалРзрв}.equals("0")?
+"---------------"
 :
-($F{РасхВнереалРзрв}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхВнереалРзрв}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЛиквОС" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЛиквОС} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЛиквОС} == null || $F{РасхЛиквОС}.equals("0")?
+"---------------"
 :
-($F{РасхЛиквОС}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЛиквОС} == null ?
-"-------------------------"
+($F{РасхЛиквОС}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЛиквОС} == null || $F{РасхЛиквОС}.equals("0")?
+"---------------"
 :
-($F{РасхЛиквОС}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЛиквОС}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхРынЦБДД" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхРынЦБДД} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхРынЦБДД} == null || $F{РасхРынЦБДД}.equals("0")?
+"---------------"
 :
-($F{РасхРынЦБДД}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхРынЦБДД} == null ?
-"-------------------------"
+($F{РасхРынЦБДД}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхРынЦБДД} == null || $F{РасхРынЦБДД}.equals("0")?
+"---------------"
 :
-($F{РасхРынЦБДД}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхРынЦБДД}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхШтраф" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхШтраф} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхШтраф} == null || $F{РасхШтраф}.equals("0")?
+"---------------"
 :
-($F{РасхШтраф}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхШтраф} == null ?
-"-------------------------"
+($F{РасхШтраф}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхШтраф} == null || $F{РасхШтраф}.equals("0")?
+"---------------"
 :
-($F{РасхШтраф}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхШтраф}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытРеалПравТр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытРеалПравТр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытРеалПравТр} == null || $F{УбытРеалПравТр}.equals("0")?
+"---------------"
 :
-($F{УбытРеалПравТр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытРеалПравТр} == null ?
-"-------------------------"
+($F{УбытРеалПравТр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытРеалПравТр} == null || $F{УбытРеалПравТр}.equals("0")?
+"---------------"
 :
-($F{УбытРеалПравТр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытРеалПравТр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумБезнадДолг" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумБезнадДолг} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумБезнадДолг} == null || $F{СумБезнадДолг}.equals("0")?
+"---------------"
 :
-($F{СумБезнадДолг}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумБезнадДолг} == null ?
-"-------------------------"
+($F{СумБезнадДолг}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумБезнадДолг} == null || $F{СумБезнадДолг}.equals("0")?
+"---------------"
 :
-($F{СумБезнадДолг}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумБезнадДолг}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытПриравнВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытПриравнВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытПриравнВс} == null || $F{УбытПриравнВс}.equals("0")?
+"---------------"
 :
-($F{УбытПриравнВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытПриравнВс} == null ?
-"-------------------------"
+($F{УбытПриравнВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытПриравнВс} == null || $F{УбытПриравнВс}.equals("0")?
+"---------------"
 :
-($F{УбытПриравнВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытПриравнВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытПрошПер" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытПрошПер} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытПрошПер} == null || $F{УбытПрошПер}.equals("0")?
+"---------------"
 :
-($F{УбытПрошПер}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытПрошПер} == null ?
-"-------------------------"
+($F{УбытПрошПер}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытПрошПер} == null || $F{УбытПрошПер}.equals("0")?
+"---------------"
 :
-($F{УбытПрошПер}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытПрошПер}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПрямРасхТоргВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПрямРасхТоргВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПрямРасхТоргВс} == null || $F{ПрямРасхТоргВс}.equals("0")?
+"---------------"
 :
-($F{ПрямРасхТоргВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПрямРасхТоргВс} == null ?
-"-------------------------"
+($F{ПрямРасхТоргВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПрямРасхТоргВс} == null || $F{ПрямРасхТоргВс}.equals("0")?
+"---------------"
 :
-($F{ПрямРасхТоргВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПрямРасхТоргВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РеалПокТов" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РеалПокТов} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РеалПокТов} == null || $F{РеалПокТов}.equals("0")?
+"---------------"
 :
-($F{РеалПокТов}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РеалПокТов} == null ?
-"-------------------------"
+($F{РеалПокТов}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РеалПокТов} == null || $F{РеалПокТов}.equals("0")?
+"---------------"
 :
-($F{РеалПокТов}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РеалПокТов}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="КосвРасхВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КосвРасхВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{КосвРасхВс} == null || $F{КосвРасхВс}.equals("0")?
+"---------------"
 :
-($F{КосвРасхВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КосвРасхВс} == null ?
-"-------------------------"
+($F{КосвРасхВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{КосвРасхВс} == null || $F{КосвРасхВс}.equals("0")?
+"---------------"
 :
-($F{КосвРасхВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{КосвРасхВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НИОКР" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НИОКР} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НИОКР} == null || $F{НИОКР}.equals("0")?
+"---------------"
 :
-($F{НИОКР}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НИОКР} == null ?
-"-------------------------"
+($F{НИОКР}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НИОКР} == null || $F{НИОКР}.equals("0")?
+"---------------"
 :
-($F{НИОКР}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НИОКР}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НИОКРПер" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НИОКРПер} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НИОКРПер} == null || $F{НИОКРПер}.equals("0")?
+"---------------"
 :
-($F{НИОКРПер}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НИОКРПер} == null ?
-"-------------------------"
+($F{НИОКРПер}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НИОКРПер} == null || $F{НИОКРПер}.equals("0")?
+"---------------"
 :
-($F{НИОКРПер}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НИОКРПер}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НИОКРПерНеРез" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НИОКРПерНеРез} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НИОКРПерНеРез} == null || $F{НИОКРПерНеРез}.equals("0")?
+"---------------"
 :
-($F{НИОКРПерНеРез}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НИОКРПерНеРез} == null ?
-"-------------------------"
+($F{НИОКРПерНеРез}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НИОКРПерНеРез} == null || $F{НИОКРПерНеРез}.equals("0")?
+"---------------"
 :
-($F{НИОКРПерНеРез}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НИОКРПерНеРез}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НИОКРнеПолРез" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НИОКРнеПолРез} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НИОКРнеПолРез} == null || $F{НИОКРнеПолРез}.equals("0")?
+"---------------"
 :
-($F{НИОКРнеПолРез}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НИОКРнеПолРез} == null ?
-"-------------------------"
+($F{НИОКРнеПолРез}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НИОКРнеПолРез} == null || $F{НИОКРнеПолРез}.equals("0")?
+"---------------"
 :
-($F{НИОКРнеПолРез}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НИОКРнеПолРез}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Налоги" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Налоги} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Налоги} == null || $F{Налоги}.equals("0")?
+"---------------"
 :
-($F{Налоги}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Налоги} == null ?
-"-------------------------"
+($F{Налоги}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Налоги} == null || $F{Налоги}.equals("0")?
+"---------------"
 :
-($F{Налоги}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Налоги}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЗемУч30пр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЗемУч30пр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЗемУч30пр} == null || $F{РасхЗемУч30пр}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУч30пр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЗемУч30пр} == null ?
-"-------------------------"
+($F{РасхЗемУч30пр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЗемУч30пр} == null || $F{РасхЗемУч30пр}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУч30пр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЗемУч30пр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЗемУчВс" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЗемУчВс} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЗемУчВс} == null || $F{РасхЗемУчВс}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчВс}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЗемУчВс} == null ?
-"-------------------------"
+($F{РасхЗемУчВс}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЗемУчВс} == null || $F{РасхЗемУчВс}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчВс}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЗемУчВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЗемУчСрокАр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЗемУчСрокАр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЗемУчСрокАр} == null || $F{РасхЗемУчСрокАр}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокАр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокАр} == null ?
-"-------------------------"
+($F{РасхЗемУчСрокАр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокАр} == null || $F{РасхЗемУчСрокАр}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокАр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЗемУчСрокАр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЗемУчСрокНП" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЗемУчСрокНП} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЗемУчСрокНП} == null || $F{РасхЗемУчСрокНП}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокНП}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокНП} == null ?
-"-------------------------"
+($F{РасхЗемУчСрокНП}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокНП} == null || $F{РасхЗемУчСрокНП}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЗемУчСрокНП}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхЗемУчСрокРас" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхЗемУчСрокРас} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхЗемУчСрокРас} == null || $F{РасхЗемУчСрокРас}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокРас}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокРас} == null ?
-"-------------------------"
+($F{РасхЗемУчСрокРас}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхЗемУчСрокРас} == null || $F{РасхЗемУчСрокРас}.equals("0")?
+"---------------"
 :
-($F{РасхЗемУчСрокРас}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхЗемУчСрокРас}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхКапВл10" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхКапВл10} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхКапВл10} == null || $F{РасхКапВл10}.equals("0")?
+"---------------"
 :
-($F{РасхКапВл10}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхКапВл10} == null ?
-"-------------------------"
+($F{РасхКапВл10}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхКапВл10} == null || $F{РасхКапВл10}.equals("0")?
+"---------------"
 :
-($F{РасхКапВл10}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхКапВл10}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхКапВл30" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхКапВл30} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхКапВл30} == null || $F{РасхКапВл30}.equals("0")?
+"---------------"
 :
-($F{РасхКапВл30}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхКапВл30} == null ?
-"-------------------------"
+($F{РасхКапВл30}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхКапВл30} == null || $F{РасхКапВл30}.equals("0")?
+"---------------"
 :
-($F{РасхКапВл30}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхКапВл30}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхОргИнв" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхОргИнв} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхОргИнв} == null || $F{РасхОргИнв}.equals("0")?
+"---------------"
 :
-($F{РасхОргИнв}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхОргИнв} == null ?
-"-------------------------"
+($F{РасхОргИнв}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхОргИнв} == null || $F{РасхОргИнв}.equals("0")?
+"---------------"
 :
-($F{РасхОргИнв}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхОргИнв}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхТрудИнв" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхТрудИнв} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхТрудИнв} == null || $F{РасхТрудИнв}.equals("0")?
+"---------------"
 :
-($F{РасхТрудИнв}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхТрудИнв} == null ?
-"-------------------------"
+($F{РасхТрудИнв}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхТрудИнв} == null || $F{РасхТрудИнв}.equals("0")?
+"---------------"
 :
-($F{РасхТрудИнв}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхТрудИнв}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="str11" uuid="eaa64875-b27b-44b5-b17f-955e63d19d29">
@@ -1995,74 +1995,74 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 			<fieldDescription><![CDATA[@РасхОп302Ит]]></fieldDescription>
 		</field>
 		<variable name="УбытРеалЗУ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытРеалЗУ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытРеалЗУ} == null || $F{УбытРеалЗУ}.equals("0")?
+"---------------"
 :
-($F{УбытРеалЗУ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытРеалЗУ} == null ?
-"-------------------------"
+($F{УбытРеалЗУ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытРеалЗУ} == null || $F{УбытРеалЗУ}.equals("0")?
+"---------------"
 :
-($F{УбытРеалЗУ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытРеалЗУ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ЦенаРеалПравЗУ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ЦенаРеалПравЗУ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ЦенаРеалПравЗУ} == null || $F{ЦенаРеалПравЗУ}.equals("0")?
+"---------------"
 :
-($F{ЦенаРеалПравЗУ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ЦенаРеалПравЗУ} == null ?
-"-------------------------"
+($F{ЦенаРеалПравЗУ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ЦенаРеалПравЗУ} == null || $F{ЦенаРеалПравЗУ}.equals("0")?
+"---------------"
 :
-($F{ЦенаРеалПравЗУ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ЦенаРеалПравЗУ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытРеалАИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытРеалАИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытРеалАИ} == null || $F{УбытРеалАИ}.equals("0")?
+"---------------"
 :
-($F{УбытРеалАИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытРеалАИ} == null ?
-"-------------------------"
+($F{УбытРеалАИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытРеалАИ} == null || $F{УбытРеалАИ}.equals("0")?
+"---------------"
 :
-($F{УбытРеалАИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытРеалАИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытОп302" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытОп302} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытОп302} == null || $F{УбытОп302}.equals("0")?
+"---------------"
 :
-($F{УбытОп302}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытОп302} == null ?
-"-------------------------"
+($F{УбытОп302}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытОп302} == null || $F{УбытОп302}.equals("0")?
+"---------------"
 :
-($F{УбытОп302}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытОп302}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытОбОбслНеобл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытОбОбслНеобл} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытОбОбслНеобл} == null || $F{УбытОбОбслНеобл}.equals("0")?
+"---------------"
 :
-($F{УбытОбОбслНеобл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытОбОбслНеобл} == null ?
-"-------------------------"
+($F{УбытОбОбслНеобл}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытОбОбслНеобл} == null || $F{УбытОбОбслНеобл}.equals("0")?
+"---------------"
 :
-($F{УбытОбОбслНеобл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытОбОбслНеобл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытОбОбсл" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытОбОбсл} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытОбОбсл} == null || $F{УбытОбОбсл}.equals("0")?
+"---------------"
 :
-($F{УбытОбОбсл}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытОбОбсл} == null ?
-"-------------------------"
+($F{УбытОбОбсл}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытОбОбсл} == null || $F{УбытОбОбсл}.equals("0")?
+"---------------"
 :
-($F{УбытОбОбсл}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытОбОбсл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="УбытДоговДУИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{УбытДоговДУИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{УбытДоговДУИ} == null || $F{УбытДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{УбытДоговДУИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{УбытДоговДУИ} == null ?
-"-------------------------"
+($F{УбытДоговДУИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{УбытДоговДУИ} == null || $F{УбытДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{УбытДоговДУИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{УбытДоговДУИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ТипНП" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ТипНП} == null ?
@@ -2075,224 +2075,224 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНевозмЗатрЗУ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумНевозмЗатрЗУ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумНевозмЗатрЗУ} == null || $F{СумНевозмЗатрЗУ}.equals("0")?
+"---------------"
 :
-($F{СумНевозмЗатрЗУ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумНевозмЗатрЗУ} == null ?
-"-------------------------"
+($F{СумНевозмЗатрЗУ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумНевозмЗатрЗУ} == null || $F{СумНевозмЗатрЗУ}.equals("0")?
+"---------------"
 :
-($F{СумНевозмЗатрЗУ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумНевозмЗатрЗУ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхРеалТов" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхРеалТов} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхРеалТов} == null || $F{РасхРеалТов}.equals("0")?
+"---------------"
 :
-($F{РасхРеалТов}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхРеалТов} == null ?
-"-------------------------"
+($F{РасхРеалТов}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхРеалТов} == null || $F{РасхРеалТов}.equals("0")?
+"---------------"
 :
-($F{РасхРеалТов}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхРеалТов}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхДоговДУИ_ВнР" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхДоговДУИ_ВнР} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхДоговДУИ_ВнР} == null || $F{РасхДоговДУИ_ВнР}.equals("0")?
+"---------------"
 :
-($F{РасхДоговДУИ_ВнР}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхДоговДУИ_ВнР} == null ?
-"-------------------------"
+($F{РасхДоговДУИ_ВнР}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхДоговДУИ_ВнР} == null || $F{РасхДоговДУИ_ВнР}.equals("0")?
+"---------------"
 :
-($F{РасхДоговДУИ_ВнР}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхДоговДУИ_ВнР}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхДоговДУИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхДоговДУИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхДоговДУИ} == null || $F{РасхДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{РасхДоговДУИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхДоговДУИ} == null ?
-"-------------------------"
+($F{РасхДоговДУИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхДоговДУИ} == null || $F{РасхДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{РасхДоговДУИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхДоговДУИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ПрибРеалАИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ПрибРеалАИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ПрибРеалАИ} == null || $F{ПрибРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ПрибРеалАИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ПрибРеалАИ} == null ?
-"-------------------------"
+($F{ПрибРеалАИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ПрибРеалАИ} == null || $F{ПрибРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ПрибРеалАИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ПрибРеалАИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ОстСтРеалАИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОстСтРеалАИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ОстСтРеалАИ} == null || $F{ОстСтРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ОстСтРеалАИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОстСтРеалАИ} == null ?
-"-------------------------"
+($F{ОстСтРеалАИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОстСтРеалАИ} == null || $F{ОстСтРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ОстСтРеалАИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ОстСтРеалАИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="КолОбРеалАИУб" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КолОбРеалАИУб} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{КолОбРеалАИУб} == null || $F{КолОбРеалАИУб}.equals("0")?
+"---------------"
 :
-($F{КолОбРеалАИУб}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КолОбРеалАИУб} == null ?
-"-------------------------"
+($F{КолОбРеалАИУб}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{КолОбРеалАИУб} == null || $F{КолОбРеалАИУб}.equals("0")?
+"---------------"
 :
-($F{КолОбРеалАИУб}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{КолОбРеалАИУб}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="КолОбРеалАИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КолОбРеалАИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{КолОбРеалАИ} == null || $F{КолОбРеалАИ}.equals("0")?
+"---------------"
 :
-($F{КолОбРеалАИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КолОбРеалАИ} == null ?
-"-------------------------"
+($F{КолОбРеалАИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{КолОбРеалАИ} == null || $F{КолОбРеалАИ}.equals("0")?
+"---------------"
 :
-($F{КолОбРеалАИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{КолОбРеалАИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ДохДоговДУИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохДоговДУИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ДохДоговДУИ} == null || $F{ДохДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{ДохДоговДУИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохДоговДУИ} == null ?
-"-------------------------"
+($F{ДохДоговДУИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДохДоговДУИ} == null || $F{ДохДоговДУИ}.equals("0")?
+"---------------"
 :
-($F{ДохДоговДУИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДохДоговДУИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ДохДоговДУИ_ВнР" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохДоговДУИ_ВнР} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ДохДоговДУИ_ВнР} == null || $F{ДохДоговДУИ_ВнР}.equals("0")?
+"---------------"
 :
-($F{ДохДоговДУИ_ВнР}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохДоговДУИ_ВнР} == null ?
-"-------------------------"
+($F{ДохДоговДУИ_ВнР}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДохДоговДУИ_ВнР} == null || $F{ДохДоговДУИ_ВнР}.equals("0")?
+"---------------"
 :
-($F{ДохДоговДУИ_ВнР}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ДохДоговДУИ_ВнР}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВыручРеалТов" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВыручРеалТов} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВыручРеалТов} == null || $F{ВыручРеалТов}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалТов}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВыручРеалТов} == null ?
-"-------------------------"
+($F{ВыручРеалТов}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВыручРеалТов} == null || $F{ВыручРеалТов}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалТов}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВыручРеалТов}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВыручРеалАИ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВыручРеалАИ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВыручРеалАИ} == null || $F{ВыручРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалАИ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВыручРеалАИ} == null ?
-"-------------------------"
+($F{ВыручРеалАИ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВыручРеалАИ} == null || $F{ВыручРеалАИ}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалАИ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВыручРеалАИ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВыручОп302Ит" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВыручОп302Ит} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВыручОп302Ит} == null || $F{ВыручОп302Ит}.equals("0")?
+"---------------"
 :
-($F{ВыручОп302Ит}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВыручОп302Ит} == null ?
-"-------------------------"
+($F{ВыручОп302Ит}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВыручОп302Ит} == null || $F{ВыручОп302Ит}.equals("0")?
+"---------------"
 :
-($F{ВыручОп302Ит}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВыручОп302Ит}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВыручРеалПТДоСр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВыручРеалПТДоСр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВыручРеалПТДоСр} == null || $F{ВыручРеалПТДоСр}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалПТДоСр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВыручРеалПТДоСр} == null ?
-"-------------------------"
+($F{ВыручРеалПТДоСр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВыручРеалПТДоСр} == null || $F{ВыручРеалПТДоСр}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалПТДоСр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВыручРеалПТДоСр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ВыручРеалПТПосСр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ВыручРеалПТПосСр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{ВыручРеалПТПосСр} == null || $F{ВыручРеалПТПосСр}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалПТПосСр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ВыручРеалПТПосСр} == null ?
-"-------------------------"
+($F{ВыручРеалПТПосСр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВыручРеалПТПосСр} == null || $F{ВыручРеалПТПосСр}.equals("0")?
+"---------------"
 :
-($F{ВыручРеалПТПосСр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ВыручРеалПТПосСр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СтоимРеалПТДоСр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтоимРеалПТДоСр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтоимРеалПТДоСр} == null || $F{СтоимРеалПТДоСр}.equals("0")?
+"---------------"
 :
-($F{СтоимРеалПТДоСр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтоимРеалПТДоСр} == null ?
-"-------------------------"
+($F{СтоимРеалПТДоСр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтоимРеалПТДоСр} == null || $F{СтоимРеалПТДоСр}.equals("0")?
+"---------------"
 :
-($F{СтоимРеалПТДоСр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтоимРеалПТДоСр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СтоимРеалПТПосСр" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтоимРеалПТПосСр} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтоимРеалПТПосСр} == null || $F{СтоимРеалПТПосСр}.equals("0")?
+"---------------"
 :
-($F{СтоимРеалПТПосСр}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтоимРеалПТПосСр} == null ?
-"-------------------------"
+($F{СтоимРеалПТПосСр}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтоимРеалПТПосСр} == null || $F{СтоимРеалПТПосСр}.equals("0")?
+"---------------"
 :
-($F{СтоимРеалПТПосСр}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтоимРеалПТПосСр}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Убыт1Прев269" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Убыт1Прев269} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Убыт1Прев269} == null || $F{Убыт1Прев269}.equals("0")?
+"---------------"
 :
-($F{Убыт1Прев269}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Убыт1Прев269} == null ?
-"-------------------------"
+($F{Убыт1Прев269}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Убыт1Прев269} == null || $F{Убыт1Прев269}.equals("0")?
+"---------------"
 :
-($F{Убыт1Прев269}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Убыт1Прев269}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Убыт1Соот269" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Убыт1Соот269} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Убыт1Соот269} == null || $F{Убыт1Соот269}.equals("0")?
+"---------------"
 :
-($F{Убыт1Соот269}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Убыт1Соот269} == null ?
-"-------------------------"
+($F{Убыт1Соот269}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Убыт1Соот269} == null || $F{Убыт1Соот269}.equals("0")?
+"---------------"
 :
-($F{Убыт1Соот269}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Убыт1Соот269}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Убыт2ВнРасх" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Убыт2ВнРасх} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Убыт2ВнРасх} == null || $F{Убыт2ВнРасх}.equals("0")?
+"---------------"
 :
-($F{Убыт2ВнРасх}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Убыт2ВнРасх} == null ?
-"-------------------------"
+($F{Убыт2ВнРасх}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Убыт2ВнРасх} == null || $F{Убыт2ВнРасх}.equals("0")?
+"---------------"
 :
-($F{Убыт2ВнРасх}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Убыт2ВнРасх}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Убыт2РеалПТ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{Убыт2РеалПТ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{Убыт2РеалПТ} == null || $F{Убыт2РеалПТ}.equals("0")?
+"---------------"
 :
-($F{Убыт2РеалПТ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{Убыт2РеалПТ} == null ?
-"-------------------------"
+($F{Убыт2РеалПТ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{Убыт2РеалПТ} == null || $F{Убыт2РеалПТ}.equals("0")?
+"---------------"
 :
-($F{Убыт2РеалПТ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Убыт2РеалПТ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="РасхОп302Ит" class="java.lang.String">
-			<variableExpression><![CDATA[$F{РасхОп302Ит} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{РасхОп302Ит} == null || $F{РасхОп302Ит}.equals("0")?
+"---------------"
 :
-($F{РасхОп302Ит}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{РасхОп302Ит} == null ?
-"-------------------------"
+($F{РасхОп302Ит}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{РасхОп302Ит} == null || $F{РасхОп302Ит}.equals("0")?
+"---------------"
 :
-($F{РасхОп302Ит}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{РасхОп302Ит}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="str14" uuid="28a18d84-8f9a-4f0b-929e-3c796dd65148">
@@ -2348,7 +2348,7 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 			<fieldDescription><![CDATA[@ТипНП]]></fieldDescription>
 		</field>
 		<variable name="ДоляНалБаз" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДоляНалБаз} == null ?
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
 "---------------"
 :
 ($F{ДоляНалБаз}.indexOf(".")==2?
@@ -2358,7 +2358,7 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ("--"+$F{ДоляНалБаз}+"-------------").substring(0,15)
 :
 ($F{ДоляНалБаз}+"---------------").substring(0,15)))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null ?
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
 "---------------"
 :
 ($F{ДоляНалБаз}.indexOf(".")==2?
@@ -2380,84 +2380,84 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{КППОП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="МесАвПлат" class="java.lang.String">
-			<variableExpression><![CDATA[$F{МесАвПлат} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{МесАвПлат} == null || $F{МесАвПлат}.equals("0")?
+"---------------"
 :
-($F{МесАвПлат}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{МесАвПлат} == null ?
-"-------------------------"
+($F{МесАвПлат}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{МесАвПлат} == null || $F{МесАвПлат}.equals("0")?
+"---------------"
 :
-($F{МесАвПлат}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{МесАвПлат}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="МесАвПлат1КвСлед" class="java.lang.String">
-			<variableExpression><![CDATA[$F{МесАвПлат1КвСлед} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{МесАвПлат1КвСлед} == null || $F{МесАвПлат1КвСлед}.equals("0")?
+"---------------"
 :
-($F{МесАвПлат1КвСлед}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{МесАвПлат1КвСлед} == null ?
-"-------------------------"
+($F{МесАвПлат1КвСлед}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{МесАвПлат1КвСлед} == null || $F{МесАвПлат1КвСлед}.equals("0")?
+"---------------"
 :
-($F{МесАвПлат1КвСлед}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{МесАвПлат1КвСлед}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НаимОП" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НаимОП} == null ?
 "------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОП}.toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></variableExpression>
+($F{НаимОП}.replace(" ","-").toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{НаимОП} == null ?
 "------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
-($F{НаимОП}.toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></initialValueExpression>
+($F{НаимОП}.replace(" ","-").toUpperCase()+"------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,150)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБазаБезЛиквОП" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалБазаБезЛиквОП} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалБазаБезЛиквОП} == null || $F{НалБазаБезЛиквОП}.equals("0")?
+"---------------"
 :
-($F{НалБазаБезЛиквОП}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалБазаБезЛиквОП} == null ?
-"-------------------------"
+($F{НалБазаБезЛиквОП}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалБазаБезЛиквОП} == null || $F{НалБазаБезЛиквОП}.equals("0")?
+"---------------"
 :
-($F{НалБазаБезЛиквОП}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалБазаБезЛиквОП}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБазаДоля" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалБазаДоля} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалБазаДоля} == null || $F{НалБазаДоля}.equals("0")?
+"---------------"
 :
-($F{НалБазаДоля}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалБазаДоля} == null ?
-"-------------------------"
+($F{НалБазаДоля}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалБазаДоля} == null || $F{НалБазаДоля}.equals("0")?
+"---------------"
 :
-($F{НалБазаДоля}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалБазаДоля}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалБазаОрг" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалБазаОрг} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалБазаОрг} == null || $F{НалБазаОрг}.equals("0")?
+"---------------"
 :
-($F{НалБазаОрг}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалБазаОрг} == null ?
-"-------------------------"
+($F{НалБазаОрг}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалБазаОрг} == null || $F{НалБазаОрг}.equals("0")?
+"---------------"
 :
-($F{НалБазаОрг}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалБазаОрг}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалВыплВнеРФ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалВыплВнеРФ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалВыплВнеРФ} == null || $F{НалВыплВнеРФ}.equals("0")?
+"---------------"
 :
-($F{НалВыплВнеРФ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалВыплВнеРФ} == null ?
-"-------------------------"
+($F{НалВыплВнеРФ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалВыплВнеРФ} == null || $F{НалВыплВнеРФ}.equals("0")?
+"---------------"
 :
-($F{НалВыплВнеРФ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалВыплВнеРФ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="НалНачислСубРФ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалНачислСубРФ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{НалНачислСубРФ} == null || $F{НалНачислСубРФ}.equals("0")?
+"---------------"
 :
-($F{НалНачислСубРФ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалНачислСубРФ} == null ?
-"-------------------------"
+($F{НалНачислСубРФ}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{НалНачислСубРФ} == null || $F{НалНачислСубРФ}.equals("0")?
+"---------------"
 :
-($F{НалНачислСубРФ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{НалНачислСубРФ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="ОбРасч" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОбРасч} == null ?
@@ -2480,24 +2480,24 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ОбязУплНалОП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСубРФ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
 :
-($F{СтавНалСубРФ}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null ?
-"-------------------------"
+($F{СтавНалСубРФ}+"-----").substring(0,5)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+"-----"
 :
-($F{СтавНалСубРФ}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СтавНалСубРФ}+"-----").substring(0,5)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНал" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумНал} == null ?
-"-------------------------"
+			<variableExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
+"---------------"
 :
-($F{СумНал}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумНал} == null ?
-"-------------------------"
+($F{СумНал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
+"---------------"
 :
-($F{СумНал}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{СумНал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНалПД" class="java.lang.String">
 			<variableExpression><![CDATA[$F{СумНалП} < 0 || $F{СумНалП} == null?"-------------------------":($F{СумНалП}.toString()+"-------------------------").substring(0,25)]]></variableExpression>
@@ -2519,6 +2519,7 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Str20" uuid="ff4dff0f-e949-4e5d-8d7d-a1e044e98b64">
+		<parameter name="pReportPeriod" class="java.lang.String"/>
 		<queryString language="xPath">
 			<![CDATA[/Файл/Документ/Прибыль/НалДохСтав]]>
 		</queryString>
@@ -2560,11 +2561,11 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{НалБаза}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DohUmNalBaz" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДохУмНалБаз} == null ?
+			<variableExpression><![CDATA[$F{ДохУмНалБаз} == null || $F{ДохУмНалБаз}.equals("0")?
 "---------------"
 :
 ($F{ДохУмНалБаз}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДохУмНалБаз} == null ?
+			<initialValueExpression><![CDATA[$F{ДохУмНалБаз} == null || $F{ДохУмНалБаз}.equals("0")?
 "---------------"
 :
 ($F{ДохУмНалБаз}+"---------------").substring(0,15)]]></initialValueExpression>
@@ -2580,51 +2581,51 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{СтавНал}+"--").substring(0,2)]]></initialValueExpression>
 		</variable>
 		<variable name="NalIsch" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалИсчисл} == null ?
+			<variableExpression><![CDATA[$F{НалИсчисл} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалИсчисл}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалИсчисл} == null ?
+			<initialValueExpression><![CDATA[$F{НалИсчисл} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалИсчисл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalDivNeRFPred" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДивНеРФПред} == null ?
+			<variableExpression><![CDATA[$F{НалДивНеРФПред} == null || $P{pReportPeriod}.equals("21") || $F{ВидДоход}.equals("1") || $F{ВидДоход}.equals("2") || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалДивНеРФПред}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДивНеРФПред} == null ?
+			<initialValueExpression><![CDATA[$F{НалДивНеРФПред} == null || $P{pReportPeriod}.equals("21") || $F{ВидДоход}.equals("1") || $F{ВидДоход}.equals("2") || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалДивНеРФПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalDivNeRF" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДивНеРФ} == null ?
+			<variableExpression><![CDATA[$F{НалДивНеРФ} == null || $F{ВидДоход}.equals("1") || $F{ВидДоход}.equals("2") || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалДивНеРФ}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДивНеРФ} == null ?
+			<initialValueExpression><![CDATA[$F{НалДивНеРФ} == null || $F{ВидДоход}.equals("1") || $F{ВидДоход}.equals("2") || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалДивНеРФ}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalNachislPred" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалНачислПред} == null ?
+			<variableExpression><![CDATA[$F{НалНачислПред} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалНачислПред}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалНачислПред} == null ?
+			<initialValueExpression><![CDATA[$F{НалНачислПред} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалНачислПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalNachislPosl" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалНачислПосл} == null ?
+			<variableExpression><![CDATA[$F{НалНачислПосл} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалНачислПосл}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалНачислПосл} == null ?
+			<initialValueExpression><![CDATA[$F{НалНачислПосл} == null || $F{ВидДоход}.equals("3")?
 "---------------"
 :
 ($F{НалНачислПосл}+"---------------").substring(0,15)]]></initialValueExpression>
@@ -2801,11 +2802,24 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 			<fieldDescription><![CDATA[@СумРасход]]></fieldDescription>
 		</field>
 		<variable name="KodVidRas" class="java.lang.String">
-			<variableExpression><![CDATA[($F{КодВидРасход}+"---").substring(0,3)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{КодВидРасход}+"---").substring(0,3)]]></initialValueExpression>
+			<variableExpression><![CDATA[$F{КодВидРасход} == null?
+"---"
+:
+($F{КодВидРасход}+"---").substring(0,3)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{КодВидРасход} == null?
+"---"
+:
+($F{КодВидРасход}+"---").substring(0,3)]]></initialValueExpression>
 		</variable>
 		<variable name="SumRas" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СумРасход}+"---------------").substring(0,15)]]></variableExpression>
+			<variableExpression><![CDATA[$F{СумРасход}.equals("0") || $F{СумРасход} == null?
+"---------------"
+:
+($F{СумРасход}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумРасход}.equals("0") || $F{СумРасход} == null?
+"---------------"
+:
+($F{СумРасход}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Str17" uuid="ccfddd39-a92a-4e51-8b19-7cda8da1b154">
@@ -2882,11 +2896,11 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 			<fieldDescription><![CDATA[ДивНал/@ДивНалВс]]></fieldDescription>
 		</field>
 		<variable name="DivAll" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивВсего} == null ?
+			<variableExpression><![CDATA[$F{ДивВсего} == null || $F{ДивВсего}.equals("0")?
 "----------------"
 :
 ($F{ДивВсего}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивВсего} == null ?
+			<initialValueExpression><![CDATA[$F{ДивВсего} == null || $F{ДивВсего}.equals("0")?
 "----------------"
 :
 ($F{ДивВсего}+"---------------").substring(0,15)]]></initialValueExpression>
@@ -2912,191 +2926,191 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ОтчетГод}+"----").substring(0,4)]]></initialValueExpression>
 		</variable>
 		<variable name="DivInOrg" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивИнОрг} == null ?
+			<variableExpression><![CDATA[$F{ДивИнОрг} == null || $F{ДивИнОрг}.equals("0")?
 "---------------"
 :
 ($F{ДивИнОрг}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивИнОрг} == null ?
+			<initialValueExpression><![CDATA[$F{ДивИнОрг} == null || $F{ДивИнОрг}.equals("0")?
 "---------------"
 :
 ($F{ДивИнОрг}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivFlNeRes" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивФЛНеРез} == null ?
+			<variableExpression><![CDATA[$F{ДивФЛНеРез} == null || $F{ДивФЛНеРез}.equals("0")?
 "---------------"
 :
 ($F{ДивФЛНеРез}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивФЛНеРез} == null ?
+			<initialValueExpression><![CDATA[$F{ДивФЛНеРез} == null || $F{ДивФЛНеРез}.equals("0")?
 "---------------"
 :
 ($F{ДивФЛНеРез}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Div0" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивИсч0} == null ?
+			<variableExpression><![CDATA[$F{ДивИсч0} == null || $F{ДивИсч0}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч0}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивИсч0} == null ?
+			<initialValueExpression><![CDATA[$F{ДивИсч0} == null || $F{ДивИсч0}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч0}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Div5" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивИсч5} == null ?
+			<variableExpression><![CDATA[$F{ДивИсч5} == null || $F{ДивИсч5}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч5}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивИсч5} == null ?
+			<initialValueExpression><![CDATA[$F{ДивИсч5} == null || $F{ДивИсч5}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч5}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="Div10" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивИсч10} == null ?
+			<variableExpression><![CDATA[$F{ДивИсч10} == null || $F{ДивИсч10}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч10}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивИсч10} == null ?
+			<initialValueExpression><![CDATA[$F{ДивИсч10} == null || $F{ДивИсч10}.equals("0")?
 "---------------"
 :
 ($F{ДивИсч10}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivV10" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивИсчСв10} == null ?
+			<variableExpression><![CDATA[$F{ДивИсчСв10} == null || $F{ДивИсчСв10}.equals("0")?
 "---------------"
 :
 ($F{ДивИсчСв10}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивИсчСв10} == null ?
+			<initialValueExpression><![CDATA[$F{ДивИсчСв10} == null || $F{ДивИсчСв10}.equals("0")?
 "---------------"
 :
 ($F{ДивИсчСв10}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivRA" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивРАВс} == null ?
+			<variableExpression><![CDATA[$F{ДивРАВс} == null || $F{ДивРАВс}.equals("0")?
 "---------------"
 :
 ($F{ДивРАВс}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивРАВс} == null ?
+			<initialValueExpression><![CDATA[$F{ДивРАВс} == null || $F{ДивРАВс}.equals("0")?
 "---------------"
 :
 ($F{ДивРАВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivRO9" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивРО9} == null ?
+			<variableExpression><![CDATA[$F{ДивРО9} == null || $F{ДивРО9}.equals("0")?
 "---------------"
 :
 ($F{ДивРО9}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивРО9} == null ?
+			<initialValueExpression><![CDATA[$F{ДивРО9} == null || $F{ДивРО9}.equals("0")?
 "---------------"
 :
 ($F{ДивРО9}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivRO0" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивРО0} == null ?
+			<variableExpression><![CDATA[$F{ДивРО0} == null || $F{ДивРО0}.equals("0")?
 "---------------"
 :
 ($F{ДивРО0}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивРО0} == null ?
+			<initialValueExpression><![CDATA[$F{ДивРО0} == null || $F{ДивРО0}.equals("0")?
 "---------------"
 :
 ($F{ДивРО0}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivRes" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивФЛРез} == null ?
+			<variableExpression><![CDATA[$F{ДивФЛРез} == null || $F{ДивФЛРез}.equals("0")?
 "---------------"
 :
 ($F{ДивФЛРез}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивФЛРез} == null ?
+			<initialValueExpression><![CDATA[$F{ДивФЛРез} == null || $F{ДивФЛРез}.equals("0")?
 "---------------"
 :
 ($F{ДивФЛРез}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNP" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНеНП} == null ?
+			<variableExpression><![CDATA[$F{ДивНеНП} == null || $F{ДивНеНП}.equals("0")?
 "---------------"
 :
 ($F{ДивНеНП}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНеНП} == null ?
+			<initialValueExpression><![CDATA[$F{ДивНеНП} == null || $F{ДивНеНП}.equals("0")?
 "---------------"
 :
 ($F{ДивНеНП}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNAdoRas" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНАдоРас} == null ?
+			<variableExpression><![CDATA[$F{ДивНАдоРас} == null || $F{ДивНАдоРас}.equals("0")?
 "---------------"
 :
 ($F{ДивНАдоРас}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНАдоРас} == null ?
+			<initialValueExpression><![CDATA[$F{ДивНАдоРас} == null || $F{ДивНАдоРас}.equals("0")?
 "---------------"
 :
 ($F{ДивНАдоРас}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNAdoRas0" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНАдоРас0}== null ?
+			<variableExpression><![CDATA[$F{ДивНАдоРас0}== null || $F{ДивНАдоРас0}.equals("0")?
 "---------------"
 :
 ($F{ДивНАдоРас0}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНАдоРас0}== null ?
+			<initialValueExpression><![CDATA[$F{ДивНАдоРас0}== null || $F{ДивНАдоРас0}.equals("0")?
 "---------------"
 :
 ($F{ДивНАдоРас0}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNalAll" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНалВс}== null ?
+			<variableExpression><![CDATA[$F{ДивНалВс}== null || $F{ДивНалВс}.equals("0")?
 "---------------"
 :
 ($F{ДивНалВс}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНалВс}== null ?
+			<initialValueExpression><![CDATA[$F{ДивНалВс}== null || $F{ДивНалВс}.equals("0")?
 "---------------"
 :
 ($F{ДивНалВс}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNal9" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНал9}== null ?
+			<variableExpression><![CDATA[$F{ДивНал9}== null || $F{ДивНал9}.equals("0")?
 "---------------"
 :
 ($F{ДивНал9}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНал9}== null ?
+			<initialValueExpression><![CDATA[$F{ДивНал9}== null || $F{ДивНал9}.equals("0")?
 "---------------"
 :
 ($F{ДивНал9}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="DivNal0" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДивНал0}== null ?
+			<variableExpression><![CDATA[$F{ДивНал0}== null || $F{ДивНал0}.equals("0")?
 "---------------"
 :
 ($F{ДивНал0}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДивНал0}== null ?
+			<initialValueExpression><![CDATA[$F{ДивНал0}== null || $F{ДивНал0}.equals("0")?
 "---------------"
 :
 ($F{ДивНал0}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalIschisl" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалИсчисл}== null ?
+			<variableExpression><![CDATA[$F{НалИсчисл}== null || $F{НалИсчисл}.equals("0")?
 "---------------"
 :
 ($F{НалИсчисл}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалИсчисл}== null ?
+			<initialValueExpression><![CDATA[$F{НалИсчисл}== null || $F{НалИсчисл}.equals("0")?
 "---------------"
 :
 ($F{НалИсчисл}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalDivPred" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДивПред}== null ?
+			<variableExpression><![CDATA[$F{НалДивПред}== null || $F{НалДивПред}.equals("0")?
 "---------------"
 :
 ($F{НалДивПред}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДивПред}== null ?
+			<initialValueExpression><![CDATA[$F{НалДивПред}== null || $F{НалДивПред}.equals("0")?
 "---------------"
 :
 ($F{НалДивПред}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="NalDivPosl" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалДивПосл}== null ?
+			<variableExpression><![CDATA[$F{НалДивПосл}== null || $F{НалДивПосл}.equals("0")?
 "---------------"
 :
 ($F{НалДивПосл}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалДивПосл}== null ?
+			<initialValueExpression><![CDATA[$F{НалДивПосл}== null || $F{НалДивПосл}.equals("0")?
 "---------------"
 :
 ($F{НалДивПосл}+"---------------").substring(0,15)]]></initialValueExpression>
@@ -3381,20 +3395,24 @@ $F{СтавНалФБ}+"-----".substring(0,5))))]]></initialValueExpression>
 ($F{ДатаПерДив}+"----------").substring(0,10)]]></initialValueExpression>
 		</variable>
 		<variable name="SumDiv" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумДив} == null ?
+			<variableExpression><![CDATA[$F{СумДив} == null || $F{СумДив}.equals("0")?
 "---------------"
 :
 ($F{СумДив}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумДив} == null ?
+			<initialValueExpression><![CDATA[$F{СумДив} == null || $F{СумДив}.equals("0")?
 "---------------"
 :
 ($F{СумДив}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="SumNal" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумНал} == null ?
+			<variableExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
 "---------------"
 :
 ($F{СумНал}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
+"---------------"
+:
+($F{СумНал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<queryString language="xPath">
@@ -52915,7 +52933,10 @@ cтроки]]></text>
 			<componentElement>
 				<reportElement uuid="efcc43a4-9502-4f17-9189-b713e12b19ab" x="0" y="48" width="600" height="728"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="Str20" uuid="f37fb6aa-13ff-4d0f-a508-c688605e1f17">
+					<datasetRun subDataset="Str20" uuid="bdbcd9a3-94d6-478b-bc81-8bd8f4e4afcc">
+						<datasetParameter name="pReportPeriod">
+							<datasetParameterExpression><![CDATA[$F{Период}]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалДохСтав")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="728" width="600">

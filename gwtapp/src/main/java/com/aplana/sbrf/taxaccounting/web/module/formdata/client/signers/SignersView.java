@@ -205,20 +205,37 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		if (performer == null && !name.getText().isEmpty()) {
 			performer = new FormDataPerformer();
 		}
-		if (performer != null) {
+		if (performer != null && !name.getText().isEmpty()) {
 			performer.setName(name.getText());
 			performer.setPhone(phone.getText());
+		} else {
+			Window.alert("Необходимо ввести ФИО исполнителя");
+			return;
 		}
 
-		if (clonedSigners.size() > 0) {
+		if (validateSigners()) {
 			if (signers == null) {
 				signers = new ArrayList<FormDataSigner>();
+			} else {
+				signers.clear();
 			}
-			signers.clear();
 			copySigners(clonedSigners, signers);
+		} else {
+			return;
 		}
 
 		getUiHandlers().onSave(performer, signers);
+	}
+
+	private boolean validateSigners() {
+		for (FormDataSigner signer : clonedSigners) {
+			if (signer.getName().isEmpty() || signer.getPosition().isEmpty()) {
+				Window.alert("Необходимо ввести ФИО подписанта и должность");
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@UiHandler("cancelButton")
@@ -302,11 +319,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	}
 
 	private boolean isEqualClonedAndCurrentSignersAndReporter() {
-		if (performer != null && (name.getText().compareTo(performer.getName()) != 0 ||
-				phone.getText().compareTo(performer.getPhone()) != 0)) {
+		if (performer != null && performer.getName() != null && performer.getPhone() != null &&
+			(name.getText().compareTo(performer.getName()) != 0 ||
+			phone.getText().compareTo(performer.getPhone()) != 0)) {
 			return false;
 		}
-		if (signers != null && signers.size() == clonedSigners.size()) {
+		if (signers != null && clonedSigners != null && signers.size() == clonedSigners.size()) {
 			for (int i = 0; i < signers.size(); i++) {
 				if (signers.get(i).getName().compareTo(clonedSigners.get(i).getName()) != 0 ||
 						signers.get(i).getPosition().compareTo(clonedSigners.get(i).getPosition()) != 0) {

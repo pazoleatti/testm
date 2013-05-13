@@ -24,7 +24,7 @@ public interface TAUserDao {
 	 * @return userId
 	 * @throws DaoException если пользователя с таким логином не существует
 	 */	
-	int getUsreIdbyLogin(String login);
+	int getUserIdbyLogin(String login);
 	
 	/**
 	 * Добавляет нового пользователя
@@ -49,4 +49,18 @@ public interface TAUserDao {
 	 * @return {@link List<TAUser>}
 	 */
 	List<Integer> getUserIds();
+	
+	/**
+	 * Неоходим только для валидации
+	 * @param role
+	 * @return
+	 */
+	int checkUserRole(String role);
+	
+	/**
+	 * Неоходим только для валидации
+	 * @param login
+	 * @return
+	 */
+	int checkUserLogin(String login);
 }

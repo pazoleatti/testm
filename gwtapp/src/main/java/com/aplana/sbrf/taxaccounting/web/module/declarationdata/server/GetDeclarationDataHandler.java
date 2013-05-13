@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
@@ -105,11 +106,13 @@ public class GetDeclarationDataHandler
 		InputStream pdfData = new ByteArrayInputStream(
 				declarationDataService.getPdfData(action.getId(), userId));
 		int pageNumber = PDFImageUtils.getPageNumber(pdfData);
+		String randomUUID = UUID.randomUUID().toString().toLowerCase(); // добавлено чтобы браузер не кешировал данные
 		for (int i = 0; i < pageNumber; i++) {
 			PdfPage pdfPage = new PdfPage();
 			pdfPage.setTitle("Лист " + (i + 1));
-			pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d",
-					action.getId(), i));
+
+			pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d/%s",
+					action.getId(), i, randomUUID));
 			pdfPages.add(pdfPage);
 		}
 		pdf.setPdfPages(pdfPages);

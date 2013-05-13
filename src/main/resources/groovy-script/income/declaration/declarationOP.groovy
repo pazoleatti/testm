@@ -128,7 +128,7 @@ xml.Файл(
     // Титульный лист
     Документ(
             КНД :  knd,
-            ДатаДок : docDate != null ? docDate: new Date().format("dd.MM.yyyy"),
+            ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
             Период : period,
             ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
             КодНО : departmentParam.taxOrganCode,
@@ -224,8 +224,8 @@ xml.Файл(
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat3 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat1
-                            avPlat1 = avPlat1 + getTail(appl5List02Row120, 3)
+                            avPlat2 = avPlat3
+                            avPlat1 = avPlat3 + getTail(appl5List02Row120, 3)
                         }
                         // 0..1
                         СубБдж(
@@ -315,6 +315,9 @@ xml.Файл(
  * Получить округленное, целочисленное значение.
  */
 def getLong(def value) {
+    if (value == null) {
+        return 0
+    }
     return (long) round(value, 0)
 }
 
@@ -341,7 +344,13 @@ def getValue(def value) {
 def getFormDataSumByColName(def form, def colName) {
     def result = 0.0
     if (form != null) {
-        result = summ(form, new ColumnRange(colName, 0, form.dataRows.size() - 1))
+        def tmp
+        form.dataRows.each { row ->
+            if (row.getAlias() != 'total') {
+                tmp = row.getCell(colName).getValue()
+                result += (tmp ?: 0)
+            }
+        }
     }
     return getLong(result)
 }
@@ -358,8 +367,12 @@ def getSumRowsByCol(def form, def rows, def column) {
     if (form == null) {
         return result
     }
+    def cell
     rows.each {
-        result += getValue(form.getDataRow('R' + it).getCell(column).getValue())
+        cell = form.getDataRow('R' + it).getCell(column)
+        if (!cell.hasValueOwner()) {
+            result += getValue(cell.getValue())
+        }
     }
     return getLong(result)
 }
@@ -441,12 +454,13 @@ def getDohVnereal(def form, def formSimple, def formCalcTaxIncome) {
 
     if (formSimple != null) {
         // Код вида дохода = 11380..13080, 13100..13639, 13763, 13930, 14000
-        ((98..164) + (171..209) + [213, 217, 220]).each {
+        ((98..164) + (170..209) + [213, 214, 217, 220]).each {
             def row	= formSimple.getDataRow('R' + it)
-            result += getValue(row.rnu4Field5Accepted) +
-                    getValue(row.rnu6Field10Sum) -
-                    getValue(row.rnu4Field5PrevTaxPeriod) -
-                    getValue(row.rnu6Field12Accepted)
+            result +=
+                (row.getCell('rnu4Field5Accepted').hasValueOwner() ? 0 : getValue(row.rnu4Field5Accepted)) +
+                        (row.getCell('rnu6Field10Sum').hasValueOwner() ? 0 : getValue(row.rnu6Field10Sum)) -
+                        (row.getCell('rnu4Field5PrevTaxPeriod').hasValueOwner() ? 0 : getValue(row.rnu4Field5PrevTaxPeriod)) -
+                        (row.getCell('rnu6Field12Accepted').hasValueOwner() ? 0 : getValue(row.rnu6Field12Accepted))
         }
     }
 
@@ -474,7 +488,7 @@ def getRashVnereal(def form, def formSimple) {
     result += getComplexConsumptionSumRows9(form, ((116..139) + (144..147)))
 
     // Код вида расхода = 21680..22840, 23040..23080
-    result += getCalculatedSimpleConsumption(formSimple, ((92..184) + (188..193)))
+    result += getCalculatedSimpleConsumption(formSimple, ((92..186) + (188..193)))
 
     // Код вида расхода = 22481 - графа 9
     result -= getComplexConsumptionSumRows9(form, [114])

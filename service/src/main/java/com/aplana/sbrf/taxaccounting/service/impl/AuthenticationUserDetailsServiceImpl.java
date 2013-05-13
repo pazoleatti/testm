@@ -29,7 +29,7 @@ public class AuthenticationUserDetailsServiceImpl implements
 	public UserDetails loadUserDetails(Authentication token)
 			throws UsernameNotFoundException {
 		String userName = token.getName();
-		int userId = userDao.getUsreIdbyLogin(userName);
+		int userId = userDao.getUserIdbyLogin(userName);
 		TAUser user = userDao.getUser(userId);
 		if (user == null) {
 			String message = "User with login '" + userName

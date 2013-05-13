@@ -54,7 +54,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		return canRead(formDataAccess, formData);
+		boolean result = canRead(formDataAccess, formData);
+		if (logger.isDebugEnabled()) {
+			logger.debug("canRead: " + result);
+		}
+		return result;
 	}
 
 	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
@@ -137,7 +141,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		return canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		boolean result = canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("canEdit: " + result);
+		}
+		return result;
 	}
 
 	private boolean canEdit(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
@@ -259,7 +267,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		int formTypeId = formTemplate.getType().getId();
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formDataDepartment.getId(), formTypeId, kind);
-		return canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
+		boolean result = canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
+		if (logger.isDebugEnabled()) {
+			logger.debug("canCreate: " + result);
+		}
+		return result;
 	}
 	
 	private boolean canCreate(FormDataAccessRoles formDataAccess, int formTypeId, FormDataKind kind, Department formDataDepartment, ReportPeriod reportPeriod) {
@@ -325,7 +337,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		TAUser user = userDao.getUser(userId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		return canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		boolean result = canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("canDelete: " + result);
+		}
+		return result;
 	}
 	
 	private boolean canDelete(FormDataAccessRoles formDataAccess, FormData formData, ReportPeriod formDataReportPeriod) {
@@ -338,7 +354,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
-		return getAvailableMoves(formDataAccess,  formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		List<WorkflowMove> result = getAvailableMoves(formDataAccess,  formData, reportPeriodDao.get(formData.getReportPeriodId()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("AvailableMoves: " + result.toString());
+		}
+		return result;
 	}
 
 	private List<WorkflowMove> getAvailableMoves(FormDataAccessRoles formDataAccess, FormData formData,

@@ -150,11 +150,8 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 				if (currentCell != null) {
 					FormStyle currentCellStyle = currentCell.getStyle();
-					if (currentCellStyle != null) {
+					if (currentCellStyle != null) { // если на ячейку назначен стиль
 						applyOurCustomStyles(td, currentCellStyle);
-					} else {
-						// Error
-						//TODO (Marat Fayzullin) забыли выкинуть исключение?
 					}
 				}
 

@@ -30,5 +30,5 @@ public interface DeclarationTypeDao {
 	 * Получить список всех видов деклараций по типу налога
 	 * @return список видов деклараций
 	 */
-	public List<DeclarationType> listAllByTaxType(TaxType taxType);
+	List<DeclarationType> listAllByTaxType(TaxType taxType);
 }

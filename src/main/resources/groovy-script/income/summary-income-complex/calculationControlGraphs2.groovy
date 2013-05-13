@@ -383,23 +383,7 @@ for (DataRow row : dataRows) {
 
 }
 
-// строки 54-59, графы 13,14, 15, 16
-['R54', 'R55', 'R56', 'R57', 'R58', 'R59'].each {
-    value = getCell(it, 'incomeBuhSumAccountNumber').getValue().toString()
-    account = value.substring(0, 3) + value.substring(4)
-    temp = income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId)
-    if (temp == null) {
-        logger.info("Нет данных о оборотной ведомости")
-        getCell(it, 'opuSumByTableD').setValue(0)
-        getCell(it, 'opuSumTotal').setValue(0)
-    } else {
-        getCell(it, 'opuSumByTableD').setValue(temp.incomeDebetRemains)
-        getCell(it, 'opuSumTotal').setValue(temp.outcomeDebetRemains)
-    }
-    getCell(it, 'opuSumByOpu').setValue((BigDecimal) getCell(it, 'opuSumByTableD').getValue() - (BigDecimal) getCell(it, 'opuSumTotal').getValue())
-    getCell(it, 'difference').setValue((getCell(it, 'opuSumByOpu').getValue() ?: 0) - (getCell(it, 'incomeTaxSumS').getValue() ?: 0))
 
-}
 
 // строки 3-53, 60-131
 ((4..8) + (19) + (43..51) + (64) + (70..77) + (98..100) + (106..107) + (122..124)).each {
@@ -433,4 +417,22 @@ for (DataRow row : dataRows) {
     'R98', 'R99', 'R100', 'R106', 'R107', 'R122', 'R123', 'R124'].each{
     // графа 16
     getCell(it, 'difference').setValue(getCellValue(it, 'opuSumTotal') - getCellValue(it, 'opuSumByOpu'))
+}
+
+// строки 54-59, графы 13,14, 15, 16
+['R54', 'R55', 'R56', 'R57', 'R58', 'R59'].each {
+    value = getCell(it, 'incomeBuhSumAccountNumber').getValue().toString()
+    account = value.substring(0, 3) + value.substring(4)
+    temp = income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId)
+    if (temp == null) {
+        logger.info("Нет данных о оборотной ведомости")
+        getCell(it, 'opuSumByTableD').setValue(0)
+        getCell(it, 'opuSumTotal').setValue(0)
+    } else {
+        getCell(it, 'opuSumByTableD').setValue(temp.incomeDebetRemains)
+        getCell(it, 'opuSumTotal').setValue(temp.outcomeDebetRemains)
+    }
+    getCell(it, 'opuSumByOpu').setValue((BigDecimal) getCell(it, 'opuSumByTableD').getValue() - (BigDecimal) getCell(it, 'opuSumTotal').getValue())
+    getCell(it, 'difference').setValue((getCell(it, 'opuSumByOpu').getValue() ?: 0) - (getCell(it, 'incomeTaxSumS').getValue() ?: 0))
+
 }

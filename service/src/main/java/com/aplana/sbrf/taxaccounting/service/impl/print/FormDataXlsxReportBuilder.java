@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +17,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -477,9 +479,29 @@ public class FormDataXlsxReportBuilder {
 		
 		//Fill code
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
-		r = sheet.getRow(ar.getFirstCell().getRow());
-		c = r.getCell(ar.getFirstCell().getCol());
-		c.setCellValue(formTemplate.getCode());
+		
+		StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
+		int j = 0;
+		while(sToK.hasMoreTokens()){
+			r = sheet.getRow(ar.getFirstCell().getRow() + j);
+			if(r == null)
+				r = sheet.createRow(ar.getFirstCell().getRow() + j);
+			c = r.getCell(ar.getFirstCell().getCol());
+			if(c == null)
+				c = r.createCell(ar.getFirstCell().getCol());
+			
+			if(j != 0){
+				CellStyle style = workBook.createCellStyle();
+				Font font = workBook.createFont();
+				font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+				style.setFont(font);
+				c.setCellStyle(style);
+			}
+			c.setCellValue(sToK.nextToken());
+			
+			j++;
+		}
+		
 		
 		//Fill period
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());

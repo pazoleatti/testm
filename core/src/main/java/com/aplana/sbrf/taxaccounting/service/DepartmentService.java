@@ -28,7 +28,7 @@ public interface DepartmentService {
 	 * Получить список всех департамент
 	 * @return список всех департаментов
 	 */
-	public List<Department> listAll();
+	List<Department> listAll();
 
 	/**
 	 * Получить дочерние подразделения (не полная инициализация)

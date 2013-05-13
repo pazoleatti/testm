@@ -10,7 +10,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
 import static org.junit.Assert.assertEquals;
@@ -21,21 +24,33 @@ public class TAUserServiceTest {
 	
 	private final static int USER_OPERATOR_ID = 14;
 	
+	private final static int USER_DEPARTMENT_ID = 1;
+	
+	private final static String USER_ROLE = "ROLE_CONTROL_UNP";
+	
 	private static TAUser user;
 	
 	@BeforeClass
 	public static void init(){
 		service = new TAUserServiceImpl();
 		TAUserDao userDao = mock(TAUserDao.class);
+		DepartmentDao depDao = mock(DepartmentDao.class);
 		List<Integer> listUserIds = new ArrayList<Integer>();
 		listUserIds.add(1);
 		listUserIds.add(2);
 		listUserIds.add(3);
 		
+		TARole role = new TARole();
+		role.setAlias(USER_ROLE);
+		List<TARole> listUserRoles = new ArrayList<TARole>();
+		listUserRoles.add(role);
+		
 		user = new TAUser();
 		user.setId(USER_OPERATOR_ID);
 		user.setLogin("controlBank");
 		user.setEmail("controlBank@bank.ru");
+		user.setDepartmentId(USER_DEPARTMENT_ID);
+		user.setRoles(listUserRoles);
 		
 		when(userDao.getUser(USER_OPERATOR_ID)).thenReturn(user);
 		when(userDao.getUser(1)).thenReturn(user);
@@ -43,7 +58,11 @@ public class TAUserServiceTest {
 		when(userDao.getUser(3)).thenReturn(user);
 		when(userDao.createUser(user)).thenReturn(user.getId());
 		when(userDao.getUserIds()).thenReturn(listUserIds);
+		when(userDao.checkUserRole(USER_ROLE)).thenReturn(1);
+		
+		when(depDao.getDepartment(USER_DEPARTMENT_ID)).thenReturn(new Department());
 		ReflectionTestUtils.setField(service, "userDao", userDao);
+		ReflectionTestUtils.setField(service, "departmentDao", depDao);
 	}
 	
 	@Test

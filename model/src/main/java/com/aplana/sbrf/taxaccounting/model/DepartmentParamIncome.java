@@ -16,7 +16,7 @@ public class DepartmentParamIncome implements Serializable {
 	private String approveDocName;
 	private String approveOrgName;
 	private String taxPlaceTypeCode;
-	private Long taxRate;
+	private Double taxRate;
 	private Long externalTaxSum;
 	private Long sumDifference;
 	private Long correctionSum;
@@ -90,11 +90,11 @@ public class DepartmentParamIncome implements Serializable {
 		this.taxPlaceTypeCode = taxPlaceTypeCode;
 	}
 
-	public Long getTaxRate() {
+	public Double getTaxRate() {
 		return taxRate;
 	}
 
-	public void setTaxRate(Long taxRate) {
+	public void setTaxRate(Double taxRate) {
 		this.taxRate = taxRate;
 	}
 

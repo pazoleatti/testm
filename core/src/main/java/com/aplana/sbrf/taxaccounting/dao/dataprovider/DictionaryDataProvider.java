@@ -11,17 +11,18 @@ import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
  * Поставщик данных для справочника.
  */
 public interface DictionaryDataProvider<ValueType extends Serializable> {
+
 	/**
 	 * Возвращает наименование справочника
 	 * @return понятное пользователю наименование справочника
 	 */
-	public String getDictionaryName();
+	String getDictionaryName();
 	
 	/**
 	 * Возвращает все значения из справочника.
 	 * @return список значений справочника
 	 */
-	public List<DictionaryItem<ValueType>> getValues();
+	List<DictionaryItem<ValueType>> getValues();
 
 	/**
 	 * Возвращает отфильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
@@ -30,7 +31,7 @@ public interface DictionaryDataProvider<ValueType extends Serializable> {
 	 * @param pageParams {@link PaginatedSearchParams параметры} для выбора диапазона записей
 	 * @return отфильтрованный список значений справочника
 	 */	
-	public PaginatedSearchResult<DictionaryItem<ValueType>> getValues(String pattern, PaginatedSearchParams pageParams);
+	PaginatedSearchResult<DictionaryItem<ValueType>> getValues(String pattern, PaginatedSearchParams pageParams);
 
 	/**
 	 * Возвращает запись св справочнике по значению. Запись может содержать так же и название значения.
@@ -39,5 +40,5 @@ public interface DictionaryDataProvider<ValueType extends Serializable> {
 	 * @param value значение из справочника
 	 * @return запись в справочнике
 	 */
-	public DictionaryItem<ValueType> getItem(ValueType value);
+	DictionaryItem<ValueType> getItem(ValueType value);
 }

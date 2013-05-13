@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -8,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.SudirErrorCodes;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.validation.ValidationService;
 
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountManagement",
@@ -30,8 +31,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		
 		GenericAccountManagementException gam = new GenericAccountManagementException();
-		gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_002.toString());
-		gam.setDetails(SudirErrorCodes.SUDIR_002.detailCode());
+		gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_002.toString());
+		gam.setDetails(WSException.SudirErrorCodes.SUDIR_002.detailCode());
 		throw new GenericAccountManagementException_Exception("Метод реализуется в системе без функциональности", gam);
 	}
 
@@ -39,8 +40,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		
 		GenericAccountManagementException gam = new GenericAccountManagementException();
-		gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_002.toString());
-		gam.setDetails(SudirErrorCodes.SUDIR_002.detailCode());
+		gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_002.toString());
+		gam.setDetails(WSException.SudirErrorCodes.SUDIR_002.detailCode());
 		throw new GenericAccountManagementException_Exception("Метод реализуется в системе без функциональности", gam);
 		
 	}
@@ -49,8 +50,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		
 		GenericAccountManagementException gam = new GenericAccountManagementException();
-		gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_002.toString());
-		gam.setDetails(SudirErrorCodes.SUDIR_002.detailCode());
+		gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_002.toString());
+		gam.setDetails(WSException.SudirErrorCodes.SUDIR_002.detailCode());
 		throw new GenericAccountManagementException_Exception("Метод реализуется в системе без функциональности", gam);
 		
 	}
@@ -59,10 +60,15 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		try {
 			userService.setUserIsActive(accountId, false);
+		} catch (WSException e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
+			gam.setDetails(e.getErrorCode().detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_004.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_004.detailCode());
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		
@@ -72,13 +78,18 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
 		
-		TAUser user = gais.assembleUser(accountInfo);
 		try {
+			TAUser user = gais.assembleUser(accountInfo);
 			userService.createUser(user);
+		} catch (WSException e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
+			gam.setDetails(e.getErrorCode().detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_005.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_005.detailCode());
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		
@@ -88,13 +99,18 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		validationService.validate(accountInfo);
 		
-		TAUser user = gais.assembleUser(accountInfo);
 		try {
+			TAUser user = gais.assembleUser(accountInfo);
 			userService.updateUser(user);
+		} catch (WSException e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
+			gam.setDetails(e.getErrorCode().detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_004.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_004.detailCode());
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		
@@ -104,10 +120,15 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		try {
 			userService.setUserIsActive(accountId, true);
+		} catch (WSException e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
+			gam.setDetails(e.getErrorCode().detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_004.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_004.detailCode());
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		
@@ -116,8 +137,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public void deleteAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		GenericAccountManagementException gam = new GenericAccountManagementException();
-		gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_002.toString());
-		gam.setDetails(SudirErrorCodes.SUDIR_002.detailCode());
+		gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_002.toString());
+		gam.setDetails(WSException.SudirErrorCodes.SUDIR_002.detailCode());
 		throw new GenericAccountManagementException_Exception("Метод реализуется в системе без функциональности", gam);
 	}
 
@@ -127,8 +148,8 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			return gais.desassembleUsers(userService.listAllUsers());
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
-			gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_001.toString());
-			gam.setDetails(SudirErrorCodes.SUDIR_001.detailCode());
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
 			throw new GenericAccountManagementException_Exception(e.toString(), gam);
 		}
 		
@@ -136,10 +157,24 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
 	public List<GenericAccountInfo> getAccountListById(String accountId)
 			throws GenericAccountManagementException_Exception {
-		GenericAccountManagementException gam = new GenericAccountManagementException();
-		gam.setGenericSudirStatusCode(SudirErrorCodes.SUDIR_002.toString());
-		gam.setDetails(SudirErrorCodes.SUDIR_002.detailCode());
-		throw new GenericAccountManagementException_Exception("Метод реализуется в системе без функциональности", gam);
+		List<GenericAccountInfo> listUsersByLogin = new ArrayList<GenericAccountInfo>();
+		try {
+			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
+			listTAUsersByLogin.add(userService.getUser(accountId));
+			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
+		} catch (WSException e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(e.getErrorCode().toString());
+			gam.setDetails(e.getErrorCode().detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
+		} catch (Exception e) {
+			GenericAccountManagementException gam = new GenericAccountManagementException();
+			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
+			gam.setDetails(WSException.SudirErrorCodes.SUDIR_001.detailCode());
+			throw new GenericAccountManagementException_Exception(e.toString(), gam);
+		}
+		
+		return listUsersByLogin;
 	}
 
 

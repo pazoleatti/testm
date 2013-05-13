@@ -39,7 +39,7 @@ public interface DeclarationTemplateService {
 	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */
-	public int getActiveDeclarationTemplateId(int declarationTypeId);
+	int getActiveDeclarationTemplateId(int declarationTypeId);
 	/**
 	 * Задать шаблон Jrxml-файла
 	 * Метод компилирует jrxml-файл и записиывает в БД, как сам jrxml-файл, так и его откомпилированную версию (jasper-файл).

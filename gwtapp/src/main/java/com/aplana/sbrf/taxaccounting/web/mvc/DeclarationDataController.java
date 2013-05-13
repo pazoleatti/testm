@@ -46,7 +46,7 @@ public class DeclarationDataController {
 	}
 
 	
-	@RequestMapping(value = "/pageImage/{id}/{pageId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
 	public void pageImage(@PathVariable int id, @PathVariable int pageId,
 			HttpServletResponse response) throws IOException {
 		TAUser user = securityService.currentUser();

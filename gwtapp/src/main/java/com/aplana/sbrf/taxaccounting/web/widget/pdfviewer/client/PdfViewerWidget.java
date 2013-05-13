@@ -33,10 +33,10 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 	@UiField
 	ScrollPanel pdfPanel;
 
-	public final int DEFAULT_PAGE_WIDTH = 793;
-	public final int DEFAULT_PAGE_HEIGHT = 1123;
+	public static final int DEFAULT_PAGE_WIDTH = 793;
+	public static final int DEFAULT_PAGE_HEIGHT = 1123;
 
-	public final int DEFAULT_SCALE_POSITION = 5;
+	public static final int DEFAULT_SCALE_POSITION = 5;
 
 	public PdfViewerWidget() {
 		initWidget(uiBinder.createAndBindUi(this));

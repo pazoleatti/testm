@@ -30,7 +30,7 @@ if (!declarationData.isAccepted()) {
         Документ(
                 КНД:"1152004",
                 // TODO обсудить всплывающее окно, вынести в конф. Трансп декл
-                ДатаДок: docDate != null ? docDate: new Date().format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
+                ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                 Период: 34,
                 ОтчетГод: taxPeriodService.get(reportPeriodService.get(declarationData.reportPeriodId).taxPeriodId).startDate.format('yyyy'),
                 КодНО: departmentParam.taxOrganCode,

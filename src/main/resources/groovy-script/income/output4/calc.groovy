@@ -60,7 +60,7 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
                     }
                 }
                 //k8
-                if (typeId in [11271..11280]) {
+                if (typeId in (11271..11280)) {
                     if (value.incomeTaxSumS != null) {
                         taxBase += value.incomeTaxSumS
                     }
@@ -177,97 +177,97 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
                 }
                 //k16
                 if (typeId in [21659]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k19
                 if (typeId in [21515]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k19
                 if (typeId in [21518]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k22
                 if (typeId in [21397]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k24
                 if (typeId in ((20320..21395) + (21400..21500) + (21530..21652) + (21654..21655))) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k29
                 if (typeId in [21653, 21656]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k30
                 if (typeId in [21658]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k31
-                if (typeId in [21662..21675]) {
-                    if (value.consumptionTaxSumS != null) {
+                if (typeId in (21662..21675)) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k32
                 if (typeId in [21520, 21525]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k33
                 if (typeId in [21397]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k34
-                if (typeId in ((22482 - 22811) + (23110 - 23141))) {
-                    if (value.consumptionTaxSumS != null) {
+                if (typeId in ((22482.. 22811) + (23110 ..23141))) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k39
                 if (typeId in [22481]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase += value.consumptionTaxSumS
                     }
                 }
                 //k40
                 if (typeId in [21657]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k41
                 if (typeId in [21507]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k42
                 if (typeId in [21510]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
                 //k43
                 if (typeId in [21396]) {
-                    if (value.consumptionTaxSumS != null) {
+                    if (value.consumptionTaxSumS != null && !value.getCell('consumptionTaxSumS').hasValueOwner()) {
                         taxBase -= value.consumptionTaxSumS
                     }
                 }
@@ -402,7 +402,7 @@ if (!logger.containsLevel(LogLevel.ERROR)) {
         //графа14
         for (row in formData.dataRows) {
             if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
-                row.baseTaxOf = (BigDecimal) (row.propertyWeight + row.countWeight / 2).setScale(8, BigDecimal.ROUND_HALF_UP)
+                row.baseTaxOf = (BigDecimal) ((row.propertyWeight + row.countWeight) / 2).setScale(8, BigDecimal.ROUND_HALF_UP)
             }
         }
 

@@ -71,5 +71,5 @@ public interface FormDataDao {
 	 * @return форма или null, если такой формы не найдено
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
-	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
+	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 }

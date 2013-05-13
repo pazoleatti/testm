@@ -220,6 +220,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		reportPeriod = new ReportPeriod();
 		reportPeriod.setName("1 квартал");
 		formTemplate.setNumberedColumns(true);
+		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
 		when(formData.getFormColumns()).thenReturn(columns);
 		
 		department = new Department();

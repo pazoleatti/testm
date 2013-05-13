@@ -71,9 +71,9 @@ public class ReportPeriodServiceTest {
         when(taxPeriodDao.get(2)).thenReturn(taxPeriod2);
 		
         List<TaxPeriod> taxPeriodList = new ArrayList<TaxPeriod>();
-        taxPeriodList.add(taxPeriod1);
         taxPeriodList.add(taxPeriod2);
-        
+        taxPeriodList.add(taxPeriod1);
+
         when(taxPeriodDao.listByTaxType(TaxType.TRANSPORT)).thenReturn(taxPeriodList);
 		
         ReflectionTestUtils.setField(service, "taxPeriodDao", taxPeriodDao);
@@ -98,7 +98,6 @@ public class ReportPeriodServiceTest {
 	public void getPrevReportPeriodInSide(){
 		assertNotNull(service.getPrevReportPeriod(2));
 		assertTrue(service.getPrevReportPeriod(2).getId() == 1);
-		
 	}
 	
 	/*
@@ -106,7 +105,6 @@ public class ReportPeriodServiceTest {
 	 */
 	@Test
 	public void getPrevReportPeriodOutSide(){
-		assertEquals(service.getPrevReportPeriod(5).getId(), 4);
-		
+		assertEquals(service.getPrevReportPeriod(5).getId(), 1);
 	}
 }

@@ -80,7 +80,7 @@ public interface FormDataService {
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	public void doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
+	void doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
 
 	/**
 	 * Создаёт налоговую форму без проверок прав доступа

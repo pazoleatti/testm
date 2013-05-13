@@ -16,11 +16,11 @@ import java.io.Serializable;
  */
 public abstract class Column implements Ordered, Serializable {
 	public interface ValidationStrategy {
-		public boolean matches(String valueToCheck);
+		boolean matches(String valueToCheck);
 	}
 
 	public interface Formatter {
-		public String format(String valueToFormat);
+		String format(String valueToFormat);
 	}
 	private static final long serialVersionUID = 1L;
 	

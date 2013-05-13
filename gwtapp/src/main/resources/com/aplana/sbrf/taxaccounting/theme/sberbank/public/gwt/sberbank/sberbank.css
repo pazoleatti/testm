@@ -1062,7 +1062,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-Tree .gwt-TreeItem-selected {
-    background: #93c2f1 url(images/hborder.png) repeat-x 0 -1463px;
+    background: #FFDC82;
 }
 
 .gwt-TreeItem .gwt-RadioButton input,
@@ -1087,13 +1087,15 @@ a, a:visited, a:hover {
 }
 
 .gwt-DatePicker {
-    border: 1px solid #A2BBDD;
+    border: none;
     cursor: default;
+    height: auto !important;
+    width: auto !important;
 }
 
 .gwt-DatePicker td,
 .datePickerMonthSelector td:focus {
-    outline: none
+    outline: none;
 }
 
 .datePickerDays {
@@ -1112,9 +1114,14 @@ a, a:visited, a:hover {
 
 .datePickerWeekdayLabel,
 .datePickerWeekendLabel {
-    background: #C3D9FF;
+    background: #959595;
     padding: 0 4px 2px;
     cursor: default;
+    color: white;
+}
+
+.datePickerDayIsWeekend {
+    color: red;
 }
 
 .datePickerDay {
@@ -1123,12 +1130,11 @@ a, a:visited, a:hover {
 }
 
 .datePickerDayIsToday {
-    border: 1px solid black;
     padding: 3px;
+    background-color: #9AC733 !important;
 }
 
 .datePickerDayIsWeekend {
-    background: #EEEEEE;
 }
 
 .datePickerDayIsFiller {
@@ -1140,20 +1146,19 @@ a, a:visited, a:hover {
 }
 
 .datePickerDayIsDisabled {
-    color: #AAAAAA;
-    font-style: italic;
+    color: #C0C0C0;
 }
 
 .datePickerDayIsHighlighted {
-    background: #F0E68C;
+    background: #FFDC82;
 }
 
 .datePickerDayIsValueAndHighlighted {
-    background: #bbddd9;
+    background: #00940C;
 }
 
 .datePickerMonthSelector {
-    background: #FFDC82;
+    background: white;
     width: 100%;
 }
 
@@ -1163,14 +1168,12 @@ td.datePickerMonth {
     white-space: nowrap;
     font-size: 70%;
     font-weight: bold;
-    color: blue;
 }
 
 .datePickerPreviousButton,
 .datePickerNextButton {
     font-size: 120%;
     line-height: 1em;
-    color: blue;
     cursor: pointer;
     padding: 0 4px;
 }

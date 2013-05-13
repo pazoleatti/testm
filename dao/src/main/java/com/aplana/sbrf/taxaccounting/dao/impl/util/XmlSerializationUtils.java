@@ -113,8 +113,6 @@ public final class XmlSerializationUtils {
 	 * @param dataRow
 	 *            сериализуемая строка
 	 * @return XML-элемент
-	 * @throws XmlSerializationException
-	 *             {@link #serializeCell(org.w3c.dom.Document, String, Object)}
 	 */
 	private Element serializeRow(Document document, DataRow dataRow) {
 		Element row = document.createElement(TAG_ROW);
@@ -140,8 +138,8 @@ public final class XmlSerializationUtils {
 	 *            DOM-документ
 	 * @param alias
 	 *            алиас столбца ячейки
-	 * @param value
-	 *            значение
+	 * @param cell
+	 *            ячейка таблицы
 	 * @return XML-элемент
 	 * @throws XmlSerializationException
 	 *             в случае если тип значения не поддерживается

@@ -32,6 +32,12 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>
 		implements FormTemplateColumnPresenter.MyView {
 
@@ -42,8 +48,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private static final List<String> columnTypeNameList = new ArrayList<String>();
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
 	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
-	private static final HashMap<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
-	private static final HashMap<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
+	private static final Map<String, String> stringDictionaryCodeMap = new HashMap<String, String>();
+	private static final Map<String, String> numericDictionaryCodeMap = new HashMap<String, String>();
 	private static final String STRING_TYPE = "Строка";
 	private static final String NUMERIC_TYPE = "Число";
 	private static final String DATE_TYPE = "Дата";

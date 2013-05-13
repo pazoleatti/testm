@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,22 +70,20 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				new int[] { Types.NUMERIC },
 				TA_USER_MAPPER
 			);
+			initUser(user);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с id = " + userId + " не найден в БД");
 		}
 
-		initUser(user);
 		return user;
 	}
 	
 	@Override
-	public int getUsreIdbyLogin(String login) {
+	public int getUserIdbyLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForInt("select id from sec_user where login = ?", login);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
-		}catch (DataAccessException e){
-			throw new DaoException("Ошибка при получении идентификатора пользователя с login = " + login + " " + e.toString());
 		}
 		
 	}
@@ -131,6 +128,24 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				}
 			}; 
 			getJdbcTemplate().update(psc, keyHolder);
+			/*PreparedStatementCreator psc1 = new PreparedStatementCreator() {
+				
+				@Override
+				public PreparedStatement createPreparedStatement(Connection con)
+						throws SQLException {
+					
+					//prepareStatement(sql, string_field) Only for ORACLE using
+					PreparedStatement ps = con
+							.prepareStatement(
+									"insert into sec_user_role (user_id, role_id) " +
+											"select ?, id from sec_role where alias = ?");
+					ps.setInt(1, keyHolder.getKey().intValue());
+					ps.setString(2, user.getRoles().get(0).getAlias());
+					return ps;
+				}
+			}; 
+			getJdbcTemplate().update(psc1);*/
+			
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",new BatchPreparedStatementSetter() {
 				
@@ -148,8 +163,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			});
 			return keyHolder.getKey().intValue();
 		} catch (DataAccessException e) {
-			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить.");
-		}
+			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.toString());
+		} 
 		
 	}
 
@@ -246,16 +261,33 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Override
 	public List<Integer> getUserIds() {
 		try {
-			List<Integer> taUsersIdList = new ArrayList<Integer>();
-			List<Map<String, Object>> result = getJdbcTemplate().queryForList("select id from sec_user");
-			for (Map<String, Object> map : result) {
-				taUsersIdList.add((Integer)map.get("ID"));
-			}
-			
-			return taUsersIdList;
+			List<Integer> result = getJdbcTemplate().queryForList("select id from sec_user", Integer.class);
+			return result;
 		} catch (DataAccessException e) {
 			throw new DaoException("Ошибка при получении пользователей. ");
 		}
 	}
+
+	@Override
+	public int checkUserRole(String role) {
+		return getJdbcTemplate().queryForInt("select count(*) from sec_role where alias=? ", role);
+	}
+
+	@Override
+	public int checkUserLogin(String login) {
+		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where login = ?",
+				new Object[]{login},
+				new int[]{Types.CHAR},
+				new RowMapper<Integer>() {
+
+					@Override
+					public Integer mapRow(ResultSet rs, int arg1)
+							throws SQLException {
+						return rs.getInt("id");
+					}
+				});
+		 return list.get(0).intValue();
+	}
+
 	
 }

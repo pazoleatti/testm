@@ -11,26 +11,26 @@ public interface DictionaryRegionService {
      * @param code
      * @return
      */
-    public Boolean isValidCode(String code);
+    Boolean isValidCode(String code);
 
     /**
      * Получает регион по  полному коду ОКАТО органищации
      * @param okato код окато организации полностью
      * @return
      */
-    public DictionaryRegion getRegionByOkatoOrg(String okato);
+    DictionaryRegion getRegionByOkatoOrg(String okato);
 
     /**
      *
      * @param name
      * @return
      */
-    public DictionaryRegion getRegionByName(String name);
+    DictionaryRegion getRegionByName(String name);
 
     /**
      *
      * @param code
      * @return
      */
-    public DictionaryRegion getRegionByCode(String code) throws IllegalArgumentException;
+    DictionaryRegion getRegionByCode(String code) throws IllegalArgumentException;
 }

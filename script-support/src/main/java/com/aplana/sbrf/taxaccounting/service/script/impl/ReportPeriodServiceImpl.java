@@ -52,12 +52,12 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 		 */
 		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
 			List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
-			for (int i = taxPeriodlist.size()-1; i > 0 ; i--){
-				if (taxPeriodlist.get(i).getId() == thisTaxPeriod.getId() && i != 0){
+			for (int i = 0; i < taxPeriodlist.size()-1; i++){
+				if (taxPeriodlist.get(i).getId() == thisTaxPeriod.getId()){
 					// получим список отчетных периодов для данного налогового периода
-					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i-1).getId());
+					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i+1).getId());
 					// вернем последний отчетный период
-					return reportPeriodlist.get(reportPeriodlist.size()-1);
+					return reportPeriodlist.get(0);
 				}
 			}
 		}
