@@ -5,7 +5,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- как получить отчетную дату?
- *		- при вычислении 12 графы: 365 или 366 дней в году? как определять?
  *		- откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
  *
  * @author rtimerbaev
@@ -118,7 +117,7 @@ void calc() {
     def someDate = getDate('01.11.2009')
 
     /** Количество дней в году. */
-    def daysInYear = 365 // TODO (Ramil Timerbaev) 365 или 366
+    def daysInYear = getCountDaysInYaer(new Date())
 
     /** Курс ЦБ РФ на отчётную дату. */
     def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
@@ -197,7 +196,7 @@ void logicalCheck(def checkRequiredColumns) {
         def someDate = getDate('01.11.2009')
 
         /** Количество дней в году. */
-        def daysInYear = 365 // TODO (Ramil Timerbaev) 365 или 366
+        def daysInYear = getCountDaysInYaer(new Date())
 
         /** Курс ЦБ РФ на отчётную дату. */
         def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
@@ -462,4 +461,18 @@ void setTotalStyle(def row) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Получить количество дней в году по указанной дате.
+ */
+def getCountDaysInYaer(def date) {
+    if (date == null) {
+        return 0
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def year = date.getYear()
+    def end = format.parse("31.12.$year")
+    def begin = format.parse("01.01.$year")
+    return end - begin + 1
 }

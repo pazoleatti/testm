@@ -48,8 +48,6 @@ def addNewRow() {
     if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('2')
         formData.dataRows.add(getIndex(row), newRow)
-    } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     } else {
         formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     }
