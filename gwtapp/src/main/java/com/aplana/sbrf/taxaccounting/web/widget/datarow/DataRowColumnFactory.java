@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
@@ -12,7 +13,7 @@ public class DataRowColumnFactory {
 	private Boolean isReadOnly = false;
 	private Boolean isEditOnly = false;
 
-	public Column<DataRow, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow> cellTable) {
+	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
 		if (isEditOnly && !isReadOnly) {
 			columnContext.setMode(ColumnContext.Mode.EDIT_MODE);
@@ -21,7 +22,7 @@ public class DataRowColumnFactory {
 		} else {
 			columnContext.setMode(ColumnContext.Mode.DEFAULT_MODE);
 		}
-		com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = null;
+		Column<DataRow<Cell>, ?> tableCol = null;
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
 			columnContext.setColumn(stringColumn);

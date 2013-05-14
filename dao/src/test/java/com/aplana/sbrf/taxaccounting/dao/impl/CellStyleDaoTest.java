@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +31,7 @@ public class CellStyleDaoTest {
 	@Test
 	@Transactional
 	public void getCellStyleTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		for (int i = 1; i < 3; i++) {
@@ -40,8 +42,8 @@ public class CellStyleDaoTest {
 		}
 
 		List<FormStyle> styles = formStyleDao.getFormStyles(1);
-		rowIdMap.put(1l, new DataRow(null ,columns, styles));
-		rowIdMap.put(2l, new DataRow(null ,columns, styles));
+		rowIdMap.put(1l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, styles)));
+		rowIdMap.put(2l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, styles)));
 		cellStyleDao.fillCellStyle(1l, rowIdMap, styles);
 
 		Assert.assertEquals("alias 1", rowIdMap.get(1l).getCell("alias 1").getStyle().getAlias());
@@ -58,7 +60,7 @@ public class CellStyleDaoTest {
 	@Test
 	@Transactional
 	public void saveAndGetCellStyleTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 		List<FormStyle> styles = formStyleDao.getFormStyles(1);
 
 		List<Column> columns = new ArrayList<Column>();
@@ -71,12 +73,12 @@ public class CellStyleDaoTest {
 		stringColumn.setAlias("alias 4");
 		columns.add(stringColumn);
 
-		DataRow editCellRow = new DataRow("alias 3" ,columns, styles);
+		DataRow<Cell> editCellRow = new DataRow<Cell>("alias 3", FormDataUtils.createCells(columns, styles));
 		editCellRow.getCell("alias 3").setStyleAlias("alias 1");
 		editCellRow.getCell("alias 4").setStyleAlias("alias 3");
 
 		rowIdMap.put(3l, editCellRow);
-		rowIdMap.put(4l, new DataRow("alias 4" ,columns, styles));
+		rowIdMap.put(4l, new DataRow<Cell>("alias 4" ,FormDataUtils.createCells(columns, styles)));
 
 		cellStyleDao.saveCellStyle(rowIdMap);
 

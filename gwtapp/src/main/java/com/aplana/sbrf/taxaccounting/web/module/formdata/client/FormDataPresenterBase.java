@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -42,7 +43,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode);
 
-		void setRowsData(List<DataRow> rowsData);
+		void setRowsData(List<DataRow<Cell>> rowsData);
 
 		void addCustomHeader(boolean addNumberedHeader);
 
@@ -78,7 +79,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		DataRow getSelectedRow();
 
-		void setSelectedRow(DataRow item, boolean selected);
+		void setSelectedRow(DataRow<Cell> item, boolean selected);
 
 		void enableRemoveRowButton(boolean enable);
 		

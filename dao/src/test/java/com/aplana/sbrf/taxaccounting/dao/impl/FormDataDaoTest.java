@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -205,7 +206,7 @@ public class FormDataDaoTest {
 		FormTemplate formTemplate = formTemplateDao.get(1);
 		FormData formData = new FormData(formTemplate);
 
-		DataRow dr = formData.appendDataRow();
+		DataRow<Cell> dr = formData.appendDataRow();
 		dr.put("stringColumn", "Строка 1");
 		dr.getCell("stringColumn").setStyleAlias("alias1");
 		dr.getCell("stringColumn").setEditable(true);
@@ -263,7 +264,7 @@ public class FormDataDaoTest {
 	@Transactional
 	public void stylesRemoveStyleSuccess() {
 		FormData formData = fillFormData();
-		DataRow dr = formData.getDataRows().get(0);
+		DataRow<Cell> dr = formData.getDataRows().get(0);
 		dr.getCell("stringColumn").setStyleAlias("alias2");
 		
 		Assert.assertEquals("alias2", dr.getCell("stringColumn").getStyle().getAlias());
@@ -280,7 +281,7 @@ public class FormDataDaoTest {
 
 		FormData formData = fillFormData();
 
-		DataRow dr = formData.getDataRows().get(0);
+		DataRow<Cell> dr = formData.getDataRows().get(0);
 		dr.getCell("stringColumn").setStyleAlias(null);
 
 		dr = formData.getDataRow("newAlias");
@@ -309,7 +310,7 @@ public class FormDataDaoTest {
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
 
-		DataRow dr = formData.getDataRows().get(0);
+		DataRow<Cell> dr = formData.getDataRows().get(0);
 		Assert.assertEquals(true, dr.getCell("stringColumn").isEditable());
 		Assert.assertEquals(false, dr.getCell("numericColumn").isEditable());
 
@@ -322,7 +323,7 @@ public class FormDataDaoTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void stylesSaveErrorStyleNotExist() {
 		FormData formData = fillFormData();
-		DataRow dr = formData.getDataRow("newAlias");
+		DataRow<Cell> dr = formData.getDataRow("newAlias");
 		dr.getCell("numericColumn").setStyleAlias("not existing style");
 		formDataDao.save(formData);
 	}

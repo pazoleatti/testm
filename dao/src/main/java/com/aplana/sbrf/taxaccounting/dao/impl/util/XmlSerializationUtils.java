@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.util.FormatUtils;
 
 import org.w3c.dom.Document;
@@ -76,7 +78,7 @@ public final class XmlSerializationUtils {
 	 *             если не удалось сериализовать. Например, не поддерживается
 	 *             тип значения. Или что-то не так с поддержкой XML.
 	 */
-	public String serialize(List<DataRow> rows) {
+	public String serialize(List<DataRow<Cell>> rows) {
 		Document document = createEmptyDocument();
 
 		Element root = document.createElement(TAG_ROWS);
@@ -114,7 +116,7 @@ public final class XmlSerializationUtils {
 	 *            сериализуемая строка
 	 * @return XML-элемент
 	 */
-	private Element serializeRow(Document document, DataRow dataRow) {
+	private Element serializeRow(Document document, DataRow<?> dataRow) {
 		Element row = document.createElement(TAG_ROW);
 		if (dataRow.getAlias() != null) {
 			row.setAttribute(ATTR_ALIAS, dataRow.getAlias());
@@ -122,11 +124,14 @@ public final class XmlSerializationUtils {
 
 		for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 			String alias = entry.getKey();
-			Cell cell = dataRow.getCell(alias);
-
-			// if (entry.getValue() != null) {
-			row.appendChild(serializeCell(document, alias, cell));
-			// }
+			AbstractCell cell = dataRow.getCell(alias);
+			
+			if (cell instanceof Cell){
+				
+				// if (entry.getValue() != null) {
+				row.appendChild(serializeCell(document, alias, (Cell)cell));
+				// }
+			}
 		}
 		return row;
 	}
@@ -212,8 +217,8 @@ public final class XmlSerializationUtils {
 	 * @throws XmlSerializationException
 	 *             любая ошибка
 	 */
-	public List<DataRow> deserialize(String str, List<Column> columns, List<FormStyle> styles ) {
-		List<DataRow> rows = new ArrayList<DataRow>();
+	public List<DataRow<Cell>> deserialize(String str, List<Column> columns, List<FormStyle> styles ) {
+		List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
 
 		Document document = stringToDocument(str);
 		Element root = document.getDocumentElement();
@@ -234,7 +239,7 @@ public final class XmlSerializationUtils {
 	 *            список столбцов формы
 	 */
 	private DataRow parseDataRow(Element element, List<Column> columns, List<FormStyle> styles) {
-		DataRow dataRow = new DataRow(columns, styles);
+		DataRow<Cell> dataRow = new DataRow(FormDataUtils.createCells(columns, styles));
 
 		// Alias
 		Node aliasNode = element.getAttributes().getNamedItem(ATTR_ALIAS);

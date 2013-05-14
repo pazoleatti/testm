@@ -152,7 +152,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		}
 	}
 
-	private void validateFormRows(List<DataRow> rows, Logger logger) {
+	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
 		//TODO: подумать о уникальности порядка строк
 		for (DataRow row : rows) {
 			if (row.getAlias() != null && row.getAlias().getBytes().length > DATA_ROW_ALIAS_MAX_VALUE) {

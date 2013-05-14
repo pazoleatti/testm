@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +13,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DateColumn;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"CellEditableDaoTest.xml"})
@@ -23,7 +31,7 @@ public class CellEditableDaoTest {
 	@Test
 	@Transactional
 	public void getCellEditableTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		for (int i = 1; i < 3; i++) {
@@ -33,8 +41,8 @@ public class CellEditableDaoTest {
 			columns.add(column);
 		}
 
-		rowIdMap.put(1l, new DataRow(null ,columns, null));
-		rowIdMap.put(2l, new DataRow(null ,columns, null));
+		rowIdMap.put(1l, new DataRow<Cell>(null ,FormDataUtils.createCells(columns, null)));
+		rowIdMap.put(2l, new DataRow<Cell>(null ,FormDataUtils.createCells(columns, null)));
 
 		cellEditableDao.fillCellEditable(1l, rowIdMap);
 
@@ -47,7 +55,7 @@ public class CellEditableDaoTest {
 	@Test
 	@Transactional
 	public void saveAndGetCellEditableTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		Column dateColumn = new DateColumn();
@@ -59,12 +67,12 @@ public class CellEditableDaoTest {
 		stringColumn.setAlias("alias 4");
 		columns.add(stringColumn);
 
-		DataRow editCellRow = new DataRow("alias 3" ,columns, null);
+		DataRow<Cell> editCellRow = new DataRow<Cell>("alias 3" ,FormDataUtils.createCells(columns, null));
 		editCellRow.getCell("alias 3").setEditable(true);
 		editCellRow.getCell("alias 4").setEditable(true);
 
 		rowIdMap.put(3l, editCellRow);
-		rowIdMap.put(4l, new DataRow("alias 4" ,columns, null));
+		rowIdMap.put(4l, new DataRow<Cell>("alias 4" ,FormDataUtils.createCells(columns, null)));
 
 		cellEditableDao.saveCellEditable(rowIdMap);
 

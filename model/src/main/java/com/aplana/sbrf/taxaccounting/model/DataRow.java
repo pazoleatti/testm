@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+
 /**
  * Строка данных отчётной формы Для упрощения скриптинга, класс реализует
  * интерфейс Map<String, Object>, чтобы в скриптах можно было писать конструкции
@@ -39,11 +41,10 @@ import java.util.Set;
  * конструктор по-умолчанию и после этого вызвать метод
  * {@linkplain #setFormColumns}.
  */
-public class DataRow implements Map<String, Object>, Serializable {
+public class DataRow<C extends AbstractCell> implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 1L;
-	private List<Cell> data;
+	private List<C> data;
 	private String alias;
-	private List<FormStyle> formStyleList;
 
 	/**
 	 * Конструктор нужен для сериализации
@@ -52,15 +53,15 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	}
 
-	public static final class MapEntry implements Map.Entry<String, Object> {
+	public static final class MapEntry<C extends AbstractCell> implements Map.Entry<String, Object> {
 
-		private Cell cell;
+		private C cell;
 
-		private MapEntry(Cell cell) {
+		private MapEntry(C cell) {
 			this.cell = cell;
 		}
 		
-		public Cell getCell(){
+		public C getCell(){
 			return cell;
 		}
 
@@ -81,15 +82,14 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	}
 
-	public DataRow(String alias, List<Column> formColumns, List<FormStyle> formStyleList) {
-		this(formColumns, formStyleList);
+	public DataRow(String alias, List<C> cells) {
+		this(cells);
 		this.alias = alias;
 		
 	}
 
-	public DataRow(List<Column> formColumns, List<FormStyle> formStyleList) {
-		this.formStyleList = formStyleList;
-		setFormColumns(formColumns);
+	public DataRow(List<C> cells) {
+		setFormColumns(cells);
 	}
 
 	/**
@@ -99,9 +99,9 @@ public class DataRow implements Map<String, Object>, Serializable {
 	 * @param formColumns
 	 *            список столбцов
 	 */
-	public final void setFormColumns(List<Column> formColumns) {
-		data = new ArrayList<Cell>(formColumns.size());
-		for (Column col : formColumns) {
+	public final void setFormColumns(List<C> cells) {
+		data = new ArrayList<C>(cells.size());
+		for (C col : cells) {
 			addColumn(col);
 		}
 	}
@@ -111,14 +111,14 @@ public class DataRow implements Map<String, Object>, Serializable {
 	 * @param position позиция вставки
 	 * @param col столбец
 	 */
-	public void addColumn(int position, Column col) {
-		Cell oldValue = getCell(col.getAlias(), false);
+	public void addColumn(int position, C col) {
+		C oldValue = getCell(col.getColumn().getAlias(), false);
 		if (oldValue == null) {
-			Cell cellValue = new Cell(col, formStyleList);
+			 C cellValue = col;
 			data.add(position, cellValue);
 		} else {
 			throw new IllegalArgumentException("Алиас столбца + '"
-					+ col.getAlias() + "' уже существует в шаблоне");
+					+ col.getColumn().getAlias() + "' уже существует в шаблоне");
 		}
 	}
 
@@ -126,14 +126,14 @@ public class DataRow implements Map<String, Object>, Serializable {
 	 * Добавить столбец в существующую мапу Этот метод нужен для админки
 	 * @param col столбец
 	 */
-	public void addColumn(Column col) {
-		Cell oldValue = getCell(col.getAlias(), false);
+	public void addColumn( C col) {
+		 C oldValue = getCell(col.getColumn().getAlias(), false);
 		if (oldValue == null) {
-			Cell cellValue = new Cell(col, formStyleList);
+			 C cellValue = col;
 			data.add(cellValue);
 		} else {
 			throw new IllegalArgumentException("Алиас столбца + '"
-					+ col.getAlias() + "' уже существует в шаблоне");
+					+ col.getColumn().getAlias() + "' уже существует в шаблоне");
 		}
 	}
 
@@ -160,7 +160,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	@Override
 	public boolean containsValue(Object value) {
-		for (Cell cell: data) {
+		for ( C cell: data) {
 			if (cell.getValue() == null && value == null) {
 				return true;
 			} else if (cell.getValue() != null && cell.getValue().equals(value)) {
@@ -174,19 +174,19 @@ public class DataRow implements Map<String, Object>, Serializable {
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> entries = new LinkedHashSet<Map.Entry<String, Object>>();
 		if (data != null) {
-			for (Cell cell: data) {
-				entries.add(new MapEntry(cell));
+			for ( C cell: data) {
+				entries.add(new MapEntry<C>(cell));
 			}
 		}
 		return Collections.unmodifiableSet(entries);
 	}
 
-	public Cell getCell(String columnAlias) {
+	public C getCell(String columnAlias) {
 		return getCell(columnAlias, true);
 	}
 	
-	private Cell getCell(String columnAlias, boolean throwIfNotFound) {
-		for (Cell cell: data) {
+	private C getCell(String columnAlias, boolean throwIfNotFound) {
+		for (C cell: data) {
 			if (cell.getColumn().getAlias().equals(columnAlias)) {
 				return cell;
 			}
@@ -200,7 +200,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	@Override
 	public Object get(Object key) {
-		Cell cellValue = getCell((String) key);
+		C cellValue = getCell((String) key);
 		return cellValue.getValue();
 	}
 
@@ -212,7 +212,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 	@Override
 	public Set<String> keySet() {
 		Set<String> keySet = new LinkedHashSet<String>(data.size());
-		for (Cell cell: data) {
+		for (C cell: data) {
 			keySet.add(cell.getColumn().getAlias());
 		}
 		return Collections.unmodifiableSet(keySet);
@@ -220,7 +220,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	@Override
 	public Object put(String key, Object value) {
-		Cell cellValue = getCell((String) key);
+		C cellValue = getCell((String) key);
 		return cellValue.setValue(value);
 	}
 
@@ -237,7 +237,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 	}
 
 	public void removeColumn(Column column) {
-		Cell cell = getCell(column.getAlias(), false);
+		C cell = getCell(column.getAlias(), false);
 		if (cell != null) {
 			data.remove(cell);
 		}
@@ -251,7 +251,7 @@ public class DataRow implements Map<String, Object>, Serializable {
 	@Override
 	public Collection<Object> values() {
 		List<Object> values = new ArrayList<Object>(data.size());
-		for (Cell cell : data) {
+		for (C cell : data) {
 			values.add(cell.getValue());
 		}
 		return Collections.unmodifiableList(values);
@@ -259,8 +259,9 @@ public class DataRow implements Map<String, Object>, Serializable {
 
 	@Override
 	public String toString() {
-		return "DataRow [data=" + data + ", alias=" + alias
-				+ ", formStyleList=" + formStyleList + "]";
+		return "DataRow [data=" + data + ", alias=" + alias + "]";
 	}
+
+
 
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCellPopup;
@@ -40,7 +41,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
 	private final Widget widget;
-	private List<DataRow> rows;
+	private List<DataRow<Cell>> rows;
 	private List<Column> columns;
 	private List<FormStyle> styles;
 	private List<Cell> selectedCells = new ArrayList<Cell>();
@@ -50,7 +51,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private int initialColumnIndex;
 
 	@UiField
-	DataGrid<DataRow> formDataTable;
+	DataGrid<DataRow<Cell>> formDataTable;
 
 	@UiField
 	Button addRowButton;
@@ -121,9 +122,9 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			}
 		}, ContextMenuEvent.getType());
 
-		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow>() {
+		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow<Cell>>() {
 			@Override
-			public void onCellPreview(CellPreviewEvent<DataRow> event) {
+			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
 				TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
 				// получаем индексы первой ячейки
 				if ("mousedown".equals(event.getNativeEvent().getType())
@@ -180,7 +181,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		while (topRowIndex <= bottomRowIndex) {
 			for (int colIndex = rightColumnIndex; colIndex <= leftColumnIndex; colIndex++) {
 				Element element = DOM.getElementById(CustomTableBuilder.TD + "_" + topRowIndex + "_" + colIndex);
-				DataRow currentRow = rows.get(topRowIndex);
+				DataRow<Cell> currentRow = rows.get(topRowIndex);
 				Cell cell = currentRow.getCell(columns.get(colIndex - COLUMN_OFFSET).getAlias());
 
 				if (select) { // выделяем ячейки
@@ -242,9 +243,9 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				return aliasRow.getAlias();
 			}
 		};
-		editTextAliasColumn.setFieldUpdater(new FieldUpdater<DataRow, String>() {
+		editTextAliasColumn.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
 			@Override
-			public void update(int index, DataRow dataRow, String value) {
+			public void update(int index, DataRow<Cell> dataRow, String value) {
 				dataRow.setAlias(value);
 			}
 		});
@@ -253,7 +254,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 		//create form columns
 		for (Column col : columns) {
-			com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
+			com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 					.createTableColumn(col, formDataTable);
 			formDataTable.addColumn(tableCol, col.getName());
 			if (col.getWidth() >= 0) {
@@ -271,15 +272,15 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	}
 
 	@Override
-	public void setRowsData(List<DataRow> rowsData) {
+	public void setRowsData(List<DataRow<Cell>> rowsData) {
 		rows = rowsData;
 		if (rowsData.size() != 0) {
 			formDataTable.setRowData(rowsData);
-			CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, styles, true);
+			CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, styles, true);
 			formDataTable.setTableBuilder(builder);
 		} else {
 			formDataTable.setRowCount(0);
-			formDataTable.setRowData(new ArrayList<DataRow>(0));
+			formDataTable.setRowData(new ArrayList<DataRow<Cell>>(0));
 		}
 
 		upRowButton.setEnabled(false);
@@ -301,7 +302,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiHandler("uniteCellsButton")
 	public void onUniteButton(ClickEvent event){
 		if(getUiHandlers()!=null){
-			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
+			DataRow<Cell> currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
 			Cell cell = currentRow.getCell(columns.
 					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - COLUMN_OFFSET).getAlias());
 			cell.setRowSpan(Math.abs(initialRowIndex - lastRowIndex) + 1);
@@ -314,7 +315,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@UiHandler("disuniteCellsButton")
 	public void onDisuniteButton(ClickEvent event){
 		if(getUiHandlers()!=null){
-			DataRow currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
+			DataRow<Cell> currentRow = rows.get(initialRowIndex <= lastRowIndex ? initialRowIndex : lastRowIndex);
 			Cell cell = currentRow.getCell(columns.
 					get((initialColumnIndex <= lastColumnIndex ? initialColumnIndex : lastColumnIndex) - COLUMN_OFFSET).getAlias());
 			cell.setRowSpan(1);
@@ -326,7 +327,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	@UiHandler("addRowButton")
 	public void onAddButton(ClickEvent event){
-		rows.add(new DataRow("Новый код", columns, styles));
+		rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
 		setRowsData(rows);
 	}
 

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +27,7 @@ public class CellSpanInfoDaoTest {
 	@Test
 	@Transactional
 	public void getCellSpanInfoTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		for (int i = 1; i < 3; i++) {
@@ -35,8 +37,8 @@ public class CellSpanInfoDaoTest {
 			columns.add(column);
 		}
 
-		rowIdMap.put(1l, new DataRow(null ,columns, null));
-		rowIdMap.put(2l, new DataRow(null ,columns, null));
+		rowIdMap.put(1l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, null)));
+		rowIdMap.put(2l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, null)));
 		cellSpanInfoDao.fillCellSpanInfo(1l, rowIdMap);
 
 		Assert.assertEquals(2, rowIdMap.get(1l).getCell("alias 1").getColSpan());
@@ -50,7 +52,7 @@ public class CellSpanInfoDaoTest {
 	@Test
 	@Transactional
 	public void saveAndGetCellSpanInfoTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		Column dateColumn = new DateColumn();
@@ -62,12 +64,12 @@ public class CellSpanInfoDaoTest {
 		stringColumn.setAlias("alias 4");
 		columns.add(stringColumn);
 
-		DataRow editCellRow = new DataRow("alias 3" ,columns, null);
+		DataRow<Cell> editCellRow = new DataRow<Cell>("alias 3", FormDataUtils.createCells(columns, null));
 		editCellRow.getCell("alias 3").setColSpan(3);
 		editCellRow.getCell("alias 4").setRowSpan(2);
 
 		rowIdMap.put(3l, editCellRow);
-		rowIdMap.put(4l, new DataRow("alias 4" ,columns, null));
+		rowIdMap.put(4l, new DataRow<Cell>("alias 4", FormDataUtils.createCells(columns, null)));
 
 		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
 

@@ -111,8 +111,8 @@ public class FormDataServiceImpl implements FormDataService {
 		result.setReportPeriodId(reportPeriodId);
 		result.setCreationDate(new Date());
 
-		for (DataRow predefinedRow : form.getRows()) {
-			DataRow dataRow = result.appendDataRow(predefinedRow.getAlias());
+		for (DataRow<Cell> predefinedRow : form.getRows()) {
+			DataRow<Cell> dataRow = result.appendDataRow(predefinedRow.getAlias());
 			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
 				String columnAlias = entry.getKey();
 				dataRow.put(columnAlias, entry.getValue());
@@ -147,7 +147,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            данные формы
 	 */
 	@Override
-	public void addRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
+	public void addRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow) {
 		boolean canDo = false;
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы
@@ -452,7 +452,7 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public void deleteRow(Logger logger, int userId, FormData formData, DataRow currentDataRow) {
+	public void deleteRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow) {
 		boolean canDo = false;
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы

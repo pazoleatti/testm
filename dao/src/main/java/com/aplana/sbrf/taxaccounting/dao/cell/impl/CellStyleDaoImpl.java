@@ -1,13 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.cell.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,19 +8,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.ModelUtils;
+
 
 @Repository
 @Transactional(readOnly=true)
 public class CellStyleDaoImpl extends AbstractDao implements CellStyleDao {
 	@Override
-	public void fillCellStyle(Long formDataId, final Map<Long, DataRow> rowIdMap, final List<FormStyle> styles) {
+	public void fillCellStyle(Long formDataId, final Map<Long, DataRow<Cell>> rowIdMap, final List<FormStyle> styles) {
 		String sqlQuery = "SELECT row_id, column_id, style_id FROM cell_style cs "
 				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = cs.row_id and r.form_data_id = ?)";
 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
 				new int[] { Types.NUMERIC }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 					if (rs.getLong("row_id") == rowId.getKey()) {
 						for (String alias : rowId.getValue().keySet()) {
 							Cell cell = rowId.getValue().getCell(alias);
@@ -50,9 +54,9 @@ public class CellStyleDaoImpl extends AbstractDao implements CellStyleDao {
 
 	@Override
 	@Transactional(readOnly=false)
-	public void saveCellStyle(Map<Long, DataRow> rowIdMap) {
+	public void saveCellStyle(Map<Long, DataRow<Cell>> rowIdMap) {
 		final List<StyleRecord> records = new ArrayList<StyleRecord>();
-		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+		for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 			for (String alias : rowId.getValue().keySet()) {
 				if (rowId.getValue().getCell(alias).getStyle() != null) {
 					records.add(new StyleRecord(rowId.getKey(), rowId.getValue().getCell(alias).getColumn().getId(),

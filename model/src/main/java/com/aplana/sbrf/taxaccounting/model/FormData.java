@@ -25,7 +25,7 @@ public class FormData extends IdentityObject<Long> {
 	private List<Column> formColumns;
 	private List<FormStyle> formStyles;
 
-	private List<DataRow> dataRows;
+	private List<DataRow<Cell>> dataRows;
 	private FormType formType;
 
 	private FormDataPerformer performer;
@@ -131,7 +131,7 @@ public class FormData extends IdentityObject<Long> {
 		this.formColumns = formTemplate.getColumns();
 		this.formTemplateId = formTemplate.getId();
 		this.formType = formTemplate.getType();
-		dataRows = new ArrayList<DataRow>();
+		dataRows = new ArrayList<DataRow<Cell>>();
 		this.formStyles = formTemplate.getStyles();
 	}
 
@@ -151,7 +151,7 @@ public class FormData extends IdentityObject<Long> {
 		return formColumns;
 	}
 
-	public List<DataRow> getDataRows() {
+	public List<DataRow<Cell>> getDataRows() {
 		return dataRows;
 	}
 
@@ -168,19 +168,22 @@ public class FormData extends IdentityObject<Long> {
 	 *            <code>rowAlias.toString()</code>
 	 * @return добавленная строка с установленным алиасом
 	 */
-	public DataRow appendDataRow(int i, Object rowAlias) {
-		DataRow row = new DataRow(
-				rowAlias == null ? null : rowAlias.toString(), formColumns,
-				formStyles);
+	public DataRow<Cell> appendDataRow(int i, Object rowAlias) {
+		List<Cell> cells = new ArrayList<Cell>();
+		for (Column col : formColumns) {
+			cells.add(new Cell(col, formStyles));
+		}
+		DataRow<Cell> row = new DataRow<Cell>(
+				rowAlias == null ? null : rowAlias.toString(), cells);
 		dataRows.add(i, row);
 		return row;
 	}
 	
-	public DataRow appendDataRow(int i) {
+	public DataRow<Cell> appendDataRow(int i) {
 		return appendDataRow(i, null);
 	}
 	
-	public DataRow appendDataRow(DataRow after, Object rowAlias) {
+	public DataRow<Cell> appendDataRow(DataRow<Cell> after, Object rowAlias) {
 		return appendDataRow(dataRows.indexOf(after) + 1, rowAlias);
 	}
 
@@ -188,11 +191,11 @@ public class FormData extends IdentityObject<Long> {
 		return appendDataRow(after);
 	}*/
 	
-	public DataRow appendDataRow(Object rowAlias) {
+	public DataRow<Cell> appendDataRow(Object rowAlias) {
 		return appendDataRow(dataRows.size(), rowAlias);
 	}
 
-	public DataRow appendDataRow() {
+	public DataRow<Cell> appendDataRow() {
 		return appendDataRow(null);
 	}
 	
@@ -203,15 +206,15 @@ public class FormData extends IdentityObject<Long> {
 	 *            удаляемая строка
 	 * @return true, если удаляемая строка находилась в списке строк
 	 */
-	public boolean deleteDataRow(DataRow dataRow) {
+	public boolean deleteDataRow(DataRow<Cell> dataRow) {
 		return dataRows.remove(dataRow);
 	}
 
-	public DataRow getDataRow(String rowAlias) {
+	public DataRow<Cell> getDataRow(String rowAlias) {
 		if (rowAlias == null) {
 			throw new NullPointerException("Row alias cannot be null");
 		}
-		for (DataRow row : dataRows) {
+		for (DataRow<Cell> row : dataRows) {
 			if (rowAlias.equals(row.getAlias())) {
 				return row;
 			}
@@ -236,7 +239,7 @@ public class FormData extends IdentityObject<Long> {
 			throw new NullPointerException("Row alias cannot be null");
 		}
 		for (int index = 0; index < dataRows.size(); ++index) {
-			DataRow row = dataRows.get(index);
+			DataRow<Cell> row = dataRows.get(index);
 			if (rowAlias.equals(row.getAlias())) {
 				return index;
 			}

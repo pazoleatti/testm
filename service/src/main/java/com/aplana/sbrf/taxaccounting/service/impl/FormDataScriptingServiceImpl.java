@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -261,7 +262,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		//
 		// TODO: Надо подумать над поведением.
 		boolean error = false;
-		for (ListIterator<DataRow> i = formData.getDataRows().listIterator(); i.hasNext() && !error; ) {
+		for (ListIterator<DataRow<Cell>> i = formData.getDataRows().listIterator(); i.hasNext() && !error; ) {
 			int rowIndex = i.nextIndex();
 			DataRow row = i.next();
 

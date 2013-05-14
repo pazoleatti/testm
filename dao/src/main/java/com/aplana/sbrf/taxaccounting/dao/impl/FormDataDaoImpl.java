@@ -29,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -127,7 +128,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					+ formDataId + " не найдено");
 		}
 
-		final Map<Long, DataRow> rowIdToAlias = new HashMap<Long, DataRow>();
+		final Map<Long, DataRow<Cell>> rowIdToAlias = new HashMap<Long, DataRow<Cell>>();
 		
 		jt.query("select * from data_row where form_data_id = ? order by ord",
 				new Object[] { formDataId }, new int[] { Types.NUMERIC },
@@ -135,7 +136,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					public void processRow(ResultSet rs) throws SQLException {
 						Long rowId = rs.getLong("id");
 						String alias = rs.getString("alias");
-						DataRow row = formData.appendDataRow(alias);
+						DataRow<Cell> row = formData.appendDataRow(alias);
 						rowIdToAlias.put(rowId, row);
 					}
 				});
@@ -206,7 +207,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
 	private void saveRows(final FormData formData) {
-		final List<DataRow> dataRows = formData.getDataRows();
+		final List<DataRow<Cell>> dataRows = formData.getDataRows();
 		if (dataRows.isEmpty()) {
 			return;
 		}
@@ -223,7 +224,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			@Override
 			public void setValues(PreparedStatement ps, int orderIndex)
 					throws SQLException {
-				DataRow dr = dataRows.get(orderIndex);
+				DataRow<Cell> dr = dataRows.get(orderIndex);
 				String rowAlias = dr.getAlias();
 				ps.setString(1, rowAlias);
 				ps.setInt(2, orderIndex);
@@ -248,7 +249,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				new Object[] { formDataId }, new int[] { Types.NUMERIC },
 				Long.class);
 
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 		for (int i = 0; i < rowIds.size(); i ++) {
 			rowIdMap.put(rowIds.get(i), dataRows.get(i));
 		}

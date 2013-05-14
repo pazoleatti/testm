@@ -104,7 +104,7 @@ public interface FormDataService {
 	 * @param formData данные формы
 	 * @param currentDataRow текущая выбранная строка в НФ. Может использоваться для того, чтобы вставить новую строку после текущей
 	 */
-	void addRow(Logger logger, int userId, FormData formData, DataRow currentDataRow);
+	void addRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow);
 	
 	/**
 	 * Удаляет строку из формы и выполняет соответствующие скрипты.
@@ -114,7 +114,7 @@ public interface FormDataService {
 	 * @param formData данные формы
 	 * @param currentDataRow текущая выбранная строка в НФ, которую пытаемся удалить
 	 */
-	void deleteRow(Logger logger, int userId, FormData formData, DataRow currentDataRow);
+	void deleteRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow);
 
 	
 	/**

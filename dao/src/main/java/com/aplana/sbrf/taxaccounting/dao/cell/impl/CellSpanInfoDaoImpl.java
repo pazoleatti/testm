@@ -22,14 +22,14 @@ import java.util.Map;
 @Transactional(readOnly=true)
 public class CellSpanInfoDaoImpl extends AbstractDao implements CellSpanInfoDao {
 	@Override
-	public void fillCellSpanInfo(Long formDataId, final Map<Long, DataRow> rowIdMap) {
+	public void fillCellSpanInfo(Long formDataId, final Map<Long, DataRow<Cell>> rowIdMap) {
 		String sqlQuery = "select column_id, row_id, colspan, rowspan from cell_span_info v where exists" +
 				" (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)";
 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
 				new int[] { Types.NUMERIC }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 					if (rs.getLong("row_id") == rowId.getKey()) {
 						for (String alias : rowId.getValue().keySet()) {
 							Cell cell = rowId.getValue().getCell(alias);
@@ -46,9 +46,9 @@ public class CellSpanInfoDaoImpl extends AbstractDao implements CellSpanInfoDao 
 
 	@Override
 	@Transactional(readOnly=false)
-	public void saveCellSpanInfo(Map<Long, DataRow> rowIdMap) {
+	public void saveCellSpanInfo(Map<Long, DataRow<Cell>> rowIdMap) {
 		final List<SpanRecord> records = new ArrayList<SpanRecord>();
-		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+		for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 			for (String alias : rowId.getValue().keySet()) {
 				if (rowId.getValue().getCell(alias).getColSpan() > 1 || rowId.getValue().getCell(alias).getRowSpan() > 1) {
 					records.add(new SpanRecord(rowId.getKey(), rowId.getValue().getCell(alias).getColumn().getId(),

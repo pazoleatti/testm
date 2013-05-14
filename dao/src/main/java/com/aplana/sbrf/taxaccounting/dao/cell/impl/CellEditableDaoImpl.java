@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.cell.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.cell.CellEditableDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -20,13 +21,13 @@ import java.util.Map;
 @Transactional(readOnly=true)
 public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao {
 	@Override
-	public void fillCellEditable(Long formDataId, final Map<Long, DataRow> rowIdMap) {
+	public void fillCellEditable(Long formDataId, final Map<Long, DataRow<Cell>> rowIdMap) {
 		String sqlQuery = "SELECT row_id, column_id FROM cell_editable ce "
 				+ "WHERE exists (SELECT 1 from data_row r WHERE r.id = ce.row_id and r.form_data_id = ?)";
 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 					if (rowId.getKey() == rs.getLong("row_id")) {
 						for (String alias : rowId.getValue().keySet()) {
 							if (rowId.getValue().getCell(alias).getColumn().getId() == rs.getInt("column_id")) {
@@ -41,9 +42,9 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao 
 
 	@Override
 	@Transactional(readOnly=false)
-	public void saveCellEditable(Map<Long, DataRow> rowIdMap) {
+	public void saveCellEditable(Map<Long, DataRow<Cell>> rowIdMap) {
 		final List<CellEditable> records = new ArrayList<CellEditable>();
-		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+		for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 			for (String alias : rowId.getValue().keySet()) {
 				if (rowId.getValue().getCell(alias).isEditable()) {
 					records.add(new CellEditable(rowId.getKey(), rowId.getValue().getCell(alias).getColumn().getId()));

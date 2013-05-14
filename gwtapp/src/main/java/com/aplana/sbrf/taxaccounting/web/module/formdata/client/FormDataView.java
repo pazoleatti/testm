@@ -36,7 +36,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	DockLayoutPanel dockPanel;
 	@UiField
-	DataGrid<DataRow> formDataTable;
+	DataGrid<DataRow<Cell>> formDataTable;
 	@UiField
 	Button addRowButton;
 	@UiField
@@ -104,9 +104,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
-		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow>() {
+		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow<Cell>>() {
 			@Override
-			public void onCellPreview(CellPreviewEvent<DataRow> event) {
+			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
 				if ("mouseover".equals(event.getNativeEvent().getType())) {
 					TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
 					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
@@ -152,7 +152,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			}
 
 			if (showCheckedColumns.getValue() || !col.isChecking()) {
-				com.google.gwt.user.cellview.client.Column<DataRow, ?> tableCol = factory
+				com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
 				formDataTable.addColumn(tableCol, col.getName());
 				if (col.getWidth() > 0) {
@@ -165,13 +165,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void setRowsData(List<DataRow> rowsData) {
+	public void setRowsData(List<DataRow<Cell>> rowsData) {
 		if (rowsData != null) {
 			formDataTable.setRowCount(rowsData.size());
 			formDataTable.setRowData(rowsData);
 		} else {
 			formDataTable.setRowCount(0);
-			formDataTable.setRowData(new ArrayList<DataRow>(0));
+			formDataTable.setRowData(new ArrayList<DataRow<Cell>>(0));
 		}
 		formDataTable.redraw();
 	}
@@ -185,7 +185,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	// После вызова этого метода таблица получает возможность объединять ячейки и применять стили
 	@Override
 	public void addCustomTableStyles(List<FormStyle> allStyles) {
-		CustomTableBuilder<DataRow> builder = new CustomTableBuilder<DataRow>(formDataTable, allStyles, false);
+		CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, allStyles, false);
 		formDataTable.setTableBuilder(builder);
 	}
 
@@ -224,7 +224,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void setSelectedRow(DataRow item, boolean selected) {
+	public void setSelectedRow(DataRow<Cell> item, boolean selected) {
 		selectionModel.setSelected(item, selected);
 	}
 

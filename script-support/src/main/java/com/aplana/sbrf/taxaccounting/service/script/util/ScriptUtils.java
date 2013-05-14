@@ -47,7 +47,7 @@ public final class ScriptUtils {
 		checkNumericColumns(formData, range);
 
 		double sum = 0;
-		List<DataRow> rows = formData.getDataRows();
+		List<DataRow<Cell>> rows = formData.getDataRows();
 		List<Column> cols = formData.getFormColumns();
 		Rect rect = range.getRangeRect(formData);
 		for (int i = rect.y1; i <= rect.y2; i++) {
@@ -113,9 +113,9 @@ public final class ScriptUtils {
 			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
 		double sum = 0;
-		List<DataRow> summRows = formData.getDataRows();
+		List<DataRow<Cell>> summRows = formData.getDataRows();
 		List<Column> summCols = formData.getFormColumns();
-		List<DataRow> condRows = formData.getDataRows();
+		List<DataRow<Cell>> condRows = formData.getDataRows();
 		List<Column> condCols = formData.getFormColumns();
 		for (int i = 0; i < condRect.getHeight(); i++) {
 			for (int j = 0; j < condRect.getWidth(); j++) {
@@ -168,7 +168,7 @@ public final class ScriptUtils {
 	 *
 	 */
 	public static Cell getCell(FormData formData, String columnAlias, String rowAlias) {
-		DataRow row = formData.getDataRow(rowAlias);
+		DataRow<Cell> row = formData.getDataRow(rowAlias);
 		if (row != null) {
 			Cell cell = row.getCell(columnAlias);
 			if (cell != null) {
@@ -192,9 +192,9 @@ public final class ScriptUtils {
 		if (!fromRect.isSameSize(toRect))
 			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
-		List<DataRow> fromRows = fromFrom.getDataRows();
+		List<DataRow<Cell>> fromRows = fromFrom.getDataRows();
 		List<Column> fromCols = fromFrom.getFormColumns();
-		List<DataRow> toRows = toForm.getDataRows();
+		List<DataRow<Cell>> toRows = toForm.getDataRows();
 		List<Column> toCols = toForm.getFormColumns();
 		for (int i = 0; i < fromRect.getHeight(); i++) {
 			for (int j = 0; j < fromRect.getWidth(); j++) {

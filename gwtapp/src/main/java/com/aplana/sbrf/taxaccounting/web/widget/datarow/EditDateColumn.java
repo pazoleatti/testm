@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
 import com.google.gwt.cell.client.*;
 
@@ -18,7 +19,7 @@ public class EditDateColumn extends DataRowColumn<Date> {
     	
     	super(new DateInputWithModesCell(columnContext), dateColumn);
 	    this.setHorizontalAlignment(ALIGN_CENTER);
-        this.setFieldUpdater(new FieldUpdater<DataRow, Date>() {
+        this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, Date>() {
 			@Override
 			public void update(int index, DataRow dataRow, Date value) {
 				dataRow.put(getAlias(), value);
@@ -28,7 +29,7 @@ public class EditDateColumn extends DataRowColumn<Date> {
     }
 
     @Override
-    public Date getValue(DataRow dataRow) {
+    public Date getValue(DataRow<Cell> dataRow) {
         return (Date) dataRow.get(alias);
     }
 }

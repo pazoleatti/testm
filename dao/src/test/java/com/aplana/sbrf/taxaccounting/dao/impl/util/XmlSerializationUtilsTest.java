@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class XmlSerializationUtilsTest {
 	@Transactional
 	public void testSerialization() {
 		// Prepare
-		List<DataRow> data = prepareData();
+		List<DataRow<Cell>> data = prepareData();
 		assertNotNull("The initial data is null.", data);
 		assertFalse("The initial data is empty.", data.isEmpty());
 
@@ -69,7 +70,7 @@ public class XmlSerializationUtilsTest {
 		fs.setAlias("sa1");
 		styles.add(fs);
 		
-		List<DataRow> deserializedData = xmlSerializationUtils.deserialize(
+		List<DataRow<Cell>> deserializedData = xmlSerializationUtils.deserialize(
 				string, columns, styles);
 		assertNotNull("The result of deserialization is null.",
 				deserializedData);
@@ -98,8 +99,8 @@ public class XmlSerializationUtilsTest {
 		Assert.fail("Должно всплыть исключение о том что стиль не найден в шаблоне");
 	}
 
-	public List<DataRow> prepareData() {
-		List<DataRow> rows = new ArrayList<DataRow>();
+	public List<DataRow<Cell>> prepareData() {
+		List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
 		List<FormStyle> styles = new ArrayList<FormStyle>();
 		FormStyle fs = new FormStyle();
 		fs.setAlias("sa");
@@ -109,14 +110,14 @@ public class XmlSerializationUtilsTest {
 		styles.add(fs);
 
 		// Empty row
-		rows.add(new DataRow(columns, styles));
+		rows.add(new DataRow<Cell>(FormDataUtils.createCells(columns, styles)));
 
 		// Row with alias and order parameter
-		DataRow row = new DataRow(columns, styles);
+		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(columns, styles));
 		row.setAlias("alias");
 		rows.add(row);
 
-		row = new DataRow("withColumns", columns, styles);
+		row = new DataRow<Cell>("withColumns", FormDataUtils.createCells(columns, styles));
 		row.put("stringColumn", "test тест");
 		row.put("numericColumn", new BigDecimal(1234.56));
 		row.put("dateColumn", new Date());
@@ -130,7 +131,7 @@ public class XmlSerializationUtilsTest {
 		return rows;
 	}
 
-	private boolean equals(List<DataRow> list1, List<DataRow> list2) {
+	private boolean equals(List<DataRow<Cell>> list1, List<DataRow<Cell>> list2) {
 		if (list1 == null && list2 == null) {
 			return true;
 		}
@@ -143,8 +144,8 @@ public class XmlSerializationUtilsTest {
 			return false;
 		}
 
-		Iterator<DataRow> i1 = list1.iterator();
-		Iterator<DataRow> i2 = list2.iterator();
+		Iterator<DataRow<Cell>> i1 = list1.iterator();
+		Iterator<DataRow<Cell>> i2 = list2.iterator();
 		while (i1.hasNext() && i2.hasNext()) {
 			if (!equals(i1.next(), i2.next())) {
 				return false;
@@ -184,7 +185,7 @@ public class XmlSerializationUtilsTest {
 
 	}
 
-	private boolean equals(DataRow row1, DataRow row2) {
+	private boolean equals(DataRow<Cell> row1, DataRow<Cell> row2) {
 		if (row1 == row2) {
 			return true;
 		}

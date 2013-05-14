@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import java.math.BigDecimal;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
@@ -32,9 +33,9 @@ public class EditNumericColumn extends DataRowColumn<String> {
 			}
 		}
 		this.numberFormat = NumberFormat.getFormat(mask.toString());
-		this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
+		this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
 			@Override
-			public void update(int i, DataRow dataRow, String s) {
+			public void update(int i, DataRow<Cell> dataRow, String s) {
 				try {
 					dataRow.put(getAlias(), numberFormat.parse(s));
 				} catch (NumberFormatException e) {

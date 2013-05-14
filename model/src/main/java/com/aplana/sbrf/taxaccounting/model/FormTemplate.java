@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+
 /**
  * Описание налоговой формы (шаблон налоговой формы)
  * 
@@ -71,7 +73,9 @@ public class FormTemplate extends IdentityObject<Integer> {
 		this.script = script;
 	}
 
-	private List<DataRow> rows = new ArrayList<DataRow>();
+	private List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+	private List<DataRow<HeaderCell>> headers = new ArrayList<DataRow<HeaderCell>>();
+	
 	private List<Column> columns = new ArrayList<Column>();
 	private List<FormStyle> styles = new ArrayList<FormStyle>();
 
@@ -256,8 +260,12 @@ public class FormTemplate extends IdentityObject<Integer> {
 		return scripts;
 	}
 
-	public List<DataRow> getRows() {
+	public List<DataRow<Cell>> getRows() {
 		return rows;
+	}
+	
+	public List<DataRow<HeaderCell>> getHeaders() {
+		return headers;
 	}
 
 	/**
@@ -362,8 +370,11 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 */
 	public void addColumn(int position, Column column) {
 		columns.add(position, column);
-		for (DataRow row : rows) {
-			row.addColumn(position, column);
+		for (DataRow<Cell> row : rows) {
+			row.addColumn(position, new Cell(column, styles));
+		}
+		for (DataRow<HeaderCell> row : headers) {
+			row.addColumn(position,  new HeaderCell(column));
 		}
 	}
 
@@ -373,8 +384,11 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 */
 	public void addColumn(Column column) {
 		columns.add(column);
-		for (DataRow row : rows) {
-			row.addColumn(column);
+		for (DataRow<Cell> row : rows) {
+			row.addColumn(new Cell(column, styles));
+		}
+		for (DataRow<HeaderCell> row : headers) {
+			row.addColumn(new HeaderCell(column));
 		}
 	}
 
@@ -414,7 +428,10 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * @param column удаляемая колонка
 	 */
 	public void removeColumn(Column column) {
-		for (DataRow row : rows) {
+		for (DataRow<Cell> row : rows) {
+			row.removeColumn(column);
+		}
+		for (DataRow<HeaderCell> row : headers) {
 			row.removeColumn(column);
 		}
 		columns.remove(column);

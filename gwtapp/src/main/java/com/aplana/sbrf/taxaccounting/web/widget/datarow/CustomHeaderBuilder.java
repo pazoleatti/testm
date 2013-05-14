@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
@@ -10,10 +11,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.cell.client.Cell.Context;
 
-public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> {
+public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<Cell>> {
 	private boolean numberedColumns;
 	private int offset = 0;
-	public CustomHeaderBuilder(AbstractCellTable<DataRow> table, boolean isFooter, boolean numberedColumns, int offset) {
+	public CustomHeaderBuilder(AbstractCellTable<DataRow<Cell>> table, boolean isFooter, boolean numberedColumns, int offset) {
 		super(table, isFooter);
 		this.offset = offset;
 		this.numberedColumns = numberedColumns;
@@ -60,7 +61,7 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow> 
 		return true;
     }
 
-	private void buildHeader(TableRowBuilder out, Header<?> header, Column<DataRow, ?> column, boolean haveParentHeader) {
+	private void buildHeader(TableRowBuilder out, Header<?> header, Column<DataRow<Cell>, ?> column, boolean haveParentHeader) {
 		if (((DataRowColumn)column).getRowGroup() != null || !haveParentHeader) {
 			Style style = getTable().getResources().style();
 			StringBuilder classesBuilder = new StringBuilder(style.header());

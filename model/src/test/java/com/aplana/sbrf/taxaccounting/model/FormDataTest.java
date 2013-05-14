@@ -3,10 +3,12 @@ package com.aplana.sbrf.taxaccounting.model;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Тесты для FormData

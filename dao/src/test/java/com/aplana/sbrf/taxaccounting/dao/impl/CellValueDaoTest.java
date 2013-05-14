@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +25,7 @@ public class CellValueDaoTest {
 	@Test
 	@Transactional
 	public void getCellValueTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		Column stringColumn = new StringColumn();
@@ -39,8 +41,8 @@ public class CellValueDaoTest {
 		dateColumn.setAlias("alias 3");
 		columns.add(dateColumn);
 
-		rowIdMap.put(1l, new DataRow(null ,columns, null));
-		rowIdMap.put(2l, new DataRow(null ,columns, null));
+		rowIdMap.put(1l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, null)));
+		rowIdMap.put(2l, new DataRow<Cell>(null, FormDataUtils.createCells(columns, null)));
 		cellValueDao.fillCellValue(1l, rowIdMap);
 
 		Assert.assertEquals("string cell", rowIdMap.get(1l).getCell("alias 1").getValue());
@@ -54,7 +56,7 @@ public class CellValueDaoTest {
 	@Test
 	@Transactional
 	public void saveAndGetCellValueTest(){
-		Map<Long, DataRow> rowIdMap = new HashMap<Long, DataRow>();
+		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
 
 		List<Column> columns = new ArrayList<Column>();
 		Column dateColumn = new DateColumn();
@@ -66,12 +68,12 @@ public class CellValueDaoTest {
 		stringColumn.setAlias("alias 4");
 		columns.add(stringColumn);
 
-		DataRow editCellRow = new DataRow("alias 3" ,columns, null);
+		DataRow<Cell> editCellRow = new DataRow<Cell>("alias 3", FormDataUtils.createCells(columns, null));
 		editCellRow.getCell("alias 3").setValue(getDate(2013, 11, 31));
 		editCellRow.getCell("alias 4").setValue("string cell");
 
 		rowIdMap.put(3l, editCellRow);
-		rowIdMap.put(4l, new DataRow("alias 4" ,columns, null));
+		rowIdMap.put(4l, new DataRow<Cell>("alias 4" , FormDataUtils.createCells(columns, null)));
 
 		cellValueDao.saveCellValue(rowIdMap);
 

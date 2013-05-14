@@ -13,12 +13,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 /**
  * Тест для строки данных налоговой формы
  * @author dsultanbekov
  */
 public class DataRowTest {
-	private DataRow createRow() {
+	private DataRow<Cell> createRow() {
 		NumericColumn numericColumn = new NumericColumn();
 		numericColumn.setAlias("numeric");
 		numericColumn.setId(1);
@@ -48,13 +50,15 @@ public class DataRowTest {
 		formStyles.add(boldStyle);
 		formStyles.add(italicStyle);
 		
-		DataRow row = new DataRow(formColumns, formStyles);
+		
+		
+		DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(formColumns, formStyles));
 		return row;
 	}
 	
 	@Test
 	public void testGetCell() {
-		DataRow row = createRow();
+		DataRow<Cell> row = createRow();
 		Cell numericCell = row.getCell("numeric");
 		assertNull(numericCell.getValue());
 		assertEquals(NumericColumn.class, numericCell.getColumn().getClass());

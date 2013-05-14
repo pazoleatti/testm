@@ -387,7 +387,7 @@ public class FormDataXlsxReportBuilder {
 	
 	private void createDataForTable(){
 		sheet.shiftRows(rowNumber + 1, sheet.getLastRowNum(), data.getDataRows().size() + 2);
-		for (DataRow dataRow : data.getDataRows()) {
+		for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : data.getDataRows()) {
 			Row row = sheet.createRow(++rowNumber);
 			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {

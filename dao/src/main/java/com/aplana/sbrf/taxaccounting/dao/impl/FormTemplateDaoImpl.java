@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +115,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 		
 		String dataRowsXml = null;
-		List<DataRow> rows = formTemplate.getRows();
+		List<DataRow<Cell>> rows = formTemplate.getRows();
 		if (rows != null && !rows.isEmpty()) {
 			dataRowsXml = xmlSerializationUtils.serialize(rows);
 		}

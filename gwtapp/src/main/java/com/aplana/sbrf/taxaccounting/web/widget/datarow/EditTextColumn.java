@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import java.math.BigDecimal;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
@@ -19,16 +20,16 @@ public class EditTextColumn extends DataRowColumn<String> {
     public EditTextColumn(StringColumn col, ColumnContext columnContext) {
         super(new ValidatedInputCell(columnContext), col);
 	    this.setHorizontalAlignment(ALIGN_LEFT);
-        this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
+        this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
 			@Override
-			public void update(int index, DataRow dataRow, String value) {
+			public void update(int index, DataRow<Cell> dataRow, String value) {
 				dataRow.put(getAlias(), value);
 			}
 		});
     }
 
     @Override
-    public String getValue(DataRow dataRow) {
+    public String getValue(DataRow<Cell> dataRow) {
     	String value = null;
     	if (dataRow.get(alias) instanceof BigDecimal) {
     		value = ((BigDecimal) dataRow.get(alias)).toPlainString();

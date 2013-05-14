@@ -1,13 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.cell.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,12 +10,23 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+
 
 @Repository
 @Transactional(readOnly=true)
 public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 	@Override
-	public void fillCellValue(Long formDataId, final Map<Long, DataRow> rowIdMap) {
+	public void fillCellValue(Long formDataId, final Map<Long, DataRow<Cell>> rowIdMap) {
 		for (int i = 0; i < CELL_VALUE_TABLES.length; i++) {
 			String sqlQuery ="select * from " + CELL_VALUE_TABLES[i] +
 					" v where exists (select 1 from data_row r where r.id = v.row_id and r.form_data_id = ?)";
@@ -33,7 +36,7 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 					Object value = rs.getObject("value");
 
 					if (value != null) {
-						for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+						for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 							if (rowId.getKey() == rs.getLong("row_id")) {
 								for (String alias : rowId.getValue().keySet()) {
 									Column col = rowId.getValue().getCell(alias).getColumn();
@@ -57,12 +60,12 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 
 	@Override
 	@Transactional(readOnly=false)
-	public void saveCellValue(Map<Long, DataRow> rowIdMap) {
+	public void saveCellValue(Map<Long, DataRow<Cell>> rowIdMap) {
 		final List<ValueRecord<BigDecimal>> numericValues = new ArrayList<ValueRecord<BigDecimal>>();
 		final List<ValueRecord<String>> stringValues = new ArrayList<ValueRecord<String>>();
 		final List<ValueRecord<Date>> dateValues = new ArrayList<ValueRecord<Date>>();
 
-		for (Map.Entry<Long, DataRow> rowId : rowIdMap.entrySet()) {
+		for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
 			for (String alias : rowId.getValue().keySet()) {
 				Column col = rowId.getValue().getCell(alias).getColumn();
 				Object val = rowId.getValue().get(alias);

@@ -168,7 +168,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		
 		
 		
-		DataRow dataRow = mock(DataRow.class);
+		DataRow<Cell> dataRow = mock(DataRow.class);
 		Cell cell = mock(Cell.class);
 		FormStyle formStyle = new FormStyle();
 		formStyle.setBackColor(Color.LIGHT_BLUE);
@@ -239,7 +239,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		formDataSigner2.setName("Нина Васильевна");
 		formDataSigners.add(formDataSigner1);
 		formDataSigners.add(formDataSigner2);
-		List<DataRow> dataRows = new ArrayList<DataRow>();
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		dataRows.add(dataRow);
 		dataRows.add(dataRow);
 		dataRows.add(dataRow);

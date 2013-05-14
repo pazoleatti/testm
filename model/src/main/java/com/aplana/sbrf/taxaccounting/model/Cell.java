@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
 /**
  * Класс, содержащий информацию о ячейке таблицы налоговой формы: значение,
@@ -12,44 +13,34 @@ import java.util.List;
  * 
  * @author dsultanbekov
  */
-public class Cell implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class Cell extends AbstractCell {
+	private static final long serialVersionUID = -3684680064726678753L;
+	
 	private String stringValue;
 	private Date dateValue;
 	private BigDecimal numericValue;
-	private Column column;
 	private boolean editable;
 
-	private List<FormStyle> formStyleList;
 	private FormStyle style;
 	
-	/**
-	 * Ссылка на главную ячейку. Не должна быть null если ячейку перекрывает 
-	 * другая ячейка в таблице из-за объединения. (SBRFACCTAX-2082)
-	 * Значение не храниться не в БД не в XML. Вычисляется в соответствии с colSpan rowSpan
-	 */
-	private Cell valueOwner;
-
-	// Значение диапазона (пока используется для объединения ячеек)
-	private int colSpan = 1;
-	private int rowSpan = 1;
-
+	private List<FormStyle> formStyleList;
+	
 	/**
 	 * Конструктор только для сериализации
 	 */
 	public Cell() {
-
+		super();
 	}
 
 	public Cell(Column column, List<FormStyle> formStyleList) {
-		this.column = column;
+		super(column);
 		this.formStyleList = formStyleList;
 	}
 
 	public Object getValue() {
 		// Получаем значение из главной ячейки (SBRFACCTAX-2082)
-		if (valueOwner != null){
-			return valueOwner.getValue();
+		if (hasValueOwner()){
+			return getValueOwner().getValue();
 		}
 		
 		if (stringValue != null) {
@@ -64,14 +55,14 @@ public class Cell implements Serializable {
 
 	public Object setValue(Object value) {
 		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
-		if (valueOwner != null){
-			valueOwner.setValue(value);
-			return valueOwner.getValue();
+		if (hasValueOwner()){
+			getValueOwner().setValue(value);
+			return getValueOwner().getValue();
 		}
 		
-		if ( (value != null) && !(value instanceof Number && column instanceof NumericColumn
-				|| value instanceof String && column instanceof StringColumn
-				|| value instanceof Date && column instanceof DateColumn)) {
+		if ( (value != null) && !(value instanceof Number && getColumn() instanceof NumericColumn
+				|| value instanceof String && getColumn() instanceof StringColumn
+				|| value instanceof Date && getColumn() instanceof DateColumn)) {
 			throw new IllegalArgumentException("Несовместимые типы колонки и значения");
 		}
 		if (value instanceof Integer) {
@@ -81,19 +72,19 @@ public class Cell implements Serializable {
 		} else if (value instanceof Long) {
 			value = new BigDecimal((Long) value);
 		}
-		if (column instanceof NumericColumn && value != null) {
-			int precision = ((NumericColumn) column).getPrecision();
+		if (getColumn() instanceof NumericColumn && value != null) {
+			int precision = ((NumericColumn) getColumn()).getPrecision();
 			value = ((BigDecimal) value).setScale(precision,
 					RoundingMode.HALF_UP);
-			if (!column.getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
+			if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
 				throw new IllegalArgumentException("Число " + ((BigDecimal) value).toPlainString() +
 						" не соответствует формату " +
-						(((NumericColumn) column).getMaxLength() - ((NumericColumn) column).getPrecision()) + "." +
-						((NumericColumn) column).getPrecision());
+						(((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) + "." +
+						((NumericColumn) getColumn()).getPrecision());
 			}
-		} else if (column instanceof StringColumn) {
-			if (!column.getValidationStrategy().matches((String) value)) {
-				throw new IllegalArgumentException(((String) value) + " длинее " + ((StringColumn)column).getMaxLength());
+		} else if (getColumn() instanceof StringColumn) {
+			if (!getColumn().getValidationStrategy().matches((String) value)) {
+				throw new IllegalArgumentException(((String) value) + " длинее " + ((StringColumn)getColumn()).getMaxLength());
 			}
 		}
 
@@ -143,71 +134,6 @@ public class Cell implements Serializable {
 		dateValue = null;
 		this.numericValue = numericValue;
 	}
-
-	public Column getColumn() {
-		return column;
-	}
-
-	public void setColumn(Column column) {
-		this.column = column;
-	}
-
-	/**
-	 * Возвращает количество столбцов, на которые должна "растягиваться" данная
-	 * ячейка (аналогично атрибуту colspan html-тега TD)
-	 * 
-	 * @return значение атрибута colSpan
-	 */
-	public int getColSpan() {
-		return colSpan;
-	}
-
-	/**
-	 * Задаёт количество столбцов, на которые должна "растягиваться" данная
-	 * ячейка (аналогично атрибуту colspan html-тега TD) Если значение 1, то
-	 * объединение ячеек не требуется
-	 * 
-	 * @param colSpan
-	 *            значение атрибута colSpan
-	 * @throws IllegalArgumentException
-	 *             если задаётся значение меньше 1
-	 */
-	public void setColSpan(int colSpan) {
-		if (colSpan < 1) {
-			throw new IllegalArgumentException(
-					"colSpan value can not be less than 1");
-		}
-		this.colSpan = colSpan;
-	}
-
-	/**
-	 * Возвращает количество строк, на которые должна "растягиваться" данная
-	 * ячейка (аналогично атрибуту rowspan html-тега TD)
-	 * 
-	 * @return значение атрибута rowSpan
-	 */
-	public int getRowSpan() {
-		return rowSpan;
-	}
-
-	/**
-	 * Задаёт количество строк, на которые должна "растягиваться" данная ячейка
-	 * (аналогично атрибуту rowspan html-тега TD) Если значение 1, то
-	 * объединение ячеек не требуется
-	 * 
-	 * @param rowSpan
-	 *            значение атрибута rowSpan
-	 * @throws IllegalArgumentException
-	 *             если задаётся значение меньше 1
-	 */
-	public void setRowSpan(int rowSpan) {
-		if (rowSpan < 1) {
-			throw new IllegalArgumentException(
-					"rowSpan value can not be less than 1");
-		}
-		this.rowSpan = rowSpan;
-	}
-	
 
 	/**
 	 * Признак того, что ячейка допускает ввод значения пользователем
@@ -270,43 +196,5 @@ public class Cell implements Serializable {
 		return style != null ? style.getAlias() : null;
 	}
 
-	@Override
-	public String toString() {
-		return "CellValue [stringValue=" + stringValue + ", dateValue="
-				+ dateValue + ", numericValue=" + numericValue + ", column="
-				+ column + ", colSpan=" + colSpan + ", rowSpan=" + rowSpan
-				+ "]";
-	}
 
-	/**
-	 * Получает ячейку которая главная в группе (SBRFACCTAX-2082)
-	 * Не использовать в скриптах!
-	 * 
-	 * @return
-	 */
-	public Cell getValueOwner() {
-		return valueOwner;
-	}
-
-	/**
-	 * Устанавливает ячейку которая главная в группе (SBRFACCTAX-2082)
-	 * Не использовать в скриптах!
-	 * 
-	 * @param valueOwner
-	 */
-	public void setValueOwner(Cell valueOwner) {
-		this.valueOwner = valueOwner;
-	}
-	
-	/**
-	 * Возвращает признак наличия главной ячейки (SBRFACCTAX-2082)
-	 * Для использования в скриптах
-	 * 
-	 * @return 
-	 * true - ячейка принадлежит объединенной группе и является не главной в группе. Её значение это - не её значение
-	 * false - ячейка главная в группе или не состоит в группе
-	 */
-	public boolean hasValueOwner(){
-		return this.valueOwner != null;
-	}
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.cell;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 
 import java.util.Map;
@@ -15,10 +16,10 @@ public interface CellValueDao {
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 * @return список столбцов формы
 	 */
-	void fillCellValue(Long formDataId, Map<Long, DataRow> rowIdMap);
+	void fillCellValue(Long formDataId, Map<Long, DataRow<Cell>> rowIdMap);
 	/**
 	 * Сохранить список редактируемых ячеек для заданной формы
 	 * @param rowIdMap ключ - идентификатор строки в БД, значение - сама строка
 	 */
-	void saveCellValue(Map<Long, DataRow> rowIdMap);
+	void saveCellValue(Map<Long, DataRow<Cell>> rowIdMap);
 }

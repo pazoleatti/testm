@@ -1,13 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRow.MapEntry;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
 /**
  * Утилита для безопасной работы с обьектом FormData
@@ -27,16 +31,17 @@ public class FormDataUtils {
 	 * 
 	 * @param dataRows список строк
 	 */
-	public static void setValueOners(List<DataRow> dataRows) {
+	public static <T extends AbstractCell> void setValueOners(List<DataRow<T>> dataRows) {
 		
-		Map<Pair<Integer, Integer>, Cell> valueOwners = new HashMap<Pair<Integer, Integer>, Cell>();
+		Map<Pair<Integer, Integer>, AbstractCell> valueOwners = new HashMap<Pair<Integer, Integer>, AbstractCell>();
 
 		int rowIdx = 0;
-		for (DataRow dataRow : dataRows) {
+		for (DataRow<? extends AbstractCell> dataRow : dataRows) {
 			int colIdx = 0;
 			for (Entry<String, Object> entry : dataRow.entrySet()) {
-				Cell currentCell = ((MapEntry) entry).getCell();
-				Cell ownerCell = valueOwners.get(new Pair<Integer, Integer>(
+				@SuppressWarnings("rawtypes")
+				AbstractCell currentCell = ((MapEntry) entry).getCell();
+				AbstractCell ownerCell = valueOwners.get(new Pair<Integer, Integer>(
 						rowIdx, colIdx));
 				
 				// Проверяем - перекрыта ли ячейка с текущими индексами
@@ -74,15 +79,24 @@ public class FormDataUtils {
 	 * 
 	 * @param dataRows список строк
 	 */
-	public static void cleanValueOners(List<DataRow> dataRows) {
-		for (DataRow dataRow : dataRows) {
+	public static <T extends AbstractCell> void cleanValueOners(List<DataRow<T>> dataRows) {
+		for (DataRow<? extends AbstractCell> dataRow : dataRows) {
 			for (Entry<String, Object> entry : dataRow.entrySet()) {
-				Cell currentCell = ((MapEntry) entry).getCell();
+				@SuppressWarnings("rawtypes")
+				AbstractCell currentCell = ((MapEntry) entry).getCell();
 				currentCell.setValueOwner(null);
 			}
 		}
 	}
 	
+	
+	public static List<Cell> createCells(List<Column> columns, List<FormStyle> styles) {
+		List<Cell> cells = new ArrayList<Cell>();
+		for (Column column : columns) {
+			cells.add(new Cell(column, styles));
+		}
+		return cells;
+	}
 	
 
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
@@ -15,9 +16,9 @@ public class EditStringDictionaryColumn extends DataRowColumn<String> {
     public EditStringDictionaryColumn(StringColumn stringColumn, ColumnContext columnContext) {
     	super(new TextDictionaryCell(stringColumn.getDictionaryCode(), columnContext), stringColumn);
 	    this.setHorizontalAlignment(ALIGN_LEFT);
-        this.setFieldUpdater(new FieldUpdater<DataRow, String>() {
+        this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
 			@Override
-			public void update(int index, DataRow dataRow, String value) {
+			public void update(int index, DataRow<Cell> dataRow, String value) {
 				dataRow.put(getAlias(), value);
 			}
 		});

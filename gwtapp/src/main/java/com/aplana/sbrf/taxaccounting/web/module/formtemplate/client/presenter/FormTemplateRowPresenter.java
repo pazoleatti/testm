@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
@@ -42,7 +43,7 @@ public class FormTemplateRowPresenter
 			HasUiHandlers<FormTemplateRowUiHandlers> {
 		void setColumnsData(List<Column> columnsData);
 
-		void setRowsData(List<DataRow> rows);
+		void setRowsData(List<DataRow<Cell>> rows);
 
 		void setStylesData(List<FormStyle> styles);
 
@@ -77,7 +78,7 @@ public class FormTemplateRowPresenter
 	}
 
 	@Override
-	public void onRemoveButton(DataRow row) {
+	public void onRemoveButton(DataRow<Cell> row) {
 		if (row != null) {
 			formTemplate.getRows().remove(row);
 			getView().setRowsData(formTemplate.getRows());

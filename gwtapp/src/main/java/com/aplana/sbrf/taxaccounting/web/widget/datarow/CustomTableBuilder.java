@@ -95,7 +95,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				com.aplana.sbrf.taxaccounting.model.Cell currentCell = null;
 				if (((DataRowColumn<?>)column).getAlias() != null) {
 					currentCell =
-							((DataRow) rowValue).getCell(((DataRowColumn<?>)column).getAlias() );
+							((DataRow<com.aplana.sbrf.taxaccounting.model.Cell>) rowValue).getCell(((DataRowColumn<?>)column).getAlias() );
 				}
 				// Create the cell styles.
 				StringBuilder tdClasses = new StringBuilder(cellStyle);
