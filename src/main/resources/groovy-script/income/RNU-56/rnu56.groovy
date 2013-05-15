@@ -262,7 +262,6 @@ void logicalCheck(def checkRequiredColumns) {
             }
 
             // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
-            // TODO (Ramil Timerbaev) уточнить про "в рамках текущего года"
             if (i != row.number) {
                 logger.error('Нарушена уникальность номера по порядку!')
                 return

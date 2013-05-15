@@ -74,8 +74,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -217,8 +217,8 @@ void logicalCheck(def checkRequiredColumns) {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             // вывод сообщения
@@ -471,7 +471,7 @@ def getCountDaysInYaer(def date) {
         return 0
     }
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def year = date.getYear()
+    def year = date.format('yyyy')
     def end = format.parse("31.12.$year")
     def begin = format.parse("01.01.$year")
     return end - begin + 1

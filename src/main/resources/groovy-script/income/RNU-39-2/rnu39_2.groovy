@@ -49,7 +49,28 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow
+
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+        row = formData.getDataRow('totalA1')
+        newRow = formData.appendDataRow(getIndex(row))
+    } else if (currentDataRow.getAlias() == null) {
+        newRow = formData.appendDataRow(getIndex(currentDataRow) + 1)
+    } else {
+        def alias = currentDataRow.getAlias()
+        def row = formData.getDataRow('totalA1')
+        if (alias == 'A') {
+            row = formData.getDataRow('totalA1')
+        } else if (alias == 'B') {
+            row = formData.getDataRow('totalB1')
+        } else if (alias.contains('total')) {
+            row = formData.getDataRow(alias)
+        } else {
+            row = formData.getDataRow('total' + alias)
+        }
+        newRow = formData.appendDataRow(getIndex(row))
+    }
+
     // графа 1..17
     ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen',
             'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev',
@@ -57,29 +78,6 @@ def addNewRow() {
             'couponIncome', 'totalPercIncome', 'positionType', 'securitiesGroup'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        row = formData.getDataRow('totalA1')
-        formData.dataRows.add(getIndex(row), newRow)
-    } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
-    } else {
-        def alias = currentDataRow.getAlias()
-        def row = formData.getDataRow('totalA1')
-        if (alias == 'A') {
-            row = formData.getDataRow('totalA1')
-            formData.dataRows.add(getIndex(row), newRow)
-        } else if (alias == 'B') {
-            row = formData.getDataRow('totalB1')
-            formData.dataRows.add(getIndex(row), newRow)
-        } else if (alias.contains('total')) {
-            row = formData.getDataRow(alias)
-            formData.dataRows.add(getIndex(row), newRow)
-        } else {
-            row = formData.getDataRow('total' + alias)
-            formData.dataRows.add(getIndex(row), newRow)
-        }
     }
 }
 
@@ -110,7 +108,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -163,7 +162,8 @@ void logicalCheck(def checkRequiredColumns) {
 
         requiredColumns.each {
             if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                colNames.add('"' + name + '"')
             }
         }
         if (!colNames.isEmpty()) {

@@ -9,6 +9,7 @@
  * 		- про нумерацию пока не уточнили, пропустить
  *		- неясность с алгоритмом заполнения строки «Итого за текущий месяц» (после каких строк считать или по каким значениям группировать строки). Временно сгруппировал по графе 4 "Выпуск"
  *		- по какому полю группировать?
+ *	    - заполнение графы 15 не доописано
  *
  * @author rtimerbaev
  */
@@ -74,8 +75,8 @@ def addNewRow() {
  */
 void calc() {
     /*
-      * Проверка объязательных полей.
-      */
+     * Проверка объязательных полей.
+     */
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
@@ -89,7 +90,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -144,6 +146,7 @@ void calc() {
         } else if ((row.code == 2 || row.code == 5) && row.exercisePrice < row.marketPricePercent && row.exerciseRuble < row.marketPriceRuble) {
             row.exercisePriceRetirement = row.marketPriceRuble
         } else {
+            // TODO (Ramil Timerbaev) иначе что?
             row.exercisePriceRetirement = 0
         }
 
@@ -449,7 +452,7 @@ void setTotalStyle(def row) {
 }
 
 /**
- * * Посчитать сумму указанного графа для строк с общим значением
+ * Посчитать сумму указанного графа для строк с общим значением
  *
  * @param value значение общее для всех строк суммирования
  * @param alias название графа

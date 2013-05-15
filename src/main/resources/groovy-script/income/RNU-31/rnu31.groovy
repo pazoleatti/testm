@@ -69,8 +69,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -117,7 +117,8 @@ void logicalCheck(def checkRequiredColumns) {
 
     requiredColumns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
         }
     }
     if (!colNames.isEmpty()) {

@@ -78,8 +78,8 @@ void calc() {
 
         columns.each {
             if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                colNames.add('"' + name + '"')
             }
         }
         if (!colNames.isEmpty()) {
@@ -184,8 +184,8 @@ void logicalCheck(def checkRequiredColumns) {
 
         columns.each {
             if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                colNames.add('"' + name + '"')
             }
         }
         if (!colNames.isEmpty()) {
@@ -261,7 +261,7 @@ void logicalCheck(def checkRequiredColumns) {
             hasError = true
         }
         if (hasError) {
-            logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
+            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
             return
         }
 
@@ -275,14 +275,14 @@ void logicalCheck(def checkRequiredColumns) {
             hasError = true
         }
         if (hasError) {
-            logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
+            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
             return
         }
 
         // 9. Арифметическая проверка графы 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
         if (row.cost10perExploitation != getFromOld() + row.cost10perMonth) {
-            logger.error('Неверное значение графы «10% (30%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
+            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
             return
         }
 

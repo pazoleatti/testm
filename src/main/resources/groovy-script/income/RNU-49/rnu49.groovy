@@ -55,7 +55,18 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+        row = formData.getDataRow('totalA')
+        newRow = formData.appendDataRow(getIndex(row))
+        setEdit(newRow)
+    } else if (currentDataRow.getAlias() == null) {
+        newRow = formData.appendDataRow(getIndex(currentDataRow) + 1)
+    } else {
+        def alias = currentDataRow.getAlias()
+        def row = (alias.contains('total') ? formData.getDataRow(alias) : formData.getDataRow('total' + alias))
+        newRow = formData.appendDataRow(getIndex(row))
+    }
 
     // графа 2..14, 18, 19, 21..23
     ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
@@ -64,23 +75,6 @@ def addNewRow() {
             'monthsLoss', 'saledPropertyCode', 'saleCode', 'propertyType'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        row = formData.getDataRow('totalA')
-        formData.dataRows.add(getIndex(row), newRow)
-    } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
-    } else {
-        def alias = currentDataRow.getAlias()
-        def row = formData.getDataRow('totalA')
-        if (alias.contains('total')) {
-            row = formData.getDataRow(alias)
-            formData.dataRows.add(getIndex(row), newRow)
-        } else {
-            row = formData.getDataRow('total' + alias)
-            formData.dataRows.add(getIndex(row), newRow)
-        }
     }
 }
 
@@ -341,8 +335,6 @@ void checkNSI() {
             }
 
             // 6. Проверка шифра при реализации долей, паёв
-            // TODO (Ramil Timerbaev) Откуда взялось значение – 7. Графа 21 может принимать значения 1, 2, 3, 4, 5, 6
-            // Графа 21 (группа «Е») = 7 , и графа 22 = 1
             if (isSection('E', row) &&
                     (row.saledPropertyCode != 7 || row.saleCode != 1)) {
                 logger.error('Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')

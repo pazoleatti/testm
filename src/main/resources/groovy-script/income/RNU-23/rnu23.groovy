@@ -7,7 +7,6 @@
  *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
- *		- при выводе незаполненных ячейках, выдает ошибку "Conversion = ')'" если в названии колонки есть знак %
  *
  * @author rtimerbaev
  */
@@ -95,7 +94,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -224,7 +224,8 @@ void logicalCheck(def checkRequiredColumns) {
                     'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {

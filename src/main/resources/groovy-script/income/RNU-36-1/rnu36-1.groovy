@@ -41,21 +41,13 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow
 
-    // графа 1..7
-    ['series', 'amount', 'nominal', 'shortPositionDate',
-            'balance2', 'averageWeightedPrice', 'termBondsIssued'].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-    newRow.getCell('percIncome').styleAlias = 'Вычисляемая'
-
-    if (currentDataRow == null) {
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('totalA')
-        formData.dataRows.add(formData.dataRows.indexOf(row), newRow)
+        newRow = formData.appendDataRow(getIndex(row))
     } else if (currentDataRow.getAlias() == null) {
-        formData.dataRows.add(formData.dataRows.indexOf(currentDataRow), newRow)
+        newRow = formData.appendDataRow(getIndex(currentDataRow))
     } else {
         def row = formData.getDataRow('totalA')
         switch (currentDataRow.getAlias()) {
@@ -69,8 +61,16 @@ def addNewRow() {
                 row = formData.getDataRow('totalB')
                 break
         }
-        formData.dataRows.add(formData.dataRows.indexOf(row), newRow)
+        newRow = formData.appendDataRow(getIndex(row))
     }
+
+    // графа 1..7
+    ['series', 'amount', 'nominal', 'shortPositionDate',
+            'balance2', 'averageWeightedPrice', 'termBondsIssued'].each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).styleAlias = 'Редактируемая'
+    }
+    newRow.getCell('percIncome').styleAlias = 'Вычисляемая'
 }
 
 /**
@@ -241,4 +241,11 @@ def isFixedRow(def row) {
  */
 def getColumn8(def row, def lastDay) {
     return round(((row.nominal - row.averageWeightedPrice) * (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount, 2)
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

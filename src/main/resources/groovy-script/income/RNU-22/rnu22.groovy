@@ -7,7 +7,6 @@
  *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
- *		- при выводе незаполненных ячейках, выдает ошибку "Conversion = ')'" если в названии колонки есть знак %
  *
  * @author rtimerbaev
  */
@@ -83,8 +82,8 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {
@@ -137,7 +136,7 @@ void calc() {
         row.accruedCommisRub = round(row.accruedCommisCurrency * row.course, 2)
 
         // графа 15
-        // TODO (Ramil Timerbaev) уточнить у Карины... совпадает с 13ой строкой
+        // TODO (Ramil Timerbaev) совпадает с 13ой строкой (ответ: это нормально)
         row.commisInAccountingCurrency = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
 
         // графа 16
@@ -222,7 +221,8 @@ void logicalCheck(def checkRequiredColumns) {
                     'reportPeriodCurrency', 'reportPeriodRub']
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
                 }
             }
             if (!colNames.isEmpty()) {

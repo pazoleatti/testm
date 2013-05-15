@@ -37,19 +37,19 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow
+
+    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
+        row = formData.getDataRow('2')
+        newRow = formData.appendDataRow(getIndex(row))
+    } else {
+        newRow = formData.appendDataRow(getIndex(currentDataRow) + 1)
+    }
 
     // графа 1..6
     ['number', 'name', 'code', 'cost', 'bondsCount', 'percent'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-
-    if (currentDataRow == null || getIndex(currentDataRow) == -1) {
-        row = formData.getDataRow('2')
-        formData.dataRows.add(getIndex(row), newRow)
-    } else {
-        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     }
 }
 
