@@ -1,4 +1,4 @@
-create table dict_declaration_presentation
+﻿create table dict_declaration_presentation
 (code varchar2(3) not null,
  name varchar2(510) not null);
  
@@ -248,7 +248,8 @@ create table form_template (
   name varchar2(600) not null,
   fullname varchar2(600) not null,
   code varchar2(600) not null,
-  script clob
+  script clob,
+data_headers clob
 );
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
@@ -270,6 +271,7 @@ comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
 comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'скрипт, реализующий бизнес-логику налоговой формы';
+comment on column form_template.data_headers is 'Описание заголовка таблицы';
 ---------------------------------------------------------------------------------------------------
 create table form_style
 (
