@@ -5,11 +5,15 @@ import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -71,4 +75,85 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 		
 		return null;
 	}
+
+    /**
+     * Возвращает дату начала отчетного периода
+     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
+     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
+     * отчетных периодов в данном налоговом периоде.
+     *
+     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
+     * смещение считается по другому алгоритму
+     * @param reportPeriodId
+     * @return
+     */
+    public Calendar getStartDate(int reportPeriodId){
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod.getTaxPeriodId());
+        // календарь
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(taxPeriod.getStartDate());
+
+        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
+        if (taxPeriod.getTaxType() != TaxType.INCOME){
+            // получим отчетные периоды для данного налогового периода
+            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+            // смещение относительно налогового периода
+            int months = 0;
+            for (ReportPeriod cReportPeriod: reportPeriodList){
+                // если достигли текущего то выходим из цикла
+                if (cReportPeriod.getId() == reportPeriod.getId()){
+                    break;
+                }
+                // смещение в месяцах
+                months += cReportPeriod.getMonths();
+            }
+            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
+        }
+
+        return cal;
+    }
+
+    /**
+     * Возвращает дату конца отчетного периода
+     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
+     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
+     * отчетных периодов в данном налоговом периоде.
+     *
+     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
+     * смещение считается по другому алгоритму
+     *
+     * @param reportPeriodId
+     * @return
+     */
+    public Calendar getEndDate(int reportPeriodId){
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriodId());
+        // календарь
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(taxPeriod.getStartDate());
+
+        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
+        if (taxPeriod.getTaxType() == TaxType.INCOME){
+            cal.set(Calendar.MONTH,  reportPeriod.getMonths());
+        }
+        else{
+            // получим отчетные периоды для данного налогового периода
+            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriodId());
+            // смещение относительно налогового периода
+            int months = 0;
+            for (ReportPeriod cReportPeriod: reportPeriodList){
+                // если достигли текущего то выходим из цикла
+                if (cReportPeriod.getId() == reportPeriod.getId()){
+                    months += cReportPeriod.getMonths();
+                    break;
+                }
+                // смещение в месяцах
+                months += cReportPeriod.getMonths();
+            }
+            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
+        }
+
+        return cal;
+    }
 }

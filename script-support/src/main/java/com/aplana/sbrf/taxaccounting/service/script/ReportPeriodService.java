@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -31,5 +32,18 @@ public interface ReportPeriodService {
 	 * @return следующий отчетный период
 	 */
 	ReportPeriod getPrevReportPeriod(int reportPeriodId);
-	
+
+    /**
+     * Возвращает дату начала отчетного периода
+     * @param reportPeriodId
+     * @return
+     */
+    public Calendar getStartDate(int reportPeriodId);
+
+    /**
+     * Возвращает дату конца отчетного периода
+     * @param reportPeriodId
+     * @return
+     */
+    public Calendar getEndDate(int reportPeriodId);
 }
