@@ -2,9 +2,10 @@
  * Скрипт для РНУ-23 (rnu23.groovy).
  * Форма "(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
  *
@@ -51,7 +52,14 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = new DataRow(formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.createDataRow()
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || currentDataRow == null || getIndex(currentDataRow) == -1) {
+        formData.dataRows.add(newRow)
+    } else {
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+    }
 
     // графа 2..12
     ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction',
@@ -60,15 +68,6 @@ def addNewRow() {
             'preAccrualsStartDate', 'preAccrualsEndDate'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def index = formData.dataRows.indexOf(currentDataRow)
-
-    // если данных еще нет или строка не выбрана
-    if (formData.dataRows.isEmpty() || index == -1) {
-        formData.dataRows.add(newRow)
-    } else {
-        formData.dataRows.add(index + 1, newRow)
     }
 }
 
@@ -105,7 +104,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -173,7 +172,8 @@ void calc() {
             'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
 
     // добавить строки "итого"
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.contract = 'Итого'
     setTotalStyle(totalRow)
@@ -188,17 +188,15 @@ void calc() {
  * @param checkRequiredColumns проверять ли обязательные графы
  */
 void logicalCheck(def checkRequiredColumns) {
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    /** Налоговый период. */
-    def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
+    def tmp
 
     /** Дата начала отчетного периода. */
-    def a = (taxPeriod != null ? taxPeriod.getStartDate() : null)
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def a = (tmp ? tmp.getTime() : null)
 
     /** Дата окончания отчетного периода. */
-    def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def b = (tmp ? tmp.getTime() : null)
 
     if (!formData.dataRows.isEmpty()) {
         def i = 1
@@ -237,7 +235,7 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
@@ -257,7 +255,7 @@ void logicalCheck(def checkRequiredColumns) {
             def hasNull = true
             ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
                     'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
-                def tmp = row.getCell(alias).getValue()
+                tmp = row.getCell(alias).getValue()
                 if (tmp != null && tmp != 0) {
                     hasNull = false
                 }
@@ -304,7 +302,7 @@ void logicalCheck(def checkRequiredColumns) {
             i += 1
 
             // 10. Арифметическая проверка графы 13
-            def tmp = getColumn13or15or19(row, row.accrualAccountingStartDate, row.accrualAccountingEndDate)
+            tmp = getColumn13or15or19(row, row.accrualAccountingStartDate, row.accrualAccountingEndDate)
             if (row.incomeCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма начисленного дохода. Валюта»!')
                 return
@@ -470,3 +468,9 @@ void setTotalStyle(def row) {
     }
 }
 
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
+}

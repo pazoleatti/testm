@@ -2,9 +2,10 @@
  * Скрипт для РНУ-22 (rnu22.groovy).
  * Форма "(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
  *
@@ -51,7 +52,15 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+
+    // если данных еще нет или строка не выбрана
+    if (formData.dataRows.isEmpty() || currentDataRow == null ||
+            getIndex(currentDataRow) == -1) {
+        formData.dataRows.add(newRow)
+    } else {
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+    }
 
     // графа 2..12
     ['contractNumber', 'contraclData', 'base', 'transactionDate', 'course',
@@ -93,7 +102,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -158,7 +167,8 @@ void calc() {
     }
 
     // добавить строку "итого"
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.contractNumber = 'Итого'
     setTotalStyle(totalRow)
@@ -181,17 +191,15 @@ void logicalCheck(def checkRequiredColumns) {
     // РНУ-22 за предыдущий отчетный период
     def formDataOld = getFormDataOld()
 
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    /** Налоговый период. */
-    def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
+    def tmp
 
     /** Дата начала отчетного периода. */
-    def a = (taxPeriod != null ? taxPeriod.getStartDate() : null)
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def a = (tmp ? tmp.getTime() : null)
 
     /** Дата окончания отчетного периода. */
-    def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def b = (tmp ? tmp.getTime() : null)
 
     if (!formData.dataRows.isEmpty()) {
         def i = 1
@@ -234,7 +242,7 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
@@ -254,7 +262,7 @@ void logicalCheck(def checkRequiredColumns) {
             ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency',
                     'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
                     'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
-                def tmp = row.getCell(alias).getValue()
+                tmp = row.getCell(alias).getValue()
                 if (tmp != null && tmp != 0) {
                     allNull = false
                 }
@@ -301,7 +309,7 @@ void logicalCheck(def checkRequiredColumns) {
             i += 1
 
             // 10. Арифметическая проверка графы 13
-            def tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
+            tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
             if (row.accruedCommisCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма начисленной комиссии. Валюта»!')
                 return
@@ -463,4 +471,11 @@ def getFormDataOld() {
     def formDataOld = (prevReportPeriod != null ? FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, prevReportPeriod.id) : null)
 
     return formDataOld
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

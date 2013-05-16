@@ -96,8 +96,8 @@ void calc() {
     }
 
     /*
-      * Расчеты
-      */
+     * Расчеты
+     */
 
     // удалить строку "итого"
     def delRow = []
@@ -111,7 +111,8 @@ void calc() {
     }
 
     /** Отчетная дата. */
-    def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
     /** Дата нужная при подсчете графы 12. */
     def someDate = getDate('01.11.2009')
@@ -190,7 +191,8 @@ void calc() {
 void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {
         /** Отчетная дата. */
-        def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
+        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
         /** Дата нужная при подсчете графы 12. */
         def someDate = getDate('01.11.2009')
@@ -257,7 +259,7 @@ void logicalCheck(def checkRequiredColumns) {
             }
 
             // 5. Проверка финансового результата
-            def tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+            tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
             if (tmp < 0 && row.income != round(Math.abs(tmp), 2)) {
                 logger.warn('Неверно определены доходы')
             }
@@ -336,7 +338,8 @@ void logicalCheck(def checkRequiredColumns) {
 void checkNSI() {
     if (!formData.dataRows.isEmpty()) {
         /** Отчетная дата. */
-        def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
+        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
         def hasError = false
         for (def row : formData.dataRows) {

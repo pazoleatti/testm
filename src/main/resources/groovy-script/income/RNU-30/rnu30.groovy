@@ -2,6 +2,8 @@
  * Скрипт для РНУ-30 (rnu30.groovy).
  * Форма "(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
  *		- логическая проверка 13 уникальность поля ПП (графа 1)
@@ -50,40 +52,34 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow
+    def newRow = formData.createDataRow()
     def row
 
-    // в первые строки
     if (currentDataRow == null ||
             getIndex(currentDataRow) == -1 ||
             'total'.equals(currentDataRow.getAlias()) ||
             isFirstSection(currentDataRow)) {
-        row = formData.getDataRow('total')
-        newRow = formData.appendDataRow(getIndex(row))
-        setEdit(newRow, null)
-        return
-    }
 
-    // в раздел А
-    if ('totalA'.equals(currentDataRow.getAlias()) ||
+        // в первые строки
+        row = formData.getDataRow('total')
+        setEdit(newRow, null)
+    } else if ('totalA'.equals(currentDataRow.getAlias()) ||
             'A'.equals(currentDataRow.getAlias()) ||
             isSection(currentDataRow, 'A')) {
-        row = formData.getDataRow('totalA')
-        newRow = formData.appendDataRow(getIndex(row))
-        setEdit(newRow, 'A')
-        return
-    }
 
-    // в раздел Б
-    if ('totalAll'.equals(currentDataRow.getAlias()) ||
+        // в раздел А
+        row = formData.getDataRow('totalA')
+        setEdit(newRow, 'A')
+    } else if ('totalAll'.equals(currentDataRow.getAlias()) ||
             'totalB'.equals(currentDataRow.getAlias()) ||
             'B'.equals(currentDataRow.getAlias()) ||
             isSection(currentDataRow, 'B')) {
+
+        // в раздел Б
         row = formData.getDataRow('totalB')
-        newRow = formData.appendDataRow(getIndex(row))
         setEdit(newRow, 'B')
-        return
     }
+    formData.dataRows.add(getIndex(row), newRow)
 }
 
 /**
@@ -141,8 +137,8 @@ void calc() {
     }
 
     /*
-      * Расчеты
-      */
+     * Расчеты
+     */
 
     def isFirst
     def tmp

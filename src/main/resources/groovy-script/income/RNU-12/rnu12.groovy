@@ -2,9 +2,10 @@
  * Скрипт для РНУ-12 (rnu12.groovy).
  * Форма "(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *
  * @author rtimerbaev
@@ -42,7 +43,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
     // графа 2..10, 12
     ['code', 'numberFirstRecord', 'opy', 'operationDate',
@@ -84,7 +86,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -102,7 +104,7 @@ void calc() {
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(formData.dataRows.indexOf(row))
+        formData.dataRows.remove(getIndex(row))
     }
     if (formData.dataRows.isEmpty()) {
         return
@@ -188,18 +190,15 @@ void calc() {
  * @param checkRequiredColumns проверять ли обязательные графы
  */
 void logicalCheck(def checkRequiredColumns) {
-    // TODO (Ramil Timerbaev) как получить границы отчетного периода?
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-    /** Налоговый период. */
-    def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
+    def tmp
 
     /** Дата начала отчетного периода. */
-    def a = (taxPeriod != null ? taxPeriod.getStartDate() : null )
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def a = (tmp ? tmp.getTime() : null)
 
     /** Дата окончания отчетного периода. */
-    def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def b = (tmp ? tmp.getTime() : null)
 
     if (!formData.dataRows.isEmpty()) {
         def i = 1
@@ -239,7 +238,7 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
@@ -275,7 +274,7 @@ void logicalCheck(def checkRequiredColumns) {
                 logger.error('Деление на ноль. При проверке значения поля «Сумма расхода, начисленная в налоговом учёте».')
                 return
             }
-            def tmp = round(row.advancePayment / row.periodCounts, 2)
+            tmp = round(row.advancePayment / row.periodCounts, 2)
             if (row.outcomeInNalog != tmp) {
                 logger.error('Неверное значение поля «Сумма расхода, начисленная в налоговом учёте»!')
                 return
@@ -369,7 +368,8 @@ def getSum(def columnAlias) {
  * Получить новую строку.
  */
 def getNewRow(def alias, def totalColumns, def sums) {
-    def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.createDataRow()
+    newRow.setAlias('total' + alias)
     newRow.code = 'Итого по коду'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -387,4 +387,11 @@ void setTotalStyle(def row) {
             'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

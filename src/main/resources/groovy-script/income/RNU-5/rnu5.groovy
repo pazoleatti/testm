@@ -2,6 +2,8 @@
  * Скрипт для РНУ-5 (rnu5.groovy).
  * Форма "(РНУ-5) Простой регистр налогового учёта «расходы»".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
@@ -33,7 +35,9 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+
     ['code', 'balance', 'name', 'sum'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -64,7 +68,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -89,7 +93,7 @@ void calc() {
         }
     }
     delRow.each {
-        formData.dataRows.remove(formData.dataRows.indexOf(it))
+        formData.dataRows.remove(getIndex(it))
     }
 
     // отсортировать/группировать
@@ -132,7 +136,8 @@ void calc() {
     }
 
     // добавить строку "итого"
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.code = 'Итого'
     totalRow.sum = total
@@ -173,7 +178,7 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
@@ -261,7 +266,8 @@ def isTotal(def row) {
  * Получить новую строку.
  */
 def getNewRow(def alias, def sum) {
-    def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.createDataRow()
+    newRow.setAlias('total' + alias)
     newRow.sum = sum
     newRow.code = 'Итого по коду'
     newRow.balance = alias
@@ -276,4 +282,11 @@ void setTotalStyle(def row) {
     ['rowNumber', 'code', 'balance', 'name', 'sum'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

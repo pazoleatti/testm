@@ -4,7 +4,7 @@
  *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- уточнить про дату окончания отчётного периода, откуда ее брать?
+ *		- уточнить про дату окончания отчётного периода (или отчетная дата?!), откуда ее брать?
  *		- уточнить чтз про графу 17, в нф всего графов 15
  *		- уточнить про вычисление 14ой графы, последний блок, по предыдущим условиям туда никогда не попадет
  *
@@ -93,8 +93,8 @@ void calc() {
     }
 
     /*
-      * Расчеты
-      */
+     * Расчеты
+     */
 
     // удалить строку "итого"
     def delRow = []
@@ -110,13 +110,15 @@ void calc() {
         return
     }
 
+    def tmp
+
     /** Отчетная дата. */
-    def reportDate = new Date() + 50 // TODO (Ramil Timerbaev) как получить отчетную дату
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
     /** Начальная дата отчетного периода. */
-    def reportDateStart = new Date() // TODO (Ramil Timerbaev) как получить
-
-    def tmp
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def reportDateStart = (tmp ? tmp.getTime() : null)
 
     /** Количество дней владения векселем в отчетном периоде. */
     def countsDays = 1
@@ -211,11 +213,11 @@ void logicalCheck(def checkRequiredColumns) {
         def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
 
         /** Отчетная дата. */
-        def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
+        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
         def cell
         def hasError
-        def tmp
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 hasTotal = true

@@ -4,7 +4,7 @@
  *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- уточнить про дату окончания отчётного периода, откуда ее брать?
+ *		- уточнить отчётною дату, откуда ее брать?
  *		- уточнить про логические проверки 5, 6, проверять на незаполнение если какие-то суммы не введены
  *		- уточнить про логическую проверку 8 (проверять с даты графы 3 до начала отчетного периода?)
  *
@@ -70,7 +70,6 @@ void calc() {
 
             requiredColumns.each {
                 if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    // TODO (Ramil Timerbaev) из за % в названии заголовка может выдавать ошибки
                     colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
                 }
             }
@@ -109,16 +108,18 @@ void calc() {
         return
     }
 
+    def tmp
+
     /** Количество дней в году. */
     def daysInYear = getCountDaysInYaer(new Date())
 
     /** Отчетная дата. */
-    def reportDate = new Date() + 50 // TODO (Ramil Timerbaev) как получить отчетную дату
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
     /** Начальная дата отчетного периода. */
-    def reportDateStart = new Date() // TODO (Ramil Timerbaev) как получить
-
-    def tmp
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def reportDateStart = (tmp ? tmp.getTime() : null)
 
     /** Количество дней владения векселем в отчетном периоде. */
     def countsDays = 1
@@ -203,7 +204,8 @@ void logicalCheck(def checkRequiredColumns) {
         def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
 
         /** Отчетная дата. */
-        def reportDate = new Date() // TODO (Ramil Timerbaev) как получить отчетную дату
+        tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
 
         def cell
         def hasError

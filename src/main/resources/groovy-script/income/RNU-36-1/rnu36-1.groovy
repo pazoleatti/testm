@@ -2,6 +2,8 @@
  * Скрипт для РНУ-36.1 (rnu36-1.groovy).
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- откуда брать "Отчетная дата" для логических проверок?
@@ -17,7 +19,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         calc()
-        // logicalCheck()
+        logicalCheck()
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -41,13 +43,13 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow
+    def newRow = formData.createDataRow()
 
     if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('totalA')
-        newRow = formData.appendDataRow(getIndex(row))
+        formData.dataRows.add(getIndex(row), newRow)
     } else if (currentDataRow.getAlias() == null) {
-        newRow = formData.appendDataRow(getIndex(currentDataRow))
+        formData.dataRows.add(getIndex(currentDataRow), newRow)
     } else {
         def row = formData.getDataRow('totalA')
         switch (currentDataRow.getAlias()) {
@@ -61,7 +63,7 @@ def addNewRow() {
                 row = formData.getDataRow('totalB')
                 break
         }
-        newRow = formData.appendDataRow(getIndex(row))
+        formData.dataRows.add(getIndex(row), newRow)
     }
 
     // графа 1..7
@@ -109,7 +111,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"Серия\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -141,7 +143,7 @@ void calc() {
         def row = formData.getDataRow(it)
         def totalRow = formData.getDataRow('total' + it)
         totalColumns.each { alias ->
-            tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(row) + 1, formData.dataRows.indexOf(totalRow) - 1))
+            tmp = summ(formData, new ColumnRange(alias, getIndex(row) + 1, getIndex(totalRow) - 1))
             totalRow.getCell(alias).setValue(tmp)
         }
         sum += totalRow.percIncome
@@ -168,7 +170,10 @@ void logicalCheck() {
         }
 
         // 1. Проверка даты приобретения (открытия короткой позиции) (графа 4)
-        def reportDay = new Date()
+        // TODO (Ramil Timerbaev) откуда брать
+        // отчетная дата
+        tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def reportDay = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
         if (row.shortPositionDate > reportDay) {
             logger.error('Неверно указана дата приобретения (открытия короткой позиции)!')
             return
@@ -192,7 +197,7 @@ void logicalCheck() {
         def row = formData.getDataRow(section)
         def totalRow = formData.getDataRow('total' + section)
         totalColumns.each { alias ->
-            tmp = summ(formData, new ColumnRange(alias, formData.dataRows.indexOf(row) + 1, formData.dataRows.indexOf(totalRow) - 1))
+            tmp = summ(formData, new ColumnRange(alias, getIndex(row) + 1, getIndex(totalRow) - 1))
             if (totalRow.getCell(alias).getValue() != tmp) {
                 hasError = true
                 logger.error("Итоговые значений для раздела $section рассчитаны неверно!")

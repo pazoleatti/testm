@@ -2,6 +2,8 @@
  * Скрипт для РНУ-31 (rnu31.groovy).
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
  *		- для проверки 1 нет условия (не ясно как получать предыдущий отчет)
@@ -40,7 +42,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
     // графа 3..12
     ['ofz', 'municipalBonds', 'governmentBonds	', 'mortgageBonds',
@@ -80,7 +83,7 @@ void calc() {
                 if (!isEmpty(index)) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -130,7 +133,7 @@ void logicalCheck(def checkRequiredColumns) {
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            index = formData.dataRows.indexOf(row) + 1
+            index = getIndex(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return
@@ -209,4 +212,11 @@ def getFormDataOld() {
  */
 def isFirstMonth() {
     return true
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

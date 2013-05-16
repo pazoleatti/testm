@@ -2,9 +2,10 @@
  * Скрипт для РНУ-8 (rnu8.groovy).
  * Форма "(РНУ-8) Простой регистр налогового учёта «Требования»".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- получение даты начала и окончания отчетного периода
  * 		- про нумерацию пока не уточнили, пропустить
  *
  * @author rtimerbaev
@@ -36,7 +37,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
     // графа 2..6
     ['code', 'balance', 'name', 'income', 'outcome'].each {
@@ -74,7 +76,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -92,7 +94,7 @@ void calc() {
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(formData.dataRows.indexOf(row))
+        formData.dataRows.remove(getIndex(row))
     }
     if (formData.dataRows.isEmpty()) {
         return
@@ -110,7 +112,8 @@ void calc() {
     def totalColumns = ['income', 'outcome']
 
     // добавить строку "итого"
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.code = 'Итого'
     setTotalStyle(totalRow)
@@ -203,7 +206,7 @@ void logicalCheck(def checkRequiredColumns) {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
                 return
@@ -305,7 +308,8 @@ def getSum(def columnAlias) {
  * Получить новую строку.
  */
 def getNewRow(def alias, def totalColumns, def sums) {
-    def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.createDataRow()
+    newRow.setAlias('total' + alias)
     newRow.code = 'Итого по коду'
     setTotalStyle(newRow)
     totalColumns.each {
@@ -337,4 +341,11 @@ def calcSumByCode(def code, def alias) {
         }
     }
     return sum
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

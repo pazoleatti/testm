@@ -2,6 +2,8 @@
  * Скрипт для РНУ-33 (rnu33.groovy).
  * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- проверка 5 не сделана, потому что про предыдущие месяцы пока не прояснилось
@@ -10,18 +12,19 @@
  *		- неясность с алгоритмом заполнения строки «Итого за текущий месяц» (после каких строк считать или по каким значениям группировать строки). Временно сгруппировал по графе 4 "Выпуск"
  *		- по какому полю группировать?
  *	    - заполнение графы 15 не доописано
+ *	    - нет проверок заполнения полей перед логической проверкой
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
         calc()
-        logicalCheck()
+        logicalCheck(false)
         checkNSI()
         break
     case FormDataEvent.ADD_ROW :
@@ -58,7 +61,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
     // графа 2..14, 16, 18..20
     ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
@@ -101,7 +105,7 @@ void calc() {
                 if (index != null) {
                     logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
                 } else {
-                    index = formData.dataRows.indexOf(row) + 1
+                    index = getIndex(row) + 1
                     logger.error("В строке $index не заполнены колонки : $errorMsg.")
                 }
             }
@@ -123,7 +127,7 @@ void calc() {
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(formData.dataRows.indexOf(row))
+        formData.dataRows.remove(getIndex(row))
     }
     if (formData.dataRows.isEmpty()) {
         return
@@ -171,8 +175,10 @@ void calc() {
     def totalColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal',
             'exerciseRuble', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement',
             'allCost', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+
     // добавить строку "Итого за текущий отчётный (налоговый) период"
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.getCell('valuablePaper').setColSpan(4)
     totalRow.getCell('valuablePaper').setValue('Итого за текущий отчётный (налоговый) период')
@@ -226,8 +232,10 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param checkRequiredColumns проверять ли обязательные графы
  */
-void logicalCheck() {
+void logicalCheck(def checkRequiredColumns) {
     if (!formData.dataRows.isEmpty()) {
         def i = 1
         // суммы строки общих итогов
@@ -245,6 +253,35 @@ void logicalCheck() {
             if (isTotal(row)) {
                 hasTotal = true
                 continue
+            }
+
+            // TODO (Ramil Timerbaev) нет проверок заполнения полей перед логической проверкой
+            // . Обязательность заполнения полей (графа 2..14, 16, 18..20)
+            def colNames = []
+            // Список проверяемых столбцов (графа 2..14, 16, 18..20)
+            ['code', 'valuablePaper', 'issue', 'purchaseDate',
+                    'implementationDate', 'bondsCount','purchaseCost', 'costs',
+                    'redemptionVal', 'exercisePrice', 'exerciseRuble',
+                    'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
+                    'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
+                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+                    colNames.add('"' + name + '"')
+                }
+            }
+            if (!colNames.isEmpty()) {
+                if (!checkRequiredColumns) {
+                    return
+                }
+                def index = row.rowNumber
+                def errorMsg = colNames.join(', ')
+                if (index != null) {
+                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+                } else {
+                    index = getIndex(row) + 1
+                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
+                }
+                return
             }
 
             // 1. Проверка рыночной цены в процентах к номиналу (графа 10, 13)
@@ -347,6 +384,7 @@ void logicalCheck() {
             }
 
             // 14. Проверка на уникальность поля «№ пп» (графа 1)
+            // TODO (Ramil Timerbaev) под вопросом
             if (i != row.rowNumber) {
                 logger.error('Нарушена уникальность номера по порядку!')
                 return
@@ -426,7 +464,8 @@ def getSum(def columnAlias) {
  * Получить новую строку.
  */
 def getNewRow(def alias, def totalColumns, def sums) {
-    def newRow = new DataRow('total' + alias, formData.getFormColumns(), formData.getFormStyles())
+    def newRow = formData.createDataRow()
+    newRow.setAlias('total' + alias)
     newRow.valuablePaper = 'Итого за текущий месяц'
     newRow.getCell('valuablePaper').setColSpan(4)
     setTotalStyle(newRow)
@@ -465,4 +504,11 @@ def calcSumByCode(def value, def alias) {
         }
     }
     return sum
+}
+
+/**
+ * Получить номер строки в таблице.
+ */
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }

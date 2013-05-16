@@ -3,7 +3,6 @@
  * Форма "(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 2(квартальный)".
  *
  * TODO:
- *      - логические проверки (необходимо получать граничные даты отчетного периода)
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
  * @author rtimerbaev
@@ -145,8 +144,15 @@ void calc() {
  * @param checkRequiredColumns проверять ли обязательные графы
  */
 void logicalCheck(def checkRequiredColumns) {
-    def reportDateStart = new Date() // TODO (Ramil Timerbaev)
-    def reportDateEnd = new Date() // TODO (Ramil Timerbaev)
+    def tmp
+
+    /** Отчетная дата. */
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def reportDateEnd = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+
+    /** Начальная дата отчетного периода. */
+    tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def reportDateStart = (tmp ? tmp.getTime() : null)
 
     for (def row : formData.dataRows) {
         if (isFixedRow(row)) {
