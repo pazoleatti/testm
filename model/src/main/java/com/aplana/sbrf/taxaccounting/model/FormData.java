@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -323,8 +324,18 @@ public class FormData extends IdentityObject<Long> {
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
-	
-	@Override
+
+    /**
+     * Фабричный метод создание новой строки
+     * с установленными ячейками
+     * @return
+     */
+    public DataRow<Cell> createDataRow(){
+        List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
+        return new DataRow<Cell>(cells);
+    }
+
+    @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("FormData [state=");
