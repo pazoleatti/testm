@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRow.MapEntry;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 /**
  * Утилита для безопасной работы с обьектом FormData
@@ -90,10 +91,32 @@ public class FormDataUtils {
 	}
 	
 	
+	/**
+	 * Создает группу Cell 
+	 * 
+	 * @param columns
+	 * @param styles
+	 * @return
+	 */
 	public static List<Cell> createCells(List<Column> columns, List<FormStyle> styles) {
 		List<Cell> cells = new ArrayList<Cell>();
 		for (Column column : columns) {
 			cells.add(new Cell(column, styles));
+		}
+		return cells;
+	}
+
+	
+	/**
+	 * Создает группу CellHeader
+	 * 
+	 * @param columns
+	 * @return
+	 */
+	public static List<HeaderCell> createHeaderCells(List<Column> columns) {
+		List<HeaderCell> cells = new ArrayList<HeaderCell>();
+		for (Column column : columns) {
+			cells.add(new HeaderCell(column));
 		}
 		return cells;
 	}

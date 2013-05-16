@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import org.junit.Assert;
@@ -48,9 +50,9 @@ public class XmlSerializationUtilsTest {
 
 	@Test
 	@Transactional
-	public void testSerialization() {
+	public void testSerializationCell() {
 		// Prepare
-		List<DataRow<Cell>> data = prepareData();
+		List<DataRow<Cell>> data = prepareDataCell();
 		assertNotNull("The initial data is null.", data);
 		assertFalse("The initial data is empty.", data.isEmpty());
 
@@ -71,7 +73,7 @@ public class XmlSerializationUtilsTest {
 		styles.add(fs);
 		
 		List<DataRow<Cell>> deserializedData = xmlSerializationUtils.deserialize(
-				string, columns, styles);
+				string, columns, styles, Cell.class);
 		assertNotNull("The result of deserialization is null.",
 				deserializedData);
 		assertFalse("The result of deserialization is empty.",
@@ -92,14 +94,52 @@ public class XmlSerializationUtilsTest {
 		
 		try{
 			xmlSerializationUtils.deserialize(
-					string, columns, styles);
+					string, columns, styles, Cell.class);
 		} catch (IllegalArgumentException e){
 			return;
 		}
 		Assert.fail("Должно всплыть исключение о том что стиль не найден в шаблоне");
 	}
+	
+	@Test
+	@Transactional
+	public void testSerializationHeaderCell() {
+		// Prepare
+		List<DataRow<HeaderCell>> data = prepareDataHeaderCell();
+		assertNotNull("The initial data is null.", data);
+		assertFalse("The initial data is empty.", data.isEmpty());
 
-	public List<DataRow<Cell>> prepareData() {
+		// Serialize
+		String string = xmlSerializationUtils.serialize(data);
+		assertNotNull("The result of serialization is null.", string);
+		assertFalse("The result of serialization is empty.", string.isEmpty());
+
+		System.out.println(string);
+
+		// Deserialize
+		List<FormStyle> styles = new ArrayList<FormStyle>();
+		FormStyle fs = new FormStyle();
+		fs.setAlias("sa");
+		styles.add(fs);
+		fs = new FormStyle();
+		fs.setAlias("sa1");
+		styles.add(fs);
+		
+		List<DataRow<HeaderCell>> deserializedData = xmlSerializationUtils.deserialize(
+				string, columns, styles, HeaderCell.class);
+		assertNotNull("The result of deserialization is null.",
+				deserializedData);
+		assertFalse("The result of deserialization is empty.",
+				deserializedData.isEmpty());
+
+		// Check equals
+		assertTrue(
+				"The result of deserialization doesn't equals the initial data.",
+				equals(data, deserializedData));
+		
+	}
+
+	public List<DataRow<Cell>> prepareDataCell() {
 		List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
 		List<FormStyle> styles = new ArrayList<FormStyle>();
 		FormStyle fs = new FormStyle();
@@ -130,8 +170,38 @@ public class XmlSerializationUtilsTest {
 
 		return rows;
 	}
+	
+	public List<DataRow<HeaderCell>> prepareDataHeaderCell() {
+		List<DataRow<HeaderCell>> rows = new ArrayList<DataRow<HeaderCell>>();
+		List<FormStyle> styles = new ArrayList<FormStyle>();
+		FormStyle fs = new FormStyle();
+		fs.setAlias("sa");
+		styles.add(fs);
+		fs = new FormStyle();
+		fs.setAlias("sa1");
+		styles.add(fs);
 
-	private boolean equals(List<DataRow<Cell>> list1, List<DataRow<Cell>> list2) {
+		// Empty row
+		rows.add(new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(columns)));
+
+		// Row with alias and order parameter
+		DataRow<HeaderCell> row = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(columns));
+		row.setAlias("alias");
+		rows.add(row);
+		
+		row = new DataRow<HeaderCell>("withColumns", FormDataUtils.createHeaderCells(columns));
+		row.put("stringColumn", "test тест");
+		row.put("numericColumn", "заголовок1");
+		row.put("dateColumn", "заголовок2");
+		rows.add(row);
+
+		row.getCell("stringColumn").setColSpan(2);
+		row.getCell("stringColumn").setRowSpan(3);
+
+		return rows;
+	}
+
+	private <T extends AbstractCell> boolean equals(List<DataRow<T>> list1, List<DataRow<T>> list2) {
 		if (list1 == null && list2 == null) {
 			return true;
 		}
@@ -144,12 +214,10 @@ public class XmlSerializationUtilsTest {
 			return false;
 		}
 
-		Iterator<DataRow<Cell>> i1 = list1.iterator();
-		Iterator<DataRow<Cell>> i2 = list2.iterator();
+		Iterator<DataRow<T>> i1 = list1.iterator();
+		Iterator<DataRow<T>> i2 = list2.iterator();
 		while (i1.hasNext() && i2.hasNext()) {
-			if (!equals(i1.next(), i2.next())) {
-				return false;
-			}
+			assertEqualsDataRow(i1.next(), i2.next());
 		}
 
 		return true;
@@ -162,58 +230,47 @@ public class XmlSerializationUtilsTest {
 	 * @param cell2
 	 * @return
 	 */
-	private boolean equals(Cell cell1, Cell cell2) {
-
-		if (cell1 == cell2)
-			return true;
-
-		Cell other = (Cell) cell2;
-		if (cell1.getColSpan() != other.getColSpan())
-			return false;
-		if (cell1.getRowSpan() != other.getRowSpan())
-			return false;
-		if (cell1.getStyle() == null) {
-			if (other.getStyle() != null)
-				return false;
-		} else if (!cell1.getStyle().getAlias().equals(other.getStyle().getAlias()))
-			return false;
-		if (cell1.isEditable()!=cell2.isEditable()){
-			return false;
-		}
+	private <T extends AbstractCell> void assertEqualsCell(T cell1, T cell2) {
 		
-		return true;
-
+		assertEquals(cell1.getClass(), cell2.getClass());
+		assertEquals(cell1.getColSpan(), cell2.getColSpan());
+		assertEquals(cell1.getRowSpan(), cell2.getRowSpan());
+			
+		if (Cell.class.equals(cell1)){
+			Cell ccell1 = (Cell) cell1;
+			Cell ccell2 = (Cell) cell2;
+			assertEquals(ccell1.isEditable(), ccell2.isEditable());
+	
+			if (ccell1.getStyle() == null && ccell2.getStyle() != null){
+					fail();
+			}
+			if (ccell1.getStyle() != null && ccell2.getStyle() == null){
+				fail();
+			}
+			assertEquals(ccell1.getStyle().getAlias(), ccell2.getStyle().getAlias());
+		}
 	}
 
-	private boolean equals(DataRow<Cell> row1, DataRow<Cell> row2) {
-		if (row1 == row2) {
-			return true;
-		}
+	private <T extends AbstractCell> void assertEqualsDataRow(DataRow<T> row1, DataRow<T> row2) {
+
 
 		if (row1 == null || row2 == null) {
-			return false;
+			fail();
 		}
 
-		if (row1.getAlias() != null ? !row1.getAlias().equals(row2.getAlias())
-				: row2.getAlias() != null) {
-			return false;
-		}
+		assertEquals(row1.getAlias(), row2.getAlias());
+		assertEquals(row1.size(), row2.size());
 
-		if (row1.size() != row2.size()) {
-			return false;
-		}
 
 		for (String key : row1.keySet()) {
-			Cell cell1 = row1.getCell(key);
-			Cell cell2 = row2.getCell(key);
+			T cell1 = row1.getCell(key);
+			T cell2 = row2.getCell(key);
 			Object val1 = cell1.getValue();
 			Object val2 = cell2.getValue();
 
 			if (val1 != null && val2 != null) {
-				if (val1.getClass() != val2.getClass()) {
-					return false;
-				}
-
+				assertEquals(val1.getClass(), val2.getClass());
+	
 				if (val1 instanceof Date) {
 					Calendar c1 = Calendar.getInstance();
 					Calendar c2 = Calendar.getInstance();
@@ -222,31 +279,29 @@ public class XmlSerializationUtilsTest {
 					c2.setTime((Date) val2);
 
 					if (c1.get(Calendar.YEAR) != c2.get(Calendar.YEAR)) {
-						return false;
+						fail();
 					}
 
 					if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH)) {
-						return false;
+						fail();
 					}
 
 					if (c1.get(Calendar.DATE) != c2.get(Calendar.DATE)) {
-						return false;
+						fail();
 					}
 				} else {
-					if (!val1.equals(val2)) {
-						return false;
-					}
+					assertEquals(val1, val2);
 				}
 
-				if (!equals(cell1, cell2)) {
-					return false;
-				}
+				assertEqualsCell(cell1, cell2);
+				
 
-			} else if (val1 != null || val2 != null) {
-				return false;
+			} else if (val1 != null && val2 == null) {
+				fail(String.valueOf(val1));
+			} else if (val1 == null && val2 != null){
+				fail(String.valueOf(val2));
 			}
 		}
 
-		return true;
 	}
 }

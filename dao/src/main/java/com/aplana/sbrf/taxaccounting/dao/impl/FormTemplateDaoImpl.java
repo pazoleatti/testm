@@ -1,15 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,10 +15,17 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 @Repository
 @Transactional(readOnly = true)
@@ -66,7 +68,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				scriptDao.fillFormScripts(formTemplate);
 				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
-					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles()));
+					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class));
+				}
+				String stHeaderData = rs.getString("data_headers");
+				if (stHeaderData != null) {
+					formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
 				}
 			}
 			return formTemplate;
@@ -120,11 +126,18 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			dataRowsXml = xmlSerializationUtils.serialize(rows);
 		}
 		
+		String dataHeadersXml = null;
+		List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
+		if (rows != null && !rows.isEmpty()) {
+			dataHeadersXml = xmlSerializationUtils.serialize(headers);
+		}
+		
 		// TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, edition = ?, numbered_columns = ?, is_active = ?, version = ?, fixed_rows = ?, name = ?, " +
+			"update form_template set data_rows = ?, data_headers = ?, edition = ?, numbered_columns = ?, is_active = ?, version = ?, fixed_rows = ?, name = ?, " +
 			"fullname = ?, code = ?, script=? where id = ?",
-			dataRowsXml, 
+			dataRowsXml,
+			dataHeadersXml,
 			storedEdition + 1,
 			formTemplate.isNumberedColumns(),
 			formTemplate.isActive(),
