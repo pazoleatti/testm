@@ -120,8 +120,14 @@
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
 
-		<!-- Tester component -->
+
+        <!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
 			<artifactId>gwtp-tester</artifactId>
