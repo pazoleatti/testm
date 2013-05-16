@@ -1,4 +1,4 @@
-﻿create table dict_declaration_presentation
+create table dict_declaration_presentation
 (code varchar2(3) not null,
  name varchar2(510) not null);
  
