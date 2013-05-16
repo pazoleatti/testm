@@ -59,17 +59,16 @@ public class FormDataExcelController {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public void processDownload(HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException{
-		System.out.println("--------------------fack ");
+
 		BufferedReader inReader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
 		Properties pro = new Properties();
 		pro.load(inReader);
 		inReader.close();
-		
+
 		List<LogEntry> listLogEntries = new LinkedList<LogEntry>(); 
 		JSONTokener jt = new JSONTokener(pro.getProperty(REQUEST_JATTR));
 		JSONObject jObj = new JSONObject(jt);
-		
-		System.out.println("jSon " + jObj.toString());
+
 		JSONArray jArr = jObj.getJSONArray(LOG_ENTRIES);
 		System.out.println(jArr);
 		for(int i = 0; i < jArr.length(); i++){

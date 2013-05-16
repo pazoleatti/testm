@@ -38,6 +38,9 @@
                     <div class="{style.floatRight}" style="margin-right: 20px;">
                         <style:ButtonLink ui:field="hideButton" img="resources/img/close-16.png" title="Закрыть панель"/>
                     </div>
+                    <g:FormPanel ui:field="formPanel" method="post" visible="false" action="download/downloadController/">
+
+                    </g:FormPanel>
                 </g:HTMLPanel>
 			</g:HorizontalPanel>
 		</g:north>

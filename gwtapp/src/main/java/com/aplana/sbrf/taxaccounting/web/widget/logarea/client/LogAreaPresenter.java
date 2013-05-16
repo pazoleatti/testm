@@ -12,9 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -30,6 +28,8 @@ public class LogAreaPresenter extends
 
 		void setLogEntries(List<LogEntry> entries);
 		void setLogSize(int full, int error, int warn, int info);
+        void setFormPanel(FormPanel formPanel);
+        FormPanel getFormPanel();
 
 	}
 
@@ -85,32 +85,20 @@ public class LogAreaPresenter extends
 	}
 
 	@Override
-	public void print() {
+	public JSONObject print() {
 		
-		FormPanel form1 = new FormPanel();
-		form1.setAction("download/downloadController/");
-		form1.setVisible(false);
-		form1.setMethod(FormPanel.METHOD_POST);
-		DOM.setElementProperty(form1.getElement(), "enctype", "text/plain");
-		TextBox textBox = new TextBox();
-		textBox.setName("jsonobject");
-		textBox.setVisible(false);
 		JSONObject requestJSON = new JSONObject();
 		JSONArray jArr = new JSONArray();
-		
-		
+
 		for(int i = 0; i < logEntries.size() ; i++){
-			
 			JSONObject jObj = new JSONObject();
 			jObj.put("errorCode", new JSONString(logEntries.get(i).getLevel().name().toString()));
 			jObj.put("message", new JSONString(logEntries.get(i).getMessage()));
 			jArr.set(i, jObj);
 		}
 		requestJSON.put("listLogEntries", jArr);
-		textBox.setText(requestJSON.toString());
-		form1.add(textBox);
 		
-		form1.submit();
+		return requestJSON;
 		// TODO: SBRFACCTAX-2494
 	}
 
