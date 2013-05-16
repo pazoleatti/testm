@@ -2,7 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +60,7 @@ public class FormTemplateDaoTest {
 	@Test
 	@Transactional
 	public void testSave() {
-		FormTemplate formTemplate = formTemplateDao.get(1);
+		FormTemplate formTemplate = formTemplateDao.get(1);		
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
 		formTemplate.setVersion("321");
@@ -74,6 +79,42 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
 		Assert.assertEquals("test_script", formTemplate.getScript());
+		Assert.assertEquals(0, formTemplate.getRows().size());
+		Assert.assertEquals(0, formTemplate.getHeaders().size());
+	}
+	
+	@Test
+	@Transactional
+	public void testSaveDataRows() {
+		FormTemplate formTemplate = formTemplateDao.get(1);
+		
+		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
+		formTemplate.getRows().add(rows);
+		
+		DataRow<HeaderCell> headers = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+		formTemplate.getHeaders().add(headers);
+		
+		formTemplate.setNumberedColumns(true);
+		formTemplate.setFixedRows(false);
+		formTemplate.setVersion("321");
+		formTemplate.setActive(true);
+		formTemplate.setName("name_3");
+		formTemplate.setFullName("fullname_3");
+		formTemplate.setCode("code_3");
+		formTemplate.setScript("test_script");
+		formTemplateDao.save(formTemplate);
+		formTemplate = formTemplateDao.get(1);
+		Assert.assertTrue(formTemplate.isNumberedColumns());
+		Assert.assertFalse(formTemplate.isFixedRows());
+		Assert.assertEquals("321", formTemplate.getVersion());
+		Assert.assertEquals(true, formTemplate.isActive());
+		Assert.assertEquals("name_3", formTemplate.getName());
+		Assert.assertEquals("fullname_3", formTemplate.getFullName());
+		Assert.assertEquals("code_3", formTemplate.getCode());
+		Assert.assertEquals("test_script", formTemplate.getScript());
+		Assert.assertEquals(1, formTemplate.getRows().size());
+		Assert.assertEquals(1, formTemplate.getHeaders().size());
+		
 	}
 
 }
