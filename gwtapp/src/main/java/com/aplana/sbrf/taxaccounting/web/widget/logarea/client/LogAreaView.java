@@ -11,9 +11,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -58,14 +56,10 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 	public void setLogSize(int full, int error, int warn, int info) {
 		title.setHTML(templates.title(full, error));
 	}	
-	
+
 	@UiHandler("printButton")
 	void print(ClickEvent event){
-		Frame nf= new Frame("tes");
-		nf.getElement().setId("printingFrame");
-		RootPanel.get().add(nf);
-        exportStaticMethod();
-        RootPanel.get().remove(nf);
+		getUiHandlers().print();
 	}
 
 	@UiHandler("hideButton")
@@ -73,22 +67,5 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 		getUiHandlers().clean();
 		getUiHandlers().hide();
 	}
-	
-	public native void exportStaticMethod() /*-{
-		var frame = $doc.getElementById('printingFrame');
-		if (!frame) {
-   			alert("Error: Unable to print this document");
-   			return;
-		}
-		frame = frame.contentWindow;
-    	var doc = frame.document;
-    	doc.open();
-    	doc.write($doc.getElementById('logCellTable').parentNode.innerHTML);
-    	
-    	doc.close();
-    	frame.focus();
-    	frame.print();
-    	
- 	}-*/;
 	
 }

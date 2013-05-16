@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -18,9 +19,11 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.LogEntryReportBuilder;
 
 @Service
 public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
@@ -64,6 +67,18 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 				);
 		}
 		
+	}
+
+	@Override
+	public String generateExcel(List<LogEntry> listLogEntries) {
+		
+		try {
+			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
+			return builder.createReport() ;
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+			throw new ServiceException("Ошибка при создании печатной формы." + this.getClass());
+		}
 	}
 
 }
