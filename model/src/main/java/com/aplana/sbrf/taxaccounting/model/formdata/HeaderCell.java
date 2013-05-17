@@ -12,7 +12,7 @@ public class HeaderCell extends AbstractCell {
 
 	private static final long serialVersionUID = 5772154644676131690L;
 	
-	private Object value;
+	private String value;
 
 	/**
 	 * Конструктор только для сериализации
@@ -39,7 +39,7 @@ public class HeaderCell extends AbstractCell {
 			getValueOwner().setValue(value);
 			return getValueOwner().getValue();
 		}
-		this.value = value;
+		this.value = String.valueOf(value);
 		return this.value;
 	}
 
