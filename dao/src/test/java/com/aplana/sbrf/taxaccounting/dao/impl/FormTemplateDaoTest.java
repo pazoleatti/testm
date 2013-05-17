@@ -91,8 +91,10 @@ public class FormTemplateDaoTest {
 		DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
 		formTemplate.getRows().add(rows);
 		
-		DataRow<HeaderCell> headers = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
-		formTemplate.getHeaders().add(headers);
+		DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+		DataRow<HeaderCell> headers2 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+		formTemplate.getHeaders().add(headers1);
+		formTemplate.getHeaders().add(headers2);
 		
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
@@ -113,7 +115,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("code_3", formTemplate.getCode());
 		Assert.assertEquals("test_script", formTemplate.getScript());
 		Assert.assertEquals(1, formTemplate.getRows().size());
-		Assert.assertEquals(1, formTemplate.getHeaders().size());
+		Assert.assertEquals(2, formTemplate.getHeaders().size());
 		
 	}
 
