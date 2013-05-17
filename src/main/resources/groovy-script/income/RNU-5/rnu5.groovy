@@ -51,27 +51,14 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
+
+    // список проверяемых столбцов (графа 2..5)
+    def requiredColumns = ['code', 'balance', 'name', 'sum']
+
     def hasError = false
     formData.dataRows.each { row ->
-        if (!isTotal(row)) {
-            def colNames = []
-            // Список проверяемых столбцов (графа 2..5)
-            ['code', 'balance', 'name', 'sum'].each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                hasError = true
-                def index = row.rowNumber
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
-            }
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            hasError = true
         }
     }
     if (hasError) {
@@ -147,11 +134,15 @@ void calc() {
 /**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
         def i = 1
+
+        // список проверяемых столбцов (графа 1..5)
+        requiredColumns = ['rowNumber', 'code', 'balance', 'name', 'sum']
+
         def totalSum = 0
         def hasTotal = false
         def sums = [:]
@@ -162,25 +153,7 @@ void logicalCheck(def checkRequiredColumns) {
                 continue
             }
             // 1. Обязательность заполнения полей (графа 1..5)
-            def colNames = []
-            // Список проверяемых столбцов (графа 1..5)
-            ['rowNumber', 'code', 'balance', 'name', 'sum'].each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                if (!checkRequiredColumns) {
-                    return
-                }
-                def index = row.rowNumber
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
+            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return
             }
 
@@ -289,4 +262,38 @@ void setTotalStyle(def row) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }

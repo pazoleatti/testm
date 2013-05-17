@@ -2,6 +2,8 @@
  * Скрипт для РНУ-46 (rnu46.groovy).
  * Форма "(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые улучшения арендованного и полученного по договору безвозмездного пользования имущества»".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- получение значений за предыдущий месяц, за предыдущие месяцы
@@ -52,7 +54,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
     // графа 2..7, 9, 17..19
     ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
@@ -69,29 +72,15 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
+
+    // список проверяемых столбцов (графа 2..7, 9, 17..19)
+    def columns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
+            'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
+
     def hasError = false
     formData.dataRows.each { row ->
-        def colNames = []
-        // Список проверяемых столбцов (графа 2..7, 9, 17..19)
-        def columns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
-                'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
-
-        columns.each {
-            if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                colNames.add('"' + name + '"')
-            }
-        }
-        if (!colNames.isEmpty()) {
+        if (!checkRequiredColumns(row, columns, true)) {
             hasError = true
-            def index = row.rowNumber
-            def errorMsg = colNames.join(', ')
-            if (index != null) {
-                logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-            } else {
-                index = getIndex(row) + 1
-                logger.error("В $index строке не заполнены колонки : $errorMsg.")
-            }
         }
     }
     if (hasError) {
@@ -166,40 +155,40 @@ void calc() {
 }
 
 /**
+ * Проверки соответствия НСИ.
+ */
+void checkNSI() {
+    // 1. Проверка амортизационной группы (графа 5)
+    if (false) {
+        logger.error('Амортизационная группа не существует!')
+    }
+
+    // 2. Проверка срока полезного использования (графа 6)
+    if (false) {
+        logger.error('Срок полезного использования указан неверно!')
+    }
+}
+
+/**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
+
+    // список проверяемых столбцов (графа 1..18)
+    def columns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup',
+            'usefulLife', 'monthsUsed', 'usefulLifeWithUsed', 'specCoef',
+            'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
+            'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation',
+            'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
     def hasError = false
     for (def row : formData.dataRows) {
         // 1. Обязательность заполнения поля (графа 1..18)
-        def colNames = []
-        // Список проверяемых столбцов (графа 1..18)
-        def columns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
-                'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
-
-        columns.each {
-            if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                colNames.add('"' + name + '"')
-            }
-        }
-        if (!colNames.isEmpty()) {
-            if (!checkRequiredColumns) {
-                return
-            }
-            def index = row.rowNumber
-            def errorMsg = colNames.join(', ')
-            if (index != null) {
-                logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-            } else {
-                index = getIndex(row) + 1
-                logger.error("В строке $index не заполнены колонки : $errorMsg.")
-            }
+        if (!checkRequiredColumns(row, columns, useLog)) {
             return
         }
 
@@ -312,7 +301,8 @@ void logicalCheck(def checkRequiredColumns) {
         } else if (row.usefullLifeEnd <= lastDay2001 && row.amortMonth != row.cost / 84) {
             hasError = true
         }
-        if (hasError) {
+        // TODO (Ramil Timerbaev) убрать && false
+        if (hasError && false) {
             logger.error('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
             return
         }
@@ -345,21 +335,6 @@ void logicalCheck(def checkRequiredColumns) {
     }
 }
 
-/**
- * Проверки соответствия НСИ.
- */
-void checkNSI() {
-    // 1. Проверка амортизационной группы (графа 5)
-    if (false) {
-        logger.error('Амортизационная группа не существует!')
-    }
-
-    // 2. Проверка срока полезного использования (графа 6)
-    if (false) {
-        logger.error('Срок полезного использования указан неверно!')
-    }
-}
-
 /*
  * Вспомогательные методы.
  */
@@ -384,4 +359,38 @@ def isFirstMonth() {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }

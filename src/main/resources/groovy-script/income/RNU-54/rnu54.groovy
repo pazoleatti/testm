@@ -2,6 +2,8 @@
  * Скрипт для РНУ-54 (rnu54.groovy).
  * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- как получить отчетную дату?
@@ -45,7 +47,8 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.appendDataRow(currentDataRow, null)
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(newRow)
 
     // графа 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
@@ -63,32 +66,16 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
+
+    // список проверяемых столбцов (графа 1..10)
+    def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
+            'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
+            'part1REPODate', 'part2REPODate', 'income', 'outcome']
+
     def hasError = false
     formData.dataRows.each { row ->
-        if (!isTotal(row)) {
-            def colNames = []
-            // Список проверяемых столбцов (графа 1..10)
-            def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
-                    'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
-                    'part1REPODate', 'part2REPODate', 'income', 'outcome']
-
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                    colNames.add('"' + name + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                hasError = true
-                def index = row.tadeNumber
-                def errorMsg = colNames.join(', ')
-                if (!isEmpty(index)) {
-                    logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
-            }
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            hasError = true
         }
     }
     if (hasError) {
@@ -174,7 +161,8 @@ void calc() {
     }
 
     // строка итого
-    def totalRow = formData.appendDataRow()
+    def totalRow = formData.createDataRow()
+    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.tadeNumber = 'Итого'
     totalRow.getCell('tadeNumber').colSpan = 2
@@ -187,9 +175,15 @@ void calc() {
 
 /**
  * Логические проверки.
+ *
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
+
+        // список проверяемых столбцов (графа 12, 13)
+        def requiredColumns = ['outcome269st', 'outcomeTax']
+
         /** Отчетная дата. */
         def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
         def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
@@ -213,29 +207,7 @@ void logicalCheck(def checkRequiredColumns) {
             }
 
             // 1. Обязательность заполнения поля графы 12 и 13
-            def colNames = []
-            // Список проверяемых столбцов (графа 12, 13)
-            def requiredColumns = ['outcome269st', 'outcomeTax']
-
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                    colNames.add('"' + name + '"')
-                }
-            }
-            // вывод сообщения
-            if (!colNames.isEmpty()) {
-                if (!checkRequiredColumns) {
-                    return
-                }
-                def index = row.tadeNumber
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
+            if (!checkRequiredColumns(row, requiredColumns, true)) {
                 return
             }
 
@@ -332,8 +304,6 @@ void logicalCheck(def checkRequiredColumns) {
 
 /**
  * Проверки соответствия НСИ.
- *
- * @param checkRequiredColumns проверять ли обязательные графы
  */
 void checkNSI() {
     if (!formData.dataRows.isEmpty()) {
@@ -478,4 +448,38 @@ def getCountDaysInYaer(def date) {
     def end = format.parse("31.12.$year")
     def begin = format.parse("01.01.$year")
     return end - begin + 1
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (!isEmpty(index)) {
+            logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }

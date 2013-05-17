@@ -2,6 +2,8 @@
  * Скрипт для РНУ-39.2 (rnu39_2.groovy).
  * Форма "(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 2(квартальный)".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
@@ -48,16 +50,16 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow
+    def newRow = formData.createDataRow()
 
     if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('totalA1')
-        newRow = formData.appendDataRow(getIndex(row))
+        formData.dataRows.add(getIndex(row), newRow)
     } else if (currentDataRow.getAlias() == null) {
-        newRow = formData.appendDataRow(getIndex(currentDataRow) + 1)
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     } else {
         def alias = currentDataRow.getAlias()
-        def row = formData.getDataRow('totalA1')
+        def row
         if (alias == 'A') {
             row = formData.getDataRow('totalA1')
         } else if (alias == 'B') {
@@ -67,7 +69,7 @@ def addNewRow() {
         } else {
             row = formData.getDataRow('total' + alias)
         }
-        newRow = formData.appendDataRow(getIndex(row))
+        formData.dataRows.add(getIndex(row), newRow)
     }
 
     // графа 1..17
@@ -96,27 +98,16 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
-    def hasError = false
-    formData.dataRows.each { row ->
-        if (!isFixedRow(row)) {
-            def colNames = []
-            // Список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
-            def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
-                    'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
-                    'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
 
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                    colNames.add('"' + name + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                hasError = true
-                def index = getIndex(row) + 1
-                def errorMsg = colNames.join(', ')
-                logger.error("В строке $index не заполнены колонки : $errorMsg.")
-            }
+    // список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
+    def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
+            'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
+            'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
+    def hasError = false
+
+    formData.dataRows.each { row ->
+        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            hasError = true
         }
     }
     if (hasError) {
@@ -141,9 +132,9 @@ void calc() {
 /**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     def tmp
 
     /** Отчетная дата. */
@@ -154,31 +145,18 @@ void logicalCheck(def checkRequiredColumns) {
     tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
     def reportDateStart = (tmp ? tmp.getTime() : null)
 
+    // список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
+    def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
+            'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
+            'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
+
     for (def row : formData.dataRows) {
         if (isFixedRow(row)) {
             continue
         }
 
         // 3. Обязательность заполнения поля графы 1-6, 10-13 , 16, 17
-        def colNames = []
-        // Список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
-        def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
-                'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
-                'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
-
-        requiredColumns.each {
-            if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                colNames.add('"' + name + '"')
-            }
-        }
-        if (!colNames.isEmpty()) {
-            if (!checkRequiredColumns) {
-                return
-            }
-            def index = getIndex(row) + 1
-            def errorMsg = colNames.join(', ')
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        if (!checkRequiredColumns(row, requiredColumns, useLog)) {
             return
         }
 
@@ -304,4 +282,33 @@ def getSum(def columnAlias, def rowStart, def rowEnd) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
 }

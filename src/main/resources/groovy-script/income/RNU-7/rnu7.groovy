@@ -63,32 +63,13 @@ void calc() {
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
-            def colNames = []
-            // Список проверяемых столбцов
-            def columns = ['balance', 'date', 'code', 'docNumber', 'docDate', 'currencyCode',
+
+            // список проверяемых столбцов (графа ..)
+            def requiredColumns = ['balance', 'date', 'code', 'docNumber', 'docDate', 'currencyCode',
                     'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'accountingCurrency']
 
-            // если "графа 7" == 'RUR', то "графа 8" = 1 и ее проверять не надо
-            def needColumn8 = (row.currencyCode != null && row.currencyCode == 'RUR')
-            if (!needColumn8) {
-                columns -= 'rateOfTheBankOfRussia'
-            }
-
-            columns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
+            if (!checkRequiredColumns(row, requiredColumns, true)) {
                 hasError = true
-                def index = row.number
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
             }
         }
     }
@@ -201,9 +182,9 @@ void calc() {
 /**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     def tmp
 
     /** Дата начала отчетного периода. */
@@ -232,37 +213,12 @@ void logicalCheck(def checkRequiredColumns) {
             }
 
             // 4. Обязательность заполнения полей (графа 1..12)
-            def colNames = []
-
-            // Список проверяемых столбцов (графа 1..12)
+            // список проверяемых столбцов (графа 1..12)
             def requiredColumns = ['number', 'balance', 'date', 'code', 'docNumber',
                     'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency',
                     'taxAccountingRuble', 'accountingCurrency', 'ruble']
-
-            // если "графа 7" == 'RUR', то "графа 8" = 1 и ее проверять не надо
-            def needColumn8 = (row.currencyCode != null && row.currencyCode == 'RUR')
-            if (!needColumn8) {
-                requiredColumns -= 'rateOfTheBankOfRussia'
-            }
-
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                if (!checkRequiredColumns) {
-                    return
-                }
-                def index = row.number
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
-                return
+            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
+                hasError = true
             }
 
             // 1. Проверка даты совершения операции и границ отчётного периода (графа 3)
@@ -431,4 +387,44 @@ def calcSumByCode(def code, def alias) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    // если "графа 7" == 'RUR', то "графа 8" = 1 и ее проверять не надо
+    def needColumn8 = (row.currencyCode != null && row.currencyCode == 'RUR')
+    if (!needColumn8) {
+        columns -= 'rateOfTheBankOfRussia'
+    }
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }

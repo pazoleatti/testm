@@ -2,6 +2,8 @@
  * Скрипт для РНУ-40.2 (rnu40_2.groovy).
  * Форма "(РНУ-40.2) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 2".
  *
+ * @version 59
+ *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *
@@ -37,13 +39,13 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow
+    def newRow = formData.createDataRow()
 
     if (currentDataRow == null || getIndex(currentDataRow) == -1) {
         row = formData.getDataRow('2')
-        newRow = formData.appendDataRow(getIndex(row))
+        formData.dataRows.add(getIndex(row), newRow)
     } else {
-        newRow = formData.appendDataRow(getIndex(currentDataRow) + 1)
+        formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
     }
 
     // графа 1..6
@@ -74,29 +76,12 @@ void calc() {
  */
 void logicalCheck() {
     // 1. Обязательность заполнения поля графы 1-6
-    def hasError = false
-    formData.dataRows.each { row ->
-        if (!isFixedRow(row)) {
-            def colNames = []
-            // Список проверяемых столбцов (графа 1..6)
-            def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
+    // список проверяемых столбцов (графа 1..6)
+    def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
 
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                hasError = true
-                def index = row.number
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"Номер территориального банка\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = formData.dataRows.indexOf(row) + 1
-                    logger.error("В $index строке не заполнены колонки : $errorMsg.")
-                }
-            }
+    formData.dataRows.each { row ->
+        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns)) {
+            return
         }
     }
 }
@@ -137,4 +122,34 @@ def isFixedRow(def row) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"Номер территориального банка\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В $index строке не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }
