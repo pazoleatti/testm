@@ -6,9 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -86,7 +83,7 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
         textBox.setName("jsonobject");
         textBox.setVisible(false);
         
-        textBox.setText(getUiHandlers().print().toString());
+        textBox.setText(getUiHandlers().print());
         form1.add(textBox);
 
         form1.submit();

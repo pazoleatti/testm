@@ -85,7 +85,7 @@ public class LogAreaPresenter extends
 	}
 
 	@Override
-	public JSONObject print() {
+	public String print() {
 		
 		JSONObject requestJSON = new JSONObject();
 		JSONArray jArr = new JSONArray();
@@ -98,7 +98,7 @@ public class LogAreaPresenter extends
 		}
 		requestJSON.put("listLogEntries", jArr);
 		
-		return requestJSON;
+		return requestJSON.toString();
 		// TODO: SBRFACCTAX-2494
 	}
 

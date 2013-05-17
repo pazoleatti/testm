@@ -59,19 +59,9 @@ public class LogEntryReportBuilder {
 		cs.setBorderTop(CellStyle.BORDER_THICK);
 		cs.setBorderRight(CellStyle.BORDER_THICK);
 		cs.setBorderLeft(CellStyle.BORDER_THICK);
-		cs.setFillForegroundColor(HSSFColor.DARK_GREEN.index);
-		cs.setFillBackgroundColor(HSSFColor.DARK_GREEN.index);
-		/*((XSSFCellStyle)cs).setFillForegroundColor(new XSSFColor(new java.awt.Color(
-				0,
-				100,
-				0))
-		);
-		((XSSFCellStyle)cs).setFillBackgroundColor(
-				new XSSFColor(new java.awt.Color(
-						0,
-						100,
-						0))
-				);*/
+		cs.setFillForegroundColor(HSSFColor.BRIGHT_GREEN.index);
+		cs.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
+
 		cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		
 		Row row = sheet.createRow(rowNumber);
