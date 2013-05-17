@@ -936,3 +936,39 @@ create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
+
+------------------------------------------------------------------------------------------------------
+---- SBRFACCTAX-2568
+create table "TAX"."LOG_BUSINESS"
+(ID   NUMBER(18,0) PRIMARY KEY,
+LOG_DATE   DATE   NOT NULL,  
+EVENT_ID   NUMBER(2,0)  NOT NULL,
+USER_ID   NUMBER(9,0)  NOT NULL,
+ROLES  VARCHAR2(200) NOT NULL,
+DECLARATION_DATA_ID	 NUMBER(9,0),
+FORM_DATA_ID	 NUMBER(9,0),
+NOTE	VARCHAR2(510)
+);
+
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_USER_ID foreign key (USER_ID) references  sec_user (id);
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_DECLARATION_ID foreign key (DECLARATION_DATA_ID) references  declaration_data(id);
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_FORM_DATA_ID foreign key (FORM_DATA_ID) references  form_data (id);
+
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 0, -1));
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_FORM_DATA_ID  check (FORM_DATA_ID is not null);
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_DECL_ID check (DECLARATION_DATA_ID is not null);
+
+COMMENT ON TABLE "TAX".LOG_BUSINESS	 IS 	'Журнал событий налоговых форм\деклараций';
+
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."ID"	 IS 	'Код записи';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."LOG_DATE"	 IS 	'Дата события';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."EVENT_ID"	 IS 	'Код события (1 - создана, 2 - подготовлена, 3 - утверждена, 4 - принята, 0 - создание (фиксированное событие), -1 - сохранение)';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."USER_ID"	 IS 	'Код пользователя';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."ROLES"	 IS 	'Список ролей пользователя';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."DECLARATION_DATA_ID"	 IS 	'Код декларации';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."FORM_DATA_ID"	 IS 	'Код налоговой формы';
+COMMENT ON COLUMN "TAX".LOG_BUSINESS."NOTE"	 IS 	'Текст сообщения';
+
+commit;
+
+
