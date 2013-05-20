@@ -29,7 +29,7 @@ public interface ReportPeriodService {
 	/**
 	 * Возвращает предыдущий отчетный период, если такой период не найден то null 
 	 * @param reportPeriodId
-	 * @return следующий отчетный период
+	 * @return предыдущий отчетный период
 	 */
 	ReportPeriod getPrevReportPeriod(int reportPeriodId);
 
