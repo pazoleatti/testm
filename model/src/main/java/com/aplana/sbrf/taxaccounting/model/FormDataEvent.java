@@ -3,7 +3,12 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 /**
- * События формы. К ним привязываются скрипты.
+ * Считаем этот - enum ScriptEvent 
+ * (рефакторить имя пока не будем т.к. на него завязаны скрипты)
+ * TODO: [sgoryachkin] Порефакторить.
+ * Задача: SBRFACCTAX-1862
+ * 
+ * События системы. К ним привязываются скрипты.
  *
  * @author Vitalii Samolovskikh
  */
