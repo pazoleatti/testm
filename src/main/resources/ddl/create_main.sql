@@ -929,15 +929,6 @@ comment on column department_param_transport.tax_place_type_code is 'Код ме
 comment on column department_param_transport.app_version is 'Версия программы, с помощью которой сформирован файл';
 comment on column department_param_transport.format_version is 'Версия формата';
 ----------------------------------------------------------------------------------------------------
-create index i_department_parent_id on department(parent_id);
-create index i_data_row_form_data_id on data_row(form_data_id);
-create index i_form_data_report_period_id on form_data(report_period_id);
-create index i_form_data_form_template_id on form_data(form_template_id);
-create index i_form_data_department_id on form_data(department_id);
-create index i_form_data_kind on form_data(kind);
-create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
-
-------------------------------------------------------------------------------------------------------
 create table LOG_BUSINESS
 (ID   NUMBER(18,0) PRIMARY KEY,
 LOG_DATE   DATE   NOT NULL,  
@@ -966,7 +957,15 @@ COMMENT ON COLUMN LOG_BUSINESS."ROLES"	 IS 	'Список ролей польз�
 COMMENT ON COLUMN LOG_BUSINESS."DECLARATION_DATA_ID"	 IS 	'Код декларации';
 COMMENT ON COLUMN LOG_BUSINESS."FORM_DATA_ID"	 IS 	'Код налоговой формы';
 COMMENT ON COLUMN LOG_BUSINESS."NOTE"	 IS 	'Текст сообщения';
+------------------------------------------------------------------------------------------------------
+create index i_department_parent_id on department(parent_id);
+create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_form_data_report_period_id on form_data(report_period_id);
+create index i_form_data_form_template_id on form_data(form_template_id);
+create index i_form_data_department_id on form_data(department_id);
+create index i_form_data_kind on form_data(kind);
+create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 
-commit;
+------------------------------------------------------------------------------------------------------
 
 
