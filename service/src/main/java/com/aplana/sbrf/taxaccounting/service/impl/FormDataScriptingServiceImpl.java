@@ -210,6 +210,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
 	/**
 	 * Проверяет, есть ли скрипты для события формы
+	 * TODO: Semyon Goryachkin: Нужно будет удалить метод, 
+	         06.05.2013         когда миграция скриптов будет закончена 
+		                        (SBRFACCTAX-2233, )
 	 *
 	 * @param formData форма
 	 * @param event    событие
@@ -217,7 +220,16 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	@Override
 	@Deprecated
 	public boolean hasScripts(FormData formData, FormDataEvent event) {
-		return !getScriptsByEvent(formData, event).isEmpty();
+		// Если скрипт отсутствует, то ничего не делаем
+		String script = formTemplateDao.get(formData.getFormTemplateId()).getScript();
+		if (script == null || script.trim().isEmpty()) {
+
+			return !getScriptsByEvent(formData, event).isEmpty();
+			//
+		} else {
+			return true;
+		}
+		
 	}
 
 	@Deprecated
