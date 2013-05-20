@@ -99,7 +99,7 @@ public class DeclarationDataScriptingServiceImplTest {
 	public void testCreate() throws IOException, SAXException {
 		Logger logger = new Logger();
 		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID1, REPORT_PERIOD_ID);
-		String xml = service.create(logger, declarationData, new Date().toString());
+		String xml = service.create(logger, declarationData, new Date());
 
 		String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
 		XMLUnit.setIgnoreWhitespace(true);
@@ -114,7 +114,7 @@ public class DeclarationDataScriptingServiceImplTest {
 	public void testCreateWithException() {
 		Logger logger = new Logger();
 		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
-		String xml = service.create(logger, declarationData, new Date().toString());
+		String xml = service.create(logger, declarationData, new Date());
 		
 		assertNull(xml);
 		assertFalse(logger.getEntries().isEmpty());

@@ -46,7 +46,7 @@ public class DeclarationDataServiceImplTest {
 		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 
 		DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
-		when(declarationDataScriptingService.create(any(Logger.class), any(DeclarationData.class), any(String.class)))
+		when(declarationDataScriptingService.create(any(Logger.class), any(DeclarationData.class), any(Date.class)))
 				.thenReturn(XML_DATA);
 		ReflectionTestUtils.setField(service, "declarationDataScriptingService", declarationDataScriptingService);
 		
@@ -65,7 +65,7 @@ public class DeclarationDataServiceImplTest {
 		Logger logger = new Logger();		
 		// TODO: sgoryachkin: Нужно сделать нормальный тест. Пока как временное решение - игнорить ошибку при генерации
 		try{
-			service.reCreate(logger, 1l, USER_ID, new Date().toString());
+			service.reCreate(logger, 1l, USER_ID, new Date());
 		} catch (ServiceException e) {
 			
 		}
@@ -78,7 +78,7 @@ public class DeclarationDataServiceImplTest {
 	@Test(expected=AccessDeniedException.class)
 	public void testRefreshDeclarationNoAccess() {
 		Logger logger = new Logger();
-		service.reCreate(logger, 2l, USER_ID, new Date().toString());
+		service.reCreate(logger, 2l, USER_ID, new Date());
 	}
 	
 }

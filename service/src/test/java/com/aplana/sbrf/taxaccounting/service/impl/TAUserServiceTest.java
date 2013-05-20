@@ -28,6 +28,8 @@ public class TAUserServiceTest {
 	
 	private final static String USER_ROLE = "ROLE_CONTROL_UNP";
 	
+	private final static String USER_LOGIN = "controlBank";
+	
 	private static TAUser user;
 	
 	@BeforeClass
@@ -47,7 +49,7 @@ public class TAUserServiceTest {
 		
 		user = new TAUser();
 		user.setId(USER_OPERATOR_ID);
-		user.setLogin("controlBank");
+		user.setLogin(USER_LOGIN);
 		user.setEmail("controlBank@bank.ru");
 		user.setDepartmentId(USER_DEPARTMENT_ID);
 		user.setRoles(listUserRoles);
@@ -59,6 +61,7 @@ public class TAUserServiceTest {
 		when(userDao.createUser(user)).thenReturn(user.getId());
 		when(userDao.getUserIds()).thenReturn(listUserIds);
 		when(userDao.checkUserRole(USER_ROLE)).thenReturn(1);
+		when(userDao.checkUserLogin(USER_LOGIN)).thenReturn(0);
 		
 		when(depDao.getDepartment(USER_DEPARTMENT_ID)).thenReturn(new Department());
 		ReflectionTestUtils.setField(service, "userDao", userDao);
