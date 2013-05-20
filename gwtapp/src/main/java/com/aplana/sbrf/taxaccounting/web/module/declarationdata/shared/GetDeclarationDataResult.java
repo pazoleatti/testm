@@ -4,12 +4,14 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.gwtplatform.dispatch.shared.Result;
 
+import java.util.Date;
+
 public class GetDeclarationDataResult implements Result {
 	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
 	private String declarationType;
-	private String docDate;
+	private Date docDate;
 
 	private boolean canAccept;
 	private boolean canReject;
@@ -93,11 +95,11 @@ public class GetDeclarationDataResult implements Result {
 		this.pdf = pdf;
 	}
 
-	public String getDocDate() {
+	public Date getDocDate() {
 		return docDate;
 	}
 
-	public void setDocDate(String docDate) {
+	public void setDocDate(Date docDate) {
 		this.docDate = docDate;
 	}
 }

@@ -16,7 +16,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
 	
 	<source path="cell"/>
-    <source path="datePicker"/>
+    <source path="datepicker"/>
     <source path="style"/>
     <source path="log"/>
     <source path="pager"/>

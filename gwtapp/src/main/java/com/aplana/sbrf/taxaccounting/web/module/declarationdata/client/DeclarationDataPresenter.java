@@ -31,18 +31,18 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
+import java.util.Date;
+
 public class DeclarationDataPresenter
 		extends
 		Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
-		implements DeclarationDataUiHandlers,
-		DialogBoxChangeVisibilityEvent.MyHandler {
+		implements DeclarationDataUiHandlers {
 
 	@ProxyCodeSplit
 	@NameToken(DeclarationDataTokens.declarationData)
@@ -74,11 +74,7 @@ public class DeclarationDataPresenter
 
 		void setPdf(Pdf pdf);
 
-		void setDocDate(String date);
-
-		void showPdfFile(boolean show);
-
-		void clearPdfFile();
+		void setDocDate(Date date);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -164,7 +160,7 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void refreshDeclaration(String docDate) {
+	public void refreshDeclaration(Date docDate) {
 		LogCleanEvent.fire(this);
 		RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
 		action.setDeclarationId(declarationId);
@@ -212,7 +208,6 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void delete() {
-		getView().showPdfFile(false);
 		if (Window.confirm("Вы уверены, что хотите удалить декларацию?")) {
 			LogCleanEvent.fire(this);
 			DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
@@ -235,20 +230,7 @@ public class DeclarationDataPresenter
 																	taxName));
 										}
 									}));
-		} else {
-			getView().showPdfFile(true);
 		}
-	}
-
-	@Override
-	@ProxyEvent
-	public void onChangeVisibility(DialogBoxChangeVisibilityEvent event) {
-		getView().showPdfFile(!event.isVisible());
-	}
-
-	@Override
-	protected void onHide() {
-		getView().clearPdfFile();
 	}
 
 	@Override

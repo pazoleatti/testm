@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
-import com.aplana.sbrf.taxaccounting.web.widget.datePicker.DatePickerWithYearSelector;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Button;
@@ -23,8 +20,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-	private final PopupPanel datePickerPanel = new PopupPanel(true, true);
-	private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
 	private final Widget widget;
 
 	@UiField
@@ -59,19 +54,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Panel downloadXml;
 
 	@UiField
-	TextBox dateBox;
-	@UiField
-	Image dateImage;
+	CustomDateBox dateBox;
 
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
 		widget = uiBinder.createAndBindUi(this);
-
-		datePickerPanel.setWidth("200");
-		datePickerPanel.setHeight("200");
-		datePickerPanel.add(datePicker);
-		addDatePickerHandlers();
 	}
 
 	@Override
@@ -92,7 +80,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void showRefresh(boolean show) {
-		dateImage.setVisible(show);
+		dateBox.setVisible(show);
 		refreshButton.setVisible(show);
 		dateBox.setEnabled(show);
 	}
@@ -144,18 +132,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setDocDate(String date) {
+	public void setDocDate(Date date) {
 		dateBox.setValue(date);
 	}
-
-	@Override
-	public void showPdfFile(boolean show) {
-	}
-
-	@Override
-	public void clearPdfFile() {
-	}
-
 
 	@UiHandler("refreshButton")
 	public void onRefresh(ClickEvent event){
@@ -187,35 +166,5 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiHandler("downloadXmlButton")
 	public void onDownloadAsLegislatorButton(ClickEvent event){
 		getUiHandlers().downloadXml();
-	}
-
-	@UiHandler("dateImage")
-	public void onDateImage(ClickEvent event){
-		datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
-		datePickerPanel.show();
-	}
-
-	private void addDatePickerHandlers() {
-		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				dateBox.setValue(getFormattedDate(event.getValue()));
-				datePickerPanel.hide();
-			}
-		});
-	}
-
-	private String getFormattedDate(Date date){
-		final String DATE_SHORT_START = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
-				.format(date);
-
-		int startDayIndex = DATE_SHORT_START.lastIndexOf('-');
-		int startMonthIndex = DATE_SHORT_START.indexOf('-');
-
-		String startDate =  DATE_SHORT_START.substring(startDayIndex + 1, DATE_SHORT_START.length()) + '.' +
-				DATE_SHORT_START.substring(startMonthIndex + 1, startDayIndex) + '.' +
-				DATE_SHORT_START.substring(0, startMonthIndex);
-
-		return startDate;
 	}
 }

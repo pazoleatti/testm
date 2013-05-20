@@ -35,7 +35,7 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
 		Logger  logger = new Logger();
-		declarationDataService.reCreate(logger, command.getDeclarationDataId(), userId, new Date().toString());
+		declarationDataService.reCreate(logger, command.getDeclarationDataId(), userId, new Date());
 		RefreshDeclarationResult result = new RefreshDeclarationResult();
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			result.setSuccess(false);

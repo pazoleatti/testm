@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 
-import com.aplana.sbrf.taxaccounting.web.widget.datePicker.DatePickerWithYearSelector;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DatePickerWithYearSelector;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.core.client.*;
 import com.google.gwt.dom.client.*;

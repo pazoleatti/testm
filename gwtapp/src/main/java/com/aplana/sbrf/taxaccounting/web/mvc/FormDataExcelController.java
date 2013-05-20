@@ -32,7 +32,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 
-
 @Controller
 @RequestMapping("/downloadController")
 public class FormDataExcelController {
@@ -47,39 +46,56 @@ public class FormDataExcelController {
 	private static String LOG_ENTRIES = "listLogEntries";
 	private static String JSON_ENTRY_1 = "errorCode";
 	private static String JSON_ENTRY_2 = "message";
-	
-	
-	@RequestMapping(value = "/{formDataId}/{isShowChecked}",method = RequestMethod.GET)
-	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+
+    /**
+     * Метод контроллера для печати данных формы.
+     *
+     * @param formDataId
+     * @param isShowChecked - показывать скрытые колонки
+     * @param req
+     * @param response
+     * @throws IOException
+     */
+	@RequestMapping(value = "/{formDataId}/{isShowChecked}", method = RequestMethod.GET)
+	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked, HttpServletRequest req,
+			HttpServletResponse response) throws IOException {
 		String filePath = formDataPrintingService.generateExcel(securityService.currentUser().getId(), formDataId, isShowChecked);
-		createResponse(req, resp, filePath);
+		createResponse(req, response, filePath);
 	}
-	
-	@RequestMapping(method = RequestMethod.POST)
-	public void processLogDownload(HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException{
 
-		BufferedReader inReader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
-		Properties pro = new Properties();
-		pro.load(inReader);
-		inReader.close();
 
-		List<LogEntry> listLogEntries = new LinkedList<LogEntry>(); 
-		JSONTokener jt = new JSONTokener(pro.getProperty(REQUEST_JATTR));
-		JSONObject jObj = new JSONObject(jt);
+    /**
+      * Метод контроллерв для печати списка ошибок формы.
+      *
+      * @param req
+      * @param response
+      * @throws IOException
+      * @throws JSONException
+    */
+    @RequestMapping(method = RequestMethod.POST)
+    public void processLogDownload(HttpServletRequest req, HttpServletResponse response) throws IOException, JSONException{
 
-		JSONArray jArr = jObj.getJSONArray(LOG_ENTRIES);
-		System.out.println(jArr);
-		for(int i = 0; i < jArr.length(); i++){
-			listLogEntries.add(
-					new LogEntry(LogLevel.ERROR.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
-							?LogLevel.ERROR:LogLevel.WARNING.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
-									?LogLevel.WARNING:LogLevel.INFO,jArr.getJSONObject(i).getString(JSON_ENTRY_2)));
-		}
-		String filePath = formDataPrintingService.generateExcel(listLogEntries);
-		createResponse(req, resp, filePath);
-		
-	}
+        BufferedReader inReader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
+        Properties pro = new Properties();
+        pro.load(inReader);
+        inReader.close();
+
+        List<LogEntry> listLogEntries = new LinkedList<LogEntry>();
+        JSONTokener jt = new JSONTokener(pro.getProperty(REQUEST_JATTR));
+        JSONObject jObj = new JSONObject(jt);
+
+        JSONArray jArr = jObj.getJSONArray(LOG_ENTRIES);
+        System.out.println(jArr);
+        for(int i = 0; i < jArr.length(); i++){
+            listLogEntries.add(
+                    new LogEntry(LogLevel.ERROR.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
+                            ?LogLevel.ERROR:LogLevel.WARNING.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
+                            ?LogLevel.WARNING:LogLevel.INFO,jArr.getJSONObject(i).getString(JSON_ENTRY_2)));
+        }
+        String filePath = formDataPrintingService.generateExcel(listLogEntries);
+        createResponse(req, response, filePath);
+
+    }
 	
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
 		File file = new File(filePath);

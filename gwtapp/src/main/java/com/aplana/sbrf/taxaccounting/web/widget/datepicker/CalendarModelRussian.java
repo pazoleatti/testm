@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.datePicker;
+package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.google.gwt.user.datepicker.client.CalendarModel;
 

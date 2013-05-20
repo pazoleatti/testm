@@ -1,0 +1,17 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .imageStyle {
+            margin-top: 2px;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel>
+        <g:cell verticalAlignment="middle">
+            <g:TextBox width="100px" ui:field="dateBox"/>
+        </g:cell>
+        <g:cell verticalAlignment="middle">
+            <g:Image ui:field="dateImage" url="resources/img/calendar-16.png" styleName="{style.imageStyle}" />
+        </g:cell>
+    </g:HorizontalPanel>
+</ui:UiBinder>
