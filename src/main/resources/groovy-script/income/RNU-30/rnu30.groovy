@@ -109,26 +109,10 @@ void calc() {
 
     formData.dataRows.each { row ->
         if (!isFixedRow(row)) {
-            def colNames = []
-
             def requiredColumns = (isFirstSection(row) ? requiredColumns1 : requiredColumnsAB)
 
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                    colNames.add('"' + name + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
+            if (!checkRequiredColumns(row, requiredColumns, true)) {
                 hasError = true
-                def index = row.number
-                def errorMsg = colNames.join(', ')
-                if (!isEmpty(index)) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
             }
         }
     }
@@ -220,11 +204,23 @@ void calc() {
 /**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
         def i = 1
+
+        // для первых строк - графы 1..16
+        requiredColumns1 = ['number', 'debtor', 'provision', 'nameBalanceAccount',
+                'debt45_90DaysSum', 'debt45_90DaysNormAllocation50per',
+                'debt45_90DaysReserve', 'debtOver90DaysSum',
+                'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve',
+                'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve',
+                'reserveRecovery', 'useReserve']
+
+        //  для раздера А и Б - графы 1, 2, 4, 12, 16
+        requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
+
         def tmp
         def isFirst
         for (def row : formData.dataRows) {
@@ -235,39 +231,9 @@ void logicalCheck(def checkRequiredColumns) {
             isFirst = isFirstSection(row)
 
             // 1. Обязательность заполнения полей
-            def colNames = []
-            def requiredColumns
-            if (isFirst) {
-                // для первых строк - графы 1..16
-                requiredColumns = ['number', 'debtor', 'provision', 'nameBalanceAccount',
-                        'debt45_90DaysSum', 'debt45_90DaysNormAllocation50per',
-                        'debt45_90DaysReserve', 'debtOver90DaysSum',
-                        'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve',
-                        'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve',
-                        'reserveRecovery', 'useReserve']
-            } else {
-                //  для раздера А и Б - графы 1, 2, 4, 12, 16
-                requiredColumns = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
-            }
+            def requiredColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
 
-            requiredColumns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    def name = row.getCell(it).getColumn().getName().replace('%', '%%')
-                    colNames.add('"' + name + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                if (!checkRequiredColumns) {
-                    return
-                }
-                def index = row.number
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
+            if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return
             }
 
@@ -508,4 +474,38 @@ def setEdit(def row, def section) {
  */
 def getValue(def value) {
     return value ?: 0
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (!isEmpty(index)) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }

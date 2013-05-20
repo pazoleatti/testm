@@ -69,35 +69,16 @@ void calc() {
     /*
      * Проверка объязательных полей.
      */
+
     def hasError = false
     formData.dataRows.each { row ->
         if (!isTotal(row)) {
-            def colNames = []
-            // Список проверяемых столбцов
+            // список проверяемых столбцов (графа ..)
             def columns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
                     'lotSizeCurrent', 'reserveCalcValuePrev', 'cost', 'signSecurity',
                     'marketQuotationInRub', 'costOnMarketQuotation']
-
-            // если не заполнены графа 11 и графа 12, то графа 13 должна быть заполнена вручную
-            if (row.marketQuotation == null && row.rubCourse == null) {
-                columns -= 'marketQuotationInRub'
-            }
-
-            columns.each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
+            if (!checkRequiredColumns(row, columns, true)) {
                 hasError = true
-                def index = row.rowNumber
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
             }
         }
     }
@@ -196,9 +177,9 @@ void calc() {
 /**
  * Логические проверки.
  *
- * @param checkRequiredColumns проверять ли обязательные графы
+ * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def checkRequiredColumns) {
+void logicalCheck(def useLog) {
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
 
@@ -235,14 +216,22 @@ void logicalCheck(def checkRequiredColumns) {
 
     if (!formData.dataRows.isEmpty()) {
         def i = 1
+
+        // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
+        columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
+                'cost', 'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
+
         // суммы строки общих итогов
         def totalSums = [:]
+
         // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
         def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
                 'cost', 'costOnMarketQuotation', 'reserveCalcValue',
                 'reserveCreation', 'reserveRecovery']
+
         // признак наличия итоговых строк
         def hasTotal = false
+
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
 
@@ -253,26 +242,7 @@ void logicalCheck(def checkRequiredColumns) {
             }
 
             // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
-            def colNames = []
-            // Список проверяемых столбцов
-            ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
-                    'cost', 'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation'].each {
-                if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-                    colNames.add('"' + row.getCell(it).getColumn().getName() + '"')
-                }
-            }
-            if (!colNames.isEmpty()) {
-                if (!checkRequiredColumns) {
-                    return
-                }
-                def index = row.rowNumber
-                def errorMsg = colNames.join(', ')
-                if (index != null) {
-                    logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
-                } else {
-                    index = getIndex(row) + 1
-                    logger.error("В строке $index не заполнены колонки : $errorMsg.")
-                }
+            if (!checkRequiredColumns(row, columns, useLog)) {
                 return
             }
 
@@ -558,4 +528,43 @@ void setTotalStyle(def row) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Проверить заполненость обязательных полей.
+ *
+ * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
+ */
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    // если не заполнены графа 11 и графа 12, то графа 13 должна быть заполнена вручную
+    if (row.marketQuotation == null && row.rubCourse == null) {
+        columns -= 'marketQuotationInRub'
+    }
+
+    columns.each {
+        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            colNames.add('"' + name + '"')
+        }
+    }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        if (index != null) {
+            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+        } else {
+            index = getIndex(row) + 1
+            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        }
+        return false
+    }
+    return true
 }
