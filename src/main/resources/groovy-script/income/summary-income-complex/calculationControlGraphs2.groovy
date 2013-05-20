@@ -374,7 +374,7 @@ for (DataRow row : dataRows) {
         // графа 15
         temp = income102Dao.getIncome102(formData.reportPeriodId, row.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId)
         if (temp == null) {
-            logger.info("Нет информации о в отчётах о прибылях и убытках")
+            logger.info("Нет информации в отчётах о прибылях и убытках")
             row.getCell('opuSumByOpu').setValue(0)
         } else {
             row.getCell('opuSumByOpu').setValue(temp.totalSum)
@@ -425,7 +425,7 @@ for (DataRow row : dataRows) {
     account = value.substring(0, 3) + value.substring(4)
     temp = income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId)
     if (temp == null) {
-        logger.info("Нет данных о оборотной ведомости")
+        logger.info("Нет данных об оборотной ведомости")
         getCell(it, 'opuSumByTableD').setValue(0)
         getCell(it, 'opuSumTotal').setValue(0)
     } else {
