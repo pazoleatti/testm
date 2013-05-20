@@ -43,7 +43,6 @@ import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
 /**
  * 
@@ -425,10 +424,10 @@ public class FormDataXlsxReportBuilder {
 			}
 			
 		}
-		for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
-			//logger.debug("----n" + width.getKey() + ":" + width.getValue());
-			sheet.setColumnWidth(width.getKey(), width.getValue().intValue()*256);
-		}
+        //logger.debug("----n" + width.getKey() + ":" + width.getValue());
+        for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
+            sheet.setColumnWidth(width.getKey(), width.getValue().intValue() * 256);
+        }
 	}
 	
 	private void fillHeader(){
@@ -463,7 +462,7 @@ public class FormDataXlsxReportBuilder {
 		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
 				XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))
 		{
-			String month = new String(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а");
+			String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
 			arr = month.toCharArray();
 		} else {
 			arr[arr.length - 1] = 'я';
