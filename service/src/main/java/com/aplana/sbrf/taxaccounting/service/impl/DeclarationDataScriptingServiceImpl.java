@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -60,7 +61,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 	
 	@Override
-	public String create(Logger logger, DeclarationData declarationData, String docDate) {
+	public String create(Logger logger, DeclarationData declarationData, Date docDate) {
 		this.logger.debug("Starting processing request to run create script");
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 

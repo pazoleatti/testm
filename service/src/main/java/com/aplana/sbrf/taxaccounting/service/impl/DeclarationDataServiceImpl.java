@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,6 +71,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Override
 	@Transactional(readOnly = false)
@@ -84,7 +86,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 
 			long id = declarationDataDao.saveNew(newDeclaration);
-			setDeclarationBlobs(logger, newDeclaration, getFormattedDate(new Date()));
+			setDeclarationBlobs(logger, newDeclaration, new Date());
 			return id;
 		} else {
 			throw new AccessDeniedException(
@@ -95,7 +97,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void reCreate(Logger logger, long id, int userId,
-			String docDate) {
+			Date docDate) {
 		if (declarationDataAccessService.canRefresh(userId, id)) {
 			DeclarationData declarationData = declarationDataDao.get(id);
 			setDeclarationBlobs(logger, declarationData, docDate);
@@ -177,13 +179,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public String getXmlDataDocDate(long declarationDataId, int userId) {
+	public Date getXmlDataDocDate(long declarationDataId, int userId) {
 		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
 			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
-			return fileNameNode.getTextContent();
+			return getFormattedDate(fileNameNode.getTextContent());
 		} else {
 			throw new AccessDeniedException("Невозможно получить xml");
 		}
@@ -208,7 +210,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 	
 	private void setDeclarationBlobs(Logger logger,
-			DeclarationData declarationData, String docDate) {
+			DeclarationData declarationData, Date docDate) {
 
 		// Генерация и сохранение XML
 		String xml = declarationDataScriptingService.create(logger,
@@ -303,11 +305,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 	}
 
-	private static String getFormattedDate(Date dateToForm) {
-		// Преобразуем Date в строку вида "dd.mm.yyyy"
-		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-		formatter.format(dateToForm);
-		return (formatter.format(dateToForm));
+	private static Date getFormattedDate(String stringToDate) {
+		// Преобразуем строку вида "dd.mm.yyyy" в Date
+		try {
+			return formatter.parse(stringToDate);
+		} catch (ParseException e) {
+			throw new ServiceException("Невозможно получить дату обновления декларации", e);
+		}
 	}
 
 }

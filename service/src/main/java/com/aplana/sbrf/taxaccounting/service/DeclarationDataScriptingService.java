@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 
+import java.util.Date;
+
 /**
  * Интерфейс сервиса для запуска скриптов по декларациями (пока существует только один скрипт - скрипт создания)
  * @author dsultanbekov
@@ -17,7 +19,7 @@ public interface DeclarationDataScriptingService {
 	 * @param docDate дата обновления декларации
 	 * @return xml-данные, формат законодателя
 	 */
-	String create(Logger logger, DeclarationData declarationData, String docDate);
+	String create(Logger logger, DeclarationData declarationData, Date docDate);
 
 	/**
 	 * Вызов скрипта для осуществления логических проверок при переводе декларации из статуса "Создана" в "Принята"
