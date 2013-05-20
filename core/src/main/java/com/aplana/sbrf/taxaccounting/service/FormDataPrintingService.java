@@ -7,6 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 public interface FormDataPrintingService  {
 	
 	String generateExcel(int userId, long formDataId, boolean isShowChecked);
-	public String generateExcel(List<LogEntry> listLogEntries);
+	String generateExcel(List<LogEntry> listLogEntries);
 
 }

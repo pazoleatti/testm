@@ -286,7 +286,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 						return rs.getInt("id");
 					}
 				});
-		 return list.get(0).intValue();
+		 return list.size()!=0 ? list.get(0).intValue() : 0;
 	}
 
 	

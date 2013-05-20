@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.log.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.*;
 
+import java.util.Date;
+
 /**
  * Сервис для работы с {@link налоговыми декларациями DeclarationData}
  * @author dsultanbekov
@@ -30,7 +32,7 @@ public interface DeclarationDataService {
 	 * @param docDate - дата обновления декларации
 	 * @param userId - идентификатор пользователя, выполняющего операцию
 	 */
-	void reCreate(Logger logger, long declarationDataId, int userId, String docDate);
+	void reCreate(Logger logger, long declarationDataId, int userId, Date docDate);
 	
 	/**
 	 * Получить декларацию
@@ -99,5 +101,5 @@ public interface DeclarationDataService {
 	 * @return дату последнего изменения декларации из xml данных
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	String getXmlDataDocDate(long declarationDataId, int userId);
+	Date getXmlDataDocDate(long declarationDataId, int userId);
 }
