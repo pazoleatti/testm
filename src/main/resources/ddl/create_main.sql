@@ -945,7 +945,7 @@ alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_DECLARATION_ID foreign k
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_FORM_DATA_ID foreign key (FORM_DATA_ID) references  form_data (id) on delete cascade;
 
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 5, 6, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
-alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_FRM_DCL_EV  check (FORM_DATA_ID is not null OR DECLARATION_DATA_ID is not null OR EVENT_ID is not null);
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_FRM_DCL_EV  check (FORM_DATA_ID is not null OR DECLARATION_DATA_ID is not null);
 
 COMMENT ON TABLE LOG_BUSINESS	 IS 	'Журнал событий налоговых форм\деклараций';
 
