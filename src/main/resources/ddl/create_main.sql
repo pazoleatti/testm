@@ -940,7 +940,7 @@ FORM_DATA_ID	 NUMBER(9,0),
 NOTE	VARCHAR2(510)
 );
 
-alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_USER_ID foreign key (USER_ID) references  sec_user (id) on delete cascade;
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_USER_ID foreign key (USER_ID) references  sec_user (id);
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_DECLARATION_ID foreign key (DECLARATION_DATA_ID) references  declaration_data(id) on delete cascade;
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_FORM_DATA_ID foreign key (FORM_DATA_ID) references  form_data (id) on delete cascade;
 
