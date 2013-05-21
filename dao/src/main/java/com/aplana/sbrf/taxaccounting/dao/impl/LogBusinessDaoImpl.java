@@ -22,7 +22,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
 
-	private static final class DeclarationLogBusinessRowMapper implements RowMapper<LogBusiness> {
+	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
 			LogBusiness d = new LogBusiness();
@@ -55,7 +55,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			return getJdbcTemplate().query(
 					"select * from log_business where declaration_data_id = ?",
 					new Object[]{declarationId},
-					new DeclarationLogBusinessRowMapper()
+					new LogBusinessRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationId);
@@ -68,7 +68,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			return getJdbcTemplate().query(
 					"select * from log_business where form_data_id = ?",
 					new Object[]{formId},
-					new DeclarationLogBusinessRowMapper()
+					new LogBusinessRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(FORM_NOT_FOUND_MESSAGE, formId);

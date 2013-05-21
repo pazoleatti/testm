@@ -52,6 +52,41 @@ public class LogBusinessDaoTest {
 		assertEquals(1, d.getUserId());
 		assertEquals("operator", d.getRoles());
 		assertEquals(Integer.valueOf(1), d.getDeclarationId());
+		assertEquals(null, d.getFormId());
+		assertEquals("the best note", d.getNote());
+	}
+
+	@Test
+	public void testFormGet() {
+		LogBusiness d = logBusinessDao.getFormLogsBusiness(1).get(0);
+		assertEquals(2, d.getId());
+		assertEquals(1, d.getEventId());
+		assertEquals(1, d.getUserId());
+		assertEquals("operator", d.getRoles());
+		assertEquals(null, d.getDeclarationId());
+		assertEquals(Integer.valueOf(1), d.getFormId());
+		assertEquals("the best note", d.getNote());
+	}
+
+	@Test
+	public void testFormAdd() {
+		LogBusiness d = new LogBusiness();
+		d.setId(3);
+		d.setLogDate(new Date());
+		d.setFormId(1);
+		d.setEventId(3);
+		d.setUserId(1);
+		d.setRoles("operator");
+		d.setNote("the best note");
+		logBusinessDao.add(d);
+
+		d = logBusinessDao.getFormLogsBusiness(1).get(1);
+		assertEquals(3, d.getId());
+		assertEquals(3, d.getEventId());
+		assertEquals(1, d.getUserId());
+		assertEquals("operator", d.getRoles());
+		assertEquals(null, d.getDeclarationId());
+		assertEquals(Integer.valueOf(1), d.getFormId());
 		assertEquals("the best note", d.getNote());
 	}
 }
