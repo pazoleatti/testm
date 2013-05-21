@@ -33,10 +33,7 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 		StringBuilder roleAndDepartment = new StringBuilder(user.getName());
 		if (department != null) {
 			roleAndDepartment.append(" - ")
-				.append(department.getType().getLabel())
-				.append(" \"")
-				.append(department.getName())
-				.append("\"");
+				.append(department.getShortName());
 		}
 		GetUserInfoResult result = new GetUserInfoResult();
 		result.setUserName(user.getLogin());
