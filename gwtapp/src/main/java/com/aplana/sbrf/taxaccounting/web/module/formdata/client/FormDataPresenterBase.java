@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
+import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.web.bindery.event.shared.EventBus;
@@ -33,7 +34,6 @@ import java.util.logging.Logger;
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
 	protected Logger logger = Logger.getLogger(getClass().getName());
-
 
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -84,8 +84,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void enableRemoveRowButton(boolean enable);
 		
 		boolean getCheckedColumnsClicked();
-
-		void showHistoryPopup();
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -109,6 +107,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final TaPlaceManager placeManager;
 	protected final SignersPresenter signersPresenter;
 	protected final DialogPresenter dialogPresenter;
+	protected final HistoryPresenter historyPresenter;
 
 	protected FormData formData;
 	
@@ -123,8 +122,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
-			PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter) {
+								 PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy);
+		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.dispatcher = dispatcher;
 		this.signersPresenter = signersPresenter;

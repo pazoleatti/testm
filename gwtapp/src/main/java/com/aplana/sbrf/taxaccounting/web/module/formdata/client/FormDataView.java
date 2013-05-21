@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
-import com.aplana.sbrf.taxaccounting.web.widget.history.HistoryPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.core.client.GWT;
@@ -29,7 +28,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
 	private NoSelectionModel<DataRow> selectionModel;
-	private final HistoryPopup historyPopup = GWT.create(HistoryPopup.class);
 
 	interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -415,11 +413,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public boolean getCheckedColumnsClicked() {
 		return showCheckedColumns.getValue();
-	}
-
-	@Override
-	public void showHistoryPopup() {
-		historyPopup.show();
 	}
 
 }

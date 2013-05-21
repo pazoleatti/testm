@@ -12,6 +12,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.DictionaryPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.logarea.LogArea" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.version.ProjectVersion" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.history.History" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.PdfViewerWidget" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
 	
@@ -20,7 +21,6 @@
     <source path="style"/>
     <source path="log"/>
     <source path="pager"/>
-    <source path="history"/>
     <source path="datarow"/>
     <source path="departmentpicker"/>
     <source path="reportperiodpicker"/>

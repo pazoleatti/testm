@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataGinjecto
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListGinjector;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminGinjector;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeGinjector;
+import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInClientGinjector;
@@ -27,6 +28,7 @@ public interface ClientGinjector extends ClientGinjectorBase,
 		DeclarationListGinjector,
 		DeclarationDataGinjector,
 		LogAreaGinjector,
+		HistoryGinjector,
 		ProjectVersionGinjector
 {
 
