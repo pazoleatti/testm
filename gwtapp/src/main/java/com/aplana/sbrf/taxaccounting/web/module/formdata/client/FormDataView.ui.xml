@@ -32,6 +32,7 @@
             margin-left: 5px;
             font-size: 12px;
             font-weight: bold;
+            margin-right: 20px;
         }
 
         .headerAttrName {
@@ -106,6 +107,7 @@
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
+                            <style:ButtonLink ui:field="historyAnchor" text="Информация" />
                         </g:HorizontalPanel>
                     </g:FlowPanel>
                     <g:HorizontalPanel height="30px">

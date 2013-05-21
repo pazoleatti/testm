@@ -21,4 +21,9 @@ public class HistoryPopup extends Composite {
 		popup.setAnimationEnabled(true);
 		popup.setAutoHideEnabled(true);
 	}
+
+	public void show() {
+		popup.center();
+		popup.show();
+	}
 }

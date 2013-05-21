@@ -181,6 +181,12 @@ public class FormDataPresenter extends
 	}
 
 	@Override
+	public void onHistoryClicked() {
+		//getData
+		getView().showHistoryPopup();
+	}
+
+	@Override
 	public void onOriginalVersionClicked() {
 		Window.alert("В разработке");
 	}
