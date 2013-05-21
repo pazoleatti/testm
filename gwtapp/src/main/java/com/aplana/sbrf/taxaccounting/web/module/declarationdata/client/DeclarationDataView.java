@@ -36,6 +36,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button deleteButton;
 	@UiField
 	Anchor returnAnchor;
+	@UiField
+	Anchor historyAnchor;
 
 	@UiField
 	Label type;
