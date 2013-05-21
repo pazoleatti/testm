@@ -22,8 +22,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
-import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.LogEntryReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdatareport.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logentryreport.LogEntryReportBuilder;
 
 @Service
 public class FormDataPrintingServiceImpl implements FormDataPrintingService  {

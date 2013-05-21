@@ -29,7 +29,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.service.impl.print.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdatareport.FormDataXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 
 import static org.mockito.Mockito.mock;
