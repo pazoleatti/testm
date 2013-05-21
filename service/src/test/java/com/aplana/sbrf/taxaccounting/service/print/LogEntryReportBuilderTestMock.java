@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logentryreport.LogEntryReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 
 public class LogEntryReportBuilderTestMock {
 	
