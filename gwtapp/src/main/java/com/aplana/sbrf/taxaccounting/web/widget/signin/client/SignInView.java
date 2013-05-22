@@ -12,8 +12,6 @@ public class SignInView extends ViewImpl implements MyView{
 	interface Binder extends UiBinder<Widget, SignInView> {
 	}
 
-	private final Widget widget;
-
 	@UiField
 	Label userName;
 
@@ -22,12 +20,7 @@ public class SignInView extends ViewImpl implements MyView{
 
 	@Inject
 	public SignInView(final Binder binder){
-		this.widget = binder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	public void setUserName(String userName) {

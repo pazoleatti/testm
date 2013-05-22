@@ -28,8 +28,6 @@ public class FormDataListView extends
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
 
-	private final Widget widget;
-
 	private FormDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
@@ -48,7 +46,7 @@ public class FormDataListView extends
 
 	@Inject
 	public FormDataListView(final MyBinder binder) {
-		widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 
 		TextColumn<FormDataSearchResultItem> formKindColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
@@ -109,11 +107,6 @@ public class FormDataListView extends
 
 		pager.setDisplay(formDataTable);
 
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

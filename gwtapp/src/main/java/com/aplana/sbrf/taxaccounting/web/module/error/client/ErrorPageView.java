@@ -13,9 +13,7 @@ public class ErrorPageView extends ViewImpl implements MyView {
 
 	interface Binder extends UiBinder<Widget, ErrorPageView> {
 	}
-	
-	private final Widget widget;
-	
+
 	@UiField
 	HasText message;
 	
@@ -24,12 +22,7 @@ public class ErrorPageView extends ViewImpl implements MyView {
 
 	@Inject
 	public ErrorPageView(Binder binder) {
-		this.widget = binder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override

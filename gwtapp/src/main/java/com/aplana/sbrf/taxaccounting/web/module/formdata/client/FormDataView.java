@@ -90,11 +90,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	CheckBox showCheckedColumns;
 
-	private final Widget widget;
-
 	@Inject
 	public FormDataView(final Binder binder) {
-		widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 
 		selectionModel = new NoSelectionModel<DataRow>();
 		formDataTable.setSelectionModel(selectionModel);
@@ -120,11 +118,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

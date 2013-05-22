@@ -22,8 +22,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	interface MyBinder extends UiBinder<Widget, DeclarationFilterView> {
     }
 
-    private final Widget widget;
-
 	@UiField
 	Panel reportPeriodPanel;
 
@@ -57,7 +55,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 		    }
 	    });
 
-	    widget = binder.createAndBindUi(this);
+	    initWidget(binder.createAndBindUi(this));
     }
 
 	@Override
@@ -89,12 +87,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public void setDataFilter(DeclarationDataFilter declarationFilter, TaxType taxType) {
 		declarationType.setValue(declarationFilter.getDeclarationTypeId());
 	}
-
-
-	@Override
-    public Widget asWidget() {
-        return widget;
-    }
 
 	@Override
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){

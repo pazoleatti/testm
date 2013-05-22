@@ -41,8 +41,6 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
     interface MyDriver extends SimpleBeanEditorDriver<FormDataFilter, FilterView>{
     }
 
-    private final Widget widget;
-
     private final MyDriver driver;
 
     @UiField(provided = true)
@@ -100,7 +98,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 			}
 		});
 
-        widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
 
@@ -109,13 +107,6 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPicker("Выберите подразделение"));
 	    }
     }
-
-
-    @Override
-    public Widget asWidget() {
-        return widget;
-    }
-
 
     @Override
     public void setDataFilter(FormDataFilter formDataFilter) {

@@ -13,19 +13,12 @@ public class FormTemplateScriptCodeView extends ViewWithUiHandlers<FormTemplateS
 
 	public interface Binder extends UiBinder<Widget, FormTemplateScriptCodeView> { }
 
-	private final Widget widget;
-
 	@UiField
 	HasText script;
 
 	@Inject
-	public FormTemplateScriptCodeView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+	public FormTemplateScriptCodeView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override

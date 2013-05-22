@@ -27,8 +27,6 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	interface Binder extends UiBinder<Widget, AdminView> {
 	}
 
-	private final Widget widget;
-
 	/**
 	 * Список шаблонов форм. А больше здесь нифига нет.
 	 */
@@ -37,7 +35,7 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 
 	@Inject
 	public AdminView(Binder binder) {
-		widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 
 		// колонка Наименование декларации
 		Column<FormTemplate, FormTemplate> linkColumn = new Column<FormTemplate, FormTemplate>(
@@ -77,11 +75,6 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 				return formTemplate.getVersion();
 			}
 		}, "Версия");
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

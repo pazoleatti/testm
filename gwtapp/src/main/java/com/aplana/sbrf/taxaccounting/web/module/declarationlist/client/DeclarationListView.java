@@ -25,8 +25,6 @@ public class DeclarationListView extends
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
 
-	private final Widget widget;
-
 	private DeclarationDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
@@ -44,8 +42,8 @@ public class DeclarationListView extends
 	Label titleDesc;
 
 	@Inject
-	public DeclarationListView(final MyBinder binder) {
-		widget = binder.createAndBindUi(this);
+	public DeclarationListView(final MyBinder uiBinder) {
+		initWidget(uiBinder.createAndBindUi(this));
 
 
 		TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
@@ -110,11 +108,7 @@ public class DeclarationListView extends
 		pager.setDisplay(declarationTable);
 		tablePanel.add(pager);
 	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
-	}
+	
 
 	@Override
 	public void setInSlot(Object slot, IsWidget content) {

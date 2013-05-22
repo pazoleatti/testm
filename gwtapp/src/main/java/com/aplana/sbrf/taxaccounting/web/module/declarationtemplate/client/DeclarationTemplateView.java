@@ -23,7 +23,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplate, DeclarationTemplateView> {
 	}
 
-	private final Widget widget;
 	private final MyDriver driver = GWT.create(MyDriver.class);
 	private FileUpload upload;
 
@@ -63,7 +62,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
 	}
 
@@ -78,11 +77,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 				form.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + declaration.getId());
 			}
 		});
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@UiHandler("saveButton")

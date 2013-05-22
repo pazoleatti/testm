@@ -16,16 +16,9 @@ public class HomePageView extends ViewImpl implements MyView {
 	@UiField
 	FlowPanel test;
 
-	private final Widget widget;
-
 	@Inject
 	public HomePageView(final Binder binder) {
-		widget = binder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override

@@ -40,7 +40,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	private final StyleCellPopup styleCellPopup;
 	private final NoSelectionModel<DataRow> selectionModel;
 	private final DataRowColumnFactory factory = new DataRowColumnFactory();
-	private final Widget widget;
 	private List<DataRow<Cell>> rows;
 	private List<Column> columns;
 	private List<FormStyle> styles;
@@ -72,8 +71,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	Button disuniteCellsButton;
 
 	@Inject
-	public FormTemplateRowView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+	public FormTemplateRowView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 
 		factory.setEditOnly(true);
 		styleCellPopup = new StyleCellPopup(this);
@@ -109,7 +108,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 			}
 		}, MouseUpEvent.getType());
 
-		widget.addDomHandler(new ContextMenuHandler() {
+		asWidget().addDomHandler(new ContextMenuHandler() {
 			@Override
 			public void onContextMenu(ContextMenuEvent event) {
 				event.stopPropagation();
@@ -205,11 +204,6 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 				(selectedCells.get(0).getColSpan() > 1 || selectedCells.get(0).getRowSpan() > 1)) {
 			disuniteCellsButton.setVisible(true);
 		}
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

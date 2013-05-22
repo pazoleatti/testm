@@ -18,8 +18,6 @@ public class MainPageView extends ViewImpl implements MyView {
 	interface Binder extends UiBinder<Widget, MainPageView> {
 	}
 
-	public final Widget widget;
-
 	@UiField
 	DockLayoutPanel dockPanel;
 	
@@ -49,13 +47,8 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@Inject
 	public MainPageView(Binder binder) {
-		widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 		splitPanel.setWidgetHidden(logAreaPanel, true);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

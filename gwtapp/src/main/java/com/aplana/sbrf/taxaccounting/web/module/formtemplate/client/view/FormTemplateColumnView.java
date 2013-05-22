@@ -43,7 +43,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	public interface Binder extends UiBinder<Widget, FormTemplateColumnView> { }
 
-	private final Widget widget;
 	private List<Column> columns;
 	private static final List<String> columnTypeNameList = new ArrayList<String>();
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
@@ -142,9 +141,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@Inject
 	@UiConstructor
-	public FormTemplateColumnView(Binder uiBinder) {
+	public FormTemplateColumnView(Binder binder) {
 		init();
-		widget = uiBinder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	private void init() {
@@ -229,11 +228,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void onSelectColumn(ChangeEvent event){
 		setColumnAttributeEditor(columnListBox.getSelectedIndex());
 		setUniqueParameters();
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@UiHandler("upColumn")

@@ -30,7 +30,6 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	interface MyDriver extends SimpleBeanEditorDriver<FormStyle, FormTemplateStyleView> {
 	}
 
-	private final Widget widget;
 	private final MyDriver driver;
 	private List<FormStyle> styles;
 	private static final List<Color> colorTitles = new ArrayList<Color>();
@@ -64,7 +63,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 
 	@Inject
 	@UiConstructor
-	public FormTemplateStyleView(final Binder uiBinder, final MyDriver driver) {
+	public FormTemplateStyleView(final Binder binder, final MyDriver driver) {
 		Collections.addAll(colorTitles, Color.values());
 
 		fontColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
@@ -89,7 +88,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 		});
 		backColor.setAcceptableValues(colorTitles);
 
-		widget = uiBinder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 		this.driver = driver;
 		this.driver.initialize(this);
 	}
@@ -141,11 +140,6 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	public void onSelectColumn(ChangeEvent event){
 		flush();
 		setStyleParams(styleListBox.getSelectedIndex());
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	private void setStyleParams(int index) {

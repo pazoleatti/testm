@@ -22,8 +22,6 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		String grayMenuItem();
 	}
 
-	private Widget widget;
-
 	@UiField
 	Panel panel;
 
@@ -31,12 +29,7 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
 	@Inject
 	public MainMenu(final Binder binder) {
-		widget = binder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override

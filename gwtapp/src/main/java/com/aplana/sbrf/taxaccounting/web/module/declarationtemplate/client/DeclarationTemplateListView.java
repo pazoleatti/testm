@@ -23,9 +23,7 @@ public class DeclarationTemplateListView extends ViewImpl
 		implements DeclarationTemplateListPresenter.MyView {
 	interface Binder extends UiBinder<Widget, DeclarationTemplateListView> {
 	}
-
-	private final Widget widget;
-
+	
 	/**
 	 * Список шаблонов деклараций
 	 */
@@ -34,7 +32,7 @@ public class DeclarationTemplateListView extends ViewImpl
 
 	@Inject
 	public DeclarationTemplateListView(Binder binder) {
-		widget = binder.createAndBindUi(this);
+		initWidget(binder.createAndBindUi(this));
 
 		// колонка Наименование декларации
 		Column<DeclarationTemplate, DeclarationTemplate> linkColumn = new Column<DeclarationTemplate, DeclarationTemplate>(
@@ -74,11 +72,6 @@ public class DeclarationTemplateListView extends ViewImpl
 				return declarationTemplate.getVersion();
 			}
 		}, "Версия");
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

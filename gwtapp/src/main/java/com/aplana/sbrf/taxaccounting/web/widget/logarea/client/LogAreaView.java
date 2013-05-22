@@ -32,11 +32,9 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 	interface Binder extends UiBinder<Widget, LogAreaView> {
 	}
 
-	private final Widget widget;
-
 	@Inject
-	public LogAreaView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+	public LogAreaView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 	}
 	
 	@UiField
@@ -47,11 +45,6 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 
     @UiField
     FormPanel formPanel;
-
-	@Override
-	public Widget asWidget() {
-		return widget;
-	}
 
 	@Override
 	public void setLogEntries(List<LogEntry> entries) {

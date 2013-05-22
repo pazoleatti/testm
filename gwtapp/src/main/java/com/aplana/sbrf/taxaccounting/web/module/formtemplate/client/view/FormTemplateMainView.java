@@ -26,7 +26,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	public interface Binder extends UiBinder<Widget, FormTemplateMainView> { }
 
-	private final Widget widget;
 	private int formId;
 
 	@UiField
@@ -54,8 +53,8 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	@Inject
-	public FormTemplateMainView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+	public FormTemplateMainView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override
@@ -64,11 +63,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 			return tabPanel.addTab(tabData, historyToken + ";" + AdminConstants.NameTokens.formTemplateId + "=" + formId);
 		}
 		return tabPanel.addTab(tabData, historyToken + ";" + AdminConstants.NameTokens.formTemplateId + "=");
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

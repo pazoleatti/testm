@@ -20,8 +20,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-	private final Widget widget;
-
 	@UiField
 	Button refreshButton;
 	@UiField
@@ -61,7 +59,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+		initWidget(uiBinder.createAndBindUi(this));
 	}
 
 	@Override
@@ -116,11 +114,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setReportPeriod(String reportPeriod) {
 		this.reportPeriod.setText(reportPeriod);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
 	}
 
 	@Override

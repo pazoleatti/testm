@@ -22,8 +22,6 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 
 	public interface Binder extends UiBinder<Widget, FormTemplateEventView> { }
 
-	private final Widget widget;
-
 	@UiField
 	ListBox eventListBox;
 
@@ -40,20 +38,14 @@ public class FormTemplateEventView extends ViewWithUiHandlers<FormTemplateEventU
 	private List<Script> eventScripts;
 
 	@Inject
-	public FormTemplateEventView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+	public FormTemplateEventView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 
 		eventListBox.clear();
 		for (FormDataEvent event : FormDataEvent.values()) {
 			eventListBox.addItem(event.getTitle(), String.valueOf(event.getCode()));
 		}
 	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
-	}
-
 
 	@UiHandler("upEventScript")
 	public void onUpEventScript(ClickEvent event){

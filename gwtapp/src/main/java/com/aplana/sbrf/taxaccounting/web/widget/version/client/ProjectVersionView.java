@@ -11,20 +11,13 @@ public class ProjectVersionView extends ViewImpl implements ProjectVersionPresen
 
 	interface Binder extends UiBinder<Widget, ProjectVersionView> {
 	}
-	
-	private final Widget widget;
-	
+
 	@UiField
 	HasText projectVersion;
 	
 	@Inject
 	public ProjectVersionView(final Binder binder) {
-		this.widget = binder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override

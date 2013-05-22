@@ -10,8 +10,6 @@ import com.gwtplatform.mvp.client.*;
 public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiHandlers> implements FormTemplateInfoPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateInfoView> { }
 
-	private final Widget widget;
-
 	@UiField
 	TextBox versionBox;
 
@@ -31,8 +29,8 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	TextBox codeBox;
 
 	@Inject
-	public FormTemplateInfoView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
+	public FormTemplateInfoView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@Override
@@ -55,8 +53,4 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setCode(codeBox.getValue());
 	}
 
-	@Override
-	public Widget asWidget() {
-		return widget;
-	}
 }

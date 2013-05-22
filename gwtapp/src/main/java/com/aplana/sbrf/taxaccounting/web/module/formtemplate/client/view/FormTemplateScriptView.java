@@ -19,7 +19,6 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 
 	public interface Binder extends UiBinder<Widget, FormTemplateScriptView> { }
 
-	private final Widget widget;
 	private List<Script> scriptList;
 	private int lastSelectedScriptIndex = 0;
 
@@ -31,13 +30,8 @@ public class FormTemplateScriptView extends ViewWithUiHandlers<FormTemplateScrip
 	ListBox scriptListBox;
 
 	@Inject
-	public FormTemplateScriptView(Binder uiBinder) {
-		widget = uiBinder.createAndBindUi(this);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return widget;
+	public FormTemplateScriptView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
 	}
 
 	@UiHandler("scriptListBox")
