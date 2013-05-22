@@ -117,7 +117,7 @@ public class DeclarationListView extends
 	}
 
 	@Override
-	public void setInSlot(Object slot, Widget content) {
+	public void setInSlot(Object slot, IsWidget content) {
 		if (slot == DeclarationListPresenter.TYPE_filterPresenter) {
 			filterContentPanel.clear();
 			if (content != null) {

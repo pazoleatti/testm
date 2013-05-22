@@ -117,7 +117,7 @@ public class FormDataListView extends
 	}
 
 	@Override
-	public void setInSlot(Object slot, Widget content) {
+	public void setInSlot(Object slot, IsWidget content) {
 		if (slot == FormDataListPresenter.TYPE_filterPresenter) {
 			filterContentPanel.clear();
 			if (content != null) {

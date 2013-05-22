@@ -92,7 +92,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	}
 
 	@Override
-	public void setInSlot(Object slot, Widget content) {
+	public void setInSlot(Object slot, IsWidget content) {
 		if (slot == FormTemplateMainPresenter.TYPE_SetTabContent) {
 			tabPanel.setPanelContent(content);
 		} else {

@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -58,7 +59,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	}
 
 	@Override
-	public void setInSlot(Object slot, Widget content) {
+	public void setInSlot(Object slot, IsWidget content) {
 		if (slot == RevealContentTypeHolder.getMainContent()) {
 			setMainContent(content);
 		} else if (slot == MainPagePresenter.TYPE_SignInContent) {
@@ -74,35 +75,35 @@ public class MainPageView extends ViewImpl implements MyView {
 		}
 	}
 
-	private void setMainContent(Widget content) {
+	private void setMainContent(IsWidget content) {
 		mainContentPanel.clear();
 		if (content != null) {
 			mainContentPanel.add(content);
 		}
 	}
 
-	private void setSignInContent(Widget content) {
+	private void setSignInContent(IsWidget content) {
 		signInContentPanel.clear();
 		if (content != null) {
 			signInContentPanel.add(content);
 		}
 	}
 
-	private void setMainMenuContent(Widget content) {
+	private void setMainMenuContent(IsWidget content) {
 		mainMenuContentPanel.clear();
 		if (content != null) {
 			mainMenuContentPanel.add(content);
 		}
 	}
 	
-	private void setNotificationContent(Widget content) {
+	private void setNotificationContent(IsWidget content) {
 		logAreaPanel.clear();
 		if (content != null) {
 			logAreaPanel.add(content);
 		}
 	}
 	
-	private void setProjectVersion(Widget content) {
+	private void setProjectVersion(IsWidget content) {
 		projectVersion.clear();
 		if (content != null) {
 			projectVersion.add(content);
