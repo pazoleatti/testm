@@ -141,7 +141,7 @@ public class DeclarationListPresenter extends
 								handleResponse(result, range);
 							}
 						}
-					}));
+					}, DeclarationListPresenter.this));
 		}
 
 		private GetDeclarationList createRequestData(Range range) {

@@ -143,7 +143,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
 							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
 						}
-					}));
+					}, this));
 		}
 	}
 
@@ -168,7 +168,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							setFormTemplate();
 						}
 					}
-				}));
+				}, this));
 	}
 
 }

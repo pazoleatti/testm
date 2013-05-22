@@ -35,7 +35,7 @@ public class ProjectVersionPresenter extends
 					public void onSuccess(GetProjectVersionResult result) {
 						getView().setProjectVersion(result.getProjectVersion());
 					}
-				}));
+				}, this));
 		super.onReveal();
 	}
 

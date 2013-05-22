@@ -146,7 +146,7 @@ public class FormDataPresenter extends
 
 								}
 
-							}).addCallback(
+							}, this).addCallback(
 									TaManualRevealCallback.create(this, placeManager)));
 
 		} catch (Exception e) {
@@ -239,7 +239,7 @@ public class FormDataPresenter extends
 						processFormDataResult(result);
 					}
 
-				}));
+				}, this));
 	}
 
 	private void processFormDataResult(FormDataResult result) {
@@ -263,7 +263,7 @@ public class FormDataPresenter extends
 						getView().setSelectedRow(result.getCurrentRow(), true);
 					}
 
-				}));
+				}, this));
 	}
 
 	@Override
@@ -281,7 +281,7 @@ public class FormDataPresenter extends
 							processFormDataResult(result);
 						}
 
-					}));
+					},this));
 			getView().setRowsData(formData.getDataRows());
 		}
 	}
@@ -298,7 +298,7 @@ public class FormDataPresenter extends
 						processFormDataResult(result);
 					}
 
-				}));
+				}, this));
 	}
 
 	@Override
@@ -313,7 +313,7 @@ public class FormDataPresenter extends
 						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
 						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 					}
-				}));
+				}, this));
 	}
 
 	@Override
@@ -333,7 +333,7 @@ public class FormDataPresenter extends
 											goToFormDataList();
 										}
 
-									}));
+									}, this));
 		}
 	}
 
@@ -364,7 +364,7 @@ public class FormDataPresenter extends
 					public void onSuccess(GoMoveResult result) {
 						revealForm(true, wfMove.getId());
 					}
-				}));
+				}, this));
 	}
 
 }

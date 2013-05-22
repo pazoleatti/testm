@@ -7,8 +7,8 @@
 	<inherits name='com.google.gwt.inject.Inject' />
 
 	<!-- Main -->
-	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.entry.MainEntry" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage" />
 
 	<!-- Control -->

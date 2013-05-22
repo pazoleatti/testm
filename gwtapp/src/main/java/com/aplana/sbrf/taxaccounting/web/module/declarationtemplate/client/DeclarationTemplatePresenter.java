@@ -85,7 +85,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
 						setDeclarationTemplate();
 					}
-				}));
+				}, this));
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 							getView().setDeclarationTemplate(declarationTemplate);
 							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
 						}
-					}).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
 		}
 	}
 

@@ -6,31 +6,22 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.mvp.client.DelayedBindRegistry;
 
-public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
-		HasHandlers {
+public class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 
-	// TODO: Почему то не получается использовать @Inject для статических полей.
-	// Надо разобраться.
-	// Пока ворк эраунд - получение инжектора руками и установка значения.
-	private static final EventBus EVENT_BUS = ((ClientGinjector) DelayedBindRegistry
-			.getGinjector()).getEventBus();
+	private HasHandlers hasHandlers;
 
 	private final AsyncCallback<T> callback;
 	private boolean showLogOnly;
 
-	public static <T> AsyncCallback<T> create() {
-		return new MessageOnFailureCallback<T>(false, null);
+	public static <T> AsyncCallback<T> create(HasHandlers hasHandlers) {
+		return new MessageOnFailureCallback<T>(false, null, hasHandlers);
 	}
 
-	public static <T> AsyncCallback<T> create(AsyncCallback<T> callback) {
-		return new MessageOnFailureCallback<T>(false, callback);
+	public static <T> AsyncCallback<T> create(AsyncCallback<T> callback, HasHandlers hasHandlers) {
+		return new MessageOnFailureCallback<T>(false, callback, hasHandlers);
 	}
 
 	/**
@@ -41,19 +32,20 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 	 * @param showLogOnly
 	 * @return
 	 */
-	public static <T> AsyncCallback<T> create(boolean showLogOnly) {
-		return new MessageOnFailureCallback<T>(showLogOnly, null);
+	public static <T> AsyncCallback<T> create(boolean showLogOnly, HasHandlers hasHandlers) {
+		return new MessageOnFailureCallback<T>(showLogOnly, null, hasHandlers);
 	}
 
 	public static <T> AsyncCallback<T> create(boolean showLogOnly,
-			AsyncCallback<T> callback) {
-		return new MessageOnFailureCallback<T>(showLogOnly, callback);
+			AsyncCallback<T> callback, HasHandlers hasHandlers) {
+		return new MessageOnFailureCallback<T>(showLogOnly, callback, hasHandlers);
 	}
 
 	private MessageOnFailureCallback(boolean showLogOnly,
-			AsyncCallback<T> callback) {
+			AsyncCallback<T> callback, HasHandlers hasHandlers) {
 		this.callback = callback;
 		this.showLogOnly = showLogOnly;
+		this.hasHandlers = hasHandlers;
 	}
 
 	@Override
@@ -65,21 +57,21 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 			List<LogEntry> logEntries = ((TaActionException) caught)
 					.getLogEntries();
 			if (logEntries != null && !logEntries.isEmpty()) {
-				LogAddEvent.fire(this,
+				LogAddEvent.fire(hasHandlers,
 						((TaActionException) caught).getLogEntries());
 				// Флаг showLogOnly актуален только когда ошибка вызвана
 				// присутствием
 				// сообщений об ошибке в логе. В других случаях всё равно нужно
 				// отобразить диалог.
 				if (!showLogOnly) {
-					MessageEvent.fire(this, caught.getLocalizedMessage(),
+					MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(),
 							caught);
 				}
 			} else {
-				MessageEvent.fire(this, caught.getLocalizedMessage(), caught);
+				MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
 			}
 		} else {
-			MessageEvent.fire(this, caught.getLocalizedMessage(), caught);
+			MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
 		}
 	}
 
@@ -89,10 +81,6 @@ public class MessageOnFailureCallback<T> implements AsyncCallback<T>,
 			callback.onSuccess(result);
 		}
 	}
-
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		EVENT_BUS.fireEventFromSource(event, this);
-	}
-
 }
+
+

@@ -1,17 +1,36 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
-
-import java.util.*;
 
 public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilterPresenter.MyView>
 		implements DeclarationFilterUIHandlers {
@@ -128,7 +147,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 							getView().setDataFilter(prepareFormDataFilter(), taxType);
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}
-					}));
+					}, this));
 	}
 
 	@Override
@@ -142,7 +161,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						periods.addAll(result.getReportPeriods());
 						getView().setReportPeriods(result.getReportPeriods());
 					}
-				}));
+				}, this));
 	}
 
 	@Override
@@ -216,7 +235,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 					public void onSuccess(DetectUserRoleResult result) {
 						userRoles = result.getUserRole();
 					}
-				}));
+				}, this));
 	}
 
 }

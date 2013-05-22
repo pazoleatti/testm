@@ -1,18 +1,22 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 
+import java.io.Serializable;
+
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.DelayedBindRegistry;
-
-import java.io.Serializable;
 
 /**
  * Асинхронный провайдер для таблицы, получающий даные с сервера
@@ -23,8 +27,14 @@ import java.io.Serializable;
  * @author Eugene Stetsenko
  */
 public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T extends Serializable>
-		extends AsyncDataProvider<DictionaryItem<T>> {
+		extends AsyncDataProvider<DictionaryItem<T>> implements HasHandlers {
+
+	@Inject Provider<EventBus> eventBusProvider;
+	@Inject Provider<DispatchAsync> dispatcherAsyncProvider;
+	
+	private final EventBus eventBus;
 	private final DispatchAsync dispatcher;
+	
 	private final String dictionaryCode;
 
 	protected String searchPattern = null;
@@ -33,7 +43,8 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 	 * @param dictionaryCode Код справочника.
 	 */
 	public DictionaryDataProvider(String dictionaryCode) {
-		dispatcher = ((ClientGinjector) DelayedBindRegistry.getGinjector()).getDispatchAsync();
+		this.eventBus = eventBusProvider.get();
+		this.dispatcher = dispatcherAsyncProvider.get();
 		this.dictionaryCode = dictionaryCode;
 	}
 
@@ -65,7 +76,7 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 					updateRowData(offset, result.getDictionaryItems());
 					updateRowCount(result.getSize().intValue(), true);
 				}
-			}));
+			}, this));
 	}
 
 	/**
@@ -80,5 +91,10 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 
 	public void setSearchPattern(String searchPattern) {
 		this.searchPattern = searchPattern;
+	}
+
+	@Override
+	public void fireEvent(GwtEvent<?> event) {
+		eventBus.fireEventFromSource(event, this);
 	}
 }

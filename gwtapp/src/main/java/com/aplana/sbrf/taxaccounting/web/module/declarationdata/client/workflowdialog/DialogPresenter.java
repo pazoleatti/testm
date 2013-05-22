@@ -61,7 +61,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						public void onSuccess(AcceptDeclarationDataResult result) {
 							revealPlaceRequest();
 						}
-					}));
+					}, this));
 		}
 	}
 

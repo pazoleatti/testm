@@ -107,7 +107,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					public void onSuccess(GetReportPeriodsResult result) {
 						getView().setReportPeriods(result.getReportPeriods());
 					}
-				}));
+				}, this));
 	}
 
 	public void initDialog(TaxType taxType){
@@ -135,7 +135,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 						fillFormTypeMap(filterValues.getFormTypes());
 						currentReportPeriod = result.getCurrentReportPeriod();
 					}
-				}));
+				}, this));
 	}
 
 	public void setSelectedFilterValues(FormDataFilter formDataFilter, List<ReportPeriod> periods){

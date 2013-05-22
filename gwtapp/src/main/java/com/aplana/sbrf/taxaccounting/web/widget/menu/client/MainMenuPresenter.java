@@ -38,7 +38,7 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 					public void onSuccess(GetMainMenuResult result) {
 						getView().setMenuItems(result.getMenuItems());
 					}
-				}));
+				}, this));
 
 		super.onReveal();
 		

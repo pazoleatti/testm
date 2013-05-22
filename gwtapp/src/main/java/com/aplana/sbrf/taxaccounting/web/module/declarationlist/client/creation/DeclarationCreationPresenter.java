@@ -103,7 +103,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 																			String.valueOf(checkResult.getDeclarationDataId()))
 															);
 												}
-											}));
+											}, DeclarationCreationPresenter.this));
 								}
 							} else if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
 								MessageEvent.fire(DeclarationCreationPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
@@ -122,10 +122,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 																.with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId()))
 														);
 											}
-										}));
+										}, DeclarationCreationPresenter.this));
 							}
 						}
-					}));
+					}, DeclarationCreationPresenter.this));
 		}
 	}
 
@@ -139,7 +139,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 					public void onSuccess(GetReportPeriodsResult result) {
 						getView().setReportPeriods(result.getReportPeriods());
 					}
-				}));
+				}, DeclarationCreationPresenter.this));
 	}
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){

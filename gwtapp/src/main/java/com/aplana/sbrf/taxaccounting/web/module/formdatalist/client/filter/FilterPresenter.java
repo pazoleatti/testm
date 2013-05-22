@@ -104,7 +104,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 						getView().setDataFilter(prepareFormDataFilter(result));
 						FilterReadyEvent.fire(FilterPresenter.this);
 					}
-				}));
+				}, this));
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 						periods.addAll(result.getReportPeriods());
 						getView().setReportPeriods(result.getReportPeriods());
 					}
-				}));
+				}, this));
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -23,11 +24,11 @@ public final class CallbackUtils {
 	 * @param callback
 	 * @return
 	 */
-	public static <T> CompositeCallback<T> defaultCallback(AsyncCallback<T> callback){
+	public static <T> CompositeCallback<T> defaultCallback(AsyncCallback<T> callback, HasHandlers hasHandlers){
 		return CompositeCallback
 		.create(callback)
-		.addCallback(MessageOnFailureCallback.create())
-		.addCallback(LockScrCallback.create());
+		.addCallback(MessageOnFailureCallback.create(hasHandlers))
+		.addCallback(LockScrCallback.create(hasHandlers));
 	}
 		
 	
@@ -38,10 +39,10 @@ public final class CallbackUtils {
 	 * @param callback
 	 * @return
 	 */
-	public static <T> CompositeCallback<T> defaultCallbackNoLock(AsyncCallback<T> callback){
+	public static <T> CompositeCallback<T> defaultCallbackNoLock(AsyncCallback<T> callback, HasHandlers hasHandlers){
 		return CompositeCallback
 		.create(callback)
-		.addCallback(MessageOnFailureCallback.create());
+		.addCallback(MessageOnFailureCallback.create(hasHandlers));
 	}
 	
 	
@@ -52,11 +53,11 @@ public final class CallbackUtils {
 	 * @param callback
 	 * @return
 	 */
-	public static <T> CompositeCallback<T> defaultCallbackNoModalError(AsyncCallback<T> callback){
+	public static <T> CompositeCallback<T> defaultCallbackNoModalError(AsyncCallback<T> callback, HasHandlers hasHandlers){
 		return CompositeCallback
 		.create(callback)
-		.addCallback(MessageOnFailureCallback.create(true))
-		.addCallback(LockScrCallback.create());
+		.addCallback(MessageOnFailureCallback.create(true, hasHandlers))
+		.addCallback(LockScrCallback.create(hasHandlers));
 	}
 	
 	/**
@@ -69,18 +70,18 @@ public final class CallbackUtils {
 	 * @param callback
 	 * @return
 	 */
-	public static <T> CompositeCallback<T> wrongStateCallback(AsyncCallback<T> callback){
+	public static <T> CompositeCallback<T> wrongStateCallback(AsyncCallback<T> callback, HasHandlers hasHandlers){
 		return CompositeCallback
 		.create(callback)
-		.addCallback(ErrorOnFailureCallback.create())
-		.addCallback(LockScrCallback.create());
+		.addCallback(ErrorOnFailureCallback.create(hasHandlers))
+		.addCallback(LockScrCallback.create(hasHandlers));
 	}
 	
 	
-	public static <T> CompositeCallback<T> wrongStateCallbackNoLock(AsyncCallback<T> callback){
+	public static <T> CompositeCallback<T> wrongStateCallbackNoLock(AsyncCallback<T> callback, HasHandlers hasHandlers){
 		return CompositeCallback
 		.create(callback)
-		.addCallback(ErrorOnFailureCallback.create());
+		.addCallback(ErrorOnFailureCallback.create(hasHandlers));
 	}
 	
 	public static <T> CompositeCallback<T> simpleCallback(AsyncCallback<T> callback){

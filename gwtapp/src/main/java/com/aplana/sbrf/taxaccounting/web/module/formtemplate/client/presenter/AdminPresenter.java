@@ -82,7 +82,7 @@ public class AdminPresenter extends
 								getView().setFormTemplateTable(
 										result.getForms());
 							}
-						}).addCallback(
+						}, this).addCallback(
 						new ManualRevealCallback<GetFormTemplateListResult>(
 								AdminPresenter.this)));
 	}

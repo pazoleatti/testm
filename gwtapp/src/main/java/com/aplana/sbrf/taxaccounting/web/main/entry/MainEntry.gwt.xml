@@ -5,14 +5,20 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.inject.Inject" />
 
-	<inherits name="com.gwtplatform.mvp.Mvp" />
-
 	<source path='client' />
 
-	<!-- Specify the app entry point class. -->
-	<entry-point class='com.aplana.sbrf.taxaccounting.web.main.entry.client.MainEntry' />
+	<inherits name='com.gwtplatform.mvp.MvpWithEntryPoint'/>
+	
+	<set-configuration-property name="gin.ginjector.modules"
+                                value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>
 
 	<!-- This is required for Gwt-Platform Proxy's generator -->
+	<!-- 
 	<define-configuration-property name="gin.ginjector" is-multi-valued="false" />
 	<set-configuration-property name="gin.ginjector" value="com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientGinjector" />
+	 -->
+	 <set-configuration-property name="gin.ginjector.modules"
+                                value="com.aplana.sbrf.taxaccounting.web.main.entry.client.ClientModule"/>
+	
+	 
 </module>

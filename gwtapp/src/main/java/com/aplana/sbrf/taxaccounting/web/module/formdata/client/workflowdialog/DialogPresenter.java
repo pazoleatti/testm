@@ -64,7 +64,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 											FormDataPresenterBase.FORM_DATA_ID,
 											formData.getId().toString()));
 						}
-					}));
+					}, this));
 		}
 	}
 

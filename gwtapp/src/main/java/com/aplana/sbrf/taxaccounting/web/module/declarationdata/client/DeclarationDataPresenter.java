@@ -140,7 +140,7 @@ public class DeclarationDataPresenter
 								getView().showRefresh(result.isCanDelete());
 								getView().setPdf(result.getPdf());
 							}
-						}).addCallback(
+						}, DeclarationDataPresenter.this).addCallback(
 						TaManualRevealCallback.create(
 								DeclarationDataPresenter.this, placeManager)));
 
@@ -170,7 +170,7 @@ public class DeclarationDataPresenter
 												"Декларация обновлена");
 										revealPlaceRequest();
 									}
-								}));
+								}, DeclarationDataPresenter.this));
 	}
 
 	@Override
@@ -190,7 +190,7 @@ public class DeclarationDataPresenter
 												AcceptDeclarationDataResult result) {
 											revealPlaceRequest();
 										}
-									}));
+									}, DeclarationDataPresenter.this));
 		} else {
 			dialogPresenter.setDeclarationId(declarationId);
 			addToPopupSlot(dialogPresenter);
@@ -221,7 +221,7 @@ public class DeclarationDataPresenter
 															.with("nType",
 																	taxName));
 										}
-									}));
+									}, DeclarationDataPresenter.this));
 		}
 	}
 

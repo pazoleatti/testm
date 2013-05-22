@@ -37,7 +37,7 @@ public class SignInPresenter extends PresenterWidget<SignInView>{
 						getView().setUserName(result.getUserName());
 						getView().setRoleAndDepartment(result.getRoleAnddepartment());
 					}
-				}));
+				}, this));
 
 		super.onReveal();
 		

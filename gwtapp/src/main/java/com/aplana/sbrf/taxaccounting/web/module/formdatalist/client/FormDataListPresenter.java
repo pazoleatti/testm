@@ -173,7 +173,7 @@ public class FormDataListPresenter extends
 								handleResponse(result, range);
 							}
 						}
-					}));
+					}, FormDataListPresenter.this));
 		}
 
 		private GetFormDataList createRequestData(Range range) {

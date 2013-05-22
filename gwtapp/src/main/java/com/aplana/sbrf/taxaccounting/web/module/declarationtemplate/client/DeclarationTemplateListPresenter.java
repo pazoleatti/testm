@@ -67,7 +67,7 @@ public class DeclarationTemplateListPresenter extends Presenter<DeclarationTempl
 									getView().setDeclarationTemplateRows(result.getDeclarations());
 								}
 							}
-						}).addCallback(
+						}, this).addCallback(
 						new ManualRevealCallback<DeclarationListResult>(
 								DeclarationTemplateListPresenter.this)));
 	}
