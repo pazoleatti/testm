@@ -966,7 +966,56 @@ create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 
-commit;
 ------------------------------------------------------------------------------------------------------
+
+create table "LOG_SYSTEM"
+(ID   NUMBER(18,0) PRIMARY KEY,
+LOG_DATE   DATE   NOT NULL, 
+IP VARCHAR2(39),
+EVENT_ID   NUMBER(2,0)  NOT NULL,
+USER_ID   NUMBER(9,0),
+ROLES  VARCHAR2(200),
+DEPARTMENT_ID NUMBER(9,0) NOT NULL,
+REPORT_PERIOD_ID NUMBER(9,0) NOT NULL,
+DECLARATION_TYPE_ID   NUMBER(9,0),
+FORM_TYPE_ID   NUMBER(9,0),
+FORM_KIND_ID NUMBER(9,0),
+NOTE  VARCHAR2(510)
+);
+
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_chk_FORM_KIND_ID check (FORM_KIND_ID in (1, 2, 3, 4, 5));
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103,104,105,106,107,108,109,110, 203,204,205,206,207, 301,302,303));
+
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_chk_DCL_FORM check (DECLARATION_TYPE_ID IS NOT NULL OR (FORM_TYPE_ID IS NOT NULL AND FORM_KIND_ID IS NOT NULL));
+
+
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_USER_ID foreign key (USER_ID) references  sec_user (id);
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_DEPARTMENT_ID foreign key (DEPARTMENT_ID) references  department(id);
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_REPORT_PERIOD_ID foreign key (REPORT_PERIOD_ID) references  report_period(id);
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_DECL_TYPE_ID foreign key (DECLARATION_TYPE_ID) references  declaration_type (id);
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_FORM_TYPE_ID foreign key (FORM_TYPE_ID) references  form_type(id);
+
+COMMENT ON TABLE LOG_SYSTEM   IS   'Системный журнал';
+
+COMMENT ON COLUMN LOG_SYSTEM."ID"   IS   'Код записи';
+COMMENT ON COLUMN LOG_SYSTEM."LOG_DATE"   IS   'Дата события';
+COMMENT ON COLUMN LOG_SYSTEM."IP"   IS   'IP-адрес пользователя';
+COMMENT ON COLUMN LOG_SYSTEM."EVENT_ID"   IS   'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
+COMMENT ON COLUMN LOG_SYSTEM."USER_ID"   IS   'Код пользователя';
+COMMENT ON COLUMN LOG_SYSTEM."ROLES"   IS   'Список ролей пользователя';
+COMMENT ON COLUMN LOG_SYSTEM."DEPARTMENT_ID"   IS   'Код подразделения НФ\декларации';
+COMMENT ON COLUMN LOG_SYSTEM."REPORT_PERIOD_ID"   IS   'Код отчетного периода';
+COMMENT ON COLUMN LOG_SYSTEM."DECLARATION_TYPE_ID"   IS   'Код вида декларации';
+COMMENT ON COLUMN LOG_SYSTEM."FORM_TYPE_ID"   IS   'Код вида налоговой формы';
+COMMENT ON COLUMN LOG_SYSTEM."FORM_KIND_ID"   IS   'Код типа налоговой формы (1,2,3,4,5)';
+COMMENT ON COLUMN LOG_SYSTEM."NOTE"   IS   'Текст сообщения';
+
+create sequence seq_log_system start with 10000;
+
+------------------------------------------------------------------------------------------------------
+
+
+
+
 
 
