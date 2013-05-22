@@ -944,14 +944,14 @@ alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_USER_ID foreign key (USE
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_DECLARATION_ID foreign key (DECLARATION_DATA_ID) references  declaration_data(id) on delete cascade;
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_FORM_DATA_ID foreign key (FORM_DATA_ID) references  form_data (id) on delete cascade;
 
-alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 5, 6, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 207, 301, 302, 303));
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_FRM_DCL_EV  check (FORM_DATA_ID is not null OR DECLARATION_DATA_ID is not null);
 
 COMMENT ON TABLE LOG_BUSINESS	 IS 	'Журнал событий налоговых форм\деклараций';
 
 COMMENT ON COLUMN LOG_BUSINESS."ID"	 IS 	'Код записи';
 COMMENT ON COLUMN LOG_BUSINESS."LOG_DATE"	 IS 	'Дата события';
-COMMENT ON COLUMN LOG_BUSINESS."EVENT_ID"	 IS 	'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108,  Вернуть из \Подготовлена\ в \Создана\,109,  Принять из \Подготовлена\,110,  Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
+COMMENT ON COLUMN LOG_BUSINESS."EVENT_ID" IS 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108,  Вернуть из \Подготовлена\ в \Создана\,109,  Принять из \Подготовлена\,110,  Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
 COMMENT ON COLUMN LOG_BUSINESS."USER_ID"	 IS 	'Код пользователя';
 COMMENT ON COLUMN LOG_BUSINESS."ROLES"	 IS 	'Список ролей пользователя';
 COMMENT ON COLUMN LOG_BUSINESS."DECLARATION_DATA_ID"	 IS 	'Код декларации';
