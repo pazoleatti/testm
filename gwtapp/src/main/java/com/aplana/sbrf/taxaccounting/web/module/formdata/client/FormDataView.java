@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
@@ -173,15 +174,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void addCustomHeader(boolean addNumberedHeader) {
-		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader, 1);
+	public void addCustomHeader(List<DataRow<HeaderCell>> headers) {
+		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, 1, headers);
 		formDataTable.setHeaderBuilder(builder);
 	}
 
 	// После вызова этого метода таблица получает возможность объединять ячейки и применять стили
 	@Override
 	public void addCustomTableStyles(List<FormStyle> allStyles) {
-		CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, allStyles, false);
+		CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, false);
 		formDataTable.setTableBuilder(builder);
 	}
 

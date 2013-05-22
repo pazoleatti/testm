@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateRowPresenter;
@@ -270,7 +271,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		rows = rowsData;
 		if (rowsData.size() != 0) {
 			formDataTable.setRowData(rowsData);
-			CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, styles, true);
+			CustomTableBuilder<DataRow<Cell>> builder = new CustomTableBuilder<DataRow<Cell>>(formDataTable, true);
 			formDataTable.setTableBuilder(builder);
 		} else {
 			formDataTable.setRowCount(0);
@@ -288,8 +289,8 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	}
 
 	@Override
-	public void addCustomHeader(boolean addNumberedHeader) {
-		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, addNumberedHeader, 2);
+	public void addCustomHeader(boolean addNumberedHeader, List<DataRow<HeaderCell>> newHeaders) {
+		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, 2, newHeaders);
 		formDataTable.setHeaderBuilder(builder);
 	}
 

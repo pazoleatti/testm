@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +28,7 @@ public class FormData extends IdentityObject<Long> {
 	private List<FormStyle> formStyles;
 
 	private List<DataRow<Cell>> dataRows;
+	private List<DataRow<HeaderCell>> headers;
 	private FormType formType;
 
 	private FormDataPerformer performer;
@@ -134,6 +136,7 @@ public class FormData extends IdentityObject<Long> {
 		this.formType = formTemplate.getType();
 		dataRows = new ArrayList<DataRow<Cell>>();
 		this.formStyles = formTemplate.getStyles();
+		this.headers = formTemplate.getHeaders();
 	}
 
 	public void setFormType(FormType formType) {
@@ -323,6 +326,14 @@ public class FormData extends IdentityObject<Long> {
 	 */
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public List<DataRow<HeaderCell>> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(List<DataRow<HeaderCell>> headers) {
+		this.headers = headers;
 	}
 
     /**

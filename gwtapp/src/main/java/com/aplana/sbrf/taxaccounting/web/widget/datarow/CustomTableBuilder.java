@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.DivBuilder;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
@@ -40,7 +41,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	 *
 	 * @param cellTable the table this builder will build rows for
 	 */
-	public CustomTableBuilder(AbstractCellTable<T> cellTable, List<FormStyle> allStyles, boolean isStriped) {
+	public CustomTableBuilder(AbstractCellTable<T> cellTable, boolean isStriped) {
 		super(cellTable);
 		this.isStriped = isStriped;
 
@@ -92,10 +93,10 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		for (int curColumn = 0; curColumn < columnCount; curColumn++) {
 			if (globalSpans.get(absRowIndex) == null || !globalSpans.get(absRowIndex).contains(curColumn)) {
 				Column<T, ?> column = cellTable.getColumn(curColumn);
-				com.aplana.sbrf.taxaccounting.model.Cell currentCell = null;
+				AbstractCell currentCell = null;
 				if (((DataRowColumn<?>)column).getAlias() != null) {
 					currentCell =
-							((DataRow<com.aplana.sbrf.taxaccounting.model.Cell>) rowValue).getCell(((DataRowColumn<?>)column).getAlias() );
+							((DataRow<? extends AbstractCell>) rowValue).getCell(((DataRowColumn<?>)column).getAlias() );
 				}
 				// Create the cell styles.
 				StringBuilder tdClasses = new StringBuilder(cellStyle);
@@ -144,12 +145,14 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					}
 				}
 
-				if (isStriped && currentCell != null && currentCell.isEditable()) {
+				if (isStriped && currentCell != null
+						&& (currentCell instanceof com.aplana.sbrf.taxaccounting.model.Cell)
+						&& ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).isEditable()) {
 					td.style().trustedBackgroundImage(STRIPE_ICON_PROPERTY);
 				}
 
-				if (currentCell != null) {
-					FormStyle currentCellStyle = currentCell.getStyle();
+				if ((currentCell != null) && (currentCell instanceof com.aplana.sbrf.taxaccounting.model.Cell)) {
+					FormStyle currentCellStyle = ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).getStyle();
 					if (currentCellStyle != null) { // если на ячейку назначен стиль
 						applyOurCustomStyles(td, currentCellStyle);
 					}

@@ -2,113 +2,65 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.cellview.client.AbstractCellTable.Style;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.cell.client.Cell.Context;
 
+import java.util.List;
+
+/**
+ * @author Eugene Stetsenko
+ */
 public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<Cell>> {
-	private boolean numberedColumns;
 	private int offset = 0;
-	public CustomHeaderBuilder(AbstractCellTable<DataRow<Cell>> table, boolean isFooter, boolean numberedColumns, int offset) {
+	private List<DataRow<HeaderCell>> newHeaders;
+	Style style;
+	public CustomHeaderBuilder(AbstractCellTable<DataRow<Cell>> table,
+	                           boolean isFooter,
+	                           int offset,
+	                           List<DataRow<HeaderCell>> newHeaders) {
 		super(table, isFooter);
 		this.offset = offset;
-		this.numberedColumns = numberedColumns;
+		this.newHeaders = newHeaders;
     }
 	@Override
 	protected boolean buildHeaderOrFooterImpl() {
-		boolean tableHasGroupHeader = false;
-    	
-		for (int i=0; i<getTable().getColumnCount(); i++) {
-			if (((DataRowColumn)getTable().getColumn(i)).getRowGroup() != null) {
-				tableHasGroupHeader = true;
-				break;
-			}
-		}
-		TableRowBuilder tr = startRow();
-		// Таблица имеет дополнительный заголовок
-		if (tableHasGroupHeader) {
-			for(int i=0; i<getTable().getColumnCount(); i++) {
-				if (((DataRowColumn)getTable().getColumn(i)).getRowGroup() == null) {
-					oneCell(tr, getTable().getHeader(i).getKey().toString());
-				} else {
-					int j=i+1;
-					for (; j<getTable().getColumnCount(); j++) {
-						if (!((DataRowColumn)getTable().getColumn(i)).getRowGroup().equals(
-								((DataRowColumn)getTable().getColumn(j)).getRowGroup())) {
-							break;
-						}
-					}
-					groupColumns(tr, j-i, ((DataRowColumn)getTable().getColumn(i)).getRowGroup());
-					i+=(j-i)-1;
-				}
-			}
-			tr = startRow();
-		}
-		for (int i=0; i<getTable().getColumnCount(); i++) {
-			buildHeader(tr, getTable().getHeader(i), getTable().getColumn(i), tableHasGroupHeader);
-		}
-		tr.endTR();
-
-		if (numberedColumns) {
-			makeNumbered(tr);
-		}
-
+		style = getTable().getResources().style();
+		buildOurHeader(newHeaders);
 		return true;
     }
 
-	private void buildHeader(TableRowBuilder out, Header<?> header, Column<DataRow<Cell>, ?> column, boolean haveParentHeader) {
-		if (((DataRowColumn)column).getRowGroup() != null || !haveParentHeader) {
-			Style style = getTable().getResources().style();
-			StringBuilder classesBuilder = new StringBuilder(style.header());
-	
-			TableCellBuilder th = out.startTH().className(classesBuilder.toString());
-	
-			Context context = new Context(0, 2, header.getKey());
-			renderHeader(th, context, header);
-	
-			th.endTH();
-		}
-	}
-    
-	private void oneCell(TableRowBuilder out, String name) {
+	private void buildHeader(TableRowBuilder out, Header<?> header, int colSpan, int rowSpan) {
 		Style style = getTable().getResources().style();
-		TableCellBuilder th = out.startTH().rowSpan(2).className(style.header()).text(name);
+		StringBuilder classesBuilder = new StringBuilder(style.header());
+
+		TableCellBuilder th = out.startTH().colSpan(colSpan).rowSpan(rowSpan).className(classesBuilder.toString());
+
+		Context context = new Context(0, 2, header.getKey());
+		renderHeader(th, context, header);
+
 		th.endTH();
 	}
 
-	private void groupColumns(TableRowBuilder out, int len, String groupName) {
-		Style style = getTable().getResources().style();
-		TableCellBuilder th = out.startTH().colSpan(len).className(style.header());
-		th.text(groupName).endTH();
-	}
-
-	/**
-	 * Метод добавляет дополнительную строку к заголовку содержащую номера столбцов
-	 */
-	private void makeNumbered(TableRowBuilder out) {
-		Style style = getTable().getResources().style();
-		int columnCount = getTable().getColumnCount();
-		out.startTR();
-
-		columnCount -= offset;
-		for (int i=0; i<offset; i++) {
-			out.startTH().className(style.header()).text("").endTH();
-		}
-
-		int columnNumber = 1;
-		for (int col = offset; col < columnCount; col++) {
-			if (getTable().getColumnWidth(getTable().getColumn(col)).equals("0em")) {
-				out.startTH().className(style.header()).endTH();
-			} else {
-				out.startTH().className(style.header()).text(String.valueOf(columnNumber++)).endTH();
+	protected void buildOurHeader(List<DataRow<HeaderCell>> newHeaders) {
+		for (DataRow<HeaderCell> header : newHeaders) {
+			TableRowBuilder tr = startRow();
+			for (int i=0; i<offset; i++) {
+				tr.startTH().className(style.header()).text("").endTH();
+			}
+			for (int i=0; i<getTable().getColumnCount(); i++) {
+				Header newHeader;
+				String colAlias = ((DataRowColumn)getTable().getColumn(i)).getAlias();
+				if (!newHeaders.isEmpty() && (colAlias != null) && (header.getCell(colAlias).getValue() != null) && !header.getCell(colAlias).hasValueOwner()) {
+					newHeader = new TextHeader(header.getCell(colAlias).getValue().toString());
+					buildHeader(tr, newHeader, header.getCell(colAlias).getColSpan(), header.getCell(colAlias).getRowSpan());
+				}
 
 			}
+			tr.endTR();
 		}
-		out.endTR();
 	}
 }

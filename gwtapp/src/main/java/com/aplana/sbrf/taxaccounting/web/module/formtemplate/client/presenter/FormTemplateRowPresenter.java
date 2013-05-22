@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
@@ -47,7 +49,7 @@ public class FormTemplateRowPresenter
 
 		void setStylesData(List<FormStyle> styles);
 
-		void addCustomHeader(boolean addNumberedHeader);
+		void addCustomHeader(boolean addNumberedHeader, List<DataRow<HeaderCell>> newHeaders);
 	}
 
 	private FormTemplate formTemplate;
@@ -89,10 +91,11 @@ public class FormTemplateRowPresenter
 	}
 
 	private void setViewData() {
+		FormDataUtils.setValueOners(formTemplate.getHeaders());
 		getView().setStylesData(formTemplate.getStyles());
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setRowsData(formTemplate.getRows());
-		getView().addCustomHeader(formTemplate.isNumberedColumns());
+		getView().addCustomHeader(formTemplate.isNumberedColumns(), formTemplate.getHeaders());
 	}
 
 }

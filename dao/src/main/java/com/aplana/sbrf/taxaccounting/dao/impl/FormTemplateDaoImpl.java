@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -73,6 +74,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 				String stHeaderData = rs.getString("data_headers");
 				if (stHeaderData != null) {
 					formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(stHeaderData, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
+					FormDataUtils.setValueOners(formTemplate.getHeaders());
 				}
 			}
 			return formTemplate;
@@ -129,6 +131,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		String dataHeadersXml = null;
 		List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
 		if (headers != null && !headers.isEmpty()) {
+			FormDataUtils.cleanValueOners(headers);
 			dataHeadersXml = xmlSerializationUtils.serialize(headers);
 		}
 		

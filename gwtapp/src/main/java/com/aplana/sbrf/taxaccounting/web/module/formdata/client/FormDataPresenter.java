@@ -133,7 +133,7 @@ public class FormDataPresenter extends
 									getView().setRowsData(
 											formData.getDataRows());
 									getView().addCustomHeader(
-											result.isNumberedHeader());
+											formData.getHeaders());
 									getView().addCustomTableStyles(
 											result.getAllStyles());
 
