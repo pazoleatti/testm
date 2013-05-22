@@ -16,6 +16,8 @@
 
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -29,9 +31,6 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.List;
 
 /**
  * The base class of {@link ContactPagePresenter}. The goal of this class is
@@ -73,7 +72,7 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	public FormDataListPresenterBase(EventBus eventBus, MyView view,
 			Proxy_ proxy, PlaceManager placeManager, DispatchAsync dispatcher,
 			FilterPresenter filterPresenter, DialogPresenter dialogPresenter) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.filterPresenter = filterPresenter;
@@ -98,12 +97,6 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	protected void onHide() {
 		super.onHide();
 		clearSlot(TYPE_filterPresenter);
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 }

@@ -55,7 +55,7 @@ public class FormTemplateRowPresenter
 	@Inject
 	public FormTemplateRowPresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
 	}
 
@@ -70,7 +70,10 @@ public class FormTemplateRowPresenter
 	protected void revealInParent() {
 		RevealContentEvent.fire(this,
 				FormTemplateMainPresenter.TYPE_SetTabContent, this);
-
+		// TODO: [sgoryachkin] 
+		// 1) В перегрузке этого метода нет необходимости
+		// 2) В этом методе не должно быть логики (для этого есть события - onReveal)
+		
 		if (formTemplate != null) {
 			FormTemplateFlushEvent.fire(this);
 			setViewData();

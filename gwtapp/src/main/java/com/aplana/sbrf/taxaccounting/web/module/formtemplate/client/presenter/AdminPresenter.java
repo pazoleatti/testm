@@ -52,7 +52,7 @@ public class AdminPresenter extends
 
 	@Inject
 	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 	}
 
@@ -85,12 +85,6 @@ public class AdminPresenter extends
 						}).addCallback(
 						new ManualRevealCallback<GetFormTemplateListResult>(
 								AdminPresenter.this)));
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 }

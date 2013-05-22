@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -26,10 +29,6 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.List;
-import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
@@ -123,7 +122,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
 								 PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.dispatcher = dispatcher;
@@ -146,12 +145,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	@Override
 	public boolean useManualReveal() {
 		return true;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 	@Override

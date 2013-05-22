@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import java.util.Date;
+
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -35,9 +36,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-
-import java.util.Date;
 
 public class DeclarationDataPresenter
 		extends
@@ -87,7 +85,7 @@ public class DeclarationDataPresenter
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, DispatchAsync dispatcher,
 			PlaceManager placeManager, DialogPresenter dialogPresenter) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dialogPresenter = dialogPresenter;
@@ -151,12 +149,6 @@ public class DeclarationDataPresenter
 	@Override
 	public boolean useManualReveal() {
 		return true;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 	@Override

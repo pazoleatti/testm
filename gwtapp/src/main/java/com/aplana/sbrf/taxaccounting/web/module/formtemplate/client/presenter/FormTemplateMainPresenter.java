@@ -72,7 +72,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Inject
 	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
-		super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealType.RootLayout);
+		super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
@@ -80,6 +80,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Override
 	protected void revealInParent() {
+		// TODO: [sgoryachkin] 
+		// 1) В перегрузке этого метода нет необходимости
+		// 2) В этом методе не должно быть такого количество логики  (для этого есть события - onReveal)
+		// 3) Нудно нормально реализовать manualReveal
 		setFormTemplate();
 	}
 

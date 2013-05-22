@@ -36,7 +36,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Inject
 	public DeclarationTemplatePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
@@ -56,11 +56,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public boolean useManualReveal() {
 		return true;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(), this);
 	}
 
 	@Override

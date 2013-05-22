@@ -18,7 +18,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.TabInfo;
 import com.gwtplatform.mvp.client.annotations.Title;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 public class FormTemplateColumnPresenter
@@ -49,7 +48,7 @@ public class FormTemplateColumnPresenter
 	@Inject
 	public FormTemplateColumnPresenter(final EventBus eventBus,
 			final MyView view, final MyProxy proxy) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
 	}
 	
@@ -73,12 +72,6 @@ public class FormTemplateColumnPresenter
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().flush();
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this,
-				FormTemplateMainPresenter.TYPE_SetTabContent, this);
 	}
 
 	private boolean aliasExists(Column column) {

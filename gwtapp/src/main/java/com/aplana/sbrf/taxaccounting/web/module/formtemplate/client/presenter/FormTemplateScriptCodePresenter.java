@@ -45,7 +45,7 @@ public class FormTemplateScriptCodePresenter
 	@Inject
 	public FormTemplateScriptCodePresenter(final EventBus eventBus,
 			final MyView view, final MyProxy proxy) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
 	}
 	
@@ -78,6 +78,11 @@ public class FormTemplateScriptCodePresenter
 	protected void revealInParent() {
 		RevealContentEvent.fire(this,
 				FormTemplateMainPresenter.TYPE_SetTabContent, this);
+		
+		// TODO: [sgoryachkin] 
+		// 1) В перегрузке этого метода нет необходимости
+		// 2) В этом методе не должно быть логики  (для этого есть события - onReveal)
+
 		// Workaround
 		// Почему то тупит CodeMirror когда инициализация представления происходит до reveal
 		getView().setScriptCode(getView().getScriptCode());

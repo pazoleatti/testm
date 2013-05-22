@@ -38,7 +38,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	                             PlaceManager placeManager, DispatchAsync dispatcher,
 	                             DeclarationFilterPresenter filterPresenter,
 								 DeclarationCreationPresenter creationPresenter) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.filterPresenter = filterPresenter;
@@ -62,9 +62,4 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		clearSlot(TYPE_filterPresenter);
 	}
 
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
-	}
 }

@@ -10,7 +10,6 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 public class HomePagePresenter extends
 		Presenter<HomePagePresenter.MyView, HomePagePresenter.MyProxy> {
@@ -35,7 +34,7 @@ public class HomePagePresenter extends
 	@Inject
 	public HomePagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, PlaceManager placeManager) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 	}
 
@@ -52,9 +51,4 @@ public class HomePagePresenter extends
 		// clearSlot(TYPE_testPresenter);
 	}
 
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
-	}
 }

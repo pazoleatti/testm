@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
@@ -11,11 +13,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
+import com.gwtplatform.mvp.client.annotations.TabInfo;
+import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
-
-import java.util.List;
 
 public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePresenter.MyView, FormTemplateStylePresenter.MyProxy>
 		implements FormTemplateStyleUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
@@ -40,7 +43,7 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 
 	@Inject
 	public FormTemplateStylePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
 	}
 	
@@ -63,8 +66,4 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 		getView().onFlush();
 	}
 
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
-	}
 }

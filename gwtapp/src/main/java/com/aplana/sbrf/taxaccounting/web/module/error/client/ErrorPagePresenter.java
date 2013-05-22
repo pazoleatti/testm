@@ -11,7 +11,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 public class ErrorPagePresenter extends
 		Presenter<ErrorPagePresenter.MyView, ErrorPagePresenter.MyProxy>
@@ -33,14 +32,8 @@ public class ErrorPagePresenter extends
 	@Inject
 	public ErrorPagePresenter(final EventBus eventBus, final MyView view,
 			final MyProxy proxy, PlaceManager placeManager) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
-				this);
 	}
 
 	@Override

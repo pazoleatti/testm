@@ -79,18 +79,13 @@ public class MainPagePresenter extends
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
 			MessageDialogPresenter messageDialogPresenter, LogAreaPresenter notificationPresenter,
 			ProjectVersionPresenter projectVersionPresenter) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, RevealType.RootLayout);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
 		this.placeManager = placeManager;
 		this.messageDialogPresenter = messageDialogPresenter;
 		this.logAreaPresenter = notificationPresenter;
 		this.projectVersionPresenter = projectVersionPresenter;
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealRootContentEvent.fire(this, this);
 	}
 
 	@Override

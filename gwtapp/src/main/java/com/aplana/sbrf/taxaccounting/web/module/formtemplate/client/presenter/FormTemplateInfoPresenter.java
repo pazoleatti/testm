@@ -34,7 +34,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 
 	@Inject
 	public FormTemplateInfoPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
-		super(eventBus, view, proxy);
+		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
 	}
 	
@@ -55,11 +55,6 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().onFlush();
-	}
-
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, FormTemplateMainPresenter.TYPE_SetTabContent, this);
 	}
 
 	@Override
