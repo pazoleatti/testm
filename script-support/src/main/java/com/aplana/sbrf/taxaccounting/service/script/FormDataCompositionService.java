@@ -18,7 +18,8 @@ import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
 		AFTER_MOVE_APPROVED_TO_ACCEPTED,
 		AFTER_MOVE_ACCEPTED_TO_APPROVED,
 		AFTER_MOVE_CREATED_TO_ACCEPTED,
-		AFTER_MOVE_ACCEPTED_TO_CREATED
+		AFTER_MOVE_ACCEPTED_TO_CREATED,
+		AFTER_MOVE_PREPARED_TO_ACCEPTED
 })
 public interface FormDataCompositionService {
 	/**

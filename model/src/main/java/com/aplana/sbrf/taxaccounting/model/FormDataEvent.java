@@ -19,6 +19,7 @@ public enum FormDataEvent implements Serializable {
 	COMPOSE(4, "Обобщить"),
 	CHECK(5, "Проверить"),
 	SAVE(6, "Сохранить"),
+	IMPORT(7, "Импорт данных"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить"),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
@@ -35,6 +36,7 @@ public enum FormDataEvent implements Serializable {
 	AFTER_MOVE_ACCEPTED_TO_APPROVED(204, "После вернуть из \"Принята\" в \"Утверждена\""),
 	AFTER_MOVE_CREATED_TO_ACCEPTED(205, "После принять из \"Создана\""),
 	AFTER_MOVE_ACCEPTED_TO_CREATED(206, "После вернуть из \"Принята\" в \"Создана\""),
+	AFTER_MOVE_PREPARED_TO_ACCEPTED(207, "После принять из \"Подготовлена\""),
 
 	ADD_ROW(301, "Добавить строку"),
 	DELETE_ROW(303, "Удалить строку"),
