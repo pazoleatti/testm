@@ -4,6 +4,9 @@
  *
  * @version 59
  *
+ * TODO:
+ *      - консолидация
+ *
  * @author rtimerbaev
  */
 
@@ -41,6 +44,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

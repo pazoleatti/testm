@@ -13,6 +13,7 @@
  *		- по какому полю группировать?
  *	    - заполнение графы 15 не доописано
  *	    - нет проверок заполнения полей перед логической проверкой
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -29,6 +30,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -72,6 +76,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

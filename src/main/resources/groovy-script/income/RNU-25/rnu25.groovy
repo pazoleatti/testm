@@ -8,6 +8,7 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  * 		- про нумерацию пока не уточнили, пропустить
  *		- проверки не доделаны, потому что возможно они поменяются
+ *      - консолидация	
  *
  * @author rtimerbaev
  */
@@ -24,6 +25,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -56,6 +60,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

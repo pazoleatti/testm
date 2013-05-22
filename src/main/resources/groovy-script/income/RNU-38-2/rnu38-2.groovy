@@ -6,6 +6,7 @@
  *
  * TODO:
  *      - сколько строк в рну?
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -21,6 +22,9 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
+        break
 }
 
 // графа 1  - amount
@@ -35,6 +39,13 @@ def addNewRow() {
     if (formData.dataRows.size == 0) {
         formData.dataRows.add(formData.createDataRow())
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

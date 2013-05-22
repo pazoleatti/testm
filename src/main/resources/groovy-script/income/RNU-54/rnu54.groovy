@@ -8,6 +8,7 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- как получить отчетную дату?
  *		- откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -26,6 +27,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -57,6 +61,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

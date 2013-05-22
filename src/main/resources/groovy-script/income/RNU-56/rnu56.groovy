@@ -9,6 +9,7 @@
  *		- уточнить про дату окончания отчётного периода (или отчетная дата?!), откуда ее брать?
  *		- уточнить чтз про графу 17, в нф всего графов 15
  *		- уточнить про вычисление 14ой графы, последний блок, по предыдущим условиям туда никогда не попадет
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -25,6 +26,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -57,6 +61,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

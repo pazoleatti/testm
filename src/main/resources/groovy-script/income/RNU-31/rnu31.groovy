@@ -8,6 +8,7 @@
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
  *		- для проверки 1 нет условия (не ясно как получать предыдущий отчет)
  *		- как определить первый ли это отчет?
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -22,6 +23,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         // addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -52,6 +56,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

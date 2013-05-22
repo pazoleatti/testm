@@ -9,6 +9,7 @@
  *		- уточнить отчётною дату, откуда ее брать?
  *		- уточнить про логические проверки 5, 6, проверять на незаполнение если какие-то суммы не введены
  *		- уточнить про логическую проверку 8 (проверять с даты графы 3 до начала отчетного периода?)
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -27,6 +28,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -55,6 +59,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**

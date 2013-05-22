@@ -6,6 +6,7 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
+ *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -22,6 +23,30 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW :
         addNewRow()
+        break
+    // подготовить
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        checkOnPrepareOrAcceptance('Подготовка')
+        break
+    // принять
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        checkOnPrepareOrAcceptance('Принятие')
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
+        break
+    // вернуть из принята в подготовлена
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED : // TODO (Ramil Timerbaev) поправить на правильное событие
+        acceptance()
+        break
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
         break
 }
 
@@ -42,6 +67,13 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+}
+
+/**
+ * Удалить строку.
+ */
+def deleteRow() {
+    formData.dataRows.remove(currentDataRow)
 }
 
 /**
@@ -136,7 +168,7 @@ void calc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def useLog) {
+def logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
         def i = 1
 
@@ -154,13 +186,13 @@ void logicalCheck(def useLog) {
             }
             // 1. Обязательность заполнения полей (графа 1..5)
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return
+                return false
             }
 
             // 2. Проверка на уникальность поля «№ пп» (графа 1)
             if (i != row.rowNumber) {
                 logger.error('Нарушена уникальность номера по порядку!')
-                return
+                return false
             }
             i += 1
 
@@ -181,22 +213,24 @@ void logicalCheck(def useLog) {
                 }
             }
             if (hindError) {
-                return
+                return false
             }
 
             // 4. Проверка итогового значения по всем строкам для графы 5
             def totalRow = formData.getDataRow('total')
             if (totalRow.sum != totalSum) {
                 logger.error('Неверное итоговое значение графы «Сумма расходов за отчётный период (руб.)»!')
+                return false
             }
         }
     }
+    return true
 }
 
 /**
  * Проверки соответствия НСИ.
  */
-void checkNSI() {
+def checkNSI() {
     if (!formData.dataRows.isEmpty()) {
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
@@ -206,20 +240,98 @@ void checkNSI() {
             // Проверка балансового счёта для кода классификации расхода (графа 2)
             if (false) {
                 logger.warn('Балансовый счёт в справочнике отсутствует!')
-                break
             }
 
             // Проверка кода классификации расхода для данного РНУ (графа 2)
             if (false) {
                 logger.error('Операция в РНУ не учитывается!')
-                break
+                return false
             }
 
             // Проверка балансового счёта для кода классификации расхода (графа 3)
             if (false) {
                 logger.warn('Балансовый счёт в справочнике отсутствует!')
-                break
+                return false
             }
+        }
+    }
+    return true
+}
+
+/**
+ * Принять.
+ */
+void acceptance() {
+    if (!logicalCheck(true) || !checkNSI()) {
+        return
+    }
+    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each() {
+        formDataCompositionService.compose(it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    if (!isBank()) {
+        return
+    }
+    boolean isFirst = true;
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (child != null && child.state == WorkflowState.ACCEPTED) {
+                if (isFirst) {
+                    // Удалить все строки и собрать из источников их строки
+                    formData.dataRows.clear()
+                    isFirst = false;
+                    child.getDataRows().each { row->
+                        def newRow = formData.createDataRow()
+                        formData.dataRows.add(newRow)
+                        newRow.putAll(row)
+                        newRow.setAlias(row.getAlias())
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+def checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.PRIMARY).each { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
+ * Проверки при переходе "Отменить принятие".
+ */
+void checkOnCancelAcceptance() {
+    if (!isTerBank()) {
+        return
+    }
+
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), FormDataKind.PRIMARY);
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
         }
     }
 }
@@ -296,4 +408,17 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Проверка на банк.
+ */
+def isBank() {
+    boolean isBank = true
+    departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.PRIMARY).each {
+        if (it.departmentId != formData.departmentId) {
+            isBank = false
+        }
+    }
+    return isBank
 }
