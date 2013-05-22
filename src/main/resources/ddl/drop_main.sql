@@ -1,7 +1,3 @@
-drop view v_department;   
-drop view v_user;
-drop view v_user_role;
-
 drop table string_value;
 drop table numeric_value;
 drop table date_value;
