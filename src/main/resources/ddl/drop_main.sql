@@ -16,7 +16,9 @@ drop table data_row;
 drop sequence seq_data_row;
 
 drop table log_business;
+drop sequence seq_log_business;
 drop table LOG_SYSTEM;
+drop sequence SEQ_LOG_SYSTEM;
 
 drop table form_data_signer;
 drop sequence seq_form_data_signer;
