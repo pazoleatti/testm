@@ -3,11 +3,9 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
-    <g:DialogBox>
-        <g:VerticalPanel>
-            <g:Label text="Информация по налоговой форме/декларации" />
-            <style:GenericCellTable ui:field="logsTable" height="100%" width="100%" />
-        </g:VerticalPanel>
+    <g:DialogBox glassEnabled="true" animationEnabled="true" autoHideEnabled="true"
+                 text="Информация по налоговой форме/декларации">
+        <style:GenericCellTable ui:field="logsTable" height="100%" width="100%" />
     </g:DialogBox>
 
 </ui:UiBinder>

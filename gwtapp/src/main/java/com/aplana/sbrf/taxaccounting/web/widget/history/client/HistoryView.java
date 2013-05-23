@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -22,6 +23,7 @@ public class HistoryView extends PopupViewImpl implements
 
 	private final PopupPanel widget;
 	private Map<Integer, String> userNames;
+	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
 	@UiField
 	CellTable<LogBusiness> logsTable;
@@ -30,8 +32,6 @@ public class HistoryView extends PopupViewImpl implements
 	public HistoryView(EventBus eventBus, Binder uiBinder) {
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
-		widget.setAutoHideEnabled(true);
-		widget.setAnimationEnabled(true);
 		initTable();
 	}
 
@@ -58,7 +58,7 @@ public class HistoryView extends PopupViewImpl implements
 		TextColumn<LogBusiness> dateColumn = new TextColumn<LogBusiness>() {
 			@Override
 			public String getValue(LogBusiness object) {
-				return object.getLogDate().toString();
+				return format.format(object.getLogDate());
 			}
 		};
 
@@ -89,6 +89,7 @@ public class HistoryView extends PopupViewImpl implements
 		logsTable.addColumn(rolesColumn, "Роли пользователя");
 		logsTable.addColumn(noteColumn, "Текст события");
 
+		logsTable.setWidth("1000px", false);
 	}
 
 }
