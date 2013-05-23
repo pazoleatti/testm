@@ -137,8 +137,6 @@ public class FormDataServiceImpl implements FormDataService {
 					logger.getEntries());
 		}
 
-		addLogBusiness(result.getId(), user, FormDataEvent.CREATE, null);
-
 		return result;
 	}
 
@@ -275,6 +273,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
+			Long oldId = formData.getId();
 			TAUser user = userDao.getUser(userId);
 			formDataScriptingService.executeScript(user, formData,
 					FormDataEvent.SAVE, logger, null);
@@ -285,7 +284,11 @@ public class FormDataServiceImpl implements FormDataService {
 				lock(id, userId);
 			}
 
-			addLogBusiness(formData.getId(), user, FormDataEvent.SAVE, null);
+			if (oldId != null) {
+				addLogBusiness(formData.getId(), user, FormDataEvent.SAVE, null);
+			} else {
+				addLogBusiness(formData.getId(), user, FormDataEvent.CREATE, null);
+			}
 
 			return id;
 		} else {
