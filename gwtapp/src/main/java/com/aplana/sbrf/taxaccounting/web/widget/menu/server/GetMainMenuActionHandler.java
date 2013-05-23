@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,8 +69,14 @@ public class GetMainMenuActionHandler extends
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
 			settingMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
+
 			menuItems.add(settingMenuItem);
 		}
+        if (securityService.currentUser().hasRole(TARole.ROLE_ADMIN)) {
+            MenuItem settingMenuItem = new MenuItem("Настройки", "");
+            settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
+            menuItems.add(settingMenuItem);
+        }
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);

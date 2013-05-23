@@ -18,6 +18,9 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Sheet sheet;
 
+    /*
+     * Нужно создать в классе наследнике блок static, для определения в нем имени файла
+     */
     protected static String fileName;
 
     protected static final int cellWidth = 30;

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,5 +107,19 @@ public class TAUserServiceImpl implements TAUserService {
 			taUserList.add(userDao.getUser(userId));
 		return taUserList;
 	}
+
+    @Override
+    public List<TAUserFull> lisAllFullUsers() {
+        List<TAUserFull> taUserFullList = new ArrayList<TAUserFull>();
+        for(Integer userId : userDao.getUserIds()){
+            TAUserFull userFull = new TAUserFull();
+            TAUser user = userDao.getUser(userId);
+            userFull.setUser(user);
+            userFull.setDepartment(departmentDao.getDepartment(user.getDepartmentId()));
+            taUserFullList.add(userFull);
+        }
+
+        return taUserFullList;
+    }
 
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+
+    <ui:style>
+        .title {
+            font-size: 16px;
+            margin: 10px;
+        }
+    </ui:style>
+    <g:ScrollPanel>
+        <g:FlowPanel>
+            <g:HorizontalPanel height="35px">
+                <g:Label styleName="{style.title}">Список шаблонов форм</g:Label>
+                <g:cell verticalAlignment="middle">
+                    <style:ButtonLink ui:field="printButton" text="Печать" img="resources/img/printer-16.png" title="Отобразить печатное представление документа"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+
+            <g:VerticalPanel width="100%">
+                <style:GenericCellTable ui:field="taUserFullCellTable" width="100%" />
+            </g:VerticalPanel>
+        </g:FlowPanel>
+    </g:ScrollPanel>
+</ui:UiBinder>

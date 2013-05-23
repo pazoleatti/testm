@@ -7,16 +7,13 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataReport;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -70,15 +67,26 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 	}
 
 	@Override
-	public String generateExcel(List<LogEntry> listLogEntries) {
+	public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
 		
 		try {
 			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
 			return builder.createReport() ;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
-			throw new ServiceException("Ошибка при создании печатной формы." + this.getClass());
+			throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
 		}
 	}
+
+    @Override
+    public String generateExcelUsers(List<TAUserFull> taUserFullList) {
+        try {
+            TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserFullList);
+            return taBuilder.createReport();
+        }catch (IOException e){
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.print;
+package com.aplana.sbrf.taxaccounting.service.print.logentry;
 
 import java.io.IOException;
 import java.util.ArrayList;

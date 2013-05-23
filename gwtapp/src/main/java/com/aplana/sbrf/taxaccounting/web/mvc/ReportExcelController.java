@@ -16,6 +16,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +42,10 @@ public class ReportExcelController {
 	FormDataPrintingService formDataPrintingService;
 	
 	@Autowired
-	private SecurityService securityService;
+	SecurityService securityService;
+
+    @Autowired
+    TAUserService taUserService;
 	
 	private static String REQUEST_JATTR = "jsonobject";
 	private static String LOG_ENTRIES = "listLogEntries";
@@ -56,7 +60,7 @@ public class ReportExcelController {
 		createResponse(req, resp, filePath);
 	}
 	
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value="/processLogDownload",method = RequestMethod.POST)
 	public void processLogDownload(HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException{
 
 		BufferedReader inReader = new BufferedReader(new InputStreamReader(req.getInputStream(),"UTF-8"));
@@ -76,10 +80,16 @@ public class ReportExcelController {
 							?LogLevel.ERROR:LogLevel.WARNING.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
 									?LogLevel.WARNING:LogLevel.INFO,jArr.getJSONObject(i).getString(JSON_ENTRY_2)));
 		}
-		String filePath = formDataPrintingService.generateExcel(listLogEntries);
+		String filePath = formDataPrintingService.generateExcelLogEntry(listLogEntries);
 		createResponse(req, resp, filePath);
 		
 	}
+
+    @RequestMapping(value = "/processSecUserDownload",method = RequestMethod.GET)
+    public void processSecUserDownload(HttpServletRequest req, HttpServletResponse response) throws IOException {
+        String filePath = formDataPrintingService.generateExcelUsers(taUserService.lisAllFullUsers());
+        createResponse(req, response, filePath);
+    }
 	
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
 		File file = new File(filePath);

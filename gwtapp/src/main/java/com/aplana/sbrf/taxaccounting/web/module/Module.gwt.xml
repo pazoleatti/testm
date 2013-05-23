@@ -15,6 +15,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formdata.FormData" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.userlist.UserList"/>
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">
         <when-type-is class="com.google.gwt.user.cellview.client.CellBasedWidgetImpl"/>
