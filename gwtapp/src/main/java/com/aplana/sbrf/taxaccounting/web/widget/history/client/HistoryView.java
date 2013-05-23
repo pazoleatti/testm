@@ -2,11 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -26,7 +29,10 @@ public class HistoryView extends PopupViewImpl implements
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
 	@UiField
-	CellTable<LogBusiness> logsTable;
+	DataGrid<LogBusiness> logsTable;
+
+	@UiField
+	Button hideButton;
 
 	@Inject
 	public HistoryView(EventBus eventBus, Binder uiBinder) {
@@ -88,8 +94,11 @@ public class HistoryView extends PopupViewImpl implements
 		logsTable.addColumn(nameColumn, "Пользователь");
 		logsTable.addColumn(rolesColumn, "Роли пользователя");
 		logsTable.addColumn(noteColumn, "Текст события");
+	}
 
-		logsTable.setWidth("1000px", false);
+	@UiHandler("hideButton")
+	public void onHideButton(ClickEvent event) {
+		hide();
 	}
 
 }

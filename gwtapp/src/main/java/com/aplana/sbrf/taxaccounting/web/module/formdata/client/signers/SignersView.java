@@ -122,7 +122,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		phone.setEnabled(!readOnlyMode);
 		columnActionsBar.setVisible(!readOnlyMode);
 		if (readOnlyMode) {
-			cancelButton.setText("Ок");
+			cancelButton.setText("Закрыть");
 		}
 		else {
 			cancelButton.setText("Отмена");
