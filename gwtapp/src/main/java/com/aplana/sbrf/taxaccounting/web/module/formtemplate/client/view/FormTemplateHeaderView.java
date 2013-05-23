@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -94,6 +95,13 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 				}
 			}
 		}, MouseDownEvent.getType());
+
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+				checkEnableUpDownButton();
+			}
+		});
 
 		formDataTable.addDomHandler(new MouseUpHandler() {
 			@Override
@@ -285,6 +293,45 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 			cell.setColSpan(1);
 			refresh();
 			disuniteCellsButton.setVisible(false);
+		}
+	}
+
+	@UiHandler("upRowButton")
+	public void onUpRowButton(ClickEvent event){
+		if(getUiHandlers()!=null){
+			DataRow row = selectionModel.getLastSelectedObject();
+			int index = rows.indexOf(row);
+			rows.set(index, rows.get(index - 1));
+			rows.set(index - 1, row);
+			setHeaderData(rows);
+		}
+		checkEnableUpDownButton();
+	}
+
+	@UiHandler("downRowButton")
+	public void onDownRowButton(ClickEvent event){
+		if(getUiHandlers()!=null){
+			DataRow row = selectionModel.getLastSelectedObject();
+			int index = rows.indexOf(row);
+			rows.set(index, rows.get(index + 1));
+			rows.set(index + 1, row);
+			setHeaderData(rows);
+		}
+		checkEnableUpDownButton();
+	}
+
+	private void checkEnableUpDownButton() {
+		upRowButton.setEnabled(false);
+		downRowButton.setEnabled(false);
+
+		DataRow row = selectionModel.getLastSelectedObject();
+		int index = rows.indexOf(row);
+
+		if (index != rows.size() - 1) {
+			downRowButton.setEnabled(true);
+		}
+		if (index != 0) {
+			upRowButton.setEnabled(true);
 		}
 	}
 
