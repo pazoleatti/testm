@@ -33,9 +33,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
     }
 
 	private static final Log logger = LogFactory.getLog(FormDataXlsxReportBuilder.class);
-
-	private static final int cellWidthMin = 20;
-	private static final int cellWidthMax = 50;
 	
 	private int rowNumber = 9;
 	private int cellNumber = 0;

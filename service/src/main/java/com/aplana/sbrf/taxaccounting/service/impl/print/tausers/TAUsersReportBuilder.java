@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilde
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -82,7 +83,18 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
 
     @Override
     protected void fillHeader() {
-        //
+        CellStyle cs = workBook.createCellStyle();
+        Font font = workBook.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        cs.setFont(font);
+
+        Row row = sheet.createRow(rowNumber);
+        Cell cell = row.createCell(cellNumber++);
+        cell.setCellValue("Пользователи АС Учет налогов");
+        cell.setCellStyle(cs);
+
+        cellNumber = 0;
+        rowNumber = sheet.getLastRowNum() + 2;
     }
 
     @Override

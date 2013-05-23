@@ -18,6 +18,9 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Sheet sheet;
 
+    protected final int cellWidthMin = 20;
+    protected static final int cellWidthMax = 50;
+
     /*
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
