@@ -53,7 +53,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from log_business where declaration_data_id = ? order by log_date",
+					"select * from log_business where declaration_data_id = ? order by log_date desc",
 					new Object[]{declarationId},
 					new LogBusinessRowMapper()
 			);
@@ -66,7 +66,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	public List<LogBusiness> getFormLogsBusiness(long formId) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from log_business where form_data_id = ? order by log_date",
+					"select * from log_business where form_data_id = ? order by log_date desc",
 					new Object[]{formId},
 					new LogBusinessRowMapper()
 			);

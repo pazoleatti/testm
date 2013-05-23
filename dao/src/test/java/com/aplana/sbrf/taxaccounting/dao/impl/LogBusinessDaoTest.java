@@ -46,7 +46,7 @@ public class LogBusinessDaoTest {
 		d.setNote("the best note");
 		logBusinessDao.add(d);
 
-		d = logBusinessDao.getDeclarationLogsBusiness(1).get(1);
+		d = logBusinessDao.getDeclarationLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(3), d.getId());
 		assertEquals(3, d.getEventId());
 		assertEquals(1, d.getUserId());
@@ -80,7 +80,7 @@ public class LogBusinessDaoTest {
 		d.setNote("the best note");
 		logBusinessDao.add(d);
 
-		d = logBusinessDao.getFormLogsBusiness(1).get(1);
+		d = logBusinessDao.getFormLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(3), d.getId());
 		assertEquals(3, d.getEventId());
 		assertEquals(1, d.getUserId());
