@@ -45,7 +45,7 @@ public class GoMoveHandler extends
 			Integer userId = user.getId();
 			Logger logger = new Logger();
 			formDataService.doMove(action.getFormDataId(), userId,
-					action.getMove(), logger);
+					action.getMove(), action.getReasonToWorkflowMove(), logger);
 			GoMoveResult result = new GoMoveResult();
 			result.setLogEntries(logger.getEntries());
 			return result;

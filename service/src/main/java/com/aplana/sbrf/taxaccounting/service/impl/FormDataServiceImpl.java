@@ -365,8 +365,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            переход
 	 */
 	@Override
-	public void doMove(long formDataId, int userId, WorkflowMove workflowMove,
-					   Logger logger) {
+	public void doMove(long formDataId, int userId, WorkflowMove workflowMove, String note, Logger logger) {
 		checkLockedByAnotherUser(formDataId, userId);
 		List<WorkflowMove> availableMoves = formDataAccessService
 				.getAvailableMoves(userId, formDataId);
@@ -403,7 +402,7 @@ public class FormDataServiceImpl implements FormDataService {
 				}
 			}
 
-			addLogBusiness(formData.getId(), user, workflowMove.getEvent(), null);
+			addLogBusiness(formData.getId(), user, workflowMove.getEvent(), note);
 
 		} else {
 			throw new ServiceLoggerException(

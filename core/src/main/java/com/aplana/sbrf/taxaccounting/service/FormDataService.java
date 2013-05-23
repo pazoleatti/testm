@@ -78,9 +78,10 @@ public interface FormDataService {
 	 * @param formDataId идентификатор объекта {@link FormData}
 	 * @param userId идентификатор пользователя, от имени которого выплняется действие
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
+	 * @param note Причина возврата (перехода) по ЖЦ в Системе
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	void doMove(long formDataId, int userId, WorkflowMove move, Logger logger);
+	void doMove(long formDataId, int userId, WorkflowMove move, String note, Logger logger);
 
 	/**
 	 * Создаёт налоговую форму без проверок прав доступа
