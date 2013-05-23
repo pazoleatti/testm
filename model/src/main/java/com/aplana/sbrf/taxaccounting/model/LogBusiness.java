@@ -10,20 +10,20 @@ import java.util.Date;
 public class LogBusiness implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private long id;
+	private Long id;
 	private Date logDate;
 	private int eventId;
 	private int userId;
 	private String roles;
-	private Integer declarationId;
-	private Integer formId;
+	private Long declarationId;
+	private Long formId;
 	private String note;
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -59,19 +59,19 @@ public class LogBusiness implements Serializable {
 		this.roles = roles;
 	}
 
-	public Integer getDeclarationId() {
+	public Long getDeclarationId() {
 		return declarationId;
 	}
 
-	public void setDeclarationId(Integer declarationId) {
+	public void setDeclarationId(Long declarationId) {
 		this.declarationId = declarationId;
 	}
 
-	public Integer getFormId() {
+	public Long getFormId() {
 		return formId;
 	}
 
-	public void setFormId(Integer formId) {
+	public void setFormId(Long formId) {
 		this.formId = formId;
 	}
 

@@ -1,10 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
     <g:DialogBox>
         <g:VerticalPanel>
-            <g:Label text="Я Попап и НастьЯ" />
+            <g:Label text="Информация по налоговой форме/декларации" />
+            <style:GenericCellTable ui:field="logsTable" height="100%" width="100%" />
         </g:VerticalPanel>
     </g:DialogBox>
 

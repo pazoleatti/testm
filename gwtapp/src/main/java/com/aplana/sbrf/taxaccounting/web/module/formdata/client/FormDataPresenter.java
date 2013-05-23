@@ -181,7 +181,8 @@ public class FormDataPresenter extends
 	}
 
 	@Override
-	public void onHistoryClicked() {
+	public void onInfoClicked() {
+		historyPresenter.prepareFormHistory(formData.getId());
 		addToPopupSlot(historyPresenter);
 	}
 

@@ -17,12 +17,12 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	private LogBusinessDao logBusinessDao;
 
 	@Override
-	public List<LogBusiness> getFormLogsBusiness(int formId) {
+	public List<LogBusiness> getFormLogsBusiness(long formId) {
 		return logBusinessDao.getFormLogsBusiness(formId);
 	}
 
 	@Override
-	public List<LogBusiness> getDeclarationLogsBusiness(int declarationId) {
+	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
 		return logBusinessDao.getDeclarationLogsBusiness(declarationId);
 	}
 

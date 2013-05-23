@@ -14,14 +14,14 @@ public interface LogBusinessDao {
 	 * @param declarationId идентификатор пользователя
 	 * @return объект, представляющий историю событий для декларации
 	 */
-	List<LogBusiness> getDeclarationLogsBusiness(int declarationId);
+	List<LogBusiness> getDeclarationLogsBusiness(long declarationId);
 
 	/**
 	 * Получить информацию об историей событий налоговой формы
 	 * @param formId идентификатор пользователя
 	 * @return объект, представляющий историю событий для декларации
 	 */
-	List<LogBusiness> getFormLogsBusiness(int formId);
+	List<LogBusiness> getFormLogsBusiness(long formId);
 
 	/**
 	 * добавить информацию в историю событий деклараций

@@ -13,14 +13,14 @@ public interface LogBusinessService {
 	 * @param declarationId идентификатор декларации
 	 * @return объект, представляющий историю событий для декларации
 	 */
-	List<LogBusiness> getDeclarationLogsBusiness(int declarationId);
+	List<LogBusiness> getDeclarationLogsBusiness(long declarationId);
 
 	/**
 	 * Получить информацию об историей событий налоговой формы
 	 * @param formId идентификатор формы
 	 * @return объект, представляющий историю событий для налоговой формы
 	 */
-	List<LogBusiness> getFormLogsBusiness(int formId);
+	List<LogBusiness> getFormLogsBusiness(long formId);
 
 	/**
 	 * добавить информацию в историю событий декларации/налоговой формы

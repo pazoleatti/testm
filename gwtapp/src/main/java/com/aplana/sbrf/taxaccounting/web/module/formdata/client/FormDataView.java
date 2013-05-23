@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -61,7 +60,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Anchor manualInputAnchor;
 	@UiField
-	Anchor historyAnchor;
+	Anchor infoAnchor;
 	@UiField
 	Button cancelButton;
 	@UiField
@@ -232,10 +231,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
-	@UiHandler("historyAnchor")
-	void onHistoryButtonClicked(ClickEvent event) {
+	@UiHandler("infoAnchor")
+	void onInfoButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onHistoryClicked();
+			getUiHandlers().onInfoClicked();
 		}
 	}
 

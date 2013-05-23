@@ -17,7 +17,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onManualInputClicked(boolean readOnlyMode);
 
-	void onHistoryClicked();
+	void onInfoClicked();
 
 	void onOriginalVersionClicked();
 

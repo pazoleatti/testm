@@ -1,10 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewImpl;
+
+import java.util.List;
+import java.util.Map;
 
 public class HistoryView extends PopupViewImpl implements
 		HistoryPresenter.MyView {
@@ -13,6 +21,10 @@ public class HistoryView extends PopupViewImpl implements
 	}
 
 	private final PopupPanel widget;
+	private Map<Integer, String> userNames;
+
+	@UiField
+	CellTable<LogBusiness> logsTable;
 
 	@Inject
 	public HistoryView(EventBus eventBus, Binder uiBinder) {
@@ -20,6 +32,14 @@ public class HistoryView extends PopupViewImpl implements
 		widget = uiBinder.createAndBindUi(this);
 		widget.setAutoHideEnabled(true);
 		widget.setAnimationEnabled(true);
+		initTable();
+	}
+
+	@Override
+	public void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames) {
+		this.userNames = userNames;
+		logsTable.setRowData(logs);
+		logsTable.redraw();
 	}
 
 	@Override
@@ -27,6 +47,48 @@ public class HistoryView extends PopupViewImpl implements
 		return widget;
 	}
 
+	private void initTable() {
+		TextColumn<LogBusiness> eventColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return FormDataEvent.getByCode(object.getEventId()).getTitle();
+			}
+		};
 
+		TextColumn<LogBusiness> dateColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return object.getLogDate().toString();
+			}
+		};
+
+		TextColumn<LogBusiness> nameColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return userNames.get(object.getUserId());
+			}
+		};
+
+		TextColumn<LogBusiness> rolesColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return object.getRoles();
+			}
+		};
+
+		TextColumn<LogBusiness> noteColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return object.getNote();
+			}
+		};
+
+		logsTable.addColumn(eventColumn, "Событие");
+		logsTable.addColumn(dateColumn, "Дата-время");
+		logsTable.addColumn(nameColumn, "Пользователь");
+		logsTable.addColumn(rolesColumn, "Роли пользователя");
+		logsTable.addColumn(noteColumn, "Текст события");
+
+	}
 
 }

@@ -33,13 +33,13 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			d.setRoles(rs.getString("roles"));
 
 			if (rs.getInt("declaration_data_id") != 0) {
-				d.setDeclarationId(rs.getInt("declaration_data_id"));
+				d.setDeclarationId(rs.getLong("declaration_data_id"));
 			} else {
 				d.setDeclarationId(null);
 			}
 
 			if (rs.getInt("form_data_id") != 0) {
-				d.setFormId(rs.getInt("form_data_id"));
+				d.setFormId(rs.getLong("form_data_id"));
 			} else {
 				d.setFormId(null);
 			}
@@ -50,10 +50,10 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
-	public List<LogBusiness> getDeclarationLogsBusiness(int declarationId) {
+	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from log_business where declaration_data_id = ?",
+					"select * from log_business where declaration_data_id = ? order by log_date",
 					new Object[]{declarationId},
 					new LogBusinessRowMapper()
 			);
@@ -63,10 +63,10 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
-	public List<LogBusiness> getFormLogsBusiness(int formId) {
+	public List<LogBusiness> getFormLogsBusiness(long formId) {
 		try {
 			return getJdbcTemplate().query(
-					"select * from log_business where form_data_id = ?",
+					"select * from log_business where form_data_id = ? order by log_date",
 					new Object[]{formId},
 					new LogBusinessRowMapper()
 			);
@@ -80,9 +80,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	public void add(LogBusiness logBusiness) {
 		JdbcTemplate jt = getJdbcTemplate();
 
-		long id = logBusiness.getId();
-		if (id == 0) {
-			id = generateId("seq_log_business", long.class);
+		Long id = logBusiness.getId();
+		if (id == null) {
+			id = generateId("seq_log_business", Long.class);
 		}
 
 		jt.update(
