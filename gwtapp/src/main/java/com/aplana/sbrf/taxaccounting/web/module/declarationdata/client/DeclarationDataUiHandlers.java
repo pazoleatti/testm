@@ -10,4 +10,5 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void delete();
 	void downloadExcel();
 	void downloadXml();
+	void onInfoClicked();
 }

@@ -108,7 +108,7 @@
                     <g:HorizontalPanel>
                         <g:Label width="100px" addStyleNames="{style.headerAttrName}">Состояние:</g:Label>
                         <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                        <style:ButtonLink ui:field="historyAnchor" text="Информация" />
+                        <style:ButtonLink ui:field="infoAnchor" text="Информация" />
                     </g:HorizontalPanel>
                 </g:FlowPanel>
             </g:HorizontalPanel>

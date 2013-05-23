@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclar
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -78,15 +79,18 @@ public class DeclarationDataPresenter
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
 	private final DialogPresenter dialogPresenter;
+	private final HistoryPresenter historyPresenter;
 	private long declarationId;
 	private String taxName;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
-			final MyProxy proxy, DispatchAsync dispatcher,
-			PlaceManager placeManager, DialogPresenter dialogPresenter) {
+									final MyProxy proxy, DispatchAsync dispatcher,
+									PlaceManager placeManager, DialogPresenter dialogPresenter,
+									HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
+		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dialogPresenter = dialogPresenter;
 		getView().setUiHandlers(this);
@@ -235,6 +239,12 @@ public class DeclarationDataPresenter
 	public void downloadXml() {
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xml/"
 				+ declarationId, null, null);
+	}
+
+	@Override
+	public void onInfoClicked() {
+		historyPresenter.prepareDeclarationHistory(declarationId);
+		addToPopupSlot(historyPresenter);
 	}
 
 	private void revealPlaceRequest() {

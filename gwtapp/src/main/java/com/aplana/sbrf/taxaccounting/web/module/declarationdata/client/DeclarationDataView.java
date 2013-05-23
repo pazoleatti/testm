@@ -35,7 +35,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	Anchor returnAnchor;
 	@UiField
-	Anchor historyAnchor;
+	Anchor infoAnchor;
 
 	@UiField
 	Label type;
@@ -161,5 +161,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiHandler("downloadXmlButton")
 	public void onDownloadAsLegislatorButton(ClickEvent event){
 		getUiHandlers().downloadXml();
+	}
+
+	@UiHandler("infoAnchor")
+	void onInfoButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onInfoClicked();
+		}
 	}
 }
