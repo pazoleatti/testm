@@ -980,7 +980,8 @@ REPORT_PERIOD_ID NUMBER(9,0) NOT NULL,
 DECLARATION_TYPE_ID   NUMBER(9,0),
 FORM_TYPE_ID   NUMBER(9,0),
 FORM_KIND_ID NUMBER(9,0),
-NOTE  VARCHAR2(510)
+NOTE  VARCHAR2(510),
+USER_DEPARTMENT_ID NUMBER(9,0)
 );
 
 alter table LOG_SYSTEM add constraint LOG_SYSTEM_chk_FORM_KIND_ID check (FORM_KIND_ID in (1, 2, 3, 4, 5));
@@ -994,6 +995,7 @@ alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_DEPARTMENT_ID foreign key (D
 alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_REPORT_PERIOD_ID foreign key (REPORT_PERIOD_ID) references  report_period(id);
 alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_DECL_TYPE_ID foreign key (DECLARATION_TYPE_ID) references  declaration_type (id);
 alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_FORM_TYPE_ID foreign key (FORM_TYPE_ID) references  form_type(id);
+alter table LOG_SYSTEM add constraint LOG_SYSTEM_fk_USER_DPRTMENT_ID foreign key (USER_DEPARTMENT_ID) references  DEPARTMENT (id);
 
 COMMENT ON TABLE LOG_SYSTEM   IS   'Системный журнал';
 
@@ -1009,6 +1011,7 @@ COMMENT ON COLUMN LOG_SYSTEM."DECLARATION_TYPE_ID"   IS   'Код вида де�
 COMMENT ON COLUMN LOG_SYSTEM."FORM_TYPE_ID"   IS   'Код вида налоговой формы';
 COMMENT ON COLUMN LOG_SYSTEM."FORM_KIND_ID"   IS   'Код типа налоговой формы (1,2,3,4,5)';
 COMMENT ON COLUMN LOG_SYSTEM."NOTE"   IS   'Текст сообщения';
+COMMENT ON COLUMN LOG_SYSTEM."USER_DEPARTMENT_ID" IS 'Код подразделения пользователя';
 
 create sequence seq_log_system start with 10000;
 
