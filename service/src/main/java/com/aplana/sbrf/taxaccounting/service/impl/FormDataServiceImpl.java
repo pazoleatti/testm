@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,6 +52,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataScriptingService formDataScriptingService;
 	@Autowired
 	private ObjectLockDao lockDao;
+	@Autowired
+	private LogBusinessService logBusinessService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -133,6 +136,9 @@ public class FormDataServiceImpl implements FormDataService {
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
+
+		addLogBusiness(result.getId(), user, FormDataEvent.CREATE, null);
+
 		return result;
 	}
 
@@ -181,6 +187,7 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new AccessDeniedException(
 					"Недостаточно прав для добавления строки к налоговой форме");
 		}
+
 	}
 
 	/**
@@ -268,7 +275,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			formDataScriptingService.executeScript(userDao.getUser(userId), formData,
+			TAUser user = userDao.getUser(userId);
+			formDataScriptingService.executeScript(user, formData,
 					FormDataEvent.SAVE, logger, null);
 
 			boolean needLock = formData.getId() == null;
@@ -276,6 +284,9 @@ public class FormDataServiceImpl implements FormDataService {
 			if (needLock) {
 				lock(id, userId);
 			}
+
+			addLogBusiness(formData.getId(), user, FormDataEvent.SAVE, null);
+
 			return id;
 		} else {
 			throw new AccessDeniedException(
@@ -379,9 +390,11 @@ public class FormDataServiceImpl implements FormDataService {
 							workflowMove.getToState().equals(
 									WorkflowState.ACCEPTED) ? new Date() : null);
 
+			TAUser user = userDao.getUser(userId);
+
 			if (workflowMove.getAfterEvent() != null) {
 				formDataScriptingService.executeScript(
-						userDao.getUser(userId), formData,
+						user, formData,
 						workflowMove.getAfterEvent(), logger, null);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
@@ -389,6 +402,8 @@ public class FormDataServiceImpl implements FormDataService {
 							logger.getEntries());
 				}
 			}
+
+			addLogBusiness(formData.getId(), user, workflowMove.getEvent(), null);
 
 		} else {
 			throw new ServiceLoggerException(
@@ -487,6 +502,23 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new AccessDeniedException(
 					"Недостаточно прав для удаления строки из налоговой формы");
 		}
+	}
+
+	private void addLogBusiness(Long formDataId, TAUser user, FormDataEvent event, String note) {
+		LogBusiness log = new LogBusiness();
+		log.setFormId(formDataId);
+		log.setEventId(event.getCode());
+		log.setUserId(user.getId());
+		log.setLogDate(new Date());
+		log.setNote(note);
+
+		StringBuilder roles = new StringBuilder();
+		for (TARole role : user.getRoles()) {
+			roles.append(role.getName());
+		}
+		log.setRoles(roles.toString());
+
+		logBusinessService.add(log);
 	}
 
 }

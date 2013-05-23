@@ -26,8 +26,6 @@ public class SaveFormDataHandler extends
 	private SecurityService securityService;
 	@Autowired
 	private FormDataService formDataService;
-	@Autowired
-	private LogBusinessService logBusinessService;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -40,21 +38,6 @@ public class SaveFormDataHandler extends
 		FormData formData = action.getFormData();
 		TAUser currentUser = securityService.currentUser();
 		formDataService.saveFormData(logger, currentUser.getId(), formData);
-
-		LogBusiness log = new LogBusiness();
-		log.setFormId(formData.getId());
-		log.setEventId(FormDataEvent.SAVE.getCode());
-		log.setUserId(currentUser.getId());
-		log.setLogDate(new Date());
-		log.setNote("супер заметка");
-
-		StringBuilder roles = new StringBuilder();
-		for (TARole role : currentUser.getRoles()) {
-			roles.append(role.getName());
-		}
-		log.setRoles(roles.toString());
-
-		logBusinessService.add(log);
 
 		logger.info("Данные успешно записаны");
 		FormDataResult result = new FormDataResult();
