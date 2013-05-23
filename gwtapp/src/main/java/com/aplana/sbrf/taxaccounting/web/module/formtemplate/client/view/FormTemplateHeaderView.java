@@ -179,6 +179,9 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 					return aliasRow.getCell(col.getAlias()).getValue() == null ? col.getName() : aliasRow.getCell(col.getAlias()).getValue().toString();
 				}
 			};
+			if (col.getWidth() >= 0) {
+				formDataTable.setColumnWidth(editTextAliasColumn, col.getWidth() + "em");
+			}
 			formDataTable.addColumn(editTextAliasColumn);
 		}
 
@@ -242,6 +245,13 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 	public void onAddButton(ClickEvent event){
 		if(getUiHandlers()!= null){
 			getUiHandlers().onAddButton(new DataRow<HeaderCell>("", FormDataUtils.createHeaderCells(columns)));
+		}
+	}
+
+	@UiHandler("addNumberedHeaderButton")
+	public void onAddNumberedHeaderButton(ClickEvent event){
+		if(getUiHandlers()!= null){
+			getUiHandlers().onAddNumberedHeaderButton(new DataRow<HeaderCell>("", FormDataUtils.createHeaderCells(columns)));
 		}
 	}
 

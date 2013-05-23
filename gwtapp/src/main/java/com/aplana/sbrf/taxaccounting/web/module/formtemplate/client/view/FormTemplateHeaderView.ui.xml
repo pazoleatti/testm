@@ -12,6 +12,7 @@
         <style:Bar height="5%">
             <style:LeftBar>
                 <g:Button ui:field="addRowButton">Добавить строку</g:Button>
+                <g:Button ui:field="addNumberedHeaderButton">Добавить нумерацию</g:Button>
                 <g:Button ui:field="removeRowButton">Удалить строку</g:Button>
                 <g:Button enabled="false" ui:field="upRowButton">Вверх</g:Button>
                 <g:Button enabled="false" ui:field="downRowButton">Вниз</g:Button>

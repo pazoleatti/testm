@@ -89,7 +89,27 @@ public class FormTemplateHeaderPresenter
 	public void onAddButton(DataRow<HeaderCell> row) {
 		if (row != null) {
 			for (Column column: formTemplate.getColumns()) {
+				if (column.getWidth() > 0) {
 				row.getCell(column.getAlias()).setValue(formTemplate.getColumn(column.getAlias()).getName());
+				} else {
+					row.getCell(column.getAlias()).setValue("");
+				}
+			}
+			formTemplate.getHeaders().add(row);
+			getView().setHeaderData(formTemplate.getHeaders());
+		}
+	}
+
+	@Override
+	public void onAddNumberedHeaderButton(DataRow<HeaderCell> row) {
+		if (row != null) {
+			int colNum = 1;
+			for (Column column: formTemplate.getColumns()) {
+				if (column.getWidth() > 0) {
+					row.getCell(column.getAlias()).setValue(colNum++);
+				} else {
+					row.getCell(column.getAlias()).setValue("");
+				}
 			}
 			formTemplate.getHeaders().add(row);
 			getView().setHeaderData(formTemplate.getHeaders());
