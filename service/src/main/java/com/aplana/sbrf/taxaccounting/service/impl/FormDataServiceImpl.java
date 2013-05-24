@@ -513,6 +513,7 @@ public class FormDataServiceImpl implements FormDataService {
 		log.setUserId(user.getId());
 		log.setLogDate(new Date());
 		log.setNote(note);
+		log.setDepartmentId(user.getDepartmentId());
 
 		StringBuilder roles = new StringBuilder();
 		for (TARole role : user.getRoles()) {

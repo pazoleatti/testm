@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UpdateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetDeclarationLogsBusinessAction;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetFormLogsBusinessAction;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetLogsBusinessResult;
@@ -22,7 +20,7 @@ public class HistoryPresenter extends
 		PresenterWidget<HistoryView> {
 
 	public static interface MyView extends PopupView{
-		void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames);
+		void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames, Map<Integer, String> userDepartments);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -50,7 +48,7 @@ public class HistoryPresenter extends
 				.defaultCallback(new AbstractCallback<GetLogsBusinessResult>() {
 					@Override
 					public void onSuccess(GetLogsBusinessResult result) {
-						getView().setHistory(result.getLogs(), result.getUserNames());
+						getView().setHistory(result.getLogs(), result.getUserNames(), null);
 					}
 				}, this));
 	}

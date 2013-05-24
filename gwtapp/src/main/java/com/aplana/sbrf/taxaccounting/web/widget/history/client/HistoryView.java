@@ -26,6 +26,7 @@ public class HistoryView extends PopupViewImpl implements
 
 	private final PopupPanel widget;
 	private Map<Integer, String> userNames;
+	private Map<Integer, String> userDepartments;
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
 	@UiField
@@ -42,8 +43,9 @@ public class HistoryView extends PopupViewImpl implements
 	}
 
 	@Override
-	public void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames) {
+	public void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames, Map<Integer, String> userDepartments) {
 		this.userNames = userNames;
+		this.userDepartments = userDepartments;
 		logsTable.setRowData(logs);
 		logsTable.redraw();
 	}
