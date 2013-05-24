@@ -937,7 +937,8 @@ USER_ID   NUMBER(9,0)  NOT NULL,
 ROLES  VARCHAR2(200) NOT NULL,
 DECLARATION_DATA_ID	 NUMBER(9,0),
 FORM_DATA_ID	 NUMBER(9,0),
-NOTE	VARCHAR2(510)
+NOTE	VARCHAR2(510),
+USER_DEPARTMENT_ID NUMBER(9,0) NOT NULL
 );
 
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_USER_ID foreign key (USER_ID) references  sec_user (id);
@@ -946,6 +947,7 @@ alter table LOG_BUSINESS add constraint LOG_BUSINESS_fk_FORM_DATA_ID foreign key
 
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_EVENT_ID check (EVENT_ID in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 207, 301, 302, 303));
 alter table LOG_BUSINESS add constraint LOG_BUSINESS_chk_FRM_DCL_EV  check (FORM_DATA_ID is not null OR DECLARATION_DATA_ID is not null);
+alter table LOG_BUSINESS add constraint LOG_BUSINESS_FK_USR_DEPARTM_ID foreign key (USER_DEPARTMENT_ID) references  DEPARTMENT (id);
 
 COMMENT ON TABLE LOG_BUSINESS	 IS 	'Журнал событий налоговых форм\деклараций';
 
@@ -957,6 +959,7 @@ COMMENT ON COLUMN LOG_BUSINESS."ROLES"	 IS 	'Список ролей польз�
 COMMENT ON COLUMN LOG_BUSINESS."DECLARATION_DATA_ID"	 IS 	'Код декларации';
 COMMENT ON COLUMN LOG_BUSINESS."FORM_DATA_ID"	 IS 	'Код налоговой формы';
 COMMENT ON COLUMN LOG_BUSINESS."NOTE"	 IS 	'Текст сообщения';
+COMMENT ON COLUMN LOG_BUSINESS."USER_DEPARTMENT_ID" IS 'Код подразделения пользователя';
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
