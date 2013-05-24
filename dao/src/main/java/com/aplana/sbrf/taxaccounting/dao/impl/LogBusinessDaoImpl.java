@@ -25,27 +25,28 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
-			LogBusiness d = new LogBusiness();
-			d.setId(rs.getLong("id"));
-			d.setLogDate(rs.getTimestamp("log_date"));
-			d.setEventId(rs.getInt("event_id"));
-			d.setUserId(rs.getInt("user_id"));
-			d.setRoles(rs.getString("roles"));
+			LogBusiness log = new LogBusiness();
+			log.setId(rs.getLong("id"));
+			log.setLogDate(rs.getTimestamp("log_date"));
+			log.setEventId(rs.getInt("event_id"));
+			log.setUserId(rs.getInt("user_id"));
+			log.setRoles(rs.getString("roles"));
 
 			if (rs.getInt("declaration_data_id") != 0) {
-				d.setDeclarationId(rs.getLong("declaration_data_id"));
+				log.setDeclarationId(rs.getLong("declaration_data_id"));
 			} else {
-				d.setDeclarationId(null);
+				log.setDeclarationId(null);
 			}
 
 			if (rs.getInt("form_data_id") != 0) {
-				d.setFormId(rs.getLong("form_data_id"));
+				log.setFormId(rs.getLong("form_data_id"));
 			} else {
-				d.setFormId(null);
+				log.setFormId(null);
 			}
 
-			d.setNote(rs.getString("note"));
-			return d;
+			log.setDepartmentId(rs.getInt("user_department_id"));
+			log.setNote(rs.getString("note"));
+			return log;
 		}
 	}
 
@@ -86,8 +87,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		}
 
 		jt.update(
-				"insert into log_business (id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, note)" +
-						" values (?, ?, ?, ?, ?, ?, ?, ?)",
+				"insert into log_business (id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, user_department_id, note)" +
+						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
 				logBusiness.getLogDate(),
 				logBusiness.getEventId(),
@@ -95,6 +96,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 				logBusiness.getRoles(),
 				logBusiness.getDeclarationId(),
 				logBusiness.getFormId(),
+				logBusiness.getDepartmentId(),
 				logBusiness.getNote()
 		);
 	}

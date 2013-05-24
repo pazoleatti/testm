@@ -17,6 +17,7 @@ public class LogBusiness implements Serializable {
 	private String roles;
 	private Long declarationId;
 	private Long formId;
+	private int departmentId;
 	private String note;
 
 	public Long getId() {
@@ -81,5 +82,13 @@ public class LogBusiness implements Serializable {
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+
+	public int getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(int departmentId) {
+		this.departmentId = departmentId;
 	}
 }
