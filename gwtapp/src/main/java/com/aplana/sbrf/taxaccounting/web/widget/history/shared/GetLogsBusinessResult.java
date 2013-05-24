@@ -9,6 +9,7 @@ import java.util.Map;
 public class GetLogsBusinessResult implements Result{
 
 	private Map<Integer, String> userNames;
+	private Map<Integer, String> userDepartments;
 	private List<LogBusiness> logs;
 
 	public List<LogBusiness> getLogs() {
@@ -25,5 +26,13 @@ public class GetLogsBusinessResult implements Result{
 
 	public void setUserNames(Map<Integer, String> usersName) {
 		this.userNames = usersName;
+	}
+
+	public Map<Integer, String> getUserDepartments() {
+		return userDepartments;
+	}
+
+	public void setUserDepartments(Map<Integer, String> userDepartments) {
+		this.userDepartments = userDepartments;
 	}
 }

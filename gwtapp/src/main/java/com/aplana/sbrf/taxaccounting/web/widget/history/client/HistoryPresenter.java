@@ -48,7 +48,7 @@ public class HistoryPresenter extends
 				.defaultCallback(new AbstractCallback<GetLogsBusinessResult>() {
 					@Override
 					public void onSuccess(GetLogsBusinessResult result) {
-						getView().setHistory(result.getLogs(), result.getUserNames(), null);
+						getView().setHistory(result.getLogs(), result.getUserNames(), result.getUserDepartments());
 					}
 				}, this));
 	}

@@ -28,6 +28,7 @@ public class HistoryView extends PopupViewImpl implements
 	private Map<Integer, String> userNames;
 	private Map<Integer, String> userDepartments;
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
+	private static final String DECLARATION_SAVE_EVENT = "Обновление";
 
 	@UiField
 	DataGrid<LogBusiness> logsTable;
@@ -59,7 +60,11 @@ public class HistoryView extends PopupViewImpl implements
 		TextColumn<LogBusiness> eventColumn = new TextColumn<LogBusiness>() {
 			@Override
 			public String getValue(LogBusiness object) {
-				return FormDataEvent.getByCode(object.getEventId()).getTitle();
+				FormDataEvent event = FormDataEvent.getByCode(object.getEventId());
+				if (object.getDeclarationId() != null && FormDataEvent.SAVE == event) {
+					return DECLARATION_SAVE_EVENT;
+				}
+				return event.getTitle();
 			}
 		};
 
@@ -84,6 +89,13 @@ public class HistoryView extends PopupViewImpl implements
 			}
 		};
 
+		TextColumn<LogBusiness> departmentColumn = new TextColumn<LogBusiness>() {
+			@Override
+			public String getValue(LogBusiness object) {
+				return userDepartments.get(object.getDepartmentId());
+			}
+		};
+
 		TextColumn<LogBusiness> noteColumn = new TextColumn<LogBusiness>() {
 			@Override
 			public String getValue(LogBusiness object) {
@@ -95,6 +107,7 @@ public class HistoryView extends PopupViewImpl implements
 		logsTable.addColumn(dateColumn, "Дата-время");
 		logsTable.addColumn(nameColumn, "Пользователь");
 		logsTable.addColumn(rolesColumn, "Роли пользователя");
+		logsTable.addColumn(departmentColumn, "Подразделение пользователя");
 		logsTable.addColumn(noteColumn, "Текст события");
 	}
 
