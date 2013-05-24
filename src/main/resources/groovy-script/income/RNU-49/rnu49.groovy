@@ -7,11 +7,15 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - уникальность инвентарного номера
+ *      - консолидация (объединение строк в рамках выделенных разделов?!?! в чтз просто объединение строк)
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck(true)
         checkNSI()
@@ -26,6 +30,30 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        break
+    // проверка при "подготовить"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        checkOnPrepareOrAcceptance('Подготовка')
+        break
+    // проверка при "принять"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        checkOnPrepareOrAcceptance('Принятие')
+        break
+    // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        acceptance()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -103,14 +131,10 @@ void calc() {
             'sum', 'sumInFact', 'costProperty', 'marketPrice', 'usefullLifeEnd',
             'monthsLoss', 'saledPropertyCode', 'saleCode', 'propertyType']
 
-    def hasError = false
-    formData.dataRows.each { row ->
-        if (!isFixedRow(row) && !checkRequiredColumns(row, columns, true)) {
-            hasError = true
+    for (def row : formData.dataRows) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            return
         }
-    }
-    if (hasError) {
-        return
     }
 
     /*
@@ -164,7 +188,7 @@ void calc() {
  *
  * useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def useLog) {
+def logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
         // Список проверяемых столбцов (графа 1..22)
         def columns = ['rowNumber', 'firstRecordNumber', 'operationDate', 'reasonNumber',
@@ -180,7 +204,7 @@ void logicalCheck(def useLog) {
 
             // 1. Обязательность заполнения поля графы (графа 1..22)
             if (!checkRequiredColumns(row, columns, useLog)) {
-                return
+                return false
             }
 
             // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)
@@ -196,12 +220,12 @@ void logicalCheck(def useLog) {
                     row.loss == 0 &&
                     row.expensesSum == 0) {
                 logger.error('Все суммы по операции нулевые!')
-                return
+                return false
             }
             // 4. Проверка формата номера первой записи	Формат графы 2: ГГ-НННН
             if (!row.firstRecordNumber.matches('\\w{2}-\\w{6}')) {
                 logger.error('Неправильно указан номер предыдущей записи!')
-                return
+                return false
             }
 
             // 5. Арифметическая проверка графы 15
@@ -213,56 +237,51 @@ void logicalCheck(def useLog) {
             }
             if (hasError) {
                 logger.error('Неверное значение графы «Сумма к увеличению прибыли (уменьшению убытка)»!')
-                return
+                return false
             }
 
             // 6. Арифметическая проверка графы 16
             if (row.profit != (row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit)) {
                 logger.error('Неверное значение графы «Прибыль от реализации»!')
-                return
+                return false
             }
 
             // 7. Арифметическая проверка графы 17
             if (row.loss != row.profit) {
                 logger.error('Неверное значение графы «Убыток от реализации»!')
-                return
+                return false
             }
 
             // 8. Арифметическая проверка графы 20
             if (row.monthsLoss != 0 && row.expensesSum != round(row.loss / row.monthsLoss, 2)) {
                 logger.error('Неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
-                return
+                return false
             }
 
             // 9. Проверка итоговых значений формы
-            hasError = false
+            // графы для которых считать итого (графа 9..13, 15..20)
+            def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
+                    'profit', 'loss', /*'usefullLifeEnd',*/ 'monthsLoss', 'expensesSum']
             // подразделы
-            ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
-                if (!hasError) {
-                    firstRow = formData.getDataRow(section)
-                    lastRow = formData.getDataRow('total' + section)
-                    // графы для которых считать итого (графа 9..13, 15..20)
-                    ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
-                            'profit', 'loss', /*'usefullLifeEnd',*/ 'monthsLoss', 'expensesSum'].each {
-                        if (!hasError &&
-                                lastRow.getCell(it).getValue().equals(getSum(it, firstRow, lastRow))) {
-                            hasError = true
-                        }
+            for (def section : ['A', 'B', 'V', 'G', 'D', 'E']) {
+                firstRow = formData.getDataRow(section)
+                lastRow = formData.getDataRow('total' + section)
+                for (def column : totalColumns) {
+                    if (lastRow.getCell(column).getValue().equals(getSum(column, firstRow, lastRow))) {
+                        logger.error('Итоговые значения рассчитаны неверно!')
+                        return false
                     }
                 }
             }
-            if (hasError) {
-                logger.error('Итоговые значения рассчитаны неверно!')
-                return
-            }
         }
     }
+    return true
 }
 
 /**
  * Проверки соответствия НСИ.
  */
-void checkNSI() {
+def checkNSI() {
     if (!formData.dataRows.isEmpty()) {
         for (def row : formData.dataRows) {
             if (isFixedRow(row)) {
@@ -274,6 +293,7 @@ void checkNSI() {
             if (isSection('A', row) &&
                     ((row.saledPropertyCode != 1 && row.saledPropertyCode != 2) || row.saleCode != 1)) {
                 logger.error('Для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
+                return false
             }
 
             // 2. Проверка шифра при реализации прочего имущества
@@ -281,6 +301,7 @@ void checkNSI() {
             if (isSection('B', row) &&
                     ((row.saledPropertyCode != 3 && row.saledPropertyCode != 4) || row.saleCode != 1)) {
                 logger.error('Для реализованного прочего имущества (группа «Б») указан неверный шифр!')
+                return false
             }
 
             // 3. Проверка шифра при списании (ликвидации) амортизируемого имущества
@@ -288,6 +309,7 @@ void checkNSI() {
             if (isSection('V', row) &&
                     ((row.saledPropertyCode != 1 && row.saledPropertyCode != 2) || row.saleCode != 2)) {
                 logger.error('Для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
+                return false
             }
 
             // 4. Проверка шифра при реализации имущественных прав (кроме прав требования, долей паёв)
@@ -295,6 +317,7 @@ void checkNSI() {
             if (isSection('G', row) &&
                     (row.saledPropertyCode != 5 || row.saleCode != 1)) {
                 logger.error('Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
+                return false
             }
 
             // 5. Проверка шифра при реализации прав на земельные участки
@@ -302,12 +325,14 @@ void checkNSI() {
             if (isSection('D', row) &&
                     (row.saledPropertyCode != 6 || row.saleCode != 1)) {
                 logger.error('Для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
+                return false
             }
 
             // 6. Проверка шифра при реализации долей, паёв
             if (isSection('E', row) &&
                     (row.saledPropertyCode != 7 || row.saleCode != 1)) {
                 logger.error('Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
+                return false
             }
 
             // 7. Проверка актуальности поля «Шифр вида реализованного (выбывшего) имущества»
@@ -327,6 +352,89 @@ void checkNSI() {
                 logger.warn('Тип имущества в справочнике не найден!')
             }
         }
+    }
+    return true
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    // TODO (Ramil Timerbaev) поменять
+
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+}
+
+/**
+ * Проверки при переходе "Отменить принятие".
+ */
+void checkOnCancelAcceptance() {
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), formData.getKind());
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
+        }
+    }
+}
+
+/**
+ * Принять.
+ */
+void acceptance() {
+    if (!logicalCheck(true) || !checkNSI()) {
+        return
+    }
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 

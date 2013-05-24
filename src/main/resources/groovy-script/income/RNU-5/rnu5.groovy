@@ -6,12 +6,15 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - консолидация
+ *      - консолидация (проверить)
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck(true)
         checkNSI()
@@ -24,29 +27,32 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         addNewRow()
         break
-    // подготовить
+    case FormDataEvent.DELETE_ROW :
+        deleteRow()
+        break
+    // проверка при "подготовить"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :
         checkOnPrepareOrAcceptance('Подготовка')
         break
-    // принять
+    // проверка при "принять"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
         checkOnPrepareOrAcceptance('Принятие')
+        break
+    // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        acceptance()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
-        break
-    // вернуть из принята в подготовлена
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
-        break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED : // TODO (Ramil Timerbaev) поправить на правильное событие
-        acceptance()
-        break
-    case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -87,14 +93,10 @@ void calc() {
     // список проверяемых столбцов (графа 2..5)
     def requiredColumns = ['code', 'balance', 'name', 'sum']
 
-    def hasError = false
-    formData.dataRows.each { row ->
+    for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            hasError = true
+            return
         }
-    }
-    if (hasError) {
-        return
     }
 
     /*
@@ -169,6 +171,7 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
+    logger.warn('cheeeeeeeck') // TODO (Ramil Timerbaev)
     if (!formData.dataRows.isEmpty()) {
         def i = 1
 
@@ -265,8 +268,9 @@ void acceptance() {
     if (!logicalCheck(true) || !checkNSI()) {
         return
     }
-    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each() {
-        formDataCompositionService.compose(it.departmentId, it.formTypeId, it.kind, logger)
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
 
@@ -274,25 +278,17 @@ void acceptance() {
  * Консолидация.
  */
 void consolidation() {
-    if (!isBank()) {
-        return
-    }
-    boolean isFirst = true;
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (child != null && child.state == WorkflowState.ACCEPTED) {
-                if (isFirst) {
-                    // Удалить все строки и собрать из источников их строки
-                    formData.dataRows.clear()
-                    isFirst = false;
-                    child.getDataRows().each { row->
-                        def newRow = formData.createDataRow()
-                        formData.dataRows.add(newRow)
-                        newRow.putAll(row)
-                        newRow.setAlias(row.getAlias())
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
                     }
                 }
             }
@@ -304,8 +300,9 @@ void consolidation() {
 /**
  * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
  */
-def checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.PRIMARY).each { department ->
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
         if (department.formTypeId == formData.getFormType().getId()) {
             def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
             // если форма существует и статус "принята"
@@ -320,12 +317,8 @@ def checkOnPrepareOrAcceptance(def value) {
  * Проверки при переходе "Отменить принятие".
  */
 void checkOnCancelAcceptance() {
-    if (!isTerBank()) {
-        return
-    }
-
     List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), FormDataKind.PRIMARY);
+            formData.getFormType().getId(), formData.getKind());
     DepartmentFormType department = departments.getAt(0);
     if (department != null) {
         FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
@@ -333,6 +326,18 @@ void checkOnCancelAcceptance() {
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
         }
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 
@@ -408,17 +413,4 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
-}
-
-/**
- * Проверка на банк.
- */
-def isBank() {
-    boolean isBank = true
-    departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.PRIMARY).each {
-        if (it.departmentId != formData.departmentId) {
-            isBank = false
-        }
-    }
-    return isBank
 }

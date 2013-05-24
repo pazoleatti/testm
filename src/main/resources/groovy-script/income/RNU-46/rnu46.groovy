@@ -17,6 +17,9 @@
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck(true)
         checkNSI()
@@ -31,6 +34,30 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        break
+    // проверка при "подготовить"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        checkOnPrepareOrAcceptance('Подготовка')
+        break
+    // проверка при "принять"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        checkOnPrepareOrAcceptance('Принятие')
+        break
+    // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        acceptance()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -88,14 +115,10 @@ void calc() {
     def columns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
-    def hasError = false
-    formData.dataRows.each { row ->
-        if (!checkRequiredColumns(row, columns, true)) {
-            hasError = true
+    for (def row : formData.dataRows) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            return
         }
-    }
-    if (hasError) {
-        return
     }
 
     /*
@@ -168,16 +191,19 @@ void calc() {
 /**
  * Проверки соответствия НСИ.
  */
-void checkNSI() {
+def checkNSI() {
     // 1. Проверка амортизационной группы (графа 5)
     if (false) {
         logger.error('Амортизационная группа не существует!')
+        return false
     }
 
     // 2. Проверка срока полезного использования (графа 6)
     if (false) {
         logger.error('Срок полезного использования указан неверно!')
+        return false
     }
+    return true
 }
 
 /**
@@ -185,7 +211,7 @@ void checkNSI() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def useLog) {
+def logicalCheck(def useLog) {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
 
@@ -207,7 +233,6 @@ void logicalCheck(def useLog) {
         // TODO (Ramil Timerbaev) Как должна производиться эта проверка?
         if (false) {
             logger.warn('Инвентарный номер не уникальный!')
-            break
         }
 
         // 3. Проверка на нулевые значения (графа 9, 10, 11, 13, 14, 15)
@@ -218,6 +243,7 @@ void logicalCheck(def useLog) {
                 row.amortMonth == 0 &&
                 row.amortTaxPeriod) {
             logger.error('Все суммы по операции нулевые!')
+            return false
         }
 
         // 4. Проверка суммы расходов в виде капитальных вложений с начала года (графа 10, 9, 10 (за прошлый месяц), 9 (за предыдущие месяцы текущего года))
@@ -227,7 +253,7 @@ void logicalCheck(def useLog) {
                 // TODO (Ramil Timerbaev) getFromOld() = сумма графы 9 всех предыдущих месяцев
                 row.cost10perMonth == getFromOld()) {
             logger.error('Неверная сумма расходов в виде капитальных вложений с начала года!')
-            return
+            return false
         }
 
         // 5. Проверка суммы начисленной амортизации с начала года (графа 14, 13, 14 (за прошлый месяц), 13 (за предыдущие месяцы текущего года))
@@ -237,7 +263,7 @@ void logicalCheck(def useLog) {
                 // TODO (Ramil Timerbaev) getFromOld() = сумма графы 13 всех предыдущих месяцев
                 row.amortMonth != getFromOld()) {
             logger.error('Неверная сумма начисленной амортизации с начала года!')
-            return
+            return false
         }
 
         // 6. Арифметическая проверка графы 8
@@ -250,7 +276,7 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
-            return
+            return false
         }
 
         // 7. Арифметическая проверка графы 10
@@ -262,7 +288,7 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
-            return
+            return false
         }
 
         // 8. Арифметическая проверка графы 11
@@ -276,14 +302,14 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
-            return
+            return false
         }
 
         // 9. Арифметическая проверка графы 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
         if (row.cost10perExploitation != getFromOld() + row.cost10perMonth) {
             logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
-            return
+            return false
         }
 
         // 10. Арифметическая проверка графы 13
@@ -295,7 +321,7 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
-            return
+            return false
         }
 
         // 11. Арифметическая проверка графы 14
@@ -315,7 +341,7 @@ void logicalCheck(def useLog) {
         // TODO (Ramil Timerbaev) убрать && false
         if (hasError && false) {
             logger.error('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
-            return
+            return false
         }
 
         // 12. Арифметическая проверка графы 15
@@ -328,7 +354,7 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Сумма начисленной амортизации.с начала налогового периода»!')
-            return
+            return false
         }
 
         // 13. Арифметическая проверка графы 16
@@ -341,8 +367,91 @@ void logicalCheck(def useLog) {
         }
         if (hasError) {
             logger.error('Неверное значение графы «Сумма начисленной амортизации.с даты ввода в эксплуатацию»!')
-            return
+            return false
         }
+    }
+    return true
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    // TODO (Ramil Timerbaev) поменять
+
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+}
+
+/**
+ * Проверки при переходе "Отменить принятие".
+ */
+void checkOnCancelAcceptance() {
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), formData.getKind());
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
+        }
+    }
+}
+
+/**
+ * Принять.
+ */
+void acceptance() {
+    if (!logicalCheck(true) || !checkNSI()) {
+        return
+    }
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 

@@ -8,12 +8,15 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
- *      - консолидация	
+ *      - консолидация (проверить)
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck(true)
         checkNSI()
@@ -28,6 +31,30 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        break
+    // проверка при "подготовить"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        checkOnPrepareOrAcceptance('Подготовка')
+        break
+    // проверка при "принять"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        checkOnPrepareOrAcceptance('Принятие')
+        break
+    // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        acceptance()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -98,15 +125,10 @@ void calc() {
     // список проверяемых столбцов (графа 2..8)
     def requiredColumns = ['contract', 'contractDate', 'amountOfTheGuarantee',
             'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation']
-
-    def hasError = false
-    formData.dataRows.each { row ->
+    for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            hasError = true
+            return
         }
-    }
-    if (hasError) {
-        return
     }
 
     /*
@@ -182,7 +204,7 @@ void calc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def useLog) {
+def logicalCheck(def useLog) {
     def tmp
 
     /** Дата начала отчетного периода. */
@@ -219,7 +241,7 @@ void logicalCheck(def useLog) {
 
             // 7. Обязательность заполнения поля графы 1..8, 13..20
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
-                return
+                return false
             }
 
             // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
@@ -229,7 +251,7 @@ void logicalCheck(def useLog) {
                             (row.preAccrualsEndDate != null && (row.preAccrualsEndDate < a || b < row.preAccrualsEndDate)))
             ) {
                 logger.error('Дата совершения операции вне границ отчётного периода!')
-                return
+                return false
             }
 
             // 2. Проверка на нулевые значения (графа 13..20)
@@ -243,7 +265,7 @@ void logicalCheck(def useLog) {
             }
             if (hasNull) {
                 logger.error('Все суммы по операции нулевые!')
-                return
+                return false
             }
 
             // 3. Проверка на сумму гарантии (графа 4)
@@ -260,7 +282,7 @@ void logicalCheck(def useLog) {
             // 5. Проверка на корректность даты договора (графа 3)
             if (row.contractDate > b) {
                 logger.error('Дата договора неверная!')
-                return
+                return false
             }
 
             // 8. Проверка на заполнение поля «<Наименование поля>»
@@ -272,13 +294,13 @@ void logicalCheck(def useLog) {
                     row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
             if (checkColumn9and10 || checkColumn11and12) {
                 logger.error('Поля в графе 9, 10, 11, 12 заполены неверно!')
-                break
+                return  false
             }
 
             // 9. Проверка на уникальность поля «№ пп» (графа 1)
             if (i != row.number) {
                 logger.error('Нарушена уникальность номера по порядку!')
-                break
+                return  false
             }
             i += 1
 
@@ -286,26 +308,26 @@ void logicalCheck(def useLog) {
             tmp = getColumn13or15or19(row, row.accrualAccountingStartDate, row.accrualAccountingEndDate)
             if (row.incomeCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма начисленного дохода. Валюта»!')
-                return
+                return false
             }
 
             // 11. Арифметическая проверка графы 14
             if (row.incomeRuble != round(row.incomeCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.error('Неверно рассчитана графа «Сумма начисленного дохода. Рубли»!')
-                return
+                return false
             }
 
             // 12. Арифметическая проверка графы 15
             tmp = getColumn13or15or19(row, row.accrualAccountingStartDate, row.accrualAccountingEndDate)
             if (row.accountingCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Валюта»!')
-                return
+                return false
             }
 
             // 13. Арифметическая проверка графы 16
             if (row.accountingRuble != round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.error('Неверно рассчитана графа «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
-                return
+                return false
             }
 
             // 14. Арифметическая проверка графы 17
@@ -313,7 +335,7 @@ void logicalCheck(def useLog) {
             tmp = getSum(formDataOld, 'taxPeriodCurrency')
             if (row.preChargeCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
-                return
+                return false
             }
 
             // 15. Арифметическая проверка графы 18
@@ -321,20 +343,20 @@ void logicalCheck(def useLog) {
             tmp = getSum(formDataOld, 'taxPeriodRuble')
             if (row.preChargeRuble != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
-                return
+                return false
             }
 
             // 16. Арифметическая проверка графы 19
             tmp = getColumn13or15or19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
             if (row.taxPeriodCurrency != tmp) {
                 logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
-                return
+                return false
             }
 
             // 17. Арифметическая проверка графы 20
             if (row.taxPeriodRuble != round(row.taxPeriodCurrency * row.rateOfTheBankOfRussia, 2)) {
                 logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
-                return
+                return false
             }
 
             // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
@@ -357,22 +379,104 @@ void logicalCheck(def useLog) {
             // 18. Проверка итогового значений по всей форме (графа 13..20)
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    hindError = true
                     logger.error('Итоговые значения рассчитаны неверно!')
-                    return
+                    return false
                 }
+            }
+        }
+    }
+    return true
+}
+
+/**
+ * Проверки соответствия НСИ.
+ */
+def checkNSI() {
+    // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
+    if (false) {
+        logger.warn('Неверный курс валюты!')
+        return false
+    }
+    return true
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
             }
         }
     }
 }
 
 /**
- * Проверки соответствия НСИ.
+ * Консолидация.
  */
-void checkNSI() {
-    // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
-    if (false) {
-        logger.warn('Неверный курс валюты!')
+void consolidation() {
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+}
+
+/**
+ * Проверки при переходе "Отменить принятие".
+ */
+void checkOnCancelAcceptance() {
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), formData.getKind());
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
+        }
+    }
+}
+
+/**
+ * Принять.
+ */
+void acceptance() {
+    if (!logicalCheck(true) || !checkNSI()) {
+        return
+    }
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 

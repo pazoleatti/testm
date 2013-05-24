@@ -8,11 +8,15 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- откуда брать "Отчетная дата" для логических проверок?
  *		- откуда брать последний отчетный день месяца?
+ *      - консолидация (в рамках выделенных разделов)
  *
  * @author rtimerbaev
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE :
+        checkCreation()
+        break
     case FormDataEvent.CHECK :
         logicalCheck(true)
         checkNSI()
@@ -27,6 +31,30 @@ switch (formDataEvent) {
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
+        break
+    // проверка при "подготовить"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :
+        checkOnPrepareOrAcceptance('Подготовка')
+        break
+    // проверка при "принять"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
+        checkOnPrepareOrAcceptance('Принятие')
+        break
+    // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
+        checkOnCancelAcceptance()
+        break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        acceptance()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -96,14 +124,10 @@ void calc() {
     def requiredColumns = ['series', 'amount', 'nominal', 'shortPositionDate',
             'balance2', 'averageWeightedPrice', 'termBondsIssued']
 
-    def hasError = false
-    formData.dataRows.each { row ->
-        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
-            hasError = true
+    for (def row : formData.dataRows) {
+        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            return
         }
-    }
-    if (hasError) {
-        return
     }
 
     /*
@@ -143,7 +167,7 @@ void calc() {
  *
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
-void logicalCheck(def useLog) {
+def logicalCheck(def useLog) {
     // список проверяемых столбцов (графа 2..7)
     def requiredColumns = ['series', 'amount', 'nominal', 'shortPositionDate',
             'balance2', 'averageWeightedPrice', 'termBondsIssued']
@@ -164,7 +188,7 @@ void logicalCheck(def useLog) {
         // TODO (Ramil Timerbaev) в чтз нет проверки объязательных полей
         // . Проверка объязательных полей (графа 2..7)
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, useLog)) {
-            return
+            return false
         }
 
         // 1. Проверка даты приобретения (открытия короткой позиции) (графа 4)
@@ -174,14 +198,14 @@ void logicalCheck(def useLog) {
         def reportDay = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
         if (row.shortPositionDate > reportDay) {
             logger.error('Неверно указана дата приобретения (открытия короткой позиции)!')
-            return
+            return false
         }
 
         // 2. Арифметическая проверка графы 8
         if (row.termBondsIssued != null || row.termBondsIssued != 0) {
             if (row.percIncome > getColumn8(row, lastDay)) {
                 logger.error('Неверно рассчитана графа «Процентный доход с даты приобретения»!')
-                return
+                return false
             }
         }
     }
@@ -204,24 +228,108 @@ void logicalCheck(def useLog) {
         sum += totalRow.percIncome
     }
     if (hasError) {
-        return
+        return false
     }
 
     // 5. Проверка итоговых значений по всей форме
     def totalRow = formData.getDataRow('total')
     if (totalRow.percIncome != sum) {
         logger.error('Итоговые значений рассчитаны неверно!')
-        return
+        return false
     }
+    return true
 }
 
 /**
  * Проверки соответствия НСИ.
  */
-void checkNSI() {
+def checkNSI() {
     // графа 5
     if (false) {
         logger.warn('Балансовый счёт в справочнике отсутствует! ')
+    }
+    return true
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    // TODO (Ramil Timerbaev) поменять
+
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+}
+
+/**
+ * Проверки при переходе "Отменить принятие".
+ */
+void checkOnCancelAcceptance() {
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), formData.getKind());
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
+        }
+    }
+}
+
+/**
+ * Принять.
+ */
+void acceptance() {
+    if (!logicalCheck(true) || !checkNSI()) {
+        return
+    }
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id,
+            formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 
