@@ -65,14 +65,12 @@ public class FormDataDaoTest {
 		Assert.assertEquals(Integer.valueOf(1), formDataWithoutRows.getDepartmentId());
 		Assert.assertEquals(FormDataKind.SUMMARY, formDataWithoutRows.getKind());
 		Assert.assertEquals(WorkflowState.CREATED, formDataWithoutRows.getState());
-		Assert.assertEquals(getDate(2013, 0, 1), formDataWithoutRows.getCreationDate());
 
 		Assert.assertEquals(formData.getId(), formDataWithoutRows.getId());
 		Assert.assertEquals(formData.getReportPeriodId(), formDataWithoutRows.getReportPeriodId());
 		Assert.assertEquals(formData.getDepartmentId(), formDataWithoutRows.getDepartmentId());
 		Assert.assertEquals(formData.getKind(), formDataWithoutRows.getKind());
 		Assert.assertEquals(formData.getState(), formDataWithoutRows.getState());
-		Assert.assertEquals(formData.getCreationDate(), formDataWithoutRows.getCreationDate());
 	}
 
 	private BigDecimal getNumericValue(double value, int scale) {
@@ -116,12 +114,9 @@ public class FormDataDaoTest {
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
 		formData.setReportPeriodId(1);
-		formData.setCreationDate(getDate(2013, 0, 2));
 
 		long formDataId = formDataDao.save(formData);
 		formData = formDataDao.get(formDataId);
-
-		Assert.assertEquals(getDate(2013, 0, 2), formData.getCreationDate());
 
 		Assert.assertEquals(2, formData.getDataRows().size());
 
@@ -158,7 +153,6 @@ public class FormDataDaoTest {
 		fd.setKind(FormDataKind.SUMMARY);
 		fd.setState(WorkflowState.CREATED);
 		fd.setReportPeriodId(Constants.REPORT_PERIOD_ID);
-		fd.setCreationDate(getDate(2013, 0, 3));
 		long savedFormDataId = formDataDao.save(fd);
 
 		fd = formDataDao.get(savedFormDataId);
@@ -170,7 +164,6 @@ public class FormDataDaoTest {
 				fd.getState());
 		Assert.assertEquals("Изменился идентификатор отчётного периода",
 				new Integer(Constants.REPORT_PERIOD_ID), fd.getReportPeriodId());
-		Assert.assertEquals(getDate(2013, 0, 3), fd.getCreationDate());
 
 		int rowsCount = fd.getDataRows().size();
 		fd.appendDataRow();
@@ -188,7 +181,6 @@ public class FormDataDaoTest {
 				Department.ROOT_BANK_ID), fd.getDepartmentId());
 		Assert.assertEquals("Изменилась стадия ЖЦ", WorkflowState.CREATED,
 				fd.getState());
-		Assert.assertEquals(getDate(2013, 0, 3), fd.getCreationDate());
 
 		// Проверяем удаление записи
 		formDataDao.delete(savedFormDataId);
@@ -230,7 +222,6 @@ public class FormDataDaoTest {
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
 		formData.setReportPeriodId(1);
-		formData.setCreationDate(new Date());
 
 		return formData;
 	}

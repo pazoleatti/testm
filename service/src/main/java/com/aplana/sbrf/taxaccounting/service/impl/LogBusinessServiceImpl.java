@@ -25,9 +25,4 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
 		return logBusinessDao.getDeclarationLogsBusiness(declarationId);
 	}
-
-	@Override
-	public void add(LogBusiness logBusiness) {
-		logBusinessDao.add(logBusiness);
-	}
 }

@@ -160,12 +160,14 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private FormTemplate formTemplate;
 	private Department department;
 	private ReportPeriod reportPeriod;
+	private Date acceptanceDate;
+	private Date creationDate;
 
 	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
 
 	private int skip = 0;
-	
-	
+
+
 	public FormDataXlsxReportBuilder() throws IOException {
         super();
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
@@ -177,18 +179,20 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		}
 		sheet = workBook.getSheet("Учет налогов");
 		cellStyleBuilder = new CellStyleBuilder();
-		
+
 	}
-	
+
 	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked) throws IOException {
 		this();
 		this.data = data.getData();
-		this.formTemplate = data.getFormTemplate();
+		formTemplate = data.getFormTemplate();
 		this.isShowChecked = isShowChecked;
-		this.department = data.getDepartment();
-		this.reportPeriod = data.getReportPeriod();
+		department = data.getDepartment();
+		reportPeriod = data.getReportPeriod();
+		acceptanceDate = data.getAcceptanceDate();
+		creationDate = data.getCreationDate();
 	}
-	
+
 	protected void createTableHeaders(){
 		Row row = sheet.createRow(rowNumber);
 		boolean isSecondTable = false;
@@ -246,7 +250,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 				cell.setCellValue(el.getName());
 			}
 		}
-		
+
 		/*
 		 * If we want to display number of rows
 		 */
@@ -258,18 +262,18 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 					++k;
 					continue;
 				}
-					
+
 				Cell cell = row3.createCell(i - k - 1);
 				cell.setCellValue(i - k);
 				cell.setCellStyle(cellStyleBuilder.cellStyle);
 			}
 		}
-		
-		
+
+
 		cellNumber = 0;
 		//rowNumber = sheet.getLastRowNum() + 1;
 	}
-	
+
 	/*
 	 * realNumber - the real number that we iterate over list of columns
 	 * startCell - the cell in workbook to be filled
@@ -294,8 +298,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 					cellNumber++;
 				}
 				else
-					++k; // again to check whether the second part of the header field to be skipped 
-				
+					++k; // again to check whether the second part of the header field to be skipped
+
 			}
 			if(startCell < endCell -k)
 				tableBorders(startCell,endCell - k,rowNumber, rowNumber);
@@ -304,10 +308,10 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		}else{
 			groupCells(startCell, endCell, row1, row2);
 		}
-		
-		
+
+
 	}
-	
+
 	private void groupCells(int startCell,int endCell,Row row1,Row row2){
 		Cell cell = row1.createCell(startCell);
 		cell.setCellStyle(cellStyleBuilder.cellStyle);
@@ -323,24 +327,24 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		}
 		tableBorders(startCell,endCell,rowNumber, rowNumber);
 	}
-	
+
 	private void tableBorders(int startCell,int endCell, int startRow, int endRow){
 		if(startCell == endCell && startRow == endRow)
 			return;
 		CellRangeAddress region = new CellRangeAddress(
-				startRow, 
-				endRow, 
-				startCell, 
+				startRow,
+				endRow,
+				startCell,
 				endCell);
-		
+
 		RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook);
 		RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook);
 		RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook);
 		RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook);
 		sheet.addMergedRegion(region);
-		
+
 	}
-	
+
 	protected void createDataForTable(){
 		sheet.shiftRows(rowNumber + 1, sheet.getLastRowNum(), data.getDataRows().size() + 2);
 		for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : data.getDataRows()) {
@@ -349,7 +353,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
 				Cell cell = mergedDataCells(dataRow.getCell(alias.getValue()), row, alias.getKey());
-				
+
 				if(obj instanceof String){
 					String str = (String)obj;
 					CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING,dataRow.getCell(alias.getValue()).getStyle(),
@@ -378,11 +382,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 					cell.setCellValue("");
 				}
 			}
-			
+
 		}
 
 	}
-	
+
 	protected void fillHeader(){
 		logger.debug(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
 		StringBuilder sb;
@@ -391,7 +395,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		Date printDate;
 		Row r;
 		Cell c;
-		
+
 		//Fill subdivision
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
@@ -399,17 +403,17 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		sb = new StringBuilder(c.getStringCellValue());
 		sb.append(" ").append(department.getName());
 		c.setCellValue(sb.toString());
-		
+
 		//Fill date
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_DATE_CREATE).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
 
-		if(data.getState() == WorkflowState.ACCEPTED && data.getAcceptanceDate()!=null){
-			printDate = data.getAcceptanceDate();
+		if(data.getState() == WorkflowState.ACCEPTED && acceptanceDate!=null){
+			printDate = acceptanceDate;
 		} else {
-			printDate = data.getCreationDate();
+			printDate = creationDate;
 		}
 		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
 		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
@@ -423,16 +427,16 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
 				new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
 		c.setCellValue(sb.toString());
-		
+
 		//Fill report name
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
 		c = r.getCell(ar.getFirstCell().getCol());
 		c.setCellValue(formTemplate.getFullName());
-		
+
 		//Fill code
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
-		
+
 		StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
 		int j = 0;
 		while(sToK.hasMoreTokens()){
@@ -442,7 +446,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			c = r.getCell(ar.getFirstCell().getCol());
 			if(c == null)
 				c = r.createCell(ar.getFirstCell().getCol());
-			
+
 			if(j != 0){
 				CellStyle style = workBook.createCellStyle();
 				Font font = workBook.createFont();
@@ -451,11 +455,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 				c.setCellStyle(style);
 			}
 			c.setCellValue(sToK.nextToken());
-			
+
 			j++;
 		}
-		
-		
+
+
 		//Fill period
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_PERIOD).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
@@ -465,12 +469,12 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName()));
 		c.setCellValue(sb.toString());
 	}
-	
+
 	protected void fillFooter(){
 		AreaReference ar;
 		Row r;
 		Cell c;
-		
+
 		//Fill position and FIO
 		ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
 		r = sheet.getRow(ar.getFirstCell().getRow());
@@ -492,15 +496,16 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			rowNumber++;
 			sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);
 		}
-		
+
 		//Fill performer
 		if(data.getPerformer()!=null){
 			r = sheet.getRow(sheet.getLastRowNum());
 			c = r.getCell(0);
 			c.setCellValue(data.getPerformer().getName() + "/" + data.getPerformer().getPhone());
 		}
-		
-		
+
+		;
+
 	}
 	
 	/*

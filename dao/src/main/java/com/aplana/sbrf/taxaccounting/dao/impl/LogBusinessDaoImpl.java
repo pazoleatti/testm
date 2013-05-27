@@ -3,15 +3,20 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 
@@ -21,6 +26,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
+	private static final String ACCEPTANCE_DATE_NOT_FOUND_MESSAGE = "Дата принятия налоговой формы с id = %d не найдена в БД";
+	private static final String CREATION_DATE_NOT_FOUND_MESSAGE = "Дата создания налоговой формы с id = %d не найдена в БД";
 
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
@@ -32,13 +39,13 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			log.setUserId(rs.getInt("user_id"));
 			log.setRoles(rs.getString("roles"));
 
-			if (rs.getInt("declaration_data_id") != 0) {
+			if (rs.getLong("declaration_data_id") != 0) {
 				log.setDeclarationId(rs.getLong("declaration_data_id"));
 			} else {
 				log.setDeclarationId(null);
 			}
 
-			if (rs.getInt("form_data_id") != 0) {
+			if (rs.getLong("form_data_id") != 0) {
 				log.setFormId(rs.getLong("form_data_id"));
 			} else {
 				log.setFormId(null);
@@ -73,6 +80,33 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(FORM_NOT_FOUND_MESSAGE, formId);
+		}
+	}
+
+	@Override
+	public Date getFormAcceptanceDate(long formId) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select max(log_date) from log_business where form_data_id = ? and" +
+					" (event_id = ? or event_id = ? or event_id = ?)",
+					new Object[]{formId, FormDataEvent.MOVE_APPROVED_TO_ACCEPTED.getCode(),
+							FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getCode(),
+							FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getCode()}, Timestamp.class
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(ACCEPTANCE_DATE_NOT_FOUND_MESSAGE, formId);
+		}
+	}
+
+	@Override
+	public Date getFormCreationDate(long formId) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select log_date from log_business where form_data_id = ? and event_id = ? ",
+					new Object[]{formId, FormDataEvent.CREATE.getCode()}, Timestamp.class
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(CREATION_DATE_NOT_FOUND_MESSAGE, formId);
 		}
 	}
 

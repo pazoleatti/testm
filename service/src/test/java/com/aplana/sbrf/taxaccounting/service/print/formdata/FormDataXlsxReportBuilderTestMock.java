@@ -249,8 +249,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		when(formData.getState()).thenReturn(WorkflowState.ACCEPTED);
 		when(formData.getPerformer()).thenReturn(formDataperformer);
 		when(formData.getSigners()).thenReturn(formDataSigners);
-		when(formData.getAcceptanceDate()).thenReturn(new Date());
-		
+
 		data.setData(formData);
 		data.setDepartment(department);
 		data.setReportPeriod(reportPeriod);

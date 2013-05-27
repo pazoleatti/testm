@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.model;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,8 +16,6 @@ public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
 
 	private WorkflowState state;
-	private Date acceptanceDate;
-	private Date creationDate;
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
@@ -292,42 +289,6 @@ public class FormData extends IdentityObject<Long> {
 		this.signers = signers;
 	}
 
-	/**
-	 * Получить дату прехода в состояние ACCEPTED
-	 * 
-	 * @return
-	 */
-	public Date getAcceptanceDate() {
-		return acceptanceDate;
-	}
-
-	/**
-	 * Установить дату перехода в состояние ACCEPTED
-	 * 
-	 * @param acceptanceDate
-	 */
-	public void setAcceptanceDate(Date acceptanceDate) {
-		this.acceptanceDate = acceptanceDate;
-	}
-
-	/**
-	 * Получить дату создания налоговой формы
-	 *
-	 * @return creationDate
-	 */
-	public Date getCreationDate() {
-		return creationDate;
-	}
-
-	/**
-	 * Установить дату создания налоговой формы
-	 *
-	 * @param creationDate
-	 */
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
-	}
-
 	public List<DataRow<HeaderCell>> getHeaders() {
 		return headers;
 	}
@@ -351,8 +312,6 @@ public class FormData extends IdentityObject<Long> {
 		StringBuilder builder = new StringBuilder();
 		builder.append("FormData [state=");
 		builder.append(state);
-		builder.append(", acceptanceDate=");
-		builder.append(acceptanceDate);
 		builder.append(", kind=");
 		builder.append(kind);
 		builder.append(", departmentId=");

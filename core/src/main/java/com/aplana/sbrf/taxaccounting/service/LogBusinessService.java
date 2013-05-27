@@ -21,12 +21,4 @@ public interface LogBusinessService {
 	 * @return объект, представляющий историю событий для налоговой формы
 	 */
 	List<LogBusiness> getFormLogsBusiness(long formId);
-
-	/**
-	 * добавить информацию в историю событий декларации/налоговой формы
-	 * если нужно добавить декларацию, тогда в logBusiness должно быть declarationId отличноеот null, и formId равное null
-	 * для формы vise versa
-	 * @param logBusiness информация для хранения истории
-	 */
-	void add(LogBusiness logBusiness);
 }

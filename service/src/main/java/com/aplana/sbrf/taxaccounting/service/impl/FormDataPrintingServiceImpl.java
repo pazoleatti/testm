@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.io.IOException;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.logging.Log;
@@ -37,9 +34,11 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 	private DepartmentDao departmentDao;
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
+	@Autowired
+	private LogBusinessDao logBusinessDao;
 	
 	@Override
-	public String generateExcel(int userId, long formDataId,boolean isShowChecked) {
+	public String generateExcel(int userId, long formDataId, boolean isShowChecked) {
 		if (formDataAccessService.canRead(userId, formDataId)) {
 			FormDataReport data = new FormDataReport();
 			FormData formData = formDataDao.get(formDataId);
@@ -51,6 +50,8 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 			data.setDepartment(department);
 			data.setFormTemplate(formTemplate);
 			data.setReportPeriod(reportPeriod);
+			data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
+			data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
 			try {
 				FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,isShowChecked);
 				return builder.createReport();

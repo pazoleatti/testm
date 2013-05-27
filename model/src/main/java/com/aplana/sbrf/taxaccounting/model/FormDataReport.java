@@ -1,12 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.Date;
+
 public class FormDataReport {
 	
 	private FormData data;
 	private FormTemplate formTemplate;
 	private Department department;
 	private ReportPeriod reportPeriod;
-	
+	private Date acceptanceDate;
+	private Date creationDate;
+
 	public FormData getData() {
 		return data;
 	}
@@ -31,6 +35,16 @@ public class FormDataReport {
 	public void setReportPeriod(ReportPeriod reportPeriod) {
 		this.reportPeriod = reportPeriod;
 	}
-	
-	
+	public Date getAcceptanceDate() {
+		return acceptanceDate;
+	}
+	public void setAcceptanceDate(Date acceptanceDate) {
+		this.acceptanceDate = acceptanceDate;
+	}
+	public Date getCreationDate() {
+		return creationDate;
+	}
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 }

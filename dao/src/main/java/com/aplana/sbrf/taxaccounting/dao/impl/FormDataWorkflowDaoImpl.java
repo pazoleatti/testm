@@ -17,7 +17,7 @@ public class FormDataWorkflowDaoImpl extends AbstractDao implements FormDataWork
 	@Override
 	@Transactional(readOnly=false)
 	public void changeFormDataState(long formDataId, WorkflowState workflowState, Date acceptanceDate) {
-		int rows = getJdbcTemplate().update("update form_data set state=?, acceptance_date=? where id = ?", workflowState.getId(), acceptanceDate, formDataId);
+		int rows = getJdbcTemplate().update("update form_data set state=? where id = ?", workflowState.getId(), formDataId);
 		if (rows == 0) {
 			throw new DaoException("Не удалось изменить состояние у записи с id = " + formDataId + ", возможно идентификатор неверен");
 		}

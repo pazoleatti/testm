@@ -1,5 +1,5 @@
-insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, creation_date)
-	values (1, 1, 1, 1, 3, 1, date '2013-01-01');
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id)
+	values (1, 1, 1, 1, 3, 1);
 	
 insert into data_row(id, form_data_id, alias, ord) values (1, 1, 'testAlias', 1);
 

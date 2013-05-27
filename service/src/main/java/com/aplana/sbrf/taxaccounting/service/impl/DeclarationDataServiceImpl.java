@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
@@ -22,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -78,7 +78,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private DeclarationTemplateService declarationTemplateService;
 
 	@Autowired
-	private LogBusinessService logBusinessService;
+	private LogBusinessDao logBusinessDao;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -350,7 +350,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 		log.setRoles(roles.toString());
 
-		logBusinessService.add(log);
+		logBusinessDao.add(log);
 	}
 
 }

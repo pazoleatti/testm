@@ -5,19 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -53,7 +47,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private ObjectLockDao lockDao;
 	@Autowired
-	private LogBusinessService logBusinessService;
+	private LogBusinessDao logBusinessDao;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -112,7 +106,6 @@ public class FormDataServiceImpl implements FormDataService {
 		result.setDepartmentId(departmentId);
 		result.setKind(kind);
 		result.setReportPeriodId(reportPeriodId);
-		result.setCreationDate(new Date());
 
 		for (DataRow<Cell> predefinedRow : form.getRows()) {
 			DataRow<Cell> dataRow = result.appendDataRow(predefinedRow.getAlias());
@@ -521,7 +514,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 		log.setRoles(roles.toString());
 
-		logBusinessService.add(log);
+		logBusinessDao.add(log);
 	}
 
 }
