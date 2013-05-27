@@ -109,14 +109,16 @@ public class TAUserServiceImpl implements TAUserService {
 	}
 
     @Override
-    public List<TAUserFull> lisAllFullUsers() {
+    public List<TAUserFull> lisAllFullActiveUsers() {
         List<TAUserFull> taUserFullList = new ArrayList<TAUserFull>();
         for(Integer userId : userDao.getUserIds()){
             TAUserFull userFull = new TAUserFull();
             TAUser user = userDao.getUser(userId);
-            userFull.setUser(user);
-            userFull.setDepartment(departmentDao.getDepartment(user.getDepartmentId()));
-            taUserFullList.add(userFull);
+            if(user.isActive()){
+                userFull.setUser(user);
+                userFull.setDepartment(departmentDao.getDepartment(user.getDepartmentId()));
+                taUserFullList.add(userFull);
+            }
         }
 
         return taUserFullList;

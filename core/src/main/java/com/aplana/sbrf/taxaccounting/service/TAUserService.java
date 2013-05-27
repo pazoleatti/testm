@@ -18,6 +18,6 @@ public interface TAUserService {
 	void updateUser(TAUser user);
 	int createUser(TAUser user);
 	List<TAUser> listAllUsers();
-    List<TAUserFull> lisAllFullUsers();
+    List<TAUserFull> lisAllFullActiveUsers();
 
 }

@@ -53,6 +53,7 @@ public class TAUserServiceTest {
 		user.setEmail("controlBank@bank.ru");
 		user.setDepartmentId(USER_DEPARTMENT_ID);
 		user.setRoles(listUserRoles);
+        user.setActive(true);
 		
 		when(userDao.getUser(USER_OPERATOR_ID)).thenReturn(user);
 		when(userDao.getUser(1)).thenReturn(user);
@@ -95,7 +96,7 @@ public class TAUserServiceTest {
 
     @Test
     public void testListAllFullUsers(){
-        assertEquals(3, service.lisAllFullUsers().size());
+        assertEquals(3, service.lisAllFullActiveUsers().size());
     }
 
 }

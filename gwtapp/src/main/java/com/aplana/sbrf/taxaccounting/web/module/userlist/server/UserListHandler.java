@@ -29,7 +29,7 @@ public class UserListHandler extends AbstractActionHandler<GetUserListAction, Ge
     @Override
     public GetUserListResult execute(GetUserListAction action, ExecutionContext context) throws ActionException {
         GetUserListResult result = new GetUserListResult();
-        result.setTaUserList(taUserService.lisAllFullUsers());
+        result.setTaUserList(taUserService.lisAllFullActiveUsers());
         return result;
     }
 
