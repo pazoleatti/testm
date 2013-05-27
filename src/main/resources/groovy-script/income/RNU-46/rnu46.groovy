@@ -9,7 +9,6 @@
  *		- получение значений за предыдущий месяц, за предыдущие месяцы
  *		- определение номера месяца
  *		- проверка уникальности инвентарного номера
- *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -112,11 +111,11 @@ void calc() {
      */
 
     // список проверяемых столбцов (графа 2..7, 9, 17..19)
-    def columns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
+    def requiredColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
             'specCoef', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
     for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+        if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
@@ -222,7 +221,7 @@ def logicalCheck(def useLog) {
             'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation',
             'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
-    def hasError = false
+    def hasError
     for (def row : formData.dataRows) {
         // 1. Обязательность заполнения поля (графа 1..18)
         if (!checkRequiredColumns(row, columns, useLog)) {
@@ -267,6 +266,7 @@ def logicalCheck(def useLog) {
         }
 
         // 6. Арифметическая проверка графы 8
+        hasError = false
         if (row.specCoef < 0 || row.usefulLifeWithUsed != (row.usefulLife - row.monthsUsed) / row.specCoef) {
             hasError = true
         } else if (row.specCoef == 0) {
@@ -345,6 +345,7 @@ def logicalCheck(def useLog) {
         }
 
         // 12. Арифметическая проверка графы 15
+        hasError = false
         if (isFirstMonth() && row.amortTaxPeriod != row.amortMonth) {
             hasError = true
 
@@ -358,6 +359,7 @@ def logicalCheck(def useLog) {
         }
 
         // 13. Арифметическая проверка графы 16
+        hasError = false
         if (isFirstMonth() && row.amortExploitation != row.amortMonth) {
             hasError = true
 
@@ -398,7 +400,6 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -411,7 +412,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

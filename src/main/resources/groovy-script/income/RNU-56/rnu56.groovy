@@ -9,7 +9,7 @@
  *		- уточнить про дату окончания отчётного периода (или отчетная дата?!), откуда ее брать?
  *		- уточнить чтз про графу 17, в нф всего графов 15
  *		- уточнить про вычисление 14ой графы, последний блок, по предыдущим условиям туда никогда не попадет
- *      - консолидация
+ *      - консолидация (не создается консолидированная форма)
  *
  * @author rtimerbaev
  */
@@ -422,7 +422,7 @@ def logicalCheck(def useLog) {
 /**
  * Проверки соответствия НСИ.
  */
-void checkNSI() {
+def checkNSI() {
     if (!formData.dataRows.isEmpty()) {
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
@@ -473,7 +473,6 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -486,7 +485,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

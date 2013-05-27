@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - консолидация (объединение строк в рамках выделенных разделов)
  *
  * @author rtimerbaev
  */
@@ -51,7 +50,7 @@ switch (formDataEvent) {
         consolidation()
         // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
-        logicalCheck(false)
+        logicalCheck()
         checkNSI()
         break
 }
@@ -108,7 +107,7 @@ def logicalCheck() {
     def requiredColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
 
     for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns)) {
             return false
         }
     }
@@ -157,24 +156,31 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    // TODO (Ramil Timerbaev) поменять
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    // удалить нефиксированные строки
+    def deleteRows = []
+    formData.dataRows.each { row ->
+        if (!isFixedRow(row)) {
+            deleteRows += row
+        }
+    }
+    deleteRows.each { row ->
+        formData.dataRows.remove(getIndex(row))
+    }
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
+                // подразделы
+                (1..5).each { section ->
+                    copyRows(source, formData, section.toString(), (section + 1).toString())
                 }
+                copyRows(source, formData, '6', null)
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -197,7 +203,7 @@ void checkOnCancelAcceptance() {
  * Принять.
  */
 void acceptance() {
-    if (!logicalCheck(true) || !checkNSI()) {
+    if (!logicalCheck() || !checkNSI()) {
         return
     }
     departmentFormTypeService.getFormDestinations(formDataDepartment.id,
@@ -237,6 +243,13 @@ def getIndex(def row) {
 }
 
 /**
+ * Получить номер строки в таблице по псевдонимиу.
+ */
+def getIndex(def form, def rowAlias) {
+    return form.dataRows.indexOf(form.getDataRow(rowAlias))
+}
+
+/**
  * Проверить заполненость обязательных полей.
  *
  * @param row строка
@@ -264,4 +277,28 @@ def checkRequiredColumns(def row, def columns) {
         return false
     }
     return true
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceForm форма источник
+ * @param destinationForm форма приемник
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
+    def from = getIndex(sourceForm, fromAlias) + 1
+    def to = (toAlias != null ? getIndex(sourceForm, toAlias) : sourceForm.dataRows.size())
+    if (from > to) {
+        return
+    }
+    sourceForm.dataRows.subList(from, to).each { row ->
+        if (toAlias != null) {
+            destinationForm.dataRows.add(getIndex(destinationForm, toAlias), row)
+        } else {
+            destinationForm.dataRows.add(row)
+        }
+    }
 }

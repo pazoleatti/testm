@@ -8,7 +8,6 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
- *      - консолидация (проверить)
  *
  * @author rtimerbaev
  */
@@ -429,7 +428,6 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -442,7 +440,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

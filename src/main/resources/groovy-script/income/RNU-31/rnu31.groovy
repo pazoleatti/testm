@@ -28,7 +28,7 @@ switch (formDataEvent) {
         // addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        deleteRow()
+        // deleteRow()
         break
     // проверка при "подготовить"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :
@@ -52,7 +52,6 @@ switch (formDataEvent) {
         // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
-        checkNSI()
         break
 }
 
@@ -202,25 +201,31 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    // TODO (Ramil Timerbaev) поменять
+    // занулить данные и просуммировать из источников
 
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    def row = formData.getDataRow('total')
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    // графа 3..12
+    def columns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
+            'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
+            'eurobondsRF', 'itherEurobonds', 'corporateBonds']
+    columns.each { alias ->
+        row.getCell(alias).setValue(0)
+    }
+
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def sourceRow
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
+                sourceRow = source.getDataRow('total')
+                columns.each { alias ->
+                    row.getCell(alias).setValue(sourceRow.getCell(alias).getValue())
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -267,6 +272,13 @@ void checkCreation() {
 /*
  * Вспомогательные методы.
  */
+
+/**
+ * Проверка является ли строка итоговой.
+ */
+def isTotal(def row) {
+    return row != null && row.getAlias() != null && row.getAlias().contains('total')
+}
 
 /**
  * Проверка пустое ли значение.

@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - уникальность инвентарного номера
- *      - консолидация (объединение строк в рамках выделенных разделов?!?! в чтз просто объединение строк)
  *
  * @author rtimerbaev
  */
@@ -126,13 +125,13 @@ void calc() {
      */
 
     // Список проверяемых столбцов (графа 2..14, 18, 19, 21..23)
-    def columns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
+    def requiredColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
             'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
             'sum', 'sumInFact', 'costProperty', 'marketPrice', 'usefullLifeEnd',
             'monthsLoss', 'saledPropertyCode', 'saleCode', 'propertyType']
 
     for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
@@ -376,25 +375,30 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    // TODO (Ramil Timerbaev) поменять
+    // удалить нефиксированные строки
+    def deleteRows = []
+    formData.dataRows.each { row ->
+        if (!isFixedRow(row)) {
+            deleteRows += row
+        }
+    }
+    deleteRows.each { row ->
+        formData.dataRows.remove(getIndex(row))
+    }
 
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
-
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
+                // подразделы
+                ['A', 'B', 'V', 'G', 'D', 'E'].each { section ->
+                    copyRows(source, formData, section, 'total' + section)
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -443,13 +447,6 @@ void checkCreation() {
  */
 
 /**
- * Проверка является ли строка итоговой.
- */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
-}
-
-/**
  * Проверка является ли строка фиксированной.
  */
 def isFixedRow(def row) {
@@ -479,6 +476,13 @@ def isSection(def section, def row) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Получить номер строки в таблице по псевдонимиу.
+ */
+def getIndex(def form, def rowAlias) {
+    return form.dataRows.indexOf(form.getDataRow(rowAlias))
 }
 
 /**
@@ -513,4 +517,25 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceForm форма источник
+ * @param destinationForm форма приемник
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
+ *      если = null, то копировать с 0 строки
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
+    def from = getIndex(sourceForm, fromAlias) + 1
+    def to = getIndex(sourceForm, toAlias)
+    if (from > to) {
+        return
+    }
+    sourceForm.dataRows.subList(from, to).each { row ->
+        destinationForm.dataRows.add(getIndex(destinationForm, toAlias), row)
+    }
 }

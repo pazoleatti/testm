@@ -7,7 +7,7 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  * 		- про нумерацию пока не уточнили, пропустить
- *      - консолидация (проверить)
+ *      - консолидация (не создается консолидированная форма)
  *
  * @author rtimerbaev
  */
@@ -31,23 +31,23 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-// проверка при "подготовить"
+    // проверка при "подготовить"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :
         checkOnPrepareOrAcceptance('Подготовка')
         break
-// проверка при "принять"
+    // проверка при "принять"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED :
         checkOnPrepareOrAcceptance('Принятие')
         break
-// проверка при "вернуть из принята в подготовлена"
+    // проверка при "вернуть из принята в подготовлена"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
         checkOnCancelAcceptance()
         break
-// после принятия из подготовлена
+    // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         acceptance()
         break
-// обобщить
+    // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
@@ -270,7 +270,7 @@ def logicalCheck(def useLog) {
             // 6. Проверка на уникальность поля «№ пп» (графа 1)
             if (i != row.number) {
                 logger.error('Нарушена уникальность номера по порядку!')
-                break
+                return false
             }
             i += 1
 
@@ -372,7 +372,6 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -385,7 +384,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

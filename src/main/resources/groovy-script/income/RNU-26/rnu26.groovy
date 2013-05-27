@@ -8,7 +8,6 @@
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- логические проверки не доделаны, потому что возможно они поменяются
  * 		- про нумерацию пока не уточнили, пропустить
- *      - консолидация
  *
  * @author rtimerbaev
  */
@@ -475,7 +474,6 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -488,7 +486,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -656,7 +654,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
 
     // если не заполнены графа 11 и графа 12, то графа 13 должна быть заполнена вручную
-    if (row.marketQuotation == null && row.rubCourse == null) {
+    if (row.marketQuotation != null && row.rubCourse != null) {
         columns -= 'marketQuotationInRub'
     }
 

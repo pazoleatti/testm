@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- про нумерацию пока не уточнили, пропустить
- *	    - консолидация (проверить)
  *
  * @author rtimerbaev
  */
@@ -367,13 +366,28 @@ def checkNSI() {
 }
 
 /**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
  * Консолидация.
  */
 void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -386,7 +400,7 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

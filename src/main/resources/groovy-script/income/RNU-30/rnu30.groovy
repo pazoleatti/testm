@@ -8,7 +8,6 @@
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
  *		- логическая проверка 13 уникальность поля ПП (графа 1)
  *		- 13 графу считать только для первых строк или для всех?
- *      - консолидация (объедиинение строк в рамках разделов)
  *
  * @author rtimerbaev
  */
@@ -135,7 +134,7 @@ void calc() {
     requiredColumnsAB = ['debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
     for (def row : formData.dataRows) {
-        if (!isTotal(row)) {
+        if (!isFixedRow(row)) {
             def requiredColumns = (isFirstSection(row) ? requiredColumns1 : requiredColumnsAB)
             if (!checkRequiredColumns(row, requiredColumns, true)) {
                 return
@@ -416,25 +415,29 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    // TODO (Ramil Timerbaev) поменять
+    // удалить нефиксированные строки
+    def deleteRows = []
+    formData.dataRows.each { row ->
+        if (!isFixedRow(row)) {
+            deleteRows += row
+        }
+    }
+    deleteRows.each { row ->
+        formData.dataRows.remove(getIndex(row))
+    }
 
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
-
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
-                }
+                copyRows(source, formData, null, 'total')
+                copyRows(source, formData, 'A', 'totalA')
+                copyRows(source, formData, 'B', 'totalB')
             }
         }
     }
-    logger.info('Формирование консолидированной первичной формы прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -508,6 +511,13 @@ def isEmpty(def value) {
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
+}
+
+/**
+ * Получить номер строки в таблице по псевдонимиу.
+ */
+def getIndex(def form, def rowAlias) {
+    return form.dataRows.indexOf(form.getDataRow(rowAlias))
 }
 
 /**
@@ -615,4 +625,25 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceForm форма источник
+ * @param destinationForm форма приемник
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
+ *      если = null, то копировать с 0 строки
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
+    def from = (fromAlias != null ? getIndex(sourceForm, fromAlias) + 1 : 0)
+    def to = getIndex(sourceForm, toAlias)
+    if (from > to) {
+        return
+    }
+    sourceForm.dataRows.subList(from, to).each { row ->
+        destinationForm.dataRows.add(getIndex(destinationForm, toAlias), row)
+    }
 }
