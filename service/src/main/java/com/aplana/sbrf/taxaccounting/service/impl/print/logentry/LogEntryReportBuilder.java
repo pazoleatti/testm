@@ -27,6 +27,7 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 
 	
 	public LogEntryReportBuilder(List<LogEntry> list){
+        super();
 		this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");
@@ -89,19 +90,23 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 			cell.setCellValue(i + 1);
 			switch (list.get(i).getLevel()) {
 			case ERROR:
-				cell = row.createCell(cellNumber++);
+				cell = row.createCell(cellNumber);
 				cell.setCellStyle(cs);
 				cell.setCellValue("ошибка");
+                cellNumber++;
 				break;
 			case WARNING:
-				cell = row.createCell(cellNumber++);
+				cell = row.createCell(cellNumber);
 				cell.setCellStyle(cs);
 				cell.setCellValue("предупреждение");
+                cellNumber++;
 				break;
 			case INFO:
-				cell = row.createCell(cellNumber++);
+				cell = row.createCell(cellNumber);
 				cell.setCellStyle(cs);
 				cell.setCellValue("");
+                fillWidth(cellNumber, cell.getStringCellValue().length());
+                cellNumber++;
 				break;
 			default:
 				break;

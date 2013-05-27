@@ -160,14 +160,14 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	private FormTemplate formTemplate;
 	private Department department;
 	private ReportPeriod reportPeriod;
-	
-	private Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
+
 	private Map<Integer, String> aliasMap  = new HashMap<Integer, String>();
 
 	private int skip = 0;
 	
 	
 	public FormDataXlsxReportBuilder() throws IOException {
+        super();
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
 		try {
 			workBook = WorkbookFactory.create(templeteInputStream);
@@ -380,10 +380,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			}
 			
 		}
-		for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
-			//logger.debug("----n" + width.getKey() + ":" + width.getValue());
-			sheet.setColumnWidth(width.getKey(), width.getValue() *256);
-		}
+
 	}
 	
 	protected void fillHeader(){
@@ -504,28 +501,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		}
 		
 		
-	}
-	
-	/*
-	 * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
-	 */
-	private void fillWidth(Integer cellNumber,Integer length){
-
-		if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMin && length <= cellWidthMax)
-			widthCellsMap.put(cellNumber, length);
-		else if(widthCellsMap.get(cellNumber) == null && length <= cellWidthMin){
-			widthCellsMap.put(cellNumber, cellWidthMin);
-		}
-		else if(widthCellsMap.get(cellNumber) == null && length >= cellWidthMax){
-			widthCellsMap.put(cellNumber, cellWidthMax);
-		}
-		else if(widthCellsMap.get(cellNumber) != null){
-			if (widthCellsMap.get(cellNumber).compareTo(length) < 0 && widthCellsMap.get(cellNumber).compareTo(cellWidthMin) > 0 )
-				widthCellsMap.put(cellNumber, length);
-		}
-		else
-			widthCellsMap.put(cellNumber, cellWidthMin);
-
 	}
 	
 	/*
