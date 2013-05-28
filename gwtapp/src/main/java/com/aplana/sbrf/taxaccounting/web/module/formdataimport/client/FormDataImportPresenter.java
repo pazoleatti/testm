@@ -77,6 +77,12 @@ public class FormDataImportPresenter
 									"Форма успешно импортирована");
 							getProxy().manualRevealFailed();
 						}
+						
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+							getProxy().manualRevealFailed();
+						}
 
 					}, FormDataImportPresenter.this));
 
