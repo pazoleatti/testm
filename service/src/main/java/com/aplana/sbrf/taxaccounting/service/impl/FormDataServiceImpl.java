@@ -100,15 +100,16 @@ public class FormDataServiceImpl implements FormDataService {
 	
 	@Override
 	public void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+		Date serviceStart = new Date();
 		FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
 		Date saveDate = new Date();
 		formDataDao.save(fd);
 		Date getDate = new Date();
 		formDataDao.get(fd.getId());
+		logger.info("Старт сервиса: " + serviceStart);
 		logger.info("Сохранение: " + saveDate);
-		logger.info("Сохранение: " + getDate);
+		logger.info("Получение: " + getDate);
 		logger.info("Текущая: " + new Date());
-		formDataDao.save(fd);
 		logBusinessService.addLogBusiness(fd.getId(), null, userDao.getUser(userId), FormDataEvent.IMPORT, null);
 	}
 
