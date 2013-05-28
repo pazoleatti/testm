@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -28,12 +27,13 @@ public class LogAreaPresenter extends
 
 		void setLogEntries(List<LogEntry> entries);
 		void setLogSize(int full, int error, int warn, int info);
-        void setFormPanel(FormPanel formPanel);
-        FormPanel getFormPanel();
 
 	}
 
 	private List<LogEntry> logEntries = new ArrayList<LogEntry>();
+
+    private static final String etab =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 	@Inject
 	public LogAreaPresenter(final EventBus eventBus, final MyView view) {
@@ -97,10 +97,57 @@ public class LogAreaPresenter extends
 			jArr.set(i, jObj);
 		}
 		requestJSON.put("listLogEntries", jArr);
-		
-		return requestJSON.toString();
+
+        //additional screening because we have two daserialization, first when write a string, second on server side
+		return requestJSON.toString().replace("\\\"","\\\\\"");
 		// TODO: SBRFACCTAX-2494
 	}
+
+    /*private static String encode(String data) {
+        StringBuffer out = new StringBuffer();
+
+        int i = 0;
+        int r = data.length();
+        while (r > 0) {
+            byte d0, d1, d2;
+            byte e0, e1, e2, e3;
+
+            d0 = (byte) data.charAt(i++); --r;
+            e0 = (byte) (d0 >>> 2);
+            e1 = (byte) ((d0 & 0x03) << 4);
+
+            if (r > 0) {
+                d1 = (byte) data.charAt(i++); --r;
+                e1 += (byte) (d1 >>> 4);
+                e2 = (byte) ((d1 & 0x0f) << 2);
+            }
+            else {
+                e2 = 64;
+            }
+
+            if (r > 0) {
+                d2 = (byte) data.charAt(i++); --r;
+                e2 += (byte) (d2 >>> 6);
+                e3 = (byte) (d2 & 0x3f);
+            }
+            else {
+                e3 = 64;
+            }
+            out.append(etab.charAt(e0));
+            out.append(etab.charAt(e1));
+            out.append(etab.charAt(e2));
+            out.append(etab.charAt(e3));
+        }
+
+        return out.toString();
+    }
+
+    private String utf8EnCode(String str){
+        str.replace("/\\r\\n/g","\\n");
+
+        return null;
+
+    } */
 
 	@Override
 	public void clean() {

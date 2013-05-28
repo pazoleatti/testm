@@ -56,30 +56,20 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 		title.setHTML(templates.title(full, error));
 	}
 
-    @Override
-    public FormPanel getFormPanel() {
-        return formPanel;
-    }
-
-    @Override
-    public void setFormPanel(FormPanel formPanel) {
-        this.formPanel = formPanel;
-    }
 
 	@UiHandler("printButton")
 	void print(ClickEvent event){
-        FormPanel form1 = this.getFormPanel();
-        form1.clear();
-        DOM.setElementProperty(form1.getElement(), "enctype", "text/plain");
-        DOM.setElementProperty(form1.getElement(), "encoding", "text/plain");//for IE8 encoding only
+        DOM.setElementProperty(formPanel.getElement(), "enctype", "text/plain");
+        DOM.setElementProperty(formPanel.getElement(), "encoding", "text/plain");//for IE8 encoding only
         TextBox textBox = new TextBox();
         textBox.setName("jsonobject");
         textBox.setVisible(false);
-        
-        textBox.setText(getUiHandlers().print());
-        form1.add(textBox);
 
-        form1.submit();
+        textBox.setText(getUiHandlers().print());
+        formPanel.add(textBox);
+
+        formPanel.submit();
+        formPanel.clear();
 	}
 
 	@UiHandler("hideButton")
