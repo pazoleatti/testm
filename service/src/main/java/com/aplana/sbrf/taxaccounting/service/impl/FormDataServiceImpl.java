@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,7 +48,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private ObjectLockDao lockDao;
 	@Autowired
-	private LogBusinessDao logBusinessDao;
+	private LogBusinessService logBusinessService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -99,9 +100,9 @@ public class FormDataServiceImpl implements FormDataService {
 	
 	@Override
 	public void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
-			FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
-			formDataDao.save(fd);
-			addLogBusiness(fd.getId(), userDao.getUser(userId), FormDataEvent.IMPORT, null);
+		FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
+		formDataDao.save(fd);
+		logBusinessService.addLogBusiness(fd.getId(), null, userDao.getUser(userId), FormDataEvent.IMPORT, null);
 	}
 
 	@Override
@@ -286,9 +287,9 @@ public class FormDataServiceImpl implements FormDataService {
 			}
 
 			if (oldId != null) {
-				addLogBusiness(formData.getId(), user, FormDataEvent.SAVE, null);
+				logBusinessService.addLogBusiness(formData.getId(), null, user, FormDataEvent.SAVE, null);
 			} else {
-				addLogBusiness(formData.getId(), user, FormDataEvent.CREATE, null);
+				logBusinessService.addLogBusiness(formData.getId(), null, user, FormDataEvent.CREATE, null);
 			}
 
 			return id;
@@ -406,7 +407,7 @@ public class FormDataServiceImpl implements FormDataService {
 				}
 			}
 
-			addLogBusiness(formData.getId(), user, workflowMove.getEvent(), note);
+			logBusinessService.addLogBusiness(formData.getId(), null, user, workflowMove.getEvent(), note);
 
 		} else {
 			throw new ServiceLoggerException(
@@ -506,23 +507,4 @@ public class FormDataServiceImpl implements FormDataService {
 					"Недостаточно прав для удаления строки из налоговой формы");
 		}
 	}
-
-	private void addLogBusiness(Long formDataId, TAUser user, FormDataEvent event, String note) {
-		LogBusiness log = new LogBusiness();
-		log.setFormId(formDataId);
-		log.setEventId(event.getCode());
-		log.setUserId(user.getId());
-		log.setLogDate(new Date());
-		log.setNote(note);
-		log.setDepartmentId(user.getDepartmentId());
-
-		StringBuilder roles = new StringBuilder();
-		for (TARole role : user.getRoles()) {
-			roles.append(role.getName());
-		}
-		log.setRoles(roles.toString());
-
-		logBusinessDao.add(log);
-	}
-
 }

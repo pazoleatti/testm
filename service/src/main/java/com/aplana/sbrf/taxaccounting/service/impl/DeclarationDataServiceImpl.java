@@ -11,18 +11,11 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -78,7 +71,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private DeclarationTemplateService declarationTemplateService;
 
 	@Autowired
-	private LogBusinessDao logBusinessDao;
+	private LogBusinessService logBusinessService;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -100,7 +93,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 			long id = declarationDataDao.saveNew(newDeclaration);
 			setDeclarationBlobs(logger, newDeclaration, new Date());
-			addLogBusiness(id, userDao.getUser(userId), FormDataEvent.CREATE, null);
+			logBusinessService.addLogBusiness(null, id, userDao.getUser(userId), FormDataEvent.CREATE, null);
 			return id;
 		} else {
 			throw new AccessDeniedException(
@@ -115,7 +108,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (declarationDataAccessService.canRefresh(userId, id)) {
 			DeclarationData declarationData = declarationDataDao.get(id);
 			setDeclarationBlobs(logger, declarationData, docDate);
-			addLogBusiness(id, userDao.getUser(userId), FormDataEvent.SAVE, null);
+			logBusinessService.addLogBusiness(null, id, userDao.getUser(userId), FormDataEvent.SAVE, null);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для обновления указанной декларации");
@@ -168,7 +161,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 		declarationDataDao.setAccepted(id, accepted);
 		if (accepted) {
-			addLogBusiness(id, userDao.getUser(userId), FormDataEvent.MOVE_CREATED_TO_APPROVED, null);
+			logBusinessService.addLogBusiness(null, id, userDao.getUser(userId), FormDataEvent.MOVE_CREATED_TO_APPROVED, null);
 		} else {
 
 		}
@@ -334,23 +327,4 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			throw new ServiceException("Невозможно получить дату обновления декларации", e);
 		}
 	}
-
-	private void addLogBusiness(Long declarationId, TAUser user, FormDataEvent event, String note) {
-		LogBusiness log = new LogBusiness();
-		log.setDeclarationId(declarationId);
-		log.setEventId(event.getCode());
-		log.setUserId(user.getId());
-		log.setLogDate(new Date());
-		log.setNote(note);
-		log.setDepartmentId(user.getDepartmentId());
-
-		StringBuilder roles = new StringBuilder();
-		for (TARole role : user.getRoles()) {
-			roles.append(role.getName());
-		}
-		log.setRoles(roles.toString());
-
-		logBusinessDao.add(log);
-	}
-
 }

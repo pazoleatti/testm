@@ -5,10 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +24,6 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
-	private static final String ACCEPTANCE_DATE_NOT_FOUND_MESSAGE = "Дата принятия налоговой формы с id = %d не найдена в БД";
-	private static final String CREATION_DATE_NOT_FOUND_MESSAGE = "Дата создания налоговой формы с id = %d не найдена в БД";
 
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override

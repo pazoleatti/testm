@@ -1,23 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
@@ -58,6 +48,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
     @Autowired
     private DepartmentDao departmentDao;
 
+	@Autowired
+	private LogBusinessService logBusinessService;
+
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
 	 * <ol>
@@ -97,6 +90,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
 			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
 			formDataDao.save(dformData);
+			logBusinessService.addLogBusiness(dformData.getId(), null, scriptComponentContext.getUser(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
 		} else {
             FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
             FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
@@ -108,6 +102,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
 	@Override
 	public void setScriptComponentContext(ScriptComponentContext context) {
-		this.scriptComponentContext = scriptComponentContext;		
+		scriptComponentContext = context;
 	}
 }
