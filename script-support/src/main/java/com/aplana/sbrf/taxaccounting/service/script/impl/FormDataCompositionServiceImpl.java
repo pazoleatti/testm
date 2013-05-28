@@ -1,17 +1,28 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 
 /**
  * Сервис, отвечающий за интеграцию/дезинтеграцию форм. Поставляется в скрипты и позволяет формам посылать события
@@ -20,8 +31,11 @@ import org.springframework.stereotype.Service;
  * @author Vitalii Samolovskikh
  * @see com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
-@Service("formDataCompositionService")
-public class FormDataCompositionServiceImpl implements FormDataCompositionService {
+@Component("formDataCompositionService")
+@Scope(value="prototype")
+public class FormDataCompositionServiceImpl implements FormDataCompositionService, ScriptComponentContextHolder {
+	
+	private ScriptComponentContext scriptComponentContext;
 
 	@Autowired
 	private FormTypeDao formTypeDao;
@@ -89,5 +103,11 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
             Department sformDepartment =  departmentDao.getDepartment(dformData.getDepartmentId());
             logger.error("Невозможно принять \""+sformTemplate.getType().getName()+"\", поскольку уже принята форма: "+dformData.getKind().getName()+" \""+dformTemplate.getType().getName()+"\" ("+sformDepartment.getName()+").");
 		}
+	}
+
+
+	@Override
+	public void setScriptComponentContext(ScriptComponentContext context) {
+		this.scriptComponentContext = scriptComponentContext;		
 	}
 }

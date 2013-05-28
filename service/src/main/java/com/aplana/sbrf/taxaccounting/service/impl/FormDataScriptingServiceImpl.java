@@ -27,6 +27,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextImpl;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
@@ -70,7 +72,17 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		
 		// Биндим параметры для выполнения скрипта
 		Bindings b = scriptEngine.createBindings();
-		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));		
+		
+		Map<String, ?> scriptComponents =  getScriptExposedBeans(formData.getFormType().getTaxType(), event);
+		for (Object component : scriptComponents.values()) {
+			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+			scriptComponentContext.setUser(user);
+			if (component instanceof ScriptComponentContextHolder){
+				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
+			}
+		}
+		b.putAll(scriptComponents);
+		
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("formData", formData);
@@ -115,7 +127,16 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			return;
 		}
 		Bindings b = scriptEngine.createBindings();
-		b.putAll(getScriptExposedBeans(formData.getFormType().getTaxType(), event));
+		
+		Map<String, ?> scriptComponents =  getScriptExposedBeans(formData.getFormType().getTaxType(), event);
+		for (Object component : scriptComponents.values()) {
+			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+			scriptComponentContext.setUser(user);
+			if (component instanceof ScriptComponentContextHolder){
+				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
+			}
+		}
+		b.putAll(scriptComponents);
 
 		// predefined script variables
 		b.put("formDataEvent", event);
