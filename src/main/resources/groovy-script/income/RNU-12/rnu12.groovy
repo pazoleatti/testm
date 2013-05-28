@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  * 		- про нумерацию пока не уточнили, пропустить
- *      - консолидация (не создается консолидированная форма)
  *
  * @author rtimerbaev
  */
@@ -305,7 +304,6 @@ def logicalCheck(def useLog) {
             // 4. Проверка на превышение суммы расхода по данным бухгалтерского учёта над суммой начисленного расхода (графа 11, 12)
             if (totalRow.outcomeInNalog <= totalRow.outcomeInBuh) {
                 logger.warn('Сумма данных бухгалтерского учёта превышает сумму начисленных платежей!')
-                return false
             }
 
             // 8. Проверка итоговых значений по кодам классификации расхода
@@ -474,6 +472,22 @@ void setTotalStyle(def row) {
             'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
+}
+
+/**
+ * Посчитать сумму указанного графа для строк с общим кодом классификации
+ *
+ * @param code код классификации дохода
+ * @param alias название графа
+ */
+def calcSumByCode(def code, def alias) {
+    def sum = 0
+    formData.dataRows.each { row ->
+        if (!isTotal(row) && row.code == code) {
+            sum += row.getCell(alias).getValue()
+        }
+    }
+    return sum
 }
 
 /**

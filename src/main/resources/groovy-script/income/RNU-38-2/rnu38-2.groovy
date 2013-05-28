@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - сколько строк в рну?
- *      - консолидация (не создается консолидированная форма)
  *
  * @author rtimerbaev
  */
@@ -122,13 +121,20 @@ void calc() {
 def logicalCheck() {
     def totalRow = getTotalRowFromRNU38_1()
     if (totalRow == null) {
-        logger.warn('Отсутствует РНУ-38.1.')
+        logger.error('Отсутствует РНУ-38.1.')
         return false
     }
-    if (formData.dataRows.isEmpty() || totalRow == null) {
-        return true
+    if (formData.dataRows.isEmpty()) {
+        logger.error('Отсутствуют данные')
+        return false
     }
     def row = formData.dataRows.get(0)
+
+    // TODO (Ramil Timerbaev) для отладки консолидации, потом убрать
+//    ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome'].each {
+//        row.getCell(it).setValue(1)
+//    }
+//    return true
 
     // 1. Обязательность заполнения поля графы 1..4
     def colNames = []
