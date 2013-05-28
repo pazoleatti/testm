@@ -94,7 +94,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 							FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getCode()}, Timestamp.class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(ACCEPTANCE_DATE_NOT_FOUND_MESSAGE, formId);
+			return null;
 		}
 	}
 
@@ -106,7 +106,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 					new Object[]{formId, FormDataEvent.CREATE.getCode()}, Timestamp.class
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(CREATION_DATE_NOT_FOUND_MESSAGE, formId);
+			return null;
 		}
 	}
 
