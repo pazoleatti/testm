@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
@@ -20,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 @Component
 public class GetMainMenuActionHandler extends
@@ -61,6 +63,15 @@ public class GetMainMenuActionHandler extends
 
 			MenuItem settingMenuItem = new MenuItem("Настройки", "");
 			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов", "Empty"));
+			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",  
+					new StringBuilder(NUMBER_SIGN)
+					.append(FormDataImportPresenter.FDIMPORT)
+					.append(";").append(FormDataImportPresenter.DEPARTMENT_ID).append("=4")
+					.append(";").append(FormDataImportPresenter.FORM_DATA_TEMPLATE_ID).append("=325")
+					.append(";").append(FormDataImportPresenter.FORM_DATA_RPERIOD_ID).append("=101")
+					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
+					.toString()
+					));
 			menuItems.add(settingMenuItem);
 
 		}

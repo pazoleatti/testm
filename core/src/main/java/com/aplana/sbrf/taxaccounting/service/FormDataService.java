@@ -29,6 +29,9 @@ public interface FormDataService {
 	 */
 	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
 	
+	void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
+	
+	
 	/**
 	 * Выполнить расчёты по налоговой форме
 	 * @param logger логгер-объект для фиксации диагностических сообщений
@@ -95,7 +98,7 @@ public interface FormDataService {
 	 * @return созданный объект FormData (еще не сохранённый в БД)
 	 */
 	FormData createFormDataWithoutCheck(Logger logger, TAUser user, int formTemplateId,
-	                                    int departmentId, FormDataKind kind, int reportPeriodId);
+	                                    int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData);
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.

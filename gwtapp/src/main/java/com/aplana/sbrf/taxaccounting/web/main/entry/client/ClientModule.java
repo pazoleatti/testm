@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
+import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
@@ -69,5 +70,6 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new HistoryClientModule());
 		install(new ProjectVersionModule());
         install(new UserListModule());
+        install(new FormDataImportModule());
 	}
 }

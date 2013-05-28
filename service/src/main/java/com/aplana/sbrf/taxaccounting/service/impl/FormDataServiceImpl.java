@@ -89,19 +89,27 @@ public class FormDataServiceImpl implements FormDataService {
 		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
 				departmentId, reportPeriod.getId())) {
 			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
-					formTemplateId, departmentId, kind, reportPeriod.getId());
+					formTemplateId, departmentId, kind, reportPeriod.getId(), false);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для создания налоговой формы с указанными параметрами");
 		}
 	}
+	
+	
+	@Override
+	public void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+			FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
+			formDataDao.save(fd);
+			addLogBusiness(fd.getId(), userDao.getUser(userId), FormDataEvent.IMPORT, null);
+	}
 
 	@Override
 	public FormData createFormDataWithoutCheck(Logger logger, TAUser user,
-			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
-
+		
 		result.setState(WorkflowState.CREATED);
 		result.setDepartmentId(departmentId);
 		result.setKind(kind);
@@ -123,7 +131,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(user, result,
-				FormDataEvent.CREATE, logger,null);
+				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
