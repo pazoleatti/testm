@@ -218,23 +218,13 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	
 	private void updateUserRoles(final TAUser user) {
 		try {
-			final int userRolesCount = getJdbcTemplate().queryForInt(
+			/*final int userRolesCount = getJdbcTemplate().queryForInt(
 					"select count(*) from sec_user_role ur where ur.user_id = " +
 					"(select id from sec_user where login=?)", user.getLogin()
-				);
-			getJdbcTemplate().batchUpdate("delete from sec_user_role where user_id=" +
-					"(select id from sec_user where login=?)",new BatchPreparedStatementSetter() {
-				
-				@Override
-				public void setValues(PreparedStatement ps, int i) throws SQLException {
-					ps.setString(1, user.getLogin());
-				}
-				
-				@Override
-				public int getBatchSize() {
-					return userRolesCount;
-				}
-			});
+				);*/
+            getJdbcTemplate().update("delete from sec_user_role where user_id=" +
+                    "(select id from sec_user where login=?)",user.getLogin());
+
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",
 					new BatchPreparedStatementSetter() {

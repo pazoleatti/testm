@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter.MyView;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -31,5 +37,10 @@ public class SignInView extends ViewImpl implements MyView{
 	public void setRoleAndDepartment(String roleAndDepartment) {
 		this.roleAndDepartment.setText(roleAndDepartment);
 	}
+
+    @UiHandler("aboutButton")
+    public void onClickAboutButton(ClickEvent event){
+        Window.open(GWT.getHostPageBaseURL() + "resources/About.pdf","","");
+    }
 
 }
