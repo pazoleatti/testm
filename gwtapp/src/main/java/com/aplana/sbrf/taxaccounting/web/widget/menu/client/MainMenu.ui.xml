@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-    <ui:style type='com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenu.MainMenuStyle'>
+    <ui:style>
         @external .gwt-MenuBar-horizontal .gwt-MenuItem;
         .gwt-MenuBar-horizontal .gwt-MenuItem {
             color: white;
@@ -41,10 +41,6 @@
             padding-top: 3px;
             padding-bottom: 5px;
             padding-left: 135px;
-        }
-
-        .grayMenuItem:hover {
-            background-color: #FFDC82;
         }
     </ui:style>
 

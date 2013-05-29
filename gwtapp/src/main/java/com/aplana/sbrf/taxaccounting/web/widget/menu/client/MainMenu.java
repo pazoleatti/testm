@@ -26,16 +26,10 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	interface Binder extends UiBinder<Widget, MainMenu> {
 	}
 
-	interface MainMenuStyle extends CssResource {
-		String grayMenuItem();
-	}
-
 	private static final LocalHtmlTemplates template = GWT.create(LocalHtmlTemplates.class);
 
 	@UiField
 	Panel panel;
-
-	@UiField MainMenuStyle style;
 
 	@Inject
 	public MainMenu(final Binder binder) {
@@ -65,7 +59,6 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			} else {
 				com.google.gwt.user.client.ui.MenuItem subMenuItem =
 						new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), item.getName()));
-				subMenuItem.getElement().addClassName(style.grayMenuItem());
 				menu.addItem(subMenuItem);
 			}
 		}
