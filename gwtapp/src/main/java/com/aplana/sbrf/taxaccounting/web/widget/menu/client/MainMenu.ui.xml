@@ -43,11 +43,6 @@
             padding-left: 135px;
         }
 
-        @external .gwt-MenuBarPopup;
-        .gwt-MenuBarPopup {
-            margin: -4px 0 0 3px;
-        }
-
         .grayMenuItem:hover {
             background-color: #FFDC82;
         }
