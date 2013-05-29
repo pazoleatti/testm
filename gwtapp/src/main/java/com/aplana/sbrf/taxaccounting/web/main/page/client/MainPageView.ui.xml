@@ -2,6 +2,16 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
+    <ui:style>
+        .aboutButoon {
+            background: url("resources/img/starfish-16.png") no-repeat;
+            background-color: #FFFFFF;
+            width : 23px;
+            height: 23px;
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+    </ui:style>
 	<g:DockLayoutPanel ui:field="dockPanel" unit="PX" height="100%" width="100%">
 		<g:north size="44">
 			<g:HTMLPanel>
@@ -19,9 +29,12 @@
 							<img style="height: 41px; width:27px;" height="41px" width="27px"
 								src="resources/img/header_right.png" />
 						</div>
-
 						<g:HTMLPanel ui:field="signInContentPanel" />
+                        <div style="float: right; margin-top: 5px;">
+                            <g:Button styleName="{style.aboutButoon}" ui:field="aboutButton" title="О программе" ></g:Button>
+                        </div>
 						<g:HTMLPanel ui:field="mainMenuContentPanel" />
+
 					</div>
 				</div>
 			</g:HTMLPanel>

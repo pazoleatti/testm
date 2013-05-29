@@ -38,9 +38,4 @@ public class SignInView extends ViewImpl implements MyView{
 		this.roleAndDepartment.setText(roleAndDepartment);
 	}
 
-    @UiHandler("aboutButton")
-    public void onClickAboutButton(ClickEvent event){
-        Window.open(GWT.getHostPageBaseURL() + "resources/About.pdf","","");
-    }
-
 }
