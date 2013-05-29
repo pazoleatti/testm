@@ -27,15 +27,9 @@
         @external .gwt-MenuBar-vertical .gwt-MenuItem;
         .gwt-MenuBar-vertical .gwt-MenuItem {
             margin-left: 15px !important;
-            width: 150px;
             width: 135px;
             font-size: 12px;
             padding: 3px 5px 3px 14px;
-        }
-
-        @external .gwt-MenuBarPopup;
-        .gwt-MenuBarPopup {
-            top: 35px !important;
         }
 
         @external .gwt-MenuBar-horizontal;
@@ -47,6 +41,11 @@
             padding-top: 3px;
             padding-bottom: 5px;
             padding-left: 135px;
+        }
+
+        @external .gwt-MenuBarPopup;
+        .gwt-MenuBarPopup {
+            margin: -4px 0 0 3px;
         }
 
         .grayMenuItem:hover {
