@@ -16,7 +16,12 @@
         .gwt-MenuBar .gwt-MenuItem-selected {
             cursor: pointer;
             color: #000000;
-            background-color: #FFFFFF;
+            background-color: #FFDC82;
+        }
+
+        @external .gwt-MenuBar-vertical .subMenuIcon-selected;
+        .gwt-MenuBar-vertical .subMenuIcon-selected {
+            background-color: #FFDC82;
         }
 
         @external .gwt-MenuBar-vertical .gwt-MenuItem;

@@ -46,7 +46,6 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	public void setMenuItems(final List<MenuItem> menuItems) {
 		panel.clear();
 		MenuBar menu = new MenuBar();
-		menu.setAnimationEnabled(false);
 
 		for (MenuItem item : menuItems) {
 			MenuBar subMenuBar = new MenuBar(true);

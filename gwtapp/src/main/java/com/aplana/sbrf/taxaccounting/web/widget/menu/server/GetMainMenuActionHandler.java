@@ -79,7 +79,7 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(settingMenuItem);
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
-			MenuItem settingMenuItem = new MenuItem("Настройки", "");
+			MenuItem settingMenuItem = new MenuItem("Настройки");
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
 			settingMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
@@ -87,7 +87,7 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(settingMenuItem);
 		}
         if (securityService.currentUser().hasRole(TARole.ROLE_ADMIN)) {
-            MenuItem settingMenuItem = new MenuItem("Настройки", "");
+            MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
             menuItems.add(settingMenuItem);
         }
