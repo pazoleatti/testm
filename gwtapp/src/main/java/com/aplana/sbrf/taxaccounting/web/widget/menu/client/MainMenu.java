@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -16,11 +18,19 @@ import com.gwtplatform.mvp.client.ViewImpl;
 
 public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 
+	interface LocalHtmlTemplates extends SafeHtmlTemplates {
+		@Template("<a style=\"color:#000000; text-decoration:none;\" href=\"{0}\"><div>{1}</div></a>")
+		SafeHtml link(String url, String name);
+	}
+
 	interface Binder extends UiBinder<Widget, MainMenu> {
 	}
+
 	interface MainMenuStyle extends CssResource {
 		String grayMenuItem();
 	}
+
+	private static final LocalHtmlTemplates template = GWT.create(LocalHtmlTemplates.class);
 
 	@UiField
 	Panel panel;
@@ -38,38 +48,29 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		MenuBar menu = new MenuBar();
 		menu.setAnimationEnabled(false);
 
-		for (final MenuItem menuItem : menuItems) {
-			if (!menuItem.getSubMenu().isEmpty()) {
-				MenuBar subMenuBar = new MenuBar(true);
-				for (MenuItem subMenu : menuItem.getSubMenu()) {
-					SafeHtmlBuilder sb = new SafeHtmlBuilder();
-					sb.appendHtmlConstant("<a href=\""
-							+ subMenu.getLink()
-							+ (menuItem.getLink().isEmpty() ? "" :";nType=" + menuItem.getLink())
-							+ "\" style=\"color:#000000; text-decoration:none;\"><div>"
-							+ subMenu.getName() + "</div></a>");
-					com.google.gwt.user.client.ui.MenuItem subMenuItem =
-							new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml());
-					subMenuItem.getElement().addClassName(style.grayMenuItem());
-					subMenuBar.addItem(subMenuItem);
-				}
-				menu.addItem(menuItem.getName() + " " + getArrowSymbol(), subMenuBar);
-				menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
-			}
-			else {
-				SafeHtmlBuilder sb = new SafeHtmlBuilder();
-				sb.appendHtmlConstant("<style>a:hover {color: #000000 !important}</style>");
-				sb.appendHtmlConstant("<a href=\""
-						+ menuItem.getLink() + ";"
-						+ "nType="
-						+ menuItem.getLink()
-						+ "\" style=\"color:white; text-decoration:none;\">"
-						+ menuItem.getName() + "</a>");
-				menu.addItem(new com.google.gwt.user.client.ui.MenuItem(sb.toSafeHtml()));
-				menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
-			}
+		for (MenuItem item : menuItems) {
+			MenuBar subMenuBar = new MenuBar(true);
+			addSubMenu(item, subMenuBar);
+			menu.addItem(item.getName() + " " + getArrowSymbol(), subMenuBar);
+			menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 		}
 		panel.add(menu);
+	}
+
+	private void addSubMenu(MenuItem menuItem, MenuBar menu) {
+		for (MenuItem item : menuItem.getSubMenu()) {
+			if (!item.getSubMenu().isEmpty()) {
+				MenuBar subMenuBar = new MenuBar(true);
+				addSubMenu(item, subMenuBar);
+				menu.addItem(item.getName(), subMenuBar);
+			} else {
+				com.google.gwt.user.client.ui.MenuItem subMenuItem =
+						new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), item.getName()));
+				subMenuItem.getElement().addClassName(style.grayMenuItem());
+				menu.addItem(subMenuItem);
+			}
+		}
+
 	}
 
 	private String getArrowSymbol() {

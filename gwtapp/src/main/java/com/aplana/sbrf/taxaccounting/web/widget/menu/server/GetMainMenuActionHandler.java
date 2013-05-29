@@ -29,6 +29,7 @@ public class GetMainMenuActionHandler extends
 
 	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
 	private static final String NUMBER_SIGN = "#";
+	private static final String TYPE = "nType";
 
 	public GetMainMenuActionHandler() {
 		super(GetMainMenuAction.class);
@@ -46,23 +47,27 @@ public class GetMainMenuActionHandler extends
 		if (securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)
 				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL)
 				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-			/*
-			 *	тут важен порядок, поэтому мы не можем просто пробежаться по значениям
-			 */
-			menuItems.add(new MenuItem(TaxType.INCOME.getName(), TaxType.INCOME.name()));
-			menuItems.add(new MenuItem(TaxType.VAT.getName(), TaxType.VAT.name()));
-			menuItems.add(new MenuItem(TaxType.PROPERTY.getName(), TaxType.PROPERTY.name()));
-			menuItems.add(new MenuItem(TaxType.TRANSPORT.getName(), TaxType.TRANSPORT.name()));
 
-			for (MenuItem menu : menuItems) {
-				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST));
+			// тут важен порядок, поэтому мы не можем просто пробежаться по значениям
+			MenuItem taxMenu = new MenuItem("Налоги");
+
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.INCOME.getName(), "", TaxType.INCOME.name()));
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
+
+			for (MenuItem menu : taxMenu.getSubMenu()) {
+				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
+					+ ";" + TYPE + "=" + menu.getMeta()));
 				if (!securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)) {
-					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST));
+					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
+						+ ";" + TYPE + "=" + menu.getMeta()));
 				}
 			}
+			menuItems.add(taxMenu);
 
-			MenuItem settingMenuItem = new MenuItem("Настройки", "");
-			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов", "Empty"));
+			MenuItem settingMenuItem = new MenuItem("Настройки");
+			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
 			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",  
 					new StringBuilder(NUMBER_SIGN)
 					.append(FormDataImportPresenter.FDIMPORT)
@@ -73,7 +78,6 @@ public class GetMainMenuActionHandler extends
 					.toString()
 					));
 			menuItems.add(settingMenuItem);
-
 		}
 		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки", "");

@@ -9,14 +9,28 @@ public class MenuItem implements Serializable{
 		
 	private String name;
 	private String link;
+	private String meta;
 	private List<MenuItem> subMenu = new ArrayList<MenuItem>();
 
 	public MenuItem(){};
-	
+
+	public MenuItem(String name) {
+		super();
+		this.name = name;
+		link = "";
+	}
+
 	public MenuItem(String name, String link) {
 		super();
 		this.name = name;
 		this.link = link;
+	}
+
+	public MenuItem(String name, String link, String meta) {
+		super();
+		this.name = name;
+		this.link = link;
+		this.meta = meta;
 	}
 	
 	public String getName() {
@@ -34,5 +48,13 @@ public class MenuItem implements Serializable{
 
 	public List<MenuItem> getSubMenu() {
 		return subMenu;
+	}
+
+	public String getMeta() {
+		return meta;
+	}
+
+	public void setMeta(String meta) {
+		this.meta = meta;
 	}
 }
