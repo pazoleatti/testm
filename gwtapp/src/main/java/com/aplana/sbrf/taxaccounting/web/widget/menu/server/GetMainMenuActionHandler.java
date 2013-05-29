@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 @Component
 public class GetMainMenuActionHandler extends
@@ -68,7 +67,7 @@ public class GetMainMenuActionHandler extends
 
 			MenuItem settingMenuItem = new MenuItem("Настройки");
 			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
-			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",  
+			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
 					.append(FormDataImportPresenter.FDIMPORT)
 					.append(";").append(FormDataImportPresenter.DEPARTMENT_ID).append("=4")
