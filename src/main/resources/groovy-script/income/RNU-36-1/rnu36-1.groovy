@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- откуда брать "Отчетная дата" для логических проверок?
  *		- откуда брать последний отчетный день месяца?
  *
  * @author rtimerbaev
@@ -50,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -182,6 +180,10 @@ def logicalCheck(def useLog) {
     // TODO (Ramil Timerbaev) откуда брать?
     def lastDay = new Date()
 
+    // отчетная дата
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def reportDay = (tmp ? tmp.getTime() + 1 : null)
+
     def tmp
     for (def row : formData.dataRows) {
         if (isFixedRow(row)) {
@@ -195,10 +197,6 @@ def logicalCheck(def useLog) {
         }
 
         // 1. Проверка даты приобретения (открытия короткой позиции) (графа 4)
-        // TODO (Ramil Timerbaev) откуда брать
-        // отчетная дата
-        tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-        def reportDay = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
         if (row.shortPositionDate > reportDay) {
             logger.error('Неверно указана дата приобретения (открытия короткой позиции)!')
             return false

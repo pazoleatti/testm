@@ -49,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -228,7 +227,7 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Арифметическая проверка графы 15
-            def hasError = false
+            def hasError
             if (row.sum - row.marketPrice * 0.8 > 0) {
                 hasError = (row.sumIncProfit != 0)
             } else {

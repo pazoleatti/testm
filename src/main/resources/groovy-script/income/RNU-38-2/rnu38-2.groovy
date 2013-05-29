@@ -46,7 +46,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck()
         break
@@ -264,7 +263,7 @@ void checkCreation() {
  * Получить итоговую строку из нф (РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1.
  */
 def getTotalRowFromRNU38_1() {
-    def formDataRNU_38_1 = FormDataService.find(334, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
+    def formDataRNU_38_1 = FormDataService.find(334, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     if (formDataRNU_38_1 != null) {
         for (def row : formDataRNU_38_1.dataRows) {
             if (row.getAlias() == 'total') {

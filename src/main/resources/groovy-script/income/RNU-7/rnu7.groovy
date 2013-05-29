@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- про нумерацию пока не уточнили, пропустить
  *
  * @author rtimerbaev
  */
@@ -49,7 +48,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -139,12 +137,12 @@ void calc() {
 
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
-        row.number = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+        row.number = index + 1
 
-        // графа 10 (для строк НЕитого) = графа 9 * графа 8
+        // графа 10 = графа 9 * графа 8
         row.taxAccountingRuble = round(row.taxAccountingCurrency * row.rateOfTheBankOfRussia, 2)
 
-        // графа 12 (для строк НЕитого) = графа 11 * графа 8
+        // графа 12 = графа 11 * графа 8
         row.ruble = round(row.accountingCurrency * row.rateOfTheBankOfRussia, 2)
     }
 

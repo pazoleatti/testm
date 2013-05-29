@@ -48,7 +48,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -102,9 +101,6 @@ void calc() {
      * Расчеты.
      */
 
-    /** Сумма "Итого". */
-    def total = 0
-
     // удалить строки "итого" и "итого по коду"
     def delRow = []
     formData.dataRows.each {
@@ -118,6 +114,9 @@ void calc() {
 
     // отсортировать/группировать
     formData.dataRows.sort { it.code }
+
+    // cумма "Итого"
+    def total = 0
 
     // нумерация (графа 1) и посчитать "итого"
     formData.dataRows.eachWithIndex { row, i ->
@@ -170,7 +169,6 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
-    logger.warn('cheeeeeeeck') // TODO (Ramil Timerbaev)
     if (!formData.dataRows.isEmpty()) {
         def i = 1
 

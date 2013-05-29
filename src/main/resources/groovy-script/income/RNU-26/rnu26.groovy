@@ -6,8 +6,7 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- логические проверки не доделаны, потому что возможно они поменяются
- * 		- про нумерацию пока не уточнили, пропустить
+ *		- логические проверки возможно поменяются
  *
  * @author rtimerbaev
  */
@@ -50,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -141,7 +139,7 @@ void calc() {
 
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
-        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+        row.rowNumber = index + 1
 
         // графа 13
         if (row.marketQuotation != null && row.rubCourse != null) {
@@ -428,7 +426,6 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    // TODO (Ramil Timerbaev)
     // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
     if (false) {
         logger.warn('Неверный курс валюты!')
@@ -601,7 +598,7 @@ def getFormDataOld() {
     // РНУ-26 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld

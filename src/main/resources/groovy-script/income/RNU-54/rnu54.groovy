@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- как получить отчетную дату?
  *		- откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
  *
  * @author rtimerbaev
@@ -52,7 +51,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -131,8 +129,7 @@ void calc() {
     }
 
     /** Отчетная дата. */
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+    def reportDate = getReportDate()
 
     /** Дата нужная при подсчете графы 12. */
     def someDate = getDate('01.11.2009')
@@ -218,8 +215,7 @@ def logicalCheck(def useLog) {
         def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
-        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+        def reportDate = getReportDate()
 
         /** Дата нужная при подсчете графы 12. */
         def someDate = getDate('01.11.2009')
@@ -232,6 +228,7 @@ def logicalCheck(def useLog) {
 
         def hasTotalRow = false
         def hasError
+        def tmp
 
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
@@ -342,10 +339,9 @@ def logicalCheck(def useLog) {
 def checkNSI() {
     if (!formData.dataRows.isEmpty()) {
         /** Отчетная дата. */
-        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+        def reportDate = getReportDate()
 
-        def hasError = false
+        def hasError
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 continue
@@ -596,4 +592,12 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
 }

@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- логическая проверка 13 уникальность поля ПП (графа 1)
  *		- 13 графу считать только для первых строк или для всех?
  *
  * @author rtimerbaev
@@ -50,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -318,7 +316,6 @@ def logicalCheck(def useLog) {
             }
 
             // 13. Проверка на уникальность поля "№ пп" (графа 1)
-            // TODO (Ramil Timerbaev) ПОД ВОПРОСОМ
             if (i != row.number) {
                 logger.error('Нарушена уникальность номера по порядку!')
                 return false

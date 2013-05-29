@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- * 		- про нумерацию пока не уточнили, пропустить
  *		- графа 17 и графа 18 уточняют
  *
  * @author rtimerbaev
@@ -50,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -529,7 +527,7 @@ def getFormDataOld() {
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
     // (РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования (За предыдущий отчетный период)
-    def formDataOld = (prevReportPeriod != null ? FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, prevReportPeriod.id) : null)
+    def formDataOld = (prevReportPeriod != null ? FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, prevReportPeriod.id) : null)
 
     return formDataOld
 }

@@ -48,7 +48,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -161,7 +160,7 @@ def logicalCheck(def useLog) {
 
     /** Отчетная дата. */
     tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    def reportDateEnd = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+    def reportDateEnd = (tmp ? tmp.getTime() + 1 : null)
 
     /** Начальная дата отчетного периода. */
     tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
@@ -244,7 +243,6 @@ def checkNSI() {
 
     // 2. Проверка на наличие данных в справочнике купонов ценных бумаг
     if (false) {
-        // TODO (Ramil Timerbaev)
         logger.warn('Для ценной бумаги <Номер государственной регистрации  из справочника ценных бумаг> отсутствует купон с датой погашения в отчётном периоде либо позднее!')
     }
 

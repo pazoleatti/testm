@@ -6,9 +6,6 @@
  *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- для проверки 1 нет условия (не ясно как получать предыдущий отчет)
- *		- как определить первый ли это отчет?
- *      - консолидация (суммирование значений)
  *
  * @author rtimerbaev
  */
@@ -49,7 +46,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         break
@@ -118,7 +114,7 @@ void calc() {
  */
 def logicalCheck(def useLog) {
     // данные предыдущего отчета
-    def formDataOld = getFormDataOld() // TODO (Ramil Timerbaev) как получить?
+    def formDataOld = getFormDataOld()
 
     /** Строка из предыдущего отчета. */
     def rowOld = (formDataOld != null && !formDataOld.dataRows.isEmpty() ? formDataOld.getDataRow('total') : null)
@@ -142,7 +138,7 @@ def logicalCheck(def useLog) {
     // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
     def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
 
-    // TODO (Ramil Timerbaev) добавить проверку "начиная с отчета за февраль"
+    // TODO (Ramil Timerbaev) протестировать проверку "начиная с отчета за февраль"
     if (!isFirstMonth()) {
         // 1. Проверка наличия предыдущего экземпляра отчета
         if (rowOld == null) {
@@ -232,11 +228,11 @@ void consolidation() {
  * Проверки при переходе "Отменить принятие".
  */
 void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+    def departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
             formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
+    def department = departments.getAt(0);
     if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+        def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
 
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
@@ -294,10 +290,10 @@ def getFormDataOld() {
     // предыдущий отчётный период
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
-    // РНУ-25 за предыдущий отчетный период
+    // РНУ-31 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld
@@ -307,7 +303,13 @@ def getFormDataOld() {
  * Первый ли это месяц (январь)
  */
 def isFirstMonth() {
-    return true
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    if (reportPeriod != null && reportPeriod.getOrder() == 1) {
+        return true
+    }
+    return false
 }
 
 /**

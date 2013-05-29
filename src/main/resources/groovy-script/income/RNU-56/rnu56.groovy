@@ -6,7 +6,6 @@
  *
  * TODO:
  *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
- *		- уточнить про дату окончания отчётного периода (или отчетная дата?!), откуда ее брать?
  *		- уточнить чтз про графу 17, в нф всего графов 15
  *		- уточнить про вычисление 14ой графы, последний блок, по предыдущим условиям туда никогда не попадет
  *
@@ -51,7 +50,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -134,8 +132,7 @@ void calc() {
     def tmp
 
     /** Отчетная дата. */
-    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+    def reportDate = getReportDate()
 
     /** Начальная дата отчетного периода. */
     tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
@@ -227,21 +224,16 @@ def logicalCheck(def useLog) {
         // признак наличия итоговых строк
         def hasTotal = false
 
-        /** Отчётный период. */
-        def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-
-        /** Налоговый период. */
-        def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.taxPeriodId) : null)
-
         /** Дата начала отчетного периода. */
-        def a = (taxPeriod != null ? taxPeriod.getStartDate() : null )
+        def tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
+        def a = (tmp ? tmp.getTime() : null)
 
         /** Дата окончания отчетного периода. */
-        def b = (taxPeriod != null ? taxPeriod.getEndDate() : null)
+        tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+        def b = (tmp ? tmp.getTime() : null)
 
         /** Отчетная дата. */
-        def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-        def reportDate = (tmp ? tmp.getTime() : null) // TODO (Ramil Timerbaev) Уточнить
+        def reportDate = getReportDate()
 
         def cell
         def hasError
@@ -555,7 +547,9 @@ def getIndex(def row) {
 
 // TODO (Ramil Timerbaev) учесть графу 3 при суммировании
 /**
- * Cумма ранее начисленного процентного дохода по векселю до отчётного периода» (сумма граф 14 из РНУ-56 предыдущих отчётных (налоговых) периодов) выбирается по графе 2 с даты приобретения (графа3) по дату начала отчетного периода.
+ * Cумма ранее начисленного процентного дохода по векселю до отчётного периода
+ * (сумма граф 14 из РНУ-56 предыдущих отчётных (налоговых) периодов)
+ * выбирается по графе 2 с даты приобретения (графа 3) по дату начала отчетного периода.
  *
  * @param bill вексель
  * @param sumColumnName название графы, по которой суммировать данные
@@ -584,7 +578,7 @@ def getFormDataOld() {
     // РНУ-55 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld
@@ -650,4 +644,12 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
 }

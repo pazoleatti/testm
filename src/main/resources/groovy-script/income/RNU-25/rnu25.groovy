@@ -6,8 +6,7 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- * 		- про нумерацию пока не уточнили, пропустить
- *		- проверки не доделаны, потому что возможно они поменяются
+ *		- проверки возможно поменяются
  *
  * @author rtimerbaev
  */
@@ -50,7 +49,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -136,7 +134,7 @@ void calc() {
 
     // графа 1
     formData.dataRows.eachWithIndex { row, index ->
-        row.rowNumber = index + 1 // TODO (Ramil Timerbaev) с нумерацией пока не уточнили, пропустить
+        row.rowNumber = index + 1
     }
 
     // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
@@ -572,7 +570,7 @@ def getFormDataOld() {
     // РНУ-25 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld

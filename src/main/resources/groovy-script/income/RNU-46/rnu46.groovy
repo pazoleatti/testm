@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- получение значений за предыдущий месяц, за предыдущие месяцы
- *		- определение номера месяца
  *		- проверка уникальности инвентарного номера
  *
  * @author rtimerbaev
@@ -53,7 +52,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        // TODO (Ramil Timerbaev) нужен ли тут пересчет данных
         calc()
         logicalCheck(false)
         checkNSI()
@@ -221,6 +219,10 @@ def logicalCheck(def useLog) {
             'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation',
             'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
+    // последнее число предыдущего месяца
+    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def lastDayPrevMonth = (tmp ? tmp.getTime() : null)
+
     def hasError
     for (def row : formData.dataRows) {
         // 1. Обязательность заполнения поля (графа 1..18)
@@ -327,9 +329,6 @@ def logicalCheck(def useLog) {
         // 11. Арифметическая проверка графы 14
         hasError = false
 
-        // TODO (Ramil Timerbaev)
-        // последнее число предыдущего месяца
-        def lastDayPrevMonth = new Date()
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
         // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
         def tmp = (row.amortMonth != (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth))
@@ -395,8 +394,6 @@ void checkOnPrepareOrAcceptance(def value) {
  * Консолидация.
  */
 void consolidation() {
-    // TODO (Ramil Timerbaev) поменять
-
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
@@ -405,9 +402,7 @@ void consolidation() {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 source.getDataRows().each { row->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
+                    formData.dataRows.add(row)
                 }
             }
         }
@@ -465,6 +460,16 @@ void checkCreation() {
  */
 def getFromOld() {
     // TODO (Ramil Timerbaev)
+    /*
+    // предыдущий отчётный период
+    def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+
+    // РНУ-25 за предыдущий отчетный период
+    def formDataOld = null
+    if (reportPeriodOld != null) {
+        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+    }
+    */
     return 0
 }
 
@@ -472,6 +477,12 @@ def getFromOld() {
  * Первый ли это месяц (январь)
  */
 def isFirstMonth() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    if (reportPeriod != null && reportPeriod.getOrder() == 1) {
+        return true
+    }
     return false
 }
 
