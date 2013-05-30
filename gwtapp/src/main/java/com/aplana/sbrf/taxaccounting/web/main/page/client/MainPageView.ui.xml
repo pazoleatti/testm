@@ -31,7 +31,7 @@
 						</div>
 						<g:HTMLPanel ui:field="signInContentPanel" />
                         <div style="float: right; margin-top: 5px;">
-                            <g:Button styleName="{style.aboutButoon}" ui:field="aboutButton" title="О программе" ></g:Button>
+                            <g:Button styleName="{style.aboutButoon}" ui:field="aboutButton" title="Руководство пользователя" ></g:Button>
                         </div>
 						<g:HTMLPanel ui:field="mainMenuContentPanel" />
 
