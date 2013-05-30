@@ -63,7 +63,11 @@ public class FilterPresenter extends PresenterWidget<FilterPresenter.MyView> imp
 	public FormDataFilter getFilterData() {
 		FormDataFilter formDataFilter = getView().getDataFilter();
 		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
-		formDataFilter.setDepartmentId(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
+		if (getView().getSelectedDepartments() == null) {
+			formDataFilter.setDepartmentId(new ArrayList<Integer>());
+		} else {
+			formDataFilter.setDepartmentId(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
+		}
 		formDataFilter.setTaxType(this.taxType);
 		return formDataFilter;
 	}

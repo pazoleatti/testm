@@ -15,7 +15,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.history.History" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.PdfViewerWidget" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
-	
+
 	<source path="cell"/>
     <source path="datepicker"/>
     <source path="style"/>
@@ -23,5 +23,6 @@
     <source path="pager"/>
     <source path="datarow"/>
     <source path="departmentpicker"/>
+    <source path="newdepartmentpicker"/>
     <source path="reportperiodpicker"/>
 </module>

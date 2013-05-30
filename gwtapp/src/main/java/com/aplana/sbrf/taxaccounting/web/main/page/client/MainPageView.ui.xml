@@ -26,8 +26,10 @@
 								src="resources/img/header_left.png" />
 						</div>
 						<div class="topRightLogo">
+
 							<img style="height: 41px; width:27px;" height="41px" width="27px"
 								src="resources/img/header_right.png" />
+
 						</div>
 						<g:HTMLPanel ui:field="signInContentPanel" />
                         <div style="float: right; margin-top: 5px;">

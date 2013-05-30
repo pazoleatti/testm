@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -52,7 +52,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker reportPeriodPicker;
-	private DepartmentPicker departmentPicker;
+	private NewDepartmentPicker departmentPicker;
 
 	@Inject
 	@UiConstructor
@@ -90,7 +90,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void createDepartmentFilter(List<Department> list, Set<Integer> availableValues){
-		departmentPicker = new DepartmentPicker("Выберите подразделение", false);
+		departmentPicker = new NewDepartmentPicker("Выберите подразделение", false);
 		departmentPicker.setTreeValues(list, availableValues);
 	}
 

@@ -39,6 +39,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @deprecated use {@link com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker()} instead.
+ */
+@Deprecated
 public class DepartmentPicker extends Composite{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, DepartmentPicker> {

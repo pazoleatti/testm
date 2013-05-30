@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -30,7 +30,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
-	private DepartmentPicker departmentPicker;
+	private NewDepartmentPicker departmentPicker;
 
 	@UiField
 	Panel reportPeriodPanel;
@@ -102,11 +102,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@Override
 	public void setDepartments(List<Department> departments) {
 		departmentPickerPanel.clear();
-		departmentPicker = new DepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
+		departmentPicker = new NewDepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
 		departmentPicker.setTreeValues(departments, filterValues.getDepartmentIds());
 		departmentPickerPanel.add(departmentPicker);
 
-		if (!filter.getDepartmentIds().isEmpty()) {
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			Integer departmentId = filter.getDepartmentIds().iterator().next();
 			for (Department department : departments) {
 				if (department.getId() == departmentId) {
@@ -136,8 +136,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 					getSelectedReportPeriods().entrySet().iterator().next().getKey()));
 		}
 		if (departmentPicker.getSelectedItems().entrySet().iterator().hasNext() ) {
-			filter.setDepartmentIds(Arrays.asList(departmentPicker.
-					getSelectedItems().entrySet().iterator().next().getValue()));
+			filter.setDepartmentIds(departmentPicker.getSelectedItems().isEmpty() ? new ArrayList<Integer>() :
+					Arrays.asList(departmentPicker.
+							getSelectedItems().entrySet().iterator().next().getValue()));
 		}
 		if(declarationType.getValue() != null) {
 			filter.setDeclarationTypeId(declarationType.getValue().getId());
