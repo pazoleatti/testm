@@ -29,7 +29,7 @@ public class DeleteDeclarationDataHandler extends AbstractActionHandler<DeleteDe
     public DeleteDeclarationDataResult execute(DeleteDeclarationDataAction action, ExecutionContext context) {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		declarationDataService.delete(action.getDeclarationId(), userId);
+		declarationDataService.delete(action.getDeclarationId(), securityService.getIp(), userId);
 	    return new DeleteDeclarationDataResult();
     }
 

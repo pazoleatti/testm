@@ -65,7 +65,7 @@ public class DeclarationDataServiceImplTest {
 		Logger logger = new Logger();		
 		// TODO: sgoryachkin: Нужно сделать нормальный тест. Пока как временное решение - игнорить ошибку при генерации
 		try{
-			service.reCreate(logger, 1l, USER_ID, new Date());
+			service.reCreate(logger, 1l, "192.168.72.16", USER_ID, new Date());
 		} catch (ServiceException e) {
 			
 		}
@@ -78,7 +78,7 @@ public class DeclarationDataServiceImplTest {
 	@Test(expected=AccessDeniedException.class)
 	public void testRefreshDeclarationNoAccess() {
 		Logger logger = new Logger();
-		service.reCreate(logger, 2l, USER_ID, new Date());
+		service.reCreate(logger, 2l, "192.168.72.16", USER_ID, new Date());
 	}
 	
 }

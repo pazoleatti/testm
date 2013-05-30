@@ -19,7 +19,6 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 	@Autowired
 	private DeclarationDataService declarationDataService;
 
-
 	@Autowired
 	private SecurityService securityService;
 
@@ -31,7 +30,8 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
     public AcceptDeclarationDataResult execute(AcceptDeclarationDataAction action, ExecutionContext context) {
 		TAUser user = securityService.currentUser();
 		Integer userId = user.getId();
-		declarationDataService.setAccepted(new Logger(), action.getDeclarationId(), action.isAccepted(), userId);
+		declarationDataService.setAccepted(new Logger(), action.getDeclarationId(), action.isAccepted(),
+				securityService.getIp(), userId);
 	    return new AcceptDeclarationDataResult();
     }
 

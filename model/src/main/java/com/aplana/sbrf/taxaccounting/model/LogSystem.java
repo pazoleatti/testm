@@ -19,9 +19,9 @@ public class LogSystem implements Serializable {
 	private String roles;
 	private int departmentId;
 	private int reportPeriodId;
-	private int declarationTypeId;
-	private int formTypeId;
-	private int formKindId;
+	private Integer declarationTypeId;
+	private Integer formTypeId;
+	private Integer formKindId;
 	private String note;
 	private int userDepartmentId;
 
@@ -89,27 +89,27 @@ public class LogSystem implements Serializable {
 		this.reportPeriodId = reportPeriodId;
 	}
 
-	public int getDeclarationTypeId() {
+	public Integer getDeclarationTypeId() {
 		return declarationTypeId;
 	}
 
-	public void setDeclarationTypeId(int declarationTypeId) {
+	public void setDeclarationTypeId(Integer declarationTypeId) {
 		this.declarationTypeId = declarationTypeId;
 	}
 
-	public int getFormTypeId() {
+	public Integer getFormTypeId() {
 		return formTypeId;
 	}
 
-	public void setFormTypeId(int formTypeId) {
+	public void setFormTypeId(Integer formTypeId) {
 		this.formTypeId = formTypeId;
 	}
 
-	public int getFormKindId() {
+	public Integer getFormKindId() {
 		return formKindId;
 	}
 
-	public void setFormKindId(int formKindId) {
+	public void setFormKindId(Integer formKindId) {
 		this.formKindId = formKindId;
 	}
 

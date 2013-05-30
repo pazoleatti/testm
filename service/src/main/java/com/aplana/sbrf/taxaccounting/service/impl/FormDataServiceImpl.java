@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,9 +18,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -49,6 +46,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private ObjectLockDao lockDao;
 	@Autowired
 	private LogBusinessService logBusinessService;
+	@Autowired
+	private AuditService auditService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -99,7 +98,7 @@ public class FormDataServiceImpl implements FormDataService {
 	
 	
 	@Override
-	public void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+	public void importFormData(Logger logger, String ip, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
 		Date serviceStart = new Date();
 		FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
 		Date saveDate = new Date();
@@ -110,7 +109,9 @@ public class FormDataServiceImpl implements FormDataService {
 		logger.info("Сохранение: " + saveDate);
 		logger.info("Получение: " + getDate);
 		logger.info("Текущая: " + new Date());
-		logBusinessService.addLogBusiness(fd.getId(), null, userDao.getUser(userId), FormDataEvent.IMPORT, null);
+		logBusinessService.add(fd.getId(), null, userDao.getUser(userId), FormDataEvent.IMPORT, null);
+		auditService.add(ip, FormDataEvent.IMPORT, userDao.getUser(userId), fd.getDepartmentId(), fd.getReportPeriodId(),
+				null, fd.getFormType().getId(), fd.getKind().getId(), null);
 	}
 
 	@Override
@@ -271,7 +272,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public long saveFormData(Logger logger, int userId, FormData formData) {
+	public long saveFormData(Logger logger, String ip, int userId, FormData formData) {
 		checkLockedByAnotherUser(formData.getId(), userId);
 		boolean canDo;
 		if (formData.getId() == null) {
@@ -295,9 +296,13 @@ public class FormDataServiceImpl implements FormDataService {
 			}
 
 			if (oldId != null) {
-				logBusinessService.addLogBusiness(formData.getId(), null, user, FormDataEvent.SAVE, null);
+				logBusinessService.add(formData.getId(), null, user, FormDataEvent.SAVE, null);
+				auditService.add(ip, FormDataEvent.SAVE, user, formData.getDepartmentId(), formData.getReportPeriodId(),
+						null, formData.getFormType().getId(), formData.getKind().getId(), null);
 			} else {
-				logBusinessService.addLogBusiness(formData.getId(), null, user, FormDataEvent.CREATE, null);
+				logBusinessService.add(formData.getId(), null, user, FormDataEvent.CREATE, null);
+				auditService.add(ip, FormDataEvent.CREATE, user, formData.getDepartmentId(), formData.getReportPeriodId(),
+						null, formData.getFormType().getId(), formData.getKind().getId(), null);
 			}
 
 			return id;
@@ -357,10 +362,13 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public void deleteFormData(int userId, long formDataId) {
+	public void deleteFormData(String ip, int userId, long formDataId) {
 		checkLockedByAnotherUser(formDataId, userId);
 		if (formDataAccessService.canDelete(userId, formDataId)) {
 			formDataDao.delete(formDataId);
+			FormData formData = formDataDao.get(formDataId);
+			auditService.add(ip, FormDataEvent.DELETE, userDao.getUser(userId), formData.getDepartmentId(), formData.getReportPeriodId(),
+					null, formData.getFormType().getId(), formData.getKind().getId(), null);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для удаления налоговой формы");
@@ -378,7 +386,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            переход
 	 */
 	@Override
-	public void doMove(long formDataId, int userId, WorkflowMove workflowMove, String note, Logger logger) {
+	public void doMove(long formDataId, String ip, int userId, WorkflowMove workflowMove, String note, Logger logger) {
 		checkLockedByAnotherUser(formDataId, userId);
 		List<WorkflowMove> availableMoves = formDataAccessService
 				.getAvailableMoves(userId, formDataId);
@@ -415,7 +423,9 @@ public class FormDataServiceImpl implements FormDataService {
 				}
 			}
 
-			logBusinessService.addLogBusiness(formData.getId(), null, user, workflowMove.getEvent(), note);
+			logBusinessService.add(formData.getId(), null, user, workflowMove.getEvent(), note);
+			auditService.add(ip, workflowMove.getEvent(), user, formData.getDepartmentId(), formData.getReportPeriodId(),
+					null, formData.getFormType().getId(), formData.getKind().getId(), note);
 
 		} else {
 			throw new ServiceLoggerException(

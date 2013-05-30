@@ -37,7 +37,8 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
 		CreateDeclarationResult result = new CreateDeclarationResult();
 		result.setDeclarationId(declarationDataService.create(new Logger(), declarationTemplateService
-				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(), userId, command.getReportPeriodId()));
+				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(),
+				securityService.getIp(), userId, command.getReportPeriodId()));
 		return result;
 	}
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,7 +24,28 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void add(LogSystem logSystem) {
-		auditDao.add(logSystem);
+	public void add(String ip, FormDataEvent event, TAUser user, int departmentId, int reportPeriodId,
+					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
+		LogSystem log = new LogSystem();
+		log.setLogDate(new Date());
+		log.setIp(ip);
+		log.setEventId(event.getCode());
+		log.setUserId(user.getId());
+
+		StringBuilder roles = new StringBuilder();
+		for (TARole role : user.getRoles()) {
+			roles.append(role.getName());
+		}
+		log.setRoles(roles.toString());
+
+		log.setDepartmentId(departmentId);
+		log.setReportPeriodId(reportPeriodId);
+		log.setDeclarationTypeId(declarationTypeId);
+		log.setFormTypeId(formTypeId);
+		log.setFormKindId(formKindId);
+		log.setNote(note);
+		log.setUserDepartmentId(user.getDepartmentId());
+
+		auditDao.add(log);
 	}
 }

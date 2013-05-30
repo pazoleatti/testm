@@ -29,7 +29,7 @@ public interface FormDataService {
 	 */
 	FormData createFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
 	
-	void importFormData(Logger logger, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
+	void importFormData(Logger logger, String ip, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
 	
 	
 	/**
@@ -52,12 +52,13 @@ public interface FormDataService {
 	 * Сохранить данные по налоговой форме
 	 * Если форма новая то блокирует её после сохранения.
 	 * 
+	 * @param ip адресс пользователя, выполняющего операцию
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formData объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
-	long saveFormData(Logger logger, int userId, FormData formData);
+	long saveFormData(Logger logger, String ip, int userId, FormData formData);
 	
 	/**
 	 * Получить данные по налоговой форме
@@ -70,21 +71,23 @@ public interface FormDataService {
 
 	/**
 	 * Удалить данные по налоговой форме
+	 * @param ip адресс пользователя, выполняющего операцию
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @param formDataId идентификатор записи, котрую нужно удалить
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя недостаточно прав для удаления записи
 	 */
-	void deleteFormData(int userId, long formDataId);
+	void deleteFormData(String ip, int userId, long formDataId);
 
 	/**
 	 * Выполнить изменение статуса карточки
 	 * @param formDataId идентификатор объекта {@link FormData}
-	 * @param userId идентификатор пользователя, от имени которого выплняется действие
+	 * @param ip адресс пользователя, от имени которого выполняется действие
+	 * @param userId идентификатор пользователя, от имени которого выполняется действие
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
 	 * @param note Причина возврата (перехода) по ЖЦ в Системе
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	void doMove(long formDataId, int userId, WorkflowMove move, String note, Logger logger);
+	void doMove(long formDataId, String ip, int userId, WorkflowMove move, String note, Logger logger);
 
 	/**
 	 * Создаёт налоговую форму без проверок прав доступа

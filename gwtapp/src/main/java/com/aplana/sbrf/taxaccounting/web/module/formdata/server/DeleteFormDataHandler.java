@@ -35,7 +35,7 @@ public class DeleteFormDataHandler extends
 	@Override
 	public DeleteFormDataResult execute(DeleteFormDataAction action,
 			ExecutionContext context) throws ActionException {
-		formDataService.deleteFormData(securityService.currentUser().getId(),
+		formDataService.deleteFormData(securityService.getIp(), securityService.currentUser().getId(),
 				action.getFormDataId());
 		return new DeleteFormDataResult();
 	}

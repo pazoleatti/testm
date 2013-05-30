@@ -27,7 +27,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void addLogBusiness(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note) {
+	public void add(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note) {
 		LogBusiness log = new LogBusiness();
 		log.setFormId(formDataId);
 		log.setDeclarationId(declarationId);

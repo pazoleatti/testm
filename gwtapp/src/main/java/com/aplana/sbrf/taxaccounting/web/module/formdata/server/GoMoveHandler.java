@@ -41,7 +41,7 @@ public class GoMoveHandler extends
 			TAUser user = securityService.currentUser();
 			Integer userId = user.getId();
 			Logger logger = new Logger();
-			formDataService.doMove(action.getFormDataId(), userId,
+			formDataService.doMove(action.getFormDataId(), securityService.getIp(), userId,
 					action.getMove(), action.getReasonToWorkflowMove(), logger);
 			GoMoveResult result = new GoMoveResult();
 			result.setLogEntries(logger.getEntries());

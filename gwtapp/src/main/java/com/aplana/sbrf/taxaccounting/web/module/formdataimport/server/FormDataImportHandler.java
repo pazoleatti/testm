@@ -40,7 +40,7 @@ public class FormDataImportHandler extends AbstractActionHandler<FormDataImportA
 			TAUser user = securityService.currentUser();
 			Integer userId = user.getId();
 			Logger logger = new Logger();
-			formDataService.importFormData(logger, userId, action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
+			formDataService.importFormData(logger, securityService.getIp(), userId, action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
 			FormDataImportResult result = new FormDataImportResult();
 			result.setLogEntries(logger.getEntries());
 			return result;

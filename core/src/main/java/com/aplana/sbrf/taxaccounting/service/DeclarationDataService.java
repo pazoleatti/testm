@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.*;
 import java.util.Date;
 
 /**
- * Сервис для работы с {@link налоговыми декларациями DeclarationData}
+ * Сервис для работы с {@link DeclarationData налоговыми декларациями }
  * @author dsultanbekov
  */
 public interface DeclarationDataService {
@@ -17,22 +17,24 @@ public interface DeclarationDataService {
 	 * @param logger - объект журнала
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
+	 * @param ip адрес пользователя, выполняющего действие
 	 * @param userId идентификатор пользователя, выполняющего действие
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @return идентификатор созданной декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long create(Logger logger, int declarationTemplateId, int departmentId, int userId, int reportPeriodId);
+	long create(Logger logger, int declarationTemplateId, int departmentId, String ip, int userId, int reportPeriodId);
 	
 	/**
 	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
 	 * @param logger - объект журнала
 	 * @param declarationDataId - идентификатор декларации
 	 * @param docDate - дата обновления декларации
+	 * @param ip адрес пользователя, выполняющего действие
 	 * @param userId - идентификатор пользователя, выполняющего операцию
 	 */
-	void reCreate(Logger logger, long declarationDataId, int userId, Date docDate);
+	void reCreate(Logger logger, long declarationDataId, String ip, int userId, Date docDate);
 	
 	/**
 	 * Получить декларацию
@@ -46,21 +48,23 @@ public interface DeclarationDataService {
 	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
+	 * @param ip адрес пользователя, выполняющего действие
 	 * @param userId идентификатор пользователя, выполняющего действие
 	 * @throws DaoException если такой декларации не существует
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
-	void delete(long declarationDataId, int userId);
+	void delete(long declarationDataId, String ip, int userId);
 
 	/**
 	 * Установить в декларации флаг принятия
 	 * @param logger - объект журнала
 	 * @param declarationDataId идентификатор декларации
 	 * @param accepted значение флага
+	 * @param ip адрес пользователя, выполняющего действие
 	 * @param userId идентификатор пользователя, выполняющего операцию
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(Logger logger, long declarationDataId, boolean accepted, int userId);
+	void setAccepted(Logger logger, long declarationDataId, boolean accepted, String ip, int userId);
 	/**
 	 * Получить данные декларации в формате законодателя (XML)
 	 * @param declarationDataId идентификатор декларации

@@ -35,14 +35,15 @@ public class AuditDaoTest {
 
 		LogSystem logSystem = auditDao.getLogs(filter).get(0);
 		assertEquals(Long.valueOf(1), logSystem.getId());
+		assertEquals("192.168.72.16", logSystem.getIp());
 		assertEquals(1, logSystem.getEventId());
 		assertEquals(1, logSystem.getUserId());
 		assertEquals("operator", logSystem.getRoles());
 		assertEquals(1, logSystem.getDepartmentId());
 		assertEquals(1, logSystem.getReportPeriodId());
-		assertEquals(1, logSystem.getDeclarationTypeId());
-		assertEquals(1, logSystem.getFormTypeId());
-		assertEquals(1, logSystem.getFormKindId());
+		assertEquals(Integer.valueOf(1), logSystem.getDeclarationTypeId());
+		assertEquals(Integer.valueOf(1), logSystem.getFormTypeId());
+		assertEquals(Integer.valueOf(1), logSystem.getFormKindId());
 		assertEquals("the best note", logSystem.getNote());
 		assertEquals(1, logSystem.getUserDepartmentId());
 	}
@@ -53,6 +54,7 @@ public class AuditDaoTest {
 		logSystem.setId(3l);
 		Date date = new Date();
 		logSystem.setLogDate(date);
+		logSystem.setIp("192.168.72.16");
 		logSystem.setEventId(3);
 		logSystem.setUserId(1);
 		logSystem.setRoles("operator");
@@ -74,14 +76,16 @@ public class AuditDaoTest {
 		logSystem = auditDao.getLogs(filter).get(1);
 		assertEquals(Long.valueOf(3), logSystem.getId());
 		assertEquals(formatter.format(date), formatter.format(logSystem.getLogDate()));
+		assertEquals("192.168.72.16", logSystem.getIp());
+		assertEquals(3, logSystem.getEventId());
 		assertEquals(3, logSystem.getEventId());
 		assertEquals(1, logSystem.getUserId());
 		assertEquals("operator", logSystem.getRoles());
 		assertEquals(1, logSystem.getDepartmentId());
 		assertEquals(1, logSystem.getReportPeriodId());
-		assertEquals(1, logSystem.getDeclarationTypeId());
-		assertEquals(1, logSystem.getFormTypeId());
-		assertEquals(2, logSystem.getFormKindId());
+		assertEquals(Integer.valueOf(1), logSystem.getDeclarationTypeId());
+		assertEquals(Integer.valueOf(1), logSystem.getFormTypeId());
+		assertEquals(Integer.valueOf(2), logSystem.getFormKindId());
 		assertEquals("the best note", logSystem.getNote());
 		assertEquals(1, logSystem.getUserDepartmentId());
 	}

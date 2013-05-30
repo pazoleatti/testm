@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Сервис для работы с текущим контекстом авторизации.
@@ -43,5 +45,10 @@ public class SecurityService {
 	@Autowired
 	public void setUserDao(TAUserDao userDao) {
 		this.userDao = userDao;
+	}
+
+	public String getIp() {
+		return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest().getRemoteAddr();
 	}
 }

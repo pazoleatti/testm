@@ -32,5 +32,5 @@ public interface LogBusinessService {
 	 * @param event событие
 	 * @param note текст
 	 */
-	void addLogBusiness(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note);
+	void add(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note);
 }

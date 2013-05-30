@@ -90,7 +90,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
 			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
 			formDataDao.save(dformData);
-			logBusinessService.addLogBusiness(dformData.getId(), null, scriptComponentContext.getUser(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
+			logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUser(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
 		} else {
             FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
             FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
