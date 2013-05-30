@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,10 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	public List<LogSystem> getLogs(LogSystemFilter filter) {
+		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
+			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
+		}
+
 		return auditDao.getLogs(filter);
 	}
 
