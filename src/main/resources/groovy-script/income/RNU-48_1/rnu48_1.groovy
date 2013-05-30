@@ -29,7 +29,7 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.ADD_ROW :
-        addNewRow()
+        addNewRowAction()
         break
     case FormDataEvent.DELETE_ROW :
         deleteRow()
@@ -39,21 +39,18 @@ switch (formDataEvent) {
 /**
  * Добавить новую строку.
  */
-def addNewRow() {
-    
-    def pos
-    
+def addNewRowAction() {
     def totalAmountRow = tryFindTotalAmountRow()
     if (totalAmountRow != null) {
         //добавляем новую строку перед ИТОГО
         def tmpTotalAmountValue = totalAmountRow.amount
         formData.deleteDataRow(totalAmountRow)
-        addNewRow()
-        def newTotalAmountRow = getNewRow(true)
+        addNewRowAction()
+        def newTotalAmountRow = addNewRow(true)
         newTotalAmountRow.amount = tmpTotalAmountValue
     } else {
         //добавляем новую строку в конец таблицы
-        def newRow = getNewRow()
+        def newRow = addNewRow()
         newRow.number = formData.dataRows.size()
     }
 }
@@ -69,26 +66,24 @@ void calc() {
     }
     //расчитываем новые итоговые значения
     def totalAmount = getTotalAmount()
-    def newRow = getNewRow(true)
+    def newRow = addNewRow(true)
     newRow.amount = totalAmount
 }
 
 /**
  * Получаем новую строку
- * @param isTotalAmountRow = {@value true когда нужно получить столбец итогов}
+ * @param isTotalAmountRow = {@value true когда нужно получить строку итогов}
  * @return
  */
-private def getNewRow(boolean isTotalAmountRow = false) {
+private def addNewRow(boolean isTotalAmountRow = false) {
     def newRow
-    if (! isTotalAmountRow) {
-        //полуаем просто новую строку, ячейки разрешены для редактирования
+    if (! isTotalAmountRow) {                   //полуаем просто новую строку, ячейки разрешены для редактирования
         newRow = formData.appendDataRow()
-        def colNames = ['number', 'inventoryNumber', 'usefulDate', 'amount']
-        colNames.each{ value ->
-            newRow.getCell(value).editable = isEditable(value)
+        def editableColsNames = getEditableColsNames()
+        editableColsNames.each{ value ->
+            newRow.getCell(value).editable = true
         }
-    } else {
-        //получаем строку для ИТОГО
+    } else {                                    //получаем строку для ИТОГО
         newRow = formData.appendDataRow('total')
         newRow.inventoryNumber = 'Итого'
     }
@@ -186,8 +181,11 @@ boolean requiredColsFilled() {
     return formIsValid
 }
 
-boolean isEditable(String colName) {
-    return !colName.equals('number')
+/**
+ * @return массив имен ячеек, доступных для редактирования
+ */
+def getEditableColsNames() {
+    return ['number']
 }
 
 def tryFindTotalAmountRow() {
