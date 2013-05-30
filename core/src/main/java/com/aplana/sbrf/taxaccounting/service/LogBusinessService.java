@@ -31,7 +31,6 @@ public interface LogBusinessService {
 	 * @param user пользователь инициирующий событие
 	 * @param event событие
 	 * @param note текст
-	 * @return объект, представляющий историю событий для налоговой формы
 	 */
 	void addLogBusiness(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note);
 }

@@ -9,7 +9,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,8 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 
-@Repository("declarationLogBusinessDao")
-@Transactional(readOnly = true)
+@Repository
 public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
@@ -107,7 +105,6 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
 	public void add(LogBusiness logBusiness) {
 		JdbcTemplate jt = getJdbcTemplate();
 
