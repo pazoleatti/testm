@@ -100,7 +100,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			setDeclarationBlobs(logger, newDeclaration, new Date());
 			logBusinessService.add(null, id, user, FormDataEvent.CREATE, null);
 			auditService.add(ip, FormDataEvent.CREATE , user, newDeclaration.getDepartmentId(),
-					newDeclaration.getReportPeriodId(),	null, null, null, null);
+					newDeclaration.getReportPeriodId(),
+					declarationTemplateService.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
+					null, null, null);
 			return id;
 		} else {
 			throw new AccessDeniedException(
@@ -118,7 +120,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			TAUser user = userDao.getUser(userId);
 			logBusinessService.add(null, id, user, FormDataEvent.SAVE, null);
 			auditService.add(ip, FormDataEvent.SAVE , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), null, null, null, null);
+					declarationData.getReportPeriodId(),
+					declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+					null, null, null);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для обновления указанной декларации");
@@ -145,7 +149,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			declarationDataDao.delete(id);
 
 			auditService.add(ip, FormDataEvent.DELETE , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), null, null, null, null);
+					declarationData.getReportPeriodId(),
+					declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+					null, null, null);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав на удаление декларации");
@@ -178,14 +184,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		}
 		declarationDataDao.setAccepted(id, accepted);
 
+		Integer declarationTypeId = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
 		if (accepted) {
 			logBusinessService.add(null, id, user, FormDataEvent.MOVE_CREATED_TO_APPROVED, null);
 			auditService.add(ip, FormDataEvent.MOVE_CREATED_TO_APPROVED , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), null, null, null, null);
+					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		} else {
 			logBusinessService.add(null, id, user, FormDataEvent.MOVE_APPROVED_TO_CREATED, null);
 			auditService.add(ip, FormDataEvent.MOVE_APPROVED_TO_CREATED , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), null, null, null, null);
+					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		}
 
 	}
