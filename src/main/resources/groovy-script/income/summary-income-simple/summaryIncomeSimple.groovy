@@ -131,7 +131,6 @@ void calculationBasicSum() {
 
 /**
  * Расчет контрольных граф НФ (calculationControlGraphs.groovy).
- * Форма "Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)".
  *
  * @author auldanov
  * @author rtimerbaev
