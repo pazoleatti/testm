@@ -203,7 +203,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			declarationData.setAccepted(false);
 			
 			Map<String, Object> exchangeParams = new HashMap<String, Object>();		
-			declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+			declarationDataScriptingService.executeScript(user, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 			
 			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
 			logBusinessService.add(null, id, user, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
