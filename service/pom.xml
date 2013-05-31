@@ -47,12 +47,6 @@
 			<artifactId>jasperreports</artifactId>
 		</dependency>
 		<dependency>
-			<!-- TODO: Нужно исправить. Реализация сервисного слоя не должна зависеть 
-				от spring-security spring-security - это WEB сторона -->
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-		</dependency>
-		<dependency>
             <groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
