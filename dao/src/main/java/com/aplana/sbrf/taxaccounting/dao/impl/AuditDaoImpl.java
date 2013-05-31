@@ -11,12 +11,15 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final String dbDateFormat = "YYYYMMDD HH:MM:SS";
-	private static final SimpleDateFormat formatter = new SimpleDateFormat(dbDateFormat);
+	private static final String dateFormat = "yyyyMMdd HH:MM:SS";
+	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+	private static final long oneDayTime = 1000 * 60 * 60 * 24;
 
 	@Override
 	public List<LogSystem> getLogs(LogSystemFilter filter) {
@@ -56,9 +59,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
 	private void appendSelectFromAndWhereClause(StringBuilder sql, LogSystemFilter filter) {
-		sql.append("SELECT * FROM log_system WHERE log_date BETWEEN TO_DATE('").append(formatter.format(filter.getFromSearchDate()))
-				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('")
-				.append(formatter.format(filter.getToSearchDate())).append("', '").append(dbDateFormat).append("')");
+		sql.append("SELECT * FROM log_system WHERE log_date BETWEEN TO_DATE('").append
+				(formatter.format(new Date(filter.getFromSearchDate().getTime() - oneDayTime)))
+				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
+				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
+				.append("', '").append(dbDateFormat).append("')");
 
 		if (filter.getUserId() != 0) {
 			sql.append(" AND user_id = ").append(filter.getUserId());
