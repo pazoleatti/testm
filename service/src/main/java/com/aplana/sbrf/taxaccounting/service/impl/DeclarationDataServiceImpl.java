@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,12 +12,6 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -26,8 +21,6 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,11 +30,23 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 
 /**
  * Сервис для работы с декларациями
@@ -52,9 +57,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 @Service
 @Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
-
-	private static final Log log = LogFactory
-			.getLog(DeclarationDataServiceImpl.class);
+	
+	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
 	@Autowired
 	private TAUserDao userDao;
@@ -67,9 +71,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Autowired
 	private DeclarationDataScriptingService declarationDataScriptingService;
-
+	
 	@Autowired
-	private DeclarationTemplateService declarationTemplateService;
+	private DeclarationTemplateDao declarationTemplateDao;
+	
+	@Autowired
+	private DepartmentFormTypeDao departmentFormTypeDao;
+	
+	@Autowired
+	private FormDataDao formDataDao;
+	
+	@Autowired
+	private DepartmentDao departmentDao;
+	
+	@Autowired
+	private FormTypeDao formTypeDao;
 
 	@Autowired
 	private LogBusinessService logBusinessService;
@@ -89,19 +105,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			int departmentId, String ip, int userId, int reportPeriodId) {
 		if (declarationDataAccessService.canCreate(userId,
 				declarationTemplateId, departmentId, reportPeriodId)) {
+			
 			DeclarationData newDeclaration = new DeclarationData();
 			newDeclaration.setDepartmentId(departmentId);
 			newDeclaration.setReportPeriodId(reportPeriodId);
 			newDeclaration.setAccepted(false);
 			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-
 			long id = declarationDataDao.saveNew(newDeclaration);
 			TAUser user = userDao.getUser(userId);
-			setDeclarationBlobs(logger, newDeclaration, new Date());
+			
+			setDeclarationBlobs(logger, newDeclaration, new Date(), userId);
 			logBusinessService.add(null, id, user, FormDataEvent.CREATE, null);
 			auditService.add(ip, FormDataEvent.CREATE , user, newDeclaration.getDepartmentId(),
 					newDeclaration.getReportPeriodId(),
-					declarationTemplateService.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
+					declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
 			return id;
 		} else {
@@ -109,6 +126,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					"Недостаточно прав для создания декларации с указанными параметрами");
 		}
 	}
+	
+	
 
 	@Override
 	@Transactional(readOnly = false)
@@ -116,12 +135,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			Date docDate) {
 		if (declarationDataAccessService.canRefresh(userId, id)) {
 			DeclarationData declarationData = declarationDataDao.get(id);
-			setDeclarationBlobs(logger, declarationData, docDate);
+			setDeclarationBlobs(logger, declarationData, docDate, userId);
 			TAUser user = userDao.getUser(userId);
 			logBusinessService.add(null, id, user, FormDataEvent.SAVE, null);
 			auditService.add(ip, FormDataEvent.SAVE , user, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
-					declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
 		} else {
 			throw new AccessDeniedException(
@@ -150,7 +169,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 			auditService.add(ip, FormDataEvent.DELETE , user, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
-					declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
 		} else {
 			throw new AccessDeniedException(
@@ -161,39 +180,38 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void setAccepted(Logger logger, long id, boolean accepted, String ip, int userId) {
-		DeclarationData declarationData = declarationDataDao.get(id);
+		
 		TAUser user = userDao.getUser(userId);
+		// TODO (sgoryachkin) Это 2 метода должо быть
 		if (accepted) {
-			if (!declarationDataAccessService.canAccept(userId, id)) {
-				throw new AccessDeniedException(
-						"Недостаточно прав для принятия декларации");
-			}
-			log.debug("Accept declaration, id = " + id);
+			declarationDataAccessService.checkEvents(userId, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+			
+			DeclarationData declarationData  = declarationDataDao.get(id);
 			declarationData.setAccepted(true);
-			declarationDataScriptingService.accept(logger, declarationData);
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new ServiceLoggerException(
-						"Есть ошибки в скрипте принятия декларации",
-						logger.getEntries());
-			}
+			
+			Map<String, Object> exchangeParams = new HashMap<String, Object>();
+			declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+			
+			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+			logBusinessService.add(null, id, user, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+			auditService.add(ip, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , user, declarationData.getDepartmentId(),
+					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		} else {
-			if (!declarationDataAccessService.canReject(userId, id)) {
-				throw new AccessDeniedException(
-						"Недостаточно прав для отмены принятия декларации");
-			}
+			declarationDataAccessService.checkEvents(userId, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+			
+			DeclarationData declarationData  = declarationDataDao.get(id);
+			declarationData.setAccepted(false);
+			
+			Map<String, Object> exchangeParams = new HashMap<String, Object>();		
+			declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+			
+			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+			logBusinessService.add(null, id, user, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+			auditService.add(ip, FormDataEvent.MOVE_ACCEPTED_TO_CREATED , user, declarationData.getDepartmentId(),
+					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
+		
 		}
 		declarationDataDao.setAccepted(id, accepted);
-
-		Integer declarationTypeId = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
-		if (accepted) {
-			logBusinessService.add(null, id, user, FormDataEvent.MOVE_CREATED_TO_APPROVED, null);
-			auditService.add(ip, FormDataEvent.MOVE_CREATED_TO_APPROVED , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
-		} else {
-			logBusinessService.add(null, id, user, FormDataEvent.MOVE_APPROVED_TO_CREATED, null);
-			auditService.add(ip, FormDataEvent.MOVE_APPROVED_TO_CREATED , user, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
-		}
 
 	}
 
@@ -253,21 +271,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 	
 	private void setDeclarationBlobs(Logger logger,
-			DeclarationData declarationData, Date docDate) {
-
-		// Генерация и сохранение XML
-		String xml = declarationDataScriptingService.create(logger,
-				declarationData, docDate);
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Есть ошибки в скрипте создания декларации",
-					logger.getEntries());
-		}
+			DeclarationData declarationData, Date docDate, int userId) {
+		
+		Map<String, Object> exchangeParams = new HashMap<String, Object>();
+		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
+		StringWriter writer = new StringWriter();
+		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
+			
+		declarationDataScriptingService.executeScript(userDao.getUser(userId), declarationData, FormDataEvent.CREATE, logger, exchangeParams);
+	
+		String xml = XML_HEADER.concat(writer.toString());
+		
+		
 		declarationDataDao.setXmlData(declarationData.getId(), xml);
 
 		// Заполнение отчета и экспорт в формате PDF и XLSX
 		JasperPrint jasperPrint = fillReport(xml,
-				declarationTemplateService.getJasper(declarationData
+				declarationTemplateDao.getJasper(declarationData
 						.getDeclarationTemplateId()));
 		declarationDataDao.setPdfData(declarationData.getId(),
 				exportPDF(jasperPrint));
@@ -356,4 +376,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			throw new ServiceException("Невозможно получить дату обновления декларации", e);
 		}
 	}
+	
+
+	
+	
 }

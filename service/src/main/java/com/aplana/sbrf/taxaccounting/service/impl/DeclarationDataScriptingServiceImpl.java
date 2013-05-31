@@ -1,38 +1,28 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import groovy.xml.MarkupBuilder;
-
-import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Date;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
-import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextImpl;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**
@@ -40,92 +30,19 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
  * @author dsultanbekov
  * @author mfayzullin
  */
-@Service
+@Component
 public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements DeclarationDataScriptingService {
+	
+	private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
 
 	@Autowired
-	private DepartmentFormTypeDao departmentFormTypeDao;
-	
-	@Autowired
-	private FormDataDao formDataDao;
-	
-	@Autowired
-	private DepartmentDao departmentDao;
-	
-	@Autowired
-	private FormTypeDao formTypeDao;
-	
-	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
-
-    private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
-	
-	@Override
-	public String create(Logger logger, DeclarationData declarationData, Date docDate) {
-		this.logger.debug("Starting processing request to run create script");
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-
-		// Формирование списка НФ-источников в статусе "Принята"
-		FormDataCollection formDataCollection = getAcceptedFormDataSources(logger, declarationData);
-		// Должна быть хотя бы одна НФ-источник
-		if (formDataCollection.getRecords().isEmpty()) {
-			logger.error("Декларация не может быть сформирована, так как по крайней мере одна сводная или выходная " +
-					"налоговая форма, необходимая для формирования декларации, должна иметь статус «Принята».");
-		} else {
-			Bindings b = scriptEngine.createBindings();
-			b.putAll(getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType()));
-			b.put("formDataCollection", formDataCollection);
-			b.put("declarationData", declarationData);
-			b.put("docDate", docDate);
-			StringWriter writer = new StringWriter();
-			MarkupBuilder xml = new MarkupBuilder(writer);
-			b.put("xml", xml);
-			b.put("logger", logger);
-			try {
-				scriptEngine.eval(declarationTemplate.getCreateScript(), b);
-			} catch (ScriptException e) {
-				logScriptException(e, logger);
-			} catch (Exception e) {
-				logger.error(e);
-			}
-
-			if (!logger.containsLevel(LogLevel.ERROR)) {
-				logger.info("Декларация успешно создана");
-				return XML_HEADER.concat(writer.toString());
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public void accept(Logger logger, DeclarationData declarationData) {
-		int declarationTemplateId = declarationData.getDeclarationTemplateId();
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-
-		Bindings b = scriptEngine.createBindings();
-		b.putAll(getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType()));
-		b.put("formDataCollection", getAcceptedFormDataSources(logger, declarationData));
-		b.put("declarationData", declarationData);
-		b.put("xml", null);
-		b.put("logger", logger);
-		try {
-			scriptEngine.eval(declarationTemplate.getCreateScript(), b);
-		} catch (ScriptException e) {
-			logScriptException(e, logger);
-		} catch (Exception e) {
-			logger.error(e);
-		}
-
-		if (!logger.containsLevel(LogLevel.ERROR)) {
-			logger.info("Декларация успешно принята!");
-		}
-	}
+	private DeclarationTemplateDao declarationTemplateDao;
 	
 	/**
 	 * Возвращает спринг-бины доcтупные для использования в скрипте создания декларации.
 	 * @param taxType вид налога
 	 */
-	private Map<String, ?> getScriptExposedBeans(TaxType taxType){
+	private Map<String, ?> getScriptExposedBeans(TaxType taxType, FormDataEvent event){
 		Map<String, Object> beans = new HashMap<String, Object>();
 
 		for(Map.Entry<String, ?> entry:applicationContext.getBeansWithAnnotation(ScriptExposed.class).entrySet()){
@@ -150,45 +67,66 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		return beans;
 	}
 
-	/**
-	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
-	 * "Создана"
-	 *
-	 * @param logger журнал сообщений
-	 * @param declarationData декларация
-	 * @return список НФ-источников в статусе "Принята"
-	 */
-	private FormDataCollection getAcceptedFormDataSources(Logger logger, DeclarationData declarationData) {
-		int departmentId = declarationData.getDepartmentId();
-		int declarationTemplateId = declarationData.getDeclarationTemplateId();
-		int reportPeriodId = declarationData.getReportPeriodId();
-
-		// Формирование списка НФ-источников в статусе "Принята"
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getDeclarationType().getId());
-		List<FormData> records = new ArrayList<FormData>();
-		for (DepartmentFormType dft : sourcesInfo) {
-			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько
-			// FormData, в этом случае данный код нужно будет зарефакторить
-			FormData formData = formDataDao.find(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId);
-			if (formData != null) {
-				if (formData.getState() != WorkflowState.ACCEPTED) {
-					Department department = departmentDao.getDepartment(dft.getDepartmentId());
-					FormType formType = formTypeDao.getType(dft.getFormTypeId());
-					logger.warn(
-							"Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-							formType.getName(),
-							dft.getKind().getName(),
-							department.getName()
-					);
-				} else {
-					records.add(formData);
-				}
+	@Override
+	public void executeScript(TAUser user, DeclarationData declarationData, FormDataEvent event, Logger logger,
+			Map<String, Object> exchangeParams) {
+		this.logger.debug("Starting processing request to run create script");
+		
+		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+		
+		// Биндим параметры для выполнения скрипта
+		Bindings b = scriptEngine.createBindings();
+		
+		Map<String, ?> scriptComponents =  getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType(), event);
+		for (Object component : scriptComponents.values()) {
+			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+			scriptComponentContext.setUser(user);
+			if (component instanceof ScriptComponentContextHolder){
+				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}
 		}
-		FormDataCollection formDataCollection = new FormDataCollection();
-		formDataCollection.setRecords(records);
-		return formDataCollection;
+		b.putAll(scriptComponents);
+		
+		b.put("formDataEvent", event);
+		b.put("logger", logger);
+		b.put("declarationData", declarationData);
+		if (exchangeParams != null) {
+			for (Map.Entry<String, Object> entry : exchangeParams.entrySet()) {
+				if (b.containsKey(entry.getKey()))
+					throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
+				b.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
+		logger.setMessageDecorator(d);
+			
+		executeScript(b, declarationTemplate.getCreateScript(), logger, d);
+			
+		logger.setMessageDecorator(null);
+
+		
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			throw new ServiceLoggerException(
+					"Есть критические ошибки при выполнения скрипта",
+					logger.getEntries());
+		}
 	}
+
+	private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
+		try {
+			scriptEngine.eval(script, bindings);
+			return true;
+		} catch (ScriptException e) {
+			logScriptException(e, logger);
+			return false;
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+	}
+
+
+
 
 }

@@ -29,8 +29,10 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
 public class DeclarationDataAccessServiceImplTest {
 	private static DeclarationDataAccessServiceImpl service;
@@ -58,6 +60,26 @@ public class DeclarationDataAccessServiceImplTest {
 	private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
 
 	private final static int REPORT_PERIOD_ID = 1;
+	
+	private boolean canAccept(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean canReject(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
 
 	@BeforeClass
 	public static void tearUp() {
@@ -181,55 +203,55 @@ public class DeclarationDataAccessServiceImplTest {
 	@Test
 	public void testCanAccept() {
 		// Контролёр УНП может принимать непринятые декларации в любом подразделении
-		assertTrue(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertTrue(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может принимать непринятые декларации только в своём обособленном подразделении
-		assertFalse(service.canAccept(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canAccept(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(service.canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canAccept(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может принимать никаких деклараций
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanReject() {
 		// Контролёр УНП может отменять принятые декларации в любом подразделении
-		assertFalse(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertTrue(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertTrue(service.canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может отменять принятые декларации только в своём обособленном подразделении
-		assertFalse(service.canReject(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canReject(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(service.canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canReject(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canReject(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может отменять никаких деклараций
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test

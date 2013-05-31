@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
@@ -63,14 +65,14 @@ public class GetDeclarationDataHandler
 		Integer userId = user.getId();
 
 		GetDeclarationDataResult result = new GetDeclarationDataResult();
+		Set<FormDataEvent> permittedEvents  = declarationAccessService.getPermittedEvents(userId, action.getId());
+		
 		DeclarationData declaration = declarationDataService.get(
 				action.getId(), userId);
 		result.setDocDate(declarationDataService.getXmlDataDocDate(
 				action.getId(), userId));
-		result.setCanAccept(declarationAccessService.canAccept(userId,
-				action.getId()));
-		result.setCanReject(declarationAccessService.canReject(userId,
-				action.getId()));
+		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
+		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
 		result.setCanDownload(declarationAccessService.canDownloadXml(userId,
 				action.getId()));
 		result.setCanDelete(declarationAccessService.canDelete(userId,

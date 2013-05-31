@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 
 
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 
@@ -26,4 +28,15 @@ public interface DeclarationService {
 	 * @return идентификатор xml файла
 	 */
 	String generateXmlFileId(int declarationTypeId, int departmentId);
+	
+	/**
+	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
+	 * "Создана"
+	 *
+	 * @param declarationData декларация
+	 * @return список НФ-источников в статусе "Принята"
+	 */
+	FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData);
+	
+	
 }

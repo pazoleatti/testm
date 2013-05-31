@@ -34,5 +34,6 @@ public interface FormDataScriptingService {
 	 * @param formData форма
 	 * @param event событие
 	 */
+	@Deprecated
 	boolean hasScripts(FormData formData, FormDataEvent event);
 }
