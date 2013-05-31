@@ -6,7 +6,8 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *		- проверки возможно поменяются
+ *      - расчет графы 10, по чтз графа 9 объязательная, но проверяется на заполненость при расчете графы 10
+ *      - логическая проверка 5: графа 8 может принимать значение только + или -, а в этой проверке сравнивается с "x"
  *
  * @author rtimerbaev
  */
@@ -76,11 +77,9 @@ def addNewRow() {
     def newRow = formData.createDataRow()
     formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
-    // графа 2..13
+    // графа 2..5, 7..9
     ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
-            'reserve', 'cost', 'signSecurity', 'marketQuotation',
-            'costOnMarketQuotation', 'reserveCalcValue',
-            'reserveCreation', 'reserveRecovery'].each {
+            'cost', 'signSecurity', 'marketQuotation',].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -101,10 +100,8 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа 2..13)
-    def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
-            'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
-            'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+    // список проверяемых столбцов (графа 2..5, 7..9)
+    def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotation']
     for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
@@ -132,9 +129,31 @@ void calc() {
     // отсортировать/группировать
     formData.dataRows.sort { it.regNumber }
 
-    // графа 1
+    def tmp
     formData.dataRows.eachWithIndex { row, index ->
+        // графа 1
         row.rowNumber = index + 1
+
+        // графа 6
+        row.reserve = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
+
+        // графа 10
+        row.costOnMarketQuotation = round(row.lotSizeCurrent * row.marketQuotation, 2)
+
+        // графа 11
+        if (row.signSecurity == '+') {
+            def a = (row.cost == null ? 0 : row.cost)
+            row.reserveCalcValue = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+        } else {
+            row.reserveCalcValue = 0
+        }
+
+        // графа 12
+        tmp = row.reserveCalcValue - row.reserve
+        row.reserveCreation = (tmp > 0 ? tmp : 0)
+
+        // графа 13
+        row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
     }
 
     // графы для которых надо вычислять итого и итого по ГРН (графа 4..7, 10..13)
@@ -152,7 +171,7 @@ void calc() {
 
     // посчитать "итого по ГРН:..."
     def totalRows = [:]
-    def tmp = null
+    tmp = null
     def sums = [:]
     totalColumns.each {
         sums[it] = 0
@@ -203,7 +222,8 @@ def logicalCheck(def useLog) {
 
     if (formDataOld != null &&
             !formDataOld.dataRows.isEmpty() && !formData.dataRows.isEmpty()) {
-        // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+        // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
+        //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
         def missContract = []
         def severalContract = []
@@ -249,6 +269,9 @@ def logicalCheck(def useLog) {
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
 
+        def name
+        def tmp
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 hasTotal = true
@@ -259,6 +282,13 @@ def logicalCheck(def useLog) {
             if (!checkRequiredColumns(row, columns, useLog)) {
                 return false
             }
+
+            // дополнительная проверка графы 8
+            if (row.signSecurity != '+' && row.signSecurity != '-') {
+                logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
+                return
+            }
+
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
             if (row.lotSizeCurrent == 0 && row.reserve != row.reserveRecovery) {
                 logger.warn('Графы 6 и 13 неравны!')
@@ -276,6 +306,7 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
+            // TODO (Ramil Timerbaev) графа 8 может принимать значение только + и -
             if (row.signSecurity == 'x' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Облигации необращающиеся, графы 11 и 12 ненулевые!')
             }
@@ -305,9 +336,9 @@ def logicalCheck(def useLog) {
                 logger.warn('Резерв сформирован. Графы 5, 7, 10 и 11 неположительные!')
             }
 
-            // 10. Проверка корректности формирования резерва (графа 6, 11, 12, 13)
+            // 10. Проверка корректности создания резерва (графа 6, 11, 12, 13)
             if (row.reserve + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
-                logger.error('Резерв сформирован неверно!')
+                logger.error('Резерв сформирован некорректно!')
                 return false
             }
 
@@ -338,12 +369,56 @@ def logicalCheck(def useLog) {
             }
             i += 1
 
-            // 17. Проверка итоговых значений по ГРН
+            // 17. Арифметические проверки граф 6, 10, 11, 12, 13 =========================
+            // графа 6
+            if (row.reserve != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
+                name = getColumnName(row, 'reserve')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 10
+            if (row.costOnMarketQuotation != round(row.lotSizeCurrent * row.marketQuotation, 2)) {
+                name = getColumnName(row, 'costOnMarketQuotation')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 11
+            if (row.signSecurity == '+') {
+                def a = (row.cost == null ? 0 : row.cost)
+                tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+            } else {
+                tmp = 0
+            }
+            if (row.reserveCalcValue != tmp) {
+                name = getColumnName(row, 'reserveCalcValue')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 12
+            tmp = row.reserveCalcValue - row.reserve
+            if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
+                name = getColumnName(row, 'reserveCreation')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 13
+            if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
+                name = getColumnName(row, 'reserveRecovery')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+            // 17. конец арифметической проверки =================================
+
+            // 18. Проверка итоговых значений по ГРН
             if (!totalGroupsName.contains(row.regNumber)) {
                 totalGroupsName.add(row.regNumber)
             }
 
-            // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -612,7 +687,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
     }
@@ -631,4 +706,37 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Получить значение за предыдущий отчетный период.
+ *
+ * @param needColumnName псевдоним графы значение которой надо получить (графа значения)
+ * @param searchColumnName псевдоним графы по которой нужно отобрать значение (графа поиска)
+ * @param searchValue значение графы поиска
+ * @return возвращает найденое значение, иначе возвратит 0
+ */
+def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue) {
+    def formDataOld = getFormDataOld()
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
+        for (def row : formDataOld.dataRows) {
+            if (row.getCell(searchColumnName).getValue() == searchValue) {
+                return row.getCell(needColumnName)
+            }
+        }
+    }
+    return 0
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
