@@ -216,6 +216,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
+		view.setSelectedRow(null, true);
 	}
 
 
