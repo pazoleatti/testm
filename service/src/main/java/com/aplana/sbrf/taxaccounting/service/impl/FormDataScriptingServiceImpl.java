@@ -80,6 +80,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			if (component instanceof ScriptComponentContextHolder){
 				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}
+			if (additionalParameters != null && additionalParameters.containsKey("ip")) {
+				scriptComponentContext.setIp((String)additionalParameters.get("ip"));
+			}
 		}
 		b.putAll(scriptComponents);
 		

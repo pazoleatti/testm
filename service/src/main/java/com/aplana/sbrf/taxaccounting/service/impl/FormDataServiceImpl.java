@@ -365,10 +365,10 @@ public class FormDataServiceImpl implements FormDataService {
 	public void deleteFormData(String ip, int userId, long formDataId) {
 		checkLockedByAnotherUser(formDataId, userId);
 		if (formDataAccessService.canDelete(userId, formDataId)) {
-			formDataDao.delete(formDataId);
 			FormData formData = formDataDao.get(formDataId);
 			auditService.add(ip, FormDataEvent.DELETE, userDao.getUser(userId), formData.getDepartmentId(), formData.getReportPeriodId(),
 					null, formData.getFormType().getId(), formData.getKind().getId(), null);
+			formDataDao.delete(formDataId);
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для удаления налоговой формы");
@@ -399,9 +399,12 @@ public class FormDataServiceImpl implements FormDataService {
 							+ " не хватает полномочий для его осуществления");
 		}
 
+		Map<String, Object> additionalParameters = new HashMap<String, Object>();
+		additionalParameters.put("ip", ip);
+
 		FormData formData = formDataDao.get(formDataId);
 		formDataScriptingService.executeScript(userDao.getUser(userId),
-				formData, workflowMove.getEvent(), logger, null);
+				formData, workflowMove.getEvent(), logger, additionalParameters);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao
 					.changeFormDataState(
@@ -415,7 +418,7 @@ public class FormDataServiceImpl implements FormDataService {
 			if (workflowMove.getAfterEvent() != null) {
 				formDataScriptingService.executeScript(
 						user, formData,
-						workflowMove.getAfterEvent(), logger, null);
+						workflowMove.getAfterEvent(), logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте, который выполняется после перехода",

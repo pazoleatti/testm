@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 public class ScriptComponentContextImpl implements ScriptComponentContext {
 	
 	private TAUser user;
+	private String ip;
 
 	public void setUser(TAUser user) {
 		this.user = user;
@@ -15,4 +16,11 @@ public class ScriptComponentContextImpl implements ScriptComponentContext {
 		return user;
 	}
 
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 }

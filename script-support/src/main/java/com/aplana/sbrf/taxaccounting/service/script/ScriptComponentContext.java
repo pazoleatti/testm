@@ -5,5 +5,5 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 public interface ScriptComponentContext {
 	
 	TAUser getUser();
-
+	String getIp();
 }

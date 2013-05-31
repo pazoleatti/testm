@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -51,6 +52,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	@Autowired
 	private LogBusinessService logBusinessService;
 
+	@Autowired
+	private AuditService auditService;
+
 	/**
 	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
 	 * <ol>
@@ -90,7 +94,11 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			// TODO: Надо подумать, что делать с пользователем да и вообще.
 			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
 			formDataDao.save(dformData);
-			logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUser(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
+			logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUser(), FormDataEvent.COMPOSE,
+					"Событие инициировано Системой");
+			auditService.add(scriptComponentContext.getIp(), FormDataEvent.COMPOSE, scriptComponentContext.getUser(),
+					dformData.getDepartmentId(), dformData.getReportPeriodId(),
+					null, dformData.getFormType().getId(), dformData.getKind().getId(), "Событие инициировано Системой");
 		} else {
             FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
             FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
