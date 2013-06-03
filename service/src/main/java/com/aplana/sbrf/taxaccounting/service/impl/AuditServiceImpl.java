@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,12 @@ public class AuditServiceImpl implements AuditService {
 
 	@Autowired
 	private AuditDao auditDao;
+	@Autowired
+	private DepartmentService departmentService;
+	@Autowired
+	private FormTypeDao formTypeDao;
+	@Autowired
+	private TAUserService userService;
 
 	@Override
 	public List<LogSystem> getLogs(LogSystemFilter filter) {
@@ -52,5 +61,14 @@ public class AuditServiceImpl implements AuditService {
 		log.setUserDepartmentId(user.getDepartmentId());
 
 		auditDao.add(log);
+	}
+
+	@Override
+	public LogSystemFilterAvailableValues getFilterAvailableValues() {
+		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
+		values.setDepartments(departmentService.listDepartments());
+		values.setFormTypes(formTypeDao.listFormTypes());
+		values.setUsers(userService.listAllUsers());
+		return values;
 	}
 }

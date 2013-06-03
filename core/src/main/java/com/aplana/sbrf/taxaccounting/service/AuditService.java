@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogSystem;
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 
@@ -23,4 +20,9 @@ public interface AuditService {
 	 */
 	void add(String ip, FormDataEvent event, TAUser user, int departmentId, int reportPeriodId,
 			 Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note);
+
+	/**
+	 * Получить данные используемые для фильтрации журналом аудита
+	 */
+	LogSystemFilterAvailableValues getFilterAvailableValues();
 }
