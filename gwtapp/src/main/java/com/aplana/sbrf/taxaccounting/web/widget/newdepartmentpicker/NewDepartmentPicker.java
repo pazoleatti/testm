@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup.Select
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -39,6 +40,7 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 
 	private static SelectionUiBinder uiBinder = GWT.create(SelectionUiBinder.class);
 
+	@UiConstructor
 	public NewDepartmentPicker(String header, boolean withCheckBox) {
 		initWidget(uiBinder.createAndBindUi(this));
 		// TODO move to ui.xml
