@@ -18,7 +18,7 @@ switch (formDataEvent){
         //1. Логические проверки значений налоговой формы
         logicalCheck()
         //2. Проверки соответствия НСИ
-        NCICheck()
+        //NCICheck()
         break
     // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
@@ -63,6 +63,7 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
+        logicalCheck()
         fillForm()
         break
 }
@@ -72,7 +73,8 @@ switch (formDataEvent){
  * Добавление новой строки
  */
 def addNewRow(){
-    def newRow = formData.appendDataRow()
+    def newRow = formData.createDataRow()
+    formData.dataRows.add(formData.dataRows.size() > 0 ? formData.dataRows.size() - 1 : 0, newRow )
 
     // проставление номеров строк
     def i = 1;
@@ -157,8 +159,8 @@ def fillForm(){
         }
 
         // к сумме добавляем тукущее значени
-        summByCode += row.sum
-        total += row.sum
+        summByCode += row.sum ?:0
+        total += row.sum ?:0
 
         // добавляем последняю строку по группам
         if (i + 1 == formData.dataRows.size() && !isTotalRow(formData.dataRows[i])){
@@ -181,27 +183,102 @@ def fillForm(){
 }
 
 /**
+ * Функция возвращает суммы значений по кодам
+ * возвращет Мар [index->[code, sumByCode]]
+ */
+def sumByCode(){
+    while(formData.dataRows.size() > i){
+        // текущая строка
+        def row = formData.dataRows[i]
+        // начиная со второй строки, если код предыдущей и этой различается то вставляем итого
+        if((i != 0 && row.code != formData.dataRows[i-1].code)){
+            def newRow = formData.appendDataRow(i, "total"+row.code)
+            newRow.sum = summByCode
+            summByCode = 0
+            newRow.code = 'Итого по коду'
+            newRow.balance = formData.dataRows[i-1].code
+            i++
+        }
+
+        // к сумме добавляем тукущее значени
+        summByCode += row.sum ?:0
+        total += row.sum ?:0
+
+        // добавляем последняю строку по группам
+        if (i + 1 == formData.dataRows.size() && !isTotalRow(formData.dataRows[i])){
+            def newRow = formData.appendDataRow(i+1, "total"+row.code)
+            newRow.sum = summByCode
+            newRow.code = 'Итого по коду'
+            newRow.balance = formData.dataRows[i-1].code
+            // пропуск текущей добавленной строки
+            i++
+        }
+        // переход к следующей строке
+        i++
+    }
+}
+
+
+/**
  * Логические проверки
  */
-logicalCheck(){
+def logicalCheck(){
 
     /**
      * Проверка на заполнение поля «<Наименование поля>»
      * Обязательность заполнения поля графы 1-5
      */
     formData.dataRows.each{ row ->
-        if (!isTotalRow()){
+        if (!isTotalRow(row)){
             ['rowNumber', 'code', 'balance', 'name', 'sum'].each{ alias ->
-                if (row[alias] == null || row[alias] = '')
-                    logger.error('Поле «'+row[alias].getName()+'» не заполнено!')
+                if (row[alias] == null || row[alias] == '')
+                    logger.error('Поле «'+row.getCell(alias).getColumn().getName()+'» не заполнено! Строка №пп - '+row.rowNumber)
             }
         }
     }
 
+    // TODO нужно реализовать Проверка на уникальность поля «№ пп»
+
+    /**
+     *  Проверка итогового значения по коду для графы 5
+     */
+
+
+
+    /**
+     *  Проверка итогового значения графы 5
+     *  Пройдемся по всем строкам посчитаем сумму строк с одинаковым коодом и выберем значения итоговых строк
+     */
+    def sumAllTotalByCodeRows = 0
+    formData.dataRows.each{ row ->
+        def totalRows = [:]
+        def sumRowsByCode = [:]
+
+        // если строка
+        if (isTotalRowByCode(row) ){
+            totalRows[row.code] = row.code
+        }
+    }
+
+
 }
 
 /**
- * Проверка является ли строка итововой
+ * Проверка является ли строка итововой по коду
+ */
+def isTotalRowByCode(row){
+    row.getAlias()==~/total\d{1}/
+}
+
+/**
+ * Проверка является ли строка итововой (последняя строка)
+ */
+def isMainTotalRow(row){
+    row.getAlias()==~/total/
+}
+
+/**
+ * Проверка является ли строка итововой (любой итоговой, т.е. по коду, либо основной)
  */
 def isTotalRow(row){
     row.getAlias()==~/total\d*/
