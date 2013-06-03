@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,13 +22,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Service("securityService")
 @Transactional
 public class SecurityService {
-	
-	private TAUserDao userDao;
-	
+
 	@Autowired
-	public void setUserDao(TAUserDao userDao) {
-		this.userDao = userDao;
-	}
+	private TAUserService userService;
 	
 	/**
 	 * Получает текущую информацию о клиенте
@@ -44,8 +40,7 @@ public class SecurityService {
 		// TODO: (sgoryachkin) Инфу о пользователе нужно получать не из ДАО, 
 		// а из Authentication.credentials и Authentication.details
 		// ДАО должен использоваться только при авторизации
-		int userId = userDao.getUserIdbyLogin(auth.getName());
-		userInfo.setUser(userDao.getUser(userId));
+		userInfo.setUser(userService.getUser(auth.getName()));
 		userInfo.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest().getRemoteAddr());
 		return userInfo;
@@ -65,8 +60,7 @@ public class SecurityService {
 			return null;
 		}
 		String login = auth.getName();
-		int userId = userDao.getUserIdbyLogin(login);
-		return userDao.getUser(userId);
+		return userService.getUser(login);
 	}
 
 	/**
@@ -83,7 +77,7 @@ public class SecurityService {
 		if(SecurityContextHolder.getContext().getAuthentication() == null){
 			return null;
 		} else {
-			return userDao.getUser(userId);
+			return userService.getUser(userId);
 		}
 	}
 

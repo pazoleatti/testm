@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.api.server;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 
@@ -23,14 +23,13 @@ public class AuthenticationUserDetailsServiceImpl implements
 	private final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
-	private TAUserDao userDao;
+	TAUserService userService;
 
 	@Override
 	public UserDetails loadUserDetails(Authentication token)
 			throws UsernameNotFoundException {
 		String userName = token.getName();
-		int userId = userDao.getUserIdbyLogin(userName);
-		TAUser user = userDao.getUser(userId);
+		TAUser user = userService.getUser(userName);
 		if (user == null) {
 			String message = "User with login '" + userName
 					+ "' was not found in TaxAccounting database";
