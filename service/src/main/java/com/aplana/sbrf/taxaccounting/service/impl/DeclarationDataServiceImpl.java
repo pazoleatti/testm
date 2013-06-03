@@ -150,12 +150,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public DeclarationData get(long id, int userId) {
-		if (declarationDataAccessService.canRead(userId, id)) {
-			return declarationDataDao.get(id);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав на просмотр данных декларации");
-		}
+		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+		return declarationDataDao.get(id);
 	}
 
 	@Override
@@ -217,57 +213,40 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public String getXmlData(long declarationId, int userId) {
-		if (declarationDataAccessService.canDownloadXml(userId, declarationId)) {
-			return declarationDataDao.getXmlData(declarationId);
-		} else {
-			throw new AccessDeniedException(
-					"Нет прав на получение декларации в формате законодателя (xml)");
-		}
+		declarationDataAccessService.checkEvents(userId, declarationId, FormDataEvent.GET_LEVEL1);
+		return declarationDataDao.getXmlData(declarationId);
 	}
 
 	@Override
 	public String getXmlDataFileName(long declarationDataId, int userId) {
-		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
+		declarationDataAccessService.checkEvents(userId, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
 			return fileNameNode.getTextContent();
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав на просмотр данных декларации");
-		}
 	}
 
 	@Override
 	public Date getXmlDataDocDate(long declarationDataId, int userId) {
-		if (declarationDataAccessService.canRead(userId, declarationDataId)) {
+		declarationDataAccessService.checkEvents(userId, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
 			return getFormattedDate(fileNameNode.getTextContent());
-		} else {
-			throw new AccessDeniedException("Невозможно получить xml");
-		}
 	}
 
 	@Override
 	public byte[] getXlsxData(long id, int userId) {
-		if (declarationDataAccessService.canRead(userId, id)) {
-			return declarationDataDao.getXlsxData(id);
-		} else {
-			throw new AccessDeniedException("Нет прав на просмотр декларации");
-		}
+		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+		return declarationDataDao.getXlsxData(id);
 	}
 
 	@Override
 	public byte[] getPdfData(long id, int userId) {
-		if (declarationDataAccessService.canRead(userId, id)) {
-			return declarationDataDao.getPdfData(id);
-		} else {
-			throw new AccessDeniedException("Нет прав на просмотр декларации");
-		}
+		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+		return declarationDataDao.getPdfData(id);
 	}
 	
 	private void setDeclarationBlobs(Logger logger,

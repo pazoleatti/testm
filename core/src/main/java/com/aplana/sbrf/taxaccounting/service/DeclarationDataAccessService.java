@@ -50,16 +50,6 @@ public interface DeclarationDataAccessService {
 	 */
 	Set<FormDataEvent> getPermittedEvents(Integer userId, Integer declarationTemplateId, Integer departmentId, Integer reportPeriodId);
 	
-	
-	
-	/**
-	 * Проверяет, имеет ли пользователь права на просмотр декларации.
-	 * @param userId идентфикатор пользователя
-	 * @param declarationDataId идентификатор декларации
-	 * @return true если пользователь имеет права на просмотр декларации, false - в противном случае
-	 */
-	boolean canRead(int userId, long declarationDataId);
-	
 	/**
 	 * Проверяет права пользователя для операции создания декларации.
 	 * Данная проверка проверяет только полномочия пользователя, бизнес-проверок 
@@ -88,11 +78,5 @@ public interface DeclarationDataAccessService {
 	 */
 	boolean canRefresh(int userId, long declarationDataId);
 	
-	/**
-	 * Проверяет, может ли пользователь скачать файл в формате законодателя (XML)
-	 * @param userId идентификатор пользователя
-	 * @param declarationDataId идентификатор декларации
-	 * @return true - если у пользователя есть права на скачиваение XML декларации, false - в противном случае
-	 */
-	boolean canDownloadXml(int userId, long declarationDataId);
+
 }

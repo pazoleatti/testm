@@ -83,6 +83,26 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		}
 		return true;
 	}
+	
+	private boolean canGet(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.GET_LEVEL0);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean canGetXml(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.GET_LEVEL1);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
 
 	@BeforeClass
 	public static void tearUp() {
@@ -152,28 +172,28 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 	@Test
 	public void testCanRead() {
 		// Контролёр УНП может читать в любом подразделении и в любом статусе
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRead(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может читать только в своём обособленном подразделении и в любом статусе
-		assertFalse(service.canRead(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRead(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRead(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRead(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRead(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRead(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGet(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGet(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может читать никаких деклараций
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRead(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
@@ -260,28 +280,28 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 	@Test
 	public void testCanDownloadXml() {
 		// Контролёр УНП может скачивать файл в формате законодателя у принятых деклараций в любом подразделении
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может скачивать файл в формате законодателя у принятых деклараций только в своём обособленном подразделении
-		assertFalse(service.canDownloadXml(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDownloadXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGetXml(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGetXml(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не скачивать файл в формате законодателя ни у каких деклараций
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDownloadXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test

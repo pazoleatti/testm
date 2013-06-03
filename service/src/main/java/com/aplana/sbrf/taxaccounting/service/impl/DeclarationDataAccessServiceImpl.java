@@ -109,8 +109,7 @@ public class DeclarationDataAccessServiceImpl implements
 		return false;
 	}
 
-	@Override
-	public boolean canRead(int userId, long declarationDataId) {
+	private boolean canRead(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 
 		// Если отчетный период для ввода остатков то кидаем исключение
@@ -202,18 +201,21 @@ public class DeclarationDataAccessServiceImpl implements
 				declaration.getReportPeriodId());
 	}
 
-	@Override
-	public boolean canDownloadXml(int userId, long declarationDataId) {
+	private void canDownloadXml(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Скачивать файл в формате законодателя можно только для принятых
 		// деклараций
 		if (!declaration.isAccepted()) {
-			return false;
+			throw new AccessDeniedException(
+					"Декларация не принята");
 		}
 		// Скачивать файл в формате законодателя могут только контолёр текущего
 		// уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+		if (!checkRolesForReading(userId, declaration.getDepartmentId(),
+				declaration.getReportPeriodId())){
+			throw new AccessDeniedException(
+					"Роль пользователя не позволяет получить эти данные");
+		}
 	}
 
 	@Override
@@ -235,6 +237,15 @@ public class DeclarationDataAccessServiceImpl implements
 					throw new AccessDeniedException(
 							"Недостаточно прав для принятия декларации");
 				}
+				break;
+			case GET_LEVEL0:
+				if (!canRead(userId, declarationDataId)) {
+					throw new AccessDeniedException(
+							"Недостаточно прав для получения данных декларации");
+				}
+				break;
+			case GET_LEVEL1:
+				canDownloadXml(userId, declarationDataId);
 				break;
 			default:
 				throw new AccessDeniedException(

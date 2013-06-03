@@ -20,6 +20,8 @@ public enum FormDataEvent implements Serializable {
 	CHECK(5, "Проверить"),
 	SAVE(6, "Сохранить"),
 	IMPORT(7, "Импорт данных"),
+	GET_LEVEL0(8, "Получение данных"),
+	GET_LEVEL1(8, "Получение защищенных данных"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить"),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
