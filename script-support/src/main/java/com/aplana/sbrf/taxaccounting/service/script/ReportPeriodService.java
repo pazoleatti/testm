@@ -27,7 +27,11 @@ public interface ReportPeriodService {
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
 	
 	/**
-	 * Возвращает предыдущий отчетный период, если такой период не найден то null 
+	 * Возвращает предыдущий отчетный период, не привязываясь к налоговому периоду,
+     * т.е. если запрашивают предыдущий отчетный период первого отчетного периода в налоговом,
+     * то функция возвращает последний отчетный период предыдущего налогового периода,
+     * если такой период не найден то null
+     *
 	 * @param reportPeriodId
 	 * @return предыдущий отчетный период
 	 */
@@ -38,12 +42,12 @@ public interface ReportPeriodService {
      * @param reportPeriodId
      * @return
      */
-    public Calendar getStartDate(int reportPeriodId);
+    Calendar getStartDate(int reportPeriodId);
 
     /**
      * Возвращает дату конца отчетного периода
      * @param reportPeriodId
      * @return
      */
-    public Calendar getEndDate(int reportPeriodId);
+    Calendar getEndDate(int reportPeriodId);
 }
