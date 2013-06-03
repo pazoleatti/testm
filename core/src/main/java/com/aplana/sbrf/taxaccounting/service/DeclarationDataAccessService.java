@@ -50,33 +50,5 @@ public interface DeclarationDataAccessService {
 	 */
 	Set<FormDataEvent> getPermittedEvents(Integer userId, Integer declarationTemplateId, Integer departmentId, Integer reportPeriodId);
 	
-	/**
-	 * Проверяет права пользователя для операции создания декларации.
-	 * Данная проверка проверяет только полномочия пользователя, бизнес-проверок 
-	 * (например, что декларация уже сформирована, или что не хватает каких-то данных не выполняется)
-	 * @param userId идентификатор пользователя, выполняющего операцию
-	 * @param declarationTemplateId идентификатор шаблона декларации
-	 * @param departmentId идентификатор подразделения, в котором формируется декларация
-	 * @param reportPeriodId идентфикатор отчётного периода, в котором формируется декларация
-	 * @return true, если у пользователя есть права на создание декларации с указанными параметрами, false - в противном случае
-	 */
-	boolean canCreate(int userId, int declarationTemplateId, int departmentId, int reportPeriodId);
-	
-	/**
-	 * Проверяет, может ли пользователь удалить декларацию
-	 * @param userId идентификатор пользователя
-	 * @param declarationDataId идентификатор декларации
-	 * @return true - если у пользователя есть права на удаление декларации, false - в противном случае
-	 */
-	boolean canDelete(int userId, long declarationDataId);
-
-	/**
-	 * Проверяет, имеет ли пользователь права на обновление декларации
-	 * @param userId идентификатор пользователя
-	 * @param declarationDataId идентификатор декларации
-	 * @return true если пользователь имеет права на обновление декларации, false - в противном случае
-	 */
-	boolean canRefresh(int userId, long declarationDataId);
-	
 
 }

@@ -60,13 +60,13 @@ public class DeclarationDataAccessServiceImpl implements
 	 *            идентификатор отчетного периода
 	 * @return true - права есть, false - прав нет
 	 */
-	private boolean checkRolesForReading(int userId,
+	private void checkRolesForReading(int userId,
 			int declarationDepartmentId, int reportPeriodId) {
 		TAUser user = userDao.getUser(userId);
 		Department declarationDepartment = departmentDao
 				.getDepartment(declarationDepartmentId);
 		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		return checkRolesForReading(user, declarationDepartment, reportPeriod);
+		checkRolesForReading(user, declarationDepartment, reportPeriod);
 	}
 
 	/**
@@ -85,17 +85,17 @@ public class DeclarationDataAccessServiceImpl implements
 	 *            отчетный период
 	 * @return true - права есть, false - прав нет
 	 */
-	private boolean checkRolesForReading(TAUser user,
+	private void checkRolesForReading(TAUser user,
 			Department declarationDepartment, ReportPeriod reportPeriod) {
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
 		if (reportPeriod.isBalancePeriod()) {
-			return false;
+			throw new AccessDeniedException("Декларациями в отчетном периоде вида 'ввод остатков'");
 		}
 
 		// Контролёр УНП может просматривать все декларации
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
-			return true;
+			return;
 		}
 
 		// Обычный контролёр может просматривать декларации только в своём
@@ -104,28 +104,20 @@ public class DeclarationDataAccessServiceImpl implements
 				&& user.getDepartmentId() == declarationDepartment.getId()
 				&& !DepartmentType.ROOT_BANK.equals(declarationDepartment
 						.getType())) {
-			return true;
+			return;
 		}
-		return false;
+		throw new AccessDeniedException("Нет прав на доступ к декларации");
 	}
 
-	private boolean canRead(int userId, long declarationDataId) {
+	private void canRead(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
-
-		// Если отчетный период для ввода остатков то кидаем исключение
-		if (reportPeriodDao.get(declaration.getReportPeriodId())
-				.isBalancePeriod()) {
-			return false;
-		}
-
 		// Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userId, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	@Override
-	public boolean canCreate(int userId, int declarationTemplateId,
+	private void canCreate(int userId, int declarationTemplateId,
 			int departmentId, int reportPeriodId) {
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
@@ -145,59 +137,57 @@ public class DeclarationDataAccessServiceImpl implements
 			}
 		}
 		if (!found) {
-			return false;
+			throw new AccessDeniedException("В данном подразделении нельзя работать с декларациями данного вида");
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения
-		return checkRolesForReading(userId, departmentId, reportPeriodId);
+		checkRolesForReading(userId, departmentId, reportPeriodId);
 	}
 
-	private boolean canAccept(int userId, long declarationDataId) {
+	private void canAccept(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Принять декларацию можно только если она еще не принята
 		if (declaration.isAccepted()) {
-			return false;
+			throw new AccessDeniedException("Декларация не должна быть принята");
 		}
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userId, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private boolean canReject(int userId, long declarationDataId) {
+	private void canReject(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Отменить принятие декларации можно только если она принята
 		if (!declaration.isAccepted()) {
-			return false;
+			throw new AccessDeniedException("Декларация должна быть принята");
 		}
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userId, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	@Override
-	public boolean canDelete(int userId, long declarationDataId) {
+	private void canDelete(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Удалять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
-			return false;
+			throw new AccessDeniedException("Декларация не должна быть принята");
 		}
 		// Удалять могут только контолёр текущего уровня и контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userId, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	@Override
-	public boolean canRefresh(int userId, long declarationDataId) {
+	private void canRefresh(int userId, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Обновлять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
-			return false;
+			throw new AccessDeniedException("Декларация не должна быть принята");
 		}
 		// Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		return checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userId, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
@@ -206,16 +196,12 @@ public class DeclarationDataAccessServiceImpl implements
 		// Скачивать файл в формате законодателя можно только для принятых
 		// деклараций
 		if (!declaration.isAccepted()) {
-			throw new AccessDeniedException(
-					"Декларация не принята");
+			throw new AccessDeniedException("Декларация должна быть принята");
 		}
 		// Скачивать файл в формате законодателя могут только контолёр текущего
 		// уровня и контролёр УНП
-		if (!checkRolesForReading(userId, declaration.getDepartmentId(),
-				declaration.getReportPeriodId())){
-			throw new AccessDeniedException(
-					"Роль пользователя не позволяет получить эти данные");
-		}
+		checkRolesForReading(userId, declaration.getDepartmentId(),
+				declaration.getReportPeriodId());
 	}
 
 	@Override
@@ -224,28 +210,22 @@ public class DeclarationDataAccessServiceImpl implements
 		for (FormDataEvent scriptEvent : scriptEvents) {
 			switch (scriptEvent) {
 			case MOVE_CREATED_TO_ACCEPTED:
-				// Проверяет, может ли пользователь принять декларацию
-				if (!canAccept(userId, declarationDataId)) {
-					throw new AccessDeniedException(
-							"Недостаточно прав для принятия декларации");
-				}
+				canAccept(userId, declarationDataId);
 				break;
 			case MOVE_ACCEPTED_TO_CREATED:
-				// Проверяет, может ли пользователь отменить принятие
-				// декларации.
-				if (!canReject(userId, declarationDataId)) {
-					throw new AccessDeniedException(
-							"Недостаточно прав для принятия декларации");
-				}
+				canReject(userId, declarationDataId);
 				break;
 			case GET_LEVEL0:
-				if (!canRead(userId, declarationDataId)) {
-					throw new AccessDeniedException(
-							"Недостаточно прав для получения данных декларации");
-				}
+				canRead(userId, declarationDataId);
 				break;
 			case GET_LEVEL1:
 				canDownloadXml(userId, declarationDataId);
+				break;
+			case DELETE:
+				canDelete(userId, declarationDataId);
+				break;
+			case CALCULATE:
+				canRefresh(userId, declarationDataId);
 				break;
 			default:
 				throw new AccessDeniedException(
@@ -258,8 +238,16 @@ public class DeclarationDataAccessServiceImpl implements
 	public void checkEvents(Integer userId,
 			Integer declarationTemplateId, Integer departmentId,
 			Integer reportPeriodId, FormDataEvent... scriptEvents) {
-		throw new AccessDeniedException(
-				"Недостаточно прав для принятия декларации");
+		for (FormDataEvent scriptEvent : scriptEvents) {
+			switch (scriptEvent) {
+			case CREATE:
+				canCreate(userId, declarationTemplateId, departmentId, reportPeriodId);
+				break;
+			default:
+				throw new AccessDeniedException(
+						"Операция не предусмотрена в системе");
+			}
+		}
 	}
 
 	@Override

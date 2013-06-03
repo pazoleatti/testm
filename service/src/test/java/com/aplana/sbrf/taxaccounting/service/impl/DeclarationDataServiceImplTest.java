@@ -48,8 +48,8 @@ public class DeclarationDataServiceImplTest {
 		ReflectionTestUtils.setField(service, "declarationDataScriptingService", declarationDataScriptingService);
 		
 		DeclarationDataAccessService declarationDataAccessService = mock(DeclarationDataAccessService.class);
-		when(declarationDataAccessService.canRefresh(USER_ID, 1)).thenReturn(true);
-		when(declarationDataAccessService.canRefresh(USER_ID, 2)).thenReturn(false);
+		//when(declarationDataAccessService.canRefresh(USER_ID, 1)).thenReturn(true);
+		//when(declarationDataAccessService.canRefresh(USER_ID, 2)).thenReturn(false);
 		ReflectionTestUtils.setField(service, "declarationDataAccessService", declarationDataAccessService);
 		
 		declarationTemplateService = mock(DeclarationTemplateService.class);

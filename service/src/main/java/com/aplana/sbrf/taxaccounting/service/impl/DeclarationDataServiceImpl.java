@@ -103,8 +103,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Transactional(readOnly = false)
 	public long create(Logger logger, int declarationTemplateId,
 			int departmentId, String ip, int userId, int reportPeriodId) {
-		if (declarationDataAccessService.canCreate(userId,
-				declarationTemplateId, departmentId, reportPeriodId)) {
+		declarationDataAccessService.checkEvents(userId, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 			
 			DeclarationData newDeclaration = new DeclarationData();
 			newDeclaration.setDepartmentId(departmentId);
@@ -121,10 +120,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
 			return id;
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав для создания декларации с указанными параметрами");
-		}
 	}
 	
 	
@@ -133,7 +128,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Transactional(readOnly = false)
 	public void reCreate(Logger logger, long id, String ip, int userId,
 			Date docDate) {
-		if (declarationDataAccessService.canRefresh(userId, id)) {
+		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.CALCULATE);
 			DeclarationData declarationData = declarationDataDao.get(id);
 			setDeclarationBlobs(logger, declarationData, docDate, userId);
 			TAUser user = userDao.getUser(userId);
@@ -142,10 +137,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав для обновления указанной декларации");
-		}
+
 	}
 
 	@Override
@@ -157,7 +149,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void delete(long id, String ip, int userId) {
-		if (declarationDataAccessService.canDelete(userId, id)) {
+		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.DELETE);
 			DeclarationData declarationData = declarationDataDao.get(id);
 			TAUser user = userDao.getUser(userId);
 
@@ -167,10 +159,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
-		} else {
-			throw new AccessDeniedException(
-					"Недостаточно прав на удаление декларации");
-		}
+
 	}
 
 	@Override

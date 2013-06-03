@@ -103,6 +103,32 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		}
 		return true;
 	}
+	
+	
+	private boolean canDelete(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.DELETE);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean canRefresh(int userId, int declarationDataId){
+		try{
+		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+				    FormDataEvent.CALCULATE);
+		} catch (AccessDeniedException e){
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean canCreate(int userId, int declarationTemplateId,
+			int departmentId, int reportPeriodId) {
+			return service.getPermittedEvents(userId, declarationTemplateId, departmentId, reportPeriodId).contains(FormDataEvent.CREATE);
+	 }
 
 	@BeforeClass
 	public static void tearUp() {
@@ -199,28 +225,28 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 	@Test
 	public void testCanRefresh() {
 		// Контролёр УНП может обновлять непринятые декларации в любом подразделении
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может обновлять только непринятые декларации в своём обособленном подразделении
-		assertFalse(service.canRefresh(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canRefresh(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может обновлять никаких деклараций
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
@@ -307,52 +333,52 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 	@Test
 	public void testCanDelete() {
 		// Контролёр УНП может удалять непринятые декларации в любом подразделении
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может удалять непринятые декларации только в своём обособленном подразделении
-		assertFalse(service.canDelete(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDelete(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canDelete(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может удалять никаких деклараций
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(service.canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanCreate() {
 		// Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
-		assertFalse(service.canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 		
 		// Контролёр может создавать декларации в своём обособленном подразделении, если они там разрешены
-		assertFalse(service.canCreate(USER_CONTROL_BANK_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertFalse(service.canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_BANK_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 
 		// Оператор не может создавать декларации
-		assertFalse(service.canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertFalse(service.canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(service.canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertFalse(service.canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 	}
 	
 }

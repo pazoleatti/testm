@@ -71,11 +71,12 @@ public class GetDeclarationDataHandler
 				action.getId(), userId);
 		result.setDocDate(declarationDataService.getXmlDataDocDate(
 				action.getId(), userId));
+		
 		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
 		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
 		result.setCanDownload(permittedEvents.contains(FormDataEvent.GET_LEVEL1));
-		result.setCanDelete(declarationAccessService.canDelete(userId,
-				action.getId()));
+		result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
+		
 		result.setTaxType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
 				.getDeclarationType().getTaxType());
