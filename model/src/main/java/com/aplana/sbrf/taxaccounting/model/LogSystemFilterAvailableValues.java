@@ -9,7 +9,7 @@ import java.util.Set;
  * Модельный класс, содержащий информацию о значениях, которые допустимы
  * в фильтре по журналу аудита.
  */
-public class AuditFilterDataAvaliableValues implements Serializable {
+public class LogSystemFilterAvailableValues implements Serializable {
 
     /**
      * Набор подразделений
