@@ -164,7 +164,7 @@ def logicalCheck(def useLog) {
     // 12..21. Проверка на неотрицательные значения (графы 3..12)
     for (def column : requiredColumns) {
         if (row.getCell(column).getValue() < 0) {
-            def columnName = row.getCell(column).getColumn().getName()
+            def columnName = getColumnName(row, column)
             def message = "Значения графы \"$columnName\" по строке 1 отрицательное!"
             if (column in warnColumns) {
                 logger.warn(message)
@@ -333,6 +333,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
             def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
     }
@@ -351,4 +352,17 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         return false
     }
     return true
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }

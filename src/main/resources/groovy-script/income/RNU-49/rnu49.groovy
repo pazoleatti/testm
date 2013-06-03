@@ -163,7 +163,7 @@ void calc() {
                 row.expensesSum = round(row.loss / row.monthsLoss, 2)
             } else {
                 row.expensesSum = 0
-                def column = row.getCell('monthsLoss').getColumn().getName()
+                def column = getColumnName(row, 'monthsLoss')
                 logger.error("Деление на ноль. Возможно неправильное значение в графе \"$column\".")
             }
         }
@@ -497,7 +497,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
     }
@@ -537,4 +537,17 @@ void copyRows(def sourceForm, def destinationForm, def fromAlias, def toAlias) {
     sourceForm.dataRows.subList(from, to).each { row ->
         destinationForm.dataRows.add(getIndex(destinationForm, toAlias), row)
     }
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
 }
