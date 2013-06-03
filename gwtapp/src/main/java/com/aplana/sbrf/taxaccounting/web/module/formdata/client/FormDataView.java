@@ -151,7 +151,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
 				formDataTable.addColumn(tableCol, col.getName());
-				if (col.getWidth() > 0) {
+				if (col.getWidth() >= 0) {
 					formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 				}
 			}
