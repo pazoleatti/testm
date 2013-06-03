@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * User: avanteev
@@ -31,9 +30,9 @@ public class LogSystemFilterAvailableValues implements Serializable {
     private List<FormDataKind> kinds;
 
     /**
-     * Список логинов всех зарегистрированных пользователей
+     * Список всех пользователей
      */
-    private List<String> userLogins;
+    private List<TAUser> users;
 
     /**
      * Типы налоговых форм
@@ -48,12 +47,12 @@ public class LogSystemFilterAvailableValues implements Serializable {
         this.taxTypes = taxTypes;
     }
 
-    public List<String> getUserLogins() {
-        return userLogins;
+    public List<TAUser> getUsers() {
+        return users;
     }
 
-    public void setUserLogins(List<String> userLogins) {
-        this.userLogins = userLogins;
+    public void setUsers(List<TAUser> users) {
+        this.users = users;
     }
 
     public List<Department> getDepartments() {
