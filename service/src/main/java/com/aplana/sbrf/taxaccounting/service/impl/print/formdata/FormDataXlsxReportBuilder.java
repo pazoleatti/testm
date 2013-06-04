@@ -410,11 +410,9 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
 
-		if(data.getState() == WorkflowState.ACCEPTED && acceptanceDate!=null){
-			printDate = acceptanceDate;
-		} else {
-			printDate = creationDate;
-		}
+        printDate = (data.getState() == WorkflowState.ACCEPTED && acceptanceDate!=null)?acceptanceDate:creationDate;
+
+        System.out.println(printDate);
 		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
 		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
 				XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))

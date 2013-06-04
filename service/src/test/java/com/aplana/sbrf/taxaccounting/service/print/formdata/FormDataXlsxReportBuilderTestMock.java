@@ -254,6 +254,8 @@ public class FormDataXlsxReportBuilderTestMock {
 		data.setDepartment(department);
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
+        data.setAcceptanceDate(new Date());
+        data.setCreationDate(new Date());
 	}
 	
 	@Test
