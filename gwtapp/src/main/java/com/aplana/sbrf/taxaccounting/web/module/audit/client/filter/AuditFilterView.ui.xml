@@ -1,0 +1,75 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
+
+    <g:VerticalPanel>
+        <g:cell height="50px">
+            <g:HorizontalPanel>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="От" />
+                        <d:CustomDateBox ui:field="fromDateBox"/>
+                    </g:VerticalPanel>
+                </g:cell>
+
+                <g:cell width="250px">
+                    <g:VerticalPanel ui:field="reportPeriodPanel">
+                        <g:Label width="200px" text="Отчетный период" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px" verticalAlignment="bottom">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Подразделение" />
+                        <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px" verticalAlignment="bottom">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Пользователь" />
+                        <g:ValueListBox width="200px" ui:field="userLogin" />
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:HorizontalPanel>
+        </g:cell>
+        <g:cell height="50px">
+            <g:HorizontalPanel>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="до" />
+                        <d:CustomDateBox ui:field="toDateBox" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Тип формы"/>
+                        <g:ValueListBox width="200px" ui:field="formDataTaxType" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label width="200px" text="Тип налоговой формы"/>
+                        <g:ValueListBox width="200px" ui:field="formDataKind" />
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label text="Вид налоговой формы/декларации"/>
+                        <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell verticalAlignment="bottom">
+                    <style:Bar>
+                        <style:LeftBar>
+                            <g:Button ui:field="search">Поиск</g:Button>
+                            <g:Button ui:field="archive">Архивировать</g:Button>
+                        </style:LeftBar>
+                    </style:Bar>
+                </g:cell>
+            </g:HorizontalPanel>
+        </g:cell>
+    </g:VerticalPanel>
+
+</ui:UiBinder>

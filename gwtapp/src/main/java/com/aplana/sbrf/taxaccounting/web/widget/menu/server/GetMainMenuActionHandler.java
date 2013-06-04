@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
@@ -89,6 +90,7 @@ public class GetMainMenuActionHandler extends
         if (securityService.currentUser().hasRole(TARole.ROLE_ADMIN)) {
             MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
+            settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             menuItems.add(settingMenuItem);
         }
 
