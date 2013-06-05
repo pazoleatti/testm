@@ -68,12 +68,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			sql.append(" AND user_id = ").append(filter.getUserId());
 		}
 
-		if (filter.getReportPeriodId() != 0) {
-			sql.append(" AND report_period_id = ").append(filter.getReportPeriodId());
+		if (filter.getReportPeriodIds().size() != 0) {
+			sql.append(" AND report_period_id = ").append(filter.getReportPeriodIds().get(0));
 		}
 
-		if (filter.getFormKindId() != 0) {
-			sql.append(" AND form_kind_id = ").append(filter.getFormKindId());
+		if (filter.getFormKind() != null && filter.getFormKind().getId() !=0) {
+			sql.append(" AND form_kind_id = ").append(filter.getFormKind().getId());
 		}
 
 		if (filter.getFormTypeId() != 0) {
@@ -84,8 +84,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			sql.append(" AND declaration_type_id ").append(filter.getDeclarationTypeId());
 		}
 
-		if (filter.getDepartmentId() != 0) {
-			sql.append(" AND department_id ").append(filter.getDepartmentId());
+		if (filter.getDepartmentIds().size() != 0) {
+			sql.append(" AND department_id ").append(filter.getDepartmentIds().get(0));
 		}
 	}
 

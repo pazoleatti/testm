@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,8 @@ public class AuditDaoTest {
 		filter.setFormTypeId(1);
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date(1369911365000l));
+        filter.setReportPeriodIds(new ArrayList<Integer>());
+        filter.setDepartmentIds(new ArrayList<Integer>());
 
 		LogSystemSearchResultItem logSystem = auditDao.getLogs(filter).get(0);
 		assertEquals(Long.valueOf(1), logSystem.getId());
@@ -74,6 +77,8 @@ public class AuditDaoTest {
 		filter.setUserId(1);
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date());
+        filter.setReportPeriodIds(new ArrayList<Integer>());
+        filter.setDepartmentIds(new ArrayList<Integer>());
 
 		LogSystemSearchResultItem logSystemSearchResultItem = auditDao.getLogs(filter).get(1);
 		assertEquals(Long.valueOf(3), logSystem.getId());

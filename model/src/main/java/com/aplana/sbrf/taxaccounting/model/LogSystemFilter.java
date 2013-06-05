@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,75 +13,84 @@ public class LogSystemFilter implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private int userId;
-	private int reportPeriodId;
-	private int formKindId;
+	private List<Integer> reportPeriodIds;
+	private FormDataKind formKind;
+	private TaxType taxType;
+	private int declarationTypeId;
 	private int formTypeId;
-	private int DeclarationTypeId;
-	private int departmentId;
+	private List<Integer> departmentIds;
 	private Date fromSearchDate;
 	private Date toSearchDate;
 
-	public int getUserId() {
-		return userId;
-	}
+    public int getUserId() {
+        return userId;
+    }
 
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-	public int getReportPeriodId() {
-		return reportPeriodId;
-	}
+    public List<Integer> getReportPeriodIds() {
+        return reportPeriodIds;
+    }
 
-	public void setReportPeriodId(int reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
+    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+        this.reportPeriodIds = reportPeriodIds;
+    }
 
-	public int getFormKindId() {
-		return formKindId;
-	}
+    public FormDataKind getFormKind() {
+        return formKind;
+    }
 
-	public void setFormKindId(int formKindId) {
-		this.formKindId = formKindId;
-	}
+    public void setFormKind(FormDataKind formKind) {
+        this.formKind = formKind;
+    }
 
-	public int getFormTypeId() {
-		return formTypeId;
-	}
+    public TaxType getTaxType() {
+        return taxType;
+    }
 
-	public void setFormTypeId(int formTypeId) {
-		this.formTypeId = formTypeId;
-	}
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
 
-	public int getDeclarationTypeId() {
-		return DeclarationTypeId;
-	}
+    public int getDeclarationTypeId() {
+        return declarationTypeId;
+    }
 
-	public void setDeclarationTypeId(int declarationTypeId) {
-		DeclarationTypeId = declarationTypeId;
-	}
+    public void setDeclarationTypeId(int declarationTypeId) {
+        this.declarationTypeId = declarationTypeId;
+    }
 
-	public int getDepartmentId() {
-		return departmentId;
-	}
+    public int getFormTypeId() {
+        return formTypeId;
+    }
 
-	public void setDepartmentId(int departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setFormTypeId(int formTypeId) {
+        this.formTypeId = formTypeId;
+    }
 
-	public Date getFromSearchDate() {
-		return fromSearchDate;
-	}
+    public List<Integer> getDepartmentIds() {
+        return departmentIds;
+    }
 
-	public void setFromSearchDate(Date fromSearchDate) {
-		this.fromSearchDate = fromSearchDate;
-	}
+    public void setDepartmentIds(List<Integer> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
 
-	public Date getToSearchDate() {
-		return toSearchDate;
-	}
+    public Date getFromSearchDate() {
+        return fromSearchDate;
+    }
 
-	public void setToSearchDate(Date toSearchDate) {
-		this.toSearchDate = toSearchDate;
-	}
+    public void setFromSearchDate(Date fromSearchDate) {
+        this.fromSearchDate = fromSearchDate;
+    }
+
+    public Date getToSearchDate() {
+        return toSearchDate;
+    }
+
+    public void setToSearchDate(Date toSearchDate) {
+        this.toSearchDate = toSearchDate;
+    }
 }
