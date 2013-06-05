@@ -3,12 +3,12 @@
  * "(РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря
  * и принадлежностей до 40 000 руб.»
  *
- * Версия ЧТЗ: 57
+ * Версия ЧТЗ: 64
  *
  * Вопросы аналитикам: http://jira.aplana.com/browse/SBRFACCTAX-2469
  *
  * TODO:
- *          -   уточнить про перенос "Итого" из графы "№ пп" в графу "Вид расхода" (в вопросах аналитикам)
+ *          -   добавить справочник в графу 2
  *
  * @author vsergeev
  *
@@ -19,10 +19,10 @@
  */
 switch (formDataEvent) {
     case FormDataEvent.CHECK :
-        logicalCheck()
+        logicalCheckWithTotalDataRowCheck()
         break
     case FormDataEvent.CALCULATE :
-        if (logicalCheck(false)) {
+        if (logicalCheckWithoutTotalDataRowCheck()) {
             calc()
         }
         break
@@ -47,16 +47,12 @@ void calc() {
     totalRow.summ = getTotal()
 }
 
-boolean logicalCheck(boolean checkTotal = true) {
-    if (requiredColsFilled()) {
-        if (checkTotal) {
-            return totalRowCheck()
-        } else {
-            return true
-        }
-    }
+boolean logicalCheckWithTotalDataRowCheck() {
+    return (requiredColsFilled()) ?  totalRowCheck() : false
+}
 
-    return false
+boolean logicalCheckWithoutTotalDataRowCheck() {
+    return (requiredColsFilled())
 }
 
 /**
@@ -93,20 +89,21 @@ boolean requiredColsFilled() {
 
 BigDecimal getTotal() {
     def rowsForSumm = getRowsWithDataAliases()
-    BigDecimal result = new BigDecimal(0)
-    rowsForSumm.each {
-        def row = formData.getDataRow(it)
-        result += row.summ
+    return formData.dataRows.sum() {dataRow ->
+        logger.warn(dataRow.getClass().getName())
+        if (rowsForSumm.find{alias -> alias == dataRow.getAlias()} != null) {
+            return dataRow.summ
+        } else {
+            return 0
+        }
     }
-
-    return result
 }
 
 def getTotalDataRow() {
     return formData.getDataRow('R4')
 }
 
-def getRowsWithDataAliases() {
+List<String> getRowsWithDataAliases() {
     return ['R0', 'R1', 'R2', 'R3']
 }
 
