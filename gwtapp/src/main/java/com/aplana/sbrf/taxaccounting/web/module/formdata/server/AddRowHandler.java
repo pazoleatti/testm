@@ -41,8 +41,7 @@ public class AddRowHandler extends
 		throws ActionException {
 		FormData formData = action.getFormData();
 		Logger logger = new Logger();
-		formDataService.addRow(logger, securityService.currentUser()
-				.getId(), formData, action.getCurrentDataRow());
+		formDataService.addRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 
 		FormDataResult result = new FormDataResult();
 		result.setFormData(formData);

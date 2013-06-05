@@ -33,8 +33,7 @@ public class SaveFormDataHandler extends
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-		TAUser currentUser = securityService.currentUser();
-		formDataService.saveFormData(logger, securityService.getIp(), currentUser.getId(), formData);
+		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 
 		logger.info("Данные успешно записаны");
 		FormDataResult result = new FormDataResult();

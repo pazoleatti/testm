@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UnlockDeclarationAction;
@@ -28,11 +27,9 @@ public class UnlockDeclarationHandler extends AbstractActionHandler<UnlockDeclar
 
 	@Override
 	public UnlockDeclarationResult execute(UnlockDeclarationAction action, ExecutionContext executionContext) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-
 		UnlockDeclarationResult result = new UnlockDeclarationResult();
-		result.setUnlockedSuccessfully(declarationTemplateService.unlock(action.getDeclarationId(), userId));
+		result.setUnlockedSuccessfully(declarationTemplateService.unlock(action.getDeclarationId(),
+				securityService.currentUserInfo()));
 
 		return result;
 	}

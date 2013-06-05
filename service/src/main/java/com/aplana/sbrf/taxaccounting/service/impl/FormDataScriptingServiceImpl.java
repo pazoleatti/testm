@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -18,13 +19,6 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.RowScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.Script;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
@@ -50,7 +44,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	}
 	
 	@Override
-	public void executeScript(TAUser user, FormData formData,
+	public void executeScript(TAUserInfo userInfo, FormData formData,
 			FormDataEvent event, Logger logger,
 			Map<String, Object> additionalParameters) {
 		
@@ -65,7 +59,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			// TODO: Semyon Goryachkin: Нужно будет удалить вызов старого метода, 
 			//       06.05.2013         когда миграция скриптов будет закончена 
 			//                          (SBRFACCTAX-2233, )
-			executeScripts(user, formData, event, logger, additionalParameters);
+			executeScripts(userInfo, formData, event, logger, additionalParameters);
 			//
 			return;
 		}
@@ -76,12 +70,12 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		Map<String, ?> scriptComponents =  getScriptExposedBeans(formData.getFormType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-			scriptComponentContext.setUser(user);
+			scriptComponentContext.setUserInfo(userInfo);
 			if (component instanceof ScriptComponentContextHolder){
 				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}
 			if (additionalParameters != null && additionalParameters.containsKey("ip")) {
-				scriptComponentContext.setIp((String)additionalParameters.get("ip"));
+				scriptComponentContext.setUserInfo(userInfo);
 			}
 		}
 		b.putAll(scriptComponents);
@@ -89,9 +83,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("formData", formData);
-		if (user != null) {
-			b.put("user", user);
-			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));
+		if (userInfo != null && userInfo.getUser() != null) {
+			b.put("user", userInfo.getUser());
+			b.put("userDepartment", departmentService.getDepartment(userInfo.getUser().getDepartmentId()));
 		}
 		b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
 		if (additionalParameters != null) {
@@ -124,7 +118,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	}
 
 	@Deprecated
-	private void executeScripts(TAUser user, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
+	private void executeScripts(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
 		// Если отчетный период для ввода остатков, то не выполняем скрипты
 		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
 			return;
@@ -134,7 +128,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		Map<String, ?> scriptComponents =  getScriptExposedBeans(formData.getFormType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-			scriptComponentContext.setUser(user);
+			scriptComponentContext.setUserInfo(userInfo);
 			if (component instanceof ScriptComponentContextHolder){
 				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}
@@ -145,9 +139,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("formData", formData);
-		if (user != null) {
-			b.put("user", user);
-			b.put("userDepartment", departmentService.getDepartment(user.getDepartmentId()));
+		if (userInfo != null && userInfo.getUser() != null) {
+			b.put("user", userInfo.getUser());
+			b.put("userDepartment", departmentService.getDepartment(userInfo.getUser().getDepartmentId()));
 		}
 		b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
 		if (additionalParameters != null) {

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,13 +32,12 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
     @Override
     public GetFormResult execute(GetFormAction action, ExecutionContext context) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
+		TAUserInfo userInfo = securityService.currentUserInfo();
 
         GetFormResult result = new GetFormResult();
-		formTemplateService.checkLockedByAnotherUser(action.getId(), userId);
+		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
 		FormTemplate formTemplate = formTemplateService.get(action.getId());
-		formTemplateService.lock(action.getId(), userId);
+		formTemplateService.lock(action.getId(), userInfo);
 		result.setForm(formTemplate);
         return result;
     }

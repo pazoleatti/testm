@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,30 +10,23 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DateColumn;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.service.impl.FormDataPrintingServiceImpl;
 
 public class FormDataPrintingServiceTestMock {
 	
 	private static final int TB1_CONTROL_USER_ID = 1;
-	private static final int BANK_CONTROL_USER_ID = 3;
-	
-	private static final long TB2_CREATED_FORMDATA_ID = 4;
 	private static final long TB2_APPROVED_FORMDATA_ID = 5;
 	private static final int TB2_ACCEPTED_FORMTEMPLATE_ID = 6;
-	
+
+	private static final TAUserInfo TA_USER_INFO = new TAUserInfo();
+	{
+		TA_USER_INFO.setUser(mockUser(TB1_CONTROL_USER_ID, 2, TARole.ROLE_CONTROL));
+	}
 	static FormDataPrintingService formDataPrintingService = new FormDataPrintingServiceImpl();
 	
 	private static FormData formData;
@@ -115,9 +109,8 @@ public class FormDataPrintingServiceTestMock {
 		when(formDataDao.get(TB2_APPROVED_FORMDATA_ID)).thenReturn(formData);
 		FormTemplate formTemplate = new FormTemplate();
 		formTemplate.setNumberedColumns(true);
-		//when(formTemplate.isNumberedColumns()).thenReturn(true);
 		when(formTemplateDao.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
-		when(formDataAccessService.canRead(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
+		when(formDataAccessService.canRead(TA_USER_INFO, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateDao", formTemplateDao);
 		ReflectionTestUtils.setField(formDataPrintingService, "formDataAccessService", formDataAccessService);
@@ -126,7 +119,7 @@ public class FormDataPrintingServiceTestMock {
 	
 	@Test
 	public void testReportPrintService(){
-		formDataPrintingService.generateExcel(TB1_CONTROL_USER_ID,TB2_APPROVED_FORMDATA_ID, true);
+		formDataPrintingService.generateExcel(TA_USER_INFO,TB2_APPROVED_FORMDATA_ID, true);
 	}
 
 }

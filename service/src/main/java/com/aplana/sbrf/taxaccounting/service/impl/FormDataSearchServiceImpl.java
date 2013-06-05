@@ -3,22 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -48,13 +34,10 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	private FormTypeDao formTypeDao;
 
     @Autowired
-    private TAUserDao taUserDao;
-    
-    @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
 
 	@Override
-	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUser user, FormDataFilter formDataFilter) {
+	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
@@ -91,12 +74,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		
 		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
 		// Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl		
-		formDataDaoFilter.setUserDepartmentId(user.getDepartmentId());
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+		formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getId());
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
-		} else if (user.hasRole(TARole.ROLE_CONTROL)) {
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT_AND_SOURCES);
-		} else if (user.hasRole(TARole.ROLE_OPERATOR)) {
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_OPERATOR)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.USER_DEPARTMENT);
 		} else {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
@@ -116,11 +99,10 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	}
 	
 	@Override
-	public FormDataFilterAvailableValues getAvailableFilterValues(int userId, TaxType taxType) {
+	public FormDataFilterAvailableValues getAvailableFilterValues(TAUserInfo userInfo, TaxType taxType) {
 		FormDataFilterAvailableValues result = new FormDataFilterAvailableValues();
 		
-		TAUser user = taUserDao.getUser(userId);
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			// Контролёр УНП имеет доступ ко всем подразделениям
 			result.setDepartmentIds(null);
 			
@@ -130,7 +112,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 				// Выходные формы и формы УНП существуют только для налога на прибыль
 				kinds.remove(FormDataKind.ADDITIONAL);
 				kinds.remove(FormDataKind.UNP);
-			};
+			}
 			result.setKinds(kinds);
 			
 			// все виды налоговых форм по заданному виду налога
@@ -140,16 +122,16 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 			return result;
 		}
 		
-		if (!user.hasRole(TARole.ROLE_CONTROL) && !user.hasRole(TARole.ROLE_OPERATOR)) {
+		if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL) && !userInfo.getUser().hasRole(TARole.ROLE_OPERATOR)) {
 			throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
 		}
 		
 		// Собираем информацию о налоговых формах к которым имеет доступ пользователь
 		// К формам своего подразделения имеет доступ и контролёр и оператор
-		List<DepartmentFormType> dfts = departmentFormTypeDao.getByTaxType(user.getDepartmentId(), taxType);
+		List<DepartmentFormType> dfts = departmentFormTypeDao.getByTaxType(userInfo.getUser().getDepartmentId(), taxType);
 		// Контролёр, вдобавок, имеет доступ к формам, которые являются источниками для форм и деклараций его подразделения 
-		if (user.hasRole(TARole.ROLE_CONTROL)) {
-			dfts.addAll(departmentFormTypeDao.getDepartmentSources(user.getDepartmentId(), taxType));
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+			dfts.addAll(departmentFormTypeDao.getDepartmentSources(userInfo.getUser().getDepartmentId(), taxType));
 		}
 		
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
@@ -171,12 +153,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		Collections.sort(formTypesList, new FormTypeAlphanumericComparator());
 		result.setFormTypeIds(formTypesList);
 		
-		processKindListForCurrentUser(user, kinds);
+		processKindListForCurrentUser(userInfo.getUser(), kinds);
 
 		List<FormDataKind> kindsList = new ArrayList<FormDataKind>(kinds);
 		Collections.sort(kindsList);
 		result.setKinds(kindsList);
-		result.setDefaultDepartmentId(user.getDepartmentId());
+		result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
 
 		return result;
 	}

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Map;
 
@@ -17,7 +17,7 @@ public interface FormDataScriptingService {
 	 * (Для временной поддержки старого механизма при отсутствии FormTemplate.script
 	 * отработает старый механизм работы скриптов)
 	 *
-	 * @param user     текущий пользователь. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
+	 * @param userInfo Информация о текущем пользоваетеле. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
 	 *                 не должно зависеть от пользователя.
 	 * @param formData данные налоговой формы
 	 * @param event    событие формы
@@ -25,7 +25,7 @@ public interface FormDataScriptingService {
 	 * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
 	 *                             скрипты. Параметр может иметь значение null
 	 */
-	void executeScript(TAUser user, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+	void executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 		
 
 	/**

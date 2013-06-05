@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 
 /**
@@ -12,19 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
  */
 public class ScriptComponentContextImpl implements ScriptComponentContext {
 	
-	private TAUser user;
+	private TAUserInfo userInfo;
 	private Logger logger;
-	private String ip;
 
-	public void setUser(TAUser user) {
-		this.user = user;
-	}
-
-	@Override
-	public TAUser getUser() {
-		return user;
-	}
-	
 	public void setLogger(Logger logger) {
 		this.logger = logger;
 	}
@@ -37,11 +27,12 @@ public class ScriptComponentContextImpl implements ScriptComponentContext {
 		return logger;
 	}
 
-	public String getIp() {
-		return ip;
+	@Override
+	public TAUserInfo getUserInfo() {
+		return userInfo;
 	}
 
-	public void setIp(String ip) {
-		this.ip = ip;
+	public void setUserInfo(TAUserInfo userInfo) {
+		this.userInfo = userInfo;
 	}
 }

@@ -31,8 +31,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
-	private TAUserDao userDao;
-	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private FormDataWorkflowDao formDataWorkflowDao;
@@ -58,8 +56,8 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param logger
 	 *            логгер-объект для фиксации диагностических сообщений
-	 * @param userId
-	 *            идентификатор пользователя, запросившего операцию
+	 * @param userInfo
+	 *            информация о пользователе, запросившего операцию
 	 * @param formTemplateId
 	 *            идентификатор шаблона формы, по которой создавать объект
 	 * @param departmentId
@@ -84,11 +82,11 @@ public class FormDataServiceImpl implements FormDataService {
 	 *             отсутствием обязательных параметров
 	 */
 	@Override
-	public FormData createFormData(Logger logger, int userId,
+	public FormData createFormData(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
-		if (formDataAccessService.canCreate(userId, formTemplateId, kind,
+		if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
 				departmentId, reportPeriod.getId())) {
-			return createFormDataWithoutCheck(logger, userDao.getUser(userId),
+			return createFormDataWithoutCheck(logger, userInfo,
 					formTemplateId, departmentId, kind, reportPeriod.getId(), false);
 		} else {
 			throw new AccessDeniedException(
@@ -98,9 +96,9 @@ public class FormDataServiceImpl implements FormDataService {
 	
 	
 	@Override
-	public void importFormData(Logger logger, String ip, int userId, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+	public void importFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
 		Date serviceStart = new Date();
-		FormData fd =  createFormDataWithoutCheck(logger, userDao.getUser(userId), formTemplateId, departmentId, kind, reportPeriodId, true);
+		FormData fd =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
 		Date saveDate = new Date();
 		formDataDao.save(fd);
 		Date getDate = new Date();
@@ -109,13 +107,13 @@ public class FormDataServiceImpl implements FormDataService {
 		logger.info("Сохранение: " + saveDate);
 		logger.info("Получение: " + getDate);
 		logger.info("Текущая: " + new Date());
-		logBusinessService.add(fd.getId(), null, userDao.getUser(userId), FormDataEvent.IMPORT, null);
-		auditService.add(ip, FormDataEvent.IMPORT, userDao.getUser(userId), fd.getDepartmentId(), fd.getReportPeriodId(),
+		logBusinessService.add(fd.getId(), null, userInfo, FormDataEvent.IMPORT, null);
+		auditService.add(FormDataEvent.IMPORT, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
 				null, fd.getFormType().getId(), fd.getKind().getId(), null);
 	}
 
 	@Override
-	public FormData createFormDataWithoutCheck(Logger logger, TAUser user,
+	public FormData createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);
 		FormData result = new FormData(form);
@@ -140,7 +138,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		// Execute scripts for the form event CREATE
-		formDataScriptingService.executeScript(user, result,
+		formDataScriptingService.executeScript(userInfo, result,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -156,22 +154,22 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param logger
 	 *            логгер для регистрации ошибок
-	 * @param userId
-	 *            идентификатор пользователя
+	 * @param userInfo
+	 *            информация о пользователе
 	 * @param formData
 	 *            данные формы
 	 */
 	@Override
-	public void addRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow) {
+	public void addRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		boolean canDo = false;
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId,
+			canDo = formDataAccessService.canCreate(userInfo,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
-			canDo = formDataAccessService.canEdit(userId, formData.getId());
+			canDo = formDataAccessService.canEdit(userInfo, formData.getId());
 		}
 		}
 
@@ -179,10 +177,10 @@ public class FormDataServiceImpl implements FormDataService {
 			if (formDataScriptingService.hasScripts(formData,
 					FormDataEvent.ADD_ROW)
 					&& !reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
-				TAUser user = userDao.getUser(userId);
+
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScript(user, formData,
+				formDataScriptingService.executeScript(userInfo, formData,
 						FormDataEvent.ADD_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
@@ -204,25 +202,24 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param logger
 	 *            логгер-объект для фиксации диагностических сообщений
-	 * @param userId
-	 *            идентификатор пользователя, запросившего операцию
+	 * @param userInfo
+	 *            информация о пользователе, запросившего операцию
 	 * @param formData
 	 *            объект с данными по налоговой форме
 	 */
 	@Override
-	public void doCalc(Logger logger, int userId, FormData formData) {
+	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		boolean canDo;
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId,
+			canDo = formDataAccessService.canCreate(userInfo,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
-			canDo = formDataAccessService.canEdit(userId, formData.getId());
+			canDo = formDataAccessService.canEdit(userInfo, formData.getId());
 		}
 
 		if (canDo) {
-			TAUser user = userDao.getUser(userId);
-			formDataScriptingService.executeScript(user, formData,
+			formDataScriptingService.executeScript(userInfo, formData,
 					FormDataEvent.CALCULATE, logger, null);
 
 			// Проверяем ошибки при пересчете
@@ -241,9 +238,8 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public void doCheck(Logger logger, int userId, FormData formData) {
-		TAUser user = userDao.getUser(userId);
-		formDataScriptingService.executeScript(user, formData,
+	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
+		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CHECK, logger, null);
 
 		// Проверяем ошибки при пересчете
@@ -260,8 +256,8 @@ public class FormDataServiceImpl implements FormDataService {
 	/**
 	 * Сохранить данные по налоговой форме
 	 *
-	 * @param userId
-	 *            идентификатор пользователя, выполняющего операцию
+	 * @param userInfo
+	 *            информация о пользователе, выполняющего операцию
 	 * @param formData
 	 *            объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
@@ -272,36 +268,35 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public long saveFormData(Logger logger, String ip, int userId, FormData formData) {
-		checkLockedByAnotherUser(formData.getId(), userId);
+	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
+		checkLockedByAnotherUser(formData.getId(), userInfo);
 		boolean canDo;
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId,
+			canDo = formDataAccessService.canCreate(userInfo,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
-			canDo = formDataAccessService.canEdit(userId, formData.getId());
+			canDo = formDataAccessService.canEdit(userInfo, formData.getId());
 		}
 
 		if (canDo) {
 			Long oldId = formData.getId();
-			TAUser user = userDao.getUser(userId);
-			formDataScriptingService.executeScript(user, formData,
+			formDataScriptingService.executeScript(userInfo, formData,
 					FormDataEvent.SAVE, logger, null);
 
 			boolean needLock = formData.getId() == null;
 			long id = formDataDao.save(formData);
 			if (needLock) {
-				lock(id, userId);
+				lock(id, userInfo);
 			}
 
 			if (oldId != null) {
-				logBusinessService.add(formData.getId(), null, user, FormDataEvent.SAVE, null);
-				auditService.add(ip, FormDataEvent.SAVE, user, formData.getDepartmentId(), formData.getReportPeriodId(),
+				logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
+				auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 						null, formData.getFormType().getId(), formData.getKind().getId(), null);
 			} else {
-				logBusinessService.add(formData.getId(), null, user, FormDataEvent.CREATE, null);
-				auditService.add(ip, FormDataEvent.CREATE, user, formData.getDepartmentId(), formData.getReportPeriodId(),
+				logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+				auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 						null, formData.getFormType().getId(), formData.getKind().getId(), null);
 			}
 
@@ -315,8 +310,8 @@ public class FormDataServiceImpl implements FormDataService {
 	/**
 	 * Получить данные по налоговой форме
 	 *
-	 * @param userId
-	 *            идентификатор пользователя, выполняющего операцию
+	 * @param userInfo
+	 *            информация о пользователе, выполняющего операцию
 	 * @param formDataId
 	 *            идентификатор записи, которую необходимо считать
 	 * @param logger
@@ -328,12 +323,12 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(int userId, long formDataId, Logger logger) {
-		if (formDataAccessService.canRead(userId, formDataId)) {
+	public FormData getFormData(TAUserInfo userInfo, long formDataId, Logger logger) {
+		if (formDataAccessService.canRead(userInfo, formDataId)) {
 
 			FormData formData = formDataDao.get(formDataId);
 
-			formDataScriptingService.executeScript(userDao.getUser(userId),
+			formDataScriptingService.executeScript(userInfo,
 					formData, FormDataEvent.AFTER_LOAD, logger, null);
 
 			if (logger.containsLevel(LogLevel.ERROR)) {
@@ -346,15 +341,15 @@ public class FormDataServiceImpl implements FormDataService {
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав на просмотр данных налоговой формы",
-					userId, formDataId);
+					userInfo.getUser().getId(), formDataId);
 		}
 	}
 
 	/**
 	 * Удалить данные по налоговой форме
 	 *
-	 * @param userId
-	 *            идентификатор пользователя, выполняющего операцию
+	 * @param userInfo
+	 *            информация о пользователе, выполняющего операцию
 	 * @param formDataId
 	 *            идентификатор записи, котрую нужно удалить
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
@@ -362,11 +357,11 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public void deleteFormData(String ip, int userId, long formDataId) {
-		checkLockedByAnotherUser(formDataId, userId);
-		if (formDataAccessService.canDelete(userId, formDataId)) {
+	public void deleteFormData(TAUserInfo userInfo, long formDataId) {
+		checkLockedByAnotherUser(formDataId, userInfo);
+		if (formDataAccessService.canDelete(userInfo, formDataId)) {
 			FormData formData = formDataDao.get(formDataId);
-			auditService.add(ip, FormDataEvent.DELETE, userDao.getUser(userId), formData.getDepartmentId(), formData.getReportPeriodId(),
+			auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 					null, formData.getFormType().getId(), formData.getKind().getId(), null);
 			formDataDao.delete(formDataId);
 		} else {
@@ -380,31 +375,28 @@ public class FormDataServiceImpl implements FormDataService {
 	 *
 	 * @param formDataId
 	 *            идентификатор налоговой формы
-	 * @param userId
-	 *            идентификатор текщуего пользователя
+	 * @param userInfo
+	 *            информация о текущем пользователе
 	 * @param workflowMove
 	 *            переход
 	 */
 	@Override
-	public void doMove(long formDataId, String ip, int userId, WorkflowMove workflowMove, String note, Logger logger) {
-		checkLockedByAnotherUser(formDataId, userId);
+	public void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+		checkLockedByAnotherUser(formDataId, userInfo);
 		List<WorkflowMove> availableMoves = formDataAccessService
-				.getAvailableMoves(userId, formDataId);
+				.getAvailableMoves(userInfo, formDataId);
 		if (!availableMoves.contains(workflowMove)) {
 			throw new ServiceException(
 					"Переход \""
 							+ workflowMove
 							+ "\" из текущего состояния невозможен, или пользователя с id = "
-							+ userId
+							+ userInfo.getUser().getId()
 							+ " не хватает полномочий для его осуществления");
 		}
 
-		Map<String, Object> additionalParameters = new HashMap<String, Object>();
-		additionalParameters.put("ip", ip);
-
 		FormData formData = formDataDao.get(formDataId);
-		formDataScriptingService.executeScript(userDao.getUser(userId),
-				formData, workflowMove.getEvent(), logger, additionalParameters);
+		formDataScriptingService.executeScript(userInfo,
+				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
 			formDataWorkflowDao
 					.changeFormDataState(
@@ -413,12 +405,10 @@ public class FormDataServiceImpl implements FormDataService {
 							workflowMove.getToState().equals(
 									WorkflowState.ACCEPTED) ? new Date() : null);
 
-			TAUser user = userDao.getUser(userId);
-
 			if (workflowMove.getAfterEvent() != null) {
 				formDataScriptingService.executeScript(
-						user, formData,
-						workflowMove.getAfterEvent(), logger, additionalParameters);
+						userInfo, formData,
+						workflowMove.getAfterEvent(), logger, null);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте, который выполняется после перехода",
@@ -426,8 +416,8 @@ public class FormDataServiceImpl implements FormDataService {
 				}
 			}
 
-			logBusinessService.add(formData.getId(), null, user, workflowMove.getEvent(), note);
-			auditService.add(ip, workflowMove.getEvent(), user, formData.getDepartmentId(), formData.getReportPeriodId(),
+			logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
+			auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 					null, formData.getFormType().getId(), formData.getKind().getId(), note);
 
 		} else {
@@ -441,12 +431,12 @@ public class FormDataServiceImpl implements FormDataService {
 	 * Проверяет, не заблокирована ли форма другим пользователем
 	 *
 	 * @param formDataId
-	 * @param userId
+	 * @param userInfo
 	 */
-	private void checkLockedByAnotherUser(Long formDataId, int userId) {
+	private void checkLockedByAnotherUser(Long formDataId, TAUserInfo userInfo) {
 		if (formDataId != null) {
 			ObjectLock<Long> objectLock = getObjectLock(formDataId);
-			if (objectLock != null && objectLock.getUserId() != userId) {
+			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 				throw new AccessDeniedException(
 						"Форма заблокирована другим пользователем");
 			}
@@ -455,24 +445,24 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean lock(long formDataId, int userId) {
+	public boolean lock(long formDataId, TAUserInfo userInfo) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
-		if (objectLock != null && objectLock.getUserId() != userId) {
+		if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 			return false;
 		} else {
-			lockDao.lockObject(formDataId, FormData.class, userId);
+			lockDao.lockObject(formDataId, FormData.class, userInfo.getUser().getId());
 			return true;
 		}
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean unlock(long formDataId, int userId) {
+	public boolean unlock(long formDataId, TAUserInfo userInfo) {
 		ObjectLock<Long> objectLock = getObjectLock(formDataId);
-		if (objectLock != null && objectLock.getUserId() != userId) {
+		if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 			return false;
 		} else {
-			lockDao.unlockObject(formDataId, FormData.class, userId);
+			lockDao.unlockObject(formDataId, FormData.class, userInfo.getUser().getId());
 			return true;
 		}
 
@@ -480,8 +470,8 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean unlockAllByUserId(int userId) {
-		lockDao.unlockAllObjectByUserId(userId);
+	public boolean unlockAllByUser(TAUserInfo userInfo) {
+		lockDao.unlockAllObjectByUserId(userInfo.getUser().getId());
 		return true;// TODO обработать возможные ошибки
 	}
 
@@ -492,16 +482,16 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public void deleteRow(Logger logger, int userId, FormData formData, DataRow<Cell> currentDataRow) {
+	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		boolean canDo = false;
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		if (!formTemplate.isFixedRows()) { // если строки в НФ не фиксированы
 		if (formData.getId() == null) {
-			canDo = formDataAccessService.canCreate(userId,
+			canDo = formDataAccessService.canCreate(userInfo,
 					formData.getFormTemplateId(), formData.getKind(),
 					formData.getDepartmentId(), formData.getReportPeriodId());
 		} else {
-				canDo = formDataAccessService.canEdit(userId, formData.getId());
+				canDo = formDataAccessService.canEdit(userInfo, formData.getId());
 			}
 		}
 
@@ -509,10 +499,9 @@ public class FormDataServiceImpl implements FormDataService {
 			if (formDataScriptingService.hasScripts(formData,
 					FormDataEvent.DELETE_ROW)
 					&& !reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
-				TAUser user = userDao.getUser(userId);
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScript(user, formData,
+				formDataScriptingService.executeScript(userInfo, formData,
 						FormDataEvent.DELETE_ROW, logger, additionalParameters);
 				if (logger.containsLevel(LogLevel.ERROR)) {
 					throw new ServiceLoggerException(

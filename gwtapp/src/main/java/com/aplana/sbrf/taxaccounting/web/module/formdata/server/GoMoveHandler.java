@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
@@ -38,10 +37,8 @@ public class GoMoveHandler extends
 	public GoMoveResult execute(GoMoveAction action, ExecutionContext context)
 			throws ActionException {
 
-			TAUser user = securityService.currentUser();
-			Integer userId = user.getId();
 			Logger logger = new Logger();
-			formDataService.doMove(action.getFormDataId(), securityService.getIp(), userId,
+			formDataService.doMove(action.getFormDataId(), securityService.currentUserInfo(),
 					action.getMove(), action.getReasonToWorkflowMove(), logger);
 			GoMoveResult result = new GoMoveResult();
 			result.setLogEntries(logger.getEntries());

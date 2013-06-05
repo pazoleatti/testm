@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -32,13 +31,10 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-
 		CreateDeclarationResult result = new CreateDeclarationResult();
 		result.setDeclarationId(declarationDataService.create(new Logger(), declarationTemplateService
 				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(),
-				securityService.getIp(), userId, command.getReportPeriodId()));
+				securityService.currentUserInfo(), command.getReportPeriodId()));
 		return result;
 	}
 

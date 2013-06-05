@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.DeleteDeclarationDataAction;
@@ -27,9 +26,7 @@ public class DeleteDeclarationDataHandler extends AbstractActionHandler<DeleteDe
 
     @Override
     public DeleteDeclarationDataResult execute(DeleteDeclarationDataAction action, ExecutionContext context) {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-		declarationDataService.delete(action.getDeclarationId(), securityService.getIp(), userId);
+		declarationDataService.delete(action.getDeclarationId(), securityService.currentUserInfo());
 	    return new DeleteDeclarationDataResult();
     }
 

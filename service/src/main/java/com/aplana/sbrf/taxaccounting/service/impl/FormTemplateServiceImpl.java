@@ -67,33 +67,33 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
 	@Override
-	public void checkLockedByAnotherUser(Integer formTemplateId, int userId){
+	public void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo){
 		if (formTemplateId!=null){
 			ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
-			if(objectLock != null && objectLock.getUserId() != userId){
+			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 				throw new AccessDeniedException("Шаблон формы заблокирован другим пользователем");
 			}
 		}
 	}
 
 	@Override
-	public boolean lock(int formTemplateId, int userId){
+	public boolean lock(int formTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 			return false;
 		} else {
-			lockDao.lockObject(formTemplateId, FormTemplate.class ,userId);
+			lockDao.lockObject(formTemplateId, FormTemplate.class ,userInfo.getUser().getId());
 			return true;
 		}
 	}
 
 	@Override
-	public boolean unlock(int formTemplateId, int userId){
+	public boolean unlock(int formTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 			return false;
 		} else {
-			lockDao.unlockObject(formTemplateId, FormTemplate.class, userId);
+			lockDao.unlockObject(formTemplateId, FormTemplate.class, userInfo.getUser().getId());
 			return true;
 		}
 	}

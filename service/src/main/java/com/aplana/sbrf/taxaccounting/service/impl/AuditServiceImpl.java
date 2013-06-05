@@ -28,7 +28,7 @@ public class AuditServiceImpl implements AuditService {
 	private TAUserService userService;
 
 	@Override
-	public List<LogSystem> getLogs(LogSystemFilter filter) {
+	public List<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
 		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
 			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
 		}
@@ -38,16 +38,16 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void add(String ip, FormDataEvent event, TAUser user, int departmentId, int reportPeriodId,
+	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, int reportPeriodId,
 					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
 		LogSystem log = new LogSystem();
 		log.setLogDate(new Date());
-		log.setIp(ip);
+		log.setIp(userInfo.getIp());
 		log.setEventId(event.getCode());
-		log.setUserId(user.getId());
+		log.setUserId(userInfo.getUser().getId());
 
 		StringBuilder roles = new StringBuilder();
-		for (TARole role : user.getRoles()) {
+		for (TARole role : userInfo.getUser().getRoles()) {
 			roles.append(role.getName());
 		}
 		log.setRoles(roles.toString());
@@ -58,7 +58,7 @@ public class AuditServiceImpl implements AuditService {
 		log.setFormTypeId(formTypeId);
 		log.setFormKindId(formKindId);
 		log.setNote(note);
-		log.setUserDepartmentId(user.getDepartmentId());
+		log.setUserDepartmentId(userInfo.getUser().getDepartmentId());
 
 		auditDao.add(log);
 	}

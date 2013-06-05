@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefreshDeclarationDataAction;
@@ -28,9 +28,8 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
 
     @Override
     public RefreshDeclarationDataResult execute(RefreshDeclarationDataAction action, ExecutionContext context) {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-		declarationDataService.reCreate(new Logger(), action.getDeclarationId(), securityService.getIp(), userId, action.getDocDate());
+		TAUserInfo userInfo = securityService.currentUserInfo();
+		declarationDataService.reCreate(new Logger(), action.getDeclarationId(), userInfo, action.getDocDate());
 	    return new RefreshDeclarationDataResult();
     }
 

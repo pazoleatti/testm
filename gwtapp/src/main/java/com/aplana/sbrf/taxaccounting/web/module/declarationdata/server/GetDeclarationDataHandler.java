@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -61,16 +61,15 @@ public class GetDeclarationDataHandler
 	@Override
 	public GetDeclarationDataResult execute(GetDeclarationDataAction action,
 			ExecutionContext context) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
+		TAUserInfo userInfo = securityService.currentUserInfo();
 
 		GetDeclarationDataResult result = new GetDeclarationDataResult();
-		Set<FormDataEvent> permittedEvents  = declarationAccessService.getPermittedEvents(userId, action.getId());
+		Set<FormDataEvent> permittedEvents  = declarationAccessService.getPermittedEvents(userInfo, action.getId());
 		
 		DeclarationData declaration = declarationDataService.get(
-				action.getId(), userId);
+				action.getId(), userInfo);
 		result.setDocDate(declarationDataService.getXmlDataDocDate(
-				action.getId(), userId));
+				action.getId(), userInfo));
 		
 		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
 		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
@@ -88,7 +87,7 @@ public class GetDeclarationDataHandler
 		result.setReportPeriod(reportPeriodDao.get(
 				declaration.getReportPeriodId()).getName());
 
-		result.setPdf(generatePdfViewerModel(action, userId));
+		result.setPdf(generatePdfViewerModel(action, userInfo));
 
 		return result;
 	}
@@ -97,16 +96,16 @@ public class GetDeclarationDataHandler
 	 * Формирует модель для PDFViewer
 	 * 
 	 * @param action
-	 * @param userId
+	 * @param userInfo
 	 * @return
 	 */
 	private Pdf generatePdfViewerModel(GetDeclarationDataAction action,
-									   int userId) {
+									   TAUserInfo userInfo) {
 		Pdf pdf = new Pdf();
 		pdf.setTitle("Список листов декларации");
 		List<PdfPage> pdfPages = new ArrayList<PdfPage>();
 		InputStream pdfData = new ByteArrayInputStream(
-				declarationDataService.getPdfData(action.getId(), userId));
+				declarationDataService.getPdfData(action.getId(), userInfo));
 		int pageNumber = PDFImageUtils.getPageNumber(pdfData);
 		String randomUUID = UUID.randomUUID().toString().toLowerCase(); // добавлено чтобы браузер не кешировал данные
 		for (int i = 0; i < pageNumber; i++) {

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
@@ -28,10 +27,8 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
     @Override
     public AcceptDeclarationDataResult execute(AcceptDeclarationDataAction action, ExecutionContext context) {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
 		declarationDataService.setAccepted(new Logger(), action.getDeclarationId(), action.isAccepted(),
-				securityService.getIp(), userId);
+				securityService.currentUserInfo());
 	    return new AcceptDeclarationDataResult();
     }
 

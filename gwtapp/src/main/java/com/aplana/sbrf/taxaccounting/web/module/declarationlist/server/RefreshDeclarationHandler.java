@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -32,10 +31,8 @@ public class RefreshDeclarationHandler extends AbstractActionHandler<RefreshDecl
 
 	@Override
 	public RefreshDeclarationResult execute(RefreshDeclaration command, ExecutionContext executionContext) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
 		Logger  logger = new Logger();
-		declarationDataService.reCreate(logger, command.getDeclarationDataId(), securityService.getIp(), userId, new Date());
+		declarationDataService.reCreate(logger, command.getDeclarationDataId(), securityService.currentUserInfo(), new Date());
 		RefreshDeclarationResult result = new RefreshDeclarationResult();
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			result.setSuccess(false);

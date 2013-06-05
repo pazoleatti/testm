@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -85,33 +86,33 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
 	@Override
-	public void checkLockedByAnotherUser(Integer declarationTemplateId, int userId){
+	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
 		if (declarationTemplateId!=null){
 			ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
-			if(objectLock != null && objectLock.getUserId() != userId){
+			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 				throw new AccessDeniedException("Шаблон декларации заблокирован другим пользователем");
 			}
 		}
 	}
 
 	@Override
-	public boolean lock(int declarationTemplateId, int userId){
+	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 			return false;
 		} else {
-			lockDao.lockObject(declarationTemplateId, DeclarationTemplate.class ,userId);
+			lockDao.lockObject(declarationTemplateId, DeclarationTemplate.class ,userInfo.getUser().getId());
 			return true;
 		}
 	}
 
 	@Override
-	public boolean unlock(int declarationTemplateId, int userId){
+	public boolean unlock(int declarationTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userId){
+		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 			return false;
 		} else {
-			lockDao.unlockObject(declarationTemplateId, DeclarationTemplate.class, userId);
+			lockDao.unlockObject(declarationTemplateId, DeclarationTemplate.class, userInfo.getUser().getId());
 			return true;
 		}
 	}

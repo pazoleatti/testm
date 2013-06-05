@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,20 +26,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 public class FormDataAccessServiceImplTest {
@@ -81,14 +67,14 @@ public class FormDataAccessServiceImplTest {
 	private static final int BANK_OPERATOR_USER_ID = 4;
 	private static final int BANK_CONTROL_UNP_USER_ID = 5;
 	
-	private static final int GOSB_CONTROL_USER_ID = 6;
-
 	private static final int REPORT_PERIOD_ACTIVE_ID = 1;
 	private static final int REPORT_PERIOD_INACTIVE_ID = 2;
 	private static final int REPORT_PERIOD_BALANCED_ID = 3;
 	private static final boolean REPORT_PERIOD_ACTIVE = true;
 	private static final boolean REPORT_PERIOD_INACTIVE = false;
 	private static final boolean REPORT_PERIOD_BALANCED = true;
+
+	private final static String LOCAL_IP = "127.0.0.1";
 
 	@BeforeClass
 	public static void tearUp() {
@@ -193,24 +179,7 @@ public class FormDataAccessServiceImplTest {
 		fd = mockFormData(TB1_ACCEPTED_FORMDATA_BALANCED_ID, TB1_ID, WorkflowState.ACCEPTED, FormDataKind.SUMMARY, REPORT_PERIOD_BALANCED_ID, summaryFormType1);
 		when(formDataDao.getWithoutRows(TB1_ACCEPTED_FORMDATA_BALANCED_ID)).thenReturn(fd);
 		ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
-		
-		TAUserDao userDao = mock(TAUserDao.class);
-		TAUser user;
-		
-		user = mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL);
-		when(userDao.getUser(TB1_CONTROL_USER_ID)).thenReturn(user);
-		user = mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR);
-		when(userDao.getUser(TB1_OPERATOR_USER_ID)).thenReturn(user);
-		user = mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL);
-		when(userDao.getUser(BANK_CONTROL_USER_ID)).thenReturn(user);
-		user = mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR);
-		when(userDao.getUser(BANK_OPERATOR_USER_ID)).thenReturn(user);
-		user = mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP);
-		when(userDao.getUser(BANK_CONTROL_UNP_USER_ID)).thenReturn(user);
-		user = mockUser(GOSB_CONTROL_USER_ID, GOSB_TB1_ID, TARole.ROLE_CONTROL);
-		when(userDao.getUser(GOSB_CONTROL_USER_ID)).thenReturn(user);
-		ReflectionTestUtils.setField(service, "userDao", userDao);
-		
+
 		ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
 		ReportPeriod rp;
 		rp = mockReportPeriod(REPORT_PERIOD_ACTIVE_ID, REPORT_PERIOD_ACTIVE);
@@ -226,192 +195,248 @@ public class FormDataAccessServiceImplTest {
 	public void testCanReadForFirstLifeCycle(){
 	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
 		//Любой пользователь может читать Выходные формы данного жизненного цикла, находящиеся в любом состоянии
-		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertTrue(service.canRead(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canRead(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canRead(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanReadForSecondLifeCycle(){
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
 		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canRead(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canRead(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 
 		//Оператор не имеет прав на чтение НФ данного жизненного цикла
-		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertFalse(service.canRead(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canRead(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canRead(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanReadForThirdLifeCycle(){
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
 		//Контроллер текущего уровня, вышестоящего уровня и контроллер УНП имеют доступ на чтение НФ данного жизненного цикла
-		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertTrue(service.canRead(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertTrue(service.canRead(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canRead(userInfo, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, TB1_APPROVED_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, TB1_ACCEPTED_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canRead(userInfo, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, TB1_APPROVED_FORMDATA_ID));
+		assertTrue(service.canRead(userInfo, TB1_ACCEPTED_FORMDATA_ID));
 
 		//Оператор не имеет прав на чтение НФ данного жизненного цикла
-		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canRead(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
+		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canRead(userInfo, TB1_CREATED_FORMDATA_ID));
+		assertFalse(service.canRead(userInfo, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canRead(userInfo, TB1_ACCEPTED_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanEditForFirstLifeCycle(){
 	/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
 		//Все могут редактировать форму в статусе "Создана"
-		assertTrue(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertTrue(service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
 
 		//Все, кроме Оператора, могут редактировать форму в статусе "Подготовлена"
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));
 
 		//Никто не может редактировать НФ в статусе "Принята"
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_ADDITIONAL_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanEditForSecondLifeCycle(){
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
 		//Никто не может редактировать налоговые формы данного жизненного цикла
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID)); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canEdit(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID)); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canEdit(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
+
 	}
 
 	@Test
 	public void testCanEditForThirdLifeCycle(){
 	/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
-
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 		//Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
-		assertTrue(service.canEdit(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID));
 
 		//Оператор не может редактировать НФ данного жизненного цикла в состоянии "Создана"
-		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID));
+		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID));
 
 		//Никто не может редактировать НФ данного жизненного цикла в состоянии "Утверждена" и "Принята"
-		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertFalse(service.canEdit(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID));
-		assertFalse(service.canEdit(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertFalse(service.canEdit(userInfo, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertFalse(service.canEdit(userInfo, TB1_ACCEPTED_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
+		assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
 	}
 
 	@Test
 	public void testCanDelete() {
-		// Удалять можно налоговые формы, находящиеся в состоянии "Создана" и для которых canEdit() == true
-		assertTrue(service.canDelete(BANK_OPERATOR_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
-		assertTrue(service.canDelete(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canDelete(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID));
-		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID));
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
 
-		assertTrue(service.canDelete(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID));
-		assertFalse(service.canDelete(BANK_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID));
-		assertFalse(service.canDelete(BANK_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID));
+		// Удалять можно налоговые формы, находящиеся в состоянии "Создана" и для которых canEdit() == true
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertTrue(service.canDelete(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertFalse(service.canDelete(userInfo, TB1_CREATED_FORMDATA_BALANCED_ID));
+		assertFalse(service.canDelete(userInfo, TB1_ACCEPTED_FORMDATA_BALANCED_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canDelete(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canDelete(userInfo, TB1_CREATED_FORMDATA_ID));
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(service.canDelete(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID));
+		assertTrue(service.canDelete(userInfo, TB1_CREATED_FORMDATA_ID));
+		assertTrue(service.canDelete(userInfo, TB1_CREATED_FORMDATA_BALANCED_ID));
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canDelete(userInfo, TB1_CREATED_FORMDATA_ID));
 	}
 	
 	@Test 
 	public void testCanCreateOperator() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+
 		// Оператор может создавать первичные и выходные в своём подразделении
-		assertTrue(service.canCreate(BANK_OPERATOR_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать консолидированные и выходные формы даже в своём
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// Оператор не может создавать в чужом подразделении 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать в своём подразделении, если в подразделении не разрешена работа с такой формой
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(service.canCreate(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
+		assertFalse(service.canCreate(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
-	public void testCanCreateControl() {		
+	public void testCanCreateControl() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+
 		// Контролёр может создавать выходные формы
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
-		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
-		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
-		
 		// Контролёр не может создавать формы, если они не разрешены в подразделении
-		assertFalse(service.canCreate(BANK_CONTROL_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
-		
+		assertFalse(service.canCreate(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+
+		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
+		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+
 		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// TODO: случай, когда форма в чужом подразделении является источником для другой формы в этом же подразделении, а уже эта вторая форма
 		// является источником для одной из форм подразделения, к которому относится контролёр
 		
 		// Во всех остальных случаях контролёр не сможет создавать формы в чужих подразделениях 
-		assertFalse(service.canCreate(BANK_OPERATOR_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
-
-		assertTrue(service.canCreate(TB1_CONTROL_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+		assertFalse(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
 	public void testCanCreateControlUnp() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП может создавать консолидированные и сводные, передающиеся в вышестоящее подразделение
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
-		assertFalse(service.canCreate(BANK_CONTROL_UNP_USER_ID, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+		assertFalse(service.canCreate(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
-		assertTrue(service.canCreate(BANK_CONTROL_UNP_USER_ID, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+		assertTrue(service.canCreate(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}	
 
 	@Test
@@ -419,27 +444,39 @@ public class FormDataAccessServiceImplTest {
 		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/
 
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		//Перевести из состояния "Создана" в "Подготовлена" может любой пользователь
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
-				service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_CREATED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_CREATED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_PREPARED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_CREATED_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Подготовлена" в "Создана" и из "Подготовлена" в "Принята" может контролер текущего уровня,
 		// контролер вышестоящего уровня или контролер УНП.
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_PREPARED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Принята" в "Подготовлена" может контролер вышестоящего уровня и контролер УНП.
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_PREPARED},
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] {},service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertArrayEquals(new Object[] {},service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
 	}
 
 	@Test
@@ -447,28 +484,36 @@ public class FormDataAccessServiceImplTest {
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			 и не передаваемых на вышестоящий уровень (Сводные формы уровня БАНК)*/
 
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		//Перевести из состояния "Создана" в "Принята" может контролер текущего уровня, контролер УНП
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Принята" в "Создана" может текущий контролер или контролер УНП
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(BANK_OPERATOR_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
-
+				service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED},
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED},
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
+				service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { },
-				service.getAvailableMoves(BANK_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
 		assertArrayEquals(new Object[] { },
-				service.getAvailableMoves(BANK_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
 
 	}
 
@@ -477,50 +522,73 @@ public class FormDataAccessServiceImplTest {
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		//Переводить из состояния "Создана" в "Утверждена" может контролер текущего уровня, контролер вышестоящего уровня
 		// и контролер УНП
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
-				service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_CREATED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Утверждена" в "Создана" и из "Утверждена" в "Принята" контролер вышестоящего уровня или контролер УНП.
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_ACCEPTED, WorkflowMove.APPROVED_TO_CREATED },
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_APPROVED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 
 		//Перевести из состояния "Принята" в "Утверждена" контролер вышестоящего уровня или контролер УНП.
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
-				service.getAvailableMoves(BANK_CONTROL_UNP_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
-				service.getAvailableMoves(BANK_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_OPERATOR_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
-		assertArrayEquals(new Object[] { }, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB1_ACCEPTED_FORMDATA_ID).toArray());
+				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPERATOR));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+		assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
 	}
 
 	@Test
 	public void testGetAvailableMovesCommon() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+
 		// Контролёр ТБ не может изменять статус в чужом тербанке
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_ACCEPTED_FORMDATA_ID).size());
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_CREATED_FORMDATA_ID).size());
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, TB2_APPROVED_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(userInfo, TB2_ACCEPTED_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(userInfo, TB2_CREATED_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(userInfo, TB2_APPROVED_FORMDATA_ID).size());
 
 		// Никто не может выполнять переходы, если отчетный период неактивен
-		assertEquals(0, service.getAvailableMoves(BANK_CONTROL_USER_ID, INACTIVE_FORMDATA_ID).size());
-		assertEquals(0, service.getAvailableMoves(TB1_CONTROL_USER_ID, INACTIVE_FORMDATA_ID).size());
+		assertEquals(0, service.getAvailableMoves(userInfo, INACTIVE_FORMDATA_ID).size());
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertEquals(0, service.getAvailableMoves(userInfo, INACTIVE_FORMDATA_ID).size());
 	}
 	
 	@Test
 	public void testGetAccessParams() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		// Проверяем только один случай, так как этот метод просто аггрегирует результаты других методов,
 		// а мы их уже оттестировали отдельно
-		FormDataAccessParams params = service.getFormDataAccessParams(BANK_CONTROL_USER_ID, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
+		FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
 		assertTrue(params.isCanRead());
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
@@ -528,6 +596,5 @@ public class FormDataAccessServiceImplTest {
 			new Object[] {WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED},
 			params.getAvailableWorkflowMoves().toArray()
 		);
-
 	}
 }

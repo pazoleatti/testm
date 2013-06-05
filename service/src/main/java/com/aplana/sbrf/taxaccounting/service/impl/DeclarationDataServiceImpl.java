@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -35,12 +36,9 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
@@ -61,9 +59,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
 	@Autowired
-	private TAUserDao userDao;
-
-	@Autowired
 	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
@@ -74,18 +69,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
-	
-	@Autowired
-	private DepartmentFormTypeDao departmentFormTypeDao;
-	
-	@Autowired
-	private FormDataDao formDataDao;
-	
-	@Autowired
-	private DepartmentDao departmentDao;
-	
-	@Autowired
-	private FormTypeDao formTypeDao;
 
 	@Autowired
 	private LogBusinessService logBusinessService;
@@ -102,38 +85,36 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public long create(Logger logger, int declarationTemplateId,
-			int departmentId, String ip, int userId, int reportPeriodId) {
-		declarationDataAccessService.checkEvents(userId, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
+			int departmentId, TAUserInfo userInfo, int reportPeriodId) {
+		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 			
-			DeclarationData newDeclaration = new DeclarationData();
-			newDeclaration.setDepartmentId(departmentId);
-			newDeclaration.setReportPeriodId(reportPeriodId);
-			newDeclaration.setAccepted(false);
-			newDeclaration.setDeclarationTemplateId(declarationTemplateId);
-			long id = declarationDataDao.saveNew(newDeclaration);
-			TAUser user = userDao.getUser(userId);
-			
-			setDeclarationBlobs(logger, newDeclaration, new Date(), userId);
-			logBusinessService.add(null, id, user, FormDataEvent.CREATE, null);
-			auditService.add(ip, FormDataEvent.CREATE , user, newDeclaration.getDepartmentId(),
-					newDeclaration.getReportPeriodId(),
-					declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
-					null, null, null);
-			return id;
+		DeclarationData newDeclaration = new DeclarationData();
+		newDeclaration.setDepartmentId(departmentId);
+		newDeclaration.setReportPeriodId(reportPeriodId);
+		newDeclaration.setAccepted(false);
+		newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+		long id = declarationDataDao.saveNew(newDeclaration);
+
+		setDeclarationBlobs(logger, newDeclaration, new Date(), userInfo);
+		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
+		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
+				newDeclaration.getReportPeriodId(),
+				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
+				null, null, null);
+		return id;
 	}
 	
 	
 
 	@Override
 	@Transactional(readOnly = false)
-	public void reCreate(Logger logger, long id, String ip, int userId,
+	public void reCreate(Logger logger, long id, TAUserInfo userInfo,
 			Date docDate) {
-		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.CALCULATE);
+		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
 			DeclarationData declarationData = declarationDataDao.get(id);
-			setDeclarationBlobs(logger, declarationData, docDate, userId);
-			TAUser user = userDao.getUser(userId);
-			logBusinessService.add(null, id, user, FormDataEvent.SAVE, null);
-			auditService.add(ip, FormDataEvent.SAVE , user, declarationData.getDepartmentId(),
+			setDeclarationBlobs(logger, declarationData, docDate, userInfo);
+			logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
+			auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
@@ -141,21 +122,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public DeclarationData get(long id, int userId) {
-		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+	public DeclarationData get(long id, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
 		return declarationDataDao.get(id);
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public void delete(long id, String ip, int userId) {
-		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.DELETE);
+	public void delete(long id, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
 			DeclarationData declarationData = declarationDataDao.get(id);
-			TAUser user = userDao.getUser(userId);
 
 			declarationDataDao.delete(id);
 
-			auditService.add(ip, FormDataEvent.DELETE , user, declarationData.getDepartmentId(),
+			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
@@ -164,35 +144,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void setAccepted(Logger logger, long id, boolean accepted, String ip, int userId) {
-		
-		TAUser user = userDao.getUser(userId);
+	public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
+
 		// TODO (sgoryachkin) Это 2 метода должо быть
 		if (accepted) {
-			declarationDataAccessService.checkEvents(userId, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 			
 			DeclarationData declarationData  = declarationDataDao.get(id);
 			declarationData.setAccepted(true);
 			
 			Map<String, Object> exchangeParams = new HashMap<String, Object>();
-			declarationDataScriptingService.executeScript(user, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+			declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 			
 			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
-			logBusinessService.add(null, id, user, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-			auditService.add(ip, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , user, declarationData.getDepartmentId(),
+			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+			auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		} else {
-			declarationDataAccessService.checkEvents(userId, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 			
 			DeclarationData declarationData  = declarationDataDao.get(id);
 			declarationData.setAccepted(false);
 			
 			Map<String, Object> exchangeParams = new HashMap<String, Object>();		
-			declarationDataScriptingService.executeScript(user, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+			declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 			
 			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
-			logBusinessService.add(null, id, user, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-			auditService.add(ip, FormDataEvent.MOVE_ACCEPTED_TO_CREATED , user, declarationData.getDepartmentId(),
+			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
 		
 		}
@@ -201,14 +180,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public String getXmlData(long declarationId, int userId) {
-		declarationDataAccessService.checkEvents(userId, declarationId, FormDataEvent.GET_LEVEL1);
+	public String getXmlData(long declarationId, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
 		return declarationDataDao.getXmlData(declarationId);
 	}
 
 	@Override
-	public String getXmlDataFileName(long declarationDataId, int userId) {
-		declarationDataAccessService.checkEvents(userId, declarationDataId, FormDataEvent.GET_LEVEL0);
+	public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
@@ -217,8 +196,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public Date getXmlDataDocDate(long declarationDataId, int userId) {
-		declarationDataAccessService.checkEvents(userId, declarationDataId, FormDataEvent.GET_LEVEL0);
+	public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
 			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
@@ -227,26 +206,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
 	@Override
-	public byte[] getXlsxData(long id, int userId) {
-		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+	public byte[] getXlsxData(long id, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
 		return declarationDataDao.getXlsxData(id);
 	}
 
 	@Override
-	public byte[] getPdfData(long id, int userId) {
-		declarationDataAccessService.checkEvents(userId, id, FormDataEvent.GET_LEVEL0);
+	public byte[] getPdfData(long id, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
 		return declarationDataDao.getPdfData(id);
 	}
 	
 	private void setDeclarationBlobs(Logger logger,
-			DeclarationData declarationData, Date docDate, int userId) {
+			DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
 		
 		Map<String, Object> exchangeParams = new HashMap<String, Object>();
 		exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 			
-		declarationDataScriptingService.executeScript(userDao.getUser(userId), declarationData, FormDataEvent.CREATE, logger, exchangeParams);
+		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 	
 		String xml = XML_HEADER.concat(writer.toString());
 		

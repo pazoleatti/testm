@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.List;
 
@@ -28,9 +28,9 @@ public interface LogBusinessService {
 	 * Добавить информацию об логировании
 	 * @param formDataId идентификатор формы
 	 * @param declarationId идентификатор декларации
-	 * @param user пользователь инициирующий событие
+	 * @param userInfo информация о пользователе, инициирующего событие
 	 * @param event событие
 	 * @param note текст
 	 */
-	void add(Long formDataId, Long declarationId, TAUser user, FormDataEvent event, String note);
+	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
 }

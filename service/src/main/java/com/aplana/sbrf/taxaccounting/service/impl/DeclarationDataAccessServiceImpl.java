@@ -5,22 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 
@@ -32,8 +23,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 @Service
 public class DeclarationDataAccessServiceImpl implements
 		DeclarationDataAccessService {
-	@Autowired
-	private TAUserDao userDao;
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
@@ -52,40 +41,39 @@ public class DeclarationDataAccessServiceImpl implements
 	 * логика вынесена в отдельный метод, так как используется в нескольких
 	 * местах данного сервиса
 	 * 
-	 * @param userId
-	 *            идентификатор пользователя
+	 * @param userInfo
+	 *            информация о пользователе
 	 * @param declarationDepartmentId
 	 *            идентификатор подразделения, к которому относится декларация
 	 * @param reportPeriodId
 	 *            идентификатор отчетного периода
 	 * @return true - права есть, false - прав нет
 	 */
-	private void checkRolesForReading(int userId,
+	private void checkRolesForReading(TAUserInfo userInfo,
 			int declarationDepartmentId, int reportPeriodId) {
-		TAUser user = userDao.getUser(userId);
 		Department declarationDepartment = departmentDao
 				.getDepartment(declarationDepartmentId);
 		ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		checkRolesForReading(user, declarationDepartment, reportPeriod);
+		checkRolesForReading(userInfo, declarationDepartment, reportPeriod);
 	}
 
 	/**
-	 * Перегруженный вариант {@link #checkRolesForReading(int, int, int)},
+	 * Перегруженный вариант {@link #checkRolesForReading(TAUserInfo, int, int)},
 	 * принимающий объекты вместо идентификаторов
 	 * 
 	 * В сущности функция проверка проверяет наличие прав на просмотр
 	 * декларации, логика вынесена в отдельный метод, так как используется в
 	 * нескольких местах данного сервиса
 	 * 
-	 * @param user
-	 *            пользователь системы
+	 * @param userInfo
+	 *            информация о пользователе
 	 * @param declarationDepartment
 	 *            подразделение, к которому относится декларация
 	 * @param reportPeriod
 	 *            отчетный период
 	 * @return true - права есть, false - прав нет
 	 */
-	private void checkRolesForReading(TAUser user,
+	private void checkRolesForReading(TAUserInfo userInfo,
 			Department declarationDepartment, ReportPeriod reportPeriod) {
 		// Нельзя работать с декларациями в отчетном периоде вида
 		// "ввод остатков"
@@ -94,14 +82,14 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 
 		// Контролёр УНП может просматривать все декларации
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			return;
 		}
 
 		// Обычный контролёр может просматривать декларации только в своём
 		// обособленном подразделении
-		if (user.hasRole(TARole.ROLE_CONTROL)
-				&& user.getDepartmentId() == declarationDepartment.getId()
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+				&& userInfo.getUser().getDepartmentId() == declarationDepartment.getId()
 				&& !DepartmentType.ROOT_BANK.equals(declarationDepartment
 						.getType())) {
 			return;
@@ -109,15 +97,15 @@ public class DeclarationDataAccessServiceImpl implements
 		throw new AccessDeniedException("Нет прав на доступ к декларации");
 	}
 
-	private void canRead(int userId, long declarationDataId) {
+	private void canRead(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private void canCreate(int userId, int declarationTemplateId,
+	private void canCreate(TAUserInfo userInfo, int declarationTemplateId,
 			int departmentId, int reportPeriodId) {
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
@@ -141,10 +129,10 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения
-		checkRolesForReading(userId, departmentId, reportPeriodId);
+		checkRolesForReading(userInfo, departmentId, reportPeriodId);
 	}
 
-	private void canAccept(int userId, long declarationDataId) {
+	private void canAccept(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Принять декларацию можно только если она еще не принята
 		if (declaration.isAccepted()) {
@@ -152,11 +140,11 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private void canReject(int userId, long declarationDataId) {
+	private void canReject(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Отменить принятие декларации можно только если она принята
 		if (!declaration.isAccepted()) {
@@ -164,22 +152,22 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private void canDelete(int userId, long declarationDataId) {
+	private void canDelete(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Удалять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация не должна быть принята");
 		}
 		// Удалять могут только контолёр текущего уровня и контролёр УНП
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private void canRefresh(int userId, long declarationDataId) {
+	private void canRefresh(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Обновлять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
@@ -187,11 +175,11 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		// Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
-	private void canDownloadXml(int userId, long declarationDataId) {
+	private void canDownloadXml(TAUserInfo userInfo, long declarationDataId) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Скачивать файл в формате законодателя можно только для принятых
 		// деклараций
@@ -200,32 +188,32 @@ public class DeclarationDataAccessServiceImpl implements
 		}
 		// Скачивать файл в формате законодателя могут только контолёр текущего
 		// уровня и контролёр УНП
-		checkRolesForReading(userId, declaration.getDepartmentId(),
+		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId());
 	}
 
 	@Override
-	public void checkEvents(Integer userId, Long declarationDataId,
+	public void checkEvents(TAUserInfo userInfo, Long declarationDataId,
 			FormDataEvent... scriptEvents) {
 		for (FormDataEvent scriptEvent : scriptEvents) {
 			switch (scriptEvent) {
 			case MOVE_CREATED_TO_ACCEPTED:
-				canAccept(userId, declarationDataId);
+				canAccept(userInfo, declarationDataId);
 				break;
 			case MOVE_ACCEPTED_TO_CREATED:
-				canReject(userId, declarationDataId);
+				canReject(userInfo, declarationDataId);
 				break;
 			case GET_LEVEL0:
-				canRead(userId, declarationDataId);
+				canRead(userInfo, declarationDataId);
 				break;
 			case GET_LEVEL1:
-				canDownloadXml(userId, declarationDataId);
+				canDownloadXml(userInfo, declarationDataId);
 				break;
 			case DELETE:
-				canDelete(userId, declarationDataId);
+				canDelete(userInfo, declarationDataId);
 				break;
 			case CALCULATE:
-				canRefresh(userId, declarationDataId);
+				canRefresh(userInfo, declarationDataId);
 				break;
 			default:
 				throw new AccessDeniedException(
@@ -235,13 +223,13 @@ public class DeclarationDataAccessServiceImpl implements
 	}
 
 	@Override
-	public void checkEvents(Integer userId,
+	public void checkEvents(TAUserInfo userInfo,
 			Integer declarationTemplateId, Integer departmentId,
 			Integer reportPeriodId, FormDataEvent... scriptEvents) {
 		for (FormDataEvent scriptEvent : scriptEvents) {
 			switch (scriptEvent) {
 			case CREATE:
-				canCreate(userId, declarationTemplateId, departmentId, reportPeriodId);
+				canCreate(userInfo, declarationTemplateId, departmentId, reportPeriodId);
 				break;
 			default:
 				throw new AccessDeniedException(
@@ -251,12 +239,12 @@ public class DeclarationDataAccessServiceImpl implements
 	}
 
 	@Override
-	public Set<FormDataEvent> getPermittedEvents(Integer userId,
+	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo,
 			Long declarationDataId) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
 			try{
-				checkEvents(userId, declarationDataId, new FormDataEvent[]{scriptEvent});
+				checkEvents(userInfo, declarationDataId, new FormDataEvent[]{scriptEvent});
 				result.add(scriptEvent);
 			} catch (Exception e) {
 				// Nothink
@@ -266,13 +254,13 @@ public class DeclarationDataAccessServiceImpl implements
 	}
 
 	@Override
-	public Set<FormDataEvent> getPermittedEvents(Integer userId,
+	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo,
 			Integer declarationTemplateId, Integer departmentId,
 			Integer reportPeriodId) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
 			try{
-				checkEvents(userId, declarationTemplateId, departmentId, reportPeriodId, new FormDataEvent[]{scriptEvent});
+				checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, new FormDataEvent[]{scriptEvent});
 				result.add(scriptEvent);
 			} catch (Exception e) {
 				// Nothink

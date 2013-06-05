@@ -4,18 +4,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -60,15 +55,14 @@ public class GetFormDataHandler extends
 	public GetFormDataResult execute(GetFormData action,
 			ExecutionContext context) throws ActionException {
 
+		TAUserInfo userInfo = securityService.currentUserInfo();
 		checkAction(action);
-
-		Integer userId = securityService.currentUser().getId();
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
 
-		fillLockData(action, userId, result);
-		fillFormAndTemplateData(action, userId, logger, result);
-		fillFormDataAccessParams(action, userId, result);
+		fillLockData(action, userInfo, result);
+		fillFormAndTemplateData(action, userInfo, logger, result);
+		fillFormDataAccessParams(action, userInfo, result);
 
 		result.setLogEntries(logger.getEntries());
 
@@ -86,15 +80,15 @@ public class GetFormDataHandler extends
 	 * Получает/создает данные налоговой формы
 	 * 
 	 * @param action
-	 * @param userId
+	 * @param userInfo
 	 * @param logger
 	 * @param result
 	 */
-	private void fillFormAndTemplateData(GetFormData action, int userId,
+	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
 			Logger logger, GetFormDataResult result) {
 		FormData formData;
 		if (action.getFormDataId() == Long.MAX_VALUE) {
-			formData = formDataService.createFormData(logger, userId,
+			formData = formDataService.createFormData(logger, userInfo,
 					formTemplateService.getActiveFormTemplateId(action
 							.getFormDataTypeId().intValue()), action
 							.getDepartmentId(), FormDataKind.fromId(action
@@ -102,9 +96,9 @@ public class GetFormDataHandler extends
 							reportPeriodDao.get(action.getReportPeriodId().intValue()));
 		} else {
 			if (!action.isReadOnly()) {
-				formDataService.lock(action.getFormDataId(), userId);
+				formDataService.lock(action.getFormDataId(), userInfo);
 			}
-			formData = formDataService.getFormData(userId,
+			formData = formDataService.getFormData(userInfo,
 					action.getFormDataId(), logger);
 		}
 		FormTemplate formTemplate = formTemplateService.get(formData
@@ -125,10 +119,10 @@ public class GetFormDataHandler extends
 	 * Заполняет параметры доступа для формы
 	 * 
 	 * @param action
-	 * @param userId
+	 * @param userInfo
 	 * @param result
 	 */
-	private void fillFormDataAccessParams(GetFormData action, int userId,
+	private void fillFormDataAccessParams(GetFormData action, TAUserInfo userInfo,
 			GetFormDataResult result) {
 		FormDataAccessParams accessParams;
 		if (action.getFormDataId() == Long.MAX_VALUE) {
@@ -139,7 +133,7 @@ public class GetFormDataHandler extends
 			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(
 					0));
 		} else {
-			accessParams = accessService.getFormDataAccessParams(userId, result
+			accessParams = accessService.getFormDataAccessParams(userInfo, result
 					.getFormData().getId());
 		}
 		result.setFormDataAccessParams(accessParams);
@@ -173,10 +167,10 @@ public class GetFormDataHandler extends
 	 * Блокирует форму при необходимости, заполняет состояние блокировки
 	 * 
 	 * @param action
-	 * @param userId
+	 * @param userInfo
 	 * @param result
 	 */
-	private void fillLockData(GetFormData action, int userId,
+	private void fillLockData(GetFormData action, TAUserInfo userInfo,
 			GetFormDataResult result) {
 		FormMode formMode = FormMode.READ_LOCKED;
 
@@ -185,10 +179,9 @@ public class GetFormDataHandler extends
 		if (lockInformation != null) {
 			// Если данная форма уже заблокирована другим пользотелем
 
-			result.setLockedByUser(securityService.getUserById(
-					lockInformation.getUserId()).getName());
+			result.setLockedByUser(userInfo.getUser().getName());
 			result.setLockDate(getFormedDate(lockInformation.getLockTime()));
-			if (lockInformation.getUserId() == userId) {
+			if (lockInformation.getUserId() == userInfo.getUser().getId()) {
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;
 				} else {

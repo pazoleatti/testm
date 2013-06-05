@@ -24,9 +24,9 @@ public class LogoutServlet extends HttpServlet {
 		WebApplicationContext springContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		SecurityService securityService = (SecurityService)springContext.getBean("securityService");
-		if (securityService.currentUser() != null) {
+		if (securityService.currentUserInfo() != null) {
 			FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
-			unlockFormData.unlockAllByUserId(securityService.currentUser().getId());
+			unlockFormData.unlockAllByUser(securityService.currentUserInfo());
 		}
 		if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
 			response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");

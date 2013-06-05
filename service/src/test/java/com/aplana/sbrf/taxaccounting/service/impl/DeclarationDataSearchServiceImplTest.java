@@ -1,21 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
@@ -46,21 +34,13 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	private final static int INCOME_DECLARATION_TYPE_ID_1 = 21;
 	private final static int INCOME_DECLARATION_TYPE_ID_2 = 22;
-	
+
+	private final static String LOCAL_IP = "127.0.0.1";
+
 	@BeforeClass
 	public static void tearUp() {
 		 service = new DeclarationDataSearchServiceImpl();
-		 
-		TAUser controlUnpUser = mockUser(CONTROL_UNP_USER_ID, 1, TARole.ROLE_CONTROL_UNP),
-			controlUser = mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL),
-			operatorUser = mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPERATOR);
-			
-		TAUserDao userDao = mock(TAUserDao.class);
-		when(userDao.getUser(CONTROL_UNP_USER_ID)).thenReturn(controlUnpUser);
-		when(userDao.getUser(CONTROL_USER_ID)).thenReturn(controlUser);
-		when(userDao.getUser(OPERATOR_USER_ID)).thenReturn(operatorUser);
-		ReflectionTestUtils.setField(service, "taUserDao", userDao);
-		
+
 		DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
 		// Декларации по налогу на прибыть есть в подразделениях 1, 2, 3
 		Set<Integer> incomeDepartmentIds = new HashSet<Integer>(3);
@@ -96,7 +76,11 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	@Test
 	public void testGetAvailableFilterValuesControlUnp() {
-		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_UNP_USER_ID, TaxType.INCOME);
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(CONTROL_UNP_USER_ID, 1, TARole.ROLE_CONTROL_UNP));
+
+		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.INCOME);
 		assertEquals(2, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_2, valuesIncome.getDeclarationTypes().get(1).getId());
@@ -108,7 +92,11 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	@Test
 	public void testGetAvailableFilterValuesControl() {
-		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(CONTROL_USER_ID, TaxType.INCOME);
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
+
+		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.INCOME);
 		assertEquals(1, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(1, valuesIncome.getDepartmentIds().size());
@@ -117,6 +105,10 @@ public class DeclarationDataSearchServiceImplTest {
 	
 	@Test(expected=AccessDeniedException.class)
 	public void testGetAvailableFilterValuesOperator() {
-		service.getFilterAvailableValues(OPERATOR_USER_ID, TaxType.INCOME);
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPERATOR));
+
+		service.getFilterAvailableValues(userInfo, TaxType.INCOME);
 	}
 }

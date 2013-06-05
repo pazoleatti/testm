@@ -2,8 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.LogSystem;
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -22,7 +21,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final long oneDayTime = 1000 * 60 * 60 * 24;
 
 	@Override
-	public List<LogSystem> getLogs(LogSystemFilter filter) {
+	public List<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder();
 		appendSelectFromAndWhereClause(sql, filter);
 		sql.append(" order by id");
@@ -90,23 +89,24 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 	}
 
-	private static final class AuditRowMapper implements RowMapper<LogSystem> {
+	private static final class AuditRowMapper implements RowMapper<LogSystemSearchResultItem> {
 		@Override
-		public LogSystem mapRow(ResultSet rs, int index) throws SQLException {
-			LogSystem log = new LogSystem();
+		public LogSystemSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
+			LogSystemSearchResultItem log = new LogSystemSearchResultItem();
 			log.setId(rs.getLong("id"));
 			log.setLogDate(rs.getDate("log_date"));
 			log.setIp(rs.getString("ip"));
-			log.setEventId(rs.getInt("event_id"));
-			log.setUserId(rs.getInt("user_id"));
+			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
+			//log.setUserId(rs.getInt("user_id"));
 			log.setRoles(rs.getString("roles"));
-			log.setDepartmentId(rs.getInt("user_department_id"));
-			log.setReportPeriodId(rs.getInt("report_period_id"));
-			log.setDeclarationTypeId(rs.getInt("declaration_type_id"));
-			log.setFormTypeId(rs.getInt("form_type_id"));
-			log.setFormKindId(rs.getInt("form_kind_id"));
+			//log.setDepartmentId(rs.getInt("user_department_id"));
+			//log.setReportPeriod(rs.getInt("report_period_id"));
+			//log.setDeclarationTypeId(rs.getInt("declaration_type_id"));
+			//log.setFormTypeId(rs.getInt("form_type_id"));
+			log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
 			log.setNote(rs.getString("note"));
-			log.setUserDepartmentId(rs.getInt("user_department_id"));
+			//log.setUserDepartmentId(rs.getInt("user_department_id"));
+
 			return log;
 		}
 	}

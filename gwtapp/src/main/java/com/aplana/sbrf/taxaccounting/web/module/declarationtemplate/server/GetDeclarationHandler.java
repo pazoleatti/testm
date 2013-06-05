@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationAction;
@@ -29,13 +29,12 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
 
     @Override
     public GetDeclarationResult execute(GetDeclarationAction action, ExecutionContext context) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
+		TAUserInfo userInfo = securityService.currentUserInfo();
 
 		GetDeclarationResult result = new GetDeclarationResult();
-		declarationTemplateService.checkLockedByAnotherUser(action.getId(), userId);
+		declarationTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
 		DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
-		declarationTemplateService.lock(action.getId(), userId);
+		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
 		return result;
     }

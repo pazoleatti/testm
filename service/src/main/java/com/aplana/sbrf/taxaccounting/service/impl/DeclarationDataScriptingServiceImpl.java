@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,6 @@ import org.springframework.stereotype.Component;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
@@ -68,7 +64,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	}
 
 	@Override
-	public void executeScript(TAUser user, DeclarationData declarationData, FormDataEvent event, Logger logger,
+	public void executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
 			Map<String, Object> exchangeParams) {
 		this.logger.debug("Starting processing request to run create script");
 		
@@ -80,7 +76,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		Map<String, ?> scriptComponents =  getScriptExposedBeans(declarationTemplate.getDeclarationType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-			scriptComponentContext.setUser(user);
+			scriptComponentContext.setUserInfo(userInfo);
 			if (component instanceof ScriptComponentContextHolder){
 				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}

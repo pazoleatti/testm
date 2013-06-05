@@ -39,7 +39,7 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, For
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-		formDataService.deleteRow(logger, securityService.currentUser().getId(), formData, action.getCurrentDataRow());
+		formDataService.deleteRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		
 		FormDataResult result = new FormDataResult();
 		result.setFormData(formData);

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.server;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetFormLogsBusinessAction;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetLogsBusinessResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -28,7 +28,7 @@ public class GetFormLogsBusinessHandler extends
 	private LogBusinessService logBusinessService;
 
 	@Autowired
-	private SecurityService securityService;
+	private TAUserService userService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -45,7 +45,7 @@ public class GetFormLogsBusinessHandler extends
 		Map<Integer, String> names = new HashMap<Integer, String>();
 		Map<Integer, String> departments = new HashMap<Integer, String>();
 		for (LogBusiness log : logs) {
-			names.put(log.getUserId(), securityService.getUserById(log.getUserId()).getName());
+			names.put(log.getUserId(), userService.getUser(log.getUserId()).getName());
 			departments.put(log.getDepartmentId(), departmentService.getDepartment(log.getDepartmentId()).getName());
 		}
 		result.setUserNames(names);

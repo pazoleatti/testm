@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +13,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 
@@ -35,8 +23,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
 	private final static String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
 
-	@Autowired
-	private TAUserDao userDao;
 	@Autowired
 	private FormDataDao formDataDao;
 	@Autowired
@@ -49,10 +35,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	private DepartmentFormTypeDao departmentFormTypeDao;
 
 	@Override
-	public boolean canRead(int userId, long formDataId) {
-		TAUser user = userDao.getUser(userId);
+	public boolean canRead(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
 		boolean result = canRead(formDataAccess, formData);
 		if (logger.isDebugEnabled()) {
@@ -136,10 +121,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canEdit(int userId, long formDataId) {
-		TAUser user = userDao.getUser(userId);
+	public boolean canEdit(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
 		boolean result = canEdit(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 		if (logger.isDebugEnabled()) {
@@ -261,12 +245,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canCreate(int userId, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
-		TAUser user = userDao.getUser(userId);
+	public boolean canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId) {
 		Department formDataDepartment = departmentService.getDepartment(departmentId);
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		int formTypeId = formTemplate.getType().getId();
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formDataDepartment.getId(), formTypeId, kind);
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formDataDepartment.getId(), formTypeId, kind);
 		boolean result = canCreate(formDataAccess, formTypeId, kind, formDataDepartment, reportPeriodDao.get(reportPeriodId));
 		if (logger.isDebugEnabled()) {
 			logger.debug("canCreate: " + result);
@@ -332,10 +315,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public boolean canDelete(int userId, long formDataId) {
+	public boolean canDelete(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		TAUser user = userDao.getUser(userId);
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
 		boolean result = canDelete(formDataAccess, formData, reportPeriodDao.get(formData.getReportPeriodId()));
 		if (logger.isDebugEnabled()) {
@@ -349,10 +331,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     }
 
 	@Override
-	public List<WorkflowMove> getAvailableMoves(int userId, long formDataId) {
-		TAUser user = userDao.getUser(userId);		
+	public List<WorkflowMove> getAvailableMoves(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 				formData.getFormType().getId(), formData.getKind());
 		List<WorkflowMove> result = getAvailableMoves(formDataAccess,  formData, reportPeriodDao.get(formData.getReportPeriodId()));
 		if (logger.isDebugEnabled()) {
@@ -470,12 +451,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	@Override
-	public FormDataAccessParams getFormDataAccessParams(int userId,	long formDataId) {
-		TAUser user = userDao.getUser(userId);
+	public FormDataAccessParams getFormDataAccessParams(TAUserInfo userInfo, long formDataId) {
 		FormData formData = formDataDao.getWithoutRows(formDataId);
 		ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
-		FormDataAccessRoles formDataAccess = getFormDataUserAccess(user, formData.getDepartmentId(),
+		FormDataAccessRoles formDataAccess = getFormDataUserAccess(userInfo.getUser(), formData.getDepartmentId(),
 			formData.getFormType().getId(), formData.getKind());
 
 		FormDataAccessParams result = new FormDataAccessParams();

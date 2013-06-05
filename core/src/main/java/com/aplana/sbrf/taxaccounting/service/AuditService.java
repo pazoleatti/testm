@@ -13,12 +13,12 @@ public interface AuditService {
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
 	 * @return объект, представляющий искомую информацию из журанала аудита
 	 * */
-	List<LogSystem> getLogs(LogSystemFilter logSystemFilter);
+	List<LogSystemSearchResultItem> getLogs(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании
 	 */
-	void add(String ip, FormDataEvent event, TAUser user, int departmentId, int reportPeriodId,
+	void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, int reportPeriodId,
 			 Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note);
 
 	/**

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -8,7 +9,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import org.junit.Before;
+import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
@@ -20,8 +26,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 
 public class DeclarationDataServiceImplTest {
-	public static final int USER_ID = 1;
-	
+
 	//private static String XML_DATA = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><Документ Имя=\"Федор\"></Документ>";
 	private static String XML_DATA = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><A/>";
 
@@ -70,7 +75,10 @@ public class DeclarationDataServiceImplTest {
 		Logger logger = new Logger();		
 		// TODO: sgoryachkin: Нужно сделать нормальный тест. Пока как временное решение - игнорить ошибку при генерации
 		try{
-			service.reCreate(logger, 1l, "192.168.72.16", USER_ID, new Date());
+			TAUserInfo userInfo = new TAUserInfo();
+			userInfo.setIp("192.168.72.16");
+			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+			service.reCreate(logger, 1l, userInfo, new Date());
 		} catch (ServiceException e) {
 			
 		}
@@ -83,7 +91,10 @@ public class DeclarationDataServiceImplTest {
 	//@Test(expected=AccessDeniedException.class)
 	public void testRefreshDeclarationNoAccess() {
 		Logger logger = new Logger();
-		service.reCreate(logger, 2l, "192.168.72.16", USER_ID, new Date());
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp("192.168.72.16");
+		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
+		service.reCreate(logger, 2l, userInfo, new Date());
 	}
 	
 }

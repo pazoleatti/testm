@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
@@ -66,23 +67,23 @@ public interface DeclarationTemplateService {
 	/**
 	 * Снять блокировку с declarationTemplate.
 	 * @param declarationTemplateId - идентификатор шаблона налоговой формы
-	 * @param userId - идентификатор пользователя
+	 * @param userInfo - информация о пользователе
 	 * @return true - если удалось разблокировать форму декларации, иначе - false
 	 * */
-	boolean unlock(int declarationTemplateId, int userId);
+	boolean unlock(int declarationTemplateId, TAUserInfo userInfo);
 
 	/**
 	 * Блокировка declarationTemplate.
 	 * @param declarationTemplateId - идентификатор налоговой формы
-	 * @param userId - идентификатор пользователя
+	 * @param userInfo - информация о пользователе
 	 * @return информацию о блокировке объекта
 	 */
-	boolean lock(int declarationTemplateId, int userId);
+	boolean lock(int declarationTemplateId, TAUserInfo userInfo);
 
 	/**
 	 * Проверяет, не заблокирован ли шаблон декларации другим пользователем
 	 * @param declarationTemplateId
-	 * @param userId
+	 * @param userInfo
 	 */
-	void checkLockedByAnotherUser(Integer declarationTemplateId, int userId);
+	void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo);
 }

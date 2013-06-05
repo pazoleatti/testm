@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -28,10 +27,10 @@ public class SecurityService {
 	
 	/**
 	 * Получает текущую информацию о клиенте
-	 * 
+	 * TODO: добавить кэширование
 	 * @return
 	 */
-	public TAUserInfo getCurrentUserInfo(){
+	public TAUserInfo currentUserInfo(){
 		TAUserInfo userInfo = new TAUserInfo();
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null) {
@@ -46,52 +45,4 @@ public class SecurityService {
 		return userInfo;
 	}
 
-	/**
-	 * TODO: добавить кэширование
-	 * @return текущего авторизованного пользователя.
-	 * 
-	 * 
-	 * @deprecated
-	 * Используйте {@link #getCurrentUserInfo()}
-	 */
-	public TAUser currentUser(){
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null) {
-			return null;
-		}
-		String login = auth.getName();
-		return userService.getUser(login);
-	}
-
-	/**
-	 * @param userId
-	 * @return
-	 * 
-	 * @deprecated 
-	 * 
-	 * Информация о пользователе, если это необходимо (скорее всего в случае чужой блокировки) 
-	 * в полной мере должна возвращаться в хендлер из сервисного слоя.
-	 */
-	@Deprecated 
-	public TAUser getUserById(int userId){
-		if(SecurityContextHolder.getContext().getAuthentication() == null){
-			return null;
-		} else {
-			return userService.getUser(userId);
-		}
-	}
-
-
-
-	/**
-	 * @return
-	 * 
-	 * @deprecated
-	 * Используйте {@link #getCurrentUserInfo()}
-	 */
-	@Deprecated
-	public String getIp() {
-		return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest().getRemoteAddr();
-	}
 }

@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdataimport.shared.FormDataImportAction;
@@ -37,10 +36,8 @@ public class FormDataImportHandler extends AbstractActionHandler<FormDataImportA
 	public FormDataImportResult execute(FormDataImportAction action, ExecutionContext context)
 			throws ActionException {
 
-			TAUser user = securityService.currentUser();
-			Integer userId = user.getId();
 			Logger logger = new Logger();
-			formDataService.importFormData(logger, securityService.getIp(), userId, action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
+			formDataService.importFormData(logger, securityService.currentUserInfo(), action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
 			FormDataImportResult result = new FormDataImportResult();
 			result.setLogEntries(logger.getEntries());
 			return result;

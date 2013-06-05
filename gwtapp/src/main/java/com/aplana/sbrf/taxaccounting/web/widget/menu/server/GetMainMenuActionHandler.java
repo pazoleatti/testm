@@ -44,9 +44,9 @@ public class GetMainMenuActionHandler extends
 
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
-		if (securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)
-				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL)
-				|| securityService.currentUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_OPERATOR)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 
 			// тут важен порядок, поэтому мы не можем просто пробежаться по значениям
 			MenuItem taxMenu = new MenuItem("Налоги");
@@ -59,7 +59,7 @@ public class GetMainMenuActionHandler extends
 			for (MenuItem menu : taxMenu.getSubMenu()) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (!securityService.currentUser().hasRole(TARole.ROLE_OPERATOR)) {
+				if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_OPERATOR)) {
 					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
 				}
@@ -79,7 +79,7 @@ public class GetMainMenuActionHandler extends
 					));
 			menuItems.add(settingMenuItem);
 		}
-		if (securityService.currentUser().hasRole(TARole.ROLE_CONF)) {
+		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки");
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
 			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
@@ -87,7 +87,7 @@ public class GetMainMenuActionHandler extends
 
 			menuItems.add(settingMenuItem);
 		}
-        if (securityService.currentUser().hasRole(TARole.ROLE_ADMIN)) {
+        if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_ADMIN)) {
             MenuItem settingMenuItem = new MenuItem("Настройки");
             settingMenuItem.getSubMenu().add(new MenuItem("Пользователи системы", NUMBER_SIGN + UserListTokens.secuserPage));
             settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));

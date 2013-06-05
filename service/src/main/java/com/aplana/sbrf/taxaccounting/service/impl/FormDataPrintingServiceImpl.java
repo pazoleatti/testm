@@ -38,8 +38,8 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 	private LogBusinessDao logBusinessDao;
 	
 	@Override
-	public String generateExcel(int userId, long formDataId, boolean isShowChecked) {
-		if (formDataAccessService.canRead(userId, formDataId)) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
+		if (formDataAccessService.canRead(userInfo, formDataId)) {
 			FormDataReport data = new FormDataReport();
 			FormData formData = formDataDao.get(formDataId);
 			FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
@@ -61,7 +61,7 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 			}
 		}else{
 			throw new AccessDeniedException("Недостаточно прав на просмотр данных налоговой формы",
-					userId, formDataId
+					userInfo.getUser().getId(), formDataId
 				);
 		}
 		

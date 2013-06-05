@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface AuditDao {
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
 	 * @return объект, представляющий искомую информацию из журанала аудита
 	 * */
-	List<LogSystem> getLogs(LogSystemFilter logSystemFilter);
+	List<LogSystemSearchResultItem> getLogs(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании

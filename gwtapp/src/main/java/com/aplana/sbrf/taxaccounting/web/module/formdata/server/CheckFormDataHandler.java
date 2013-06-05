@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
@@ -37,11 +36,9 @@ public class CheckFormDataHandler extends
 	public FormDataResult execute(CheckFormDataAction action,
 			ExecutionContext context) throws ActionException {
 
-			TAUser user = securityService.currentUser();
-			Integer userId = user.getId();
 			Logger logger = new Logger();
 			FormData formData = action.getFormData();
-			formDataService.doCheck(logger, userId, formData);
+			formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
 			FormDataResult result = new FormDataResult();
 			result.setLogEntries(logger.getEntries());
 			return result;

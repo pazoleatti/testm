@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -31,11 +27,8 @@ public class UnlockFormHandler extends AbstractActionHandler<UnlockFormAction, U
 
 	@Override
 	public UnlockFormResult execute(UnlockFormAction action, ExecutionContext executionContext) throws ActionException {
-		TAUser user = securityService.currentUser();
-		Integer userId = user.getId();
-
 		UnlockFormResult result = new UnlockFormResult();
-		result.setUnlockedSuccessfully(formTemplateService.unlock(action.getFormId(), userId));
+		result.setUnlockedSuccessfully(formTemplateService.unlock(action.getFormId(), securityService.currentUserInfo()));
 
 		return result;
 	}

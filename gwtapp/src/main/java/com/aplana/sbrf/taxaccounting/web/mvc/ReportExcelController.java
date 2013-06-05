@@ -56,7 +56,7 @@ public class ReportExcelController {
 	@RequestMapping(value = "/{formDataId}/{isShowChecked}",method = RequestMethod.GET)
 	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String filePath = formDataPrintingService.generateExcel(securityService.currentUser().getId(), formDataId, isShowChecked);
+		String filePath = formDataPrintingService.generateExcel(securityService.currentUserInfo(), formDataId, isShowChecked);
 		createResponse(req, resp, filePath);
 	}
 	

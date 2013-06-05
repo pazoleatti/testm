@@ -27,7 +27,7 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 
 	@Override
 	public GetUserInfoResult execute(GetUserInfoAction action, ExecutionContext context) throws ActionException {
-		TAUser user = securityService.currentUser();
+		TAUser user = securityService.currentUserInfo().getUser();
 		Department department = departmentService.getDepartment(user.getDepartmentId());
 
 		StringBuilder roleAndDepartment = new StringBuilder(user.getName());

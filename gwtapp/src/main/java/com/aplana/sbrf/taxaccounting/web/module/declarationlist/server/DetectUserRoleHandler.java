@@ -24,7 +24,7 @@ public class DetectUserRoleHandler extends AbstractActionHandler<DetectUserRoleA
 	@Override
 	public DetectUserRoleResult execute(DetectUserRoleAction detectUserRoleAction, ExecutionContext executionContext) throws ActionException {
 		DetectUserRoleResult result = new DetectUserRoleResult();
-		result.setUserRole(securityService.currentUser().getRoles());
+		result.setUserRole(securityService.currentUserInfo().getUser().getRoles());
 		return result;
 	}
 

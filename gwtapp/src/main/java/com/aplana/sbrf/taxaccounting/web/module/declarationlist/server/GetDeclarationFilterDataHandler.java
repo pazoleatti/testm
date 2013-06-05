@@ -52,8 +52,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	@Override
 	public GetDeclarationFilterDataResult execute(GetDeclarationFilterData action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
-		DeclarationDataFilterAvailableValues declarationFilterValues = declarationDataSearchService.getFilterAvailableValues(securityService
-				.currentUser().getId(), action.getTaxType());
+		DeclarationDataFilterAvailableValues declarationFilterValues =
+				declarationDataSearchService.getFilterAvailableValues(securityService.currentUserInfo(), action.getTaxType());
 
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(declarationFilterValues
 				.getDepartmentIds()).values()));

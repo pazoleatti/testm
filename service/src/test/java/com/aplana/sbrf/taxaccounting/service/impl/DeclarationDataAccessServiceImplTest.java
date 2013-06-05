@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,15 +23,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
 public class DeclarationDataAccessServiceImplTest {
@@ -43,7 +34,6 @@ public class DeclarationDataAccessServiceImplTest {
 	private final static int USER_CONTROL_BANK_ID = 10;
 	private final static int USER_CONTROL_UNP_ID = 11;
 	private final static int USER_CONTROL_TB1_ID = 12;
-	private final static int USER_CONTROL_TB2_ID = 13;
 	private final static int USER_OPERATOR_ID = 14;
 
 	private final static int DECLARATION_TYPE_1_ID = 101;
@@ -60,10 +50,12 @@ public class DeclarationDataAccessServiceImplTest {
 	private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
 
 	private final static int REPORT_PERIOD_ID = 1;
-	
-	private boolean canAccept(int userId, int declarationDataId){
+
+	private final static String LOCAL_IP = "127.0.0.1";
+
+	private boolean canAccept(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 		} catch (AccessDeniedException e){
 			return false;
@@ -71,9 +63,9 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canReject(int userId, int declarationDataId){
+	private boolean canReject(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 		} catch (AccessDeniedException e){
 			return false;
@@ -81,9 +73,9 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canGet(int userId, int declarationDataId){
+	private boolean canGet(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.GET_LEVEL0);
 		} catch (AccessDeniedException e){
 			return false;
@@ -91,9 +83,9 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canGetXml(int userId, int declarationDataId){
+	private boolean canGetXml(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.GET_LEVEL1);
 		} catch (AccessDeniedException e){
 			return false;
@@ -101,9 +93,9 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canDelete(int userId, int declarationDataId){
+	private boolean canDelete(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.DELETE);
 		} catch (AccessDeniedException e){
 			return false;
@@ -111,9 +103,9 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canRefresh(int userId, int declarationDataId){
+	private boolean canRefresh(TAUserInfo userInfo, int declarationDataId){
 		try{
-		    service.checkEvents(userId, Long.valueOf(declarationDataId),
+		    service.checkEvents(userInfo, Long.valueOf(declarationDataId),
 				    FormDataEvent.CALCULATE);
 		} catch (AccessDeniedException e){
 			return false;
@@ -121,28 +113,15 @@ public class DeclarationDataAccessServiceImplTest {
 		return true;
 	}
 	
-	private boolean canCreate(int userId, int declarationTemplateId,
+	private boolean canCreate(TAUserInfo userInfo, int declarationTemplateId,
 			int departmentId, int reportPeriodId) {
-		return service.getPermittedEvents(userId, declarationTemplateId, departmentId, reportPeriodId).contains(FormDataEvent.CREATE);
+		return service.getPermittedEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId).contains(FormDataEvent.CREATE);
 	 }
 	
 
 	@BeforeClass
 	public static void tearUp() {
 		service = new DeclarationDataAccessServiceImpl();
-
-		TAUser controlBank = mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL);
-		TAUser controlUnp = mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP);
-		TAUser controlTB1 = mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL);
-		TAUser controlTB2 = mockUser(USER_CONTROL_TB2_ID, DEPARTMENT_TB2_ID, TARole.ROLE_CONTROL);
-		TAUser operator = mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR);
-		TAUserDao userDao = mock(TAUserDao.class);
-		when(userDao.getUser(USER_CONTROL_BANK_ID)).thenReturn(controlBank);
-		when(userDao.getUser(USER_CONTROL_UNP_ID)).thenReturn(controlUnp);
-		when(userDao.getUser(USER_CONTROL_TB1_ID)).thenReturn(controlTB1);
-		when(userDao.getUser(USER_CONTROL_TB2_ID)).thenReturn(controlTB2);
-		when(userDao.getUser(USER_OPERATOR_ID)).thenReturn(operator);
-		ReflectionTestUtils.setField(service, "userDao", userDao);
 
 		// На уровне Банка разрешена работа с декларациями DECLARATION_TYPE_1_ID
 		Department departmentBank = mockDepartment(Department.ROOT_BANK_ID, Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
@@ -191,191 +170,241 @@ public class DeclarationDataAccessServiceImplTest {
 		when(declarationDataDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);		
 		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 	}
-	
+
 	@Test
 	public void testCanRead() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может читать в любом подразделении и в любом статусе
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertTrue(canGet(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canGet(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertTrue(canGet(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может читать только в своём обособленном подразделении и в любом статусе
-		assertFalse(canGet(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGet(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canGet(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canGet(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGet(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(canGet(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canGet(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGet(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может читать никаких деклараций
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGet(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canGet(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGet(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGet(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGet(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
-	
+
 	@Test
 	public void testCanRefresh() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может обновлять непринятые декларации в любом подразделении
-		assertTrue(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertTrue(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canRefresh(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canRefresh(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertTrue(canRefresh(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может обновлять только непринятые декларации в своём обособленном подразделении
-		assertFalse(canRefresh(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canRefresh(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canRefresh(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(canRefresh(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может обновлять никаких деклараций
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canRefresh(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanAccept() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может принимать непринятые декларации в любом подразделении
-		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertTrue(canAccept(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canAccept(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
-		
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
+
 		// Контролёр может принимать непринятые декларации только в своём обособленном подразделении
-		assertFalse(canAccept(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canAccept(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canAccept(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может принимать никаких деклараций
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canAccept(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canAccept(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canAccept(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanReject() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может отменять принятые декларации в любом подразделении
-		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canReject(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertTrue(canReject(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может отменять принятые декларации только в своём обособленном подразделении
-		assertFalse(canReject(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canReject(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canReject(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canReject(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может отменять никаких деклараций
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canReject(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canReject(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canReject(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanDownloadXml() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может скачивать файл в формате законодателя у принятых деклараций в любом подразделении
-		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertTrue(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(!service.getPermittedEvents(USER_CONTROL_UNP_ID, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
-		assertTrue(service.getPermittedEvents(USER_CONTROL_UNP_ID, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
-		assertFalse(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertTrue(canGetXml(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(!service.getPermittedEvents(userInfo, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
+		assertTrue(service.getPermittedEvents(userInfo, Long.valueOf(DECLARATION_ACCEPTED_TB1_ID)).contains(FormDataEvent.GET_LEVEL1));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 		
 		// Контролёр может скачивать файл в формате законодателя у принятых деклараций только в своём обособленном подразделении
-		assertFalse(canGetXml(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGetXml(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertTrue(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGetXml(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertTrue(canGetXml(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не скачивать файл в формате законодателя ни у каких деклараций
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canGetXml(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canGetXml(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanDelete() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может удалять непринятые декларации в любом подразделении
-		assertTrue(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertTrue(canDelete(USER_CONTROL_UNP_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canDelete(USER_CONTROL_UNP_ID, DECLARATION_ACCEPTED_TB2_ID));
-		
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertTrue(canDelete(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertTrue(canDelete(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB2_ID));
+
 		// Контролёр может удалять непринятые декларации только в своём обособленном подразделении
-		assertFalse(canDelete(USER_CONTROL_BANK_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canDelete(USER_CONTROL_BANK_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertTrue(canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canDelete(USER_CONTROL_TB1_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(canDelete(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 
 		// Оператор не может удалять никаких деклараций
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_BANK_ID));
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_BANK_ID));
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB1_ID));
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB1_ID));
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_CREATED_TB2_ID));
-		assertFalse(canDelete(USER_OPERATOR_ID, DECLARATION_ACCEPTED_TB2_ID));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canDelete(userInfo, DECLARATION_CREATED_BANK_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_BANK_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_CREATED_TB1_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB1_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_CREATED_TB2_ID));
+		assertFalse(canDelete(userInfo, DECLARATION_ACCEPTED_TB2_ID));
 	}
 	
 	@Test
 	public void testCanCreate() {
+		TAUserInfo userInfo = new TAUserInfo();
+		userInfo.setIp(LOCAL_IP);
+
 		// Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
-		assertTrue(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertTrue(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertTrue(canCreate(USER_CONTROL_UNP_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
+		assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 		
 		// Контролёр может создавать декларации в своём обособленном подразделении, если они там разрешены
-		assertFalse(canCreate(USER_CONTROL_BANK_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertTrue(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertFalse(canCreate(USER_CONTROL_TB1_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
+		assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
 
 		// Оператор не может создавать декларации
-		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
-		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
-		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
-		assertFalse(canCreate(USER_OPERATOR_ID, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+		userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPERATOR));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, Department.ROOT_BANK_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB1_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, DEPARTMENT_TB2_ID, 1));
+		assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, DEPARTMENT_TB2_ID, 1));
+
 	}
-	
+
 }

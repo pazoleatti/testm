@@ -48,7 +48,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
 	    GetFilterDataResult res = new GetFilterDataResult();
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
-			    .currentUser().getId(), action.getTaxType());
+			    .currentUserInfo(), action.getTaxType());
 
 	    if(filterValues.getDepartmentIds() == null) {
 		    //Контролер УНП

@@ -17,9 +17,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	private DeclarationDataDao declarationDao;
 
 	@Autowired
-	private TAUserDao taUserDao;
-
-	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Autowired
@@ -36,17 +33,16 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	}
 	
 	@Override
-	public DeclarationDataFilterAvailableValues getFilterAvailableValues(int userId, TaxType taxType) {
+	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
-		TAUser user = taUserDao.getUser(userId);
-		
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			// Контролёр УНП видит все виды деклараций
 			result.setDeclarationTypes(declarationTypeDao.listAllByTaxType(taxType));
 			// во всех подразделениях, где они есть
 			result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
-		} else if (user.hasRole(TARole.ROLE_CONTROL)) {
-			int userDepartmentId = user.getDepartmentId();
+		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+			int userDepartmentId = userInfo.getUser().getDepartmentId();
 			// Контролёр видит виды деклараций, привязанные к его подразделению
 			Department userDepartment = departmentDao.getDepartment(userDepartmentId);			
 			List<DepartmentDeclarationType> ddts = userDepartment.getDepartmentDeclarationTypes();
@@ -69,7 +65,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 			throw new AccessDeniedException("Недостаточно прав для поиска деклараций");
 		}
 
-		result.setDefaultDepartmentId(user.getDepartmentId());
+		result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
 		Collections.sort(result.getDeclarationTypes(), new DeclarationTypeAlphanumericComparator());
 		return result;
 	}
