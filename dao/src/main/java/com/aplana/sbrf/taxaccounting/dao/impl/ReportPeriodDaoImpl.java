@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class ReportPeriodDaoImpl implements ReportPeriodDao {
 	ReportPeriodMapper reportPeriodMapper;
 
 	@Override
+	@Cacheable("ReportPeriod")
 	public ReportPeriod get(int periodId) {
 		ReportPeriod result = reportPeriodMapper.get(periodId);
 		if (result == null) {

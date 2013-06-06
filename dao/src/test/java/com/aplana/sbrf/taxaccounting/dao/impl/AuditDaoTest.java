@@ -42,15 +42,15 @@ public class AuditDaoTest {
 		assertEquals(Long.valueOf(1), logSystem.getId());
 		assertEquals("192.168.72.16", logSystem.getIp());
 		assertEquals(FormDataEvent.getByCode(1), logSystem.getEvent());
-		//assertEquals(1, logSystem.getUserId());
+		assertEquals(1, logSystem.getUser().getId());
 		assertEquals("operator", logSystem.getRoles());
-		//assertEquals(1, logSystem.getDepartmentId());
-		//assertEquals(1, logSystem.getReportPeriod());
-		//assertEquals(Integer.valueOf(1), logSystem.getDeclarationTypeId());
-		//assertEquals(Integer.valueOf(1), logSystem.getFormTypeId());
-		//assertEquals(Integer.valueOf(1), logSystem.getFormKindId());
+		assertEquals(1, logSystem.getDepartment().getId());
+		assertEquals(1, logSystem.getReportPeriod().getId());
+		assertEquals(1, logSystem.getDeclarationType().getId());
+		assertEquals(1, logSystem.getFormType().getId());
+		assertEquals(1, logSystem.getFormKind().getId());
 		assertEquals("the best note", logSystem.getNote());
-		//assertEquals(1, logSystem.getUserDepartmentId());
+		assertEquals(1, logSystem.getUserDepartment().getId());
 	}
 
 	@Test
@@ -81,18 +81,18 @@ public class AuditDaoTest {
         filter.setDepartmentIds(new ArrayList<Integer>());
 
 		LogSystemSearchResultItem logSystemSearchResultItem = auditDao.getLogs(filter).get(1);
-		assertEquals(Long.valueOf(3), logSystem.getId());
-		assertEquals(formatter.format(date), formatter.format(logSystem.getLogDate()));
+		assertEquals(Long.valueOf(3), logSystemSearchResultItem.getId());
+		assertEquals(formatter.format(date), formatter.format(logSystemSearchResultItem.getLogDate()));
 		assertEquals("192.168.72.16", logSystemSearchResultItem.getIp());
-		assertEquals(FormDataEvent.getByCode(3), logSystemSearchResultItem.getEvent());
-		//assertEquals(1, logSystem.getUserId());
+		assertEquals(3, logSystemSearchResultItem.getEvent().getCode());
+		assertEquals(1, logSystemSearchResultItem.getUser().getId());
 		assertEquals("operator", logSystemSearchResultItem.getRoles());
-		//assertEquals(1, logSystem.getDepartmentId());
-		//assertEquals(1, logSystem.getReportPeriod());
-		//assertEquals(Integer.valueOf(1), logSystem.getDeclarationTypeId());
-		//assertEquals(Integer.valueOf(1), logSystem.getFormTypeId());
-		//assertEquals(Integer.valueOf(2), logSystem.getFormKindId());
+		assertEquals(1, logSystemSearchResultItem.getDepartment().getId());
+		assertEquals(1, logSystemSearchResultItem.getReportPeriod().getId());
+		assertEquals(1, logSystemSearchResultItem.getDeclarationType().getId());
+		assertEquals(1, logSystemSearchResultItem.getFormType().getId());
+		assertEquals(2, logSystemSearchResultItem.getFormKind().getId());
 		assertEquals("the best note", logSystemSearchResultItem.getNote());
-		//assertEquals(1, logSystem.getUserDepartmentId());
+		assertEquals(1, logSystemSearchResultItem.getUserDepartment().getId());
 	}
 }

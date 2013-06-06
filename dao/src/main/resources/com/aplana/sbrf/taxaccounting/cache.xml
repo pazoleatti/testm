@@ -26,7 +26,10 @@
 
 	<jee:jndi-lookup id="userCacheStore"
 		jndi-name="services/cache/aplana/taxaccounting/User"/>
-		
+
+    <jee:jndi-lookup id="reportPeriodCacheStore"
+                     jndi-name="services/cache/aplana/taxaccounting/ReportPeriod"/>
+
 	<jee:jndi-lookup id="declarationDataBlobsCacheStore"
 		jndi-name="services/cache/aplana/taxaccounting/DeclarationDataBlobs"/>
 
@@ -58,6 +61,10 @@
 					<constructor-arg value="User" />
 					<constructor-arg ref="userCacheStore" />
 				</bean>
+                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+                    <constructor-arg value="ReportPeriod" />
+                    <constructor-arg ref="reportPeriodCacheStore" />
+                </bean>
 				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
 					<constructor-arg value="DeclarationDataBlobXlsx" />
 					<constructor-arg ref="declarationDataBlobsCacheStore" />

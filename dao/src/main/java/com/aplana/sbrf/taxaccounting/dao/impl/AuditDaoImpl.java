@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-
-import com.aplana.sbrf.taxaccounting.dao.AuditDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -15,6 +15,17 @@ import java.util.List;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
+	@Autowired
+	private TAUserDao userDao;
+	@Autowired
+	private DepartmentDao departmentDao;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
+	@Autowired
+	private DeclarationTypeDao declarationTypeDao;
+	@Autowired
+	private FormTypeDao formTypeDao;
+
 	private static final String dbDateFormat = "YYYYMMDD HH:MM:SS";
 	private static final String dateFormat = "yyyyMMdd HH:MM:SS";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
@@ -68,11 +79,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			sql.append(" AND user_id = ").append(filter.getUserId());
 		}
 
-		if (filter.getReportPeriodIds().size() != 0) {
-			sql.append(" AND report_period_id = ").append(filter.getReportPeriodIds().get(0));
+		if (filter.getReportPeriodIds() != null) {
+			for (Integer reportPeriodId : filter.getReportPeriodIds()) {
+				sql.append(" AND report_period_id = ").append(reportPeriodId);
+			}
 		}
 
-		if (filter.getFormKind() != null && filter.getFormKind().getId() !=0) {
+		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {
 			sql.append(" AND form_kind_id = ").append(filter.getFormKind().getId());
 		}
 
@@ -81,15 +94,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 
 		if (filter.getDeclarationTypeId() != 0) {
-			sql.append(" AND declaration_type_id ").append(filter.getDeclarationTypeId());
+			sql.append(" AND declaration_type_id = ").append(filter.getDeclarationTypeId());
 		}
 
-		if (filter.getDepartmentIds().size() != 0) {
-			sql.append(" AND department_id ").append(filter.getDepartmentIds().get(0));
+		if (filter.getDepartmentIds() != null) {
+			for (Integer departmentId : filter.getDepartmentIds()) {
+				sql.append(" AND department_id = ").append(departmentId);
+			}
 		}
 	}
 
-	private static final class AuditRowMapper implements RowMapper<LogSystemSearchResultItem> {
+	private final class AuditRowMapper implements RowMapper<LogSystemSearchResultItem> {
 		@Override
 		public LogSystemSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
 			LogSystemSearchResultItem log = new LogSystemSearchResultItem();
@@ -97,16 +112,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setLogDate(rs.getDate("log_date"));
 			log.setIp(rs.getString("ip"));
 			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
-			//log.setUserId(rs.getInt("user_id"));
+			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
-			//log.setDepartmentId(rs.getInt("user_department_id"));
-			//log.setReportPeriod(rs.getInt("report_period_id"));
-			//log.setDeclarationTypeId(rs.getInt("declaration_type_id"));
-			//log.setFormTypeId(rs.getInt("form_type_id"));
+			log.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+			log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
+			log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
+			log.setFormType(formTypeDao.getType(rs.getInt("form_type_id")));
 			log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
 			log.setNote(rs.getString("note"));
-			//log.setUserDepartmentId(rs.getInt("user_department_id"));
-
+			log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
 			return log;
 		}
 	}
