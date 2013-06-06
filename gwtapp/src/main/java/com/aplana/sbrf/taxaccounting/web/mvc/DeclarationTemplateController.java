@@ -46,7 +46,7 @@ public class DeclarationTemplateController {
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		resp.setCharacterEncoding("UTF-8");
 		
-		declarationTemplateImpexService.exportDeclarationTemplate(securityService.getCurrentUserInfo(), declarationTemplateId, resp.getOutputStream());
+		declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
 		resp.getOutputStream().close();
 			
 	}
