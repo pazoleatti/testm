@@ -15,10 +15,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Виджет для выбора подразделений
@@ -60,6 +57,8 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 	@Override
 	public void setSelectedItems(Map<String, Integer> items) {
 		this.selectedItems = items;
+		selected.setText(joinListToString(items.keySet()));
+		popUpWithTreeView.selectItems(items.values());
 	}
 
 	@Override
@@ -78,11 +77,15 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 	@Override
 	public void onDepartmentsReceived(SelectDepartmentsEvent event) {
 		selectedItems = event.getItems();
+		selected.setText(joinListToString(event.getItems().keySet()));
+		popup.hide();
+	}
+
+	private String joinListToString(Collection<String> strings) {
 		StringBuilder text = new StringBuilder();
-		for (String name : event.getItems().keySet()) {
+		for (String name : strings) {
 			text.append(name + "; ");
 		}
-		selected.setText(text.toString());
-		popup.hide();
+		return text.toString();
 	}
 }

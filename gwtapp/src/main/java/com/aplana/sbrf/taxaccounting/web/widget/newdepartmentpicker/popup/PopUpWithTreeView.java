@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.SelectDepartmentsEventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -16,5 +17,7 @@ public interface PopUpWithTreeView {
 
 	public HandlerRegistration addDepartmentsReceivedEventHandler(
 			SelectDepartmentsEventHandler handler);
+
+	public void selectItems(Collection<Integer> itemsIdToSelect);
 
 }
