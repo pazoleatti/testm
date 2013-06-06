@@ -26,7 +26,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	@Autowired
 	private FormTypeDao formTypeDao;
 
-	private static final String dbDateFormat = "YYYYMMDD HH:MM:SS";
+	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
 	private static final String dateFormat = "yyyyMMdd HH:MM:SS";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 	private static final long oneDayTime = 1000 * 60 * 60 * 24;
@@ -109,15 +109,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		public LogSystemSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
 			LogSystemSearchResultItem log = new LogSystemSearchResultItem();
 			log.setId(rs.getLong("id"));
-			log.setLogDate(rs.getDate("log_date"));
+			log.setLogDate(rs.getTimestamp("log_date"));
 			log.setIp(rs.getString("ip"));
 			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
 			log.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
 			log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
-			log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
-			log.setFormType(formTypeDao.getType(rs.getInt("form_type_id")));
+            if(rs.getInt("declaration_type_id") != 0)
+			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
+            if(rs.getInt("form_type_id") != 0)
+			    log.setFormType(formTypeDao.getType(rs.getInt("form_type_id")));
 			log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
 			log.setNote(rs.getString("note"));
 			log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
