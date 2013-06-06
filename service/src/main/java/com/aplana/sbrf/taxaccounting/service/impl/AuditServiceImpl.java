@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -26,6 +27,8 @@ public class AuditServiceImpl implements AuditService {
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private TAUserService userService;
+	@Autowired
+	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
 	public List<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
@@ -68,6 +71,7 @@ public class AuditServiceImpl implements AuditService {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
 		values.setDepartments(departmentService.listDepartments());
 		values.setFormTypes(formTypeDao.listFormTypes());
+		values.setDeclarationTypes(declarationTypeDao.listAll());
 		values.setUsers(userService.listAllUsers());
 		return values;
 	}
