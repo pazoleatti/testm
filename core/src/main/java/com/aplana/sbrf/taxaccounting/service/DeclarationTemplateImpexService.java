@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+
 public interface DeclarationTemplateImpexService {
 	
 	/**
@@ -11,7 +13,7 @@ public interface DeclarationTemplateImpexService {
 	 * @param id
 	 * @return
 	 */
-	InputStream exportDeclarationTemplate(Integer id);
+	void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os);
 	
 	/**
 	 * Импорт
@@ -19,6 +21,6 @@ public interface DeclarationTemplateImpexService {
 	 * @param id
 	 * @param is
 	 */
-	void importDeclarationTemplate(Integer id, OutputStream is);
+	void importDeclarationTemplate(TAUserInfo userInfo, Integer id, InputStream is);
 
 }

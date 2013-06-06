@@ -100,6 +100,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void downloadJrxml() {
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
+	
+	@Override
+	public void downloadDect() {
+		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
+	}
 
 	@Override
 	public void formSubmitFail(String fileName, String error) {
@@ -137,4 +142,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
+
+
 }

@@ -106,6 +106,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	public void onDownloadJrxmlButton(ClickEvent event){
 		getUiHandlers().downloadJrxml();
 	}
+	
+	@UiHandler("downloadDectButton")
+	public void onDownloadDectButton(ClickEvent event){
+		getUiHandlers().downloadDect();
+	}
 
 	private void addFileUploader() {
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);

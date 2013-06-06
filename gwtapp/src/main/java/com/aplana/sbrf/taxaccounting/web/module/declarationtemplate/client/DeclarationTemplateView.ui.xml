@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'>
+	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+	xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
 
 	<ui:style>
 		.title {
@@ -23,6 +24,7 @@
 					<g:Button text="Сохранить" ui:field="saveButton" />
 					<g:Button text="Сбросить" ui:field="resetButton" />
 					<g:Button text="Отмена" ui:field="cancelButton" />
+					<style:ButtonLink text="Экспорт" ui:field="downloadDectButton" title="Экспорт шаблона деклараций"/>
 				</t:LeftBar>
 			</t:Bar>
 		</g:north>
