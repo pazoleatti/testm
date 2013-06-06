@@ -78,38 +78,6 @@ switch (formDataEvent) {
         break
 }
 
-boolean logicalCheckWithoutTotalDataRowCheck() {
-    if (isCheckColsFilledByAliases(getEditableColsAliases())) { //перед расчетами проверяем заполнение только ячеек, доступных для ввода. т.к. они нам нужны для расчетов, а рассчитываемые - не нужны
-        return checkCalculatedCells()
-    }
-}
-
-boolean logicalCheckWithTotalDataRowCheck() {
-    if (isCheckColsFilledByAliases(getAllRequiredColsAliases())) {
-        return (checkCalculatedCells() && checkTotalResults())
-    }
-
-    return false
-}
-
-boolean isCheckColsFilledByAliases(List colsAliases) {
-    boolean isValid = true
-    formData.dataRows.each { dataRow ->
-        if (! isInTotalRowsAliases(dataRow.getAlias())) {       //итоговые строки не проверяем
-            for (def colAlias : colsAliases) {
-                if (isBlankOrNull(dataRow[colAlias])) {
-                    def columnIndex = formData.dataRows.indexOf(dataRow) + 1
-                    logger.error("Поле $columnIndex не заполнено!")
-                    isValid = false
-                    break
-                }
-            }
-        }
-    }
-
-    return isValid
-}
-
 boolean checkCalculatedCells() {
     def isValid = true
 
@@ -137,48 +105,9 @@ boolean checkCalculatedCells() {
     return isValid
 }
 
-boolean checkTotalResults() {
-    def totalDataRow = formData.getDataRow(getTotalDataRowAlias())
-    def controlTotalResults = getTotalResults()
-
-    for (def colName : controlTotalResults.keySet()) {
-        if (totalDataRow[colName] != controlTotalResults[colName]) {
-            logger.error('Итоговые значения рассчитаны неверно!')
-            return false
-        }
-    }
-
-    return true
-}
-
-def getEditableColsAliases() {
-    return ['bill', 'purchaseDate', 'implementationDate', 'implementationPrice', 'implementationOutcome']
-}
-
-def getAllRequiredColsAliases() {
-    return ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate', 'implementationPrice',
-            'implementationOutcome', 'price', 'percent', 'implementationpPriceTax', 'allIncome',
-            'implementationPriceUp', 'income']
-}
-
-def getTotalDataRowAlias() {
-    return 'total'
-}
-
 def calc() {
     calcValues()
     calcTotal()
-}
-
-/**
- * заполняем строку с итоговыми значениям
- */
-def calcTotal() {
-    def totalResults = getTotalResults()
-    def totalRow = formData.getDataRow(getTotalDataRowAlias())
-    getTotalColsAliases().each { colName ->
-        totalRow[colName] = totalResults[colName]
-    }
 }
 
 /**
@@ -374,21 +303,72 @@ boolean isCurrentDataRowSelected() {
     return (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) >= 0)
 }
 
-/***********   ОБЩИЕ ФУНКЦИИ ДЛЯ ИТОГОВЫХ СТРОК   ***********/
+/***********   ФУНКЦИИ ДЛЯ ПРОВЕРКИ ОБЯЗАТЕЛЬНЫХ ДЛЯ ЗАПОЛНЕНИЯ ДАННЫХ   ***********/
 
 /**
- * false, если алиас строки не входит в список алиасов итоговых строк
- * true, если алиас строки входит в алиас итоговых строк
+ * перед расчетами проверяем заполнение только ячеек, доступных для ввода. т.к.
+ * они нам нужны для расчетов, а рассчитываемые - не нужны
  */
-boolean isInTotalRowsAliases(def alias){
-    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+boolean logicalCheckWithoutTotalDataRowCheck() {
+    return checkColsFilledByAliases(getEditableColsAliases())
 }
 
 /**
- * возвращает список алиасов для итоговых строк
+ * проверяем все данные формы на обязательное и корректное заполнение
  */
-def getTotalRowsAliases() {
-    return ['total']
+boolean logicalCheckWithTotalDataRowCheck() {
+    if (checkColsFilledByAliases(getAllRequiredColsAliases())) {
+        return (checkCalculatedCells() && checkTotalResults())
+    }
+
+    return false
+}
+
+/**
+ * возвращает список алиасов всех обязательных для заполнения столбцов
+ */
+def getAllRequiredColsAliases() {
+    return ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate', 'implementationPrice',
+            'implementationOutcome', 'price', 'percent', 'implementationpPriceTax', 'allIncome',
+            'implementationPriceUp', 'income']
+}
+
+/**
+ * проверяем актуальность итоговых значения
+ */
+boolean checkTotalResults() {
+    def totalDataRow = formData.getDataRow(getTotalDataRowAlias())
+    def controlTotalResults = getTotalResults()
+
+    for (def colName : controlTotalResults.keySet()) {
+        if (totalDataRow[colName] != controlTotalResults[colName]) {
+            logger.error('Итоговые значения рассчитаны неверно!')
+            return false
+        }
+    }
+
+    return true
+}
+
+/**
+ * проверяем заполнения столбцов по алиасам этих столбцов
+ */
+boolean checkColsFilledByAliases(List colsAliases) {
+    boolean isValid = true
+    formData.dataRows.each { dataRow ->
+        if (! isInTotalRowsAliases(dataRow.getAlias())) {       //итоговые строки не проверяем
+            for (def colAlias : colsAliases) {
+                if (isBlankOrNull(dataRow[colAlias])) {
+                    def columnIndex = formData.dataRows.indexOf(dataRow) + 1
+                    logger.error("Поле $columnIndex не заполнено!")
+                    isValid = false
+                    break
+                }
+            }
+        }
+    }
+
+    return isValid
 }
 
 /***********   ДОБАВЛЕНИЕ СТРОКИ В ТАБЛИЦУ С ФИКСИРОВАННЫМИ СТРОКАМИ ИТОГОВ   ***********/
@@ -401,15 +381,29 @@ def getTotalRowsAliases() {
 def addNewRow() {
     def newRow = formData.createDataRow()
 
-    getEditableColsAliases().each{ value ->
-        newRow.getCell(value).editable = true
-    }
+    makeCellsEditable(newRow)
 
     int index = getNewRowIndex()
 
     formData.dataRows.add(index, newRow)
 
     return newRow
+}
+
+/**
+ * делает ячейки, алиасы которых есть в списке редактируемых, редактируемыми
+ */
+def makeCellsEditable(def row) {
+    getEditableColsAliases().each {
+        row.getCell(it).editable = true
+    }
+}
+
+/**
+ * возвращает список алиасов столбцов, доступных для редактирования пользователем
+ */
+def getEditableColsAliases() {
+    return ['bill', 'purchaseDate', 'implementationDate', 'implementationPrice', 'implementationOutcome']
 }
 
 /**
@@ -473,6 +467,38 @@ def deleteCurrentRow() {
     } else {
         logger.error ('Невозможно удалить фиксированную строку!')
     }
+}
+
+/***********   ОБЩИЕ ФУНКЦИИ ДЛЯ ИТОГОВЫХ СТРОК   ***********/
+
+/**
+ * заполняем строку с итоговыми значениям
+ */
+def calcTotal() {
+    def totalResults = getTotalResults()
+    def totalRow = formData.getDataRow(getTotalDataRowAlias())
+    getTotalColsAliases().each { colName ->
+        totalRow[colName] = totalResults[colName]
+    }
+}
+
+/**
+ * false, если алиас строки не входит в список алиасов итоговых строк
+ * true, если алиас строки входит в алиас итоговых строк
+ */
+boolean isInTotalRowsAliases(def alias){
+    return (totalRowsAliases.find {totalAlias -> alias == totalAlias} != null)
+}
+
+/**
+ * возвращает список алиасов для итоговых строк
+ */
+def getTotalRowsAliases() {
+    return ['total']
+}
+
+def getTotalDataRowAlias() {
+    return 'total'
 }
 
 /***********   ОБЩИЕ ФУНКЦИИ ДЛЯ СТОЛБЦОВ, ПО КОТОРЫМ ПОДВОДЯТСЯ ИТОГИ   ***********/

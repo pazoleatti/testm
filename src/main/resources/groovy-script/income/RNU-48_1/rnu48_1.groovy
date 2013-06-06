@@ -99,7 +99,7 @@ boolean requiredColsFilled() {
     for (def row : formData.dataRows) {
         if ( ! isInTotalRowsAliases(row.getAlias())) {      //строку ИТОГО не проверяем
             def fieldNumber = formData.dataRows.indexOf(row) + 1
-            for (def col : getEditableColsNames()) {
+            for (def col : getEditableColsAliases()) {
                 final def value = row.get(col)
                 if (isBlankOrNull(value)) {
                     formIsValid = false
@@ -149,7 +149,7 @@ boolean isBlankOrNull(value) {
 /**
  * возвращает список алиасов столбцов, доступных для редактирования
  */
-def getEditableColsNames() {
+def getEditableColsAliases() {
     return ['inventoryNumber', 'usefulDate', 'amount']
 }
 
@@ -215,7 +215,7 @@ def getTotalResultsForCols() {
 def addNewRow() {
     def newRow = formData.createDataRow()
 
-    getEditableColsNames().each{ value ->
+    getEditableColsAliases().each{ value ->
         newRow.getCell(value).editable = true
     }
 
