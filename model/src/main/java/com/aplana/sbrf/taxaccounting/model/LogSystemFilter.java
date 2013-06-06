@@ -15,7 +15,6 @@ public class LogSystemFilter implements Serializable{
 	private int userId;
 	private List<Integer> reportPeriodIds;
 	private FormDataKind formKind;
-	private TaxType taxType;
 	private int declarationTypeId;
 	private int formTypeId;
 	private List<Integer> departmentIds;
@@ -44,14 +43,6 @@ public class LogSystemFilter implements Serializable{
 
     public void setFormKind(FormDataKind formKind) {
         this.formKind = formKind;
-    }
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
     }
 
     public int getDeclarationTypeId() {

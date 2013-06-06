@@ -22,6 +22,12 @@ public class LogSystemFilterAvailableValues implements Serializable {
     private List<FormType> formTypes;
 
     /**
+     * Набор видов деклараций
+     */
+    private List<FormType> declarationTypes;
+
+
+    /**
      * Список всех пользователей
      */
     private List<TAUser> users;
@@ -48,5 +54,13 @@ public class LogSystemFilterAvailableValues implements Serializable {
 
     public void setFormTypes(List<FormType> formTypes) {
         this.formTypes = formTypes;
+    }
+
+    public List<FormType> getDeclarationTypes() {
+        return declarationTypes;
+    }
+
+    public void setDeclarationTypes(List<FormType> declarationTypes) {
+        this.declarationTypes = declarationTypes;
     }
 }
