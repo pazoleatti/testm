@@ -148,10 +148,13 @@ public class PopUpWithTree extends Composite implements PopUpWithTreeView, HasHa
 		}
 
 		Collections.sort(list, new Comparator<Department>() {
+
+			private Map<Department, List<Integer>> hierarchyCacheStorage = new HashMap<Department, List<Integer>>();
+
 			@Override
 			public int compare(Department o1, Department o2) {
-				List<Integer> o1h = TreeUtils.getCachedHierarchy(o1, idToDepMap);
-				List<Integer> o2h = TreeUtils.getCachedHierarchy(o2, idToDepMap);
+				List<Integer> o1h = TreeUtils.getCachedHierarchy(o1, idToDepMap, hierarchyCacheStorage);
+				List<Integer> o2h = TreeUtils.getCachedHierarchy(o2, idToDepMap, hierarchyCacheStorage);
 
 				int min = Math.min(o1h.size(), o2h.size());
 				for (int i=0; i<min-1; i++) {
