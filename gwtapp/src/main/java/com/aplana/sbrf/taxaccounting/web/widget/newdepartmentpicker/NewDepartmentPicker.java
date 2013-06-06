@@ -57,8 +57,13 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 	@Override
 	public void setSelectedItems(Map<String, Integer> items) {
 		this.selectedItems = items;
-		selected.setText(joinListToString(items.keySet()));
-		popUpWithTreeView.selectItems(items.values());
+		if (items == null) {
+			selected.setText("");
+			popUpWithTreeView.selectItems(null);
+		} else {
+			selected.setText(joinListToString(items.keySet()));
+			popUpWithTreeView.selectItems(items.values());
+		}
 	}
 
 	@Override

@@ -83,7 +83,7 @@ public class PopUpWithTree extends Composite implements PopUpWithTreeView, HasHa
 		}
 		for (TreeItem item : allItems) {
 			CheckBox checkBox = (CheckBox)item.getWidget();
-			if (itemsIdToSelect.contains(((Pair<Integer, String>)item.getUserObject()).first)) {
+			if ((itemsIdToSelect != null) && itemsIdToSelect.contains(((Pair<Integer, String>)item.getUserObject()).first)) {
 				checkBox.setValue(true);
 			} else {
 				checkBox.setValue(false);
