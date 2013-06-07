@@ -2,10 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,7 +18,7 @@ import java.util.List;
 
 /**
  * User: avanteev
- * Обработчик запроса для фильтрации журнала аудита
+ * Обработчик запроса для заполнения данных фильтра
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

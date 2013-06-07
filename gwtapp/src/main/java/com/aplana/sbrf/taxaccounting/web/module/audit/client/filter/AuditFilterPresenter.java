@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditFormSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
@@ -48,16 +49,26 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 }, this));
     }
 
+    @Override
+    public void onSearchButtonClicked() {
+        AuditFormSearchEvent.fire(this);
+    }
+
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers>{
         void setDepartments(List<Department> list, Set<Integer> availableValues);
         void setFormTypeId(Map<Integer, String> formTypesMap);
+        void setDeclarationType(Map<Integer, String> declarationTypesMap);
         void setFormDataKind(List<FormDataKind> list);
         void setFormDataTaxType(List<TaxType> taxTypeList);
         void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
+        void setFromSearchDate(Date fromSearchDate);
+        void setToSearchDate(Date toSearchDate);
         void updateReportPeriodPicker(TaxType taxType, List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        LogSystemFilter getFilterData();
+        void setDataFilter(LogSystemFilter dataFilter);
     }
 
     public void initFilterData(){
@@ -71,13 +82,21 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
                         convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
                 getView().setFormTypeId(fillFormTypesMap(auditFilterDataAvaliableValues.getFormTypes()));
+                getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
                 getView().setFormDataKind(result.getFormDataKinds());
                 getView().setFormDataTaxType(result.getTaxTypes());
                 getView().setUserLogins(fillUserMap(auditFilterDataAvaliableValues.getUsers()));
-
+                //getView().setDataFilter(prepareLogSystemFilter(result));
             }
         });
 
+    }
+
+    private LogSystemFilter prepareLogSystemFilter(GetAuditFilterDataResult result){
+        LogSystemFilter logSystemFilter = new LogSystemFilter();
+        logSystemFilter.setFromSearchDate(new Date());
+        logSystemFilter.setToSearchDate(new Date());
+        return logSystemFilter;
     }
 
     private Set<Integer> convertDepartmentsToIds(List<Department> source){
@@ -97,6 +116,15 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         return formTypesMap;
     }
 
+    private Map<Integer, String> fillDeclarationTypeMap(List<DeclarationType> source){
+        Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
+        formTypesMap.put(null, "");
+        for(DeclarationType formType : source){
+            formTypesMap.put(formType.getId(), formType.getName());
+        }
+        return formTypesMap;
+    }
+
     private Map<Integer, String> fillUserMap(List<TAUser> source){
         Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
         formTypesMap.put(null, "");
@@ -104,6 +132,10 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             formTypesMap.put(user.getId(), user.getName());
         }
         return formTypesMap;
+    }
+
+    public LogSystemFilter getLogSystemFilter(){
+        return getView().getFilterData();
     }
 
     @Override

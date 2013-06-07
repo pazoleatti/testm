@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +19,17 @@ public class LogSystemFilter implements Serializable{
 	private List<Integer> departmentIds;
 	private Date fromSearchDate;
 	private Date toSearchDate;
+
+    /*Стартовый индекс списка записей */
+    private int startIndex;
+
+    /*Количество записей, которые нужно вернуть*/
+    private int countOfRecords;
+
+    private FormDataSearchOrdering searchOrdering;
+
+    /*true, если сортируем по возрастанию, false - по убыванию*/
+    private boolean ascSorting;
 
     public int getUserId() {
         return userId;
@@ -83,5 +93,37 @@ public class LogSystemFilter implements Serializable{
 
     public void setToSearchDate(Date toSearchDate) {
         this.toSearchDate = toSearchDate;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
+    }
+
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public int getCountOfRecords() {
+        return countOfRecords;
+    }
+
+    public void setCountOfRecords(int countOfRecords) {
+        this.countOfRecords = countOfRecords;
+    }
+
+    public FormDataSearchOrdering getSearchOrdering() {
+        return searchOrdering;
+    }
+
+    public void setSearchOrdering(FormDataSearchOrdering searchOrdering) {
+        this.searchOrdering = searchOrdering;
+    }
+
+    public boolean isAscSorting() {
+        return ascSorting;
+    }
+
+    public void setAscSorting(boolean ascSorting) {
+        this.ascSorting = ascSorting;
     }
 }

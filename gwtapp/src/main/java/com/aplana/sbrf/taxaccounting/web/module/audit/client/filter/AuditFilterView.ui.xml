@@ -11,7 +11,7 @@
                 <g:cell width="250px">
                     <g:VerticalPanel>
                         <g:Label width="200px" text="От" />
-                        <d:CustomDateBox ui:field="fromDateBox"/>
+                        <d:CustomDateBox ui:field="fromSearchDate"/>
                     </g:VerticalPanel>
                 </g:cell>
 
@@ -29,7 +29,7 @@
                 <g:cell width="250px" verticalAlignment="bottom">
                     <g:VerticalPanel>
                         <g:Label width="200px" text="Пользователь" />
-                        <g:ValueListBox width="200px" ui:field="userLogin" />
+                        <g:ValueListBox width="200px" ui:field="userId" />
                     </g:VerticalPanel>
                 </g:cell>
             </g:HorizontalPanel>
@@ -39,7 +39,7 @@
                 <g:cell width="250px">
                     <g:VerticalPanel>
                         <g:Label width="200px" text="до" />
-                        <d:CustomDateBox ui:field="toDateBox" />
+                        <d:CustomDateBox ui:field="toSearchDate" />
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell width="250px">
@@ -51,13 +51,19 @@
                 <g:cell width="250px">
                     <g:VerticalPanel>
                         <g:Label width="200px" text="Тип налоговой формы"/>
-                        <g:ValueListBox width="200px" ui:field="formDataKind" />
+                        <g:ValueListBox width="200px" ui:field="formKind" />
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell width="250px">
                     <g:VerticalPanel>
-                        <g:Label text="Вид налоговой формы/декларации"/>
+                        <g:Label text="Вид налоговой формы"/>
                         <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:Label text="Вид декларации"/>
+                        <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeId" showTooltip="true"/>
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell verticalAlignment="bottom">
