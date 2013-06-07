@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.script.QuarterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * Time: 14:09
  * To change this template use File | Settings | File Templates.
  */
+@Service("quarterService")
 public class QuarterServiceImpl implements QuarterService {
     @Autowired
     ReportPeriodDao reportPeriodDao;
