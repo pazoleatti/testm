@@ -107,8 +107,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	@Override
-	public void formSubmitFail(String fileName, String error) {
-		MessageEvent.fire(this, "Не удалось загрузить файл " + fileName + ". Ошибка: " + error);
+	public void uploadJrxmlFail(String error) {
+		MessageEvent.fire(this, "Не удалось загрузить файл. Ошибка: " + error);
 	}
 
 	private void setDeclarationTemplate() {
@@ -141,6 +141,16 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
+	}
+
+	@Override
+	public void uploadDectSuccess() {
+		setDeclarationTemplate();
+	}
+
+	@Override
+	public void uploadDectFail(String msg) {
+		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
 
 

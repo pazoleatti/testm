@@ -8,5 +8,7 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void close();
 	void downloadJrxml();
 	void downloadDect();
-	void formSubmitFail(String fileName, String error);
+	void uploadJrxmlFail(String msg);
+	void uploadDectSuccess();
+	void uploadDectFail(String msg);
 }

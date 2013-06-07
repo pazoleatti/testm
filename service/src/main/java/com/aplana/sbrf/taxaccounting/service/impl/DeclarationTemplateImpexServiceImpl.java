@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.DataOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 
 @Service
 @Transactional
@@ -23,6 +28,11 @@ public class DeclarationTemplateImpexServiceImpl implements
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
+	
+	@Autowired
+	DeclarationTemplateService declarationTemplateService;
+	
+	final static String VERSION_FILE = "version";
 
 	@Override
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
@@ -32,40 +42,34 @@ public class DeclarationTemplateImpexServiceImpl implements
 			DeclarationTemplate dt = declarationTemplateDao.get(id);
 
 
-			ZipOutputStream zout = new ZipOutputStream(os);
-			DataOutputStream zoutData = new DataOutputStream(zout);
+			ZipOutputStream zos = new ZipOutputStream(os);
 			
 			// Version
-			ZipEntry ze = new ZipEntry("version");
-			zout.putNextEntry(ze);
-			zoutData.write("1.0".getBytes());
-			zoutData.flush();
-			zout.closeEntry();
+			ZipEntry ze = new ZipEntry(VERSION_FILE);
+			zos.putNextEntry(ze);
+			zos.write("1.0".getBytes());
+			zos.closeEntry();
 			
 			// Script
 			ze = new ZipEntry("script.groovy");
-			zout.putNextEntry(ze);
-			zoutData.write(dt.getCreateScript().getBytes());
-			zoutData.flush();
-			zout.closeEntry();
+			zos.putNextEntry(ze);
+			zos.write(dt.getCreateScript().getBytes());
+			zos.closeEntry();
 			
 			// JasperTemplate
 			ze = new ZipEntry("report.jrxml");
-			zout.putNextEntry(ze);
-			zoutData.write(declarationTemplateDao.getJrxml(id).getBytes());
-			zoutData.flush();
-			zout.closeEntry();
+			zos.putNextEntry(ze);
+			zos.write(declarationTemplateDao.getJrxml(id).getBytes());
+			zos.closeEntry();
 			
 			
 			// content
 			ze = new ZipEntry("content.xml");
-			zout.putNextEntry(ze);
-			zoutData.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><declarationTemplate></declarationTemplate>".getBytes());
-			zoutData.flush();
-			zout.closeEntry();
+			zos.putNextEntry(ze);
+			zos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><declarationTemplate></declarationTemplate>".getBytes());
+			zos.closeEntry();
 			
-			
-			zout.finish();
+			zos.finish();
 
 		} catch (Exception e) {
 			throw new ServiceException("Неудалось экспортировать шаблон", e);
@@ -76,7 +80,39 @@ public class DeclarationTemplateImpexServiceImpl implements
 	@Override
 	public void importDeclarationTemplate(TAUserInfo userInfo, Integer id,
 			InputStream is) {
-		// TODO Auto-generated method stub
+		
+		try {
+
+			ZipInputStream zis = new ZipInputStream(is);
+			ZipEntry entry;
+			String version = null;
+			Map<String, byte[]> files = new HashMap<String, byte[]>();
+            while((entry = zis.getNextEntry())!=null){
+            	if (VERSION_FILE.equals(entry.getName())){
+            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+            		IOUtils.copy(zis, baos);
+            		version = new String(baos.toByteArray());
+            	} else {
+            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+            		IOUtils.copy(zis, baos);
+            		files.put(entry.getName(), baos.toByteArray());
+            	}
+            	
+            }
+			
+            if ("1.0".equals(version)){
+            	DeclarationTemplate dt = declarationTemplateDao.get(id);
+            	dt.setCreateScript(new String(files.get("script.groovy")));
+            	declarationTemplateDao.save(dt);
+            	declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+            } else {
+            	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
+            }
+			
+
+		} catch (Exception e) {
+			throw new ServiceException("Неудалось экспортировать шаблон", e);
+		}
 
 	}
 

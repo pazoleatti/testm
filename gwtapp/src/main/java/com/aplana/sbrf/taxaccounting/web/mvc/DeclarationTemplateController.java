@@ -12,6 +12,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,18 @@ public class DeclarationTemplateController {
 		resp.setCharacterEncoding("UTF-8");
 		
 		declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
-		resp.getOutputStream().close();
-			
+		resp.getOutputStream().close();	
+	}
+	
+	
+	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
+	public void uploadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
+			throws FileUploadException, UnsupportedEncodingException, IOException {
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		List<FileItem> items = upload.parseRequest(req);
+		declarationTemplateImpexService.importDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
+		IOUtils.closeQuietly(items.get(0).getInputStream());
 	}
 
 	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
@@ -81,6 +92,7 @@ public class DeclarationTemplateController {
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
+		logger.warn(e.getLocalizedMessage(), e);
 		try {
 			response.getWriter().append("error ").append(e.getMessage()).close();
 		} catch (IOException ioException) {

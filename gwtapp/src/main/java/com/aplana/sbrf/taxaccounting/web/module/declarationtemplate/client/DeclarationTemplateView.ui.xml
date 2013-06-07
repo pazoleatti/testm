@@ -24,7 +24,15 @@
 					<g:Button text="Сохранить" ui:field="saveButton" />
 					<g:Button text="Сбросить" ui:field="resetButton" />
 					<g:Button text="Отмена" ui:field="cancelButton" />
-					<style:ButtonLink text="Экспорт" ui:field="downloadDectButton" title="Экспорт шаблона деклараций"/>
+					<style:ButtonLink text="Экспорт" ui:field="downloadDectButton"
+						title="Экспорт шаблона деклараций" />
+					<g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data"
+						method="post">
+						<g:HorizontalPanel>
+							<g:FileUpload name="uploadDectFile" />
+							<g:SubmitButton text="Импортировать" />
+						</g:HorizontalPanel>
+					</g:FormPanel>
 				</t:LeftBar>
 			</t:Bar>
 		</g:north>
@@ -48,7 +56,9 @@
 
 						<g:HorizontalPanel height="30px">
 							<g:Label width="150px">Загузить jrxml файл</g:Label>
-							<g:FormPanel ui:field="form" />
+							<g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
+								<g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
+							</g:FormPanel>
 						</g:HorizontalPanel>
 
 
