@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"Income102DaoTest.xml"})
@@ -24,12 +22,12 @@ public class Income102DaoTest {
 	
 	@Test
 	public void testValid(){
-		assertEquals(income102Dao.getIncome102(1, "2", 1).getTotalSum(), 666, 1e-5);
+		assertEquals(income102Dao.getIncome102(1, "2", 1).get(0).getTotalSum(), new Double(666));
 	}
 
 	@Test
 	public void testNotFound(){
-		assertNull(income102Dao.getIncome102(1, "not exists", 1));
+		assertTrue(income102Dao.getIncome102(1, "not exists", 1).size() == 0);
 	}
 }
 

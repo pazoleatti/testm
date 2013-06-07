@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.script;
 import com.aplana.sbrf.taxaccounting.model.Income101;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.List;
 /**
  * Дао для оборотной ведомости
  */
@@ -14,6 +15,6 @@ public interface Income101Dao {
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @param account номер счета
 	 */
-	public Income101 getIncome101(int reportPeriodId, String account, int departmentId);
+	public List<Income101> getIncome101(int reportPeriodId, String account, int departmentId);
 
 }
