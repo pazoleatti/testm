@@ -5,12 +5,15 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
@@ -38,7 +41,14 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 	@Override
 	public void setMenuItems(final List<MenuItem> menuItems) {
 		panel.clear();
-		MenuBar menu = new MenuBar();
+		final MenuBar menu = new MenuBar();
+
+		menu.addCloseHandler(new CloseHandler<PopupPanel>() {
+			@Override
+			public void onClose(CloseEvent<PopupPanel> event) {
+				menu.selectItem(null);
+			}
+		});
 
 		for (MenuItem item : menuItems) {
 			MenuBar subMenuBar = new MenuBar(true);
