@@ -32,6 +32,18 @@
                         <g:ValueListBox width="200px" ui:field="userId" />
                     </g:VerticalPanel>
                 </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:Label height="20px" text="Дата архивации: " />
+                        <style:ButtonLink  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
+                                           title="Выгрузка отчета в excel"/>
+                    </g:VerticalPanel>
+                </g:cell>
             </g:HorizontalPanel>
         </g:cell>
         <g:cell height="50px">

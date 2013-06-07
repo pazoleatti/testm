@@ -28,7 +28,7 @@ import java.util.List;
  * User: avanteev
  * Date: 2013
  */
-public class AuditFormPresenter extends Presenter<AuditFormPresenter.MyView, AuditFormPresenter.MyProxy>
+public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
         implements AuditFormSearchEvent.AuditFormSearchHandler {
 
     @ProxyEvent
@@ -43,7 +43,7 @@ public class AuditFormPresenter extends Presenter<AuditFormPresenter.MyView, Aud
             }
         });
 
-        getProxy().manualReveal(AuditFormPresenter.this);
+        getProxy().manualReveal(AuditClientPresenter.this);
     }
 
     interface MyView extends View{
@@ -52,7 +52,7 @@ public class AuditFormPresenter extends Presenter<AuditFormPresenter.MyView, Aud
 
     @ProxyCodeSplit
     @NameToken(AuditToken.AUDIT)
-    interface MyProxy extends ProxyPlace<AuditFormPresenter> {}
+    interface MyProxy extends ProxyPlace<AuditClientPresenter> {}
 
     static final Object TYPE_auditFilterPresenter = new Object();
 
@@ -63,7 +63,7 @@ public class AuditFormPresenter extends Presenter<AuditFormPresenter.MyView, Aud
     private static final int PAGE_SIZE = 20;
 
     @Inject
-    public AuditFormPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
+    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;

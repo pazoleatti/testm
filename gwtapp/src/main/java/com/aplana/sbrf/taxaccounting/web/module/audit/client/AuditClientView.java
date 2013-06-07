@@ -21,9 +21,9 @@ import java.util.List;
  * User: avanteev
  * Date: 2013
  */
-public class AuditFormView extends ViewWithUiHandlers implements AuditFormPresenter.MyView {
+public class AuditClientView extends ViewWithUiHandlers implements AuditClientPresenter.MyView {
 
-    interface Binder extends UiBinder<Widget, AuditFormView>{}
+    interface Binder extends UiBinder<Widget, AuditClientView>{}
 
     @UiField
     Panel filterContentPanel;
@@ -53,7 +53,7 @@ public class AuditFormView extends ViewWithUiHandlers implements AuditFormPresen
 
     @Inject
     @UiConstructor
-    public AuditFormView(final Binder uiBinder) {
+    public AuditClientView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
 
         //Инициализация колонок
@@ -147,7 +147,7 @@ public class AuditFormView extends ViewWithUiHandlers implements AuditFormPresen
 
     @Override
     public void setInSlot(Object slot, IsWidget content) {
-        if (slot == AuditFormPresenter.TYPE_auditFilterPresenter) {
+        if (slot == AuditClientPresenter.TYPE_auditFilterPresenter) {
             filterContentPanel.clear();
             if (content!=null){
                 filterContentPanel.add(content);

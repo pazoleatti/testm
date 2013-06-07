@@ -8,10 +8,10 @@ import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
  * User: avanteev
  * Date: 2013
  */
-public class AuditFormUIModule extends AbstractPresenterModule {
+public class AuditClientUIModule extends AbstractPresenterModule {
     @Override
     protected void configure() {
-        bindPresenter(AuditFormPresenter.class, AuditFormPresenter.MyView.class, AuditFormView.class, AuditFormPresenter.MyProxy.class);
+        bindPresenter(AuditClientPresenter.class, AuditClientPresenter.MyView.class, AuditClientView.class, AuditClientPresenter.MyProxy.class);
         bindSingletonPresenterWidget(AuditFilterPresenter.class, AuditFilterPresenter.MyView.class, AuditFilterView.class);
     }
 }

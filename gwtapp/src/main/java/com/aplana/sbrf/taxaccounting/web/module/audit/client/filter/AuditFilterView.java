@@ -93,12 +93,12 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void updateReportPeriodPicker(TaxType taxType, List<TaxPeriod> taxPeriods) {
+    public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
         if(currentReportPeriod != null){
             reportPeriodPanel.remove(currentReportPeriod);
         }
         currentReportPeriod = new ReportPeriodPicker(this);
-        currentReportPeriod.setTaxPeriods(taxPeriods);
+        currentReportPeriod.setTaxPeriods(taxPeriods == null?new ArrayList<TaxPeriod>():taxPeriods);
         reportPeriodPanel.add(currentReportPeriod);
     }
 
@@ -223,6 +223,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        currentReportPeriod = new ReportPeriodPicker(this);
+        reportPeriodPanel.add(currentReportPeriod);
     }
 
     @UiHandler("search")

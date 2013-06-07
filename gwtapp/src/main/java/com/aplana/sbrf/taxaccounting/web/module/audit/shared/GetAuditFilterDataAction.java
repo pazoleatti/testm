@@ -6,13 +6,12 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * User: avanteev
  * Date: 2013
- * Запрос для получение отфильтрованного журнала аудита
- * Данные для фильтра в жураале аудита
+ * Получение данных для заполнения фильтра
  */
 public class GetAuditFilterDataAction extends UnsecuredActionImpl<GetAuditFilterDataResult> implements ActionName{
 
     @Override
     public String getName() {
-        return "Получение журнал аудита";
+        return "Получение данных фильтра";
     }
 }

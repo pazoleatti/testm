@@ -65,7 +65,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
         void setFromSearchDate(Date fromSearchDate);
         void setToSearchDate(Date toSearchDate);
-        void updateReportPeriodPicker(TaxType taxType, List<TaxPeriod> taxPeriods);
+        void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
         void setDataFilter(LogSystemFilter dataFilter);
@@ -145,12 +145,16 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             @Override
             public void onValueChange(ValueChangeEvent<TaxType> event) {
                 final TaxType taxType = event.getValue();
+                if(taxType == null) {
+                    getView().updateTaxPeriodPicker(null);
+                    return;
+                }
                 GetTaxPeriodAction action = new GetTaxPeriodAction();
                 action.setTaxType(taxType);
                 dispatchAsync.execute(action, new AbstractCallback<GetTaxPeriodResult>() {
                     @Override
                     public void onSuccess(GetTaxPeriodResult result) {
-                        getView().updateReportPeriodPicker(taxType, result.getTaxPeriods());
+                        getView().updateTaxPeriodPicker(result.getTaxPeriods());
                     }
                 });
 
