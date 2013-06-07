@@ -42,6 +42,12 @@
             padding-bottom: 5px;
             padding-left: 135px;
         }
+
+        @external gwt-MenuBar-horizontal .gwt-MenuItem-selected;
+        .gwt-MenuBar-horizontal .gwt-MenuItem-selected {
+            background-color: white;
+        }
+
     </ui:style>
 
 	<g:HTMLPanel ui:field="panel"/>
