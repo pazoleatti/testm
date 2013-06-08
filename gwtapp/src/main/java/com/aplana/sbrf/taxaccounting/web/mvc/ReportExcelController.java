@@ -90,6 +90,11 @@ public class ReportExcelController {
         String filePath = formDataPrintingService.generateExcelUsers(taUserService.lisAllFullActiveUsers());
         createResponse(req, response, filePath);
     }
+
+    @RequestMapping(value = "/processLogSystmeDownload", method = RequestMethod.GET)
+    public void processLogSystemDownload(HttpServletRequest request, HttpServletResponse response){
+
+    }
 	
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
 		File file = new File(filePath);

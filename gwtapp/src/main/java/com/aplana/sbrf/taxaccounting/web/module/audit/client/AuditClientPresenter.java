@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditFormSearchEvent;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
@@ -29,11 +29,11 @@ import java.util.List;
  * Date: 2013
  */
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
-        implements AuditFormSearchEvent.AuditFormSearchHandler {
+        implements AuditClientSearchEvent.AuditFormSearchHandler {
 
     @ProxyEvent
     @Override
-    public void onAuditFormSearchButtonClicked(AuditFormSearchEvent event) {
+    public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
         GetAuditDataListAction action = new GetAuditDataListAction();
         action.setLogSystemFilter(auditFilterPresenter.getLogSystemFilter());
         dispatcher.execute(action, new AbstractCallback<GetAuditDataListResult>() {

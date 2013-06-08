@@ -90,4 +90,9 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
         }
     }
 
+    @Override
+    public String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems) {
+        return null;
+    }
+
 }

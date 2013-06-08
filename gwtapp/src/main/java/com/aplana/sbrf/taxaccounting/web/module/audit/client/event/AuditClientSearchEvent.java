@@ -7,15 +7,15 @@ import com.google.gwt.event.shared.HasHandlers;
 /**
  * User: avanteev
  */
-public class AuditFormSearchEvent extends GwtEvent<AuditFormSearchEvent.AuditFormSearchHandler> {
+public class AuditClientSearchEvent extends GwtEvent<AuditClientSearchEvent.AuditFormSearchHandler> {
     public static interface AuditFormSearchHandler extends EventHandler{
-        void onAuditFormSearchButtonClicked(AuditFormSearchEvent event);
+        void onAuditFormSearchButtonClicked(AuditClientSearchEvent event);
     }
 
     private static final Type<AuditFormSearchHandler> TYPE = new Type<AuditFormSearchHandler>();
 
     public static void fire(HasHandlers source) {
-        source.fireEvent(new AuditFormSearchEvent());
+        source.fireEvent(new AuditClientSearchEvent());
     }
 
     public static Type<AuditFormSearchHandler> getType(){

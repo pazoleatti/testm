@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditFormSearchEvent;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
@@ -51,7 +51,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     @Override
     public void onSearchButtonClicked() {
-        AuditFormSearchEvent.fire(this);
+        AuditClientSearchEvent.fire(this);
     }
 
 
