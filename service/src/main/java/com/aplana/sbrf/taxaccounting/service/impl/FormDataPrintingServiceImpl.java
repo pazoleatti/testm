@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +93,13 @@ public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
 
     @Override
     public String generateExcelLogSystem(List<LogSystemSearchResultItem> resultItems) {
-        return null;
+        try {
+            LogSystemReportBuilder builder = new LogSystemReportBuilder(resultItems);
+            return builder.createReport();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при создании печатной формы." + LogSystemReportBuilder.class);
+        }
     }
 
 }

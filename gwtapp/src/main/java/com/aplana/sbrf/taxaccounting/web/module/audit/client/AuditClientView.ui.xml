@@ -41,7 +41,7 @@
 
         <g:center>
                 <g:VerticalPanel width="100%" height="100%">
-                    <style:GenericDataGrid ui:field="auditTable" width="100%" height="700px" />
+                    <style:GenericDataGrid ui:field="auditTable" width="100%" height="600px" />
                     <pager:FlexiblePager ui:field="pager" location="CENTER"
                                          showFastForwardButton="false" fastForwardRows="0"
                                          showLastPageButton="true" rangeLimited="true" styleName="{style.pager}" />

@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -160,8 +161,15 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
     }
 
     @Override
-    public void setAuditTableData(List<LogSystemSearchResultItem> itemList) {
-        auditTable.setRowData(itemList);
+    public void setAuditTableData(int startIndex, long count, List<LogSystemSearchResultItem> itemList) {
+        auditTable.setRowCount((int)count);
+        auditTable.setRowData(startIndex, itemList);
+    }
+
+    @Override
+    public void assignDataProvider(int pageSize, AbstractDataProvider<LogSystemSearchResultItem> provider) {
+        auditTable.setPageSize(pageSize);
+        provider.addDataDisplay(auditTable);
     }
 
 }

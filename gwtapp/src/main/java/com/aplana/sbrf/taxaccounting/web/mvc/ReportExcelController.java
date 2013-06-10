@@ -34,6 +34,9 @@ import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 
 
+/**
+ * Контроллер для формирования отчетов в формате Excel АС Учкет налогов
+ */
 @Controller
 @RequestMapping("/downloadController")
 public class ReportExcelController {
@@ -51,15 +54,30 @@ public class ReportExcelController {
 	private static String LOG_ENTRIES = "listLogEntries";
 	private static String JSON_ENTRY_1 = "errorCode";
 	private static String JSON_ENTRY_2 = "message";
-	
-	
+
+
+    /**
+     * Обработка запроса на формирование отчета для налоговых форм
+     * @param formDataId
+     * @param isShowChecked
+     * @param req
+     * @param resp
+     * @throws IOException
+     */
 	@RequestMapping(value = "/{formDataId}/{isShowChecked}",method = RequestMethod.GET)
 	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		String filePath = formDataPrintingService.generateExcel(securityService.currentUserInfo(), formDataId, isShowChecked);
 		createResponse(req, resp, filePath);
 	}
-	
+
+    /**
+     * Обработка запроса на формирование отчета об ошибках
+     * @param req
+     * @param resp
+     * @throws IOException
+     * @throws JSONException
+     */
 	@RequestMapping(value="/processLogDownload",method = RequestMethod.POST)
 	public void processLogDownload(HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException{
 
@@ -85,12 +103,23 @@ public class ReportExcelController {
 		
 	}
 
+    /**
+     * Обработка запроса на формирования отчета по пользователям системы АС Учет налогов
+     * @param req
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping(value = "/processSecUserDownload",method = RequestMethod.GET)
     public void processSecUserDownload(HttpServletRequest req, HttpServletResponse response) throws IOException {
         String filePath = formDataPrintingService.generateExcelUsers(taUserService.lisAllFullActiveUsers());
         createResponse(req, response, filePath);
     }
 
+    /**
+     * Обработка запроса для формирования отчета по журналу аудита
+     * @param request
+     * @param response
+     */
     @RequestMapping(value = "/processLogSystmeDownload", method = RequestMethod.GET)
     public void processLogSystemDownload(HttpServletRequest request, HttpServletResponse response){
 
