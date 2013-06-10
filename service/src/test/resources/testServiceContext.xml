@@ -17,9 +17,6 @@
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTypeDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ScriptDao"/>
-	</bean>
-	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTemplateDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">

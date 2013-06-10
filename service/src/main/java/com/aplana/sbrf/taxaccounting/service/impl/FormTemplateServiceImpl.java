@@ -35,7 +35,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE = 30;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
-	private static final int FORM_SCRIPT_NAME_MAX_VALUE = 255;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
 
 	private Set<String> checkSet = new HashSet<String>();
@@ -109,7 +108,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 		validateFormColumns(formTemplate.getColumns(), logger);
 		validateFormStyles(formTemplate.getStyles(), logger);
-		validateFormScripts(formTemplate.getScripts(), logger);
 		validateFormRows(formTemplate.getRows(), logger);
 	}
 
@@ -154,21 +152,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
 		//TODO: подумать о уникальности порядка строк
-		for (DataRow row : rows) {
+		for (DataRow<Cell> row : rows) {
 			if (row.getAlias() != null && row.getAlias().getBytes().length > DATA_ROW_ALIAS_MAX_VALUE) {
 				logger.error("значение для кода строки \"" + row.getAlias() +
 						"\" слишком велико (фактическое: " + row.getAlias().getBytes().length +
 						", максимальное: " + DATA_ROW_ALIAS_MAX_VALUE + ")");
-			}
-		}
-	}
-
-	private void validateFormScripts(List<Script> scrips, Logger logger) {
-		for (Script script : scrips) {
-			if (script.getName() != null && script.getName().getBytes().length > FORM_SCRIPT_NAME_MAX_VALUE) {
-				logger.error("значение для имени скрипта \"" + script.getName() +
-						"\" слишком велико (фактическое: " + script.getName().getBytes().length +
-						", максимальное: " + FORM_SCRIPT_NAME_MAX_VALUE + ")");
 			}
 		}
 	}

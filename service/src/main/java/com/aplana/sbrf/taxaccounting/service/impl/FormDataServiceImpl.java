@@ -174,9 +174,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			if (formDataScriptingService.hasScripts(formData,
-					FormDataEvent.ADD_ROW)
-					&& !reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
+			if (!reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
 
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
@@ -496,9 +494,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			if (formDataScriptingService.hasScripts(formData,
-					FormDataEvent.DELETE_ROW)
-					&& !reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
+			if (!reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
 				Map<String, Object> additionalParameters = new HashMap<String, Object>();
 				additionalParameters.put("currentDataRow", currentDataRow);
 				formDataScriptingService.executeScript(userInfo, formData,

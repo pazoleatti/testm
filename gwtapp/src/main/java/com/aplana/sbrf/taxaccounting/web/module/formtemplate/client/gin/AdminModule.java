@@ -16,9 +16,7 @@ public class AdminModule extends AbstractPresenterModule {
     protected void configure() {
         bindPresenter(AdminPresenter.class, AdminPresenter.MyView.class, AdminView.class, AdminPresenter.MyProxy.class);
 		bindPresenter(FormTemplateMainPresenter.class, FormTemplateMainPresenter.MyView.class, FormTemplateMainView.class, FormTemplateMainPresenter.MyProxy.class);
-		bindPresenter(FormTemplateScriptPresenter.class, FormTemplateScriptPresenter.MyView.class, FormTemplateScriptView.class, FormTemplateScriptPresenter.MyProxy.class);
 		bindPresenter(FormTemplateScriptCodePresenter.class, FormTemplateScriptCodePresenter.MyView.class, FormTemplateScriptCodeView.class, FormTemplateScriptCodePresenter.MyProxy.class);
-		bindPresenter(FormTemplateEventPresenter.class, FormTemplateEventPresenter.MyView.class, FormTemplateEventView.class, FormTemplateEventPresenter.MyProxy.class);
 		bindPresenter(FormTemplateColumnPresenter.class, FormTemplateColumnPresenter.MyView.class, FormTemplateColumnView.class, FormTemplateColumnPresenter.MyProxy.class);
 		bindPresenter(FormTemplateRowPresenter.class, FormTemplateRowPresenter.MyView.class, FormTemplateRowView.class, FormTemplateRowPresenter.MyProxy.class);
 		bindPresenter(FormTemplateInfoPresenter.class, FormTemplateInfoPresenter.MyView.class, FormTemplateInfoView.class, FormTemplateInfoPresenter.MyProxy.class);

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,13 +19,13 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.ScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 @Repository
 @Transactional(readOnly = true)
@@ -35,8 +34,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private FormTypeDao formTypeDao;
 	@Autowired
 	private ColumnDao columnDao;
-	@Autowired
-	private ScriptDao scriptDao;
 	@Autowired
 	private FormStyleDao formStyleDao;
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
@@ -66,7 +63,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 			if (deepFetch) {
 				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
-				scriptDao.fillFormScripts(formTemplate);
 				String stRowsData = rs.getString("data_rows");
 				if (stRowsData != null) {
 					formTemplate.getRows().addAll(xmlSerializationUtils.deserialize(stRowsData, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class));
@@ -154,7 +150,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		);
 		formStyleDao.saveFormStyles(formTemplate);
 		columnDao.saveFormColumns(formTemplate);
-		scriptDao.saveFormScripts(formTemplate);
 		return formTemplateId;
 	}
 

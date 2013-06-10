@@ -28,12 +28,4 @@ public interface FormDataScriptingService {
 	void executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 		
 
-	/**
-	 * Проверяет, есть ли скрипты для события формы
-	 *
-	 * @param formData форма
-	 * @param event событие
-	 */
-	@Deprecated
-	boolean hasScripts(FormData formData, FormDataEvent event);
 }

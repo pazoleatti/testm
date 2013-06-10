@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
@@ -78,17 +76,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	private List<Column> columns = new ArrayList<Column>();
 	private List<FormStyle> styles = new ArrayList<FormStyle>();
-
-	/**
-	 * Все скрипты формы.
-	 */
-	private List<Script> scripts = new ArrayList<Script>();
-
-	/**
-	 * Маппинг скриптов формы на события. Порядок выполнения гарантируется
-	 * <code>java.util.List</code>.
-	 */
-	private Map<FormDataEvent, List<Script>> eventScripts = new HashMap<FormDataEvent, List<Script>>();
 
 	/**
 	 * Возвращает список {@link Column столбцов}, образующих налоговую форму.
@@ -251,14 +238,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 		this.version = version;
 	}
 
-	/**
-	 * Не использовать для манипуляций сриптами!!!
-	 * 
-	 * @return список скриптов формы.
-	 */
-	public List<Script> getScripts() {
-		return scripts;
-	}
+
 
 	public List<DataRow<Cell>> getRows() {
 		return rows;
@@ -294,76 +274,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Возвращает маппинг скриптов на события формы. в виде отображения события
-	 * на списки скриптов. Порядок в списке скриптов соответствует порядку
-	 * выполнения скриптов для каждого конкретного события.
-	 * 
-	 * @return маппинг скриптов на события формы.
-	 */
-	public Map<FormDataEvent, List<Script>> getEventScripts() {
-		return eventScripts;
-	}
-
-	/**
-	 * Удаляет все скрипты в шаблоне формы. Так же очищает маппинг скриптов.
-	 */
-	public void clearScripts() {
-		scripts.clear();
-		if (eventScripts != null) {
-			eventScripts.clear();
-		}
-	}
-
-	/**
-	 * Добавляет скрипт для события формы. Добавляемый скрипт ранее должен быть
-	 * привязан к шаблону формы.
-	 * 
-	 * @see #addScript(Script)
-	 * @param event
-	 *            событие формы
-	 * @param script
-	 *            скрипт
-	 */
-	public void addEventScript(FormDataEvent event, Script script) {
-		if (!scripts.contains(script)) {
-			throw new IllegalArgumentException("Form doesn't contain script.");
-		}
-
-		List<Script> scriptList = eventScripts.get(event);
-		if (scriptList == null) {
-			scriptList = new ArrayList<Script>();
-			eventScripts.put(event, scriptList);
-		}
-
-		if (!scriptList.contains(script)) {
-			scriptList.add(script);
-		}
-	}
-
-	/**
-	 * Удаляет привязку скрипта к событию формы. Отвязка скрипта от шаблона
-	 * формы не происходит.
-	 * 
-	 * @param event
-	 *            событие формы
-	 * @param script
-	 *            скрипт
-	 */
-	public void removeEventScript(FormDataEvent event, Script script) {
-		if (!scripts.contains(script)) {
-			throw new IllegalArgumentException("Form doesn't contain script.");
-		}
-
-		List<Script> scriptList = eventScripts.get(event);
-		if (scriptList == null || !scriptList.contains(script)) {
-			throw new IllegalArgumentException(
-					"Form event doesn't contain script.");
-		}
-
-		scriptList.remove(script);
-	}
-
-	/**
 	 * Добавляет колонку в шаблон формы.
 	 * @param position позиция для вставки
 	 * @param column добавляемая колонка
@@ -393,37 +303,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Добавляет скрипт к шаблону формы. При это не происходит привязки скрипта
-	 * на событие.
-	 * 
-	 * @param script
-	 *            скрипт
-	 */
-	public void addScript(Script script) {
-		scripts.add(script);
-	}
-
-	/**
-	 * Удаляет скрипт из шаблона формы. Удаляются так же все привязки скрипта к
-	 * событиям формы.
-	 * 
-	 * @param script
-	 *            скрипт
-	 */
-	public void removeScript(Script script) {
-		if (!scripts.contains(script)) {
-			throw new IllegalArgumentException(
-					"Form template doesn't contain the script.");
-		}
-
-		scripts.remove(script);
-		for (Map.Entry<FormDataEvent, List<Script>> entry : eventScripts
-				.entrySet()) {
-			entry.getValue().remove(script);
-		}
-	}
-
-	/**
 	 * Удаляет колонку из шаблона формы.
 	 * @param column удаляемая колонка
 	 */
@@ -435,28 +314,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 			row.removeColumn(column);
 		}
 		columns.remove(column);
-	}
-
-	/**
-	 * @param script
-	 *            script
-	 * @return индекс скрипта в списке скриптов TODO: нужно перетащить в DAO?
-	 */
-	public int indexOfScript(Script script) {
-		return scripts.indexOf(script);
-	}
-
-	/**
-	 * @param event
-	 *            событие формы
-	 * @return список скриптов для определенного события формы.
-	 */
-	public List<Script> getScriptsByEvent(FormDataEvent event) {
-		if (eventScripts.containsKey(event)) {
-			return eventScripts.get(event);
-		} else {
-			return new ArrayList<Script>(0);
-		}
 	}
 
 	/**
