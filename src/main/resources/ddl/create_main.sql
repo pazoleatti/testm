@@ -343,28 +343,7 @@ comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'признак проверочного столбца';
 comment on column form_column.format is 'формат';
 ---------------------------------------------------------------------------------------------------
-create table form_script (
-  id number(9) not null,
-  form_template_id number(9) not null,
-  name varchar(255),
-  ord number(9) not null,
-  body clob,
-  condition clob,
-  per_row number(1) not null
-);
-alter table form_script add constraint form_script_pk primary key (id);
-alter table form_script add constraint form_script_fk_form_templ_id foreign key (form_template_id) references form_template(id);
-alter table form_script add constraint form_script_chk_per_row check (per_row in (0,1));
-create sequence seq_form_script start with 10000;
 
-comment on table form_script is 'Скрипты';
-comment on column form_script.body is 'Тело скрипта';
-comment on column form_script.condition is 'Условие выполнения скрипта';
-comment on column form_script.form_template_id is 'Идентификатор шаблона формы';
-comment on column form_script.id is 'Первичный ключ';
-comment on column form_script.name is 'Наименование скрипта';
-comment on column form_script.ord is 'Порядок исполнения';
-comment on column form_script.per_row is 'Признак строкового скрипта';
 ---------------------------------------------------------------------------------------------------
 create table department
 (
@@ -731,21 +710,7 @@ comment on table form_data_source is 'информация об источник
 comment on column form_data_source.department_form_type_id is 'идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
 comment on column form_data_source.src_department_form_type_id is ' идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-create table event_script(
-  event_code number(9) not null,
-  script_id number(9) not null,
-  ord number(9) not null
-);
 
-comment on table event_script is 'Привязка скриптов налоговой формы к событиям системы';
-comment on column event_script.event_code is 'Тип события';
-comment on column event_script.script_id is 'Идентификатор скрипта';
-comment on column event_script.ord is 'Порядок выполнения скрипта';
-
-alter table event_script add constraint event_script_chk_event_code check (EVENT_CODE IN (1, 2, 3, 4, 5, 6, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 301, 302, 303));
-
-alter table event_script add constraint event_script_pk primary key (event_code, script_id);
-alter table event_script add constraint event_script_fk_script_id foreign key (script_id) references form_script (ID);
 ---------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,
