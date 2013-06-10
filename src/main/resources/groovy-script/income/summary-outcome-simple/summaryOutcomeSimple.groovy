@@ -1,8 +1,8 @@
 /**
  * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
+ *
+ * @version 46
  */
-
-import java.text.DecimalFormat
 
 switch (formDataEvent) {
     // создать
@@ -45,7 +45,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         checkDeclarationBankOnCancelAcceptance()
         break
-// после принятия из утверждена
+    // после принятия из утверждена
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED :
         acceptance()
         break
@@ -54,28 +54,27 @@ switch (formDataEvent) {
 // графа  1 - consumptionTypeId
 // графа  2 - consumptionGroup
 // графа  3 - consumptionTypeByOperation
-// графа  4 - ptionAccountNumber
+// графа  4 - consumptionAccountNumber
 // графа  5 - rnu7Field10Sum
 // графа  6 - rnu7Field12Accepted
 // графа  7 - rnu7Field12PrevTaxPeriod
 // графа  8 - rnu5Field5Accepted
-// графа  9 - rnu5Field5PrevTaxPeriod
-// графа 10 - logicalCheck
+// графа  9 - logicalCheck (9 - rnu5Field5PrevTaxPeriod - удалено)
+// графа 10 - accountingRecords
 // графа 11 - opuSumByEnclosure2
 // графа 12 - opuSumByTableP
 // графа 13 - opuSumTotal
-// графа 14 - opuSumByOpu
-// графа 15 - difference
+// графа 14 - difference (14 - opuSumByOpu - удалено)
 
 /**
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    checkRequiredFields()
+    // checkRequiredFields()
     calculationBasicSum()
-    calculationControlGraphs()
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Скрипт для перевода сводной налогой формы в статус "принят".
  *
@@ -90,29 +89,43 @@ void acceptance() {
 
 /**
  * Вычисление сумм.
- *
- * @since 15.03.2013 15:00
  */
 void calculationBasicSum() {
-    ['rnu5Field5Accepted', 'rnu5Field5PrevTaxPeriod'].each {
-        setSum('R2', 'R85', it)
+
+//    formData.dataRows.each { row ->
+//        ['rnu7Field10Sum', 'rnu7Field12Accepted',
+//                'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
+//            def cell = row.getCell(it)
+//            if (cell.isEditable()) {
+//                cell.setValue(1)
+//            }
+//        }
+//    }
+
+    /*
+     * Проверка объязательных полей
+     */
+    def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+    for (def row : formData.dataRows) {
+        if (!checkRequiredColumns(row, requiredColumns, true)) {
+            return
+        }
     }
 
-    ['rnu7Field10Sum', 'rnu7Field12Accepted'].each {
-        setSum('R2', 'R86', it)
+    /*
+     * Расчет сумм
+     */
+    def row50001 = formData.getDataRow('R107')
+    def row50002 = formData.getDataRow('R212')
+
+    // суммы для графы 5..8
+    ['rnu7Field10Sum', 'rnu7Field12Accepted',
+            'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+        row50001.getCell(alias).setValue(getSum(alias, 'R2', 'R106'))
+        row50002.getCell(alias).setValue(getSum(alias, 'R109', 'R211'))
     }
 
-    ['rnu5Field5Accepted', 'rnu5Field5PrevTaxPeriod'].each {
-        setSum('R87', 'R89', it)
-    }
-
-    ['rnu5Field5Accepted', 'rnu5Field5PrevTaxPeriod'].each {
-        setSum('R91', 'R194', it)
-    }
-
-    ['rnu7Field10Sum', 'rnu7Field12Accepted'].each {
-        setSum('R92', 'R195', it)
-    }
+    calculationControlGraphs()
 }
 
 /**
@@ -126,85 +139,58 @@ void calculationBasicSum() {
  * @version 14 05.03.2013
  */
 void calculationControlGraphs() {
-    // графа 10
-    ([10] + (13..15) + (23..25) + (30..33) + [35, 36, 39, 52, 55, 56, 63] +
-            (70..73) + [76, 77, 81, 82, 88, 155] + (166..176) + [178] + (180..183)).each {
-        setColumn9Equals0(formData.getDataRow('R' + it))
-    }
-    [37, 38].each {
-        setColumn9Less0(formData.getDataRow('R' + it))
-    }
-
-    // получение данных из расходов сложных (303) для вычисления 11 графы
-    def formData303 = FormDataService.find(303, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
-    if (formData303 != null) {
-        ((3..84) + [88] + (92..192)).each() {
-            def row = formData.getDataRow('R' + it)
-
-            // графа 11
-            if (row.consumptionAccountNumber != null) {
-                def from = 0
-                def to = formData303.getDataRows().size() - 1
-                ColumnRange columnRange4 = new ColumnRange('consumptionBuhSumAccountNumber', from, to)
-                ColumnRange columnRange6 = new ColumnRange('consumptionBuhSumAccepted', from, to)
-                row.opuSumByEnclosure2 = summIfEquals(formData303, columnRange4, row.consumptionAccountNumber, columnRange6)
-            }
+    def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
+    def tmp
+    def value
+    def formDataComplex = getFormDataComplex()
+    def income102NotFound = []
+    for (def row : formData.dataRows) {
+        // исключить итоговые строки
+        if (row.getAlias() in ['R107', 'R212']) {
+            continue
         }
-    } else {
-        // если источников нет то зануляем поля в которые должны были перетянуться данные
-        ((3..84) + [88] + (92..192)).each() {
-            def row = formData.getDataRow('R' + it)
-
-            // графа 11
-            row.opuSumByEnclosure2 = 0
+        if (!isEmpty(row.rnu7Field10Sum) && !isEmpty(row.rnu7Field12Accepted) &&
+                !isEmpty(row.rnu7Field12PrevTaxPeriod)) {
+            // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
+            tmp = round(row.rnu7Field10Sum - (row.rnu7Field10Sum - row.rnu7Field12Accepted), 2)
+            value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
+            row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
-    }
 
-    // строка 193 графа 15
-    def row193 = formData.getDataRow('R193')
-    def bVal15 = new StringBuffer(row193.consumptionAccountNumber)
-    bVal15.delete(4,5)
-    def data193 = income101Dao.getIncome101(formData.reportPeriodId, bVal15.toString(), formData.departmentId)
-    if (data193 == null)
-        logger.warn("Не найдены соответствующие данные в оборотной ведомости")
-    row193.opuSumByOpu = data193 ? data193.creditRate: 0
-    // строка 193 графа 16 («графа 16»= «графа 15»-«графа 6»)
-    row193.difference = (row193.opuSumByOpu ?:0) - (row193.rnu7Field12Accepted ?:0)
-
-    // вычислять только для заданных строк
-    ((3..84) + [88] + (92..192)).each() {
-        def row = formData.getDataRow('R' + it)
+        // графа 11
+        // TODO (Ramil Timerbaev) проверить как работает после того как будет готова формы "расходы сложные"
+        row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
+                'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
 
         // графа 12
-        if (row.consumptionAccountNumber != null) {
-            def from = 0
-            def to = formData.getDataRows().size() - 1
-            ColumnRange columnRange4 = new ColumnRange('consumptionAccountNumber', from, to)
-            ColumnRange columnRange8 = new ColumnRange('rnu5Field5Accepted', from, to)
-            row.opuSumByTableP = summIfEquals(formData, columnRange4, row.consumptionAccountNumber, columnRange8)
+        if (row.getAlias() in ['R105', 'R209']) {
+            tmp = calcColumn6(['R105', 'R209'])
+        } else if (row.getAlias() in ['R106', 'R211']) {
+            tmp = calcColumn6(['R106', 'R211'])
+        } else if (row.getAlias() in ['R104', 'R208']) {
+            tmp = calcColumn6(['R104', 'R208'])
+        } else {
+            tmp = row.rnu5Field5Accepted
         }
+        row.opuSumByTableP = tmp
 
         // графа 13
-        if (row.opuSumByEnclosure2 != null && row.opuSumByTableP != null) {
-            row.opuSumTotal = row.opuSumByEnclosure2 + row.opuSumByTableP
+        def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords, formData.departmentId)
+        if (income102 == null || income102.isEmpty()) {
+            income102NotFound += getIndex(row)
+            tmp = 0
         } else {
-            row.opuSumTotal = null
+            tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
         }
+        row.opuSumTotal = tmp
 
         // графа 14
-        def bVal = new StringBuffer(row.consumptionAccountNumber)
-        bVal.delete(1,8)
-        def dataThisRow = income102Dao.getIncome102(formData.reportPeriodId, bVal.toString(), formData.departmentId)
-        if (dataThisRow == null)
-            logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках")
-        row.opuSumByOpu = dataThisRow ? dataThisRow.creditRate : 0
+        row.difference = (getValue(row.opuSumByEnclosure2) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal)
+    }
 
-        // графа 15
-        if (row.opuSumTotal != null && row.opuSumByOpu != null) {
-            row.difference = row.opuSumTotal - row.opuSumByOpu
-        } else {
-            row.difference = null
-        }
+    if (!income102NotFound.isEmpty()) {
+        def rows = income102NotFound.join(', ')
+        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
     }
 }
 
@@ -226,6 +212,7 @@ void checkCreation() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверки наличия декларации Банка при принятии нф (checkDeclarationBankOnAcceptance.groovy).
  *
@@ -244,6 +231,7 @@ void checkDeclarationBankOnAcceptance() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверки наличия декларации Банка при отмене принятия нф.
  *
@@ -262,6 +250,7 @@ void checkDeclarationBankOnCancelAcceptance() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверка при осуществлении перевода формы в статус "Принята".
  *
@@ -280,6 +269,7 @@ void checkOnAcceptance() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверка, наличия и статуса сводной формы уровня Банка при осуществлении перевода формы в статус "Утверждена".
  *
@@ -298,6 +288,7 @@ void checkOnApproval() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверки при переходе "Отменить принятие".
  */
@@ -316,53 +307,26 @@ void checkOnCancelAcceptance() {
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
  * Проверка обязательных полей.
  *
  * @author rtimerbaev
  * @since 20.03.2013 18:30
  */
-void checkRequiredFields() {
-    // 5-9 графы
-    [
-            'rnu7Field10Sum' : ([17, 18, 22, 28, 29, 34] + (48..51) + [53, 54] + (57..62) + [74, 75, 78, 79, 80, 184, 185, 186]),
-            'rnu7Field12Accepted' : ([17, 18, 22, 28, 29, 34] + (48..51) + [53, 54] + (57..62) + [74, 75, 78, 79, 80, 184, 185, 186, 193]),
-            'rnu7Field12PrevTaxPeriod' : ([17, 18, 22, 28, 29, 34] + (48..51) + [53, 54] + (57..62) + [74, 75, 78, 79, 80, 184, 185, 186]),
-            'rnu5Field5Accepted' : ((3..84) + [88] + (92..191)),
-            'rnu5Field5PrevTaxPeriod' : ([10, 13, 14, 15, 23, 24, 25] + (30..33) + (35..39) + [52, 55, 56, 63] + (70..73) + [76, 77, 81, 82, 88, 155] + (166..176) + [178] + (180..183))
-    ].each() { colAlias, items ->
-        def errorMsg = ''
-        def colName = formData.getDataRow('R1').getCell(colAlias).getColumn().getName()
-        // разделы
-        def sectionA1 = '', sectionB1 = '', sectionA2 = ''
-        items.each { item->
-            def row = formData.getDataRow('R' + item)
-            if (row.getCell(colAlias) != null && (row.getCell(colAlias).getValue() == null || ''.equals(row.getCell(colAlias).getValue()))) {
-                switch (item) {
-                    case (3..84) :
-                        sectionA1 += getEmptyCellType(row)
-                        break
-                    case 88 :
-                        sectionB1 += getEmptyCellType(row)
-                        break
-                    case (92..193) :
-                        sectionA2 += getEmptyCellType(row)
-                        break
-                }
-            }
-        }
-        errorMsg += addSector(errorMsg, sectionA1, '"А1"')
-        errorMsg += addSector(errorMsg, sectionB1, '"Б1"')
-        errorMsg += addSector(errorMsg, sectionA2, '"А2"')
-
-        if (!''.equals(errorMsg)) {
-            logger.error("Не заполнены ячейки колонки \"$colName\" в разделе: $errorMsg.")
+def checkRequiredFields() {
+    def cell
+    def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+    for (def row : formData.dataRows) {
+        if (!checkRequiredColumns(row, requiredColumns, true)) {
+            return
         }
     }
 }
 
+// TODO (Ramil Timerbaev) удалить
 /**
- * Скрипт для консолидации (consolidation.groovy).
+ * Скрипт для консолидации.
  *
  * @author rtimerbaev
  * @since 21.02.2013 13:50
@@ -428,82 +392,120 @@ def isTerBank() {
 }
 
 /**
- * Функция суммирует диапазон строк определенного столбца и вставляет указаную сумму в последнюю ячейку.
+ * Получить сумму диапазона строк определенного столбца.
  */
-def setSum(String rowFromAlias, String rowToAlias, String columnAlias) {
-    int rowFrom = formData.getDataRowIndex(rowFromAlias)
-    int rowTo = formData.getDataRowIndex(rowToAlias)
-    def sumRow = formData.getDataRow(rowToAlias)
-
-    sumRow[columnAlias] = summ(formData, new ColumnRange(columnAlias, rowFrom + 1, rowTo - 1))
+def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
+    def from = formData.getDataRowIndex(rowFromAlias) + 1
+    def to = formData.getDataRowIndex(rowToAlias) - 1
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
 /**
- * Пустое ли значение.
- */
-boolean isEquals(Double value1, Double value2) {
-    def eps = 1e-8
-    return value1 != null && (Math.abs(value1 - value2) < eps)
-}
-
-/**
- * Установить значение для 10ого столбца (если 9ый столбец = 0).
+ * Получить название графы по псевдониму.
  *
  * @param row строка
+ * @param alias псевдоним графы
  */
-void setColumn9Equals0(def row) {
-    if (row != null && row.rnu5Field5PrevTaxPeriod != null) {
-        def result = (Double) round(row.rnu5Field5PrevTaxPeriod, 2)
-        row.logicalCheck = isEquals(result, 0) ? result.toString() : 'Требуется объяснение'
-    } else {
-        row.logicalCheck = null
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
+    return ''
 }
 
 /**
- * Установить значение для 10ого столбца (если 9ый столбец < 0).
+ * Проверить заполненость обязательных полей.
  *
  * @param row строка
+ * @param columns список обязательных графов
+ * @param useLog нужно ли записывать сообщения в лог
+ * @return true - все хорошо, false - есть незаполненные поля
  */
-void setColumn9Less0(def row) {
-    if (row != null) {
-        def result = round((row.rnu5Field5Accepted?:0) - (row.rnu7Field12Accepted?:0), 2)
-        row.logicalCheck = result < 0 ? 'Требуется объяснение' : (new DecimalFormat("#0.##").format(result)).toString().replace(",", ".")
+def checkRequiredColumns(def row, def columns, def useLog) {
+    def colNames = []
+
+    def cell
+    columns.each {
+        cell = row.getCell(it)
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+            def name = getColumnName(row, it)
+            colNames.add('"' + name + '"')
+        }
     }
+    if (!colNames.isEmpty()) {
+        if (!useLog) {
+            return false
+        }
+        def index = getIndex(row) + 1
+        def errorMsg = colNames.join(', ')
+        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        return false
+    }
+    return true
 }
 
 /**
- * Получить разделить между названиями разделов.
+ * Получить номер строки в таблице.
  */
-def getSectionSeparator(def value1, def value2) {
-    return ((!''.equals(value1)) && !''.equals(value2) ? ', ' : '')
+def getIndex(def row) {
+    formData.dataRows.indexOf(row)
 }
 
 /**
- * Получить код строки в которой есть незаполненная ячейка.
+ * Проверка пустое ли значение.
  */
-def getEmptyCellType(def row) {
-    return (row.consumptionTypeId != null ? row.consumptionTypeId : 'пусто') + ', '
+def isEmpty(def value) {
+    return value == null || value == ''
 }
 
 /**
- * Удалить последнюю запятую.
- */
-def deleteLastSeparator(String values) {
-    return values.substring(0, values.length() - 2)
-}
-
-/**
- * Добавить в сообщение коды незаполненных ячеек.
+ * Получить сумму значений из расходов сложных.
  *
- * @param errorMsg сообщение
- * @param values список незаполненных полей в виде строки (перечислены через запятую)
- * @param sectorName название раздела
+ * @param formDataComplex данные формы "расходы сложные"
+ * @param columnAliasCheck алиас графы формы "расходы сложные", по которой отбираются строки для суммирования
+ * @param columnAliasSum алиас графы формы "расходы сложные", значения которой суммируются
+ * @param value значение из формы "расходы простые" по которому отбираются строки для суммирования
  */
-def addSector(def errorMsg, def values, def sectorName) {
-    if (values != null && !''.equals(values)) {
-        return getSectionSeparator(errorMsg, values) + sectorName + ' (' + deleteLastSeparator(values) + ')'
-    } else {
-        return ''
+def getSumFromComplex(formDataComplex, columnAliasCheck, columnAliasSum, value) {
+    def sum = 0
+    if (formDataComplex != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
+        for (def row : formDataComplex.dataRows) {
+            if (row.getCell(columnAliasCheck).getValue() == value) {
+                sum += (row.getCell(columnAliasSum).getValue() ?: 0)
+            }
+        }
     }
+    return sum
+}
+
+/**
+ * Получить значение для графы 12. Сумма значении графы 6 указанных строк
+ *
+ * @param aliasRows список алиасов значения которых надо просуммировать
+ */
+def calcColumn6(def aliasRows) {
+    def sum = 0
+    aliasRows.each { alias ->
+        sum += formData.getDataRow(alias).rnu7Field12Accepted
+    }
+    return sum
+}
+
+/**
+ * Получить данные формы "расходы сложные" (id = 303)
+ */
+def getFormDataComplex() {
+    return FormDataService.find(303, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+}
+
+/**
+ * Получить значение или ноль.
+ *
+ * @param value значение которое надо проверить
+ */
+def getValue(def value) {
+    return value ?: 0
 }
