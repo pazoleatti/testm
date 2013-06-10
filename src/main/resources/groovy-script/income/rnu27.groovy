@@ -14,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
+        allCheck()
+        break
     case FormDataEvent.CALCULATE:
         deleteAllStatic()
         sort()
