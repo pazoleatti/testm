@@ -35,6 +35,9 @@ public interface DataRowDao {
 	 */
 	void getSavedRows(Long id, DataRowHandler handler, DataRowFilter filter,
 			DataRowRange range);
+	
+	int getSavedSize(Long id, DataRowFilter filter,
+			DataRowRange range);
 
 	/*
 	 * Методы для работы с редактируемым срезом формы
@@ -45,22 +48,26 @@ public interface DataRowDao {
 	 * 
 	 * @param id
 	 * @param handler
-	 * @param filter
-	 * @param range
+	 * @param filter фильтр (возможно значение null)
+	 * @param range диапазон (возможно значение null)
 	 */
 	void getRows(Long id, DataRowHandler handler, DataRowFilter filter,
 			DataRowRange range);
-
+	
 	/**
-	 * Метод получает строку
+	 * Метод получает строку редактируемого в данный момент состояния формы.
 	 * 
 	 * @param id
-	 *            - идентификатор НФ
 	 * @param index
-	 *            - индекс строки в НФ
-	 * @return строка НФ
+	 * @param filter
+	 * @param range
+	 * @return
 	 */
-	DataRow<Cell> getRow(Long id, int index);
+	DataRow<Cell> getRow(Long id, int index, DataRowFilter filter,
+			DataRowRange range);
+	
+	int getSize(Long id, DataRowFilter filter,
+			DataRowRange range);
 
 	void updateRow(Long id, DataRow<Cell> row);
 
