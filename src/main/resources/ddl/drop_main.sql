@@ -8,8 +8,6 @@ drop table cell_style;
 drop table form_column;
 drop sequence seq_form_column;
 
-drop table event_script;
-drop table form_script;
 drop sequence seq_form_script;
 
 drop table data_row;
