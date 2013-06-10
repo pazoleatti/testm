@@ -66,6 +66,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;
+        this.auditFilterPresenter.initFilterData();
         getView().assignDataProvider(PAGE_SIZE, dataProvider);
     }
 
@@ -87,19 +88,6 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         setInSlot(TYPE_auditFilterPresenter, auditFilterPresenter);
     }
 
-    @Override
-    public void prepareFromRequest(PlaceRequest request) {
-        super.prepareFromRequest(request);
-        auditFilterPresenter.initFilterData();
-        GetAuditDataListAction action = new GetAuditDataListAction();
-        action.setLogSystemFilter(auditFilterPresenter.getLogSystemFilter());
-        dispatcher.execute(action, new AbstractCallback<GetAuditDataListResult>() {
-            @Override
-            public void onSuccess(GetAuditDataListResult result) {
-                getView().setAuditTableData(0, result.getTotalCountOfRecords(), result.getRecords());
-            }
-        });
-    }
 
     private class MyDataProvider extends AsyncDataProvider<LogSystemSearchResultItem>{
 
