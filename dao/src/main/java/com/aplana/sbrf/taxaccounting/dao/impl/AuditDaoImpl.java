@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -32,11 +33,30 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final long oneDayTime = 1000 * 60 * 60 * 24;
 
 	@Override
-	public List<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
-		StringBuilder sql = new StringBuilder();
+	public PaginatedSearchResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
+		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select * ");
 		appendSelectFromAndWhereClause(sql, filter);
 		sql.append(" order by id");
-		return getJdbcTemplate().query(sql.toString(), new AuditRowMapper());
+		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
+				.append(" order by ordDat.rn");
+		List<LogSystemSearchResultItem> records = getJdbcTemplate().query(
+				sql.toString(),
+				new Object[] {
+						filter.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
+						filter.getStartIndex() + filter.getCountOfRecords()
+				},
+				new int[] {
+						Types.NUMERIC,
+						Types.NUMERIC
+				},
+				new AuditRowMapper()
+		);
+
+		PaginatedSearchResult<LogSystemSearchResultItem> result = new PaginatedSearchResult<LogSystemSearchResultItem>();
+		result.setRecords(records);
+		result.setTotalRecordCount(getCount(filter));
+
+		return result;
 	}
 
 	@Override
@@ -69,7 +89,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
 	private void appendSelectFromAndWhereClause(StringBuilder sql, LogSystemFilter filter) {
-		sql.append("SELECT * FROM log_system WHERE log_date BETWEEN TO_DATE('").append
+		sql.append(" FROM log_system WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(new Date(filter.getFromSearchDate().getTime() - oneDayTime)))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
 				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
@@ -125,5 +145,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
 			return log;
 		}
+	}
+
+	private long getCount(LogSystemFilter filter) {
+		StringBuilder sql = new StringBuilder("select count(*) ");
+		appendSelectFromAndWhereClause(sql, filter);
+		return getJdbcTemplate().queryForLong(sql.toString());
 	}
 }

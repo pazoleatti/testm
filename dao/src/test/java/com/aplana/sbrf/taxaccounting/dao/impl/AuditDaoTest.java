@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogSystem;
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
-import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +29,14 @@ public class AuditDaoTest {
 	@Test
 	public void testGet() {
 		LogSystemFilter filter = new LogSystemFilter();
+		filter.setCountOfRecords(10);
+		filter.setStartIndex(0);
 		filter.setFormTypeId(1);
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date(1369911365000l));
-        filter.setReportPeriodIds(new ArrayList<Integer>());
-        filter.setDepartmentIds(new ArrayList<Integer>());
 
-		LogSystemSearchResultItem logSystem = auditDao.getLogs(filter).get(0);
+		PaginatedSearchResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
+		LogSystemSearchResultItem logSystem = records.getRecords().get(0);
 		assertEquals(Long.valueOf(1), logSystem.getId());
 		assertEquals("192.168.72.16", logSystem.getIp());
 		assertEquals(FormDataEvent.getByCode(1), logSystem.getEvent());
@@ -51,6 +49,7 @@ public class AuditDaoTest {
 		assertEquals(1, logSystem.getFormKind().getId());
 		assertEquals("the best note", logSystem.getNote());
 		assertEquals(1, logSystem.getUserDepartment().getId());
+		assertEquals(1, records.getTotalRecordCount());
 	}
 
 	@Test
@@ -73,14 +72,15 @@ public class AuditDaoTest {
 		auditDao.add(logSystem);
 
 		LogSystemFilter filter = new LogSystemFilter();
+		filter.setCountOfRecords(10);
+		filter.setStartIndex(0);
 		filter.setFormTypeId(1);
 		filter.setUserId(1);
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date());
-        filter.setReportPeriodIds(new ArrayList<Integer>());
-        filter.setDepartmentIds(new ArrayList<Integer>());
 
-		LogSystemSearchResultItem logSystemSearchResultItem = auditDao.getLogs(filter).get(1);
+		PaginatedSearchResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
+		LogSystemSearchResultItem logSystemSearchResultItem = records.getRecords().get(1);
 		assertEquals(Long.valueOf(3), logSystemSearchResultItem.getId());
 		assertEquals(formatter.format(date), formatter.format(logSystemSearchResultItem.getLogDate()));
 		assertEquals("192.168.72.16", logSystemSearchResultItem.getIp());
@@ -94,5 +94,6 @@ public class AuditDaoTest {
 		assertEquals(2, logSystemSearchResultItem.getFormKind().getId());
 		assertEquals("the best note", logSystemSearchResultItem.getNote());
 		assertEquals(1, logSystemSearchResultItem.getUserDepartment().getId());
+		assertEquals(2, records.getTotalRecordCount());
 	}
 }

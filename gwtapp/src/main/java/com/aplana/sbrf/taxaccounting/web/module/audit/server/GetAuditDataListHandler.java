@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
+import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
@@ -28,7 +30,9 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
     public GetAuditDataListResult execute(GetAuditDataListAction getAuditDataListAction, ExecutionContext executionContext) throws ActionException {
 
         GetAuditDataListResult result = new GetAuditDataListResult();
-        result.setRecords(auditService.getLogs(getAuditDataListAction.getLogSystemFilter()));
+		PaginatedSearchResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(getAuditDataListAction.getLogSystemFilter());
+        result.setRecords(records.getRecords());
+		result.setTotalCountOfRecords(records.getTotalRecordCount());
 
         return result;
     }

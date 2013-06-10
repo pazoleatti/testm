@@ -31,7 +31,7 @@ public class AuditServiceImpl implements AuditService {
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
-	public List<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
+	public PaginatedSearchResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
 		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
 			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
 		}
