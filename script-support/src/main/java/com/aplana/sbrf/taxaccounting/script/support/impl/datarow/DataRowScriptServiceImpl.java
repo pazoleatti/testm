@@ -41,7 +41,7 @@ public class DataRowScriptServiceImpl implements DataRowScriptService, ScriptCom
 
 	@Override
 	public List<DataRow<Cell>> getList(DataRowFilter filter, DataRowRange range) {
-		return new DataRowList(dao, formData.getId(), range, filter, context.getLogger());
+		return new DataRowList(dao, formData, range, filter, context.getLogger());
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class DataRowScriptServiceImpl implements DataRowScriptService, ScriptCom
 
 	@Override
 	public void updateRow(DataRow<Cell> row) {
-		dao.updateRow(formData.getId(), row);
+		dao.updateRow(formData, row);
 	}
 
 }

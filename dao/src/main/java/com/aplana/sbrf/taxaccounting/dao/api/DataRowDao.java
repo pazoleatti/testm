@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 
@@ -28,15 +29,15 @@ public interface DataRowDao {
 	/**
 	 * Метод получает строки сохранненого состояния
 	 * 
-	 * @param id
+	 * @param fd - FormData со строками которой идет работа
 	 * @param handler
 	 * @param filter
 	 * @param range
 	 */
-	void getSavedRows(Long id, DataRowHandler handler, DataRowFilter filter,
+	void getSavedRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
 			DataRowRange range);
 	
-	int getSavedSize(Long id, DataRowFilter filter,
+	int getSavedSize(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 
 	/*
@@ -46,51 +47,57 @@ public interface DataRowDao {
 	/**
 	 * Метод получает строки редактируемого в данный момент состояния формы.
 	 * 
-	 * @param id
+	 * @param fd - FormData со строками которой идет работа
 	 * @param handler
 	 * @param filter фильтр (возможно значение null)
 	 * @param range диапазон (возможно значение null)
 	 */
-	void getRows(Long id, DataRowHandler handler, DataRowFilter filter,
+	void getRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
 			DataRowRange range);
 	
 	/**
 	 * Метод получает строку редактируемого в данный момент состояния формы.
 	 * 
-	 * @param id
+	 * @param fd - FormData со строками которой идет работа
 	 * @param index
 	 * @param filter
 	 * @param range
 	 * @return
 	 */
-	DataRow<Cell> getRow(Long id, int index, DataRowFilter filter,
+	DataRow<Cell> getRow(FormData fd, int index, DataRowFilter filter,
 			DataRowRange range);
 	
-	int getSize(Long id, DataRowFilter filter,
+	int getSize(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 
-	void updateRow(Long id, DataRow<Cell> row);
+	/**
+	 * Обновляет существующую строку НФ
+	 * 
+	 * @param fd
+	 * @param row
+	 */
+	void updateRow(FormData fd, DataRow<Cell> row);
 
-	void removeRow(Long id, DataRow<Cell> row);
+	void removeRow(FormData fd, DataRow<Cell> row);
 
-	void removeRow(Long id, int index);
+	void removeRow(FormData fd, int index);
 
-	DataRow<Cell> addRow(Long id, int index, DataRow<Cell> rowTemplate);
+	DataRow<Cell> addRow(FormData fd, int index, DataRow<Cell> rowTemplate);
 
-	DataRow<Cell> addRow(Long id, DataRow<Cell> rowTemplate);
+	DataRow<Cell> addRow(FormData fd, DataRow<Cell> rowTemplate);
 
-	DataRow<Cell> addRowAfter(Long id, DataRow<Cell> afterRow,
+	DataRow<Cell> addRowAfter(FormData fd, DataRow<Cell> afterRow,
 			DataRow<Cell> rowTemplate);
 
-	DataRow<Cell> addRowBefore(Long id, DataRow<Cell> beforeRow,
+	DataRow<Cell> addRowBefore(FormData fd, DataRow<Cell> beforeRow,
 			DataRow<Cell> rowTemplate);
 
 	/*
 	 * Сохранение/отмена
 	 */
 
-	void save(Long id);
+	void save(FormData fd);
 
-	void cancel(Long id);
+	void cancel(FormData fd);
 
 }

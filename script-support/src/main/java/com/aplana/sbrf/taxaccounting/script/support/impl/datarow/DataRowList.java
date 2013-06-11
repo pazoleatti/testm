@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 
@@ -21,17 +22,17 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 public class DataRowList extends AbstractList<DataRow<Cell>> {
 	
 	private DataRowDao dao;
-	private Long id;
+	private FormData fd;
 	private DataRowRange range;
 	private DataRowFilter filter;
 	private Logger log;
 	
 	
-	public DataRowList(DataRowDao dao, Long id, DataRowRange range,
+	public DataRowList(DataRowDao dao, FormData fd, DataRowRange range,
 			DataRowFilter filter, Logger log) {
 		super();
 		this.dao = dao;
-		this.id = id;
+		this.fd = fd;
 		this.range = range;
 		this.filter = filter;
 		this.log = log;
@@ -40,12 +41,12 @@ public class DataRowList extends AbstractList<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> get(int index) {
-		return dao.getRow(id, index, filter, range);
+		return dao.getRow(fd, index, filter, range);
 	}
 
 	@Override
 	public int size() {
-		return dao.getSize(id, filter, range);
+		return dao.getSize(fd, filter, range);
 	}
 
 
