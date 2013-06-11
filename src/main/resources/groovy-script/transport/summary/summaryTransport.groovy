@@ -378,34 +378,38 @@ void fillForm() {
         /*
          * Графа 19 Коэффициент Кл
          */
-        if (row.benefitStartDate != null && row.benefitEndDate != null) {
-            int start = row.benefitStartDate.getMonth()
-            int end = row.benefitEndDate.getMonth()
-            row.coefKl = (end - start + 1) / monthCountInPeriod
-        } else {
-            row.coefKl = null
+        if (row.taxBenefitCode != null) {
+            if (row.benefitStartDate != null && row.benefitEndDate != null) {
+                int start = row.benefitStartDate.getMonth()
+                int end = row.benefitEndDate.getMonth()
+                row.coefKl = (end - start + 1) / monthCountInPeriod
+            } else {
+                row.coefKl = null
 
-            def errors = []
-            if (row.benefitStartDate == null) {
-                errors.add('"Дата начала"')
+                def errors = []
+                if (row.benefitStartDate == null) {
+                    errors.add('"Дата начала"')
+                }
+                if (row.benefitEndDate == null) {
+                    errors.add('"Дата окончания"')
+                }
+                //logger.error("\"Коэффициент Кл\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
             }
-            if (row.benefitEndDate == null) {
-                errors.add('"Дата окончания"')
-            }
-            //logger.error("\"Коэффициент Кл\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
         }
 
         /*
          * Графа 20 - Сумма налоговой льготы (руб.)
          */
-        if (row.taxBenefitCode == '20210' || row.taxBenefitCode == '30200') {
-            row.benefitSum = round(row.taxBase * row.coefKl * row.taxRate, 0)
-        } else if (row.taxBenefitCode == '20220') {
-            row.benefitSum = round(row.taxBase * row.taxRate * row.coefKl * reducingPerc / 100, 0)
-        } else if (row.taxBenefitCode == '20230') {
-            row.benefitSum = round(row.coefKl * row.taxRate * (row.taxRate - loweringRates), 0)
-        } else {
-            row.benefitSum = 0
+        if (row.taxBenefitCode != null) {
+            if (row.taxBenefitCode == '20210' || row.taxBenefitCode == '30200') {
+                row.benefitSum = round(row.taxBase * row.coefKl * row.taxRate, 0)
+            } else if (row.taxBenefitCode == '20220') {
+                row.benefitSum = round(row.taxBase * row.taxRate * row.coefKl * reducingPerc / 100, 0)
+            } else if (row.taxBenefitCode == '20230') {
+                row.benefitSum = round(row.coefKl * row.taxRate * (row.taxRate - loweringRates), 0)
+            } else {
+                row.benefitSum = 0
+            }
         }
 
         /*
