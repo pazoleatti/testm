@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,6 +64,8 @@ public class GetMainMenuActionHandler extends
 					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
 				}
+				menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
+						+ ";" + TYPE + "=" + menu.getMeta()));
 			}
 			menuItems.add(taxMenu);
 

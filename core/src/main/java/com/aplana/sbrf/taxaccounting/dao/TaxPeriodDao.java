@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -25,4 +26,13 @@ public interface TaxPeriodDao {
 	 * @return список налоговых периодов по данному виду налога, отсортированный по убыванию даты начала периодоа
 	 */
 	List<TaxPeriod> listByTaxType(TaxType taxType);
+
+	/**
+	 * Получить список всех налоговых периодов по заданному виду налога за период.
+	 * @param taxType вид налога
+	 * @param from дата начала
+	 * @param to дата конца
+	 * @return  список налогововых периодов по данному виду налога за определенный период
+	 */
+	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
 }

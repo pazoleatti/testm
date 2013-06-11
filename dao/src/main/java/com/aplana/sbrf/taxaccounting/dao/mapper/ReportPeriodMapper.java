@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ReportPeriodMapper {
@@ -45,4 +46,11 @@ public interface ReportPeriodMapper {
 	@Select("select * from report_period where tax_period_id = #{taxPeriodId} order by ord")
 	@ResultMap("reportPeriodMap")
 	List<ReportPeriod> listByTaxPeriod(@Param("taxPeriodId")int taxPeriodId);
+
+	/**
+	 *
+	 */
+	@Select("select t1.* from report_period t1 join tax_period t2 on t1.tax_period_id = t2.id where t2.start_date >= #{from} and t2.end_date <= #{to}")
+	@ResultMap("reportPeriodMap")
+	List<ReportPeriod> getReportPeriodsFromTo(@Param("from")Date from, @Param("to")Date to);
 }

@@ -58,12 +58,6 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 	DataGrid<DataRow<HeaderCell>> formDataTable;
 
 	@UiField
-	Button addRowButton;
-
-	@UiField
-	Button removeRowButton;
-
-	@UiField
 	Button upRowButton;
 
 	@UiField

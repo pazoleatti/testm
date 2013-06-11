@@ -1,0 +1,18 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .imageStyle {
+            margin-top: 2px;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel>
+
+        <g:TextBox width="100px" ui:field="textBox"/>
+
+
+            <g:Button ui:field="upButton">▲</g:Button>
+            <g:Button ui:field="downButton">▼</g:Button>
+
+    </g:HorizontalPanel>
+</ui:UiBinder>

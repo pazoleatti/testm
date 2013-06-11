@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,6 +55,20 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 					"select * from tax_period where tax_type = ?",
 					new Object[]{taxType.getCode()},
 					new int[] { Types.VARCHAR },
+					new TaxPeriodRowMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Не удалось получить список налоговых периодов с типом = " + taxType.getCode());
+		}
+	}
+
+	@Override
+	public List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to) {
+		try {
+			return getJdbcTemplate().query(
+					"select * from tax_period where tax_type = ? and start_date>=? and end_date<=?",
+					new Object[]{taxType.getCode(), from, to},
+					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new TaxPeriodRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
