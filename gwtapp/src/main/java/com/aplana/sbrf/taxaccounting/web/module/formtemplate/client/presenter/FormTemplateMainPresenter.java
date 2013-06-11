@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormResul
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormResult;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -171,4 +172,18 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 				}, this));
 	}
 
+	@Override
+	public void uploadFormTemplateSuccess() {
+		setFormTemplate();
+	}
+
+	@Override
+	public void uploadFormTemplateFail(String msg) {
+		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
+	}
+
+	@Override
+	public void downloadFormTemplate() {
+		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
+	}
 }

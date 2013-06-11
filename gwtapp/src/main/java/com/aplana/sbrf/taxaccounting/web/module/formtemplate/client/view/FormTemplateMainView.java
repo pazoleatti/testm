@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.Fo
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,6 +30,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	private int formId;
 
 	@UiField
+	FormPanel uploadFormTemplatePanel;
+
+	@UiField
 	DockLayoutPanel dockPanel;
 
 	@UiField
@@ -49,12 +53,26 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@UiField
 	Button cancelButton;
 
+	@UiField
+	Anchor downloadFormTemplateButton;
+
 	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	@Inject
 	public FormTemplateMainView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
+
+		uploadFormTemplatePanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+			@Override
+			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+				if (!event.getResults().toLowerCase().contains("error")) {
+					getUiHandlers().uploadFormTemplateSuccess();
+				} else {
+					getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
+				}
+			}
+		});
 	}
 
 	@Override
@@ -117,6 +135,8 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public void setFormId(int formId) {
 		List<BaseTab> tabList = tabPanel.getTabList();
 
+		uploadFormTemplatePanel.setAction(GWT.getHostPageBaseURL() + "download/formTemplate/upload/" + formId);
+
 		if (this.formId != 0) {
 			for (BaseTab tab : tabList) {
 				tab.setTargetHistoryToken(tab.getTargetHistoryToken()
@@ -149,5 +169,10 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@Override
 	public void setTitle(String title) {
 		this.title.setText(title);
+	}
+
+	@UiHandler("downloadFormTemplateButton")
+	public void onDownloadFormTemplateButton(ClickEvent event){
+		getUiHandlers().downloadFormTemplate();
 	}
 }

@@ -11,7 +11,7 @@ public interface FormTemplateImpexService {
 	 * @param id
 	 * @return
 	 */
-	InputStream exportFormTemplate(Integer id);
+	void exportFormTemplate(Integer id, OutputStream os);
 	
 	/**
 	 * Импорт
@@ -19,7 +19,7 @@ public interface FormTemplateImpexService {
 	 * @param id
 	 * @param is
 	 */
-	void importFormTemplate(Integer id, OutputStream is);
+	void importFormTemplate(Integer id, InputStream is);
 
 
 }

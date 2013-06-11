@@ -22,6 +22,15 @@
                 <g:Button text="Сохранить" ui:field="saveButton"/>
                 <g:Button text="Сбросить" ui:field="resetButton"/>
                 <g:Button text="Отмена" ui:field="cancelButton"/>
+                <t:ButtonLink text="Экспорт" ui:field="downloadFormTemplateButton"
+                                  title="Экспорт шаблона формы" />
+                <g:FormPanel ui:field="uploadFormTemplatePanel" encoding="multipart/form-data"
+                             method="post">
+                    <g:HorizontalPanel>
+                        <g:FileUpload name="uploadFormFile" />
+                        <g:SubmitButton text="Импортировать" />
+                    </g:HorizontalPanel>
+                </g:FormPanel>
             </t:LeftBar>
         </t:Bar>
     </g:north>

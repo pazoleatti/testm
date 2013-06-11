@@ -1,5 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,51 +20,38 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-
 @Service
 @Transactional
-public class DeclarationTemplateImpexServiceImpl implements
-		DeclarationTemplateImpexService {
+public class FormTemplateImpexServiceImpl implements
+		FormTemplateImpexService {
 
 	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
+	FormTemplateDao formTemplateDao;
 	
 	@Autowired
-	DeclarationTemplateService declarationTemplateService;
+	FormTemplateService formTemplateService;
 	
 	final static String VERSION_FILE = "version";
 
 	@Override
-	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
+	public void exportFormTemplate(Integer id, OutputStream os) {
 
 		try {
-
-			DeclarationTemplate dt = declarationTemplateDao.get(id);
-
+			FormTemplate ft = formTemplateDao.get(id);
 
 			ZipOutputStream zos = new ZipOutputStream(os);
 			
 			// Version
 			ZipEntry ze = new ZipEntry(VERSION_FILE);
 			zos.putNextEntry(ze);
-			zos.write("1.0".getBytes());
+			zos.write(ft.getVersion().getBytes());
 			zos.closeEntry();
-			
+
+			/*
 			// Script
 			ze = new ZipEntry("script.groovy");
 			zos.putNextEntry(ze);
-			zos.write(dt.getCreateScript().getBytes());
+			zos.write(ft.getCreateScript().getBytes());
 			zos.closeEntry();
 			
 			// JasperTemplate
@@ -61,12 +59,12 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.putNextEntry(ze);
 			zos.write(declarationTemplateDao.getJrxml(id).getBytes());
 			zos.closeEntry();
-			
+			*/
 			
 			// content
 			ze = new ZipEntry("content.xml");
 			zos.putNextEntry(ze);
-			zos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><declarationTemplate></declarationTemplate>".getBytes());
+			zos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><formTemplate></formTemplate>".getBytes());
 			zos.closeEntry();
 			
 			zos.finish();
@@ -78,8 +76,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 	}
 
 	@Override
-	public void importDeclarationTemplate(TAUserInfo userInfo, Integer id,
-			InputStream is) {
+	public void importFormTemplate(Integer id, InputStream is) {
 		
 		try {
 
@@ -99,16 +96,17 @@ public class DeclarationTemplateImpexServiceImpl implements
             	}
             	
             }
-			
+			/*
             if ("1.0".equals(version)){
-            	DeclarationTemplate dt = declarationTemplateDao.get(id);
-            	dt.setCreateScript(new String(files.get("script.groovy")));
+            	FormTemplate ft = formTemplateDao.get(id);
+				ft.setCreateScript(new String(files.get("script.groovy")));
             	declarationTemplateDao.save(dt);
             	declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
-            }
-			
+            } */
+
 
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось импортировать шаблон", e);
