@@ -2,7 +2,7 @@
  * Скрипт для РНУ-26 (rnu26.groovy).
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
  *
- * @version 59
+ * @version 65
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
@@ -12,6 +12,11 @@
  *
  * @author rtimerbaev
  */
+
+if (!checkPrevPeriod()) {
+    logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+    return
+}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -787,4 +792,16 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
+}
+
+/**
+ * Проверить данные за предыдущий отчетный период.
+ */
+def checkPrevPeriod() {
+    def formDataOld = getFormDataOld()
+
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        return true
+    }
+    return false
 }

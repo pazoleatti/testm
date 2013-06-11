@@ -59,22 +59,20 @@ switch (formDataEvent) {
 // графа  6 - rnu7Field12Accepted
 // графа  7 - rnu7Field12PrevTaxPeriod
 // графа  8 - rnu5Field5Accepted
-// графа  9 - logicalCheck (9 - rnu5Field5PrevTaxPeriod - удалено)
+// графа  9 - logicalCheck
 // графа 10 - accountingRecords
 // графа 11 - opuSumByEnclosure2
 // графа 12 - opuSumByTableP
 // графа 13 - opuSumTotal
-// графа 14 - difference (14 - opuSumByOpu - удалено)
+// графа 14 - difference
 
 /**
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    // checkRequiredFields()
     calculationBasicSum()
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
  * Скрипт для перевода сводной налогой формы в статус "принят".
  *
@@ -158,7 +156,6 @@ void calculationControlGraphs() {
         }
 
         // графа 11
-        // TODO (Ramil Timerbaev) проверить как работает после того как будет готова формы "расходы сложные"
         row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
 
@@ -212,9 +209,8 @@ void checkCreation() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
- * Проверки наличия декларации Банка при принятии нф (checkDeclarationBankOnAcceptance.groovy).
+ * Проверки наличия декларации Банка при принятии нф.
  *
  * @author rtimerbaev
  * @since 21.03.2013 11:00
@@ -231,7 +227,6 @@ void checkDeclarationBankOnAcceptance() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
  * Проверки наличия декларации Банка при отмене принятия нф.
  *
@@ -250,7 +245,6 @@ void checkDeclarationBankOnCancelAcceptance() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
  * Проверка при осуществлении перевода формы в статус "Принята".
  *
@@ -269,7 +263,6 @@ void checkOnAcceptance() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
  * Проверка, наличия и статуса сводной формы уровня Банка при осуществлении перевода формы в статус "Утверждена".
  *
@@ -288,7 +281,6 @@ void checkOnApproval() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
 /**
  * Проверки при переходе "Отменить принятие".
  */
@@ -307,24 +299,6 @@ void checkOnCancelAcceptance() {
     }
 }
 
-// TODO (Ramil Timerbaev) удалить
-/**
- * Проверка обязательных полей.
- *
- * @author rtimerbaev
- * @since 20.03.2013 18:30
- */
-def checkRequiredFields() {
-    def cell
-    def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
-    for (def row : formData.dataRows) {
-        if (!checkRequiredColumns(row, requiredColumns, true)) {
-            return
-        }
-    }
-}
-
-// TODO (Ramil Timerbaev) удалить
 /**
  * Скрипт для консолидации.
  *
@@ -337,8 +311,7 @@ void consolidation() {
     }
     // очистить форму
     formData.getDataRows().each{ row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod',
-                'rnu5Field5Accepted', 'rnu5Field5PrevTaxPeriod', 'logicalCheck'].each{ alias->
+        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each{ alias->
             row.getCell(alias).setValue(null)
         }
     }
@@ -349,8 +322,7 @@ void consolidation() {
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             child.getDataRows().eachWithIndex() { row, i ->
                 def rowResult = formData.getDataRows().get(i)
-                ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod',
-                        'rnu5Field5Accepted', 'rnu5Field5PrevTaxPeriod'].each {
+                ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
                     if (row.getCell(it).getValue() != null) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
                     }
@@ -464,15 +436,15 @@ def isEmpty(def value) {
 /**
  * Получить сумму значений из расходов сложных.
  *
- * @param formDataComplex данные формы "расходы сложные"
- * @param columnAliasCheck алиас графы формы "расходы сложные", по которой отбираются строки для суммирования
- * @param columnAliasSum алиас графы формы "расходы сложные", значения которой суммируются
- * @param value значение из формы "расходы простые" по которому отбираются строки для суммирования
+ * @param data данные формы
+ * @param columnAliasCheck алиас графы, по которой отбираются строки для суммирования
+ * @param columnAliasSum алиас графы, значения которой суммируются
+ * @param value значение, по которому отбираются строки для суммирования
  */
-def getSumFromComplex(formDataComplex, columnAliasCheck, columnAliasSum, value) {
+def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
     def sum = 0
-    if (formDataComplex != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
-        for (def row : formDataComplex.dataRows) {
+    if (data != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
+        for (def row : data.dataRows) {
             if (row.getCell(columnAliasCheck).getValue() == value) {
                 sum += (row.getCell(columnAliasSum).getValue() ?: 0)
             }

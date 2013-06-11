@@ -2,15 +2,19 @@
  * Скрипт для РНУ-25 (rnu25.groovy).
  * Форма "(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения".
  *
- * @version 59
+ * @version 65
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - расчет графы 10, по чтз графа 9 объязательная, но проверяется на заполненость при расчете графы 10
  *      - логическая проверка 5: графа 8 может принимать значение только + или -, а в этой проверке сравнивается с "x"
  *
  * @author rtimerbaev
  */
+
+if (!checkPrevPeriod()) {
+    logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+    return
+}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -101,7 +105,7 @@ void calc() {
      */
 
     // список проверяемых столбцов (графа 2..5, 7..9)
-    def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotation']
+    def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity']
     for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
@@ -138,7 +142,7 @@ void calc() {
         row.reserve = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
 
         // графа 10
-        row.costOnMarketQuotation = round(row.lotSizeCurrent * row.marketQuotation, 2)
+        row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
 
         // графа 11
         if (row.signSecurity == '+') {
@@ -220,8 +224,7 @@ void calc() {
 def logicalCheck(def useLog) {
     def formDataOld = getFormDataOld()
 
-    if (formDataOld != null &&
-            !formDataOld.dataRows.isEmpty() && !formData.dataRows.isEmpty()) {
+    if (!formData.dataRows.isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
@@ -257,7 +260,7 @@ def logicalCheck(def useLog) {
 
         // список проверяемых столбцов (графа ..)
         def columns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
-                'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
+                'cost', 'signSecurity', 'costOnMarketQuotation',
                 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
         // суммы строки общих итогов
         def totalSums = [:]
@@ -378,7 +381,8 @@ def logicalCheck(def useLog) {
             }
 
             // графа 10
-            if (row.costOnMarketQuotation != round(row.lotSizeCurrent * row.marketQuotation, 2)) {
+            tmp = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
+            if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
                 logger.error("Неверно рассчитана графа «$name»!")
                 return false
@@ -739,4 +743,16 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
+}
+
+/**
+ * Проверить данные за предыдущий отчетный период.
+ */
+def checkPrevPeriod() {
+    def formDataOld = getFormDataOld()
+
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        return true
+    }
+    return false
 }
