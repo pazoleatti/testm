@@ -634,7 +634,7 @@ comment on column numeric_value.value is 'Значение';
 create table string_value (
   row_id number(18) not null,
   column_id number(9) not null,
-  value varchar2(500 char)
+  value varchar2(700 char)
 );
 alter table string_value add constraint string_value_pk primary key (row_id, column_id);
 alter table string_value add constraint string_value_fk_column_id foreign key (column_id) references form_column(id);
