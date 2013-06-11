@@ -36,10 +36,10 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 					Object value = rs.getObject("value");
 
 					if (value != null) {
-						for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
-							if (rowId.getKey() == rs.getLong("row_id")) {
-								for (String alias : rowId.getValue().keySet()) {
-									Column col = rowId.getValue().getCell(alias).getColumn();
+						DataRow<Cell> rowValue = rowIdMap.get(rs.getLong("row_id"));
+						if (rowValue!=null){
+								for (String alias : rowValue.keySet()) {
+									Column col = rowValue.getCell(alias).getColumn();
 									if (col.getId() == rs.getInt("column_id")) {
 										// TODO: думаю, стоит зарефакторить
 										if (value instanceof java.sql.Date) {
@@ -47,12 +47,12 @@ public class CellValueDaoImpl extends AbstractDao implements CellValueDao {
 													((java.sql.Date) value)
 															.getTime());
 										}
-										rowId.getValue().put(alias, value);
+										rowValue.put(alias, value);
 									}
 								}
 							}
 						}
-					}
+					
 				}
 			});
 		}

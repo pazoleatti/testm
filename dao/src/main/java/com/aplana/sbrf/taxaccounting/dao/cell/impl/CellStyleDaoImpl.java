@@ -32,19 +32,18 @@ public class CellStyleDaoImpl extends AbstractDao implements CellStyleDao {
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
 				new int[] { Types.NUMERIC }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
-					if (rs.getLong("row_id") == rowId.getKey()) {
-						for (String alias : rowId.getValue().keySet()) {
-							Cell cell = rowId.getValue().getCell(alias);
-							if (rs.getInt("column_id") == rowId.getValue().getCell(alias).getColumn().getId()) {
-								cell.setStyleAlias(ModelUtils.findByProperties(styles, rs.getInt("style_id"),
-										new ModelUtils.GetPropertiesFunc<FormStyle, Integer>() {
-											@Override
-											public Integer getProperties(FormStyle object) {
-												return object.getId();
-											}
-										}).getAlias());
-							}
+				DataRow<Cell> rowValue = rowIdMap.get(rs.getLong("row_id"));
+				if (rowValue!=null){
+					for (String alias : rowValue.keySet()) {
+						Cell cell = rowValue.getCell(alias);
+						if (rs.getInt("column_id") == rowValue.getCell(alias).getColumn().getId()) {
+							cell.setStyleAlias(ModelUtils.findByProperties(styles, rs.getInt("style_id"),
+									new ModelUtils.GetPropertiesFunc<FormStyle, Integer>() {
+										@Override
+										public Integer getProperties(FormStyle object) {
+											return object.getId();
+										}
+									}).getAlias());
 						}
 					}
 				}

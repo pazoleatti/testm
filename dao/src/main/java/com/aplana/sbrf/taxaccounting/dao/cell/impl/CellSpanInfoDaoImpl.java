@@ -29,16 +29,16 @@ public class CellSpanInfoDaoImpl extends AbstractDao implements CellSpanInfoDao 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId },
 				new int[] { Types.NUMERIC }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
-					if (rs.getLong("row_id") == rowId.getKey()) {
-						for (String alias : rowId.getValue().keySet()) {
-							Cell cell = rowId.getValue().getCell(alias);
-							if (rs.getInt("column_id") == rowId.getValue().getCell(alias).getColumn().getId()) {
-								cell.setColSpan(rs.getInt("colspan"));
-								cell.setRowSpan(rs.getInt("rowspan"));
-							}
+				DataRow<Cell> rowValue = rowIdMap.get(rs.getLong("row_id"));
+				if (rowValue!=null){
+					for (String alias : rowValue.keySet()) {
+						Cell cell = rowValue.getCell(alias);
+						if (rs.getInt("column_id") == rowValue.getCell(alias).getColumn().getId()) {
+							cell.setColSpan(rs.getInt("colspan"));
+							cell.setRowSpan(rs.getInt("rowspan"));
 						}
 					}
+					
 				}
 			}
 		});

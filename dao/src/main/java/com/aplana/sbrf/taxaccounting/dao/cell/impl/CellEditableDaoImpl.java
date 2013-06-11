@@ -27,12 +27,11 @@ public class CellEditableDaoImpl extends AbstractDao implements CellEditableDao 
 
 		getJdbcTemplate().query(sqlQuery, new Object[] { formDataId }, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
-				for (Map.Entry<Long, DataRow<Cell>> rowId : rowIdMap.entrySet()) {
-					if (rowId.getKey() == rs.getLong("row_id")) {
-						for (String alias : rowId.getValue().keySet()) {
-							if (rowId.getValue().getCell(alias).getColumn().getId() == rs.getInt("column_id")) {
-								rowId.getValue().getCell(alias).setEditable(true);
-							}
+				DataRow<Cell> rowValue = rowIdMap.get(rs.getLong("row_id"));
+				if (rowValue!=null){
+					for (String alias : rowValue.keySet()) {
+						if (rowValue.getCell(alias).getColumn().getId() == rs.getInt("column_id")) {
+								rowValue.getCell(alias).setEditable(true);
 						}
 					}
 				}
