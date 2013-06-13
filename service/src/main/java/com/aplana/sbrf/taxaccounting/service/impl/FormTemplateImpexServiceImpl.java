@@ -115,9 +115,7 @@ public class FormTemplateImpexServiceImpl implements
 				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 				ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
 				ftc.fillFormTemplate(ft);
-
 				ft.setScript(new String(files.get(SCRIPT_FILE)));
-
 				ft.getRows().clear();
 				ft.getRows().addAll(xmlSerializationUtils.deserialize
 						(new String(files.get(ROWS_FILE)), ft.getColumns(), ft.getStyles(), Cell.class));

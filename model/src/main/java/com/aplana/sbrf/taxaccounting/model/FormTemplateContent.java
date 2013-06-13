@@ -28,86 +28,6 @@ public class FormTemplateContent {
 	@XmlElement
 	private List<FormStyle> styles;
 
-	public FormType getType() {
-		return type;
-	}
-
-	public void setType(FormType type) {
-		this.type = type;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-
-	public boolean isNumberedColumns() {
-		return numberedColumns;
-	}
-
-	public void setNumberedColumns(boolean numberedColumns) {
-		this.numberedColumns = numberedColumns;
-	}
-
-	public boolean isFixedRows() {
-		return fixedRows;
-	}
-
-	public void setFixedRows(boolean fixedRows) {
-		this.fixedRows = fixedRows;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getFullName() {
-		return fullName;
-	}
-
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public List<Column> getColumns() {
-		return columns;
-	}
-
-	public void setColumns(List<Column> columns) {
-		this.columns = columns;
-	}
-
-	public List<FormStyle> getStyles() {
-		return styles;
-	}
-
-	public void setStyles(List<FormStyle> styles) {
-		this.styles = styles;
-	}
-
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
 		this.type = formTemplate.getType();
 		this.version = formTemplate.getVersion();
@@ -130,9 +50,21 @@ public class FormTemplateContent {
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
 		formTemplate.setCode(code);
-		formTemplate.getColumns().clear();
-		formTemplate.getColumns().addAll(columns);
+
+		//TODO: тут для стилей и колонок выставляем id = null. потому что id для них хранится в xml и оно не null.
+		// эти поля могут быть новыми для текущей версии формы, но id != null поэтому мы просто пытаемся их обновить
+		// вместо того чтобы сделать insert.
+
+		for (FormStyle style : styles) {
+			style.setId(null);
+		}
+		for (Column column : columns) {
+			column.setId(null);
+		}
+
 		formTemplate.getStyles().clear();
 		formTemplate.getStyles().addAll(styles);
+		formTemplate.getColumns().clear();
+		formTemplate.getColumns().addAll(columns);
 	}
 }
