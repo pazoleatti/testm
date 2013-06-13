@@ -44,7 +44,6 @@ public class FormTemplateController {
 			throws IOException {
 		
 		String fileName = "formTemplate_" + formTemplateId + ".zip";
-		resp.setContentType("application/ft");
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		resp.setCharacterEncoding("UTF-8");
 

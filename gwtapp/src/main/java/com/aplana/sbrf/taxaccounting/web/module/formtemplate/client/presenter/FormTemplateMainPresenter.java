@@ -174,6 +174,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Override
 	public void uploadFormTemplateSuccess() {
+		MessageEvent.fire(FormTemplateMainPresenter.this, "Форма импортирована");
 		setFormTemplate();
 	}
 

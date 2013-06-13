@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.apache.commons.io.IOUtils;
@@ -11,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -30,45 +32,57 @@ public class FormTemplateImpexServiceImpl implements
 	
 	@Autowired
 	FormTemplateService formTemplateService;
-	
-	final static String VERSION_FILE = "version";
+
+	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
+	private final static String VERSION_FILE = "version";
+	private final static String CONTENT_FILE = "content.xml";
+	private final static String SCRIPT_FILE = "script.groovy";
+	private final static String ROWS_FILE = "rows.xml";
+	private final static String HEADERS_FILE = "headers.xml";
 
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
-
 		try {
 			FormTemplate ft = formTemplateDao.get(id);
-
 			ZipOutputStream zos = new ZipOutputStream(os);
-			
+
 			// Version
 			ZipEntry ze = new ZipEntry(VERSION_FILE);
 			zos.putNextEntry(ze);
-			zos.write(ft.getVersion().getBytes());
+			zos.write("1.0".getBytes());
 			zos.closeEntry();
 
-			/*
-			// Script
-			ze = new ZipEntry("script.groovy");
-			zos.putNextEntry(ze);
-			zos.write(ft.getCreateScript().getBytes());
-			zos.closeEntry();
-			
-			// JasperTemplate
-			ze = new ZipEntry("report.jrxml");
-			zos.putNextEntry(ze);
-			zos.write(declarationTemplateDao.getJrxml(id).getBytes());
-			zos.closeEntry();
-			*/
-			
 			// content
-			ze = new ZipEntry("content.xml");
+			ze = new ZipEntry(CONTENT_FILE);
 			zos.putNextEntry(ze);
-			zos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><formTemplate></formTemplate>".getBytes());
+			FormTemplateContent ftc = new FormTemplateContent();
+			ftc.fillFormTemplateContent(ft);
+			JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+			jaxbMarshaller.marshal(ftc, zos);
+			zos.closeEntry();
+
+			// Script
+			ze = new ZipEntry(SCRIPT_FILE);
+			zos.putNextEntry(ze);
+			if (ft.getScript() != null) {
+				zos.write(ft.getScript().getBytes());
+			}
 			zos.closeEntry();
 			
-			zos.finish();
+			// DataRows
+			ze = new ZipEntry(ROWS_FILE);
+			zos.putNextEntry(ze);
+			zos.write(xmlSerializationUtils.serialize(ft.getRows()).getBytes());
+			zos.closeEntry();
 
+			// Headers
+			ze = new ZipEntry(HEADERS_FILE);
+			zos.putNextEntry(ze);
+			zos.write(xmlSerializationUtils.serialize(ft.getHeaders()).getBytes());
+			zos.closeEntry();
+
+			zos.finish();
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось экспортировать шаблон", e);
 		}
@@ -77,41 +91,46 @@ public class FormTemplateImpexServiceImpl implements
 
 	@Override
 	public void importFormTemplate(Integer id, InputStream is) {
-		
 		try {
-
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
-			String version = null;
+			FormTemplateContent ftc;
+			FormTemplate ft = formTemplateDao.get(id);
 			Map<String, byte[]> files = new HashMap<String, byte[]>();
-            while((entry = zis.getNextEntry())!=null){
-            	if (VERSION_FILE.equals(entry.getName())){
-            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
-            		IOUtils.copy(zis, baos);
-            		version = new String(baos.toByteArray());
-            	} else {
-            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
-            		IOUtils.copy(zis, baos);
-            		files.put(entry.getName(), baos.toByteArray());
-            	}
-            	
-            }
-			/*
-            if ("1.0".equals(version)){
-            	FormTemplate ft = formTemplateDao.get(id);
-				ft.setCreateScript(new String(files.get("script.groovy")));
-            	declarationTemplateDao.save(dt);
-            	declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+			String version = null;
+			while((entry = zis.getNextEntry())!=null){
+				if (VERSION_FILE.equals(entry.getName())){
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					IOUtils.copy(zis, baos);
+					version = new String(baos.toByteArray());
+				} else {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					IOUtils.copy(zis, baos);
+					files.put(entry.getName(), baos.toByteArray());
+				}
+			}
 
+            if ("1.0".equals(version)) {
+				JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
+				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
+				ftc.fillFormTemplate(ft);
+
+				ft.setScript(new String(files.get(SCRIPT_FILE)));
+
+				ft.getRows().clear();
+				ft.getRows().addAll(xmlSerializationUtils.deserialize
+						(new String(files.get(ROWS_FILE)), ft.getColumns(), ft.getStyles(), Cell.class));
+				ft.getHeaders().clear();
+				ft.getHeaders().addAll(xmlSerializationUtils.deserialize
+						(new String(files.get(HEADERS_FILE)), ft.getColumns(), ft.getStyles(), HeaderCell.class));
+            	formTemplateDao.save(ft);
             } else {
-            	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
-            } */
-
-
+            	throw new ServiceException("Версия файла для импорта не поддерживается: " + ft.getVersion());
+            }
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
-
 	}
 
 }

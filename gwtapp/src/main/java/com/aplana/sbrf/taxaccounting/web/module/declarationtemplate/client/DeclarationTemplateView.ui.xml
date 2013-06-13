@@ -19,22 +19,24 @@
 		</g:north>
 
 		<g:north size="30">
-			<t:Bar>
-				<t:LeftBar>
-					<g:Button text="Сохранить" ui:field="saveButton" />
-					<g:Button text="Сбросить" ui:field="resetButton" />
-					<g:Button text="Отмена" ui:field="cancelButton" />
-					<style:ButtonLink text="Экспорт" ui:field="downloadDectButton"
-						title="Экспорт шаблона деклараций" />
-					<g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data"
-						method="post">
-						<g:HorizontalPanel>
-							<g:FileUpload name="uploadDectFile" />
-							<g:SubmitButton text="Импортировать" />
-						</g:HorizontalPanel>
-					</g:FormPanel>
-				</t:LeftBar>
-			</t:Bar>
+			<g:HorizontalPanel>
+                <t:Bar>
+				    <t:LeftBar>
+					    <g:Button text="Сохранить" ui:field="saveButton" />
+					    <g:Button text="Сбросить" ui:field="resetButton" />
+					    <g:Button text="Отмена" ui:field="cancelButton" />
+				    </t:LeftBar>
+			    </t:Bar>
+                <style:ButtonLink text="Экспорт" ui:field="downloadDectButton"
+                                  title="Экспорт шаблона деклараций" />
+                <g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data"
+                             method="post">
+                    <g:HorizontalPanel>
+                        <g:FileUpload name="uploadDectFile" />
+                        <g:SubmitButton text="Импортировать" />
+                    </g:HorizontalPanel>
+                </g:FormPanel>
+            </g:HorizontalPanel>
 		</g:north>
 
 
