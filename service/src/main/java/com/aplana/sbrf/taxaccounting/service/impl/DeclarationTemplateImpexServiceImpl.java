@@ -80,9 +80,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 	@Override
 	public void importDeclarationTemplate(TAUserInfo userInfo, Integer id,
 			InputStream is) {
-		
 		try {
-
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
 			String version = null;
@@ -97,7 +95,6 @@ public class DeclarationTemplateImpexServiceImpl implements
             		IOUtils.copy(zis, baos);
             		files.put(entry.getName(), baos.toByteArray());
             	}
-            	
             }
 			
             if ("1.0".equals(version)){
@@ -112,9 +109,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
-			
-
-		} catch (Exception e) {
+					} catch (Exception e) {
 			throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
 
