@@ -94,12 +94,10 @@ public class FormTemplateImpexServiceImpl implements
 		try {
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
-			FormTemplateContent ftc;
-			FormTemplate ft = formTemplateDao.get(id);
 			Map<String, byte[]> files = new HashMap<String, byte[]>();
 			String version = null;
-			while((entry = zis.getNextEntry())!=null){
-				if (VERSION_FILE.equals(entry.getName())){
+			while((entry = zis.getNextEntry())!=null) {
+				if (VERSION_FILE.equals(entry.getName())) {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					IOUtils.copy(zis, baos);
 					version = new String(baos.toByteArray());
@@ -111,24 +109,33 @@ public class FormTemplateImpexServiceImpl implements
 			}
 
             if ("1.0".equals(version)) {
-				JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
-				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-				ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
-				ftc.fillFormTemplate(ft);
-				ft.setScript(new String(files.get(SCRIPT_FILE)));
-				ft.getRows().clear();
-				ft.getRows().addAll(xmlSerializationUtils.deserialize
-						(new String(files.get(ROWS_FILE)), ft.getColumns(), ft.getStyles(), Cell.class));
-				ft.getHeaders().clear();
-				ft.getHeaders().addAll(xmlSerializationUtils.deserialize
-						(new String(files.get(HEADERS_FILE)), ft.getColumns(), ft.getStyles(), HeaderCell.class));
+				FormTemplate ft = formTemplateDao.get(id);
+				if (files.get(CONTENT_FILE).length != 0) {
+					FormTemplateContent ftc;
+					JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
+					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+					ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
+					ftc.fillFormTemplate(ft);
+				}
+				if (files.get(SCRIPT_FILE).length != 0) {
+					ft.setScript(new String(files.get(SCRIPT_FILE)));
+				}
+				if (files.get(ROWS_FILE).length != 0) {
+					ft.getRows().clear();
+					ft.getRows().addAll(xmlSerializationUtils.deserialize
+							(new String(files.get(ROWS_FILE)), ft.getColumns(), ft.getStyles(), Cell.class));
+				}
+				if (files.get(HEADERS_FILE).length != 0) {
+					ft.getHeaders().clear();
+					ft.getHeaders().addAll(xmlSerializationUtils.deserialize
+							(new String(files.get(HEADERS_FILE)), ft.getColumns(), ft.getStyles(), HeaderCell.class));
+				}
             	formTemplateDao.save(ft);
             } else {
-            	throw new ServiceException("Версия файла для импорта не поддерживается: " + ft.getVersion());
+            	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
 	}
-
 }

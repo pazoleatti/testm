@@ -102,9 +102,13 @@ public class DeclarationTemplateImpexServiceImpl implements
 			
             if ("1.0".equals(version)){
             	DeclarationTemplate dt = declarationTemplateDao.get(id);
-            	dt.setCreateScript(new String(files.get("script.groovy")));
+				if (files.get("script.groovy").length != 0) {
+					dt.setCreateScript(new String(files.get("script.groovy")));
+				}
             	declarationTemplateDao.save(dt);
-            	declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+				if (files.get("report.jrxml").length != 0) {
+					declarationTemplateService.setJrxml(id, new String(files.get("report.jrxml")));
+				}
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
