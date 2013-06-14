@@ -145,6 +145,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Override
 	public void uploadDectSuccess() {
+		MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация импортирована");
 		setDeclarationTemplate();
 	}
 
@@ -152,6 +153,5 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void uploadDectFail(String msg) {
 		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
-
 
 }

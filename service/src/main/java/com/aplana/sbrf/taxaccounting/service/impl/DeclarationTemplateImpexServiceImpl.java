@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,17 +10,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 @Service
 @Transactional
@@ -31,17 +35,16 @@ public class DeclarationTemplateImpexServiceImpl implements
 	
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
-	
-	final static String VERSION_FILE = "version";
+
+	private final static String VERSION_FILE = "version";
+	private final static String CONTENT_FILE = "content.xml";
+	private final static String SCRIPT_FILE = "script.groovy";
+	private final static String REPORT_FILE = "report.jrxml";
 
 	@Override
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
-
 		try {
-
 			DeclarationTemplate dt = declarationTemplateDao.get(id);
-
-
 			ZipOutputStream zos = new ZipOutputStream(os);
 			
 			// Version
@@ -51,30 +54,32 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.closeEntry();
 			
 			// Script
-			ze = new ZipEntry("script.groovy");
+			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
 			zos.write(dt.getCreateScript().getBytes());
 			zos.closeEntry();
 			
 			// JasperTemplate
-			ze = new ZipEntry("report.jrxml");
+			ze = new ZipEntry(REPORT_FILE);
 			zos.putNextEntry(ze);
 			zos.write(declarationTemplateDao.getJrxml(id).getBytes());
 			zos.closeEntry();
-			
-			
+
 			// content
-			ze = new ZipEntry("content.xml");
+			ze = new ZipEntry(CONTENT_FILE);
 			zos.putNextEntry(ze);
-			zos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><declarationTemplate></declarationTemplate>".getBytes());
+			DeclarationTemplateContent dtc = new DeclarationTemplateContent();
+			dtc.setType(dt.getDeclarationType());
+			dtc.setVersion(dt.getVersion());
+			JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+			jaxbMarshaller.marshal(dtc, zos);
 			zos.closeEntry();
 			
 			zos.finish();
-
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось экспортировать шаблон", e);
 		}
-
 	}
 
 	@Override
@@ -99,6 +104,16 @@ public class DeclarationTemplateImpexServiceImpl implements
 			
             if ("1.0".equals(version)){
             	DeclarationTemplate dt = declarationTemplateDao.get(id);
+
+				if (files.get(CONTENT_FILE).length != 0) {
+					DeclarationTemplateContent dtc;
+					JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
+					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+					dtc = (DeclarationTemplateContent) jaxbUnmarshaller.
+							unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
+					dt.setDeclarationType(dtc.getType());
+					dt.setVersion(dtc.getVersion());
+				}
 				if (files.get("script.groovy").length != 0) {
 					dt.setCreateScript(new String(files.get("script.groovy")));
 				}
@@ -109,10 +124,8 @@ public class DeclarationTemplateImpexServiceImpl implements
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
-					} catch (Exception e) {
+		} catch (Exception e) {
 			throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
-
 	}
-
 }
