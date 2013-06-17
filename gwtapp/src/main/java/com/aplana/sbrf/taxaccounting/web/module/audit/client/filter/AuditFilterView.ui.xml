@@ -5,36 +5,99 @@
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
 
+    <ui:style>
+
+        .titleText{
+            font-size: 16px;
+        }
+
+        .titlePanel{
+            padding-left: 10px
+        }
+        .lable{
+            margin-bottom: 2px
+        }
+    </ui:style>
+
     <g:VerticalPanel>
         <g:cell height="50px">
             <g:HorizontalPanel>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="От" />
-                        <d:CustomDateBox ui:field="fromSearchDate"/>
+                <g:cell>
+                    <g:VerticalPanel width="200px" addStyleNames="{style.titlePanel}">
+                        <g:cell height="30px">
+                            <g:Label styleName="{style.titleText}">Журнал аудита</g:Label>
+                        </g:cell>
+                        <g:cell>
+                            <g:HorizontalPanel>
+                                <g:Label width="30px" text="От" />
+                                <d:CustomDateBox ui:field="fromSearchDate"/>
+                            </g:HorizontalPanel>
+                        </g:cell>
+                        <g:cell>
+                            <g:HorizontalPanel>
+                                <g:Label width="30px" text="до" />
+                                <d:CustomDateBox ui:field="toSearchDate" />
+                            </g:HorizontalPanel>
+                        </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
 
+
                 <g:cell width="250px">
-                    <g:VerticalPanel ui:field="reportPeriodPanel">
-                        <g:Label width="200px" text="Отчетный период" />
+                    <g:VerticalPanel>
+                        <g:cell>
+                            <g:VerticalPanel ui:field="reportPeriodPanel">
+                                <g:Label width="200px" text="Отчетный период" />
+                            </g:VerticalPanel>
+                        </g:cell>
+                        <g:cell verticalAlignment="bottom">
+                            <g:VerticalPanel>
+                                <g:Label width="200px" text="Тип формы"/>
+                                <g:ValueListBox width="200px" ui:field="formDataTaxType" />
+                            </g:VerticalPanel>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:cell>
+                            <g:VerticalPanel>
+                                <g:Label width="200px" text="Подразделение" />
+                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
+                            </g:VerticalPanel>
+                        </g:cell>
+                        <g:cell>
+                            <g:VerticalPanel>
+                                <g:Label width="200px" text="Тип налоговой формы"/>
+                                <g:ValueListBox width="200px" ui:field="formKind" />
+                            </g:VerticalPanel>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:cell>
+                            <g:VerticalPanel>
+                                <g:Label width="200px" text="Пользователь" styleName="{style.lable}"/>
+                                <g:ValueListBox width="200px" ui:field="userId" />
+                            </g:VerticalPanel>
+                        </g:cell>
+                        <g:cell width="250px">
+                            <g:VerticalPanel>
+                                <g:Label text="Вид налоговой формы" styleName="{style.lable}"/>
+                                <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
+                            </g:VerticalPanel>
+                        </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell width="250px" verticalAlignment="bottom">
                     <g:VerticalPanel>
-                        <g:Label width="200px" text="Подразделение" />
-                        <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px" verticalAlignment="bottom">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="Пользователь" />
-                        <g:ValueListBox width="200px" ui:field="userId" />
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-
+                        <g:cell>
+                            <g:VerticalPanel>
+                                <g:Label text="Вид декларации" styleName="{style.lable}"/>
+                                <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeId" showTooltip="true"/>
+                            </g:VerticalPanel>
+                        </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell>
@@ -42,52 +105,23 @@
                         <g:Label height="20px" text="Дата архивации: " />
                         <style:ButtonLink  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/printer-16.png"
                                            title="Выгрузка отчета в excel"/>
+                        <g:cell height="50px"  verticalAlignment="bottom">
+                            <g:HorizontalPanel>
+                                <g:cell>
+                                    <style:Bar>
+                                        <style:LeftBar>
+                                            <g:Button ui:field="search">Поиск</g:Button>
+                                            <g:Button ui:field="archive">Архивировать</g:Button>
+                                        </style:LeftBar>
+                                    </style:Bar>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                        </g:cell>
                     </g:VerticalPanel>
                 </g:cell>
             </g:HorizontalPanel>
         </g:cell>
-        <g:cell height="50px">
-            <g:HorizontalPanel>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="до" />
-                        <d:CustomDateBox ui:field="toSearchDate" />
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="Тип формы"/>
-                        <g:ValueListBox width="200px" ui:field="formDataTaxType" />
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label width="200px" text="Тип налоговой формы"/>
-                        <g:ValueListBox width="200px" ui:field="formKind" />
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label text="Вид налоговой формы"/>
-                        <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px">
-                    <g:VerticalPanel>
-                        <g:Label text="Вид декларации"/>
-                        <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeId" showTooltip="true"/>
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell verticalAlignment="bottom">
-                    <style:Bar>
-                        <style:LeftBar>
-                            <g:Button ui:field="search">Поиск</g:Button>
-                            <g:Button ui:field="archive">Архивировать</g:Button>
-                        </style:LeftBar>
-                    </style:Bar>
-                </g:cell>
-            </g:HorizontalPanel>
-        </g:cell>
+
     </g:VerticalPanel>
 
 </ui:UiBinder>

@@ -9,32 +9,12 @@
         margin-right: auto;
         margin-left: auto;
         }
-
-        .titleText{
-        font-size: 26px;
-        }
-
-        .titleDesc{
-        font-size: 16px;
-        }
-
-        .titlePanel{
-        padding-left: 10px
-        }
     </ui:style>
 
     <g:DockLayoutPanel unit='PX' height="100%" width="100%">
 
         <g:north size="100">
             <g:HorizontalPanel>
-                <g:cell width="335px">
-                    <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
-                        <g:cell height="45px">
-                            <g:Label styleName="{style.titleText}">Журнал аудита</g:Label>
-                        </g:cell>
-                        <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
-                    </g:VerticalPanel>
-                </g:cell>
                 <g:FlowPanel width="100%" ui:field="filterContentPanel" />
             </g:HorizontalPanel>
         </g:north>

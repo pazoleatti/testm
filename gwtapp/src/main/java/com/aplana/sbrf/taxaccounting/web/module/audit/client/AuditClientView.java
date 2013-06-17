@@ -35,9 +35,6 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
     @UiField
     AbstractPager pager;
 
-    @UiField
-    Label titleDesc;
-
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
     private static final String dateColumnHeader = "Дата-время";

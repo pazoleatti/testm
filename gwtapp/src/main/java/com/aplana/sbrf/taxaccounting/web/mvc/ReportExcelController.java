@@ -91,11 +91,11 @@ public class ReportExcelController {
 		JSONObject jObj = new JSONObject(jt);
 
 		JSONArray jArr = jObj.getJSONArray(LOG_ENTRIES);
-		System.out.println(jArr);
+		//System.out.println(jArr);
 		for(int i = 0; i < jArr.length(); i++){
 			listLogEntries.add(
 					new LogEntry(LogLevel.ERROR.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
-							?LogLevel.ERROR:LogLevel.WARNING.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
+							?LogLevel.ERROR : LogLevel.WARNING.name().equals(jArr.getJSONObject(i).getString(JSON_ENTRY_1))
 									?LogLevel.WARNING:LogLevel.INFO,jArr.getJSONObject(i).getString(JSON_ENTRY_2)));
 		}
 		String filePath = formDataPrintingService.generateExcelLogEntry(listLogEntries);
