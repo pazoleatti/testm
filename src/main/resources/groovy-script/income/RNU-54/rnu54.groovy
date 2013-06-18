@@ -2,11 +2,12 @@
  * Скрипт для РНУ-54 (rnu54.groovy).
  * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
  *
- * @version 59
+ * @version 65
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
+ *      - расчет графы 9, 10 недоописано в чтз, потом переделать
  *
  * @author rtimerbaev
  */
@@ -80,8 +81,7 @@ def addNewRow() {
 
     // графа 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
-            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate',
-            'income', 'outcome'].each {
+            'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -105,7 +105,7 @@ void calc() {
     // список проверяемых столбцов (графа 1..10)
     def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
             'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
-            'part1REPODate', 'part2REPODate', 'income', 'outcome']
+            'part1REPODate', 'part2REPODate']
 
     for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
@@ -140,7 +140,19 @@ void calc() {
     /** Курс ЦБ РФ на отчётную дату. */
     def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
 
+    def tmp
+
     formData.dataRows.eachWithIndex { row, i ->
+
+        // графа 9
+        // TODO (Ramil Timerbaev) недоописано в чтз, потом переделать
+        tmp = calcColumn9or10(row)
+        row.income = tmp
+
+        // графа 10
+        // TODO (Ramil Timerbaev)
+        tmp = calcColumn9or10(row)
+        row.outcome = tmp
 
         // графа 11
         if (row.outcome == 0 || isEmpty(row.currencyCode)) {
@@ -271,53 +283,31 @@ def logicalCheck(def useLog) {
                 logger.warn('Неверно определены расходы')
             }
 
-            // 7. Арифметическая проверка графы 12
-            hasError = false
-            if (row.outcome > 0 && row.currencyCode == '810') {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009') &&
-                        row.outcome269st != calc12Value(row, 1.5, reportDate, daysInYear)) {
-                    hasError = true
-                } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') &&
-                        row.part1REPODate < someDate &&
-                        row.outcome269st != calc12Value(row, 2, reportDate, daysInYear)) {
-                    hasError = true
-                } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012') &&
-                        row.outcome269st != calc12Value(row, 1.8, reportDate, daysInYear)) {
-                    hasError = true
-                } else if (row.outcome269st != calc12Value(row, 1.1, reportDate, daysInYear)) {
-                    hasError = true
-                }
-            } else if (row.outcome > 0 && row.currencyCode != '810') {
-                if (inPeriod(reportDate, '01.01.20011', '31.12.2012') &&
-                        row.outcome269st != calc12Value(row, 0.8, reportDate, daysInYear) * course) {
-                    hasError = true
-                } else if (row.outcome269st != calc12Value(row, 1, reportDate, daysInYear) * course) {
-                    hasError = true
-                }
-            }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.)»!')
+            // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
+            // графа 9
+            tmp = row.reserveCalcValue - row.reserve
+            if (row. != (tmp > 0 ? tmp : 0)) {
+                name = getColumnName(row, 'reserveCreation')
+                logger.error("Неверно рассчитана графа «$name»!")
                 return false
             }
-
-            // 8. Арифметическая проверка графы 13
-            hasError = false
-            if (row.outcome == 0 && row.outcomeTax != 0) {
-                hasError = true
-            } else if (row.outcome > 0 && row.outcome <= row.outcome269st &&
-                    row.outcomeTax != row.outcome) {
-                hasError = true
-            } else if (row.outcome > 0 && row.outcome > row.outcome269st &&
-                    row.outcomeTax != row.outcome269st) {
-                hasError = true
-            }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)»!')
-                return false
-            }
+            // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
+// графа 1  - tadeNumber
+// графа 2  - securityName
+// графа 3  - currencyCode
+// графа 4  - nominalPriceSecurities
+// графа 5  - salePrice
+// графа 6  - acquisitionPrice
+// графа 7  - part1REPODate
+// графа 8  - part2REPODate
+// графа 9  - income
+// графа 10 - outcome
+// графа 11 - rateBR
+// графа 12 - outcome269st
+// графа 13 - outcomeTax
         }
 
-        // 9. Проверка итоговых значений формы	Заполняется автоматически (графа 4..6, 9, 10, 12, 13).
+        // 8. Проверка итоговых значений формы	Заполняется автоматически (графа 4..6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
             def totalSumColumns = ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income',
@@ -573,7 +563,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
+            def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
     }
@@ -600,4 +590,29 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 def getReportDate() {
     def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     return (tmp ? tmp.getTime() + 1 : null)
+}
+
+/**
+ * Получить название графы по псевдониму.
+ *
+ * @param row строка
+ * @param alias псевдоним графы
+ */
+def getColumnName(def row, def alias) {
+    if (row != null && alias != null) {
+        return row.getCell(alias).getColumn().getName().replace('%', '%%')
+    }
+    return ''
+}
+
+/**
+ * Получить значение для графы 9 и графы 10
+ *
+ * @param row строка
+ */
+def calcColumn9or10(def row) {
+    // ОКРУГЛ(|((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ|; 2), при условии < 0;
+    // при условии, что если «графа 3» = «код валюты цифровой, соответствующий рублю», то курс ЦБ РФ = 1
+    def tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+    return round(Math.abs(tmp))
 }

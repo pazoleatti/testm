@@ -77,6 +77,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
 			scriptComponentContext.setUserInfo(userInfo);
+			scriptComponentContext.setLogger(logger);
 			if (component instanceof ScriptComponentContextHolder){
 				((ScriptComponentContextHolder)component).setScriptComponentContext(scriptComponentContext);
 			}

@@ -13,20 +13,23 @@
  * @author rtimerbaev
  */
 
-if (!checkPrevPeriod()) {
-    logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-    return
-}
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
+        if (!checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
+        if (!checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         calc()
         logicalCheck(false)
         checkNSI()
@@ -241,37 +244,6 @@ void calc() {
 def logicalCheck(def useLog) {
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
-
-    if (formDataOld != null &&
-            !formDataOld.dataRows.isEmpty() && !formData.dataRows.isEmpty()) {
-        // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
-        def count
-        def missContract = []
-        def severalContract = []
-        formDataOld.dataRows.each { prevRow ->
-            if (prevRow.reserveCalcValue > 0) {
-                count = 0
-                formDataOld.dataRows.each { row ->
-                    if (row.tradeNumber == prevRow.tradeNumber) {
-                        count += 1
-                    }
-                }
-                if (count == 0) {
-                    missContract.add(prevRow.tradeNumber)
-                } else if (count > 1) {
-                    severalContract.add(prevRow.tradeNumber)
-                }
-            }
-        }
-        if (!missContract.isEmpty()) {
-            def message = missContract.join(', ')
-            logger.warn("Отсутствуют строки с номерами сделок: $message!")
-        }
-        if (!severalContract.isEmpty()) {
-            def message = severalContract.join(', ')
-            logger.warn("Существует несколько строк с номерами сделок: $message!")
-        }
-    }
 
     if (!formData.dataRows.isEmpty()) {
         def i = 1

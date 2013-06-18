@@ -16,7 +16,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        checkAndCalc()
         break
     // проверить
     case FormDataEvent.CHECK :
@@ -337,8 +336,11 @@ void consolidation() {
         def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED
                 && child.formType.id == 303) {
-            child.getDataRows().eachWithIndex() { row, i ->
-                def rowResult = formData.getDataRows().get(i)
+            for (def row : child.getDataRows()) {
+                if (row.getAlias() == null) {
+                    continue
+                }
+                def rowResult = formData.getDataRow(row.getAlias())
                 ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                     if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))

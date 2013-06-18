@@ -16,7 +16,6 @@ switch (formDataEvent) {
     // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        checkAndCalc()
         break
     // проверить
     case FormDataEvent.CHECK :
@@ -70,7 +69,7 @@ switch (formDataEvent) {
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    calculationBasicSum()
+    calculationBasicSum(true)
 }
 
 /**
@@ -319,9 +318,12 @@ void consolidation() {
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED) {
-            child.getDataRows().eachWithIndex() { row, i ->
-                def rowResult = formData.getDataRows().get(i)
+        if (child != null && child.formType.id == 304 && child.state == WorkflowState.ACCEPTED) {
+            for (def row : child.getDataRows()) {
+                if (row.getAlias() == null) {
+                    continue
+                }
+                def rowResult = formData.getDataRow(row.getAlias())
                 ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
                     if (row.getCell(it).getValue() != null) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))

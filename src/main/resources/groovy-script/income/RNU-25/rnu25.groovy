@@ -7,24 +7,28 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - логическая проверка 5: графа 8 может принимать значение только + или -, а в этой проверке сравнивается с "x"
+ *      - в чтз нету заполнения графы 4
  *
  * @author rtimerbaev
  */
-
-if (!checkPrevPeriod()) {
-    logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
-    return
-}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
+        if (!checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         logicalCheck(true)
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
+        if (!checkPrevPeriod()) {
+            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            return
+        }
         calc()
         logicalCheck(false)
         checkNSI()
@@ -104,7 +108,7 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа 2..5, 7..9)
+    // список проверяемых столбцов (графа 2, 3, 5, 7..9)
     def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity']
     for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
@@ -137,6 +141,9 @@ void calc() {
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
+
+        // графа 4
+        // row.lotSizePrev = // TODO (Ramil Timerbaev) в чтз нету заполнения
 
         // графа 6
         row.reserve = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
