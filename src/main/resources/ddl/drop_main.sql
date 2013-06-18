@@ -66,6 +66,8 @@ drop table dict_declaration_presentation;
 drop table dict_reorganization_form;
 drop table dict_declaration_present_way;
 
+drop table blob_data;
+
 
 
 

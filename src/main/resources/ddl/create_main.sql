@@ -984,6 +984,26 @@ COMMENT ON COLUMN LOG_SYSTEM."USER_DEPARTMENT_ID" IS 'Код подраздел�
 create sequence seq_log_system start with 10000;
 
 ------------------------------------------------------------------------------------------------------
+create table blob_data
+(
+id varchar2(36) not null,
+name varchar2(200) null,
+data blob not null,
+creation_date date not null,
+type number(1) default 0 not null
+);
+
+alter table blob_data add constraint blob_data_pk primary key(id);
+alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
+
+comment on table blob_data is 'Файловое хранилище';
+comment on column blob_data.id is 'Уникальный идентификатор';
+comment on column blob_data.name is 'Название файла';
+comment on column blob_data.data is 'Бинарные данные';
+comment on column blob_data.creation_date is 'Дата создания';
+comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
+
+------------------------------------------------------------------------------------------------------
 
 
 
