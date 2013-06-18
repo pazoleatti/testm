@@ -4,9 +4,6 @@
  *
  * Версия ЧТЗ: 64
  *
- * TODO:
- *          http://jira.aplana.com/browse/SBRFACCTAX-2775
- *
  * @author vsergeev
  *
  * Графы:
@@ -146,6 +143,10 @@ def calc35to40() {
 
         final income101Data = getIncome101Data(dataRow)
 
+        if (income101Data == null || income101Data.isEmpty()) {     //Нет данных об оборотной ведомости
+            return
+        }
+
         dataRow.with{
 //          графа  14
             opuSumByTableD = getOpuSumByTableDFor35to40(dataRow, income101Data)
@@ -175,12 +176,16 @@ def getDifferenceFor35to40(def dataRow) {
  * Графа 15
  */
 def getOpuSumTotalFor35to40(def dataRow, def income101Data) {
-    return income101Data.sum { income101Row ->
-        if (income101Data.account == dataRow.accountingRecords) {
-            return income101Row.outcomeDebetRemains
-        } else {
-            return 0
+    if (income101Data != null && ! income101Data.isEmpty()) {
+        return income101Data.sum { income101Row ->
+            if (income101Data.account == dataRow.accountingRecords) {
+                return income101Row.outcomeDebetRemains
+            } else {
+                return 0
+            }
         }
+    } else {
+        return 0
     }
 }
 
@@ -190,12 +195,16 @@ def getOpuSumTotalFor35to40(def dataRow, def income101Data) {
  * Графа 14
  */
 def getOpuSumByTableDFor35to40(def dataRow, def income101Data){
-    return income101Data.sum { income101Row ->
-        if (income101Data.account == dataRow.accountingRecords) {
-            return (! isBlankOrNull(income101Row.incomeDebetRemains)) ? income101Row.incomeDebetRemains : 0
-        } else {
-            return 0
+    if (income101Data != null && ! income101Data.isEmpty()) {
+        return income101Data.sum { income101Row ->
+            if (income101Data.account == dataRow.accountingRecords) {
+                return (! isBlankOrNull(income101Row.incomeDebetRemains)) ? income101Row.incomeDebetRemains : 0
+            } else {
+                return 0
+            }
         }
+    } else {
+        return 0
     }
 }
 
@@ -203,15 +212,11 @@ def getOpuSumByTableDFor35to40(def dataRow, def income101Data){
  * возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
  */
 def getIncome101Data(def dataRow) {
-    value = dataRow.getCell('incomeBuhSumAccountNumber').getValue().toString()
-    account = value.substring(0, 3) + value.substring(4)
-    def income101Data = income101Dao.getIncome101(formData.reportPeriodId, account, formData.departmentId)
+    def account = dataRow.accountingRecords
+    def reportPeriodId = formData.reportPeriodId
+    def departmentId = formData.departmentId
 
-    if (income101Data == null || income101Data.isEmpty()) {     //todo http://jira.aplana.com/browse/SBRFACCTAX-2775
-        logger.error("Нет данных об оборотной ведомости")
-    }
-
-    return income101Data
+    return income101Dao.getIncome101(reportPeriodId, account, departmentId)
 }
 
 /**
@@ -263,8 +268,11 @@ def getOpuSumTotalFor4to5(def dataRow, def income102Data) {
             if (income102DataRow.opuCode == dataRow.accountingRecords) {
                 return (! isBlankOrNull(income102DataRow.totalSum)) ? 0 : income102DataRow.totalSum
             }
+
             return 0
         }
+    } else {
+        return 0
     }
 }
 
@@ -272,14 +280,11 @@ def getOpuSumTotalFor4to5(def dataRow, def income102Data) {
  * получаем отчет о прибылях и убытках на период, для которого сформирована текущая форма
  */
 def getIncome102Data(def dataRow){
-    def income102FormData = income102Dao.getIncome102(formData.reportPeriodId,
-            dataRow.incomeBuhSumAccountNumber.toString().substring(8), formData.departmentId)
+    def account = dataRow.accountingRecords
+    def reportPeriodId = formData.reportPeriodId
+    def departmentId = formData.departmentId
 
-    if (income102FormData == null || income102FormData.isEmpty()) {     //todo http://jira.aplana.com/browse/SBRFACCTAX-2775
-        logger.error('Нет информации в отчётах о прибылях и убытках')
-    }
-
-    return income102FormData
+    return income102Dao.getIncome102(reportPeriodId, account, departmentId)
 }
 
 /**
@@ -304,9 +309,13 @@ def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormData) {
  * SBRFACCTAX-2749 Доходы сложные - за какой период брать данные по форме "доходы простые"
  */
 def getSummaryIncomeSimpleFormData() {
-    def summaryIncomeSimpleFormData = FormDataService.find(
-            301, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
-    if (summaryIncomeSimpleFormData == null || summaryIncomeSimpleFormData.dataRows.isEmpty()) {    //todo http://jira.aplana.com/browse/SBRFACCTAX-2775
+    def formId = 301
+    def formDataKind = FormDataKind.SUMMARY
+    def departmentId = formData.departmentId
+    def reportPeriodId = formData.reportPeriodId
+
+    def summaryIncomeSimpleFormData = FormDataService.find(formId, formDataKind, departmentId, reportPeriodId)
+    if (summaryIncomeSimpleFormData == null || summaryIncomeSimpleFormData.dataRows.isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
     }
 
