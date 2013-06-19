@@ -12,6 +12,8 @@
 */
 import groovy.time.TimeCategory
 
+def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+
 def departmentId = declarationData.departmentId
 // получить настройки обособленного подразделения
 def departmentParam = departmentService.getDepartmentParam(departmentId)
