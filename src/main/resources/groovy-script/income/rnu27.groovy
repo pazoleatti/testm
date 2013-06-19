@@ -397,7 +397,11 @@ void deleteAllStatic() {
  * @return
  */
 BigDecimal round(BigDecimal value, int newScale) {
-    return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+    if (value != null) {
+        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
 }
 
 void setError(Column c) {
