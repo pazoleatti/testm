@@ -37,8 +37,6 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	private FormTemplateDao formTemplateDao;
 	@Autowired
 	private DepartmentService departmentService;
-	@Autowired
-	private ReportPeriodDao reportPeriodDao;
 
 	public FormDataScriptingServiceImpl() {
 	}
@@ -47,12 +45,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 	public void executeScript(TAUserInfo userInfo, FormData formData,
 			FormDataEvent event, Logger logger,
 			Map<String, Object> additionalParameters) {
-		
-		// Если отчетный период для ввода остатков, то не выполняем скрипты
-		if (reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
-			return;
-		}
-		
+
 		// Если скрипт отсутствует, то ничего не делаем
 		String script = formTemplateDao.get(formData.getFormTemplateId()).getScript();
 		if (script == null || script.trim().isEmpty()) {
