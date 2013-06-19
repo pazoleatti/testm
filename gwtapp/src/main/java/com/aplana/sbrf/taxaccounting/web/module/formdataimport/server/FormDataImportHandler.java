@@ -37,7 +37,7 @@ public class FormDataImportHandler extends AbstractActionHandler<FormDataImportA
 			throws ActionException {
 
 			Logger logger = new Logger();
-			formDataService.importFormData(logger, securityService.currentUserInfo(), action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
+			formDataService.importFormDataTest(logger, securityService.currentUserInfo(), action.getFormTemplateId(), action.getDepartmentId(), action.getKind(), action.getReportPeriodId());
 			FormDataImportResult result = new FormDataImportResult();
 			result.setLogEntries(logger.getEntries());
 			return result;

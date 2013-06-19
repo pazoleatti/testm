@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +97,7 @@ public class FormDataServiceImpl implements FormDataService {
 	
 	
 	@Override
-	public void importFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
+	public void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
 		Date serviceStart = new Date();
 		FormData fd =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
 		Date saveDate = new Date();
@@ -112,7 +113,29 @@ public class FormDataServiceImpl implements FormDataService {
 				null, fd.getFormType().getId(), fd.getKind().getId(), null);
 	}
 
-	@Override
+    @Override
+    public void importFormData(Logger logger, TAUserInfo userInfo, int formDataId, int formTemplateId,
+                               int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream) {
+        if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
+                departmentId, reportPeriodId)) {
+            FormData fd = formDataDao.getWithoutRows(formDataId);
+            fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
+            Map<String, Object> additionalParameters = new HashMap<String, Object>();
+            additionalParameters.put("dataStream", inputStream);
+            formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
+            formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
+
+            logBusinessService.add(Long.valueOf(formDataId), null, userInfo, FormDataEvent.IMPORT, null);
+            auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId,
+                    null, fd.getFormType().getId(), kind.getId(), null);
+        }else {
+            throw new AccessDeniedException(
+                    "Недостаточно прав для создания налоговой формы с указанными параметрами");
+        }
+
+    }
+
+    @Override
 	public FormData createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
 		FormTemplate form = formTemplateDao.get(formTemplateId);

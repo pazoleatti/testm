@@ -36,4 +36,10 @@ public interface FormDataUiHandlers extends UiHandlers{
 	void onSelectRow();
 
 	void onShowCheckedColumns();
+
+    void onUploadClickedSuccess();
+
+    void onUploadClickedFail(String message);
+
+    String jsoninit();
 }

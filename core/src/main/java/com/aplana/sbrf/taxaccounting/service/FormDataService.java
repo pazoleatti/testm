@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.io.InputStream;
+
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
  * @author dsultanbekov
@@ -28,8 +30,32 @@ public interface FormDataService {
 	 *		обязательных параметров
 	 */
 	FormData createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
-	
-	void importFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
+
+
+    /**
+     * Тестовый метод, для создания формы РНУ с большим колличеством данных. Только для тестирования!
+     * @param logger
+     * @param userInfo
+     * @param formTemplateId
+     * @param departmentId
+     * @param kind
+     * @param reportPeriodId
+     */
+	void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId);
+
+    /**
+     * Метод для импорта данных из xls-файлов
+     * @param logger
+     * @param userInfo
+     * @param formDataId
+     * @param formTemplateId
+     * @param departmentId
+     * @param kind
+     * @param reportPeriodId
+     * @param inputStream
+     */
+    public void importFormData(Logger logger, TAUserInfo userInfo, int formDataId,int formTemplateId,
+                               int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream);
 	
 	
 	/**

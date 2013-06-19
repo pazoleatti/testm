@@ -27,6 +27,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataActi
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -167,7 +169,115 @@ public class FormDataPresenter extends
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 	}
 
-	private void manageDeleteRowButtonEnabled() {
+    @Override
+    public void onUploadClickedSuccess() {
+        //TODO: Надо сделать второй запрос в базу за распарсенными xls данными
+        try {
+
+            final GetFormData action = new GetFormData();
+            action.setFormDataId(formData.getId());
+            action.setDepartmentId(formData.getDepartmentId());
+            action.setFormDataKind(Long.valueOf(formData.getKind().getId()));
+            action.setFormDataTypeId(Long.valueOf(formData.getFormType().getId()));
+            action.setReportPeriodId(Long.valueOf(formData.getReportPeriodId()));
+            action.setReadOnly(readOnlyMode);
+
+            dispatcher.execute(
+                    action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<GetFormDataResult>() {
+                                @Override
+                                public void onSuccess(GetFormDataResult result) {
+
+                                    LogAddEvent.fire(FormDataPresenter.this,
+                                            result.getLogEntries());
+
+                                    formData = result.getFormData();
+                                    formDataAccessParams = result
+                                            .getFormDataAccessParams();
+                                    fixedRows = result.isFixedRows();
+
+                                    switch (result.getFormMode()) {
+                                        case READ_UNLOCKED:
+                                            setReadUnlockedMode();
+                                            break;
+                                        case READ_LOCKED:
+                                            setReadLockedMode(
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+                                        case EDIT:
+                                            setEditMode();
+                                            break;
+                                    }
+
+                                    manageDeleteRowButtonEnabled();
+
+                                    getView().setAdditionalFormInfo(
+                                            result.getTemplateFormName(),
+                                            result.getFormData().getFormType()
+                                                    .getTaxType(),
+                                            result.getFormData().getKind()
+                                                    .getName(),
+                                            result.getDepartmenName(),
+                                            result.getReportPeriod().getName(),
+                                            result.getFormData().getState()
+                                                    .getName());
+                                    // Если период для ввода остатков, то делаем все ячейки редактируемыми
+                                    if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
+                                        forceEditMode = true;
+                                    }
+                                    getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
+                                            + String.valueOf(result.getFormData().getFormType().getTaxType()));
+                                    getView().setColumnsData(
+                                            formData.getFormColumns(),
+                                            readOnlyMode,
+                                            forceEditMode);
+                                    getView().setRowsData(
+                                            formData.getDataRows());
+                                    getView().addCustomHeader(
+                                            formData.getHeaders());
+                                    getView().addCustomTableStyles(
+                                            result.getAllStyles());
+
+                                    TitleUpdateEvent
+                                            .fire(FormDataPresenter.this,
+                                                    readOnlyMode ? "Налоговая форма"
+                                                            : "Редактирование налоговой формы",
+                                                    formData.getFormType()
+                                                            .getName());
+
+                                }
+
+                            }, this).addCallback(
+                            TaManualRevealCallback.create(this, placeManager)));
+
+        } catch (Exception e) {
+            placeManager.navigateBackQuietly();
+            getProxy().manualRevealFailed();
+            MessageEvent.fire(this,
+                    "Не удалось открыть/создать налоговую форму", e);
+        }
+    }
+
+    @Override
+    public void onUploadClickedFail(String msg) {
+        MessageEvent.fire(this, "Не удалось импортировать данные для формы. Ошибка: " + msg);
+    }
+
+    @Override
+    public String jsoninit() {
+        JSONObject jObj = new JSONObject();
+        jObj.put("formDataId",new JSONString(String.valueOf(formData.getId())));
+        jObj.put("formTemplateId",new JSONString(String.valueOf(formData.getFormTemplateId())));
+        jObj.put("departmentId",new JSONString(String.valueOf(formData.getDepartmentId())));
+        jObj.put("formDataKindId",new JSONString(String.valueOf(formData.getKind().getId())));
+        jObj.put("formDataRPId",new JSONString(String.valueOf(formData.getReportPeriodId())));
+
+        return jObj.toString();
+    }
+
+    private void manageDeleteRowButtonEnabled() {
 		if (!readOnlyMode) {
 			MyView view = getView();
 			DataRow dataRow = view.getSelectedRow();

@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.dom.client.TableCellElement;
@@ -16,13 +15,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
@@ -74,6 +77,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Panel manualInputPanel;
 
+    @UiField
+    FormPanel uploadFormDataXls;
+
+    @UiField
+    HorizontalPanel uploadPanel;
+
 	@UiField
 	Label formKindLabel;
 	@UiField
@@ -118,6 +127,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
+
+        uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                if(!event.getResults().toLowerCase().contains("error")){
+                    getUiHandlers().onUploadClickedSuccess();
+                }else{
+                    getUiHandlers().onUploadClickedFail(event.getResults().replaceFirst("error ", ""));
+                }
+            }
+        });
 	}
 
 	@Override
@@ -295,6 +315,19 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onShowCheckedColumns();
 		}
 	}
+
+    @UiHandler("uploadButton")
+    void onUploadButtonClicked(ClickEvent event){
+        //Make post request for script
+        TextBox tb = new TextBox();
+        tb.setName("formData");
+        tb.setValue(getUiHandlers().jsoninit());
+        tb.setVisible(false);
+        uploadPanel.add(tb);
+
+        uploadFormDataXls.submit();
+        uploadPanel.remove(tb);
+    }
 
 	@Override
 	public void setAdditionalFormInfo(

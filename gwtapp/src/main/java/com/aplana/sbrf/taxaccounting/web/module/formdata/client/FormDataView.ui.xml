@@ -52,6 +52,30 @@
         .attrPanel {
             float: right;
         }
+
+        .gwtButton {
+            position: relative;
+            color: #fff;
+            text-decoration: none;
+            font-size: small;
+            cursor: pointer;
+            padding: 2px 4px 2px 5px;
+            border: solid 1px #00940C;
+            border-radius: 11px;
+            margin-left: 0;
+
+            background: #00940C; /* Для старых браузеров */
+            background: -moz-linear-gradient(top, #CBE6B8, #00940C); /* Firefox 3.6+ */
+            /* Chrome 10+, Safari 5.1+ */
+            background: -webkit-linear-gradient(top, #CBE6B8, #00940C);
+            background: -o-linear-gradient(top, #CBE6B8, #00940C); /* Opera 11.10+ */
+            background: -ms-linear-gradient(top, #CBE6B8, #00940C); /* IE10 */
+            background: linear-gradient(top, #CBE6B8, #00940C); /* CSS3 */
+            /* IE8 hack */
+            behavior: url(resources/pie.htc)\0/;
+            -pie-background: linear-gradient(top, #CBE6B8, #00940C)\0/;
+        }
+
     </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
@@ -115,11 +139,20 @@
                             <style:ButtonLink text="Ручной ввод" ui:field="manualInputAnchor" img="resources/img/pencil-16.png"
                                  title="Перейти в режим редактирования"/>
                         </g:SimplePanel>
-                        <style:Bar width="245px" ui:field="saveCancelBar">
+                        <style:Bar width="500px" ui:field="saveCancelBar">
                             <style:LeftBar>
                                 <g:Button ui:field="saveButton" text="Сохранить" />
                                 <g:Button ui:field="cancelButton" text="Отмена" />
                             </style:LeftBar>
+                            <style:RightBar>
+                                <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post"
+                                        action="upload/uploadController/xls/">
+                                    <g:HorizontalPanel ui:field="uploadPanel">
+                                        <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader" addStyleNames="{style.gwtButton}"/>
+                                        <g:Button ui:field="uploadButton" text="Загрузить"/>
+                                    </g:HorizontalPanel>
+                                </g:FormPanel>
+                            </style:RightBar>
                         </style:Bar>
                         <g:CheckBox ui:field="showCheckedColumns" value="true" addStyleNames="{style.showCheckedColumns}"
                                 text="Показывать контрольные поля"/>
