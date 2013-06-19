@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -115,6 +117,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
 					null, null, null);
 
+	}
+
+	@Override
+	public void check(Logger logger, long id, TAUserInfo userInfo) {
+		declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+		// Проверяем ошибки при пересчете
+		if (logger.containsLevel(LogLevel.ERROR)) {
+			throw new ServiceLoggerException(
+					"Найдены ошибки при выполнении проверки декларации",
+					logger.getEntries());
+		} else {
+			logger.info("Проверка завершена, ошибок не обнаружено");
+		}
 	}
 
 	@Override

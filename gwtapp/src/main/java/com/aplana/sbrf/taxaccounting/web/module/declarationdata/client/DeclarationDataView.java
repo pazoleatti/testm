@@ -33,6 +33,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	Button deleteButton;
 	@UiField
+	Button checkButton;
+	@UiField
 	Anchor returnAnchor;
 	@UiField
 	Anchor infoAnchor;
@@ -151,6 +153,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiHandler("deleteButton")
 	public void onDelete(ClickEvent event){
 		getUiHandlers().delete();
+	}
+
+	@UiHandler("checkButton")
+	public void onCheck(ClickEvent event){
+		getUiHandlers().check();
 	}
 
 	@UiHandler("downloadExcelButton")

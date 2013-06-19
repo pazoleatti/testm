@@ -8,6 +8,7 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void refreshDeclaration(Date docDate);
 	void accept(boolean accepted);
 	void delete();
+	void check();
 	void downloadExcel();
 	void downloadXml();
 	void onInfoClicked();

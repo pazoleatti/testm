@@ -82,6 +82,7 @@
                     </g:HorizontalPanel>
                     <style:Bar height="30px">
                         <style:LeftBar>
+                            <g:Button text="Проверить" ui:field="checkButton" />
                             <g:Button text="Обновить" ui:field="refreshButton" />
                             <g:Button text="Удалить" ui:field="deleteButton" />
                             <g:Button text="Принять" ui:field="acceptButton" />

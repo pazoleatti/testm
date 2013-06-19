@@ -53,6 +53,16 @@ public interface DeclarationDataService {
 	void delete(long declarationDataId, TAUserInfo userInfo);
 
 	/**
+	 * метод запускает скрипты с событием проверить
+	 * @param declarationDataId идентификатор декларации
+	 * @param userInfo информация о пользователе, выполняющего действие
+	 * @param logger - объект журнала
+	 * @throws DaoException если такой декларации не существует
+	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+	 */
+	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
+
+	/**
 	 * Установить в декларации флаг принятия
 	 * @param logger - объект журнала
 	 * @param declarationDataId идентификатор декларации
