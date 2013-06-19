@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -42,8 +41,8 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
     private static final String noteColumnHeader = "Текст события";
     private static final String reportPeriodColumnHeader = "Период";
     private static final String departmentColumnHeader = "Подразделение";
-    private static final String formDataKindtColumnHeader = "Тип налоговой формы";
-    private static final String formTypetColumnHeader = "Вид налоговой формы/декларации";
+    private static final String formDataKindColumnHeader = "Тип налоговой формы";
+    private static final String formTypeColumnHeader = "Вид налоговой формы/декларации";
     private static final String userLoginColumnHeader = "Пользователь";
     private static final String userRolesColumnHeader = "Роль пользователя";
     private static final String userIpColumnHeader = "IP пользователя";
@@ -90,14 +89,18 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> formDataKindtColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> formDataKindColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
             public String getValue(LogSystemSearchResultItem object) {
-                return object.getFormKind().getName();
+				if (object.getFormKind() != null) {
+					return object.getFormKind().getName();
+				} else {
+					return "";
+				}
             }
         };
 
-        TextColumn<LogSystemSearchResultItem> formDeclTypetColumn = new TextColumn<LogSystemSearchResultItem>() {
+        TextColumn<LogSystemSearchResultItem> formDeclTypeColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
             public String getValue(LogSystemSearchResultItem object) {
                 if(object.getFormType() != null)
@@ -133,8 +136,8 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
         auditTable.addColumn(noteColumn, noteColumnHeader);
         auditTable.addColumn(reportPeriodColumn, reportPeriodColumnHeader);
         auditTable.addColumn(departmentColumn, departmentColumnHeader);
-        auditTable.addColumn(formDataKindtColumn, formDataKindtColumnHeader);
-        auditTable.addColumn(formDeclTypetColumn, formTypetColumnHeader);
+        auditTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
+        auditTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
         auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
         auditTable.addColumn(userRolesColumn, userRolesColumnHeader);
         auditTable.addColumn(userIpColumn, userIpColumnHeader);

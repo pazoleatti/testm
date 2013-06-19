@@ -140,7 +140,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             if(rs.getInt("form_type_id") != 0)
 			    log.setFormType(formTypeDao.getType(rs.getInt("form_type_id")));
-			log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
+			if (rs.getInt("form_kind_id") != 0) {
+				log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
+			}
 			log.setNote(rs.getString("note"));
 			log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
 			return log;
