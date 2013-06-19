@@ -124,6 +124,15 @@ void calc() {
         }
     }
 
+    // дополнительная проверка графы 10
+    for (def row : formData.dataRows) {
+        // дополнительная проверка графы 10
+        if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
+            logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
+            return
+        }
+    }
+
     /*
      * Расчеты.
      */
@@ -245,7 +254,7 @@ def logicalCheck(def useLog) {
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
 
-    if (!formData.dataRows.isEmpty()) {
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         def i = 1
 
         // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)

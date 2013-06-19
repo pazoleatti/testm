@@ -87,7 +87,7 @@ void checkAndCalc() {
  * @since 22.02.2013 12:50
  */
 void acceptance() {
-    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each{
+    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
@@ -277,7 +277,7 @@ void checkOnAcceptance() {
 }
 
 /**
- * Проверка, наличия и статуса сводной формы уровня Банка  при осуществлении перевода формы в статус "Утверждена".
+ * Проверка, наличия и статуса сводной формы уровня Банка при осуществлении перевода формы в статус "Утверждена".
  *
  * @author auldanov
  * @since 21.03.2013 17:00
@@ -326,16 +326,19 @@ void consolidation() {
         return
     }
     // очистить форму
-    formData.getDataRows().each{ row ->
+    formData.getDataRows().each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { it ->
             row.getCell(it).setValue(null)
         }
     }
+
+    def needCalc = false
+
     // получить консолидированные формы из источников
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.state == WorkflowState.ACCEPTED
-                && child.formType.id == 303) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 303) {
+            needCalc = true
             for (def row : child.getDataRows()) {
                 if (row.getAlias() == null) {
                     continue
@@ -348,6 +351,9 @@ void consolidation() {
                 }
             }
         }
+    }
+    if (needCalc) {
+        checkAndCalc()
     }
     logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }

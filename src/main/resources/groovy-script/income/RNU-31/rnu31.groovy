@@ -332,7 +332,6 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 
     columns.each {
         if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
-            def name = row.getCell(it).getColumn().getName().replace('%', '%%')
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }

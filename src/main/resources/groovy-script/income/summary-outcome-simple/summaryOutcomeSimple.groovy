@@ -48,6 +48,11 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED :
         acceptance()
         break
+    // после вернуть из "Принята" в "Утверждена"
+    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED :
+        checkDeclarationBankOnCancelAcceptance()
+        acceptance()
+        break
 }
 
 // графа  1 - consumptionTypeId
@@ -69,17 +74,17 @@ switch (formDataEvent) {
  * Проверить и расчитать.
  */
 void checkAndCalc() {
-    calculationBasicSum(true)
+    calculationBasicSum()
 }
 
 /**
- * Скрипт для перевода сводной налогой формы в статус "принят".
+ * Для перевода сводной налогой формы в статус "принят".
  *
  * @author rtimerbaev
  * @since 13.02.2013 12:00
  */
 void acceptance() {
-    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each() {
+    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
@@ -284,7 +289,7 @@ void checkOnApproval() {
  * Проверки при переходе "Отменить принятие".
  */
 void checkOnCancelAcceptance() {
-    if (!isTerBank()) {
+    if (isBank()) {
         return
     }
     List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY);
@@ -305,20 +310,23 @@ void checkOnCancelAcceptance() {
  * @since 21.02.2013 13:50
  */
 void consolidation() {
-    if (!isBank()) {
+    if (isTerBank()) {
         return
     }
     // очистить форму
-    formData.getDataRows().each{ row ->
-        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each{ alias->
+    formData.getDataRows().each { row ->
+        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias->
             row.getCell(alias).setValue(null)
         }
     }
 
+    def needCalc = false
+
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (child != null && child.formType.id == 304 && child.state == WorkflowState.ACCEPTED) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
+            needCalc = true
             for (def row : child.getDataRows()) {
                 if (row.getAlias() == null) {
                     continue
@@ -332,6 +340,10 @@ void consolidation() {
             }
         }
     }
+    if (needCalc) {
+        checkAndCalc()
+    }
+    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }
 
 

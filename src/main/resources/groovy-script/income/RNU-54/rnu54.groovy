@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *		- откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
- *      - расчет графы 9, 10 недоописано в чтз, потом переделать
  *
  * @author rtimerbaev
  */
@@ -141,65 +140,71 @@ void calc() {
     def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
 
     def tmp
+    def a, b ,c
 
     formData.dataRows.eachWithIndex { row, i ->
 
-        // графа 9
-        // TODO (Ramil Timerbaev) недоописано в чтз, потом переделать
-        tmp = calcColumn9or10(row)
-        row.income = tmp
-
-        // графа 10
-        // TODO (Ramil Timerbaev)
-        tmp = calcColumn9or10(row)
-        row.outcome = tmp
+        // графа 9, 10
+        a = calcAForColumn9or10(row, reportDate, course)
+        b = 0
+        c = 0
+        if (a < 0) {
+            c = round(Math.abs(a), 2)
+        } else if (a > 0) {
+            b = round(a, 2)
+        }
+        row.income = b
+        row.outcome = c
 
         // графа 11
         if (row.outcome == 0 || isEmpty(row.currencyCode)) {
-            row.rateBR = null
+            tmp = null
         } else if (row.currencyCode == '810') {
             // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-            row.rateBR = 0
+            tmp = 0
         } else {
             if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
-                row.rateBR = 22
+                tmp = 22
             } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
                 // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                row.rateBR = 0
+                tmp = 0
             } else {
-                row.rateBR = 15
+                tmp = 15
             }
         }
+        row.rateBR = tmp
 
         // графа 12
         if (row.outcome == 0) {
-            row.outcome269st = 0
+            tmp = 0
         } else if (row.outcome > 0 && row.currencyCode == '810') {
             if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
-                row.outcome269st = calc12Value(row, 1.5, reportDate, daysInYear)
+                tmp = calc12Value(row, 1.5, reportDate, daysInYear)
             } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
-                row.outcome269st = calc12Value(row, 2, reportDate, daysInYear)
+                tmp = calc12Value(row, 2, reportDate, daysInYear)
             } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012')) {
-                row.outcome269st = calc12Value(row, 1.8, reportDate, daysInYear)
+                tmp = calc12Value(row, 1.8, reportDate, daysInYear)
             } else {
-                row.outcome269st = calc12Value(row, 1.1, reportDate, daysInYear)
+                tmp = calc12Value(row, 1.1, reportDate, daysInYear)
             }
         } else if (row.outcome > 0 && row.currencyCode != '810') {
             if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
-                row.outcome269st = calc12Value(row, 0.8, reportDate, daysInYear) * course
+                tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
             } else {
-                row.outcome269st = calc12Value(row, 1, reportDate, daysInYear) * course
+                tmp = calc12Value(row, 1, reportDate, daysInYear) * course
             }
         }
+        row.outcome269st = tmp
 
         // графа 13
         if (row.outcome == 0) {
-            row.outcomeTax = 0
+            tmp = 0
         } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
-            row.outcomeTax = row.outcome
+            tmp = row.outcome
         } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
-            row.outcomeTax = row.outcome269st
+            tmp = row.outcome269st
         }
+        row.outcomeTax = tmp
     }
 
     // строка итого
@@ -209,8 +214,7 @@ void calc() {
     totalRow.tadeNumber = 'Итого'
     totalRow.getCell('tadeNumber').colSpan = 2
     setTotalStyle(totalRow)
-    ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income',
-            'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
+    ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
 }
@@ -241,6 +245,7 @@ def logicalCheck(def useLog) {
         def hasTotalRow = false
         def hasError
         def tmp
+        def a, b, c
 
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
@@ -284,33 +289,96 @@ def logicalCheck(def useLog) {
             }
 
             // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
+            // графа 9, 10
+            a = calcAForColumn9or10(row, reportDate, course)
+            b = 0
+            c = 0
+            if (a < 0) {
+                c = round(Math.abs(a), 2)
+            } else if (a > 0) {
+                b = round(a, 2)
+            }
             // графа 9
-            tmp = row.reserveCalcValue - row.reserve
-            if (row. != (tmp > 0 ? tmp : 0)) {
-                name = getColumnName(row, 'reserveCreation')
+            if (row.income != b) {
+                name = getColumnName(row, 'income')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+            // графа 10
+            if (row.outcome != c) {
+                name = getColumnName(row, 'outcome')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 11
+            if (row.outcome == 0 || isEmpty(row.currencyCode)) {
+                tmp = null
+            } else if (row.currencyCode == '810') {
+                // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
+                tmp = 0
+            } else {
+                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+                    tmp = 22
+                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
+                    // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
+                    tmp = 0
+                } else {
+                    tmp = 15
+                }
+            }
+            if (row.rateBR != tmp) {
+                name = getColumnName(row, 'rateBR')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 12
+            if (row.outcome == 0) {
+                tmp = 0
+            } else if (row.outcome > 0 && row.currencyCode == '810') {
+                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+                    tmp = calc12Value(row, 1.5, reportDate, daysInYear)
+                } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
+                    tmp = calc12Value(row, 2, reportDate, daysInYear)
+                } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012')) {
+                    tmp = calc12Value(row, 1.8, reportDate, daysInYear)
+                } else {
+                    tmp = calc12Value(row, 1.1, reportDate, daysInYear)
+                }
+            } else if (row.outcome > 0 && row.currencyCode != '810') {
+                if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
+                    tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
+                } else {
+                    tmp = calc12Value(row, 1, reportDate, daysInYear) * course
+                }
+            }
+            if (row.outcome269st != tmp) {
+                name = getColumnName(row, 'outcome269st')
+                logger.error("Неверно рассчитана графа «$name»!")
+                return false
+            }
+
+            // графа 13
+            if (row.outcome == 0) {
+                tmp = 0
+            } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
+                tmp = row.outcome
+            } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
+                tmp = row.outcome269st
+            }
+            if (row.outcomeTax != tmp) {
+                name = getColumnName(row, 'outcomeTax')
                 logger.error("Неверно рассчитана графа «$name»!")
                 return false
             }
             // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
-// графа 1  - tadeNumber
-// графа 2  - securityName
-// графа 3  - currencyCode
-// графа 4  - nominalPriceSecurities
-// графа 5  - salePrice
-// графа 6  - acquisitionPrice
-// графа 7  - part1REPODate
-// графа 8  - part2REPODate
-// графа 9  - income
-// графа 10 - outcome
-// графа 11 - rateBR
-// графа 12 - outcome269st
-// графа 13 - outcomeTax
         }
 
-        // 8. Проверка итоговых значений формы	Заполняется автоматически (графа 4..6, 9, 10, 12, 13).
+        // 8. Проверка итоговых значений формы	Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
-            def totalSumColumns = ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income',
+            def totalSumColumns = ['salePrice', 'acquisitionPrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
@@ -609,10 +677,12 @@ def getColumnName(def row, def alias) {
  * Получить значение для графы 9 и графы 10
  *
  * @param row строка
+ * @param reportDate отчетная дата
+ * @param course курс
  */
-def calcColumn9or10(def row) {
-    // ОКРУГЛ(|((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ|; 2), при условии < 0;
-    // при условии, что если «графа 3» = «код валюты цифровой, соответствующий рублю», то курс ЦБ РФ = 1
-    def tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-    return round(Math.abs(tmp))
+def calcAForColumn9or10(def row, def reportDate, def course) {
+    // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
+    return ((row.acquisitionPrice - row.salePrice) *
+            (reportDate - row.part1REPODate) /
+            (row.part2REPODate - row.part1REPODate)) * course
 }

@@ -108,10 +108,19 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа 2, 3, 5, 7..9)
+    // список проверяемых столбцов (графа 2, 3, 5, 7, 8)
     def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity']
     for (def row : formData.dataRows) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+            return
+        }
+    }
+
+    // дополнительная проверка графы 8
+    for (def row : formData.dataRows) {
+        // дополнительная проверка графы 8
+        if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
+            logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
             return
         }
     }
@@ -231,7 +240,7 @@ void calc() {
 def logicalCheck(def useLog) {
     def formDataOld = getFormDataOld()
 
-    if (!formData.dataRows.isEmpty()) {
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
@@ -557,8 +566,7 @@ void acceptance() {
     if (!logicalCheck(true) || !checkNSI()) {
         return
     }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each() {
         formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
