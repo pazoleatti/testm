@@ -358,11 +358,11 @@ void calc() {
  */
 void sort() {
     formData.dataRows.sort({ DataRow a, DataRow b ->
-        if (a.issuer == b.issuer) {
-            return a.regNumber <=> b.regNumber
-        }
         if (a.issuer == b.issuer && a.regNumber == b.regNumber) {
             return a.tradeNumber <=> b.tradeNumber
+        }
+        if (a.issuer == b.issuer) {
+            return a.regNumber <=> b.regNumber
         }
         return a.issuer <=> b.issuer
     })
