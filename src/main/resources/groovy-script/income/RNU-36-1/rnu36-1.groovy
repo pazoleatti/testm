@@ -205,8 +205,7 @@ def logicalCheck(def useLog) {
         // 2. Арифметическая проверка графы 8
         if (row.termBondsIssued != null || row.termBondsIssued != 0) {
             if (row.percIncome > getColumn8(row, lastDay)) {
-                logger.error('Неверно рассчитана графа «Процентный доход с даты приобретения»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Процентный доход с даты приобретения»!')
             }
         }
     }
@@ -355,7 +354,9 @@ def isFixedRow(def row) {
  * @param lastDay последний день отчетного месяца
  */
 def getColumn8(def row, def lastDay) {
-    return round(((row.nominal - row.averageWeightedPrice) * (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount, 2)
+    def tmp = ((row.nominal - row.averageWeightedPrice) *
+            (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount
+    return round(tmp, 2)
 }
 
 /**

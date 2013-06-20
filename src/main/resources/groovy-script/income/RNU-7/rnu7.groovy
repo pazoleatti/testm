@@ -274,15 +274,13 @@ def logicalCheck(def useLog) {
             // 6. Арифметическая проверка графы 10
             tmp = round(row.rateOfTheBankOfRussia * row.taxAccountingCurrency , 2)
             if (row.taxAccountingRuble != tmp) {
-                logger.error('Неверное значение в поле «Сумма дохода, начисленная в налоговом учёте. Рубли»!')
-                return false
+                logger.warn('Неверное значение в поле «Сумма дохода, начисленная в налоговом учёте. Рубли»!')
             }
 
             // 7. Арифметическая проверка графы 12
             tmp = round(row.accountingCurrency * row.taxAccountingCurrency , 2)
             if (row.ruble != tmp) {
-                logger.error('Неверное значение поле «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
-                return false
+                logger.warn('Неверное значение поле «Сумма дохода, отражённая в бухгалтерском учёте. Рубли»!')
             }
 
             // 8. Проверка итоговых значений по кодам классификации дохода - нахождение кодов классификации

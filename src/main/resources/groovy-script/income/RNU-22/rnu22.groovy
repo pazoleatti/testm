@@ -147,6 +147,8 @@ void calc() {
         return
     }
 
+    def tmp
+
     // графа 1, 13..20
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
@@ -167,11 +169,13 @@ void calc() {
 
         // графа 17
         // TODO (Ramil Timerbaev) уточнят
-        row.accrualPrevCurrency = getSum(formDataOld, 'reportPeriodCurrency')
+        tmp = getSum(formDataOld, 'reportPeriodCurrency')
+        row.accrualPrevCurrency = round(tmp, 2)
 
         // графа 18
         // TODO (Ramil Timerbaev) уточнят
-        row.accrualPrevRub = getSum(formDataOld, 'reportPeriodRub')
+        tmp = getSum(formDataOld, 'reportPeriodRub')
+        row.accrualPrevRub = round(tmp, 2)
 
         // графа 19
         row.reportPeriodCurrency = getColumn13or15or19(row, row.calcPeriodBeginDate, row.calcPeriodEndDate)
@@ -310,56 +314,48 @@ def logicalCheck(def useLog) {
             // 10. Арифметическая проверка графы 13
             tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
             if (row.accruedCommisCurrency != tmp) {
-                logger.error('Неверно рассчитана графа «Сумма начисленной комиссии. Валюта»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма начисленной комиссии. Валюта»!')
             }
 
             // 11. Арифметическая проверка графы 14
             if (row.accruedCommisRub != round(row.accruedCommisCurrency * row.course, 2)) {
-                logger.error('Неверно рассчитана графа «Сумма начисленной комиссии. Рубли»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма начисленной комиссии. Рубли»!')
             }
 
             // 12. Арифметическая проверка графы 15
             tmp = getColumn13or15or19(row, row.calcPeriodAccountingBeginDate, row.calcPeriodAccountingEndDate)
             if (row.commisInAccountingCurrency != tmp) {
-                logger.error('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Валюта»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Валюта»!')
             }
 
             // 13. Арифметическая проверка графы 16
             if (row.commisInAccountingRub != round(row.commisInAccountingCurrency * row.course, 2)) {
-                logger.error('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Рубли»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма комиссии, отражённая в бухгалтерском учёте. Рубли»!')
             }
 
             // 14. Арифметическая проверка графы 17
             // TODO (Ramil Timerbaev) уточнят
             tmp = getSum(formDataOld, 'reportPeriodCurrency')
-            if (row.accrualPrevCurrency != tmp) {
-                logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
-                return false
+            if (row.accrualPrevCurrency != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Валюта»!')
             }
 
             // 15. Арифметическая проверка графы 18
             // TODO (Ramil Timerbaev) уточнят
             tmp = getSum(formDataOld, 'reportPeriodRub')
-            if (row.accrualPrevRub != tmp) {
-                logger.error('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
-                return false
+            if (row.accrualPrevRub != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма доначисления. Предыдущий период. Рубли»!')
             }
 
             // 16. Арифметическая проверка графы 19
             tmp = getColumn13or15or19(row, row.calcPeriodBeginDate, row.calcPeriodEndDate)
             if (row.reportPeriodCurrency != tmp) {
-                logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Валюта»!')
             }
 
             // 17. Арифметическая проверка графы 20
             if (row.reportPeriodRub != round(row.reportPeriodCurrency * row.course, 2)) {
-                logger.error('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Сумма доначисления. Отчётный период. Рубли»!')
             }
 
             // 18. Проверка итогового значений по всей форме - подсчет сумм для общих итогов

@@ -152,26 +152,22 @@ def logicalCheck() {
 
     // 2. Арифметическая проверка графы 1
     if (row.amount != totalRow.amount) {
-        logger.error('Неверно рассчитана графа «Количество (шт.)»!')
-        return false
+        logger.warn('Неверно рассчитана графа «Количество (шт.)»!')
     }
 
     // 3. Арифметическая проверка графы 2
     if (row.incomePrev != totalRow.incomePrev) {
-        logger.error('Неверно рассчитана графа «Доход с даты погашения предыдущего купона (руб.коп.)»!')
-        return false
+        logger.warn('Неверно рассчитана графа «Доход с даты погашения предыдущего купона (руб.коп.)»!')
     }
 
     // 4. Арифметическая проверка графы 3
     if (row.incomeShortPosition != totalRow.incomeShortPosition) {
-        logger.error('Неверно рассчитана графа «Доход с даты открытия короткой позиции, (руб.коп.)»!')
-        return false
+        logger.warn('Неверно рассчитана графа «Доход с даты открытия короткой позиции, (руб.коп.)»!')
     }
 
     // 5. Арифметическая проверка графы 4
     if (row.totalPercIncome != row.incomePrev + row.incomeShortPosition) {
-        logger.error('Неверно рассчитана графа «Всего процентный доход (руб.коп.)»!')
-        return false
+        logger.warn('Неверно рассчитана графа «Всего процентный доход (руб.коп.)»!')
     }
     return true
 }

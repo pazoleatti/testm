@@ -125,7 +125,7 @@ void calc() {
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def lastDay2001 = format.parse('31.12.2001')
 
-    def tmp = null
+    def tmp
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
@@ -133,10 +133,11 @@ void calc() {
         // графа 8
         // TODO (Ramil Timerbaev) спросить у аналитика
         if (row.specCoef > 0) {
-            row.usefulLifeWithUsed = (row.usefulLife - row.monthsUsed) / row.specCoef
+            tmp = (row.usefulLife - row.monthsUsed) / row.specCoef
         } else {
-            row.usefulLifeWithUsed = 0 // TODO (Ramil Timerbaev) не описано в чтз
+            tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
         }
+        row.usefulLifeWithUsed = round(tmp, 0)
 
         // графа 10
         tmp = 0
@@ -145,27 +146,28 @@ void calc() {
         } else if (row.amortGroup in ('3'..'7')) {
             tmp = row.cost * 0.3
         }
-        row.cost10perMonth = tmp
+        row.cost10perMonth = round(tmp, 2)
 
         // графа 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
         row.cost10perExploitation = getFromOld() + row.cost10perMonth
 
         // графа 13
+        tmp = 0
         if (row.usefulLifeWithUsed != 0) {
-            row.amortNorm = (1 / row.usefulLifeWithUsed) * 100
-        } else {
-            row.amortNorm = 0
+            tmp = (1 / row.usefulLifeWithUsed) * 100
         }
+        row.amortNorm = round(tmp, 0)
 
         // графа 14
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
         if (row.usefullLifeEnd > lastDay2001) {
-            row.amortMonth = 0
             // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
+            tmp = (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth)
         } else {
-            row.amortMonth = row.cost / 84
+            tmp = row.cost / 84
         }
+        row.amortMonth = round(tmp, 2)
 
         // графа 11, 15, 16
         if (isFirstMonth()) {
@@ -220,7 +222,7 @@ def logicalCheck(def useLog) {
             'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
     // последнее число предыдущего месяца
-    tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
     def lastDayPrevMonth = (tmp ? tmp.getTime() : null)
 
     def hasError
@@ -268,107 +270,89 @@ def logicalCheck(def useLog) {
         }
 
         // 6. Арифметическая проверка графы 8
-        hasError = false
-        if (row.specCoef < 0 || row.usefulLifeWithUsed != (row.usefulLife - row.monthsUsed) / row.specCoef) {
-            hasError = true
-        } else if (row.specCoef == 0) {
-            hasError = true
+        if (row.specCoef < 0) {
+            tmp = (row.usefulLife - row.monthsUsed) / row.specCoef
         } else {
-            // row.usefulLifeWithUsed = 0 // TODO (Ramil Timerbaev) не описано в чтз
+            tmp = 0 // TODO (Ramil Timerbaev) не описано в чтз
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
-            return false
+        if (row.usefulLifeWithUsed != round(tmp, 0)) {
+            logger.warn('Неверное значение графы «Срок полезного использования с учётом срока эксплуатации предыдущими собственниками (арендодателями, ссудодателями) либо установленный самостоятельно, (мес.)»!')
         }
 
         // 7. Арифметическая проверка графы 10
-        hasError = false
-        if (row.amortGroup in ['1', '2', '8', '9', '10'] && row.cost10perMonth != row.cost * 0.1) {
-            hasError = true
-        } else if (row.amortGroup in ('3'..'7') && row.cost10perMonth != row.cost * 0.3) {
-            hasError = true
+        tmp = 0
+        if (row.amortGroup in ['1', '2', '8', '9', '10']) {
+            tmp = row.cost * 0.1
+        } else if (row.amortGroup in ('3'..'7')) {
+            tmp = row.cost * 0.3
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
-            return false
+        if (row.cost10perMonth != round(tmp, 2)) {
+            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.За месяц»!')
         }
 
         // 8. Арифметическая проверка графы 11
-        hasError = false
-        if (isFirstMonth() && row.cost10perTaxPeriod != row.cost10perMonth) {
-            hasError = true
+        if (isFirstMonth()) {
+            tmp = row.cost10perMonth
 
             // TODO (Ramil Timerbaev) getFromOld() = 11 графа предыдущего месяца
-        } else if (!isFirstMonth() && row.cost10perTaxPeriod != getFromOld() + row.cost10perMonth) {
-            hasError = true
+        } else {
+            tmp = getFromOld() + row.cost10perMonth
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
-            return false
+        if (row.cost10perTaxPeriod != tmp) {
+            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с начала налогового периода»!')
         }
 
         // 9. Арифметическая проверка графы 12
         // TODO (Ramil Timerbaev) getFromOld() = 12 графа предыдущего месяца
         if (row.cost10perExploitation != getFromOld() + row.cost10perMonth) {
-            logger.error('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
-            return false
+            logger.warn('Неверное значение графы «10%% (30%%) от первоначальной стоимости, включаемые в расходы.с даты ввода в эксплуатацию»!')
         }
 
         // 10. Арифметическая проверка графы 13
-        hasError = false
-        if (row.usefulLifeWithUsed != 0 && row.amortNorm != (1 / row.usefulLifeWithUsed) * 100) {
-            hasError = true
+        if (row.usefulLifeWithUsed != 0) {
+            tmp = (1 / row.usefulLifeWithUsed) * 100
         } else if (row.usefulLifeWithUsed == 0) {
-            // hasError = true // TODO (Ramil Timerbaev) уточнить
+            tmp = 0 // TODO (Ramil Timerbaev) уточнить
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
-            return false
+        if (row.amortNorm != round(tmp, 0)) {
+            logger.warn('Неверное значение графы «Норма амортизации (процентов в мес.)»!')
         }
 
         // 11. Арифметическая проверка графы 14
-        hasError = false
-
         // TODO (Ramil Timerbaev) требуется пояснение относительно этой формулы
-        // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
-        def tmp = (row.amortMonth != (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth))
-        if (row.usefullLifeEnd > lastDay2001 && tmp) {
-            hasError = true
-        } else if (row.usefullLifeEnd <= lastDay2001 && row.amortMonth != row.cost / 84) {
-            hasError = true
+        if (row.usefullLifeEnd > lastDay2001) {
+            // row.amortMonth = (row.cost (на начало месяца) - row.cost10perExploitation - row.amortExploitation (на начало месяца)) / (row.usefullLifeEnd - последнее число предыдущего месяца)
+            tmp = (row.cost - row.cost10perExploitation - row.amortExploitation) / (row.usefullLifeEnd - lastDayPrevMonth)
+        } else if (row.usefullLifeEnd <= lastDay2001) {
+            tmp = row.cost / 84
         }
         // TODO (Ramil Timerbaev) убрать && false
-        if (hasError && false) {
-            logger.error('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
-            return false
+        if (row.amortMonth != round(tmp, 2) && false) {
+            logger.warn('Неверно рассчитана графа «Сумма начисленной амортизации.за месяц»!')
         }
 
         // 12. Арифметическая проверка графы 15
-        hasError = false
-        if (isFirstMonth() && row.amortTaxPeriod != row.amortMonth) {
-            hasError = true
+        if (isFirstMonth()) {
+            tmp = row.amortMonth
 
             // TODO (Ramil Timerbaev) getFromOld() = 15 графа предыдущего месяца
-        } else if (!isFirstMonth() && row.amortTaxPeriod != getFromOld() + row.amortMonth) {
-            hasError = true
+        } else {
+            tmp = getFromOld() + row.amortMonth
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «Сумма начисленной амортизации.с начала налогового периода»!')
-            return false
+        if (row.amortTaxPeriod != tmp) {
+            logger.warn('Неверное значение графы «Сумма начисленной амортизации.с начала налогового периода»!')
         }
 
         // 13. Арифметическая проверка графы 16
-        hasError = false
-        if (isFirstMonth() && row.amortExploitation != row.amortMonth) {
-            hasError = true
+        if (isFirstMonth()) {
+            tmp = row.amortMonth
 
             // TODO (Ramil Timerbaev) getFromOld() = 16 графа предыдущего месяца
-        } else if (!isFirstMonth() && row.amortExploitation != getFromOld() + row.amortMonth) {
-            hasError = true
+        } else {
+            tmp = getFromOld() + row.amortMonth
         }
-        if (hasError) {
-            logger.error('Неверное значение графы «Сумма начисленной амортизации.с даты ввода в эксплуатацию»!')
-            return false
+        if (row.amortExploitation != tmp) {
+            logger.warn('Неверное значение графы «Сумма начисленной амортизации.с даты ввода в эксплуатацию»!')
         }
     }
     return true

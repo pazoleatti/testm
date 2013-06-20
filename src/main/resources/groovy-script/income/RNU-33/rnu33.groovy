@@ -152,6 +152,8 @@ void calc() {
     // отсортировать/группировать
     formData.dataRows.sort { it.issue } // TODO (Ramil Timerbaev) уточнить по какому полю группировать
 
+    def tmp
+
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
@@ -160,15 +162,16 @@ void calc() {
         if (row.code == 1 ||
                 ((row.code == 2 || row.code == 5) && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
                 ((row.code == 2 || row.code == 5) && row.marketPricePercent == 0 && row.marketPriceRuble == 0)) {
-            row.exercisePriceRetirement = row.exerciseRuble
+            tmp = row.exerciseRuble
         } else if (row.code == 4) {
-            row.exercisePriceRetirement = row.redemptionVal
+            tmp = row.redemptionVal
         } else if ((row.code == 2 || row.code == 5) && row.exercisePrice < row.marketPricePercent && row.exerciseRuble < row.marketPriceRuble) {
-            row.exercisePriceRetirement = row.marketPriceRuble
+            tmp = row.marketPriceRuble
         } else {
             // TODO (Ramil Timerbaev) иначе что?
-            row.exercisePriceRetirement = 0
+            tmp = 0
         }
+        row.exercisePriceRetirement = tmp
 
         // графа 17
         row.allCost = row.purchaseCost + row.costs + row.costsRetirement
@@ -272,6 +275,8 @@ def logicalCheck(def useLog) {
         // список групп кодов классификации для которых надо будет посчитать суммы
         def totalGroupsName = []
 
+        def tmp
+
         for (def row : formData.dataRows) {
             if (isTotal(row)) {
                 hasTotal = true
@@ -318,56 +323,49 @@ def logicalCheck(def useLog) {
             }
 
             // 6. Арифметическая проверка графы 15
-            condition1 = (row.code == 1 ||
+            if (row.code == 1 ||
                     (row.code in [2, 5] && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
-                    (row.code in [2, 5] && row.marketPricePercent == 0 && row.marketPriceRuble)) &&
-                    row.exercisePriceRetirement != row.exerciseRuble
-
-            condition2 = row.code == 4 && row.exercisePriceRetirement != row.redemptionVal
-
-            condition3 = row.code in [2, 5] &&
+                    (row.code in [2, 5] && row.marketPricePercent == 0 && row.marketPriceRuble)) {
+                tmp = row.exerciseRuble
+            } else if (row.code == 4) {
+                tmp = row.redemptionVal
+            } else if (row.code in [2, 5] &&
                     row.exercisePrice < row.marketPricePercent &&
-                    row.exerciseRuble < row.marketPriceRuble &&
-                    row.exercisePriceRetirement != row.marketPriceRuble
-
-            if (condition1 || condition2 || condition3) {
-                logger.error('Неверное значение поля «Цена реализации (выбытия) для целей налогообложения (руб.коп.)»!')
-                return false
+                    row.exerciseRuble < row.marketPriceRuble) {
+                tmp = row.marketPriceRuble
+            }
+            if (row.exercisePriceRetirement != tmp) {
+                logger.warn('Неверное значение поля «Цена реализации (выбытия) для целей налогообложения (руб.коп.)»!')
             }
 
             // 7. Арифметическая проверка графы 17
             tmp = row.purchaseCost + row.costs + row.costsRetirement
             if (row.allCost != tmp) {
-                logger.error('Неверное значение поля «Всего расходы (руб.коп.)»!')
-                return false
+                logger.warn('Неверное значение поля «Всего расходы (руб.коп.)»!')
             }
 
             // 8. Арифметическая проверка графы 21
             if (row.tenureSkvitovannymiBonds != row.implementationDate - row.purchaseDate) {
-                logger.error('Неверное значение поля «Показатели для расчёта процентного дохода за время владения сквитованными облигациями.Срок владения сквитованными облигациями (дни)»!')
-                return false
+                logger.warn('Неверное значение поля «Показатели для расчёта процентного дохода за время владения сквитованными облигациями.Срок владения сквитованными облигациями (дни)»!')
             }
 
             // 9. Арифметическая проверка графы 22
             tmp = round((row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays, 2)
             if (row.interestEarned != tmp) {
-                logger.error('Неверное значение поля «Процентный доход, полученный за время владения сквитованными облигациями (руб.коп.)»!')
-                return false
+                logger.warn('Неверное значение поля «Процентный доход, полученный за время владения сквитованными облигациями (руб.коп.)»!')
             }
 
             // 10. Арифметическая проверка графы 23
             tmp = row.exercisePriceRetirement - row.allCost - Math.abs(row.interestEarned)
             if (row.profitLoss != tmp) {
-                logger.error('Неверное значение поля «Прибыль (+), убыток (-) от реализации (погашения) за вычетом процентного дохода (руб.коп.)»!')
-                return false
+                logger.warn('Неверное значение поля «Прибыль (+), убыток (-) от реализации (погашения) за вычетом процентного дохода (руб.коп.)»!')
             }
 
             // 11. Арифметическая проверка графы 24
             tmp = row.exercisePriceRetirement - row.exerciseRuble
             if ((row.code != 4 && row.excessOfTheSellingPrice != tmp) ||
                     (row.code == 4 && row.excessOfTheSellingPrice != 0)) {
-                logger.error('Неверное значение поля «Превышение цены реализации для целей налогообложения над ценой реализации (руб.коп.)»!')
-                return false
+                logger.warn('Неверное значение поля «Превышение цены реализации для целей налогообложения над ценой реализации (руб.коп.)»!')
             }
 
             // 12. Проверка итоговых значений за текущий месяц

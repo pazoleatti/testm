@@ -199,15 +199,13 @@ def logicalCheck(def useLog) {
             // 4. Арифметическая проверка графы 8
             tmp = row.income - (row.cost279 - row.costReserve)
             if (row.loss != (tmp < 0 ? Math.abs(tmp) : 0)) {
-                logger.error('Неверно рассчитана графа «Убыток (руб.)»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Убыток (руб.)»!')
             }
 
             // 5. Арифметическая проверка графы 9
             tmp = row.income - (row.cost279 - row.costReserve)
             if (row.profit != (tmp >= 0 ? tmp : 0)) {
-                logger.error('Неверное рассчитана графа «Прибыль (руб.)»!')
-                return false
+                logger.warn('Неверное рассчитана графа «Прибыль (руб.)»!')
             }
 
             // 6. Проверка итогового значений по всей форме - подсчет сумм для общих итогов

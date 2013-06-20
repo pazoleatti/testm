@@ -147,10 +147,11 @@ void calc() {
 
             // графа 15
             if (row.sum - row.marketPrice * 0.8 > 0) {
-                row.sumIncProfit = 0
+                tmp = 0
             } else {
-                row.sumIncProfit = row.marketPrice * 0.8 - row.sum
+                tmp = row.marketPrice * 0.8 - row.sum
             }
+            row.sumIncProfit = round(tmp, 2)
 
             // графа 16
             row.profit = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
@@ -163,8 +164,8 @@ void calc() {
                 row.expensesSum = round(row.loss / row.monthsLoss, 2)
             } else {
                 row.expensesSum = 0
-                def column = getColumnName(row, 'monthsLoss')
-                logger.error("Деление на ноль. Возможно неправильное значение в графе \"$column\".")
+                // def column = getColumnName(row, 'monthsLoss')
+                // logger.warn("Деление на ноль. Возможно неправильное значение в графе \"$column\".")
             }
         }
     }
@@ -227,33 +228,35 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Арифметическая проверка графы 15
-            def hasError
             if (row.sum - row.marketPrice * 0.8 > 0) {
-                hasError = (row.sumIncProfit != 0)
+                tmp = 0
             } else {
-                hasError = (row.sumIncProfit != (row.marketPrice * 0.8 - row.sum))
+                tmp = row.marketPrice * 0.8 - row.sum
             }
-            if (hasError) {
-                logger.error('Неверное значение графы «Сумма к увеличению прибыли (уменьшению убытка)»!')
-                return false
+            if (row.sumIncProfit != round(tmp, 2)) {
+                logger.warn('Неверное значение графы «Сумма к увеличению прибыли (уменьшению убытка)»!')
             }
 
             // 6. Арифметическая проверка графы 16
             if (row.profit != (row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit)) {
-                logger.error('Неверное значение графы «Прибыль от реализации»!')
-                return false
+                logger.warn('Неверное значение графы «Прибыль от реализации»!')
             }
 
             // 7. Арифметическая проверка графы 17
             if (row.loss != row.profit) {
-                logger.error('Неверное значение графы «Убыток от реализации»!')
-                return false
+                logger.warn('Неверное значение графы «Убыток от реализации»!')
             }
 
             // 8. Арифметическая проверка графы 20
-            if (row.monthsLoss != 0 && row.expensesSum != round(row.loss / row.monthsLoss, 2)) {
-                logger.error('Неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
-                return false
+            if (row.monthsLoss != 0) {
+                tmp = round(row.loss / row.monthsLoss, 2)
+            } else {
+                tmp = 0
+                def column = getColumnName(row, 'monthsLoss')
+                logger.warn("Деление на ноль. Возможно неправильное значение в графе \"$column\".")
+            }
+            if (row.expensesSum != tmp) {
+                logger.warn('Неверное значение графы «Сумма расходов, приходящаяся на каждый месяц»!')
             }
 
             // 9. Проверка итоговых значений формы

@@ -149,7 +149,7 @@ void calc() {
         row.number = i + 1
 
         // графа 8
-        row.termDealBill = row.buyDate - row.maturity + 1
+        row.termDealBill = round(row.buyDate - row.maturity + 1, 0)
 
         // графа 9
         row.percIncome = row.nominal - row.price
@@ -159,35 +159,35 @@ void calc() {
 
         // графа 13
         // TODO (Ramil Timerbaev) уточнить чтз про графу 17, в нф всего графов 15
-        row.discountInRub = row.discountInCurrency * getRate(row.currency)
+        row.discountInRub = round(row.discountInCurrency * getRate(row.currency), 2)
 
         // графа 14
         if (row.implementationDate == null && row.sum == null) {
             countsDays = (row.buyDate >= reportDateStart ?
                 reportDate - row.buyDate + 1 : reportDate - reportDateStart)
             if (row.termDealBill != 0) {
-                row.sumIncomeinCurrency = row.percIncome / row.termDealBill * countsDays
+                tmp = row.percIncome / row.termDealBill * countsDays
             } else {
                 def index = getIndex(row)
                 logger.warn("Невозможно вычислить графу 10 в строке $index. Деление на ноль. Количество дней владения векселем в отчётном периоде равно 0.")
             }
         } else {
-            tmp = getCalcPrevColumn(row.bill, 'sumIncomeinCurrency')
-            row.sumIncomeinCurrency = (row.implementationDate != null && row.sum == null ?
-                row.percIncome : row.discountInCurrency) - tmp
+            tmp = (row.implementationDate != null && row.sum == null ? row.percIncome : row.discountInCurrency) -
+                    getCalcPrevColumn(row.bill, 'sumIncomeinCurrency')
         }
+        row.sumIncomeinCurrency = round(tmp, 2)
 
         // графа 15
         if (row.implementationDate == null && row.sum == null) {
             rate = getRate(reportDate)
-            row.sumIncomeinRuble = row.sumIncomeinCurrency * rate
+            tmp = row.sumIncomeinCurrency * rate
         } else if (row.implementationDate != null && row.sum == null) { // последнее условие поменял местами
-            tmp = getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
-            row.sumIncomeinRuble = row.discountInRub - tmp
+            tmp = row.discountInRub - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
         } else if (row.implementationDate != null) {
             rate = getRate(row.implementationDate)
-            row.sumIncomeinRuble = row.sumIncomeinCurrency * rate
+            tmp = row.sumIncomeinCurrency * rate
         }
+        row.sumIncomeinRuble = round(tmp, 2)
     }
 
     // итого (графа 13, 15)
@@ -315,75 +315,56 @@ def logicalCheck(def useLog) {
             }
 
             // 10. Арифметическая проверка графы 8
-            if (row.termDealBill != row.buyDate - row.maturity + 1) {
-                logger.error('Неверно рассчитана графа «Возможный срок обращения векселя, дней»!')
-                return false
+            if (row.termDealBill != round(row.buyDate - row.maturity + 1, 0)) {
+                logger.warn('Неверно рассчитана графа «Возможный срок обращения векселя, дней»!')
             }
 
             // 11. Арифметическая проверка графы 9
             if (row.percIncome != row.nominal - row.price) {
-                logger.error('Неверно рассчитана графа «Заявленный процентный доход (дисконт), ед. валюты»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Заявленный процентный доход (дисконт), ед. валюты»!')
             }
 
             // 12. Арифметическая проверка графы 12
             if (row.discountInCurrency != row.sum - row.price) {
-                logger.error('Неверно рассчитана графа «Фактически поступившая сумма дисконта в валюте»!')
-                return false
+                logger.warn('Неверно рассчитана графа «Фактически поступившая сумма дисконта в валюте»!')
             }
 
             // 13. Арифметическая проверка графы 13
             // TODO (Ramil Timerbaev) уточнить чтз про графу 17, в нф всего графов 15
-            if (row.discountInRub != row.discountInCurrency * getRate(row.currency)) {
-                logger.error('Неверно рассчитана графа «Фактически поступившая сумма дисконта в рублях по курсу Банка России»!')
-                return false
+            if (row.discountInRub != round(row.discountInCurrency * getRate(row.currency), 2)) {
+                logger.warn('Неверно рассчитана графа «Фактически поступившая сумма дисконта в рублях по курсу Банка России»!')
             }
 
             // 14. Арифметическая проверка графы 14
-            hasError = false
             if (row.implementationDate == null && row.sum == null) {
                 countsDays = (row.buyDate >= reportDateStart ?
                     reportDate - row.buyDate + 1 : reportDate - reportDateStart)
-                if (row.termDealBill != 0 &&
-                        row.sumIncomeinCurrency != row.percIncome / row.termDealBill * countsDays) {
-                    hasError = true
+                if (row.termDealBill != 0) {
+                    tmp = row.percIncome / row.termDealBill * countsDays
                 } else {
                     def index = getIndex(row)
                     logger.warn("Невозможно вычислить графу 10 в строке $index. Деление на ноль. Количество дней владения векселем в отчётном периоде равно 0.")
                 }
             } else {
-                tmp = getCalcPrevColumn(row.bill, 'sumIncomeinCurrency')
-                if (row.sumIncomeinCurrency != (row.implementationDate != null && row.sum == null ?
-                    row.percIncome : row.discountInCurrency) - tmp) {
-                    hasError = true
-                }
+                tmp = (row.implementationDate != null && row.sum == null ? row.percIncome : row.discountInCurrency) -
+                        getCalcPrevColumn(row.bill, 'sumIncomeinCurrency')
             }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
-                return false
+            if (row.sumIncomeinCurrency != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
             }
 
             // 15. Арифметическая проверка графы 15
-            hasError = false
             if (row.implementationDate == null && row.sum == null) {
                 rate = getRate(reportDate)
-                if (row.sumIncomeinRuble != row.sumIncomeinCurrency * rate) {
-                    hasError = true
-                }
+                tmp = row.sumIncomeinCurrency * rate
             } else if (row.implementationDate != null && row.sum == null) { // последнее условие поменял местами
-                tmp = getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
-                if (row.sumIncomeinRuble != row.discountInRub - tmp) {
-                    hasError = true
-                }
+                tmp = row.discountInRub - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
             } else if (row.implementationDate != null) {
                 rate = getRate(row.implementationDate)
-                if (row.sumIncomeinRuble != row.sumIncomeinCurrency * rate) {
-                    hasError = true
-                }
+                tmp = row.sumIncomeinCurrency * rate
             }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
-                return false
+            if (row.sumIncomeinRuble != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
             }
 
             // 16. Проверка итогового значений по всей форме - подсчет сумм для общих итогов

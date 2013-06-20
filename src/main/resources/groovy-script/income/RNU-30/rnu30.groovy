@@ -183,8 +183,7 @@ void calc() {
 
                 // TODO (Ramil Timerbaev) уточнить: 13 графу считать только для первых строк или для всех?
                 // графа 13 - стоит поле остальных потому что в расчетах используются графа 14, 15
-                row.reserveCurrent = row.reservePrev + row.calcReserve -
-                        row.reserveRecovery - row.useReserve
+                row.reserveCurrent = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
             }
         }
     }
@@ -261,57 +260,49 @@ def logicalCheck(def useLog) {
                 // 2. Арифметическая проверка графы 7
                 tmp = row.debt45_90DaysSum * row.debt45_90DaysNormAllocation50per / 100
                 if (row.debt45_90DaysReserve != round(tmp, 2)) {
-                    logger.error('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Расчётный резерв»!')
                 }
 
                 // 3. Арифметическая проверка графы 10
                 tmp = row.debtOver90DaysSum * row.debtOver90DaysNormAllocation100per / 100
                 if (row.debtOver90DaysReserve != round(tmp, 2)) {
-                    logger.error('Неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Расчётный резерв»!')
                 }
 
                 // 4. Арифметическая проверка графы 11
                 if (row.totalReserve != row.debt45_90DaysReserve + row.debtOver90DaysReserve) {
-                    logger.error('Наверное значение графы «Итого расчётный резерв»')
-                    return false
+                    logger.warn('Наверное значение графы «Итого расчётный резерв»')
                 }
 
                 // 5. Арифметическая проверка графы 13
                 // TODO (Ramil Timerbaev) уточнить: 13 графу считать только для первых строк или для всех?
                 tmp = row.reservePrev + row.calcReserve - row.reserveRecovery - row.useReserve
                 if (row.reserveCurrent != tmp) {
-                    logger.error('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Резерв на отчётную дату. Текущую»!')
                 }
 
                 // 6. Арифметическая проверка графы 14
                 tmp = (row.totalReserve + row.useReserve > row.reservePrev ?
                     row.totalReserve + row.useReserve - row.reservePrev : 0)
                 if (row.calcReserve != tmp) {
-                    logger.error('Неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670»!')
                 }
 
                 // 7. Арифметическая проверка графы 15
                 tmp = (row.totalReserve + row.useReserve < row.reservePrev ?
                     row.reservePrev - (row.totalReserve + row.useReserve) : 0)
                 if (row.reserveRecovery != tmp) {
-                    logger.error('Неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Изменение фактического резерва. Восстановление резерва на доходах код 13091»!')
                 }
 
                 // 8. Арифметическая проверка графы 6
                 if (row.debt45_90DaysNormAllocation50per != 50) {
-                    logger.error('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Задолженность от 45 до 90 дней. Норматив отчислений 50%»!')
                 }
 
                 // 9. Арифметическая проверка графы 9
                 if (row.debtOver90DaysNormAllocation100per != 100) {
-                    logger.error('Неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
-                    return false
+                    logger.warn('Неверно рассчитана графа «Задолженность более 90 дней. Норматив отчислений 100%»!')
                 }
             }
 

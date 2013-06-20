@@ -6,6 +6,27 @@
  * @author rtimerbaev
  */
 
+switch (formDataEvent) {
+    // создать / обновить
+    case FormDataEvent.CREATE :
+        break
+    // проверить
+    case FormDataEvent.CHECK :
+        return
+        break
+    // принять из создана
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
+        return
+        break
+    // после принять из создана
+    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED :
+        break
+    // из принять в создана
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
+        return
+        break
+}
+
 /*
  * Константы.
  */

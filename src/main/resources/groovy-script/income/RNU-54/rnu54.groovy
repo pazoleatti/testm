@@ -172,7 +172,7 @@ void calc() {
                 tmp = 15
             }
         }
-        row.rateBR = tmp
+        row.rateBR = round(tmp, 2)
 
         // графа 12
         if (row.outcome == 0) {
@@ -301,14 +301,12 @@ def logicalCheck(def useLog) {
             // графа 9
             if (row.income != b) {
                 name = getColumnName(row, 'income')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // графа 10
             if (row.outcome != c) {
                 name = getColumnName(row, 'outcome')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 11
@@ -327,10 +325,9 @@ def logicalCheck(def useLog) {
                     tmp = 15
                 }
             }
-            if (row.rateBR != tmp) {
+            if (row.rateBR != round(tmp, 2)) {
                 name = getColumnName(row, 'rateBR')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
@@ -355,8 +352,7 @@ def logicalCheck(def useLog) {
             }
             if (row.outcome269st != tmp) {
                 name = getColumnName(row, 'outcome269st')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 13
@@ -369,8 +365,7 @@ def logicalCheck(def useLog) {
             }
             if (row.outcomeTax != tmp) {
                 name = getColumnName(row, 'outcomeTax')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
         }
@@ -467,7 +462,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                source.getDataRows().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         formData.dataRows.add(row)
                     }
@@ -682,7 +677,7 @@ def getColumnName(def row, def alias) {
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
     // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
-    return ((row.acquisitionPrice - row.salePrice) *
-            (reportDate - row.part1REPODate) /
-            (row.part2REPODate - row.part1REPODate)) * course
+    def tmp = ((row.acquisitionPrice - row.salePrice) *
+            (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+    return tmp
 }

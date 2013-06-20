@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - логическая проверка 5: графа 8 может принимать значение только + или -, а в этой проверке сравнивается с "x"
- *      - в чтз нету заполнения графы 4
  *
  * @author rtimerbaev
  */
@@ -151,9 +150,6 @@ void calc() {
         // графа 1
         row.rowNumber = index + 1
 
-        // графа 4
-        // row.lotSizePrev = // TODO (Ramil Timerbaev) в чтз нету заполнения
-
         // графа 6
         row.reserve = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
 
@@ -163,13 +159,14 @@ void calc() {
         // графа 11
         if (row.signSecurity == '+') {
             def a = (row.cost == null ? 0 : row.cost)
-            row.reserveCalcValue = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+            tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
         } else {
-            row.reserveCalcValue = 0
+            tmp = 0
         }
+        row.reserveCalcValue = round(tmp, 2)
 
         // графа 12
-        tmp = row.reserveCalcValue - row.reserve
+        tmp = round(row.reserveCalcValue - row.reserve, 2)
         row.reserveCreation = (tmp > 0 ? tmp : 0)
 
         // графа 13
@@ -392,16 +389,14 @@ def logicalCheck(def useLog) {
             // графа 6
             if (row.reserve != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserve')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 10
             tmp = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 11
@@ -411,25 +406,22 @@ def logicalCheck(def useLog) {
             } else {
                 tmp = 0
             }
-            if (row.reserveCalcValue != tmp) {
+            if (row.reserveCalcValue != round(tmp, 2)) {
                 name = getColumnName(row, 'reserveCalcValue')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
-            tmp = row.reserveCalcValue - row.reserve
+            tmp = round(row.reserveCalcValue - row.reserve, 2)
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 13
             if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
                 name = getColumnName(row, 'reserveRecovery')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // 17. конец арифметической проверки =================================
 
@@ -740,7 +732,7 @@ def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue
     if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         for (def row : formDataOld.dataRows) {
             if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return row.getCell(needColumnName)
+                return round(row.getCell(needColumnName), 2)
             }
         }
     }

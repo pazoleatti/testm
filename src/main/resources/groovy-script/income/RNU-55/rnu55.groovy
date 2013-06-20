@@ -154,15 +154,15 @@ void calc() {
             countsDays = (row.buyDate >= reportDateStart ?
                 reportDate - row.buyDate + 1 : reportDate - reportDateStart)
             if (countsDays != 0) {
-                row.sumIncomeinCurrency = row.nominal * row.percent / 100 * countsDays / daysInYear
+                tmp = row.nominal * row.percent / 100 * countsDays / daysInYear
             } else {
                 def index = getIndex(row)
                 logger.warn("Невозможно вычислить графу 10 в строке $index. Деление на ноль. Количество дней владения векселем в отчётном периоде равно 0.")
             }
         } else if (row.percentInCurrency != null && row.percentInRuble != null) {
-            tmp = getCalcPrevColumn10(row.bill, 'sumIncomeinCurrency')
-            row.sumIncomeinCurrency = row.percentInCurrency - tmp
+            tmp = row.percentInCurrency - getCalcPrevColumn10(row.bill, 'sumIncomeinCurrency')
         }
+        row.sumIncomeinCurrency = round(tmp, 2)
 
         // графа 11
         if (row.percentInCurrency == null && row.percentInRuble == null) {
@@ -172,11 +172,11 @@ void calc() {
                 // TODO (Ramil Timerbaev) сделать получение курса Банка России из справочника по графе 4
                 rate = 1
             }
-            row.sumIncomeinRuble = row.sumIncomeinCurrency * rate
+            tmp = row.sumIncomeinCurrency * rate
         } else if (row.percentInCurrency != null && row.percentInRuble != null) {
-            tmp = getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
-            row.sumIncomeinRuble = row.percentInRuble - tmp
+            tmp = row.percentInRuble - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
         }
+        row.sumIncomeinRuble = round(tmp, 2)
     }
 
     // итого
@@ -310,25 +310,20 @@ def logicalCheck(def useLog) {
             if (row.percentInCurrency == null && row.percentInRuble == null) {
                 def countsDays = (row.buyDate >= reportDateStart ?
                     reportDate - row.buyDate + 1 : reportDate - reportDateStart)
-                if (countsDays != 0 &&
-                        row.sumIncomeinCurrency != row.nominal * row.percent / 100 * countsDays / daysInYear) {
-                    hasError = true
+                if (countsDays != 0) {
+                    tmp =  row.nominal * row.percent / 100 * countsDays / daysInYear
                 } else if (useLog) {
                     def index = getIndex(row)
                     logger.warn("Невозможно вычислить графу 10 в строке $index. Деление на ноль. Количество дней владения векселем в отчётном периоде равно 0.")
                 }
-            } else if (row.percentInCurrency != null && row.percentInRuble != null &&
-                    row.sumIncomeinCurrency != row.percentInCurrency - tmp) {
-                hasError = true
+            } else if (row.percentInCurrency != null && row.percentInRuble != null) {
+                tmp = row.percentInCurrency - getCalcPrevColumn10(row.bill, 'sumIncomeinCurrency')
             }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
-                return false
+            if (row.sumIncomeinCurrency != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в валюте»!')
             }
 
             // 11. Арифметическая проверка графы 11
-            hasError = false
-            tmp = getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
             if (row.percentInCurrency == null && row.percentInRuble == null) {
                 if (row.implementationDate != null) {
                     rate = getRate(row.implementationDate)
@@ -336,16 +331,12 @@ def logicalCheck(def useLog) {
                     // TODO (Ramil Timerbaev) сделать получение курса Банка России из справочника по графе 4
                     rate = 1
                 }
-                if (row.sumIncomeinRuble != row.sumIncomeinCurrency * rate) {
-                    hasError = false
-                }
-            } else if (row.percentInCurrency != null && row.percentInRuble != null &&
-                    row.sumIncomeinRuble != row.percentInRuble - tmp) {
-                hasError = true
+                tmp = row.sumIncomeinCurrency * rate
+            } else if (row.percentInCurrency != null && row.percentInRuble != null) {
+                tmp = row.percentInRuble - getCalcPrevColumn10(row.bill, 'sumIncomeinRuble')
             }
-            if (hasError) {
-                logger.error('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
-                return false
+            if (row.sumIncomeinRuble != round(tmp, 2)) {
+                logger.warn('Неверно рассчитана графа «Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России»!')
             }
 
             // 12. Проверка итогового значений по всей форме - подсчет сумм для общих итогов

@@ -164,7 +164,7 @@ void calc() {
 
         // графа 13
         if (row.marketQuotation != null && row.rubCourse != null) {
-            row.marketQuotationInRub = row.marketQuotation * row.rubCourse
+            row.marketQuotationInRub = round(row.marketQuotation * row.rubCourse, 2)
         }
 
         // графа 14
@@ -376,24 +376,21 @@ def logicalCheck(def useLog) {
             // графа 8
             if (row.reserveCalcValuePrev != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserveCalcValuePrev')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 13
             if (row.marketQuotation != null && row.rubCourse != null &&
-                    row.marketQuotationInRub != row.marketQuotation * row.rubCourse) {
+                    row.marketQuotationInRub != round(row.marketQuotation * row.rubCourse, 2)) {
                 name = getColumnName(row, 'marketQuotationInRub')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 14
             tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 15
@@ -405,23 +402,20 @@ def logicalCheck(def useLog) {
             }
             if (row.reserveCalcValue != tmp) {
                 name = getColumnName(row, 'reserveCalcValue')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 16
             tmp = (row.reserveCalcValue ?: 0) - row.reserveCalcValuePrev
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 17
             if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
                 name = getColumnName(row, 'reserveRecovery')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // 17. конец=========================================
 
@@ -755,7 +749,7 @@ def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue
     if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         for (def row : formDataOld.dataRows) {
             if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return row.getCell(needColumnName)
+                return round(row.getCell(needColumnName), 2)
             }
         }
     }

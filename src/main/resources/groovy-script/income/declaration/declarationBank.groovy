@@ -10,6 +10,29 @@
  * @author rtimerbaev
  */
 
+def needLogicalCheck = false
+
+switch (formDataEvent) {
+    // создать / обновить
+    case FormDataEvent.CREATE :
+        break
+    // проверить
+    case FormDataEvent.CHECK :
+        needLogicalCheck = true
+        break
+    // принять из создана
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
+        needLogicalCheck = true
+        break
+    // после принять из создана
+    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED :
+        break
+    // из принять в создана
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
+        return
+        break
+}
+
 /*
  * Константы.
  */
@@ -555,7 +578,7 @@ if (formDataSimpleConsumption != null) {
 /*
  * Логические проверки. Выполняются только при нажатии на кнопку "Принять".
  */
-if (declarationData.isAccepted()) {
+if (needLogicalCheck) {
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
     if (nalVipl311 > nalIschisl) {
         logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)')
@@ -619,6 +642,7 @@ if (declarationData.isAccepted()) {
         logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
         return
     }
+    return
 }
 if (xml == null) {
     return
