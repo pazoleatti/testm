@@ -45,7 +45,6 @@ switch (formDataEvent){
     case FormDataEvent.CREATE:
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
         //2.	Логические проверки значений налоговой.
-        logicalCheck()
         //3.	Проверки соответствия НСИ.
         break
 // Инициирование Пользователем перехода «Подготовить»
@@ -150,6 +149,36 @@ def fillForm(){
          * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
          */
 
+        // графа 9, 10
+        // A=«графа8» - «графа7»
+        def a = row.salePrice - row.acquisitionPrice
+        // B=ОКРУГЛ(A;2),
+        def b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
+        // C= ОКРУГЛ(ABS(A);2),
+        def c = a.abs().setScale(2, BigDecimal.ROUND_HALF_UP)
+
+        /**
+        *    Если  .A>0, то
+             «графа 9» = B
+             «графа 10» = 0
+             Иначе Если  A<0
+             «графа 9» = 0
+             «графа 10» = С
+             Иначе
+             «графа 9»= «графа 10» = 0
+         */
+        if (a.compareTo(0) > 0){
+            row.income = b
+            row.outcome = 0
+        } else if (a.compareTo(0) < 0){
+            row.income = 0
+            row.outcome = c
+        }   else{
+            row.income = 0
+            row.outcome = 0
+        }
+
+
         // Графа 11
         row.rateBR = calculateColumn11(row)
 
@@ -159,8 +188,7 @@ def fillForm(){
         // Графа 13
         row.outcomeTax = calculateColumn13(row)
 
-        // экономим на итерациях, подсчитаем сумму для граф 4,7-10, 12-13
-        newRow.nominalPrice += row.nominalPrice ?:0
+        // экономим на итерациях, подсчитаем сумму для граф 7-10, 12-13
         newRow.acquisitionPrice += row.acquisitionPrice ?:0
         newRow.salePrice += row.salePrice ?:0
         newRow.income += row.income ?:0
@@ -179,8 +207,6 @@ def fillForm(){
  */
 def logicalCheck(){
 
-    logger.error("ev="+formDataEvent)
-
     def nominalPrice = 0
     def acquisitionPrice = 0
     def salePrice = 0
@@ -193,49 +219,39 @@ def logicalCheck(){
         // Обязательность заполнения поля графы 12 и 13. Текст ошибки - Поле “Наименование поля” не заполнено!
         ['outcome269st', 'outcomeTax'].each{ alias ->
             if (row[alias] == null){
-
+                logger.error('Поле '+row.getCell(alias).getColumn().getName()+' не заполнено!')
             }
-                logger.error('Поле '+row.getCell(alias).getAlias()+' не заполнено!')
         }
 
         // графа 5 заполнена и «графа 5» ≤ «отчётная дата». Текст ошибки - Неверно указана дата первой части сделки! SBRFACCTAX-2575
-        Calendar part1REPODate = Calendar.getInstance()
-        part1REPODate.setTime(row.part1REPODate)
-        if (row.part1REPODate != null && (part1REPODate.before(reportingDate) || part1REPODate.equals(reportingDate))){
+        if (!(row.part1REPODate != null && (row.part1REPODate.compareTo(reportingDate.getTime())  <= 0))){
             logger.error('Неверно указана дата первой части сделки!')
         }
 
 
         // графа 6 заполнена и графа 6 в рамках отчётного периода. Текст ошибки - Неверно указана дата второй части сделки!
-        Calendar part2REPODate = Calendar.getInstance()
-        part2REPODate.setTime(row.part2REPODate)
-        if (row.part2REPODate != null && (part2REPODate.after(periodStartDate) || part2REPODate.before(periodEndDate))){
+        if (!(row.part2REPODate != null && (row.part2REPODate.compareTo(periodStartDate.getTime()) >=0 && row.part2REPODate.compareTo(periodEndDate.getTime()) <=0))){
             logger.error('Неверно указана дата второй части сделки!')
         }
 
 
-        // если «графа 9» > 0, «графа 10» = 0. = Задвоение финансового результата!
-        if (row.income > 0 && row.outcome == 0){
+        // если«графа 9» = 0 ИЛИ  «графа 10» = 0. = Задвоение финансового результата!
+        if (!(row.income == 0 || row.outcome == 0)){
             logger.error("Задвоение финансового результата!")
         }
 
-        // если «графа 10» > 0,» графа 9» = 0.  = Задвоение финансового результата!
-        if (row.outcome > 0 && row.income == 0){
-            logger.error("Задвоение финансового результата!")
-        }
-
-        // если «графа 10» = 0, то «графа 12» = 0 и «графа 13» = 0
-        if (row.outcome == 0 && row.outcome269st == 0 && row.outcomeTax == 0){
+         // если «графа 10» = 0, то «графа 12» = 0 и «графа 13» = 0
+        if (row.outcome == 0 && !(row.outcome269st == 0 && row.outcomeTax == 0)){
             logger.error("Задвоение финансового результата!")
         }
 
         //  «графа 9» = «графа 8» - «графа 7», при условии («графа 8» - «графа 7») > 0. = Неверно определены доходы
-        if (row.salePrice -  row.acquisitionPrice > 0 && row.salePrice -  row.acquisitionPrice == row.income){
+        if (row.salePrice -  row.acquisitionPrice > 0 && !(row.salePrice -  row.acquisitionPrice == row.income)){
             logger.warn('Неверно определены доходы')
         }
 
         // «графа 10» =|«графа 8» - «графа 7»|, при условии («графа 8» - «графа 7») < 0.  = Неверно определены расходы
-        if ((row.salePrice -  row.acquisitionPrice) < 0 && row.outcome == (row.salePrice -  row.acquisitionPrice).abs()){
+        if ((row.salePrice -  row.acquisitionPrice) < 0 && !(row.outcome == (row.salePrice -  row.acquisitionPrice).abs())){
             logger.warn('Неверно определены расходы')
         }
 
@@ -289,20 +305,6 @@ def isTotalRow(row){
     row.getAlias()=='total'
 }
 
-class eCalendar{
-    def val = Calendar.getInstance()
-
-    eCalendar(int year, int month, int date) {
-        val.set(year, month, date)
-        this
-    }
-
-    def add(int field, int amount){
-        val.add(field, amount)
-        this
-    }
-}
-
 /**
  * Метод возвращает значение для графы 11
  * Логика выделена в отдельный метод так как
@@ -317,13 +319,10 @@ def calculateColumn11(DataRow row){
             // TODO справочника «Ставки рефинансирования ЦБ РФ» еще нет
             return '';
         } else{ // Если «графа 3» ≠ 810), то
-            def cal = Calendar.getInstance()
-            cal.set(row.part2REPODate.year, row.part2REPODate.month, row.part2REPODate.day)
-
             // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
-            if (cal.after(new eCalendar(2008, 9, 1).add(Calendar.DATE, -1).val) &&  cal.before(new eCalendar(2009, 12, 31).add(Calendar.DATE, 1).val)){
+            if (row.part2REPODate.compareTo(date01092008) >= 0 && compareTo(date31122009) <= 0){
                 return 22
-            } else if (cal.after(new eCalendar(2011, 1, 1).add(Calendar.DATE, -1).val) &&  cal.before(new eCalendar(2012, 12, 31).add(Calendar.DATE, 1).val)){
+            } else if (row.part2REPODate.compareTo(date01012011) >= 0 && compareTo(date31122012) <= 0){
                 // Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
                 // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «графа 6»;
                 // TODO справочник не готов
@@ -344,25 +343,17 @@ def calculateColumn11(DataRow row){
  * @param row
  */
 def calculateColumn12(DataRow row){
-    def cal = Calendar.getInstance()
-    if (row.part2REPODate != null){
-        cal.set(row.part2REPODate.year, row.part2REPODate.month, row.part2REPODate.day)
-    } else {
-        cal = null
-    }
-
-
     // Если «графа 10» > 0 И«графа 3» = 810, то:
     if (row.outcome > 0 && row.currencyCode == 810){
-        if (cal != null && cal.after(new eCalendar(2008, 9, 1).val) &&  cal.before(new eCalendar(2009, 12, 31).val)){
+        if (row.part2REPODate.compareTo(date01092008) >= 0 && row.part2REPODate.compareTo(date31122009) <=0){
             // 1.	Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
             // «графа 12» = («графа 7» × «графа 11» × 1,5) × ((«графа 6» - «графа 5») / 365 (366)) / 100;
             return (row.acquisitionPrice * rateBR * 1.5) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        } else if (cal != null && cal.after(new eCalendar(2010, 1, 1).val) &&  cal.before(new eCalendar(2010, 6, 30).val)){
+        } else if (row.part2REPODate.compareTo(date01012010) >= 0 && row.part2REPODate.compareTo(date30062010) <=0 && row.part1REPODate.compareTo(date01112009) <= 0){
             // 2.	Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 И «графа 5» < 01.11.2009, то:
             // «графа 12» = («графа 7» × «графа 11» × 2) × ((«графа 6» - «графа 5») / 365 (366)) / 100;
             return (row.acquisitionPrice * rateBR * 2) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        } else if (cal != null && cal.after(new eCalendar(2010, 1, 1).val) &&  cal.before(new eCalendar(2012, 12, 31).val)){
+        } else if (row.part2REPODate.compareTo(date01012010) >= 0 && row.part2REPODate.compareTo(date31122012)){
             // 3.	Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
             // «графа 12» = («графа 7» × «графа 11» × 1,8) × ((«графа6» - «графа5») / 365(366)) / 100.
             return (row.acquisitionPrice * rateBR * 1.1) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
@@ -372,7 +363,7 @@ def calculateColumn12(DataRow row){
             return (row.acquisitionPrice * rateBR * 1.1) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
         }
     } else if (row.outcome != null && row.outcome > 0 && row.currencyCode != 810){ // Если «графа 10» > 0 И «графа 3» ≠ 810, то:
-        if (cal != null && cal.after((new eCalendar(2011, 1, 1)).val) &&  cal.before((new eCalendar(2012, 12, 31)).val)){
+        if (row.part2REPODate.compareTo(date01012011) >= 0 && row.part2REPODate.compareTo(date31122012)){
             //Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012, то:
             // «графа 12» = («графа 7» × «графа 11» × 0,8) × ((«графа 6» - «графа 5») / 365 (366)) / 100.
             // При этом, если «графа 6» = «графе 5», то («графа 6» - «графа 5») =1
