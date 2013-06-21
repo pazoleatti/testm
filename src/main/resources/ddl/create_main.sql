@@ -209,33 +209,6 @@ comment on column tax_period.tax_type is 'Вид налога (I-на прибы
 comment on column tax_period.start_date is 'дата начала (включительно)';
 comment on column tax_period.end_date is 'дата окончания (включительно)';
 ---------------------------------------------------------------------------------------------------
-create table report_period
-(
-  id number(9) not null,
-  name varchar2(50) not null,
-  is_active number(1) default 1 not null,
-  months    number(2) not null,
-  tax_period_id number(9) not null,
-  ord           number(2) not null,
-  is_balance_period number(1) default 0 not null
-);
-
-alter table report_period add constraint report_period_pk primary key(id);
-alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
-alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
-alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
-
-comment on table report_period is 'Отчетные периоды';
-comment on column report_period.id is 'Первичный ключ';
-comment on column report_period.name is 'Наименование периода';
-comment on column report_period.is_active is 'Признак активности';
-comment on column report_period.months is 'Количество месяцев в периоде';
-comment on column report_period.tax_period_id is 'Налоговый период';
-comment on column report_period.ord is 'Номер отчетного периода в налоговом';
-comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
-
-create sequence seq_report_period start with 100;
-----------------------------------------------------------------------------------------------------
 create table form_template (
   id number(9) not null,
   type_id number(9) not null,
@@ -343,8 +316,6 @@ comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'признак проверочного столбца';
 comment on column form_column.format is 'формат';
 ---------------------------------------------------------------------------------------------------
-
----------------------------------------------------------------------------------------------------
 create table department
 (
   id number(9) not null,
@@ -372,8 +343,37 @@ comment on column department.sbrf_code is 'Код подразделения в 
 
 alter table DEPARTMENT add constraint department_chk_id check ((type= 1 and id = 1) or (type <> 1 and id <> 1));
 alter table DEPARTMENT add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
-
 ---------------------------------------------------------------------------------------------------
+create table report_period
+(
+  id number(9) not null,
+  name varchar2(50) not null,
+  is_active number(1) default 1 not null,
+  months    number(2) not null,
+  tax_period_id number(9) not null,
+  ord           number(2) not null,
+  department_id number(15) not null,
+  is_balance_period number(1) default 0 not null
+);
+
+alter table report_period add constraint report_period_pk primary key(id);
+alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
+alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
+alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
+alter table report_period add constraint report_period_fk_department_id foreign key (department_id) references department(id);
+
+comment on table report_period is 'Отчетные периоды';
+comment on column report_period.id is 'Первичный ключ';
+comment on column report_period.name is 'Наименование периода';
+comment on column report_period.is_active is 'Признак активности';
+comment on column report_period.months is 'Количество месяцев в периоде';
+comment on column report_period.tax_period_id is 'Налоговый период';
+comment on column report_period.ord is 'Номер отчетного периода в налоговом';
+comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
+comment on column report_period.department_id is 'Подразделение';
+
+create sequence seq_report_period start with 100;
+----------------------------------------------------------------------------------------------------
 create table income_101
 (report_period_id number(9) not null,
  account varchar2(255) not null,
@@ -399,7 +399,7 @@ comment on column income_101.debet_rate is 'Обороты по дебету';
 comment on column income_101.credit_rate is 'Обороты по кредиту';
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
-comment on column income_101.department_id is 'подразделение';
+comment on column income_101.department_id is 'Подразделение';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102
 (report_period_id number(9) not null,
@@ -415,7 +415,7 @@ comment on table income_102 is 'Отчет о прибылях и убытках
 comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
-comment on column income_102.department_id is 'подразделение';
+comment on column income_102.department_id is 'Подразделение';
 ---------------------------------------------------------------------------------------------------
 create table declaration_type
 (

@@ -90,15 +90,15 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 		}
 
 		if(dformData.getState() != WorkflowState.ACCEPTED){
-			// Execute composition scripts
-			// TODO: Надо подумать, что делать с пользователем да и вообще.
-			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
-			formDataDao.save(dformData);
 			logBusinessService.add(dformData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
 					"Событие инициировано Системой");
 			auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
 					dformData.getDepartmentId(), dformData.getReportPeriodId(),
 					null, dformData.getFormType().getId(), dformData.getKind().getId(), "Событие инициировано Системой");
+			// Execute composition scripts
+			// TODO: Надо подумать, что делать с пользователем да и вообще.
+			formDataScriptingService.executeScript(null, dformData, FormDataEvent.COMPOSE, logger, null);
+			formDataDao.save(dformData);
 		} else {
             FormTemplate sformTemplate = formTemplateDao.get(sformData.getFormTemplateId());
             FormTemplate dformTemplate = formTemplateDao.get(dformData.getFormTemplateId());
