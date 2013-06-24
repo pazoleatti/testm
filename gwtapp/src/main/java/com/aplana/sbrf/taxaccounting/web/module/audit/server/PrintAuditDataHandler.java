@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
+import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 /**
  * User: avanteev
@@ -36,9 +35,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     AuditService auditService;
 
     @Autowired
-    FormDataPrintingService formDataPrintingService;
-
-    private Log logger = LogFactory.getLog(getClass());
+    PrintingService printingService;
 
     public PrintAuditDataHandler() {
         super(PrintAuditDataAction.class);
@@ -48,8 +45,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     public PrintAuditDataResult execute(PrintAuditDataAction printAuditDataAction, ExecutionContext executionContext) throws ActionException {
         try {
             PaginatedSearchResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
-            String filePath = formDataPrintingService.generateExcelLogSystem(records.getRecords());
-            logger.info("Report is formed " + filePath);
+            String filePath = printingService.generateExcelLogSystem(records.getRecords());
             InputStream fileInputStream = new FileInputStream(filePath);
 
             PrintAuditDataResult result = new PrintAuditDataResult();

@@ -4,7 +4,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface LogAreaUiHandlers extends UiHandlers {
 	
-	String print();
+	void print();
 	
 	void clean();
 	

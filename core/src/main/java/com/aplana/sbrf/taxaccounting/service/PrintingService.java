@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
-public interface FormDataPrintingService  {
+public interface PrintingService {
 	
 	String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);

@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.aplana.sbrf.taxaccounting.service.impl.FormDataPrintingServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.impl.PrintingServiceImpl;
 
 public class FormDataPrintingServiceTestMock {
 	
@@ -27,7 +27,7 @@ public class FormDataPrintingServiceTestMock {
 	{
 		TA_USER_INFO.setUser(mockUser(TB1_CONTROL_USER_ID, 2, TARole.ROLE_CONTROL));
 	}
-	static FormDataPrintingService formDataPrintingService = new FormDataPrintingServiceImpl();
+	static PrintingService printingService = new PrintingServiceImpl();
 	
 	private static FormData formData;
 	
@@ -111,15 +111,15 @@ public class FormDataPrintingServiceTestMock {
 		formTemplate.setNumberedColumns(true);
 		when(formTemplateDao.get(TB2_ACCEPTED_FORMTEMPLATE_ID)).thenReturn(formTemplate);
 		when(formDataAccessService.canRead(TA_USER_INFO, TB2_APPROVED_FORMDATA_ID)).thenReturn(true);
-		ReflectionTestUtils.setField(formDataPrintingService, "formDataDao", formDataDao);
-		ReflectionTestUtils.setField(formDataPrintingService, "formTemplateDao", formTemplateDao);
-		ReflectionTestUtils.setField(formDataPrintingService, "formDataAccessService", formDataAccessService);
-		ReflectionTestUtils.setField(formDataPrintingService, "departmentDao", departmentDao);
+		ReflectionTestUtils.setField(printingService, "formDataDao", formDataDao);
+		ReflectionTestUtils.setField(printingService, "formTemplateDao", formTemplateDao);
+		ReflectionTestUtils.setField(printingService, "formDataAccessService", formDataAccessService);
+		ReflectionTestUtils.setField(printingService, "departmentDao", departmentDao);
 	}
 	
 	@Test
 	public void testReportPrintService(){
-		formDataPrintingService.generateExcel(TA_USER_INFO,TB2_APPROVED_FORMDATA_ID, true);
+		printingService.generateExcel(TA_USER_INFO,TB2_APPROVED_FORMDATA_ID, true);
 	}
 
 }

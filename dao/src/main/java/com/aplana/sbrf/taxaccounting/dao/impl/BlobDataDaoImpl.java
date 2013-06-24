@@ -13,6 +13,8 @@ import java.sql.*;
 
 /**
  * User: avanteev
+ *
+ * Дао для работы с файловым хранилищем.
  */
 @Repository
 public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {

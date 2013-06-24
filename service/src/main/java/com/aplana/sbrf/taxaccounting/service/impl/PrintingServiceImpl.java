@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.PrintingService;
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.logging.Log;
@@ -12,30 +16,30 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataPrintingService;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsxReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
+import java.io.IOException;
+import java.util.List;
 
 @Service
-public class FormDataPrintingServiceImpl implements FormDataPrintingService  {
+public class PrintingServiceImpl implements PrintingService {
 
-	private static final Log logger = LogFactory.getLog(FormDataPrintingServiceImpl.class);
+	private static final Log logger = LogFactory.getLog(PrintingServiceImpl.class);
 
 	@Autowired
 	private FormDataDao formDataDao;
-	@Autowired
+
+    @Autowired
 	private FormTemplateDao formTemplateDao;
+
 	@Autowired
 	private FormDataAccessService formDataAccessService;
-	@Autowired
+
+    @Autowired
 	private DepartmentDao departmentDao;
-	@Autowired
+
+    @Autowired
 	private ReportPeriodDao reportPeriodDao;
-	@Autowired
+
+    @Autowired
 	private LogBusinessDao logBusinessDao;
 	
 	@Override

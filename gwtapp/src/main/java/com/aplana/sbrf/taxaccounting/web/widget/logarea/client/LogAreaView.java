@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
@@ -56,10 +57,17 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 		title.setHTML(templates.title(full, error));
 	}
 
+    @Override
+    public void getReport(String uuid) {
+        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+    }
 
-	@UiHandler("printButton")
+
+    @UiHandler("printButton")
 	void print(ClickEvent event){
-        DOM.setElementProperty(formPanel.getElement(), "enctype", "text/plain");
+        getUiHandlers().print();
+        //Формирование через JSON. Вариант без файлового хранилища
+        /*DOM.setElementProperty(formPanel.getElement(), "enctype", "text/plain");
         DOM.setElementProperty(formPanel.getElement(), "encoding", "text/plain");//for IE8 encoding only
         TextBox textBox = new TextBox();
         textBox.setName("jsonobject");
@@ -69,7 +77,7 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
         formPanel.add(textBox);
 
         formPanel.submit();
-        formPanel.clear();
+        formPanel.clear();*/
 	}
 
 	@UiHandler("hideButton")

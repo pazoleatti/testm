@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
@@ -26,10 +25,18 @@ public class ReportController {
     @Autowired
     BlobDataService blobDataService;
 
+    /**
+     * Обработка запроса для формирования отчета по журналу аудита
+     * @param uuid
+     * @param request
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
     public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         InputStream is = blobDataService.get(uuid);
         createResponse(request, response, is);
+        blobDataService.delete(uuid);
     }
 
     private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final InputStream is) throws IOException {

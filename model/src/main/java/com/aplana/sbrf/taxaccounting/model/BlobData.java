@@ -5,13 +5,19 @@ import java.util.Date;
 
 /**
  * User: avanteev
+ * Модель для работы с файловым хранилищем.
  */
 public class BlobData {
 
+    /*Уникальный иденификатор записи. Формируется в сервисном слое.*/
     private String uuid;
+    /*Наименование файла вместе с расширением*/
     private String name;
+    /*Данные загружаемого файла*/
     private InputStream inputStream;
+    /*Дата создания(текущий день)*/
     private Date creationDate;
+    /*Тип записи,временная или постоянная(если временная, type = 1)*/
     private int type;
 
     public String getUuid() {
