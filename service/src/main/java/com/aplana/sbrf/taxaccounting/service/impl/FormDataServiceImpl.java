@@ -36,8 +36,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private FormDataWorkflowDao formDataWorkflowDao;
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
-	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
@@ -197,19 +195,14 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			if (!reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
-
-				Map<String, Object> additionalParameters = new HashMap<String, Object>();
-				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScript(userInfo, formData,
-						FormDataEvent.ADD_ROW, logger, additionalParameters);
-				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new ServiceLoggerException(
-							"Произошли ошибки в скрипте добавления новой строки",
-							logger.getEntries());
-				}
-			} else {
-				formData.appendDataRow();
+			Map<String, Object> additionalParameters = new HashMap<String, Object>();
+			additionalParameters.put("currentDataRow", currentDataRow);
+			formDataScriptingService.executeScript(userInfo, formData,
+					FormDataEvent.ADD_ROW, logger, additionalParameters);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Произошли ошибки в скрипте добавления новой строки",
+						logger.getEntries());
 			}
 		} else {
 			throw new AccessDeniedException(
@@ -517,19 +510,14 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			if (!reportPeriodDao.get(formData.getReportPeriodId()).isBalancePeriod()) {
-				Map<String, Object> additionalParameters = new HashMap<String, Object>();
-				additionalParameters.put("currentDataRow", currentDataRow);
-				formDataScriptingService.executeScript(userInfo, formData,
-						FormDataEvent.DELETE_ROW, logger, additionalParameters);
-				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new ServiceLoggerException(
-							"Произошли ошибки в скрипте удаление строки",
-							logger.getEntries());
-				}
-
-			}else{
-				formData.deleteDataRow(currentDataRow);
+			Map<String, Object> additionalParameters = new HashMap<String, Object>();
+			additionalParameters.put("currentDataRow", currentDataRow);
+			formDataScriptingService.executeScript(userInfo, formData,
+					FormDataEvent.DELETE_ROW, logger, additionalParameters);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Произошли ошибки в скрипте удаление строки",
+						logger.getEntries());
 			}
 		}else {
 			throw new AccessDeniedException(
