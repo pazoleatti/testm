@@ -29,7 +29,7 @@ switch (formDataEvent){
     case FormDataEvent.CREATE:
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
         //2.	Логические проверки значений налоговой.
-        logicalCheck()
+        // ?? logicalCheck()
         //3.	Проверки соответствия НСИ.
         break
 // Инициирование Пользователем перехода «Подготовить»
@@ -68,8 +68,8 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
-        logicalCheck()
         fillForm()
+        logicalCheck()
         break
 }
 
@@ -175,13 +175,7 @@ def fillForm(){
     formData.dataRows.add(formData.dataRows.size() > 0 ? formData.dataRows.size(): 0, newRowQuarter )
 
     // 6 графа Содержит сумму значений "графы 6" для всех строк данной таблицы, за исключением итоговых строк («Итого за текущий квартал», «Итого за текущий отчетный (налоговый) период»)
-    def row6val = 0
-    formData.dataRows.each{ row->
-        if (!isTotalRow(row)){
-            row6val += row.costs?:0
-        }
-    }
-    newRowQuarter.costs = row6val
+    newRowQuarter.costs = getQuarterTotal()
 
     // строка Итого за текущий отчетный (налоговый) период
     def newRowTotal = formData.createDataRow()
@@ -190,16 +184,55 @@ def fillForm(){
     newRowTotal.getCell("fix").setColSpan(4)
     newRowTotal.fix = "Итого за текущий отчетный (налоговый) период"
     formData.dataRows.add(formData.dataRows.size(), newRowTotal)
-    // возьмем форму за предыдущий отчетный период
-    getPrevReportPeriod(formData.reportPeriodId, taxPeriodId)
-
-    newRowTotal.costs = newRowQuarter.costs +
+    newRowTotal.costs = getTotalValue()
 }
 
 /**
  * Логические проверки
  */
 def logicalCheck(){
+
+    formData.dataRows.each{ row ->
+        // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
+        ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs'].each{alias ->
+            if (!isTotalRow(row) && (row[alias] == null || row[alias] == '')){
+                logger.error('Поле ”'+row.getCell(alias).getColumn().getName()+'” не заполнено!')
+            }
+        }
+
+        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+        // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
+        if (row.date != null && !(
+                (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
+                (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
+        )){
+            // TODO возможно нужно в сообщении указать номер строки
+            logger.error('Дата совершения операции вне границ отчетного периода!')
+        }
+
+        // Проверка на уникальность поля «№ пп»
+        // TODO не реализовано
+
+        // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
+        if (row.costs == 0){
+            logger.error('Все суммы по операции нулевые!')
+        }
+    }
+
+    // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
+    if (formData.getDataRow('totalQuarter').costs != getQuarterTotal()){
+        logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
+    }
+
+    // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
+    if (formData.getDataRow('total').costs != getTotalValue()){
+        logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+    }
+
+    // Проверка актуальности поля «Часть сделки»; не фатальная; Поле ”Наименование поля” указано неверно не заполнено!
+    // TODO не реализован сравочник
+
 }
 
 /**
@@ -221,4 +254,29 @@ def isMainTotalRow(row){
  */
 def isTotalRow(row){
     return row.getAlias()=='total' || row.getAlias()=='totalQuarter'
+}
+
+// функция возвращает итоговые значения за текущий квартал
+def getQuarterTotal(){
+    def row6val = 0
+    formData.dataRows.each{ row->
+        if (!isTotalRow(row)){
+            row6val += row.costs?:0
+        }
+    }
+    row6val
+}
+
+// Функция возвращает итоговые значения за текущий отчётный (налоговый) период
+def getTotalValue(){
+    quarterRow = formData.getDataRow('totalQuarter')
+    // возьмем форму за предыдущий отчетный период
+    def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
+    if (prevQuarter != null){
+        prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
+        def prevQuarterTotalRow = prevQuarterFormData.getDataRow("total")
+        return quarterRow.costs + prevQuarterTotalRow.costs
+    } else{
+        return quarterRow.costs
+    }
 }
