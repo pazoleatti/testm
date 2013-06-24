@@ -39,6 +39,7 @@ public enum FormDataEvent implements Serializable {
 	AFTER_MOVE_CREATED_TO_ACCEPTED(205, "После принять из \"Создана\""),
 	AFTER_MOVE_ACCEPTED_TO_CREATED(206, "После вернуть из \"Принята\" в \"Создана\""),
 	AFTER_MOVE_PREPARED_TO_ACCEPTED(207, "После принять из \"Подготовлена\""),
+    AFTER_MOVE_ACCEPTED_TO_PREPARED(206, "После вернуть из \"Принята\" в \"Подготовлена\""),
 
 	ADD_ROW(301, "Добавить строку"),
 	DELETE_ROW(303, "Удалить строку"),

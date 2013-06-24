@@ -1,20 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_APPROVED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_CREATED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_ACCEPTED_TO_PREPARED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_APPROVED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_APPROVED_TO_CREATED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_APPROVED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_CREATED_TO_PREPARED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_PREPARED_TO_ACCEPTED;
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.MOVE_PREPARED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
 import static com.aplana.sbrf.taxaccounting.model.WorkflowState.ACCEPTED;
 import static com.aplana.sbrf.taxaccounting.model.WorkflowState.APPROVED;
 import static com.aplana.sbrf.taxaccounting.model.WorkflowState.CREATED;
@@ -33,7 +19,7 @@ public enum WorkflowMove {
 	CREATED_TO_PREPARED(7, "Подготовить", CREATED, PREPARED, MOVE_CREATED_TO_PREPARED, false),
 	PREPARED_TO_CREATED(8, "Вернуть в \"Создана\"", PREPARED, CREATED, MOVE_PREPARED_TO_CREATED, true),
 	PREPARED_TO_ACCEPTED(9, "Принять", PREPARED, ACCEPTED, MOVE_PREPARED_TO_ACCEPTED, AFTER_MOVE_PREPARED_TO_ACCEPTED, false),
-	ACCEPTED_TO_PREPARED(10, "Вернуть в \"Подготовлена\"", ACCEPTED, PREPARED, MOVE_ACCEPTED_TO_PREPARED, true);
+	ACCEPTED_TO_PREPARED(10, "Вернуть в \"Подготовлена\"", ACCEPTED, PREPARED, MOVE_ACCEPTED_TO_PREPARED, AFTER_MOVE_ACCEPTED_TO_PREPARED, true);
 
 	private final int id;
 	private final String name;
