@@ -37,20 +37,28 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select * ");
 		appendSelectFromAndWhereClause(sql, filter);
 		sql.append(" order by id");
-		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
-				.append(" order by ordDat.rn");
-		List<LogSystemSearchResultItem> records = getJdbcTemplate().query(
-				sql.toString(),
-				new Object[] {
-						filter.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
-						filter.getStartIndex() + filter.getCountOfRecords()
-				},
-				new int[] {
-						Types.NUMERIC,
-						Types.NUMERIC
-				},
-				new AuditRowMapper()
-		);
+		sql.append(") dat) ordDat");
+        List<LogSystemSearchResultItem> records;
+        if(filter.getCountOfRecords() != 0){
+            sql.append(" where ordDat.rn between ? and ?")
+                    .append(" order by ordDat.rn");
+            records = getJdbcTemplate().query(
+                    sql.toString(),
+                    new Object[] {
+                            filter.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
+                            filter.getStartIndex() + filter.getCountOfRecords()
+                    },
+                    new int[] {
+                            Types.NUMERIC,
+                            Types.NUMERIC
+                    },
+                    new AuditRowMapper()
+            );
+        }else{
+            sql.append(" order by ordDat.rn");
+            records = getJdbcTemplate().query(sql.toString(),
+                    new AuditRowMapper());
+        }
 
 		PaginatedSearchResult<LogSystemSearchResultItem> result = new PaginatedSearchResult<LogSystemSearchResultItem>();
 		result.setRecords(records);

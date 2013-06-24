@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.logsystem;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractXlsxReportBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -42,6 +44,8 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
     private static final String userRolesColumnHeader = "Роль пользователя";
     private static final String userIpColumnHeader = "IP пользователя";
 
+    private Log logger = LogFactory.getLog(getClass());
+
     public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
         super();
         this.workBook = new SXSSFWorkbook();
@@ -49,10 +53,12 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         this.sheet.setColumnWidth(2, cellWidth * 256);
         sheet.getLastRowNum();
         this.items = items;
+        logger.info("Report initialize " + fileName);
     }
 
     @Override
     protected void createTableHeaders() {
+        logger.info("Initialize table headers " + getClass());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setBorderBottom(CellStyle.BORDER_THICK);
@@ -110,6 +116,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
     @Override
     protected void fillHeader() {
+        logger.info("Initialize file header. " + getClass());
         CellStyle cs = workBook.createCellStyle();
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -130,6 +137,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
     @Override
     protected void createDataForTable() {
+        logger.info("Fill data for table. " + getClass());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setWrapText(true);
@@ -141,6 +149,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_DATA_FORMAT);
 
         for(LogSystemSearchResultItem item : items){
+            logger.info("Data table " + item);
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             Cell cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
@@ -156,7 +165,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getNote());
+            cell.setCellValue(item.getNote() == null?"":item.getNote());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

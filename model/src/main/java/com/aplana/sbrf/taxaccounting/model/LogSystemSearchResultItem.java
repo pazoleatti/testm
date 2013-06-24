@@ -127,4 +127,18 @@ public class LogSystemSearchResultItem implements Serializable {
 	public void setUserDepartment(Department userDepartment) {
 		this.userDepartment = userDepartment;
 	}
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("id: " + id).append(", user: " + user.getLogin())
+                .append(" ip: " + ip)
+                .append(" department: " + department.getName())
+                .append(" roles: " + roles)
+                .append(" event: " + event.getTitle())
+                .append(" logdate: " + logDate)
+                .append(" note: " + note)
+                .append(" reportperiod: " + reportPeriod.getName())
+                .append(" formKind: " + formKind.getName())
+                .toString();
+    }
 }

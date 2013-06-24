@@ -1,0 +1,1 @@
+insert into blob_data (id, name, data, creation_date, type) values ("")
