@@ -9,4 +9,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface AuditFilterUIHandlers extends UiHandlers {
     void onTaxPeriodSelected(TaxPeriod taxPeriod);
     void onSearchButtonClicked();
+    void onPrintButtonClicked();
 }

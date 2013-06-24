@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -54,6 +51,18 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         AuditClientSearchEvent.fire(this);
     }
 
+    @Override
+    public void onPrintButtonClicked() {
+        PrintAuditDataAction dataAction = new PrintAuditDataAction();
+        dataAction.setLogSystemFilter(getView().getFilterData());
+        dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
+            @Override
+            public void onSuccess(PrintAuditDataResult result) {
+                getView().getBlobFromServer(result.getUuid());
+            }
+        });
+    }
+
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers>{
         void setDepartments(List<Department> list, Set<Integer> availableValues);
@@ -69,6 +78,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
         void setDataFilter(LogSystemFilter dataFilter);
+        void getBlobFromServer(String uuid);
     }
 
     public void initFilterData(){

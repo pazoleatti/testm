@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmen
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -13,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -139,6 +141,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
+    public void getBlobFromServer(String uuid) {
+        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+    }
+
     public void setUserLogins(Map<Integer, String> userLoginsMap) {
         this.userLoginMap = userLoginsMap;
         userId.setAcceptableValues(userLoginsMap.keySet());
@@ -231,6 +238,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     void onSearchButtonClicked(ClickEvent event){
         if(getUiHandlers() != null)
             getUiHandlers().onSearchButtonClicked();
+    }
+
+    @UiHandler("printButton")
+    void onPrintButtonClicked(ClickEvent event){
+        getUiHandlers().onPrintButtonClicked();
     }
 
 }

@@ -16,6 +16,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -37,6 +38,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 /**
  * Контроллер для формирования отчетов в формате Excel АС Учкет налогов
  */
+
+//TODO: Переделать в дальнейшем всю генерацию отчетов через временное хранилище com.aplana.sbrf.taxaccounting.web.mvc.ReportController
 @Controller
 @RequestMapping("/downloadController")
 public class ReportExcelController {
@@ -49,6 +52,9 @@ public class ReportExcelController {
 
     @Autowired
     TAUserService taUserService;
+
+    @Autowired
+    AuditService auditService;
 	
 	private static String REQUEST_JATTR = "jsonobject";
 	private static String LOG_ENTRIES = "listLogEntries";
@@ -122,7 +128,7 @@ public class ReportExcelController {
      */
     @RequestMapping(value = "/processLogSystmeDownload", method = RequestMethod.GET)
     public void processLogSystemDownload(HttpServletRequest request, HttpServletResponse response){
-
+        /*String filePath = formDataPrintingService.generateExcelLogSystem(auditService.getLogsByFilter());*/
     }
 	
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
