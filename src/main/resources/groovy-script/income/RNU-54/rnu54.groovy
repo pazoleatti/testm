@@ -270,25 +270,29 @@ def logicalCheck(def useLog) {
             }
 
             // 4. Проверка финансового результата (графа 9, 10, 12, 13)
-            if ((row.income > 0 && row.outcome != 0) ||
-                    (row.outcome > 0 && row.income != 0) ||
-                    (row.outcome == 0 && (row.outcome269st != 0 || row.outcomeTax != 0))) {
+            if (row.income != 0 && row.outcome != 0) {
                 logger.error('Задвоение финансового результата!')
                 return false
             }
 
-            // 5. Проверка финансового результата
+            // 5. Проверка финансого результата
+            if (row.outcome != 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
+                logger.error('Задвоение финансового результата!')
+                return false
+            }
+
+            // 6. Проверка финансового результата
             tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
             if (tmp < 0 && row.income != round(Math.abs(tmp), 2)) {
                 logger.warn('Неверно определены доходы')
             }
 
-            // 6. Проверка финансового результата
+            // 7. Проверка финансового результата
             if (tmp > 0 && row.outcome != round(Math.abs(tmp), 2)) {
                 logger.warn('Неверно определены расходы')
             }
 
-            // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
+            // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
             // графа 9, 10
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
@@ -367,10 +371,10 @@ def logicalCheck(def useLog) {
                 name = getColumnName(row, 'outcomeTax')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
-            // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
+            // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
         }
 
-        // 8. Проверка итоговых значений формы	Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
+        // 9. Проверка итоговых значений формы	Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
             def totalSumColumns = ['salePrice', 'acquisitionPrice', 'income',
@@ -506,6 +510,15 @@ void acceptance() {
  * Проверка при создании формы.
  */
 void checkCreation() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    //проверка периода ввода остатков
+    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
+        return
+    }
+
     def findForm = FormDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 

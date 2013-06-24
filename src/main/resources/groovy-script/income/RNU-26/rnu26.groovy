@@ -6,19 +6,23 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - логическая проверка 5: графа 10 может принимать значение только + или -, а в этой проверке сравнивается с "x"
  *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
- *      - логическая проверка 16: проверяемые значения и присваиваемые отличаются
  *
  * @author rtimerbaev
  */
+
+/** Отчётный период. */
+def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+/** Признак периода ввода остатков. */
+def isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod())
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        if (!checkPrevPeriod()) {
+        if (!isBalancePeriod && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -26,7 +30,7 @@ switch (formDataEvent) {
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        if (!checkPrevPeriod()) {
+        if (!isBalancePeriod && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -310,7 +314,7 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка необращающихся акций (графа 10, 15, 16)
-            if (row.signSecurity == 'x' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            if (row.signSecurity == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Акции необращающиеся, графы 15 и 16 ненулевые!')
             }
 

@@ -6,17 +6,22 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - логическая проверка 5: графа 8 может принимать значение только + или -, а в этой проверке сравнивается с "x"
  *
  * @author rtimerbaev
  */
+
+/** Отчётный период. */
+def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+/** Признак периода ввода остатков. */
+def isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod())
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
         break
     case FormDataEvent.CHECK :
-        if (!checkPrevPeriod()) {
+        if (!isBalancePeriod && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -24,7 +29,7 @@ switch (formDataEvent) {
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        if (!checkPrevPeriod()) {
+        if (!isBalancePeriod && !checkPrevPeriod()) {
             logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
             return
         }
@@ -158,7 +163,7 @@ void calc() {
 
         // графа 11
         if (row.signSecurity == '+') {
-            def a = (row.cost == null ? 0 : row.cost)
+            def a = (row.cost ?: 0)
             tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
         } else {
             tmp = 0
@@ -322,8 +327,7 @@ def logicalCheck(def useLog) {
             }
 
             // 5. Проверка необращающихся акций (графа 8, 11, 12)
-            // TODO (Ramil Timerbaev) графа 8 может принимать значение только + и -
-            if (row.signSecurity == 'x' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            if (row.signSecurity == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn('Облигации необращающиеся, графы 11 и 12 ненулевые!')
             }
 
