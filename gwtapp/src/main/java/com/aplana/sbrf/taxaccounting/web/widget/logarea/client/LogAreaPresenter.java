@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -12,15 +7,15 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.LogErrorAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.LogErrorResult;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LogAreaPresenter extends
 		PresenterWidget<LogAreaPresenter.MyView> implements

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +16,7 @@ import org.springframework.util.ClassUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
@@ -33,10 +34,13 @@ public class BlobDataDaoTest {
 
     BlobData blobData;
 
+    File file;
+
     @Before
     public void init() throws FileNotFoundException {
         URL url = Thread.currentThread().getContextClassLoader().getResource(ClassUtils.classPackageAsResourcePath(BlobDataDaoTest.class));
-        File file = new File(url.getPath() + "/BlobDataDaoTest.xml");
+        assert url != null;
+        file = new File(url.getPath() + "/BlobDataDaoTest.xml");
 
         blobData = new BlobData();
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
@@ -44,11 +48,12 @@ public class BlobDataDaoTest {
         blobData.setInputStream(new FileInputStream(file));
         blobData.setCreationDate(new Date());
         blobData.setType(0);
+        blobData.setDataSize(76754);
     }
 
     @Test
-    public void createGetTest(){
-
+    public void createGetTest() throws IOException {
+        Assert.assertEquals(file.length(), blobData.getInputStream().available());
         blobDataDao.create(blobData);
         Assert.assertEquals(blobData.getName(),blobDataDao.get(blobData.getUuid()).getName());
     }

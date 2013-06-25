@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
 import com.google.gwt.core.client.GWT;
@@ -11,14 +9,14 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
 
 public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implements
 		LogAreaPresenter.MyView {

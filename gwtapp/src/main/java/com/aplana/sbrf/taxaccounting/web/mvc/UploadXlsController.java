@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 
 /**
@@ -47,6 +48,15 @@ public class UploadXlsController {
     private static String JSON_ATTR5 = "formDataRPId";
     @RequestMapping(value = "/xls", method = RequestMethod.POST)
     public void processUpload(HttpServletRequest request, HttpServletResponse response) throws FileUploadException, IOException, JSONException {
+
+        /*BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+        char[] chars = new char[request.getInputStream().available()];
+        System.out.println(request.getInputStream().available());
+        String str;
+        while ((str = reader.readLine()) != null){
+            System.out.println(str);
+        }
+        reader.close();*/
 
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);

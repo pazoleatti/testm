@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+
 import java.io.InputStream;
 
 /**
@@ -39,8 +41,9 @@ public interface BlobDataService {
 
     /**
      * ПОлучение данных из фйалового хранилища
+     *
      * @param blob_id
      * @return
      */
-    InputStream get(String blob_id);
+    BlobData get(String blob_id);
 }

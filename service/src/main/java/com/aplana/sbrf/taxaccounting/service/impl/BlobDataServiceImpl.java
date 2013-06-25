@@ -2,12 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
@@ -45,14 +46,19 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
-    public InputStream get(String blob_id) {
+    public BlobData get(String blob_id) {
         BlobData blobData = blobDataDao.get(blob_id);
-        return blobData.getInputStream();
+        return blobData;
     }
 
     private BlobData initBlob(String blob_id, InputStream is, String name, int isTemp){
         BlobData blobData = new BlobData();
         blobData.setName(name);
+        try {
+            blobData.setDataSize(is.available());
+        } catch (IOException e) {
+            throw new ServiceException("Ошибка при получении данных", e);
+        }
         blobData.setInputStream(is);
         blobData.setCreationDate(new Date());
         blobData.setUuid(blob_id.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blob_id);

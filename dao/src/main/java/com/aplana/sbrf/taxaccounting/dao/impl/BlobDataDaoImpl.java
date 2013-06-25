@@ -29,6 +29,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
             blobData.setInputStream(rs.getBlob("data").getBinaryStream());
+            blobData.setDataSize(rs.getInt("data_size"));
             return blobData;
         }
     }
@@ -44,12 +45,13 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "insert into blob_data (id, name, data, creation_date, type) values (?,?,?,?,?)");
+                                    "insert into blob_data (id, name, data, creation_date, type, data_size) values (?,?,?,?,?,?)");
                     ps.setString(1, blobData.getUuid());
                     ps.setString(2, blobData.getName());
                     ps.setBlob(3, blobData.getInputStream());
                     ps.setDate(4, new java.sql.Date(blobData.getCreationDate().getTime()));
                     ps.setInt(5, blobData.getType());
+                    ps.setInt(6, blobData.getDataSize());
                     return ps;
                 }
             };

@@ -19,6 +19,8 @@ public class BlobData {
     private Date creationDate;
     /*Тип записи,временная или постоянная(если временная, type = 1)*/
     private int type;
+    /*Размер файла*/
+    private int dataSize;
 
     public String getUuid() {
         return uuid;
@@ -58,5 +60,13 @@ public class BlobData {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public int getDataSize() {
+        return dataSize;
+    }
+
+    public void setDataSize(int dataSize) {
+        this.dataSize = dataSize;
     }
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 
 /**
  * User: avanteev
@@ -34,20 +36,20 @@ public class ReportController {
      */
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
     public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        InputStream is = blobDataService.get(uuid);
-        createResponse(request, response, is);
+        BlobData blobData = blobDataService.get(uuid);
+        createResponse(request, response, blobData);
         blobDataService.delete(uuid);
     }
 
-    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final InputStream is) throws IOException {
+    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException {
 
         String mimeType = null;
 
         response.setContentType(mimeType == null ?
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8" : mimeType);
-        response.setHeader("Content-Disposition", "attachment;");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(blobData.getName(), "UTF-8") + "\"");
 
-        DataInputStream in = new DataInputStream(is);
+        DataInputStream in = new DataInputStream(blobData.getInputStream());
         OutputStream out = response.getOutputStream();
         int count = 0;
         try {
