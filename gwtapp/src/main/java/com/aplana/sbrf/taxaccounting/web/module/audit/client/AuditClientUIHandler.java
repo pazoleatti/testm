@@ -1,0 +1,10 @@
+package com.aplana.sbrf.taxaccounting.web.module.audit.client;
+
+import com.gwtplatform.mvp.client.UiHandlers;
+
+/**
+ * User: avanteev
+ */
+public interface AuditClientUIHandler extends UiHandlers {
+    void onRangeChange(int start, int len);
+}

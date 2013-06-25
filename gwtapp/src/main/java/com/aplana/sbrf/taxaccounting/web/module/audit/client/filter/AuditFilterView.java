@@ -137,11 +137,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void setDataFilter(LogSystemFilter dataFilter) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public void getBlobFromServer(String uuid) {
         Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
@@ -154,16 +149,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public void setValueListBoxHandler(ValueChangeHandler<TaxType> handler) {
         formDataTaxType.addValueChangeHandler(handler);
-    }
-
-    @Override
-    public void setFromSearchDate(Date fromSearchDate) {
-        this.fromSearchDate.setValue(fromSearchDate);
-    }
-
-    @Override
-    public void setToSearchDate(Date toSearchDate) {
-        this.toSearchDate.setValue(toSearchDate);
     }
 
     @Override

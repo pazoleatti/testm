@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 
@@ -37,16 +36,13 @@ public class ReportController {
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
     public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
-        createResponse(request, response, blobData);
+        createResponse(response, blobData);
         blobDataService.delete(uuid);
     }
 
-    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException {
+    private void createResponse(final HttpServletResponse response, final BlobData blobData) throws IOException {
 
-        String mimeType = null;
-
-        response.setContentType(mimeType == null ?
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8" : mimeType);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(blobData.getName(), "UTF-8") + "\"");
 
         DataInputStream in = new DataInputStream(blobData.getInputStream());

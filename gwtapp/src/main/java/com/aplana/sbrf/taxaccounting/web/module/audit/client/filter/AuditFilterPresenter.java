@@ -72,12 +72,9 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setFormDataTaxType(List<TaxType> taxTypeList);
         void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
-        void setFromSearchDate(Date fromSearchDate);
-        void setToSearchDate(Date toSearchDate);
         void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
-        void setDataFilter(LogSystemFilter dataFilter);
         void getBlobFromServer(String uuid);
     }
 
@@ -96,17 +93,9 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 getView().setFormDataKind(result.getFormDataKinds());
                 getView().setFormDataTaxType(result.getTaxTypes());
                 getView().setUserLogins(fillUserMap(auditFilterDataAvaliableValues.getUsers()));
-                //getView().setDataFilter(prepareLogSystemFilter(result));
             }
         });
 
-    }
-
-    private LogSystemFilter prepareLogSystemFilter(GetAuditFilterDataResult result){
-        LogSystemFilter logSystemFilter = new LogSystemFilter();
-        logSystemFilter.setFromSearchDate(new Date());
-        logSystemFilter.setToSearchDate(new Date());
-        return logSystemFilter;
     }
 
     private Set<Integer> convertDepartmentsToIds(List<Department> source){

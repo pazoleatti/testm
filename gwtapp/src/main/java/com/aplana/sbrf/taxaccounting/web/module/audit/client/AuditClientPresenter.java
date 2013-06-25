@@ -8,13 +8,10 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSe
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
@@ -31,19 +28,38 @@ import java.util.List;
  * Date: 2013
  */
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
-        implements AuditClientSearchEvent.AuditFormSearchHandler {
+        implements AuditClientSearchEvent.MyHandler, AuditClientUIHandler {
 
     @ProxyEvent
     @Override
     public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
-        dataProvider.update();
-
+        getView().updateDataTable();
         getProxy().manualReveal(AuditClientPresenter.this);
     }
 
-    interface MyView extends View{
+    @Override
+    public void onRangeChange(final int start, int length) {
+        GetAuditDataListAction action = new GetAuditDataListAction();
+        LogSystemFilter filter = auditFilterPresenter.getLogSystemFilter();
+        filter.setStartIndex(start);
+        filter.setCountOfRecords(length);
+        action.setLogSystemFilter(filter);
+
+        dispatcher.execute(action, new AbstractCallback<GetAuditDataListResult>() {
+            @Override
+            public void onSuccess(GetAuditDataListResult result) {
+                if(result==null || result.getTotalCountOfRecords() == 0)
+                    getView().setAuditTableData(start, 0, new ArrayList<LogSystemSearchResultItem>());
+                else
+                    getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());
+            }
+        });
+    }
+
+    interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
-        void assignDataProvider(int pageSize, AbstractDataProvider<LogSystemSearchResultItem> provider);
+        void assignDataProvider(int pageSize);
+        void updateDataTable();
     }
 
     @ProxyCodeSplit
@@ -56,8 +72,6 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
 
     protected final DispatchAsync dispatcher;
 
-    private MyDataProvider dataProvider = new MyDataProvider();
-
     private static final int PAGE_SIZE = 30;
 
     @Inject
@@ -66,7 +80,8 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;
         this.auditFilterPresenter.initFilterData();
-        getView().assignDataProvider(PAGE_SIZE, dataProvider);
+        getView().setUiHandlers(this);
+        getView().assignDataProvider(PAGE_SIZE);
     }
 
     @Override
@@ -87,40 +102,4 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         setInSlot(TYPE_auditFilterPresenter, auditFilterPresenter);
     }
 
-
-    private class MyDataProvider extends AsyncDataProvider<LogSystemSearchResultItem>{
-
-        private int zeroRecordsCount = 0;
-
-        public void update() {
-            for (HasData<LogSystemSearchResultItem> display: getDataDisplays()) {
-                onRangeChanged(display);
-            }
-        }
-
-        @Override
-        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
-            final Range range = display.getVisibleRange();
-            GetAuditDataListAction action = prepareRange(range);
-            dispatcher.execute(action, new AbstractCallback<GetAuditDataListResult>() {
-                @Override
-                public void onSuccess(GetAuditDataListResult result) {
-                    if(result==null || result.getTotalCountOfRecords() == zeroRecordsCount)
-                        getView().setAuditTableData(range.getStart(), zeroRecordsCount, new ArrayList<LogSystemSearchResultItem>());
-                    else
-                        getView().setAuditTableData(range.getStart(), result.getTotalCountOfRecords(), result.getRecords());
-                }
-            });
-        }
-
-        private GetAuditDataListAction prepareRange(Range range){
-            GetAuditDataListAction action = new GetAuditDataListAction();
-            LogSystemFilter filter = auditFilterPresenter.getLogSystemFilter();
-            filter.setStartIndex(range.getStart());
-            filter.setCountOfRecords(range.getLength());
-            action.setLogSystemFilter(filter);
-
-            return action;
-        }
-    }
 }

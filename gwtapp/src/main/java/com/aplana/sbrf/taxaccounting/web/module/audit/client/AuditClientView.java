@@ -11,7 +11,9 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -21,7 +23,7 @@ import java.util.List;
  * User: avanteev
  * Date: 2013
  */
-public class AuditClientView extends ViewWithUiHandlers implements AuditClientPresenter.MyView {
+public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> implements AuditClientPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, AuditClientView>{}
 
@@ -33,6 +35,8 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
 
     @UiField
     AbstractPager pager;
+
+    private MyDataProvider dataProvider = new MyDataProvider();
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
@@ -167,9 +171,29 @@ public class AuditClientView extends ViewWithUiHandlers implements AuditClientPr
     }
 
     @Override
-    public void assignDataProvider(int pageSize, AbstractDataProvider<LogSystemSearchResultItem> provider) {
+    public void assignDataProvider(int pageSize) {
         auditTable.setPageSize(pageSize);
-        provider.addDataDisplay(auditTable);
+        dataProvider.addDataDisplay(auditTable);
+    }
+
+    @Override
+    public void updateDataTable() {
+        dataProvider.update();
+    }
+
+    private class MyDataProvider extends AsyncDataProvider<LogSystemSearchResultItem> {
+
+        public void update() {
+            for (HasData<LogSystemSearchResultItem> display: getDataDisplays()) {
+                onRangeChanged(display);
+            }
+        }
+
+        @Override
+        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
+            final Range range = display.getVisibleRange();
+            getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+        }
     }
 
 }

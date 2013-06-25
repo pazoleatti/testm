@@ -7,28 +7,28 @@ import com.google.gwt.event.shared.HasHandlers;
 /**
  * User: avanteev
  */
-public class AuditClientSearchEvent extends GwtEvent<AuditClientSearchEvent.AuditFormSearchHandler> {
-    public static interface AuditFormSearchHandler extends EventHandler{
+public class AuditClientSearchEvent extends GwtEvent<AuditClientSearchEvent.MyHandler> {
+    public static interface MyHandler extends EventHandler{
         void onAuditFormSearchButtonClicked(AuditClientSearchEvent event);
     }
 
-    private static final Type<AuditFormSearchHandler> TYPE = new Type<AuditFormSearchHandler>();
+    private static final Type<MyHandler> TYPE = new Type<MyHandler>();
 
     public static void fire(HasHandlers source) {
         source.fireEvent(new AuditClientSearchEvent());
     }
 
-    public static Type<AuditFormSearchHandler> getType(){
+    public static Type<MyHandler> getType(){
         return TYPE;
     }
 
     @Override
-    public Type getAssociatedType() {
-        return getType();  //To change body of implemented methods use File | Settings | File Templates.
+    public Type<MyHandler> getAssociatedType() {
+        return getType();
     }
 
     @Override
-    protected void dispatch(AuditFormSearchHandler handler) {
+    protected void dispatch(MyHandler handler) {
         handler.onAuditFormSearchButtonClicked(this);
     }
 }
