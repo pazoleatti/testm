@@ -135,7 +135,7 @@ void logicalCheck() {
                     setError(row.getCell(alias).column)
                 }
             }
-            // @todo block http://jira.aplana.com/browse/SBRFACCTAX-2523 Проверка на уникальность поля «№ пп»
+            //Проверка на уникальность поля «№ пп»
             if (row.currency == 'RUR') {
                 // LC Проверка графы 11
                 if (row.marketQuotation != null) {

@@ -73,7 +73,7 @@ void logicalCheck() {
                 log(reportDate.time.toString())
                 logger.error("Неверно указана дата первой части сделки!")
             }
-            // 3. Проверка даты второй части РЕПО @todo проверить http://jira.aplana.com/browse/SBRFACCTAX-2851
+            // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
                     && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
             )) {
@@ -82,19 +82,6 @@ void logicalCheck() {
                 logger.error("Неверно указана дата второй части сделки!")
             }
 
-            // @TODO LC 4, 5 block http://jira.aplana.com/browse/SBRFACCTAX-2870 ниже вариант как в ЧТЗ возможно его стоит изменить
-//            // 4. Проверка финансового результата
-//            if (!(row.income > 0 && row.outcome == 0)) {
-//                log('income = ' + row.income.toString())
-//                log('outcome = ' + row.outcome.toString())
-//                logger.error("Задвоение финансового результата!")
-//            }
-//
-//            // 5. Проверка финансового результата
-//            if (!(row.outcome > 0 && row.income == 0)) {
-//                logger.error("Задвоение финансового результата!")
-//            }
-            // Проверка финансового результата в соответсвие с разговором в skype Гриша поправит аналитику
             if (row.outcome > 0 && row.income > 0) {
                 logger.error("Задвоение финансового результата!")
             }
