@@ -958,7 +958,8 @@ create table blob_data (
   name          varchar2(200) null,
   data          blob not null,
   creation_date date not null,
-  type          number(1) default 0 not null
+  type          number(1) default 0 not null,
+  data_size     number(9) default 0 not null
 );
 alter table blob_data add constraint blob_data_pk primary key(id);
 alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
@@ -969,4 +970,5 @@ comment on column blob_data.name is 'Название файла';
 comment on column blob_data.data is 'Бинарные данные';
 comment on column blob_data.creation_date is 'Дата создания';
 comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
+comment on column blob_data.data_size is 'Размер файла в байтах';
 ------------------------------------------------------------------------------------------------------
