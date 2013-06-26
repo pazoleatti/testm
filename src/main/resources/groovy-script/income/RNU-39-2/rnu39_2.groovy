@@ -2,7 +2,7 @@
  * Скрипт для РНУ-39.2 (rnu39_2.groovy).
  * Форма "(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 2(квартальный)".
  *
- * @version 59
+ * @version 68
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
@@ -69,8 +69,8 @@ switch (formDataEvent) {
 // графа 13 - incomeCurrentCoupon
 // графа 14 - couponIncome
 // графа 15 - totalPercIncome
-// графа 16 - positionType
-// графа 17 - securitiesGroup
+// графа 16 - positionType (удалено)
+// графа 17 - securitiesGroup (удалено)
 
 /**
  * Добавить новую строку.
@@ -98,11 +98,11 @@ def addNewRow() {
         formData.dataRows.add(getIndex(row), newRow)
     }
 
-    // графа 1..17
+    // графа 1..15
     ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen',
             'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev',
             'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon',
-            'couponIncome', 'totalPercIncome', 'positionType', 'securitiesGroup'].each {
+            'couponIncome', 'totalPercIncome'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
@@ -125,10 +125,10 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
+    // список проверяемых столбцов (графа 1..6, 10..13)
     def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
             'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
-            'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
+            'currentCouponRate', 'incomeCurrentCoupon']
     for (def row : formData.dataRows) {
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
@@ -166,10 +166,10 @@ def logicalCheck(def useLog) {
     tmp = reportPeriodService.getStartDate(formData.reportPeriodId)
     def reportDateStart = (tmp ? tmp.getTime() : null)
 
-    // список проверяемых столбцов (графа 1..6, 10..13, 16, 17)
+    // список проверяемых столбцов (графа 1..6, 10..13)
     def requiredColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost',
             'shortPositionOpen', 'maturityDatePrev', 'maturityDateCurrent',
-            'currentCouponRate', 'incomeCurrentCoupon',	'positionType', 'securitiesGroup']
+            'currentCouponRate', 'incomeCurrentCoupon']
 
     for (def row : formData.dataRows) {
         if (isFixedRow(row)) {

@@ -2,7 +2,7 @@
  * Скрипт для РНУ-33 (rnu33.groovy).
  * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО".
  *
- * @version 59
+ * @version 68
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
@@ -70,21 +70,24 @@ switch (formDataEvent) {
 // графа 7  - bondsCount
 // графа 8  - purchaseCost
 // графа 9  - costs
-// графа 10 - redemptionVal
-// графа 11 - exercisePrice
-// графа 12 - exerciseRuble
-// графа 13 - marketPricePercent
-// графа 14 - marketPriceRuble
-// графа 15 - exercisePriceRetirement
-// графа 16 - costsRetirement
-// графа 17 - allCost
-// графа 18 - parPaper
-// графа 19 - averageWeightedPricePaper
-// графа 20 - issueDays
-// графа 21 - tenureSkvitovannymiBonds
-// графа 22 - interestEarned
-// графа 23 - profitLoss
-// графа 24 - excessOfTheSellingPrice
+// графа 10 - marketPriceOnDateAcquisitionInPerc
+// графа 11 - marketPriceOnDateAcquisitionInRub
+// графа 12 - taxPrice
+// графа 13 - redemptionVal
+// графа 14 - exercisePrice
+// графа 15 - exerciseRuble
+// графа 16 - marketPricePercent
+// графа 17 - marketPriceRuble
+// графа 18 - exercisePriceRetirement
+// графа 19 - costsRetirement
+// графа 20 - allCost
+// графа 21 - parPaper
+// графа 22 - averageWeightedPricePaper
+// графа 23 - issueDays
+// графа 24 - tenureSkvitovannymiBonds
+// графа 25 - interestEarned
+// графа 26 - profitLoss
+// графа 27 - excessOfTheSellingPrice
 
 /**
  * Добавить новую строку.
@@ -93,11 +96,12 @@ def addNewRow() {
     def newRow = formData.createDataRow()
     formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
-    // графа 2..14, 16, 18..20
+    // графа 2..17, 19, 21..23
     ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
-            'bondsCount','purchaseCost', 'costs', 'redemptionVal', 'exercisePrice',
-            'exerciseRuble', 'marketPricePercent', 'marketPriceRuble',
-            'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
+            'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
+            'marketPriceOnDateAcquisitionInRub', 'redemptionVal', 'exercisePrice',
+            'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
+            'parPaper', 'averageWeightedPricePaper', 'issueDays'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
@@ -118,11 +122,11 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа 2..14, 16, 18..20)
-    def requiredColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate',
-            'implementationDate', 'bondsCount','purchaseCost', 'costs',
-            'redemptionVal', 'exercisePrice', 'exerciseRuble',
-            'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
+    // список проверяемых столбцов (графа 2..17, 19, 21..23)
+    def requiredColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
+            'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
+            'marketPriceOnDateAcquisitionInRub', 'redemptionVal', 'exercisePrice',
+            'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
             'parPaper', 'averageWeightedPricePaper', 'issueDays']
 
     for (def row : formData.dataRows) {
@@ -158,7 +162,7 @@ void calc() {
         // графа 1
         row.rowNumber = index + 1
 
-        // графа 15
+        // графа 18
         if (row.code == 1 ||
                 ((row.code == 2 || row.code == 5) && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
                 ((row.code == 2 || row.code == 5) && row.marketPricePercent == 0 && row.marketPriceRuble == 0)) {
@@ -173,24 +177,24 @@ void calc() {
         }
         row.exercisePriceRetirement = tmp
 
-        // графа 17
+        // графа 20
         row.allCost = row.purchaseCost + row.costs + row.costsRetirement
 
-        // графа 21
+        // графа 24
         row.tenureSkvitovannymiBonds = row.implementationDate - row.purchaseDate
 
-        // графа 22
+        // графа 25
         def column22 = (row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays
         row.interestEarned = round(column22, 0)
 
         // графа 23
         row.profitLoss = row.exercisePriceRetirement - row.allCost - Math.abs(row.interestEarned)
 
-        // графа 24
+        // графа 27
         row.excessOfTheSellingPrice = (row.code != 4 ? row.exercisePriceRetirement - row.exerciseRuble : 0)
     }
 
-    // графы для которых надо вычислять итого и итого по эмитенту (графа 7..10, 12, 14..17, 22..24)
+    // графы для которых надо вычислять итого и итого по эмитенту (графа 7..9, 13, 15, 17..20, 25..27)
     def totalColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal',
             'exerciseRuble', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement',
             'allCost', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
@@ -209,7 +213,7 @@ void calc() {
     // посчитать "Итого за текущий месяц"
     def totalRows = [:]
     def sums = [:]
-    def tmp = null
+    tmp = null
     totalColumns.each {
         sums[it] = 0
     }
@@ -258,15 +262,15 @@ def logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа 2..14, 16, 18..20)
-        requiredColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate',
-                'implementationDate', 'bondsCount','purchaseCost', 'costs',
-                'redemptionVal', 'exercisePrice', 'exerciseRuble',
-                'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
+        // список проверяемых столбцов (графа 2..17, 19, 21..23)
+        def requiredColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
+                'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
+                'marketPriceOnDateAcquisitionInRub', 'redemptionVal', 'exercisePrice',
+                'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'costsRetirement',
                 'parPaper', 'averageWeightedPricePaper', 'issueDays']
         // суммы строки общих итогов
         def totalSums = [:]
-        // графы для которых надо вычислять итого и итого по эмитенту (графа 7..10, 12, 14..17, 22..24)
+        // графы для которых надо вычислять итого и итого по эмитенту (графа 7..9, 13, 15, 17..20, 25..27)
         def totalColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal',
                 'exerciseRuble', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement',
                 'allCost', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
@@ -284,30 +288,30 @@ def logicalCheck(def useLog) {
             }
 
             // TODO (Ramil Timerbaev) нет проверок заполнения полей перед логической проверкой
-            // . Обязательность заполнения полей (графа 2..14, 16, 18..20)
+            // . Обязательность заполнения полей (графа 2..17, 19, 21..23)
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return false
             }
 
-            // 1. Проверка рыночной цены в процентах к номиналу (графа 10, 13)
+            // 1. Проверка рыночной цены в процентах к номиналу (графа 13, 15)
             if (row.redemptionVal > 0 && row.marketPricePercent != 100) {
                 logger.error('Неверно указана цена в процентах при погашении!')
                 return false
             }
 
-            // 2. Проверка рыночной цены в рублях к номиналу (графа 10, 14)
+            // 2. Проверка рыночной цены в рублях к номиналу (графа 13, 17)
             if (row.redemptionVal > 0 && row. redemptionVal != row.marketPriceRuble) {
                 logger.error('Неверно указана цена в рублях при погашении!')
                 return false
             }
 
-            // 3. Проверка определения срока короткой позиции (графа 2, 21)
+            // 3. Проверка определения срока короткой позиции (графа 2, 24)
             if (row.code == 5 && row.tenureSkvitovannymiBonds >= 0) {
                 logger.error('Неверно определен срок короткой позиции!')
                 return false
             }
 
-            // 4. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
+            // 4. Проверка определения процентного дохода по короткой позиции (графа 2, 25)
             if (row.code == 5 && row.interestEarned >= 0) {
                 logger.error('Неверно определен процентный доход по короткой позиции!')
                 return false
@@ -322,7 +326,7 @@ def logicalCheck(def useLog) {
                 return false
             }
 
-            // 6. Арифметическая проверка графы 15
+            // 6. Арифметическая проверка графы 18
             if (row.code == 1 ||
                     (row.code in [2, 5] && row.exercisePrice > row.marketPricePercent && row.exerciseRuble > row.marketPriceRuble) ||
                     (row.code in [2, 5] && row.marketPricePercent == 0 && row.marketPriceRuble)) {
@@ -338,24 +342,24 @@ def logicalCheck(def useLog) {
                 logger.warn('Неверное значение поля «Цена реализации (выбытия) для целей налогообложения (руб.коп.)»!')
             }
 
-            // 7. Арифметическая проверка графы 17
+            // 7. Арифметическая проверка графы 20
             tmp = row.purchaseCost + row.costs + row.costsRetirement
             if (row.allCost != tmp) {
                 logger.warn('Неверное значение поля «Всего расходы (руб.коп.)»!')
             }
 
-            // 8. Арифметическая проверка графы 21
+            // 8. Арифметическая проверка графы 24
             if (row.tenureSkvitovannymiBonds != row.implementationDate - row.purchaseDate) {
                 logger.warn('Неверное значение поля «Показатели для расчёта процентного дохода за время владения сквитованными облигациями.Срок владения сквитованными облигациями (дни)»!')
             }
 
-            // 9. Арифметическая проверка графы 22
+            // 9. Арифметическая проверка графы 25
             tmp = round((row.parPaper - row.averageWeightedPricePaper) * row.tenureSkvitovannymiBonds * row.bondsCount / row.issueDays, 2)
             if (row.interestEarned != tmp) {
                 logger.warn('Неверное значение поля «Процентный доход, полученный за время владения сквитованными облигациями (руб.коп.)»!')
             }
 
-            // 10. Арифметическая проверка графы 23
+            // 10. Арифметическая проверка графы 27
             tmp = row.exercisePriceRetirement - row.allCost - Math.abs(row.interestEarned)
             if (row.profitLoss != tmp) {
                 logger.warn('Неверное значение поля «Прибыль (+), убыток (-) от реализации (погашения) за вычетом процентного дохода (руб.коп.)»!')
@@ -567,6 +571,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
 void setTotalStyle(def row) {
     ['rowNumber', 'code', 'valuablePaper', 'issue', 'purchaseDate',
             'implementationDate', 'bondsCount', 'purchaseCost', 'costs',
+            'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice',
             'redemptionVal', 'exercisePrice', 'exerciseRuble',
             'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
             'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper',
