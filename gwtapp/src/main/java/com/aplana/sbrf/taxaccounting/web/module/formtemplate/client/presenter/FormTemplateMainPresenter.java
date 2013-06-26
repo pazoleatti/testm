@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSaveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
@@ -18,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormResul
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormResult;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -30,11 +30,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.RequestTabsHandler;
 import com.gwtplatform.mvp.client.TabContainerPresenter;
 import com.gwtplatform.mvp.client.TabView;
-import com.gwtplatform.mvp.client.annotations.ChangeTab;
-import com.gwtplatform.mvp.client.annotations.ContentSlot;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.RequestTabs;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
@@ -44,7 +40,7 @@ import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
-		implements FormTemplateMainUiHandlers {
+		implements FormTemplateMainUiHandlers, FormTemplateSaveEvent.MyHandler {
 
 	private HandlerRegistration closeFormTemplateHandlerRegistration;
 	private final DispatchAsync dispatcher;
@@ -110,6 +106,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		saveAfterFlush();
 	}
 
+	@ProxyEvent
+	@Override
+	public void onSave(FormTemplateSaveEvent event) {
+		setFormTemplate();
+	}
+
 	/**
 	 * Закрыть форму редактирования и вернуться на форму администрирования со списком шаблонов форм.
 	 */
@@ -170,21 +172,5 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 						}
 					}
 				}, this));
-	}
-
-	@Override
-	public void uploadFormTemplateSuccess() {
-		MessageEvent.fire(FormTemplateMainPresenter.this, "Форма импортирована");
-		setFormTemplate();
-	}
-
-	@Override
-	public void uploadFormTemplateFail(String msg) {
-		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
-	}
-
-	@Override
-	public void downloadFormTemplate() {
-		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
 	}
 }

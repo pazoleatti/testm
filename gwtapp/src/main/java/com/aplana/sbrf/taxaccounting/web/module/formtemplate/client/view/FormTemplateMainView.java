@@ -30,9 +30,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	private int formId;
 
 	@UiField
-	FormPanel uploadFormTemplatePanel;
-
-	@UiField
 	DockLayoutPanel dockPanel;
 
 	@UiField
@@ -53,26 +50,12 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@UiField
 	Button cancelButton;
 
-	@UiField
-	Anchor downloadFormTemplateButton;
-
 	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	@Inject
 	public FormTemplateMainView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
-
-		uploadFormTemplatePanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains("error")) {
-					getUiHandlers().uploadFormTemplateSuccess();
-				} else {
-					getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
-				}
-			}
-		});
 	}
 
 	@Override
@@ -135,8 +118,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public void setFormId(int formId) {
 		List<BaseTab> tabList = tabPanel.getTabList();
 
-		uploadFormTemplatePanel.setAction(GWT.getHostPageBaseURL() + "download/formTemplate/upload/" + formId);
-
 		if (this.formId != 0) {
 			for (BaseTab tab : tabList) {
 				tab.setTargetHistoryToken(tab.getTargetHistoryToken()
@@ -169,10 +150,5 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@Override
 	public void setTitle(String title) {
 		this.title.setText(title);
-	}
-
-	@UiHandler("downloadFormTemplateButton")
-	public void onDownloadFormTemplateButton(ClickEvent event){
-		getUiHandlers().downloadFormTemplate();
 	}
 }

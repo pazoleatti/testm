@@ -22,6 +22,7 @@ public class AdminModule extends AbstractPresenterModule {
 		bindPresenter(FormTemplateInfoPresenter.class, FormTemplateInfoPresenter.MyView.class, FormTemplateInfoView.class, FormTemplateInfoPresenter.MyProxy.class);
 		bindPresenter(FormTemplateStylePresenter.class, FormTemplateStylePresenter.MyView.class, FormTemplateStyleView.class, FormTemplateStylePresenter.MyProxy.class);
 	    bindPresenter(FormTemplateHeaderPresenter.class, FormTemplateHeaderPresenter.MyView.class, FormTemplateHeaderView.class, FormTemplateHeaderPresenter.MyProxy.class);
+	    bindPresenter(FormTemplateImpexPresenter.class, FormTemplateImpexPresenter.MyView.class, FormTemplateImpexView.class, FormTemplateImpexPresenter.MyProxy.class);
 		install(new UiModule());
     }
 

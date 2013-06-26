@@ -67,6 +67,52 @@ a, a:visited, a:hover {
     border: 1px outset #ccc;
 }
 
+.gwt-SubmitButton {
+    position: relative;
+    color: #fff;
+    text-decoration: none;
+    font-size: small;
+    cursor: pointer;
+    padding: 2px 4px 2px 5px;
+    border: solid 1px #00940C;
+    border-radius: 11px;
+    margin-left: 0;
+
+    background: #00940C; /* Для старых браузеров */
+    background: -moz-linear-gradient(top, #CBE6B8, #00940C); /* Firefox 3.6+ */
+    /* Chrome 10+, Safari 5.1+ */
+    background: -webkit-linear-gradient(top, #CBE6B8, #00940C);
+    background: -o-linear-gradient(top, #CBE6B8, #00940C); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #CBE6B8, #00940C); /* IE10 */
+    background: linear-gradient(top, #CBE6B8, #00940C); /* CSS3 */
+    /* IE8 hack */
+    behavior: url(resources/pie.htc)\0/;
+    -pie-background: linear-gradient(top, #CBE6B8, #00940C)\0/;
+}
+
+@-moz-document url-prefix() {
+    .gwt-SubmitButton {
+       padding: 1px 3px;
+    }
+}
+
+.gwt-SubmitButton:active {
+    border: 1px inset #ccc;
+}
+
+.gwt-SubmitButton:hover {
+    border-color: #9cf #69e #69e #7af;
+}
+
+.gwt-SubmitButton[disabled] {
+    cursor: default;
+    color: #888;
+}
+
+.gwt-SubmitButton[disabled]:hover {
+    border: 1px outset #ccc;
+}
+
 .gwt-CheckBox {
 }
 

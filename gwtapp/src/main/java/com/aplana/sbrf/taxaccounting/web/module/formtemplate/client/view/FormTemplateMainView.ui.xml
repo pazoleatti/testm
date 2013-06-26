@@ -17,24 +17,13 @@
     </g:north>
 
     <g:north size="30">
-        <g:HorizontalPanel>
-            <t:Bar>
-                <t:LeftBar>
-                    <g:Button text="Сохранить" ui:field="saveButton"/>
-                    <g:Button text="Сбросить" ui:field="resetButton"/>
-                    <g:Button text="Отмена" ui:field="cancelButton"/>
-                </t:LeftBar>
-            </t:Bar>
-            <t:ButtonLink text="Экспорт" ui:field="downloadFormTemplateButton"
-                          title="Экспорт шаблона формы" />
-            <g:FormPanel ui:field="uploadFormTemplatePanel" encoding="multipart/form-data"
-                         method="post">
-                <g:HorizontalPanel>
-                    <g:FileUpload name="uploadFormFile" />
-                    <g:SubmitButton text="Импортировать" />
-                </g:HorizontalPanel>
-            </g:FormPanel>
-        </g:HorizontalPanel>
+        <t:Bar>
+            <t:LeftBar>
+                <g:Button text="Сохранить" ui:field="saveButton"/>
+                <g:Button text="Сбросить" ui:field="resetButton"/>
+                <g:Button text="Отмена" ui:field="cancelButton"/>
+            </t:LeftBar>
+        </t:Bar>
     </g:north>
 
     <g:north size="80">
