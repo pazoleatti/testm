@@ -74,7 +74,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		
 		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
 		// Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl		
-		formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getId());
+		formDataDaoFilter.setUserDepartmentId(userInfo.getUser().getDepartmentId());
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
 		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
