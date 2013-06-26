@@ -119,7 +119,7 @@ public class FormDataServiceImpl implements FormDataService {
             FormData fd = formDataDao.getWithoutRows(formDataId);
             fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();
-            additionalParameters.put("dataStream", inputStream);
+            additionalParameters.put("ImportInputStream", inputStream);
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
