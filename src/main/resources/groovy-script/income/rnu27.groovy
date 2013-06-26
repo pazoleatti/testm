@@ -25,7 +25,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         //deleteAllStatic()
-        addNewRowInFormData()
+        addNewRowwarnrmData()
         break
     case FormDataEvent.DELETE_ROW:
         //deleteAllStatic()
@@ -35,7 +35,7 @@ switch (formDataEvent) {
 
 
 void log(String message, Object... args) {
-    logger.info(message, args)
+    logger.warn(message, args)
 }
 
 // графа 1  - число  number № пп
@@ -414,7 +414,7 @@ void setError(Column c) {
 /**
  * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
  */
-void addNewRowInFormData() {
+void addNewRowwarnrmData() {
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
 

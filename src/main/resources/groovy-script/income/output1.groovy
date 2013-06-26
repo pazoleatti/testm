@@ -100,7 +100,7 @@ void logicalCheck() {
         formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
     }
     if (formPrev == null) {
-        logger.info('Форма за предыдущий отчётный период не создавалась!')
+        logger.warn('Форма за предыдущий отчётный период не создавалась!')
     }
 }
 
