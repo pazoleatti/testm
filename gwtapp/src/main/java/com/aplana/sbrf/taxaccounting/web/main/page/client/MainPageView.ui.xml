@@ -33,7 +33,7 @@
                             <b:ButtonLink href="resources/About.pdf" title="Руководство пользователя" />
                         </div>
                         <div class="{style.about}">
-                            <b:ButtonLink href="resources/About.pdf" title="О программе" />
+                            <b:ButtonLink ui:field="aboutLink" title="О программе" />
                         </div>
 						<g:HTMLPanel ui:field="mainMenuContentPanel" />
 
