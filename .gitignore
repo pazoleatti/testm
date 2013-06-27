@@ -5,5 +5,5 @@ target
 .settings
 .project
 .idea
-.iml
+*.iml
 *~
