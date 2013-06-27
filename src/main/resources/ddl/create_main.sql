@@ -612,7 +612,7 @@ comment on column cell_editable.column_id is 'Идентификатор сто�
 create table numeric_value (
   row_id number(18) not null,
   column_id number(9) not null,
-  value decimal(25, 8)
+  value decimal(27, 10)
 );
 alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
 alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
