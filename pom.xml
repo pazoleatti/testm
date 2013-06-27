@@ -425,13 +425,21 @@
 			<url>http://aplana.datateh.ru:8181/nexus/content/repositories/thirdparty/</url>
 		</repository>
 	</repositories>
+	
 	<scm>
-		<connection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/trunk</connection>
-		<developerConnection>scm:svn:https://horse.aplana.com/svn/SBRFACCTAX/trunk</developerConnection>
-		<url>https://horse.aplana.com/svn/SBRFACCTAX/trunk</url>
+		<connection>scm:git:https://git.aplana.com/git/sbrfacctax</connection>
+		<developerConnection>scm:git:https://git.aplana.com/git/sbrfacctax</developerConnection>
+		<url>https://git.aplana.com/git/sbrfacctax</url>
 	</scm>
+	
 	<issueManagement>
 		<url>http://jira.aplana.com/browse/SBRFACCTAX</url>
 		<system>JIRA</system>
 	</issueManagement>
+	
+	<ciManagement>
+		<url>http://172.16.127.19:8080/job/SBRF-NK-build</url>
+		<system>Jenkins</system>
+	</ciManagement>
+	
 </project>
