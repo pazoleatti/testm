@@ -21,13 +21,13 @@ public class NumericColumn extends Column implements Serializable {
 	 * Максимально допустимое значение точности для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
-	public static final int MAX_PRECISION = 8;
+	public static final int MAX_PRECISION = 10;
 	
 	/**
 	 * Максимально допустимое колличество значений для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
-	public static final int MAX_LENGTH = 25;
+	public static final int MAX_LENGTH = 27;
 
 	private int precision = 0;
 

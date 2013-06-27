@@ -66,6 +66,7 @@ public class FormDataPresenter extends
 		try {
 			super.prepareFromRequest(request);
 
+            //TODO: Возможно переписать придется, если новый пейджинг сделают, т.к. данные в какой-то временной таблице будут.
 			final GetFormData action = new GetFormData();
 			// WTF? Почему Long.MAX_VALUE?
 			action.setFormDataId(Long.parseLong(request.getParameter(
@@ -81,75 +82,7 @@ public class FormDataPresenter extends
 			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
 					READ_ONLY, "true")));
 
-			dispatcher.execute(
-					action,
-					CallbackUtils.defaultCallback(
-							new AbstractCallback<GetFormDataResult>() {
-								@Override
-								public void onSuccess(GetFormDataResult result) {
-
-									LogAddEvent.fire(FormDataPresenter.this,
-											result.getLogEntries());
-
-									formData = result.getFormData();
-									formDataAccessParams = result
-											.getFormDataAccessParams();
-									fixedRows = result.isFixedRows();
-
-									switch (result.getFormMode()) {
-									case READ_UNLOCKED:
-										setReadUnlockedMode();
-										break;
-									case READ_LOCKED:
-										setReadLockedMode(
-												result.getLockedByUser(),
-												result.getLockDate());
-										break;
-									case EDIT:
-										setEditMode();
-										break;
-									}
-
-									manageDeleteRowButtonEnabled();
-
-									getView().setAdditionalFormInfo(
-											result.getTemplateFormName(),
-											result.getFormData().getFormType()
-													.getTaxType(),
-											result.getFormData().getKind()
-													.getName(),
-											result.getDepartmenName(),
-											result.getReportPeriod().getName(),
-											result.getFormData().getState()
-													.getName());
-									// Если период для ввода остатков, то делаем все ячейки редактируемыми
-									if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
-										forceEditMode = true;
-									}
-									getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
-											+ String.valueOf(result.getFormData().getFormType().getTaxType()));
-									getView().setColumnsData(
-											formData.getFormColumns(),
-											readOnlyMode,
-											forceEditMode);
-									getView().setRowsData(
-											formData.getDataRows());
-									getView().addCustomHeader(
-											formData.getHeaders());
-									getView().addCustomTableStyles(
-											result.getAllStyles());
-
-									TitleUpdateEvent
-											.fire(FormDataPresenter.this,
-													readOnlyMode ? "Налоговая форма"
-															: "Редактирование налоговой формы",
-													formData.getFormType()
-															.getName());
-
-								}
-
-							}, this).addCallback(
-									TaManualRevealCallback.create(this, placeManager)));
+            executeAction(action);
 
 		} catch (Exception e) {
 			placeManager.navigateBackQuietly();
@@ -171,7 +104,7 @@ public class FormDataPresenter extends
 
     @Override
     public void onUploadClickedSuccess() {
-        //TODO: Надо сделать второй запрос в базу за распарсенными xls данными
+
         try {
 
             final GetFormData action = new GetFormData();
@@ -182,81 +115,13 @@ public class FormDataPresenter extends
             action.setReportPeriodId(Long.valueOf(formData.getReportPeriodId()));
             action.setReadOnly(readOnlyMode);
 
-            dispatcher.execute(
-                    action,
-                    CallbackUtils.defaultCallback(
-                            new AbstractCallback<GetFormDataResult>() {
-                                @Override
-                                public void onSuccess(GetFormDataResult result) {
-
-                                    LogAddEvent.fire(FormDataPresenter.this,
-                                            result.getLogEntries());
-
-                                    formData = result.getFormData();
-                                    formDataAccessParams = result
-                                            .getFormDataAccessParams();
-                                    fixedRows = result.isFixedRows();
-
-                                    switch (result.getFormMode()) {
-                                        case READ_UNLOCKED:
-                                            setReadUnlockedMode();
-                                            break;
-                                        case READ_LOCKED:
-                                            setReadLockedMode(
-                                                    result.getLockedByUser(),
-                                                    result.getLockDate());
-                                            break;
-                                        case EDIT:
-                                            setEditMode();
-                                            break;
-                                    }
-
-                                    manageDeleteRowButtonEnabled();
-
-                                    getView().setAdditionalFormInfo(
-                                            result.getTemplateFormName(),
-                                            result.getFormData().getFormType()
-                                                    .getTaxType(),
-                                            result.getFormData().getKind()
-                                                    .getName(),
-                                            result.getDepartmenName(),
-                                            result.getReportPeriod().getName(),
-                                            result.getFormData().getState()
-                                                    .getName());
-                                    // Если период для ввода остатков, то делаем все ячейки редактируемыми
-                                    if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
-                                        forceEditMode = true;
-                                    }
-                                    getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
-                                            + String.valueOf(result.getFormData().getFormType().getTaxType()));
-                                    getView().setColumnsData(
-                                            formData.getFormColumns(),
-                                            readOnlyMode,
-                                            forceEditMode);
-                                    getView().setRowsData(
-                                            formData.getDataRows());
-                                    getView().addCustomHeader(
-                                            formData.getHeaders());
-                                    getView().addCustomTableStyles(
-                                            result.getAllStyles());
-
-                                    TitleUpdateEvent
-                                            .fire(FormDataPresenter.this,
-                                                    readOnlyMode ? "Налоговая форма"
-                                                            : "Редактирование налоговой формы",
-                                                    formData.getFormType()
-                                                            .getName());
-
-                                }
-
-                            }, this).addCallback(
-                            TaManualRevealCallback.create(this, placeManager)));
+            executeAction(action);
 
         } catch (Exception e) {
             placeManager.navigateBackQuietly();
             getProxy().manualRevealFailed();
             MessageEvent.fire(this,
-                    "Не удалось открыть/создать налоговую форму", e);
+                    "Не удалось загрузить данные из файла для налоговой формы", e);
         }
     }
 
@@ -478,5 +343,77 @@ public class FormDataPresenter extends
 					}
 				}, this));
 	}
+
+    private void executeAction(GetFormData action){
+        dispatcher.execute(
+                action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetFormDataResult>() {
+                            @Override
+                            public void onSuccess(GetFormDataResult result) {
+
+                                LogAddEvent.fire(FormDataPresenter.this,
+                                        result.getLogEntries());
+
+                                formData = result.getFormData();
+                                formDataAccessParams = result
+                                        .getFormDataAccessParams();
+                                fixedRows = result.isFixedRows();
+
+                                switch (result.getFormMode()) {
+                                    case READ_UNLOCKED:
+                                        setReadUnlockedMode();
+                                        break;
+                                    case READ_LOCKED:
+                                        setReadLockedMode(
+                                                result.getLockedByUser(),
+                                                result.getLockDate());
+                                        break;
+                                    case EDIT:
+                                        setEditMode();
+                                        break;
+                                }
+
+                                manageDeleteRowButtonEnabled();
+
+                                getView().setAdditionalFormInfo(
+                                        result.getTemplateFormName(),
+                                        result.getFormData().getFormType()
+                                                .getTaxType(),
+                                        result.getFormData().getKind()
+                                                .getName(),
+                                        result.getDepartmenName(),
+                                        result.getReportPeriod().getName(),
+                                        result.getFormData().getState()
+                                                .getName());
+                                // Если период для ввода остатков, то делаем все ячейки редактируемыми
+                                if (!readOnlyMode && result.getReportPeriod().isBalancePeriod()) {
+                                    forceEditMode = true;
+                                }
+                                getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
+                                        + String.valueOf(result.getFormData().getFormType().getTaxType()));
+                                getView().setColumnsData(
+                                        formData.getFormColumns(),
+                                        readOnlyMode,
+                                        forceEditMode);
+                                getView().setRowsData(
+                                        formData.getDataRows());
+                                getView().addCustomHeader(
+                                        formData.getHeaders());
+                                getView().addCustomTableStyles(
+                                        result.getAllStyles());
+
+                                TitleUpdateEvent
+                                        .fire(FormDataPresenter.this,
+                                                readOnlyMode ? "Налоговая форма"
+                                                        : "Редактирование налоговой формы",
+                                                formData.getFormType()
+                                                        .getName());
+
+                            }
+
+                        }, this).addCallback(
+                        TaManualRevealCallback.create(this, placeManager)));
+    }
 
 }
