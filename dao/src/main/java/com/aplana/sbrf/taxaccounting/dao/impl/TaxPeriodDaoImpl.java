@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DictionaryTaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -22,7 +24,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 
-	private static final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
+	@Autowired
+	private DictionaryTaxPeriodDao dictionaryTaxPeriodDao;
+
+	private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
 		@Override
 		public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
 			TaxPeriod t = new TaxPeriod();
@@ -30,6 +35,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			t.setStartDate(rs.getDate("start_date"));
 			t.setEndDate(rs.getDate("end_date"));
+			t.setDictionaryTaxPeriod(dictionaryTaxPeriodDao.getByTaxType(t.getTaxType()));
 			return t;
 		}
 	}

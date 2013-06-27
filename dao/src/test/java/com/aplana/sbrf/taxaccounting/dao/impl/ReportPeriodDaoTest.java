@@ -82,4 +82,22 @@ public class ReportPeriodDaoTest {
 		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());
 	}
+
+	@Test
+	public void closeReportPeriodTest() {
+		ReportPeriod reportPeriod = reportPeriodDao.get(1);
+		assertEquals(true, reportPeriod.isActive());
+		reportPeriodDao.changeActive(reportPeriod.getId(), false);
+		reportPeriod = reportPeriodDao.get(1);
+		assertEquals(false, reportPeriod.isActive());
+	}
+
+	@Test
+	public void openReportPeriodTest() {
+		ReportPeriod reportPeriod = reportPeriodDao.get(2);
+		assertEquals(false, reportPeriod.isActive());
+		reportPeriodDao.changeActive(reportPeriod.getId(), true);
+		reportPeriod = reportPeriodDao.get(2);
+		assertEquals(true, reportPeriod.isActive());
+	}
 }

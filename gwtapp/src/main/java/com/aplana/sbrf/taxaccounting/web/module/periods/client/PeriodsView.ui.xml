@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 <ui:style>
     .titleLabel {
@@ -72,8 +73,8 @@
                         </g:HorizontalPanel>
                         <g:HorizontalPanel>
                             <g:Label>Подразделение:</g:Label>
-                            <g:ListBox></g:ListBox>
-                            <style:ButtonLink img="resources/img/starfish-16.png" text="Открыть период"></style:ButtonLink>
+                            <picker:NewDepartmentPicker header="Подразделение"  ui:field="departmentPicker"  withCheckBox="false"/>
+                            <style:ButtonLink img="resources/img/starfish-16.png" text="Открыть период" ui:field="openPeriod"></style:ButtonLink>
                         </g:HorizontalPanel>
 
                     </g:VerticalPanel>
@@ -81,9 +82,9 @@
             </g:HorizontalPanel>
         </g:north>
         <g:center>
-            <g:ResizeLayoutPanel>
+            <g:ScrollPanel>
                 <style:GenericCellTable ui:field="periodsTable" width="100%"/>
-            </g:ResizeLayoutPanel>
+            </g:ScrollPanel>
         </g:center>
 
     </g:DockLayoutPanel>

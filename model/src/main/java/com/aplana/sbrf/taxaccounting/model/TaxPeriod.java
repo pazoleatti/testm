@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Налоговый период.
@@ -14,6 +15,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	private TaxType taxType;
 	private Date startDate;
 	private Date endDate;
+	private List<DictionaryTaxPeriod> dictionaryTaxPeriod;
 	
 	/**
 	 * @return вид налога
@@ -58,5 +60,13 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
-	}	
+	}
+
+	public List<DictionaryTaxPeriod> getDictionaryTaxPeriod() {
+		return dictionaryTaxPeriod;
+	}
+
+	public void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod) {
+		this.dictionaryTaxPeriod = dictionaryTaxPeriod;
+	}
 }
