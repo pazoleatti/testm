@@ -53,11 +53,12 @@ switch (formDataEvent) {
         break
     // проверка при "вернуть из принята в подготовлена"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
-        checkOnCancelAcceptance()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        acceptance()
+        if (!logicalCheck(true) || !checkNSI()) {
+
+        }
         break
     // обобщить
     case FormDataEvent.COMPOSE :
@@ -540,34 +541,6 @@ void consolidation() {
 }
 
 /**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
-        }
-    }
-}
-
-/**
- * Принять.
- */
-void acceptance() {
-    if (!logicalCheck(true) || !checkNSI()) {
-        return
-    }
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
-}
-
-/**
  * Проверка при создании формы.
  */
 void checkCreation() {
@@ -736,7 +709,7 @@ def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue
     if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         for (def row : formDataOld.dataRows) {
             if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return round(row.getCell(needColumnName), 2)
+                return round(row.getCell(needColumnName).getValue(), 2)
             }
         }
     }
