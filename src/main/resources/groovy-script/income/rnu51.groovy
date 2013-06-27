@@ -21,7 +21,7 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addNewRowInFormData()
+        addNewRowwarnrmData()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
@@ -196,7 +196,7 @@ void logicalCheck() {
 /**
  * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
  */
-void addNewRowInFormData() {
+void addNewRowwarnrmData() {
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
 

@@ -50,18 +50,6 @@ public class FormTemplateContent {
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
 		formTemplate.setCode(code);
-
-		//TODO: тут для стилей и колонок выставляем id = null. потому что id для них хранится в xml и оно не null.
-		// эти поля могут быть новыми для текущей версии формы, но id != null поэтому мы просто пытаемся их обновить
-		// вместо того чтобы сделать insert.
-
-		for (FormStyle style : styles) {
-			style.setId(null);
-		}
-		for (Column column : columns) {
-			column.setId(null);
-		}
-
 		formTemplate.getStyles().clear();
 		formTemplate.getStyles().addAll(styles);
 		formTemplate.getColumns().clear();
