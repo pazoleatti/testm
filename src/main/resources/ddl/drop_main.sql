@@ -1,3 +1,8 @@
+drop table ref_book_value;
+drop table ref_book_record;
+drop table ref_book_attribute;
+drop table ref_book;
+
 drop table string_value;
 drop table numeric_value;
 drop table date_value;
