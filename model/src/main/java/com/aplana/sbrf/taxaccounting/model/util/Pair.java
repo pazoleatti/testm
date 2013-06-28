@@ -15,11 +15,11 @@ public class Pair<F,S> {
 		this.second = second;
 	}
 
-	F getFirst() {
+	public F getFirst() {
 		return first;
 	}
 
-	S getSecond() {
+	public S getSecond() {
 		return second;
 	}
 

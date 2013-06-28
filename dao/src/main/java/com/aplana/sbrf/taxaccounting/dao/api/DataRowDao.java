@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -29,12 +31,8 @@ public interface DataRowDao {
 	/**
 	 * Метод получает строки сохранненого состояния
 	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param handler
-	 * @param filter
-	 * @param range
 	 */
-	void getSavedRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
+	List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 	
 	int getSavedSize(FormData fd, DataRowFilter filter,
@@ -47,50 +45,30 @@ public interface DataRowDao {
 	/**
 	 * Метод получает строки редактируемого в данный момент состояния формы.
 	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param handler
-	 * @param filter фильтр (возможно значение null)
-	 * @param range диапазон (возможно значение null)
 	 */
-	void getRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
+	List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 	
-	/**
-	 * Метод получает строку редактируемого в данный момент состояния формы.
-	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param index
-	 * @param filter
-	 * @param range
-	 * @return
-	 */
-	DataRow<Cell> getRow(FormData fd, int index, DataRowFilter filter,
-			DataRowRange range);
+
 	
 	int getSize(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 
 	/**
-	 * Обновляет существующую строку НФ
+	 * Обновляет строки НФ
 	 * 
 	 * @param fd
 	 * @param row
 	 */
-	void updateRow(FormData fd, DataRow<Cell> row);
+	void updateRows(FormData fd, List<DataRow<Cell>> rows);
 
 	void removeRow(FormData fd, DataRow<Cell> row);
 
 	void removeRow(FormData fd, int index);
 
-	DataRow<Cell> addRow(FormData fd, int index, DataRow<Cell> rowTemplate);
+	DataRow<Cell> insertRow(FormData fd, int index, DataRow<Cell> row);
 
-	DataRow<Cell> addRow(FormData fd, DataRow<Cell> rowTemplate);
-
-	DataRow<Cell> addRowAfter(FormData fd, DataRow<Cell> afterRow,
-			DataRow<Cell> rowTemplate);
-
-	DataRow<Cell> addRowBefore(FormData fd, DataRow<Cell> beforeRow,
-			DataRow<Cell> rowTemplate);
+	DataRow<Cell> insertRowAfter(FormData fd, DataRow<Cell> afterRow, DataRow<Cell> row);
 
 	/*
 	 * Сохранение/отмена
