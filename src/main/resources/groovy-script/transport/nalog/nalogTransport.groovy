@@ -82,7 +82,7 @@ switch (formDataEvent) {
 // Инициирование Пользователем перехода «Подготовить»     //..
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
-        checkOnPrepareOrAcceptance('Подготовка')
+        // (Ramil Timerbaev) проверка производится в ядре
         // 2.	Логические проверки значений налоговой формы.
         //       logicalChecks()
         // 3.	Проверки соответствия НСИ.
@@ -93,7 +93,7 @@ switch (formDataEvent) {
 // Инициирование Пользователем  выполнение перехода в статус «Принята» из Подготовлена      //..
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
-        checkOnPrepareOrAcceptance('Принятие')
+        // (Ramil Timerbaev) проверка производится в ядре
         // 2.	Логические проверки значений налоговой формы.
         //       logicalChecks()
         // 3.	Проверки соответствия НСИ.
@@ -104,24 +104,24 @@ switch (formDataEvent) {
 // проверка при "вернуть из принята в подготовлена"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:    //..
         // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        checkOnCancelAcceptance()
+        // (Ramil Timerbaev) проверка производится в ядре
 
         break
 
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:    //..
-        acceptance()
+        // (Ramil Timerbaev) проверка производится в ядре
         break
 
 // после вернуть из принята в подготовлена
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:    //..
-        acceptance()
+        // (Ramil Timerbaev) проверка производится в ядре
         break
 
 //отменить принятие консолидированной формы
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:    //..
         // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        checkOnCancelAcceptance()
+        // (Ramil Timerbaev) проверка производится в ядре
         break
 
 // обобщить (3.10.1)
@@ -348,54 +348,4 @@ boolean isRowInDataRows(def nrow) {
         }
     }
     return false
-}
-
-/*
-* Проверки наличия и статусов форм, консолидирующих данные текущей формы
-*/
-
-/**
- * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
- */
-void checkOnPrepareOrAcceptance(def value) {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
-            }
-        }
-    }
-}
-
-/**
- * Проверки при переходе "Отменить принятие" в подготовлена.
- */
-void checkOnCancelAcceptance() {
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
-            formData.getFormType().getId(), formData.getKind());
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
-            if (formData.getKind().getId() == 1) { // если форма первичная
-                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма.")
-            } else {    // если форма консолидированая
-                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма вышестоящего уровня.")
-            }
-        }
-    }
-}
-
-/**
- * Для перевода сводной налогой формы в статус "принят".
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each()
-            {
-                formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-            }
 }

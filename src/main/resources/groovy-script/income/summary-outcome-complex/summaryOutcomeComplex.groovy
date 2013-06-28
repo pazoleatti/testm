@@ -24,17 +24,14 @@ switch (formDataEvent) {
     // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         checkAndCalc()
-        checkOnApproval()
         break
     // принять из утверждена
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
         checkAndCalc()
-        checkOnAcceptance()
         break
     // вернуть из принята в утверждена
     case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED :
         checkDeclarationBankOnCancelAcceptance()
-        checkOnCancelAcceptance()
         break
     // принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
@@ -47,12 +44,10 @@ switch (formDataEvent) {
         break
     // после принятия из утверждена
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED :
-        acceptance()
         break
     // после вернуть из "Принята" в "Утверждена"
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED :
         checkDeclarationBankOnCancelAcceptance()
-        acceptance()
         break
 }
 
@@ -78,18 +73,6 @@ switch (formDataEvent) {
  */
 void checkAndCalc() {
     calculation()
-}
-
-/**
- * Для перевода сводной налогой формы в статус "принят".
- *
- * @author rtimerbaev
- * @since 22.02.2013 12:50
- */
-void acceptance() {
-    departmentFormTypeService.getDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
 }
 
 /**
@@ -252,65 +235,6 @@ void checkDeclarationBankOnCancelAcceptance() {
         def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
         if (bank != null && bank.accepted) {
             logger.error('Отмена принятия налоговой формы невозможно, т.к. уже принята декларация Банка.')
-        }
-    }
-}
-
-/**
- * Проверка при осуществлении перевода формы в статус "Принята".
- *
- * @since 21.03.2013 17:00
- */
-void checkOnAcceptance() {
-    if (isBank()) {
-        return
-    }
-    departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error('Принятие сводной налоговой формы невозможно, т.к. уже подготовлена сводная налоговая форма Банка.')
-            }
-        }
-    }
-}
-
-/**
- * Проверка, наличия и статуса сводной формы уровня Банка при осуществлении перевода формы в статус "Утверждена".
- *
- * @author auldanov
- * @since 21.03.2013 17:00
- */
-void checkOnApproval() {
-    if (isBank()) {
-        return
-    }
-    departmentFormTypeService.getDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
-        if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-            // если форма существует и статус "принята"
-            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
-                logger.error('Утверждение сводной налоговой формы невозможно, т.к. уже подготовлена сводная налоговая форма Банка.')
-            }
-        }
-    }
-}
-
-/**
- * Проверки при переходе "Отменить принятие".
- */
-void checkOnCancelAcceptance() {
-    if (isBank()) {
-        return
-    }
-    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY);
-    DepartmentFormType department = departments.getAt(0);
-    if (department != null) {
-        FormData bank = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
-
-        if (bank != null && (bank.getState() == WorkflowState.APPROVED || bank.getState() == WorkflowState.ACCEPTED)) {
-            logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
         }
     }
 }
