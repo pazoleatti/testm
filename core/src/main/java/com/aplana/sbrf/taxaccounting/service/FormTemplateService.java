@@ -70,4 +70,10 @@ public interface FormTemplateService {
 	 * @param userInfo
 	 */
 	void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo);
+
+    /**
+     * Исполяет для теста написанный скрипт от имени пользователя controlUnp
+     * @param formTemplate
+     */
+    void executeTestScript(FormTemplate formTemplate);
 }
