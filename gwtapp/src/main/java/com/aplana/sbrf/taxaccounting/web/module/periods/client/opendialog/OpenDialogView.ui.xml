@@ -1,0 +1,67 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker"
+    xmlns:w='urn:import:com.aplana.sbrf.taxaccounting.web.widget.incrementbutton'
+    xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+    <ui:style>
+        .content {
+            padding: 10px;
+            border: 1px solid #949494;
+            border-radius: 3px;
+            margin: 10px 0px;
+        }
+
+        .buttonBar {
+            margin-left: 25%;
+        }
+    </ui:style>
+
+	<g:DialogBox height="100%" width="250px" glassEnabled="true" text="Открыть период">
+        <g:VerticalPanel height="100%" width="250px">
+            <g:FlowPanel styleName="{style.content}">
+
+                <g:HorizontalPanel height="10px" >
+                    <g:Label text="Подразделение: " />
+                    <picker:NewDepartmentPicker header="Подразделение"  ui:field="departmentPicker"  withCheckBox="false"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="10px">
+                    <g:Label text="Год: " />
+                    <w:IncrementButton ui:field="yearBox"   minValue="1900" maxValue="2100"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="10px">
+                    <g:Label text="Период: " />
+                    <style:ListBoxWithTooltip width="200px" ui:field="period" showTooltip="true"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="10px">
+                    <g:Label text="Срок сдачи отчетности: " />
+                    <date:CustomDateBox width="60px" ui:field="term"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="10px">
+                    <g:CheckBox width="60px" ui:field="balancePeriod"/>
+                    <g:Label text="Ввод остатков" />
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="10px">
+                    <g:CheckBox width="60px" ui:field="correctPeriod" enabled="false"/>
+                    <g:Label text="Корректирующий" />
+                </g:HorizontalPanel>
+            </g:FlowPanel>
+
+            <style:Bar>
+                <style:LeftBar addStyleNames="{style.buttonBar}">
+                    <g:Button ui:field="continueButton" text="Открыть период" width="150px"/>
+                    <g:Button ui:field="cancelButton" text="Отмена"/>
+                </style:LeftBar>
+            </style:Bar>
+
+        </g:VerticalPanel>
+
+	</g:DialogBox>
+
+</ui:UiBinder> 

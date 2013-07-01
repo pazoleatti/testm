@@ -15,4 +15,10 @@ public interface ReportPeriodService {
 	ReportPeriod getCurrentPeriod(TaxType taxType);
 
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
+
+	List<ReportPeriod> listByTaxPeriodAndDepartment(int taxPeriodId, long departmentId);
+
+	void closePeriod(int reportPeriodId);
+
+	void openPeriod(int reportPeriodId);
 }

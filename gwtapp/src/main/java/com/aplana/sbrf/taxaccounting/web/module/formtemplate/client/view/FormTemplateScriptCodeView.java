@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateScriptCodePresenter;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -30,4 +32,10 @@ public class FormTemplateScriptCodeView extends ViewWithUiHandlers<FormTemplateS
 	public String getScriptCode() {
 		return script.getText();
 	}
+
+    @UiHandler("executeScript")
+    public void onExecuteButtonClicked(ClickEvent event){
+        if(getUiHandlers() != null)
+            getUiHandlers().executeScript();
+    }
 }

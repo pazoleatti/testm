@@ -5,4 +5,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormTemplateScriptCodeUiHandlers extends UiHandlers {
 
+    void executeScript();
+
 }

@@ -31,6 +31,19 @@ switch (formDataEvent) {
         //deleteAllStatic()
         deleteRow()
         break
+    // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        allCheck()
+        break
+    // обобщить
+    case FormDataEvent.COMPOSE :
+        consolidation()
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        allCheck()
+        break
 }
 
 
@@ -481,7 +494,29 @@ FormData getFormPrev() {
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = formDataService.find(formData.getFormType().id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        formPrev = FormDataService.find(formData.getFormType().id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
     }
     return formPrev
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
