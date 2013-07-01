@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 @Repository
@@ -59,26 +62,85 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRow(FormData fd, DataRow<Cell> row) {
-		// TODO Auto-generated method stub
+	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
+		// Если строка помечена как ADD, то физическое удаление
+		// Если строка помесена как DELETE, то ничего не делаем
+		// Если строка помечена как SAME, то помечаем как DELETE
+		
+		getJdbcTemplate().batchUpdate("delete from DATA_ROW where ID=? and TYPE=?", new BatchPreparedStatementSetter() {
+			
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				Long rowId = rows.get(i).getId();
+				if (rowId == null){
+					throw new IllegalArgumentException();
+				}
+				ps.setLong(1, rows.get(i).getId());
+				ps.setInt(2, RT.ADD.getKey());
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return rows.size();
+			}
+			
+		});
+		
+		getJdbcTemplate().batchUpdate("update DATA_ROW set TYPE=? where ID=? and TYPE=?", new BatchPreparedStatementSetter() {
+			
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setInt(1, RT.DEL.getKey());
+				ps.setLong(2, rows.get(i).getId());
+				ps.setInt(3, RT.SAME.getKey());
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return rows.size();
+			}
+		});
 
 	}
 
 	@Override
-	public void removeRow(FormData fd, int index) {
-		// TODO Auto-generated method stub
+	public void removeRows(final FormData fd, final int idxFrom, final int idxTo) {
+		if ((idxFrom < 1) || (idxTo < idxFrom)){
+			throw new IllegalArgumentException();
+		}
+		// Если строка помечена как ADD, то физическое удаление
+		// Если строка помесена как DELETE, то ничего не делаем
+		// Если строка помечена как SAME, то помечаем как DELETE
+		String idsSQL = "select ID from (select rownum as IDX, ID, TYPE from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX between :from and :to";
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("types", RT.rtsToKeys(new RT[]{RT.ADD, RT.SAME}));
+		params.put("formDataId", fd.getId());
+		params.put("from", idxFrom);
+		params.put("to", idxTo);
+		params.put("remType", RT.ADD.getKey());
+		params.put("updType", RT.SAME.getKey());
+		params.put("setType", RT.DEL.getKey());
+		
+		getNamedParameterJdbcTemplate().update("delete from DATA_ROW where ID in (" + idsSQL + ") and TYPE=:remType", params);
+		getNamedParameterJdbcTemplate().update("update DATA_ROW set TYPE=:setType where ID in (" + idsSQL + ") and TYPE=:updType", params);
 
 	}
 
 	@Override
-	public DataRow<Cell> insertRow(FormData fd, int index, DataRow<Cell> row) {
+	public DataRow<Cell> insertRows(FormData fd, int index, List<DataRow<Cell>> rows) {
+		// Если строка присутствует то ошибка (rowId должно быть null)
+		// Если строка помечена как ADD, то физическое удаление
+		// Если строка помесена как DELETE, то ничего не делаем
+		// Если строка помечена как SAME, то помечаем как DELETE
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public DataRow<Cell> insertRowAfter(FormData fd, DataRow<Cell> afterRow,
-			DataRow<Cell> row) {
+	public DataRow<Cell> insertRowsAfter(FormData fd, DataRow<Cell> afterRow,
+			List<DataRow<Cell>> rows) {
+		// Получаем текущую и следующую строку
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -111,8 +173,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			DataRowFilter filter, DataRowRange range) {
 		DataRowMapper mapper = new DataRowMapper(fd, types, filter, range);
 		Pair<String, Map<String, Object>> sql = mapper.createSql();
-		System.out.println(sql.getFirst());
-		System.out.println(sql.getSecond());
 		return getNamedParameterJdbcTemplate().query(sql.getFirst(),
 				sql.getSecond(), mapper);
 	}
@@ -139,8 +199,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		public int getKey() {
 			return key;
 		}
-		
-		public static Set<Integer> rtsToKeys(RT[] types){
+
+		public static Set<Integer> rtsToKeys(RT[] types) {
 			Set<Integer> result = new HashSet<Integer>();
 			for (RT rt : types) {
 				result.add(rt.getKey());
@@ -152,7 +212,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * @author sgoryachkin
 	 * 
-	 *         <a>http://conf.aplana.com/pages/viewpage.action?pageId=9588773&focusedCommentId=9591393#comment-9591393</a>
+	 *         <a>http://conf.aplana.com/pages/viewpage.action?pageId=9588773&
+	 *         focusedCommentId=9591393#comment-9591393</a>
 	 */
 	private static class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
@@ -169,7 +230,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		public Pair<String, Map<String, Object>> createSql() {
 
-			StringBuilder select = new StringBuilder("select R.ALIAS as A");
+			StringBuilder select = new StringBuilder("select rownum as IDX, R.ID as ID, R.ALIAS as A");
 			StringBuilder from = new StringBuilder(" from DATA_ROW R");
 
 			Map<String, Object> params = new HashMap<String, Object>();
@@ -178,15 +239,34 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 			for (Column c : fd.getFormColumns()) {
 				params.put(String.format("column%sId", c.getId()), c.getId());
-				String valueTableName = getCellValueTableName(c);
+				String valueTableName = getCellValueTableName(c,
+						CELL_VALUE_TABLE_NAMES);
 
+				// Values
 				select.append(String.format(", C%s.VALUE as V%s", c.getId(),
 						c.getId()));
-
 				from.append(String
-						.format(" left join (select COLUMN_ID, ROW_ID, VALUE from %s n join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) C%s on C%s.ROW_ID = R.ID and C%s.COLUMN_ID = :column%sId",
+						.format(" left join (select COLUMN_ID, ROW_ID, VALUE from %s N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) C%s on C%s.ROW_ID = R.ID and C%s.COLUMN_ID = :column%sId",
 								valueTableName, c.getId(), c.getId(),
 								c.getId(), c.getId()));
+				// Styles
+				select.append(String.format(", S%s.STYLE_ID as S%s", c.getId(),
+						c.getId()));
+				from.append(String
+						.format(" left join (select COLUMN_ID, ROW_ID, STYLE_ID from CELL_STYLE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) S%s on S%s.ROW_ID = R.ID and S%s.COLUMN_ID = :column%sId",
+								c.getId(), c.getId(), c.getId(), c.getId()));
+				// Editables
+				select.append(String.format(", E%s.EDIT as E%s", c.getId(),
+						c.getId()));
+				from.append(String
+						.format(" left join (select COLUMN_ID, ROW_ID, 1 as EDIT from CELL_EDITABLE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) E%s on E%s.ROW_ID = R.ID and E%s.COLUMN_ID = :column%sId",
+								c.getId(), c.getId(), c.getId(), c.getId()));
+				// Span Info
+				select.append(String.format(", SI%s.COLSPAN as CSI%s, SI%s.ROWSPAN as RSI%s", c.getId(),
+						c.getId(), c.getId(), c.getId()));
+				from.append(String
+						.format(" left join (select COLUMN_ID, ROW_ID, COLSPAN, ROWSPAN from CELL_SPAN_INFO N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) SI%s on SI%s.ROW_ID = R.ID and SI%s.COLUMN_ID = :column%sId",
+								c.getId(), c.getId(), c.getId(), c.getId()));
 
 			}
 
@@ -196,8 +276,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					.append(" where R.FORM_DATA_ID = :formDataId and R.TYPE in (:types) order by R.ORD");
 
 			if (range != null) {
-				sql.insert(0, "select rownum IDX, * from(");
-				sql.append(") IDX between :from and :to");
+				sql.insert(0, "select * from(");
+				sql.append(") where IDX between :from and :to");
 				params.put("from", range.getOffset());
 				params.put("to", range.getOffset() + range.getLimit());
 			}
@@ -209,21 +289,70 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		@Override
 		public DataRow<Cell> mapRow(ResultSet rs, int rowNum)
 				throws SQLException {
-			return fd.createDataRow();
+			List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
+					fd.getFormStyles());
+			for (Cell cell : cells) {
+				// Values
+				CellValueExtractor extr = getCellValueTableName(
+						cell.getColumn(), CELL_VALUE_TABLE_EXTRACTORS);
+				cell.setValue(extr.getValue(rs,
+						String.format("V%s", cell.getColumn().getId())));
+				// Styles
+				BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
+						.getColumn().getId()));
+				cell.setStyleId(styleId != null ? styleId.intValueExact()
+						: null);
+				// Editable
+				cell.setEditable(rs.getBoolean(String.format("E%s", cell
+						.getColumn().getId())));
+				// Span Info
+				int rowSpan = rs.getInt(String.format("RSI%s", cell.getColumn().getId()));
+				cell.setRowSpan(rowSpan==0 ? 1 : rowSpan);
+				int colSpan = rs.getInt(String.format("CSI%s", cell.getColumn().getId()));
+				cell.setColSpan(colSpan==0 ? 1 : colSpan);
+			}
+			DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
+			dataRow.setId(rs.getLong("ID"));
+			return dataRow;
 		}
-
 	}
 
 	private static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
 			"STRING_VALUE", "DATE_VALUE" };
 
-	private static String getCellValueTableName(Column c) {
+	private static interface CellValueExtractor {
+		public Object getValue(ResultSet rs, String columnLabel)
+				throws SQLException;
+	}
+
+	private static final CellValueExtractor[] CELL_VALUE_TABLE_EXTRACTORS = {
+			new CellValueExtractor() {
+				@Override
+				public Object getValue(ResultSet rs, String columnLabel)
+						throws SQLException {
+					return rs.getBigDecimal(columnLabel);
+				}
+			}, new CellValueExtractor() {
+				@Override
+				public Object getValue(ResultSet rs, String columnLabel)
+						throws SQLException {
+					return rs.getString(columnLabel);
+				}
+			}, new CellValueExtractor() {
+				@Override
+				public Object getValue(ResultSet rs, String columnLabel)
+						throws SQLException {
+					return rs.getDate(columnLabel);
+				}
+			} };
+
+	private static <T> T getCellValueTableName(Column c, T[] objects) {
 		if (c instanceof StringColumn) {
-			return CELL_VALUE_TABLE_NAMES[1];
+			return objects[1];
 		} else if (c instanceof NumericColumn) {
-			return CELL_VALUE_TABLE_NAMES[0];
+			return objects[0];
 		} else if (c instanceof DateColumn) {
-			return CELL_VALUE_TABLE_NAMES[2];
+			return objects[2];
 		} else {
 			throw new IllegalArgumentException();
 		}

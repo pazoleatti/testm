@@ -62,13 +62,13 @@ public interface DataRowDao {
 	 */
 	void updateRows(FormData fd, List<DataRow<Cell>> rows);
 
-	void removeRow(FormData fd, DataRow<Cell> row);
+	void removeRows(FormData fd, List<DataRow<Cell>> rows);
 
-	void removeRow(FormData fd, int index);
+	void removeRows(FormData fd, int idxFrom, int idxTo);
 
-	DataRow<Cell> insertRow(FormData fd, int index, DataRow<Cell> row);
+	DataRow<Cell> insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
 
-	DataRow<Cell> insertRowAfter(FormData fd, DataRow<Cell> afterRow, DataRow<Cell> row);
+	DataRow<Cell> insertRowsAfter(FormData fd, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
 
 	/*
 	 * Сохранение/отмена
