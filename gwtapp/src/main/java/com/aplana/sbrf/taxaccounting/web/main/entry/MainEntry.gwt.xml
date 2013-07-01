@@ -8,8 +8,19 @@
 	<source path='client' />
 
 	<inherits name='com.gwtplatform.mvp.MvpWithEntryPoint'/>
-	
-	<set-configuration-property name="gin.ginjector.modules"
+    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.DeclarationTemplate"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.userlist.UserList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdataimport.FormDataImport"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
+
+    <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>
 
 	<!-- This is required for Gwt-Platform Proxy's generator -->
