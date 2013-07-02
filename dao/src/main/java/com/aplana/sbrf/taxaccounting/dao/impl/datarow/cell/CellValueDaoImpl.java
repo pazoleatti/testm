@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.cell.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;

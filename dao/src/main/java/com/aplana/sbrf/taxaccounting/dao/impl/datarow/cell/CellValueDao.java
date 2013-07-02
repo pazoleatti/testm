@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.cell;
+package com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;

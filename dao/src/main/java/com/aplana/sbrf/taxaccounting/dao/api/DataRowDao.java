@@ -92,6 +92,26 @@ public interface DataRowDao {
 	 * @param idxTo
 	 */
 	void removeRows(FormData fd, int idxFrom, int idxTo);
+	
+	
+	/**
+	 * Удаляем все строки
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 */
+	void removeRows(FormData fd);
+	
+	
+	/**
+	 * Сохраняет все строки во временном срезе формы, при этом сохраняется порядок, и 
+	 * удаляются все существующие строки. Фактически метод ведет себя как старый способ сохранения формы.
+	 * Поля DataRow.index и DataRow.id не принимаются во внимание. 
+	 * 
+	 * @param fd
+	 * @param rows
+	 */
+	void saveRows(FormData fd, List<DataRow<Cell>> rows);
 
 	DataRow<Cell> insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
 
@@ -106,13 +126,13 @@ public interface DataRowDao {
 	 * 
 	 * @param fd
 	 */
-	void save(FormData fd);
+	void commit(FormData fd);
 
 	/**
 	 * Откатывает временный срез формы к постоянному.
 	 * 
 	 * @param fd
 	 */
-	void cancel(FormData fd);
+	void rollback(FormData fd);
 
 }
