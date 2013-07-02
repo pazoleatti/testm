@@ -192,7 +192,7 @@ create table form_type (
   tax_type char(1) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
-alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
