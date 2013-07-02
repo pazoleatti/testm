@@ -1,0 +1,8 @@
+settings.xml
+m2
+target
+.classpath
+.settings
+.project
+.idea
+*~
