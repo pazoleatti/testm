@@ -41,12 +41,12 @@ public class DataRowList extends AbstractList<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> get(int index) {
-		return dao.getRow(fd, index, filter, range);
+		return null;//dao.getRow(fd, index, filter, range);
 	}
 
 	@Override
 	public int size() {
-		return dao.getSize(fd, filter, range);
+		return dao.getSize(fd, filter);
 	}
 
 
