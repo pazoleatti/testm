@@ -53,29 +53,6 @@
             float: right;
         }
 
-        .gwtButton {
-            position: relative;
-            color: #fff;
-            text-decoration: none;
-            font-size: small;
-            cursor: pointer;
-            padding: 2px 4px 2px 5px;
-            border: solid 1px #00940C;
-            border-radius: 11px;
-            margin-left: 0;
-
-            background: #00940C; /* Для старых браузеров */
-            background: -moz-linear-gradient(top, #CBE6B8, #00940C); /* Firefox 3.6+ */
-            /* Chrome 10+, Safari 5.1+ */
-            background: -webkit-linear-gradient(top, #CBE6B8, #00940C);
-            background: -o-linear-gradient(top, #CBE6B8, #00940C); /* Opera 11.10+ */
-            background: -ms-linear-gradient(top, #CBE6B8, #00940C); /* IE10 */
-            background: linear-gradient(top, #CBE6B8, #00940C); /* CSS3 */
-            /* IE8 hack */
-            behavior: url(resources/pie.htc)\0/;
-            -pie-background: linear-gradient(top, #CBE6B8, #00940C)\0/;
-        }
-
     </ui:style>
 
 	<g:DockLayoutPanel ui:field="dockPanel" unit='PX' height="100%" width="100%">
@@ -148,7 +125,7 @@
                                 <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post"
                                         action="upload/uploadController/xls/">
                                     <g:HorizontalPanel ui:field="uploadPanel">
-                                        <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader" addStyleNames="{style.gwtButton}"/>
+                                        <g:FileUpload ui:field="uploader" title="Файл xls" name="uploader"/>
                                         <g:Button ui:field="uploadButton" text="Загрузить"/>
                                     </g:HorizontalPanel>
                                 </g:FormPanel>
