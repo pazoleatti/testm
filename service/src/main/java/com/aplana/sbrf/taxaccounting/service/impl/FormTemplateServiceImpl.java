@@ -9,6 +9,12 @@ import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +45,19 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private Set<String> checkSet = new HashSet<String>();
 
+    private final Log logger = LogFactory.getLog(getClass());
+
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
 	@Autowired
 	private ObjectLockDao lockDao;
+
+    @Autowired
+    private FormDataScriptingService scriptingService;
+
+    @Autowired
+    TAUserService userService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -75,7 +89,33 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		}
 	}
 
-	@Override
+    @Override
+    public void executeTestScript(FormTemplate formTemplate) {
+        //Формируем контекст выполнения скрипта(userInfo)
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser("controlUnp"));
+        userInfo.setIp("192.168.0.1");
+
+        FormData formData = new FormData(formTemplate);
+        formData.setState(WorkflowState.CREATED);
+        formData.setDepartmentId(17);
+
+        /*formTemplateDao.save(formTemplate);
+        logger.info("formTemplate is saved with body-text for testing");*/
+        Logger log = new Logger();
+        scriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, log, null);
+        if(!log.getEntries().isEmpty())
+        {
+            StringBuilder sb = new StringBuilder("В скрипте найдены ошибки: ");
+            for(LogEntry logEntry : log.getEntries())
+                sb.append(logEntry.getMessage());
+            throw new ServiceException(sb.toString());
+        }
+        logger.info("Script has been executed successful.");
+        throw new ServiceException("Скрипт выполнен успешно.");
+    }
+
+    @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){

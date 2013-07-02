@@ -1,6 +1,21 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'>
+             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-	<cm:CodeMirror ui:field="script"/>
+    <ui:style>
+        .execute{
+            position: fixed;
+            z-index: 10;
+            text-align: right;
+        }
+
+    </ui:style>
+
+    <g:VerticalPanel>
+        <g:FlowPanel addStyleNames="{style.execute}">
+            <g:Button text="Тестъ" ui:field="executeScript" />
+        </g:FlowPanel>
+        <cm:CodeMirror ui:field="script"/>
+    </g:VerticalPanel>
 
 </ui:UiBinder>

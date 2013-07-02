@@ -13,12 +13,9 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSaveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateTestEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormResult;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UnlockFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -40,14 +37,50 @@ import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
-		implements FormTemplateMainUiHandlers, FormTemplateSaveEvent.MyHandler {
+		implements FormTemplateMainUiHandlers, FormTemplateSaveEvent.MyHandler, FormTemplateTestEvent.MyHandler {
 
 	private HandlerRegistration closeFormTemplateHandlerRegistration;
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 	private FormTemplate formTemplate;
 
-	@ProxyCodeSplit
+    @ProxyEvent
+    @Override
+    public void onTest(final FormTemplateTestEvent event) {
+        formTemplate = event.getFormTemplate();
+        final int formId = formTemplate.getId();
+        GetFormTestAction action = new GetFormTestAction();
+        action.setFormTemplate(formTemplate);
+
+        closeFormTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+            @Override
+            public void onWindowClosing(Window.ClosingEvent event) {
+                unlockForm(formId);
+                closeFormTemplateHandlerRegistration.removeHandler();
+            }
+        });
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetFormTestResult>() {
+                    @Override
+                    public void onSuccess(GetFormTestResult result) {
+                        //Nothing, because always fault.
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        getView().setLogMessages(null);
+                        getView().setFormId(formTemplate.getId());
+                        getView().setTitle(formTemplate.getType().getName());
+                        RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
+                        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplate);
+                        /*Window.alert(String.valueOf(formTemplate.getEdition()));*/
+                        super.onFailure(caught);
+                    }
+                }, this));
+    }
+
+    @ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateMainPage)
 	public interface MyProxy extends ProxyPlace<FormTemplateMainPresenter>, Place {
 	}
@@ -161,16 +194,16 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		UpdateFormAction action = new UpdateFormAction();
 		action.setForm(formTemplate);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateFormResult>() {
-					@Override
-					public void onSuccess(UpdateFormResult result) {
-						if (!result.getLogEntries().isEmpty()) {
-							getView().setLogMessages(result.getLogEntries());
-						} else {
-							MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
-							setFormTemplate();
-						}
-					}
-				}, this));
+                .defaultCallback(new AbstractCallback<UpdateFormResult>() {
+                    @Override
+                    public void onSuccess(UpdateFormResult result) {
+                        if (!result.getLogEntries().isEmpty()) {
+                            getView().setLogMessages(result.getLogEntries());
+                        } else {
+                            MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+                            setFormTemplate();
+                        }
+                    }
+                }, this));
 	}
 }
