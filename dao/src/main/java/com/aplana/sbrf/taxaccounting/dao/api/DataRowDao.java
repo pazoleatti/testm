@@ -29,21 +29,27 @@ public interface DataRowDao {
 	 */
 
 	/**
-	 * Метод получает строки сохранненого состояния
+	 * Метод получает строки сохранненого среза строк НФ.
 	 * 
 	 */
 	List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 	
-	int getSavedSize(FormData fd, DataRowFilter filter,
-			DataRowRange range);
+	/**
+	 * Метод получает количество строк сохранненого среза.
+	 * 
+	 * @param fd
+	 * @param filter
+	 * @return
+	 */
+	int getSavedSize(FormData fd, DataRowFilter filter);
 
 	/*
 	 * Методы для работы с редактируемым срезом формы
 	 */
 
 	/**
-	 * Метод получает строки редактируемого в данный момент состояния формы.
+	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 * 
 	 */
 	List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
@@ -51,8 +57,14 @@ public interface DataRowDao {
 	
 
 	
-	int getSize(FormData fd, DataRowFilter filter,
-			DataRowRange range);
+	/**
+	 * Метод получает количество строк редактируемого среза.
+	 * 
+	 * @param fd
+	 * @param filter
+	 * @return
+	 */
+	int getSize(FormData fd, DataRowFilter filter);
 
 	/**
 	 * Обновляет строки НФ
@@ -62,8 +74,23 @@ public interface DataRowDao {
 	 */
 	void updateRows(FormData fd, List<DataRow<Cell>> rows);
 
+	/**
+	 * Удалет строки. При этом используется иденитфикатор DataRow.id 
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 * @param rows
+	 */
 	void removeRows(FormData fd, List<DataRow<Cell>> rows);
 
+	/**
+	 * Удаляет строки в диапазоне индексов. (Индексы от 1)
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 * @param idxFrom
+	 * @param idxTo
+	 */
 	void removeRows(FormData fd, int idxFrom, int idxTo);
 
 	DataRow<Cell> insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
@@ -74,8 +101,18 @@ public interface DataRowDao {
 	 * Сохранение/отмена
 	 */
 
+	/**
+	 * Делает временный срез строк формы - постоянным.
+	 * 
+	 * @param fd
+	 */
 	void save(FormData fd);
 
+	/**
+	 * Откатывает временный срез формы к постоянному.
+	 * 
+	 * @param fd
+	 */
 	void cancel(FormData fd);
 
 }

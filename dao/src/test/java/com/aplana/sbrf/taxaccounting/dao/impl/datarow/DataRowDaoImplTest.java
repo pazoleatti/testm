@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import java.util.List;
 
@@ -37,10 +37,22 @@ public class DataRowDaoImplTest {
 	public void cleanDataRow(){
 		
 		FormData fd = formDataDao.get(1);
-		//List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		//dataRowDao.removeRows(fd, dataRows);
-		dataRowDao.removeRows(fd, 1, 2);
-		dataRowDao.save(fd);
+		dataRowDao.removeRows(fd, 1, 1);
+		
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+		Assert.assertEquals(1, dataRows.size());
+		Assert.assertEquals(1, dataRowDao.getSize(fd, null));
+		
+		dataRows = dataRowDao.getSavedRows(fd, null, null);
+		Assert.assertEquals(2, dataRows.size());
+		Assert.assertEquals(2, dataRowDao.getSavedSize(fd, null));
+		
+		dataRowDao.cancel(fd);
+		
+		dataRows = dataRowDao.getRows(fd, null, null);
+		Assert.assertEquals(2, dataRows.size());
+		Assert.assertEquals(2, dataRowDao.getSize(fd, null));
+		
 		
 		// Проверяем, пуста ли форма для дальнейшего тестирования
 		//dataRows = dataRowDao.getRows(fd, null, null);
