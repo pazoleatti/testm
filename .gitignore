@@ -6,6 +6,7 @@ target
 .project
 .idea
 <<<<<<< HEAD
+<<<<<<< HEAD
 .iml
 <<<<<<< HEAD
 =======
@@ -13,4 +14,7 @@ target
 =======
 bin
 >>>>>>> Добавлен паттерн bin в .gitignore
+=======
+*.iml
+>>>>>>> исправил фильтр в .gitignore
 *~
