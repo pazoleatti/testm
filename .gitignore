@@ -9,6 +9,7 @@ target
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 .iml
 <<<<<<< HEAD
 =======
@@ -24,4 +25,8 @@ bin
 =======
 .iml
 >>>>>>> добавил фильтр в .gitignore
+=======
+*.iml
+bin
+>>>>>>> Добавлен файл .gitignore
 *~
