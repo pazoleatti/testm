@@ -27,6 +27,7 @@ switch (formDataEvent){
         break
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
+        checkBeforeCreate()
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
         //2.	Логические проверки значений налоговой.
         // ?? logicalCheck()
@@ -39,37 +40,63 @@ switch (formDataEvent){
         logicalCheck()
         //3.	Проверки соответствия НСИ.
         break
-// Инициирование Пользователем  выполнение перехода «Утвердить»
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Утверждена».
-        //2.	Логические проверки значений налоговой формы.
-        //3.	Проверки соответствия НСИ.
+
+// проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
+        // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
+        checkOnCancelAcceptance()
+
         break
-// Инициирование Пользователем  выполнение перехода «Принять»
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
+
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+
+// после вернуть из принята в подготовлена
+    case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED:
+        acceptance()
+        break
+
+// Инициирование Пользователем  выполнение перехода в статус «Принята» из Подготовлена
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
-        //2.	Логические проверки значений налоговой формы.
-        //3.	Проверки соответствия НСИ.
+        checkOnPrepareOrAcceptance('Принятие')
+        // 2.	Логические проверки значений налоговой формы.
+        //       logicalChecks()
+        // 3.	Проверки соответствия НСИ.
+        //       checkNSI()
+
         break
-// Инициирование Пользователем выполнения перехода «Отменить принятие»
-    case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED:
-        //1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
-        //2.	Логические проверки значений налоговой формы.
-        //3.	Проверки соответствия НСИ.
+
+// отменить принятие
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+        // 1.	Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
+        checkOnCancelAcceptance()
         break
 
 // Событие добавить строку
     case FormDataEvent.ADD_ROW:
         addNewRow()
+        setRowIndex()
         break
 
 // событие удалить строку
     case FormDataEvent.DELETE_ROW:
+        deleteRow()
+        setRowIndex()
         break
 
     case FormDataEvent.CALCULATE:
         fillForm()
         logicalCheck()
+
+        sort()
+        break
+
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        fillForm()
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
@@ -82,6 +109,7 @@ switch (formDataEvent){
         logicalCheck()
         break
 }
+
 
 
 /**
@@ -153,18 +181,16 @@ def log(String message, Object... args) {
 }
 /**
  * Удаление строки
+ *
+ * @author Ivildanov
+ * вынес пересчет №пп в отдельную процедуру
  */
-def deleteRow(){
-    def row = (DataRow)additionalParameter
-    if (!isTotalRow(row)){
+def deleteRow() {
+    // def row = (DataRow)additionalParameter
+    def row = currentDataRow
+    if (!isTotalRow(row)) {
         // удаление строки
         formData.deleteDataRow(row)
-    }
-
-    // пересчет номеров строк таблицы
-    def i = 1;
-    formData.dataRows.each{rowItem->
-        rowItem.rowNumber = i++
     }
 }
 
@@ -223,6 +249,15 @@ def logicalCheck(){
 
         // Проверка на уникальность поля «№ пп»
         // TODO не реализовано
+        /**
+         * @author Ivildanov
+         *  не тестировано
+         */
+        formData.dataRows.each { rowItem ->
+            if (row.number == rowItem.number && !row.equals(rowItem)) {
+                //logger.error('Нарушена уникальность номера по порядку!')
+            }
+        }
 
         // Проверка на нулевые значения; фатальная; Все суммы по операции нулевые!
         if (row.costs == 0){
@@ -230,19 +265,64 @@ def logicalCheck(){
         }
     }
 
-    // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
-    if (formData.getDataRow('totalQuarter').costs != getQuarterTotal()){
-        logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
-    }
+    // проверка на наличие итоговых строк, иначе будет ошибка
+    if ((formData.dataRows.findAll { it.getAlias() == 'totalQuarter' && it.getAlias() == 'total' }).size() > 0) {
+        // Проверка итоговых значений за текущий квартал; фатальная; Итоговые значения за текущий квартал рассчитаны неверно!
+        if (formData.getDataRow('totalQuarter').costs != getQuarterTotal()) {
+            logger.error('Итоговые значения за текущий квартал рассчитаны неверно!')
+        }
 
-    // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
-    if (formData.getDataRow('total').costs != getTotalValue()){
-        logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+        // Проверка итоговых значений за текущий отчётный (налоговый) период; фатальная; Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!
+        if (formData.getDataRow('total').costs != getTotalValue()) {
+            logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+        }
     }
 
     // Проверка актуальности поля «Часть сделки»; не фатальная; Поле ”Наименование поля” указано неверно не заполнено!
     // TODO не реализован сравочник
 
+}
+
+/**
+ * Скрипт для проверки создания.
+ */
+void checkBeforeCreate() {
+    // отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    //проверка периода ввода остатков
+    if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
+        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
+        return
+    }
+
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
+
+}
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    // удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null || row.getAlias() == '') {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -282,12 +362,98 @@ def getTotalValue(){
     quarterRow = formData.getDataRow('totalQuarter')
     // возьмем форму за предыдущий отчетный период
     def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
-    if (prevQuarter != null){
-        prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
-        def prevQuarterTotalRow = prevQuarterFormData.getDataRow("total")
-        return quarterRow.costs + prevQuarterTotalRow.costs
-    } else{
+    if (prevQuarter != null) {
+        log('Текущий период Id:' + formData.reportPeriodId)
+        log('Предыдущий период найден Id:' + prevQuarter.id)
+        prevQuarterFormData = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
+
+        if (prevQuarterFormData != null && prevQuarterFormData.state == WorkflowState.ACCEPTED) {
+            def prevQuarterTotalRow = prevQuarterFormData.getDataRow("total")
+            return quarterRow.costs + prevQuarterTotalRow.costs
+        } else {
+            //	Если предыдущей формы нет (либо она не принята)  то B = 0
+            return quarterRow.costs
+        }
+
+    } else {
         return quarterRow.costs
+    }
+}
+
+/**
+ * Установка номера строки.
+ *
+ * @author Ivildanov
+ */
+void setRowIndex() {
+    def i = 1;
+    formData.dataRows.each { rowItem ->
+        rowItem.number = i++
+    }
+}
+
+/**
+ * Скрипт для сортировки.
+ *
+ * @author Ivildanov
+ */
+void sort() {
+    // сортировка
+    // 1 - Дата сделки
+    // 2 - Номер сделки
+    formData.dataRows.sort { a, b ->
+        if (a == null || isTotalRow(a)) return 0
+        int val = (a.date).compareTo(b.date)
+        if (val == 0) {
+            val = (a.dealingNumber ?: "").compareTo(b.dealingNumber ?: "")
+        }
+        return val
+    }
+}
+
+/**
+ * Для перевода сводной налогой формы в статус "принят".
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.PRIMARY).each()
+            {
+                formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+            }
+}
+
+/**
+ * Проверка наличия и статуса консолидированной формы при осуществлении перевода формы в статус "Подготовлена"/"Принята".
+ */
+void checkOnPrepareOrAcceptance(def value) {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() { department ->
+        if (department.formTypeId == formData.getFormType().getId()) {
+            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            // если форма существует и статус "принята"
+            if (form != null && form.getState() == WorkflowState.ACCEPTED) {
+                logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
+            }
+        }
+    }
+}
+
+/**
+ * Проверки при переходе "Отменить принятие" в подготовлена.
+ */
+void checkOnCancelAcceptance() {
+    List<DepartmentFormType> departments = departmentFormTypeService.getFormDestinations(formData.getDepartmentId(),
+            formData.getFormType().getId(), formData.getKind());
+    DepartmentFormType department = departments.getAt(0);
+    if (department != null) {
+        FormData form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+
+        if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
+            if (formData.getKind().getId() == 1) { // если форма первичная
+                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма.")
+            } else {    // если форма консолидированая
+                logger.error("Нельзя отменить принятие налоговой формы, так как уже «Утверждена» или «Принята» консолидированная налоговая форма вышестоящего уровня.")
+            }
+        }
     }
 }
 
