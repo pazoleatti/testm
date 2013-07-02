@@ -7,6 +7,10 @@ target
 .idea
 <<<<<<< HEAD
 .iml
+<<<<<<< HEAD
 =======
 >>>>>>> Добавлен файл .gitignore
+=======
+bin
+>>>>>>> Добавлен паттерн bin в .gitignore
 *~
