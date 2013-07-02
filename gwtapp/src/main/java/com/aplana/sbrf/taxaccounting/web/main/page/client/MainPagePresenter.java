@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.ApplicationContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -14,6 +15,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
@@ -74,7 +76,7 @@ public class MainPagePresenter extends
 	private final PlaceManager placeManager;
 
 	@Inject
-	public MainPagePresenter(final EventBus eventBus, final MyView view,
+	public MainPagePresenter(final EventBus eventBus, final DispatchAsync dispatcher, final MyView view,
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
 			MessageDialogPresenter messageDialogPresenter, LogAreaPresenter notificationPresenter,
@@ -86,6 +88,8 @@ public class MainPagePresenter extends
 		this.messageDialogPresenter = messageDialogPresenter;
 		this.logAreaPresenter = notificationPresenter;
 		this.projectVersionPresenter = projectVersionPresenter;
+		ApplicationContextHolder.setDispatchAsync(dispatcher);
+		ApplicationContextHolder.setEventBus(eventBus);
 	}
 
 	@Override

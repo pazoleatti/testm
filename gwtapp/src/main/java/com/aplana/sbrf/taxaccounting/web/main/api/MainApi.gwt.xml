@@ -4,6 +4,7 @@
 <module>
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.logging.Logging" />
-	<source path='client' />
+    <inherits name="com.gwtplatform.dispatch.DispatchShared"/>
+    <source path='client' />
 	<source path='shared' />
 </module>
