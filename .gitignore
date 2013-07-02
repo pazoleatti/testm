@@ -5,5 +5,8 @@ target
 .settings
 .project
 .idea
+<<<<<<< HEAD
 .iml
+=======
+>>>>>>> Добавлен файл .gitignore
 *~
