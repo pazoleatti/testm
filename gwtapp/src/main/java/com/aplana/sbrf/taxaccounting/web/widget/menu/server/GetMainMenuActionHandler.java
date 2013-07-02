@@ -56,6 +56,7 @@ public class GetMainMenuActionHandler extends
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.TCO.getName(), "", TaxType.TCO.name()));
 
 			for (MenuItem menu : taxMenu.getSubMenu()) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
