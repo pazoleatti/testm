@@ -5,28 +5,6 @@ target
 .settings
 .project
 .idea
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-.iml
-<<<<<<< HEAD
-=======
->>>>>>> Добавлен файл .gitignore
-=======
-bin
->>>>>>> Добавлен паттерн bin в .gitignore
-=======
-*.iml
->>>>>>> исправил фильтр в .gitignore
-=======
->>>>>>> Добавлен файл .gitignore
-=======
-.iml
->>>>>>> добавил фильтр в .gitignore
-=======
 *.iml
 bin
->>>>>>> Добавлен файл .gitignore
 *~
