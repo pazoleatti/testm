@@ -10,11 +10,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -61,6 +59,19 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @UiField(provided = true)
     ValueListBox<TaxType> formDataTaxType;
+
+    @UiField(provided = true)
+    ValueListBox<String> formType;
+
+    @UiField
+    Panel formKindPanel;
+
+    @UiField
+    Panel formTypePanel;
+
+    @UiField
+    Panel declarationTypePanel;
+
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> userLoginMap;
@@ -141,6 +152,33 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 
+    @Override
+    public void setVisibleTaxFields() {
+        formTypePanel.setVisible(true);
+        formKindPanel.setVisible(true);
+        declarationTypePanel.setVisible(false);
+        declarationTypeId.setValue(null);
+    }
+
+    @Override
+    public void setVisibleDeclarationFields() {
+        formTypePanel.setVisible(false);
+        formKindPanel.setVisible(false);
+        formTypeId.setValue(null);
+        formKind.setValue(null);
+        declarationTypePanel.setVisible(true);
+    }
+
+    @Override
+    public void hideAll() {
+        formTypePanel.setVisible(false);
+        formKindPanel.setVisible(false);
+        formTypeId.setValue(null);
+        formKind.setValue(null);
+        declarationTypePanel.setVisible(false);
+        declarationTypeId.setValue(null);
+    }
+
     public void setUserLogins(Map<Integer, String> userLoginsMap) {
         this.userLoginMap = userLoginsMap;
         userId.setAcceptableValues(userLoginsMap.keySet());
@@ -149,6 +187,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public void setValueListBoxHandler(ValueChangeHandler<TaxType> handler) {
         formDataTaxType.addValueChangeHandler(handler);
+    }
+
+    @Override
+    public void setFormTypeHandler(ValueChangeHandler<String> handler) {
+        formType.addValueChangeHandler(handler);
     }
 
     @Override
@@ -161,6 +204,17 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Inject
     @UiConstructor
     public AuditFilterView(final Binder uiBinder) {
+
+        formType = new ValueListBox<String>(new AbstractRenderer<String>() {
+            @Override
+            public String render(String s) {
+                return s;
+            }
+        });
+
+        formType.setValue("Налоговые формы");
+        formType.setValue("Декларации");
+        formType.setValue("");
 
         formKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
             @Override
