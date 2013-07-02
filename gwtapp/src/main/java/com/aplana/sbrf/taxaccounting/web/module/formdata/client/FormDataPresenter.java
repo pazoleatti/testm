@@ -183,23 +183,15 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onReturnClicked() {
-		if (readOnlyMode ||
-				Window.confirm("Вы уверены, что хотите прекратить редактирование данных" +
-						" и перейти к списку налоговых форм?")) {
-			unlockForm(formData.getId());
-			goToFormDataList();
-		}
+		goToFormDataList();
 	}
 
 	@Override
 	public void onCancelClicked() {
-		if (Window.confirm("Вы уверены, что хотите прекратить редактирование данных налоговой формы?")){
-			if(formData.getId() == null){
-				goToFormDataList();
-			} else {
-				unlockForm(formData.getId());
-				revealForm(true);
-			}
+		if(formData.getId() == null) {
+			goToFormDataList();
+		} else {
+			revealForm(true);
 		}
 	}
 

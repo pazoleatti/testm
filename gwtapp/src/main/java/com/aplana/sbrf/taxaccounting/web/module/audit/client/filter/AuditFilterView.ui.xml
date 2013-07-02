@@ -45,15 +45,32 @@
 
                 <g:cell width="250px">
                     <g:VerticalPanel>
-                        <g:cell>
-                            <g:VerticalPanel ui:field="reportPeriodPanel">
-                                <g:Label width="200px" text="Отчетный период" />
+                        <g:cell verticalAlignment="bottom">
+                            <g:VerticalPanel>
+                                <g:Label width="200px" text="Вид налога"/>
+                                <g:ValueListBox width="200px" ui:field="formDataTaxType" />
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell verticalAlignment="bottom">
                             <g:VerticalPanel>
                                 <g:Label width="200px" text="Тип формы"/>
-                                <g:ValueListBox width="200px" ui:field="formDataTaxType" />
+                                <g:ValueListBox width="200px" ui:field="formType" />
+                            </g:VerticalPanel>
+                        </g:cell>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="250px">
+                    <g:VerticalPanel>
+                        <g:cell>
+                            <g:VerticalPanel ui:field="reportPeriodPanel">
+                                <g:Label width="200px" text="Период" />
+                            </g:VerticalPanel>
+                        </g:cell>
+
+                        <g:cell>
+                            <g:VerticalPanel ui:field="formKindPanel" visible="false">
+                                <g:Label width="200px" text="Тип налоговой формы"/>
+                                <g:ValueListBox width="200px" ui:field="formKind" />
                             </g:VerticalPanel>
                         </g:cell>
                     </g:VerticalPanel>
@@ -66,10 +83,10 @@
                                 <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
                             </g:VerticalPanel>
                         </g:cell>
-                        <g:cell>
-                            <g:VerticalPanel>
-                                <g:Label width="200px" text="Тип налоговой формы"/>
-                                <g:ValueListBox width="200px" ui:field="formKind" />
+                        <g:cell width="250px">
+                            <g:VerticalPanel ui:field="formTypePanel" visible="false">
+                                <g:Label text="Вид налоговой формы" styleName="{style.lable}"/>
+                                <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
                             </g:VerticalPanel>
                         </g:cell>
                     </g:VerticalPanel>
@@ -82,18 +99,8 @@
                                 <g:ValueListBox width="200px" ui:field="userId" />
                             </g:VerticalPanel>
                         </g:cell>
-                        <g:cell width="250px">
-                            <g:VerticalPanel>
-                                <g:Label text="Вид налоговой формы" styleName="{style.lable}"/>
-                                <style:ListBoxWithTooltip width="200px" ui:field="formTypeId" showTooltip="true"/>
-                            </g:VerticalPanel>
-                        </g:cell>
-                    </g:VerticalPanel>
-                </g:cell>
-                <g:cell width="250px" verticalAlignment="bottom">
-                    <g:VerticalPanel>
                         <g:cell>
-                            <g:VerticalPanel>
+                            <g:VerticalPanel ui:field="declarationTypePanel" visible="false">
                                 <g:Label text="Вид декларации" styleName="{style.lable}"/>
                                 <style:ListBoxWithTooltip width="200px" ui:field="declarationTypeId" showTooltip="true"/>
                             </g:VerticalPanel>
