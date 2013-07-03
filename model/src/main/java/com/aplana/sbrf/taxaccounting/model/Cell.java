@@ -191,6 +191,24 @@ public class Cell extends AbstractCell {
 		throw new IllegalArgumentException("Стиля с алиасом '" + styleAlias
 				+ "' не существует в шаблоне");
 	}
+	
+	
+	public void setStyleId(Integer styleId) {
+		if (styleId == null) {
+			style = null;
+			return;
+		}
+		for (FormStyle formStyle : formStyleList) {
+			if (formStyle.getAlias() != null
+					&& formStyle.getId().equals(styleId)) {
+				style = formStyle;
+				return;
+			}
+		}
+		throw new IllegalArgumentException("Стиля с id '" + styleId
+				+ "' не существует в шаблоне");
+	}
+	
 
 	public String getStyleAlias() {
 		return style != null ? style.getAlias() : null;

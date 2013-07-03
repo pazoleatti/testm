@@ -41,10 +41,11 @@ import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
  * конструктор по-умолчанию и после этого вызвать метод
  * {@linkplain #setFormColumns}.
  */
-public class DataRow<C extends AbstractCell> implements Map<String, Object>, Serializable {
+public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private List<C> data;
 	private String alias;
+	private Integer index;
 
 	/**
 	 * Конструктор нужен для сериализации
@@ -257,11 +258,19 @@ public class DataRow<C extends AbstractCell> implements Map<String, Object>, Ser
 		return Collections.unmodifiableList(values);
 	}
 
-	@Override
-	public String toString() {
-		return "DataRow [data=" + data + ", alias=" + alias + "]";
+	public Integer getIndex() {
+		return index;
 	}
 
+	public void setIndex(Integer index) {
+		this.index = index;
+	}
+
+	@Override
+	public String toString() {
+		return "DataRow [data=" + data + ", alias=" + alias + ", index="
+				+ index + "]";
+	}
 
 
 }

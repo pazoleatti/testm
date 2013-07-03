@@ -1,6 +1,6 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell;
 
-import com.aplana.sbrf.taxaccounting.dao.cell.CellSpanInfoDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellSpanInfoDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 

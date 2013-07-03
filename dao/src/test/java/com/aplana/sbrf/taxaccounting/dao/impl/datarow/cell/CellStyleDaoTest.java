@@ -1,7 +1,7 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell;
 
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.cell.CellStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellStyleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
