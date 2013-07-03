@@ -113,9 +113,9 @@ public interface DataRowDao {
 	 */
 	void saveRows(FormData fd, List<DataRow<Cell>> rows);
 
-	DataRow<Cell> insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
+	void insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
 
-	DataRow<Cell> insertRowsAfter(FormData fd, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
+	void insertRows(FormData fd, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
 
 	/*
 	 * Сохранение/отмена
