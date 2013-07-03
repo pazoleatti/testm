@@ -43,7 +43,7 @@ public class DataRowDaoImplTest {
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		
 		DataRow<Cell> dr = fd.createDataRow();
-		dr.put("stringColumn", "String 1");
+		dr.put("stringColumn", "1");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
@@ -51,7 +51,7 @@ public class DataRowDaoImplTest {
 
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "String 2");
+		dr.put("stringColumn", "2");
 		dr.put("numericColumn", 2.02);
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
@@ -59,7 +59,7 @@ public class DataRowDaoImplTest {
 		
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias1");
-		dr.put("stringColumn", "String 3");
+		dr.put("stringColumn", "3");
 		dr.put("numericColumn", 2.02);
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
@@ -67,7 +67,7 @@ public class DataRowDaoImplTest {
 		
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias2");
-		dr.put("stringColumn", "String 4");
+		dr.put("stringColumn", "4");
 		dr.put("numericColumn", 2.02);
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
@@ -75,7 +75,7 @@ public class DataRowDaoImplTest {
 		
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias3");
-		dr.put("stringColumn", "String 5");
+		dr.put("stringColumn", "5");
 		dr.put("numericColumn", 2.02);
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
@@ -84,6 +84,17 @@ public class DataRowDaoImplTest {
 		dataRowDao.saveRows(fd, dataRows);
 		dataRowDao.commit(fd);
 
+	}
+	
+	private int[] dataRowsToStringColumnValues(List<DataRow<Cell>> dataRows) {
+		int[] result = new int[dataRows.size()];
+		int i = 0;
+		for (DataRow<Cell> dataRow : dataRows) {
+			 Object v = dataRow.get("stringColumn");;
+			 result[i] = Integer.valueOf(v!=null ? String.valueOf(v) : "0");
+			 i++;
+		}
+		return result;
 	}
 	
 	private Date getDate(int year, int month, int day) {
@@ -127,26 +138,118 @@ public class DataRowDaoImplTest {
 	}
 	
 	@Test
-	public void deleteDataRow(){
+	public void saveRowsSuccess(){
+		
 		FormData fd = formDataDao.get(1);
-		dataRowDao.removeRows(fd, 1, 1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertEquals(1, dataRows.size());
-		Assert.assertEquals(1, dataRowDao.getSize(fd, null));
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "100");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+		dataRows.add(dr);
+
+		dr = fd.createDataRow();
+		dr.setAlias("newAlias0");
+		dr.put("numericColumn", 2.02);
+		date = getDate(2013, 0, 1);
+		dr.put("dateColumn", date);
+		dataRows.add(dr);
 		
-		dataRows = dataRowDao.getSavedRows(fd, null, null);
-		Assert.assertEquals(2, dataRows.size());
-		Assert.assertEquals(2, dataRowDao.getSavedSize(fd, null));
-		
-		dataRowDao.rollback(fd);
-		
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertEquals(2, dataRows.size());
-		Assert.assertEquals(2, dataRowDao.getSize(fd, null));
-		
-		dataRows = dataRowDao.getRows(fd, null, null);
-		System.out.println(dataRows.size());
+		dataRowDao.saveRows(fd, dataRows);
+		Assert.assertArrayEquals(new int[]{100, 0}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void removeRowsByIndexes1Success(){
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd, 2, 4);
+		Assert.assertArrayEquals(new int[]{1, 5}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void removeRowsByIndexes2Success(){
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd, 2, 5);
+		Assert.assertArrayEquals(new int[]{1}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void removeRowsByIndexes3Success(){
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd, 1, 5);
+		Assert.assertArrayEquals(new int[]{}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void removeRowsAll(){
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd);
+		Assert.assertArrayEquals(new int[]{}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void removeRowsByDataRows(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(2, 3);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, range);
+		dataRowDao.removeRows(fd, dataRows);
+		Assert.assertArrayEquals(new int[]{1, 5}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void getRowsSuccess(){
+		FormData fd = formDataDao.get(1);
+		Assert.assertArrayEquals(new int[]{1, 2, 3, 4, 5}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test
+	public void getRowsRange1Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(2, 3);
+		Assert.assertArrayEquals(new int[]{2, 3, 4}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, range)));
+	}
+	
+	@Test
+	public void getRowsRange2Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(1, 2);
+		Assert.assertArrayEquals(new int[]{1, 2}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, range)));
+	}
+	
+	@Test
+	public void getRowsRange3Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(5, 1);
+		Assert.assertArrayEquals(new int[]{5}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, range)));
+	}
+	
+	@Test
+	public void getSavedRowsSuccess(){
+		FormData fd = formDataDao.get(1);
+		Assert.assertArrayEquals(new int[]{1, 2, 3, 4, 5}, dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null, null)));
+	}
+	
+	@Test
+	public void getSavedRowsRange1Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(2, 3);
+		Assert.assertArrayEquals(new int[]{2, 3, 4}, dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null, range)));
+	}
+	
+	@Test
+	public void getSavedRowsRange2Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(1, 2);
+		Assert.assertArrayEquals(new int[]{1, 2}, dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null, range)));
+	}
+	
+	@Test
+	public void getSavedRowsRange3Success(){
+		FormData fd = formDataDao.get(1);
+		DataRowRange range = new DataRowRange(5, 1);
+		Assert.assertArrayEquals(new int[]{5}, dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null, range)));
 	}
 	
 	

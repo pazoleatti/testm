@@ -90,7 +90,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			sql.insert(0, "select * from(");
 			sql.append(") where IDX between :from and :to");
 			params.put("from", range.getOffset());
-			params.put("to", range.getOffset() + range.getLimit());
+			params.put("to", range.getOffset() + range.getLimit() - 1);
 		}
 
 		return new Pair<String, Map<String, Object>>(sql.toString(), params);
