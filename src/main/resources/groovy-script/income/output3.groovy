@@ -1,3 +1,4 @@
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -13,18 +14,21 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         logicCheck()
+        calc()
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         checkDecl()
+        calc()
         logicCheck()
         break
     case FormDataEvent.MOVE_PREPARED_TO_CREATED:
         break
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         checkDecl()
+        calc()
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
@@ -36,17 +40,30 @@ switch (formDataEvent) {
         deleteRow()
         break
 }
+void calc() {
+    for(DataRow row in formData.dataRows) {
+        row.okatoCode = 45293554000
+        if (row.paymentType == '1') {
+            row.budgetClassificationCode = '18210101040011000110'
+        }
+        if (row.paymentType == '3') {
+            row.budgetClassificationCode = '18210101070011000110'
+        }
+        if (row.paymentType == '4') {
+            row.budgetClassificationCode = '18210101060011000110'
+        }
+    }
+}
 
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
+    if (currentDataRow != null) {
         formData.dataRows.remove(currentDataRow)
     }
 }
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']) {
+    for (alias in ['paymentType', 'dateOfPayment', 'sumTax']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
