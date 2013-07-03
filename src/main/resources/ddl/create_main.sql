@@ -36,7 +36,8 @@ create table dict_tax_period (
   I    number(1,0) default 0 not null,
   T    number(1,0) default 0 not null,
   P    number(1,0) default 0 not null,
-  V    number(1,0) default 0 not null
+  V    number(1,0) default 0 not null,
+  D    number(1,0) default 0 not null
 );
 alter table dict_tax_period add constraint dict_tax_period_pk primary key (code);
 
@@ -44,6 +45,7 @@ alter table dict_tax_period add constraint dict_tax_period_chk_i check (I in (0,
 alter table dict_tax_period add constraint dict_tax_period_chk_t check (T in (0, 1));
 alter table dict_tax_period add constraint dict_tax_period_chk_p check (P in (0, 1));
 alter table dict_tax_period add constraint dict_tax_period_chk_v check (V in (0, 1));
+alter table dict_tax_period add constraint dict_tax_period_chk_d check (D in (0, 1));
 
 comment on table dict_tax_period is 'Коды, определяющие налоговый (отчётный) период';
 comment on column dict_tax_period.code is 'Код';
@@ -52,6 +54,7 @@ comment on column dict_tax_period.I is 'Принадлежность к нало
 comment on column dict_tax_period.T is 'Принадлежность к налогу на транспорт';
 comment on column dict_tax_period.P is 'Принадлежность к налогу на имущество';
 comment on column dict_tax_period.V is 'Принадлежность к налогу ндс';
+comment on column dict_tax_period.D is 'Принадлежность к ТЦО';
 ---------------------------------------------------------------------------------------------
 create table dict_region (
   code varchar2(2) not null,
@@ -197,7 +200,7 @@ alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
-comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -206,11 +209,11 @@ create table tax_period (
   end_date date not null
 );
 alter table tax_period add constraint tax_period_pk primary key (id);
-alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
-comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.start_date is 'Дата начала (включительно)';
 comment on column tax_period.end_date is 'Дата окончания (включительно)';
 ---------------------------------------------------------------------------------------------------
@@ -425,11 +428,11 @@ create table declaration_type (
   name     varchar(80) not null
 );
 alter table declaration_type add constraint declaration_type_pk primary key (id);
-alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
+alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'Тип налога';
+comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
