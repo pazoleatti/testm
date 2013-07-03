@@ -1,5 +1,7 @@
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
@@ -306,27 +308,6 @@ void checkBeforeCreate() {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 
-}
-/**
- * Консолидация.
- */
-void consolidation() {
-    // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
-
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
-                    }
-                }
-            }
-        }
-    }
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
