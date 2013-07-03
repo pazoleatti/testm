@@ -1046,15 +1046,17 @@ comment on column ref_book_record.ord is 'Порядок следования';
 create table ref_book_value (
   record_id number(9) not null,
   attribute_id number(9) not null,
-  string_value varchar2(510),
+  string_value varchar2(4000),
   number_value number(27,10),
-  date_value date
+  date_value date,
+  reference_value number(9)
 );
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
 
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_value add constraint ref_book_value_fk_reference foreign key (reference_value) references ref_book_record (id);
 
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -1062,5 +1064,6 @@ comment on column ref_book_value.attribute_id is 'Ссылка на атрибу
 comment on column ref_book_value.string_value is 'Строковое значение';
 comment on column ref_book_value.number_value is 'Численное значение';
 comment on column ref_book_value.date_value is 'Значение даты';
+comment on column ref_book_value.reference_value is 'Значение ссылки';
 ------------------------------------------------------------------------------------------------------
 
