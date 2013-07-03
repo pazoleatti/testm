@@ -130,15 +130,15 @@ public class LogSystemSearchResultItem implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("id: " + id).append(", user: " + user.getLogin())
+        return new StringBuilder().append("id: " + id).append(", user: " + (user != null?user.getLogin():""))
                 .append(" ip: " + ip)
-                .append(" department: " + department.getName())
+                .append(" department: " + (department != null?department.getName():""))
                 .append(" roles: " + roles)
-                .append(" event: " + event.getTitle())
+                .append(" event: " + (event!= null?event.getTitle():""))
                 .append(" logdate: " + logDate)
                 .append(" note: " + note)
-                .append(" reportperiod: " + reportPeriod.getName())
-                .append(" formKind: " + formKind.getName())
+                .append(" reportperiod: " + (reportPeriod != null?reportPeriod.getName():""))
+                .append(" formKind: " + (formKind !=null?formKind.getName():""))
                 .toString();
     }
 }

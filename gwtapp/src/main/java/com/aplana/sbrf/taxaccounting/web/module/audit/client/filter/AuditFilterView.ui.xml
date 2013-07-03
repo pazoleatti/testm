@@ -80,7 +80,7 @@
                         <g:cell>
                             <g:VerticalPanel>
                                 <g:Label width="200px" text="Подразделение" />
-                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
+                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="true"/>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="250px">

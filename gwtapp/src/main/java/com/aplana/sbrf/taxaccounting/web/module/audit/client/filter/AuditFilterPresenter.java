@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
@@ -56,14 +57,19 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     @Override
     public void onPrintButtonClicked() {
-        PrintAuditDataAction dataAction = new PrintAuditDataAction();
-        dataAction.setLogSystemFilter(getView().getFilterData());
-        dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
-            @Override
-            public void onSuccess(PrintAuditDataResult result) {
-                getView().getBlobFromServer(result.getUuid());
-            }
-        });
+        try{
+            PrintAuditDataAction dataAction = new PrintAuditDataAction();
+            dataAction.setLogSystemFilter(getView().getFilterData());
+            dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
+                @Override
+                public void onSuccess(PrintAuditDataResult result) {
+                    getView().getBlobFromServer(result.getUuid());
+                }
+            });
+        }catch (Exception e){
+            MessageEvent.fire(this,
+                    "Не удалось напечатать журнал аудита", e);
+        }
     }
 
 
