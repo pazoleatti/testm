@@ -1,20 +1,20 @@
 /**
- * Скрипт для РНУ-26 (rnu26.groovy).
- * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения".
+ * РЎРєСЂРёРїС‚ РґР»СЏ Р РќРЈ-26 (rnu26.groovy).
+ * Р¤РѕСЂРјР° "(Р РќРЈ-26) Р РµРіРёСЃС‚СЂ РЅР°Р»РѕРіРѕРІРѕРіРѕ СѓС‡С‘С‚Р° СЂР°СЃС‡С‘С‚Р° СЂРµР·РµСЂРІР° РїРѕРґ РІРѕР·РјРѕР¶РЅРѕРµ РѕР±РµСЃС†РµРЅРµРЅРёРµ Р°РєС†РёР№, Р Р”Р , ADR, GDR Рё РѕРїС†РёРѕРЅРѕРІ СЌРјРёС‚РµРЅС‚Р° РІ С†РµР»СЏС… РЅР°Р»РѕРіРѕРѕР±Р»РѕР¶РµРЅРёСЏ".
  *
  * @version 65
  *
  * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
+ *      - РЅРµС‚ СѓСЃР»РѕРІРёРё РІ РїСЂРѕРІРµСЂРєР°С… СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ РќРЎР (РїРѕС‚РѕРјСѓ С‡С‚Рѕ РЅРµС‚Сѓ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ)
+ *      - РіСЂР°С„Р° 8, 14-17 СЂР°СЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ, РЅРѕ РІ РїРµСЂРµС‡РЅРµ РїРѕР»РµР№ РѕРЅРё РјРѕРіСѓС‚ СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊСЃСЏ
  *
  * @author rtimerbaev
  */
 
-/** Отчётный период. */
+/** РћС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ. */
 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-/** Признак периода ввода остатков. */
+/** РџСЂРёР·РЅР°Рє РїРµСЂРёРѕРґР° РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ. */
 def isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod())
 
 switch (formDataEvent) {
@@ -23,7 +23,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Р¤РѕСЂРјР° РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїРµСЂРёРѕРґР° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, РёР»Рё РЅРµ РЅР°С…РѕРґРёС‚СЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ В«РџСЂРёРЅСЏС‚Р°В»')
             return
         }
         logicalCheck(true)
@@ -31,7 +31,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         if (!isBalancePeriod && !checkPrevPeriod()) {
-            logger.error('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+            logger.error('Р¤РѕСЂРјР° РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїРµСЂРёРѕРґР° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, РёР»Рё РЅРµ РЅР°С…РѕРґРёС‚СЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ В«РџСЂРёРЅСЏС‚Р°В»')
             return
         }
         calc()
@@ -44,12 +44,12 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    // после принятия из подготовлена
+    // РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚РёСЏ РёР· РїРѕРґРіРѕС‚РѕРІР»РµРЅР°
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         checkNSI()
         break
-    // обобщить
+    // РѕР±РѕР±С‰РёС‚СЊ
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -58,56 +58,56 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1  - rowNumber
-// графа 2  - issuer
-// графа 3  - shareType
-// графа 4  - tradeNumber
-// графа 5  - currency
-// графа 6  - lotSizePrev
-// графа 7  - lotSizeCurrent
-// графа 8  - reserveCalcValuePrev
-// графа 9  - cost
-// графа 10 - signSecurity
-// графа 11 - marketQuotation
-// графа 12 - rubCourse
-// графа 13 - marketQuotationInRub
-// графа 14 - costOnMarketQuotation
-// графа 15 - reserveCalcValue
-// графа 16 - reserveCreation
-// графа 17 - reserveRecovery
+// РіСЂР°С„Р° 1  - rowNumber
+// РіСЂР°С„Р° 2  - issuer
+// РіСЂР°С„Р° 3  - shareType
+// РіСЂР°С„Р° 4  - tradeNumber
+// РіСЂР°С„Р° 5  - currency
+// РіСЂР°С„Р° 6  - lotSizePrev
+// РіСЂР°С„Р° 7  - lotSizeCurrent
+// РіСЂР°С„Р° 8  - reserveCalcValuePrev
+// РіСЂР°С„Р° 9  - cost
+// РіСЂР°С„Р° 10 - signSecurity
+// РіСЂР°С„Р° 11 - marketQuotation
+// РіСЂР°С„Р° 12 - rubCourse
+// РіСЂР°С„Р° 13 - marketQuotationInRub
+// РіСЂР°С„Р° 14 - costOnMarketQuotation
+// РіСЂР°С„Р° 15 - reserveCalcValue
+// РіСЂР°С„Р° 16 - reserveCreation
+// РіСЂР°С„Р° 17 - reserveRecovery
 
 /**
- * Добавить новую строку.
+ * Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ.
  */
 def addNewRow() {
     def newRow = formData.createDataRow()
     formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
-    // графа 2..7, 9..13
+    // РіСЂР°С„Р° 2..7, 9..13
     ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
             'cost', 'signSecurity', 'marketQuotation', 'rubCourse'].each {
         newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
 }
 
 /**
- * Удалить строку.
+ * РЈРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ.
  */
 def deleteRow() {
     formData.dataRows.remove(currentDataRow)
 }
 
 /**
- * Расчеты. Алгоритмы заполнения полей формы.
+ * Р Р°СЃС‡РµС‚С‹. РђР»РіРѕСЂРёС‚РјС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ С„РѕСЂРјС‹.
  */
 void calc() {
     /*
-     * Проверка объязательных полей.
+     * РџСЂРѕРІРµСЂРєР° РѕР±СЉСЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
      */
     for (def row : formData.dataRows) {
         if (!isTotal(row)) {
-            // список проверяемых столбцов (графа 2..7, 9, 10, 11)
+            // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 2..7, 9, 10, 11)
             def requiredColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
                     'lotSizeCurrent', 'cost', 'signSecurity', 'marketQuotationInRub']
 
@@ -117,20 +117,20 @@ void calc() {
         }
     }
 
-    // дополнительная проверка графы 10
+    // РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 10
     for (def row : formData.dataRows) {
-        // дополнительная проверка графы 10
+        // РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 10
         if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
-            logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
+            logger.error('Р“СЂР°С„Р° 10 РјРѕР¶РµС‚ РїСЂРёРЅРёРјР°С‚СЊ С‚РѕР»СЊРєРѕ СЃР»РµРґСѓСЋС‰РёРµ Р·РЅР°С‡РµРЅРёСЏ: "+" РёР»Рё "-".')
             return
         }
     }
 
     /*
-     * Расчеты.
+     * Р Р°СЃС‡РµС‚С‹.
      */
 
-    // удалить строку "итого" и "итого по Эмитенту: ..."
+    // СѓРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ "РёС‚РѕРіРѕ" Рё "РёС‚РѕРіРѕ РїРѕ Р­РјРёС‚РµРЅС‚Сѓ: ..."
     def delRow = []
     formData.dataRows.each { row ->
         if (isTotal(row)) {
@@ -144,27 +144,27 @@ void calc() {
         return
     }
 
-    // отсортировать/группировать
+    // РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°С‚СЊ/РіСЂСѓРїРїРёСЂРѕРІР°С‚СЊ
     formData.dataRows.sort { it.issuer }
 
     def tmp
     formData.dataRows.eachWithIndex { row, index ->
-        // графа 1
+        // РіСЂР°С„Р° 1
         row.rowNumber = index + 1
 
-        // графа 8
+        // РіСЂР°С„Р° 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
 
-        // графа 13
+        // РіСЂР°С„Р° 13
         if (row.marketQuotation != null && row.rubCourse != null) {
             row.marketQuotationInRub = round(row.marketQuotation * row.rubCourse, 2)
         }
 
-        // графа 14
+        // РіСЂР°С„Р° 14
         tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
         row.costOnMarketQuotation = tmp
 
-        // графа 15
+        // РіСЂР°С„Р° 15
         if (row.signSecurity == '+') {
             def a = (row.cost == null ? 0 : row.cost)
             tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
@@ -173,29 +173,29 @@ void calc() {
         }
         row.reserveCalcValue = tmp
 
-        // графа 16
+        // РіСЂР°С„Р° 16
         tmp = row.reserveCalcValue - row.reserveCalcValuePrev
         row.reserveCreation = (tmp > 0 ? tmp : 0)
 
-        // графа 17
+        // РіСЂР°С„Р° 17
         row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
     }
 
-    // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
+    // РіСЂР°С„С‹ РґР»СЏ РєРѕС‚РѕСЂС‹С… РЅР°РґРѕ РІС‹С‡РёСЃР»СЏС‚СЊ РёС‚РѕРіРѕ Рё РёС‚РѕРіРѕ РїРѕ СЌРјРёС‚РµРЅС‚Сѓ (РіСЂР°С„Р° 6..9, 14..17)
     def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
             'cost', 'costOnMarketQuotation', 'reserveCalcValue',
             'reserveCreation', 'reserveRecovery']
-    // добавить строку "итого"
+    // РґРѕР±Р°РІРёС‚СЊ СЃС‚СЂРѕРєСѓ "РёС‚РѕРіРѕ"
     def totalRow = formData.createDataRow()
     formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
-    totalRow.issuer = 'Общий итог'
+    totalRow.issuer = 'РћР±С‰РёР№ РёС‚РѕРі'
     setTotalStyle(totalRow)
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
 
-    // посчитать "итого по Эмитенту:..."
+    // РїРѕСЃС‡РёС‚Р°С‚СЊ "РёС‚РѕРіРѕ РїРѕ Р­РјРёС‚РµРЅС‚Сѓ:..."
     def totalRows = [:]
     def sums = [:]
     tmp = null
@@ -207,14 +207,14 @@ void calc() {
             if (tmp == null) {
                 tmp = row.issuer
             }
-            // если код расходы поменялся то создать новую строку "итого по Эмитента:..."
+            // РµСЃР»Рё РєРѕРґ СЂР°СЃС…РѕРґС‹ РїРѕРјРµРЅСЏР»СЃСЏ С‚Рѕ СЃРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ "РёС‚РѕРіРѕ РїРѕ Р­РјРёС‚РµРЅС‚Р°:..."
             if (tmp != row.issuer) {
                 totalRows.put(i, getNewRow(tmp, totalColumns, sums))
                 totalColumns.each {
                     sums[it] = 0
                 }
             }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по Эмитента:..."
+            // РµСЃР»Рё СЃС‚СЂРѕРєР° РїРѕСЃР»РµРґРЅСЏСЏ С‚Рѕ СЃРґРµР»Р°С‚СЊ РґР»СЏ РµРµ РєРѕРґР° СЂР°СЃС…РѕРґР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ "РёС‚РѕРіРѕ РїРѕ Р­РјРёС‚РµРЅС‚Р°:..."
             if (i == formData.dataRows.size() - 2) {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
@@ -230,7 +230,7 @@ void calc() {
             tmp = row.issuer
         }
     }
-    // добавить "итого по Эмитенту:..." в таблицу
+    // РґРѕР±Р°РІРёС‚СЊ "РёС‚РѕРіРѕ РїРѕ Р­РјРёС‚РµРЅС‚Сѓ:..." РІ С‚Р°Р±Р»РёС†Сѓ
     def i = 0
     totalRows.each { index, row ->
         formData.dataRows.add(index + i, row)
@@ -239,33 +239,33 @@ void calc() {
 }
 
 /**
- * Логические проверки.
+ * Р›РѕРіРёС‡РµСЃРєРёРµ РїСЂРѕРІРµСЂРєРё.
  *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ РІ Р»РѕРі СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ РЅРµР·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
  */
 def logicalCheck(def useLog) {
-    // данные предыдущего отчетного периода
+    // РґР°РЅРЅС‹Рµ РїСЂРµРґС‹РґСѓС‰РµРіРѕ РѕС‚С‡РµС‚РЅРѕРіРѕ РїРµСЂРёРѕРґР°
     def formDataOld = getFormDataOld()
 
     if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
+        // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 1..3, 5..10, 13, 14)
         columns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
                 'cost', 'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
 
-        // суммы строки общих итогов
+        // СЃСѓРјРјС‹ СЃС‚СЂРѕРєРё РѕР±С‰РёС… РёС‚РѕРіРѕРІ
         def totalSums = [:]
 
-        // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
+        // РіСЂР°С„С‹ РґР»СЏ РєРѕС‚РѕСЂС‹С… РЅР°РґРѕ РІС‹С‡РёСЃР»СЏС‚СЊ РёС‚РѕРіРѕ Рё РёС‚РѕРіРѕ РїРѕ СЌРјРёС‚РµРЅС‚Сѓ (РіСЂР°С„Р° 6..9, 14..17)
         def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
                 'cost', 'costOnMarketQuotation', 'reserveCalcValue',
                 'reserveCreation', 'reserveRecovery']
 
-        // признак наличия итоговых строк
+        // РїСЂРёР·РЅР°Рє РЅР°Р»РёС‡РёСЏ РёС‚РѕРіРѕРІС‹С… СЃС‚СЂРѕРє
         def hasTotal = false
 
-        // список групп кодов классификации для которых надо будет посчитать суммы
+        // СЃРїРёСЃРѕРє РіСЂСѓРїРї РєРѕРґРѕРІ РєР»Р°СЃСЃРёС„РёРєР°С†РёРё РґР»СЏ РєРѕС‚РѕСЂС‹С… РЅР°РґРѕ Р±СѓРґРµС‚ РїРѕСЃС‡РёС‚Р°С‚СЊ СЃСѓРјРјС‹
         def totalGroupsName = []
 
         def tmp
@@ -275,118 +275,118 @@ def logicalCheck(def useLog) {
                 continue
             }
 
-            // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
+            // 15. РћР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»СЏ РіСЂР°С„С‹ 1..3, 5..10, 13, 14
             if (!checkRequiredColumns(row, columns, useLog)) {
                 return false
             }
 
-            // дополнительная проверка графы 10
+            // РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 10
             if (row.signSecurity != '+' && row.signSecurity != '-') {
-                logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
+                logger.error('Р“СЂР°С„Р° 10 РјРѕР¶РµС‚ РїСЂРёРЅРёРјР°С‚СЊ С‚РѕР»СЊРєРѕ СЃР»РµРґСѓСЋС‰РёРµ Р·РЅР°С‡РµРЅРёСЏ: "+" РёР»Рё "-".')
                 return
             }
 
-            // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
+            // 2. РџСЂРѕРІРµСЂРєР° РїСЂРё РЅСѓР»РµРІРѕРј Р·РЅР°С‡РµРЅРёРё СЂР°Р·РјРµСЂР° Р»РѕС‚Р° РЅР° С‚РµРєСѓС‰СѓСЋ РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ (РіСЂР°С„Р° 7, 8, 17)
             if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
-                logger.warn('Графы 8 и 17 неравны!')
+                logger.warn('Р“СЂР°С„С‹ 8 Рё 17 РЅРµСЂР°РІРЅС‹!')
             }
 
-            // 3. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 9, 14, 15)
+            // 3. РџСЂРѕРІРµСЂРєР° РїСЂРё РЅСѓР»РµРІРѕРј Р·РЅР°С‡РµРЅРёРё СЂР°Р·РјРµСЂР° Р»РѕС‚Р° РЅР° С‚РµРєСѓС‰СѓСЋ РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ (РіСЂР°С„Р° 7, 9, 14, 15)
             if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
-                logger.warn('Графы 9, 14 и 15 ненулевые!')
+                logger.warn('Р“СЂР°С„С‹ 9, 14 Рё 15 РЅРµРЅСѓР»РµРІС‹Рµ!')
             }
 
-            // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
+            // 4. РџСЂРѕРІРµСЂРєР° РїСЂРё РЅСѓР»РµРІРѕРј Р·РЅР°С‡РµРЅРёРё СЂР°Р·РјРµСЂР° Р»РѕС‚Р° РЅР° РїСЂРµРґС‹РґСѓС‰СѓСЋ РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ (РіСЂР°С„Р° 6, 8, 17)
             if (row.lotSizePrev == 0 && (row.reserveCalcValuePrev != 0 || row.reserveRecovery != 0)) {
-                logger.error('Графы 8 и 17 ненулевые!')
+                logger.error('Р“СЂР°С„С‹ 8 Рё 17 РЅРµРЅСѓР»РµРІС‹Рµ!')
                 return false
             }
 
-            // 5. Проверка необращающихся акций (графа 10, 15, 16)
+            // 5. РџСЂРѕРІРµСЂРєР° РЅРµРѕР±СЂР°С‰Р°СЋС‰РёС…СЃСЏ Р°РєС†РёР№ (РіСЂР°С„Р° 10, 15, 16)
             if (row.signSecurity == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
-                logger.warn('Акции необращающиеся, графы 15 и 16 ненулевые!')
+                logger.warn('РђРєС†РёРё РЅРµРѕР±СЂР°С‰Р°СЋС‰РёРµСЃСЏ, РіСЂР°С„С‹ 15 Рё 16 РЅРµРЅСѓР»РµРІС‹Рµ!')
             }
 
-            // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
+            // 6. РџСЂРѕРІРµСЂРєР° СЃРѕР·РґР°РЅРёСЏ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ) СЂРµР·РµСЂРІР° РїРѕ РѕР±СЂР°С‰Р°СЋС‰РёРјСЃСЏ Р°РєС†РёСЏРј (РіСЂР°С„Р° 8, 10, 15, 17)
             tmp = (row.reserveCalcValue ?: 0) - row.reserveCalcValuePrev
             if (row.signSecurity == '+' && tmp > 0 && row.reserveRecovery != 0) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error('РђРєС†РёРё РѕР±СЂР°С‰Р°СЋС‰РёРµСЃСЏ вЂ“ СЂРµР·РµСЂРІ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ) РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ!')
                 return false
             }
 
-            // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
+            // 7. РџСЂРѕРІРµСЂРєР° СЃРѕР·РґР°РЅРёСЏ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ) СЂРµР·РµСЂРІР° РїРѕ РѕР±СЂР°С‰Р°СЋС‰РёРјСЃСЏ Р°РєС†РёСЏРј (РіСЂР°С„Р° 8, 10, 15, 16)
             if (row.signSecurity == '+' && tmp < 0 && row.reserveCreation != 0) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error('РђРєС†РёРё РѕР±СЂР°С‰Р°СЋС‰РёРµСЃСЏ вЂ“ СЂРµР·РµСЂРІ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ) РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ!')
                 return false
             }
 
-            // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
+            // 8. РџСЂРѕРІРµСЂРєР° СЃРѕР·РґР°РЅРёСЏ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ) СЂРµР·РµСЂРІР° РїРѕ РѕР±СЂР°С‰Р°СЋС‰РёРјСЃСЏ Р°РєС†РёСЏРј (РіСЂР°С„Р° 8, 10, 15, 17)
             if (row.signSecurity == '+' && tmp == 0 &&
                     (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-                logger.error('Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+                logger.error('РђРєС†РёРё РѕР±СЂР°С‰Р°СЋС‰РёРµСЃСЏ вЂ“ СЂРµР·РµСЂРІ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ (РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ) РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ!')
                 return false
             }
 
-            // 9. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
+            // 9. РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ СЂРµР·РµСЂРІР° (РіСЂР°С„Р° 8, 15, 16, 17)
             if (row.reserveCalcValuePrev + (row.reserveCreation ?: 0) != (row.reserveCalcValue ?: 0) + (row.reserveRecovery ?: 0)) {
-                logger.error('Резерв сформирован неверно!')
+                logger.error('Р РµР·РµСЂРІ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ РЅРµРІРµСЂРЅРѕ!')
                 return false
             }
 
-            // 10. Проверка на положительные значения при наличии созданного резерва
+            // 10. РџСЂРѕРІРµСЂРєР° РЅР° РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РїСЂРё РЅР°Р»РёС‡РёРё СЃРѕР·РґР°РЅРЅРѕРіРѕ СЂРµР·РµСЂРІР°
             if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
                     row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
-                logger.warn('Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
+                logger.warn('Р РµР·РµСЂРІ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ. Р“СЂР°С„С‹ 7, 9, 14 Рё 15 РЅРµРїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рµ!')
             }
 
-            // 11. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
+            // 11. РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ Р РќРЈ (РіСЂР°С„Р° 4, 4 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ), 6, 7 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ) )
             if (checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', formDataOld)) {
                 def curCol = 4
                 def curCol2 = 6
                 def prevCol = 4
                 def prevCol2 = 7
-                logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
+                logger.warn("Р РќРЈ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ! РќРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ СѓСЃР»РѕРІРёРµ: Р•СЃР»Рё В«РіСЂР°С„Р° $curColВ» = В«РіСЂР°С„Р° $prevColВ» С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ, С‚Рѕ В«РіСЂР°С„Р° $curCol2В»  = В«РіСЂР°С„Р° $prevCol2В» С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ.")
             }
 
-            // 12. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
+            // 12. РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ Р РќРЈ (РіСЂР°С„Р° 4, 4 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ), 8, 15 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ) )
             if (checkOld(row, 'tradeNumber', 'reserveCalcValuePrev', 'reserveCalcValue', formDataOld)) {
                 def curCol = 4
                 def curCol2 = 4
                 def prevCol = 8
                 def prevCol2 = 15
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: Если «графа $curCol» = «графа $prevCol» формы РНУ-26 за предыдущий отчётный период, то «графа $curCol2»  = «графа $prevCol2» формы РНУ-26 за предыдущий отчётный период.")
+                logger.error("Р РќРЈ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ! РќРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ СѓСЃР»РѕРІРёРµ: Р•СЃР»Рё В«РіСЂР°С„Р° $curColВ» = В«РіСЂР°С„Р° $prevColВ» С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ, С‚Рѕ В«РіСЂР°С„Р° $curCol2В»  = В«РіСЂР°С„Р° $prevCol2В» С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ.")
                 return false
             }
 
-            // 16. Проверка на уникальность поля «№ пп» (графа 1)
+            // 16. РџСЂРѕРІРµСЂРєР° РЅР° СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РїРѕР»СЏ В«в„– РїРїВ» (РіСЂР°С„Р° 1)
             if (i != row.rowNumber) {
-                logger.error('Нарушена уникальность номера по порядку!')
+                logger.error('РќР°СЂСѓС€РµРЅР° СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РЅРѕРјРµСЂР° РїРѕ РїРѕСЂСЏРґРєСѓ!')
                 return false
             }
             i += 1
 
-            // 17. Арифметическая проверка графы 8, 14..17
-            // графа 8
+            // 17. РђСЂРёС„РјРµС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 8, 14..17
+            // РіСЂР°С„Р° 8
             if (row.reserveCalcValuePrev != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserveCalcValuePrev')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 13
+            // РіСЂР°С„Р° 13
             if (row.marketQuotation != null && row.rubCourse != null &&
                     row.marketQuotationInRub != round(row.marketQuotation * row.rubCourse, 2)) {
                 name = getColumnName(row, 'marketQuotationInRub')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 14
+            // РіСЂР°С„Р° 14
             tmp = (row.marketQuotationInRub == null ? 0 : round(row.lotSizeCurrent * row.marketQuotationInRub, 2))
             if (row.costOnMarketQuotation != tmp) {
                 name = getColumnName(row, 'costOnMarketQuotation')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 15
+            // РіСЂР°С„Р° 15
             if (row.signSecurity == '+') {
                 def a = (row.cost == null ? 0 : row.cost)
                 tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
@@ -395,29 +395,29 @@ def logicalCheck(def useLog) {
             }
             if (row.reserveCalcValue != tmp) {
                 name = getColumnName(row, 'reserveCalcValue')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 16
+            // РіСЂР°С„Р° 16
             tmp = (row.reserveCalcValue ?: 0) - row.reserveCalcValuePrev
             if (row.reserveCreation != (tmp > 0 ? tmp : 0)) {
                 name = getColumnName(row, 'reserveCreation')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 17
+            // РіСЂР°С„Р° 17
             if (row.reserveRecovery != (tmp < 0 ? Math.abs(tmp) : 0)) {
                 name = getColumnName(row, 'reserveRecovery')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
-            // 17. конец=========================================
+            // 17. РєРѕРЅРµС†=========================================
 
-            // 18. Проверка итоговых значений по эмитентам
+            // 18. РџСЂРѕРІРµСЂРєР° РёС‚РѕРіРѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїРѕ СЌРјРёС‚РµРЅС‚Р°Рј
             if (!totalGroupsName.contains(row.issuer)) {
                 totalGroupsName.add(row.issuer)
             }
 
-            // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
+            // 19. РџСЂРѕРІРµСЂРєР° РёС‚РѕРіРѕРІРѕРіРѕ Р·РЅР°С‡РµРЅРёР№ РїРѕ РІСЃРµР№ С„РѕСЂРјРµ - РїРѕРґСЃС‡РµС‚ СЃСѓРјРј РґР»СЏ РѕР±С‰РёС… РёС‚РѕРіРѕРІ
             totalColumns.each { alias ->
                 if (totalSums[alias] == null) {
                     totalSums[alias] = 0
@@ -430,19 +430,19 @@ def logicalCheck(def useLog) {
             totalRow = formData.getDataRow('total')
             totalRowOld = formDataOld.getDataRow('total')
 
-            // 13. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
+            // 13. РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ Р РќРЈ (РіСЂР°С„Р° 6, 7 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
                 def curCol = 6
                 def prevCol = 7
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе $curCol = «Итого» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
+                logger.error("Р РќРЈ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ! РќРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ СѓСЃР»РѕРІРёРµ: В«РС‚РѕРіРѕВ» РїРѕ РіСЂР°С„Рµ $curCol = В«РС‚РѕРіРѕВ» РїРѕ РіСЂР°С„Рµ $prevCol С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ.")
                 return false
             }
 
-            // 14. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
+            // 14. РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё Р·Р°РїРѕР»РЅРµРЅРёСЏ Р РќРЈ (РіСЂР°С„Р° 8, 15 (Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РїРµСЂРёРѕРґ))
             if (totalRow.cost != totalRowOld.reserveCalcValue) {
                 def curCol = 8
                 def prevCol = 15
-                logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе $curCol = «Итого» по графе $prevCol формы РНУ-26 за предыдущий отчётный период.")
+                logger.error("Р РќРЈ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ! РќРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ СѓСЃР»РѕРІРёРµ: В«РС‚РѕРіРѕВ» РїРѕ РіСЂР°С„Рµ $curCol = В«РС‚РѕРіРѕВ» РїРѕ РіСЂР°С„Рµ $prevCol С„РѕСЂРјС‹ Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ.")
                 return false
             }
         }
@@ -450,21 +450,21 @@ def logicalCheck(def useLog) {
         if (hasTotal) {
             def totalRow = formData.getDataRow('total')
 
-            // 18. Проверка итоговых значений по эмитенту
+            // 18. РџСЂРѕРІРµСЂРєР° РёС‚РѕРіРѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїРѕ СЌРјРёС‚РµРЅС‚Сѓ
             for (def codeName : totalGroupsName) {
                 def row = formData.getDataRow('total' + codeName)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Итоговые значения по эмитенту $codeName рассчитаны неверно!")
+                        logger.error("РС‚РѕРіРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РїРѕ СЌРјРёС‚РµРЅС‚Сѓ $codeName СЂР°СЃСЃС‡РёС‚Р°РЅС‹ РЅРµРІРµСЂРЅРѕ!")
                         return false
                     }
                 }
             }
 
-            // 19. Проверка итогового значений по всей форме
+            // 19. РџСЂРѕРІРµСЂРєР° РёС‚РѕРіРѕРІРѕРіРѕ Р·РЅР°С‡РµРЅРёР№ РїРѕ РІСЃРµР№ С„РѕСЂРјРµ
             for (def alias : totalColumns) {
                 if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.error('Итоговые значения рассчитаны неверно!')
+                    logger.error('РС‚РѕРіРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЂР°СЃСЃС‡РёС‚Р°РЅС‹ РЅРµРІРµСЂРЅРѕ!')
                     return false
                 }
             }
@@ -474,25 +474,25 @@ def logicalCheck(def useLog) {
 }
 
 /**
- * Проверки соответствия НСИ.
+ * РџСЂРѕРІРµСЂРєРё СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ РќРЎР.
  */
 def checkNSI() {
-    // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
+    // 1. РџСЂРѕРІРµСЂРєР° РєСѓСЂСЃР° РІР°Р»СЋС‚С‹ СЃРѕ СЃРїСЂР°РІРѕС‡РЅС‹Рј - РџСЂРѕРІРµСЂРєР° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё Р·РЅР°С‡РµРЅРёСЏВ» РіСЂР°С„С‹ 6В» РЅР° РґР°С‚Сѓ РїРѕ В«РіСЂР°С„Рµ 5В»
     if (false) {
-        logger.warn('Неверный курс валюты!')
+        logger.warn('РќРµРІРµСЂРЅС‹Р№ РєСѓСЂСЃ РІР°Р»СЋС‚С‹!')
     }
 
-    // 1. Проверка актуальности поля «Валюта выпуска ценной бумаги» Какой алгоритм?
+    // 1. РџСЂРѕРІРµСЂРєР° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё РїРѕР»СЏ В«Р’Р°Р»СЋС‚Р° РІС‹РїСѓСЃРєР° С†РµРЅРЅРѕР№ Р±СѓРјР°РіРёВ» РљР°РєРѕР№ Р°Р»РіРѕСЂРёС‚Рј?
     if (false) {
-        logger.warn('Валюта выпуска ценной бумаги указана неверно!')
+        logger.warn('Р’Р°Р»СЋС‚Р° РІС‹РїСѓСЃРєР° С†РµРЅРЅРѕР№ Р±СѓРјР°РіРё СѓРєР°Р·Р°РЅР° РЅРµРІРµСЂРЅРѕ!')
     }
 
-    // 2. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
+    // 2. РџСЂРѕРІРµСЂРєР° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё РїРѕР»СЏ В«РџСЂРёР·РЅР°Рє С†РµРЅРЅРѕР№ Р±СѓРјР°РіРё РЅР° С‚РµРєСѓС‰СѓСЋ РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚СѓВ»
     if (false) {
         logger.warn('')
     }
 
-    // 3. Проверка актуальности поля «Курс рубля к валюте рыночной котировки»
+    // 3. РџСЂРѕРІРµСЂРєР° Р°РєС‚СѓР°Р»СЊРЅРѕСЃС‚Рё РїРѕР»СЏ В«РљСѓСЂСЃ СЂСѓР±Р»СЏ Рє РІР°Р»СЋС‚Рµ СЂС‹РЅРѕС‡РЅРѕР№ РєРѕС‚РёСЂРѕРІРєРёВ»
     if (false) {
         logger.warn('')
     }
@@ -500,10 +500,10 @@ def checkNSI() {
 }
 
 /**
- * Консолидация.
+ * РљРѕРЅСЃРѕР»РёРґР°С†РёСЏ.
  */
 void consolidation() {
-    // удалить все строки и собрать из источников их строки
+    // СѓРґР°Р»РёС‚СЊ РІСЃРµ СЃС‚СЂРѕРєРё Рё СЃРѕР±СЂР°С‚СЊ РёР· РёСЃС‚РѕС‡РЅРёРєРѕРІ РёС… СЃС‚СЂРѕРєРё
     formData.dataRows.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -518,34 +518,34 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    logger.info('Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РєРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅРѕР№ С„РѕСЂРјС‹ РїСЂРѕС€Р»Рѕ СѓСЃРїРµС€РЅРѕ.')
 }
 
 /**
- * Проверка при создании формы.
+ * РџСЂРѕРІРµСЂРєР° РїСЂРё СЃРѕР·РґР°РЅРёРё С„РѕСЂРјС‹.
  */
 void checkCreation() {
     def findForm = FormDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
 }
 
 /*
- * Вспомогательные методы.
+ * Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹.
  */
 
 /**
- * Проверка является ли строка итоговой.
+ * РџСЂРѕРІРµСЂРєР° СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЃС‚СЂРѕРєР° РёС‚РѕРіРѕРІРѕР№.
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /**
- * Получить сумму столбца.
+ * РџРѕР»СѓС‡РёС‚СЊ СЃСѓРјРјСѓ СЃС‚РѕР»Р±С†Р°.
  */
 def getSum(def columnAlias) {
     def from = 0
@@ -557,12 +557,12 @@ def getSum(def columnAlias) {
 }
 
 /**
- * Получить новую строку.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ.
  */
 def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
-    newRow.issuer = alias + ' итог'
+    newRow.issuer = alias + ' РёС‚РѕРі'
     setTotalStyle(newRow)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it])
@@ -571,13 +571,13 @@ def getNewRow(def alias, def totalColumns, def sums) {
 }
 
 /**
- * Сверить данные с предыдущим периодом.
+ * РЎРІРµСЂРёС‚СЊ РґР°РЅРЅС‹Рµ СЃ РїСЂРµРґС‹РґСѓС‰РёРј РїРµСЂРёРѕРґРѕРј.
  *
- * @param row строка нф текущего периода
- * @param likeColumnName псевдоним графы по которому ищутся соответствующиеся строки
- * @param curColumnName псевдоним графы текущей нф для второго условия
- * @param prevColumnName псевдоним графы предыдущей нф для второго условия
- * @param prevForm данные нф предыдущего периода
+ * @param row СЃС‚СЂРѕРєР° РЅС„ С‚РµРєСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
+ * @param likeColumnName РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹ РїРѕ РєРѕС‚РѕСЂРѕРјСѓ РёС‰СѓС‚СЃСЏ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРµСЃСЏ СЃС‚СЂРѕРєРё
+ * @param curColumnName РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹ С‚РµРєСѓС‰РµР№ РЅС„ РґР»СЏ РІС‚РѕСЂРѕРіРѕ СѓСЃР»РѕРІРёСЏ
+ * @param prevColumnName РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹ РїСЂРµРґС‹РґСѓС‰РµР№ РЅС„ РґР»СЏ РІС‚РѕСЂРѕРіРѕ СѓСЃР»РѕРІРёСЏ
+ * @param prevForm РґР°РЅРЅС‹Рµ РЅС„ РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
  */
 def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName, def prevForm) {
     if (prevForm == null) {
@@ -595,13 +595,13 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
 }
 
 /**
- * Получить данные за предыдущий отчетный период
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ
  */
 def getFormDataOld() {
-    // предыдущий отчётный период
+    // РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
-    // РНУ-26 за предыдущий отчетный период
+    // Р РќРЈ-26 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def formDataOld = null
     if (reportPeriodOld != null) {
         formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
@@ -611,10 +611,10 @@ def getFormDataOld() {
 }
 
 /**
- * * Посчитать сумму указанного графа для строк с общим значением
+ * * РџРѕСЃС‡РёС‚Р°С‚СЊ СЃСѓРјРјСѓ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РіСЂР°С„Р° РґР»СЏ СЃС‚СЂРѕРє СЃ РѕР±С‰РёРј Р·РЅР°С‡РµРЅРёРµРј
  *
- * @param value значение общее для всех строк суммирования
- * @param alias название графа
+ * @param value Р·РЅР°С‡РµРЅРёРµ РѕР±С‰РµРµ РґР»СЏ РІСЃРµС… СЃС‚СЂРѕРє СЃСѓРјРјРёСЂРѕРІР°РЅРёСЏ
+ * @param alias РЅР°Р·РІР°РЅРёРµ РіСЂР°С„Р°
  */
 def calcSumByCode(def value, def alias) {
     def sum = 0
@@ -627,36 +627,36 @@ def calcSumByCode(def value, def alias) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * РЈСЃС‚Р°РЅРѕСЃРёС‚СЊ СЃС‚РёР»СЊ РґР»СЏ РёС‚РѕРіРѕРІС‹С… СЃС‚СЂРѕРє.
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency',
             'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost', 'signSecurity',
             'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation',
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
+        row.getCell(it).setStyleAlias('РљРѕРЅС‚СЂРѕР»СЊРЅС‹Рµ СЃСѓРјРјС‹')
     }
 }
 
 /**
- * Получить номер строки в таблице.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ.
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
 }
 
 /**
- * Проверить заполненость обязательных полей.
+ * РџСЂРѕРІРµСЂРёС‚СЊ Р·Р°РїРѕР»РЅРµРЅРѕСЃС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
  *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
+ * @param row СЃС‚СЂРѕРєР°
+ * @param columns СЃРїРёСЃРѕРє РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РіСЂР°С„РѕРІ
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РІ Р»РѕРі
+ * @return true - РІСЃРµ С…РѕСЂРѕС€Рѕ, false - РµСЃС‚СЊ РЅРµР·Р°РїРѕР»РЅРµРЅРЅС‹Рµ РїРѕР»СЏ
  */
 def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
 
-    // если не заполнены графа 11 и графа 12, то графа 13 должна быть заполнена вручную
+    // РµСЃР»Рё РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РіСЂР°С„Р° 11 Рё РіСЂР°С„Р° 12, С‚Рѕ РіСЂР°С„Р° 13 РґРѕР»Р¶РЅР° Р±С‹С‚СЊ Р·Р°РїРѕР»РЅРµРЅР° РІСЂСѓС‡РЅСѓСЋ
     if (row.marketQuotation != null && row.rubCourse != null) {
         columns -= 'marketQuotationInRub'
     }
@@ -674,10 +674,10 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (index != null) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ \"в„– РїРї\" СЂР°РІРЅРѕР№ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         } else {
             index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         }
         return false
     }
@@ -685,12 +685,12 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 }
 
 /**
- * Получить значение за предыдущий отчетный период.
+ * РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ.
  *
- * @param needColumnName псевдоним графы значение которой надо получить (графа значения)
- * @param searchColumnName псевдоним графы по которой нужно отобрать значение (графа поиска)
- * @param searchValue значение графы поиска
- * @return возвращает найденое значение, иначе возвратит 0
+ * @param needColumnName РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹ Р·РЅР°С‡РµРЅРёРµ РєРѕС‚РѕСЂРѕР№ РЅР°РґРѕ РїРѕР»СѓС‡РёС‚СЊ (РіСЂР°С„Р° Р·РЅР°С‡РµРЅРёСЏ)
+ * @param searchColumnName РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹ РїРѕ РєРѕС‚РѕСЂРѕР№ РЅСѓР¶РЅРѕ РѕС‚РѕР±СЂР°С‚СЊ Р·РЅР°С‡РµРЅРёРµ (РіСЂР°С„Р° РїРѕРёСЃРєР°)
+ * @param searchValue Р·РЅР°С‡РµРЅРёРµ РіСЂР°С„С‹ РїРѕРёСЃРєР°
+ * @return РІРѕР·РІСЂР°С‰Р°РµС‚ РЅР°Р№РґРµРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ, РёРЅР°С‡Рµ РІРѕР·РІСЂР°С‚РёС‚ 0
  */
 def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue) {
     def formDataOld = getFormDataOld()
@@ -705,10 +705,10 @@ def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue
 }
 
 /**
- * Получить название графы по псевдониму.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ РіСЂР°С„С‹ РїРѕ РїСЃРµРІРґРѕРЅРёРјСѓ.
  *
- * @param row строка
- * @param alias псевдоним графы
+ * @param row СЃС‚СЂРѕРєР°
+ * @param alias РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹
  */
 def getColumnName(def row, def alias) {
     if (row != null && alias != null) {
@@ -718,7 +718,7 @@ def getColumnName(def row, def alias) {
 }
 
 /**
- * Проверить данные за предыдущий отчетный период.
+ * РџСЂРѕРІРµСЂРёС‚СЊ РґР°РЅРЅС‹Рµ Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ.
  */
 def checkPrevPeriod() {
     def formDataOld = getFormDataOld()

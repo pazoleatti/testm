@@ -1,11 +1,11 @@
 /**
- * Скрипт для РНУ-31 (rnu31.groovy).
- * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
+ * РЎРєСЂРёРїС‚ РґР»СЏ Р РќРЈ-31 (rnu31.groovy).
+ * Р¤РѕСЂРјР° "(Р РќРЈ-31) Р РµРіРёСЃС‚СЂ РЅР°Р»РѕРіРѕРІРѕРіРѕ СѓС‡С‘С‚Р° РїСЂРѕС†РµРЅС‚РЅРѕРіРѕ РґРѕС…РѕРґР° РїРѕ РєСѓРїРѕРЅРЅС‹Рј РѕР±Р»РёРіР°С†РёСЏРј".
  *
  * @version 59
  *
  * TODO:
- *      - нет уcловии в проверках соответствия НСИ (потому что нету справочников)
+ *      - РЅРµС‚ СѓcР»РѕРІРёРё РІ РїСЂРѕРІРµСЂРєР°С… СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ РќРЎР (РїРѕС‚РѕРјСѓ С‡С‚Рѕ РЅРµС‚Сѓ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ)
  *
  * @author rtimerbaev
  */
@@ -27,15 +27,15 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         // deleteRow()
         break
-    // проверка при "вернуть из принята в подготовлена"
+    // РїСЂРѕРІРµСЂРєР° РїСЂРё "РІРµСЂРЅСѓС‚СЊ РёР· РїСЂРёРЅСЏС‚Р° РІ РїРѕРґРіРѕС‚РѕРІР»РµРЅР°"
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED :
         checkOnCancelAcceptance()
         break
-    // после принятия из подготовлена
+    // РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚РёСЏ РёР· РїРѕРґРіРѕС‚РѕРІР»РµРЅР°
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         break
-    // обобщить
+    // РѕР±РѕР±С‰РёС‚СЊ
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -43,51 +43,51 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1  - number
-// графа 2  - securitiesType
-// графа 3  - ofz
-// графа 4  - municipalBonds
-// графа 5  - governmentBonds
-// графа 6  - mortgageBonds
-// графа 7  - municipalBondsBefore
-// графа 8  - rtgageBondsBefore
-// графа 9  - ovgvz
-// графа 10 - eurobondsRF
-// графа 11 - itherEurobonds
-// графа 12 - corporateBonds
+// РіСЂР°С„Р° 1  - number
+// РіСЂР°С„Р° 2  - securitiesType
+// РіСЂР°С„Р° 3  - ofz
+// РіСЂР°С„Р° 4  - municipalBonds
+// РіСЂР°С„Р° 5  - governmentBonds
+// РіСЂР°С„Р° 6  - mortgageBonds
+// РіСЂР°С„Р° 7  - municipalBondsBefore
+// РіСЂР°С„Р° 8  - rtgageBondsBefore
+// РіСЂР°С„Р° 9  - ovgvz
+// РіСЂР°С„Р° 10 - eurobondsRF
+// РіСЂР°С„Р° 11 - itherEurobonds
+// РіСЂР°С„Р° 12 - corporateBonds
 
 /**
- * Добавить новую строку.
+ * Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ.
  */
 def addNewRow() {
     def newRow = formData.createDataRow()
     formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
 
-    // графа 3..12
+    // РіСЂР°С„Р° 3..12
     ['ofz', 'municipalBonds', 'governmentBonds  ', 'mortgageBonds',
             'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
             'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each {
         newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
 }
 
 /**
- * Удалить строку.
+ * РЈРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ.
  */
 def deleteRow() {
     formData.dataRows.remove(currentDataRow)
 }
 
 /**
- * Расчеты. Алгоритмы заполнения полей формы.
+ * Р Р°СЃС‡РµС‚С‹. РђР»РіРѕСЂРёС‚РјС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ С„РѕСЂРјС‹.
  */
 void calc() {
     /*
-     * Проверка объязательных полей.
+     * РџСЂРѕРІРµСЂРєР° РѕР±СЉСЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
      */
 
-    // список проверяемых столбцов (графа 3..12)
+    // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 3..12)
     def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds',
             'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore',
             'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
@@ -100,49 +100,49 @@ void calc() {
 }
 
 /**
- * Логические проверки.
+ * Р›РѕРіРёС‡РµСЃРєРёРµ РїСЂРѕРІРµСЂРєРё.
  *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ РІ Р»РѕРі СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ РЅРµР·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
  */
 def logicalCheck(def useLog) {
-    // данные предыдущего отчета
+    // РґР°РЅРЅС‹Рµ РїСЂРµРґС‹РґСѓС‰РµРіРѕ РѕС‚С‡РµС‚Р°
     def formDataOld = getFormDataOld()
 
-    /** Строка из предыдущего отчета. */
+    /** РЎС‚СЂРѕРєР° РёР· РїСЂРµРґС‹РґСѓС‰РµРіРѕ РѕС‚С‡РµС‚Р°. */
     def rowOld = (formDataOld != null && !formDataOld.dataRows.isEmpty() ? formDataOld.getDataRow('total') : null)
 
-    /** Строка из текущего отчета. */
+    /** РЎС‚СЂРѕРєР° РёР· С‚РµРєСѓС‰РµРіРѕ РѕС‚С‡РµС‚Р°. */
     def row = (formData != null && !formData.dataRows.isEmpty() ? formData.getDataRow('total') : null)
     if (row == null) {
         return true
     }
 
-    // список проверяемых столбцов (графа 1..12)
+    // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 1..12)
     def requiredColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
             'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz', 'eurobondsRF',
             'itherEurobonds', 'corporateBonds']
 
-    // 22. Обязательность заполнения полей графы 1..12
+    // 22. РћР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ РіСЂР°С„С‹ 1..12
     if (!checkRequiredColumns(row, requiredColumns, useLog)) {
         return false
     }
 
-    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
+    // РіСЂР°С„С‹ РґР»СЏ РєРѕС‚РѕСЂС‹С… С‚РёРї РѕС€РёР±РєРё РЅРµС„Р°С‚Р°Р»СЊРЅС‹Р№ (РіСЂР°С„Р° 5, 9, 10, 11)
     def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
 
-    // TODO (Ramil Timerbaev) протестировать проверку "начиная с отчета за февраль"
+    // TODO (Ramil Timerbaev) РїСЂРѕС‚РµСЃС‚РёСЂРѕРІР°С‚СЊ РїСЂРѕРІРµСЂРєСѓ "РЅР°С‡РёРЅР°СЏ СЃ РѕС‚С‡РµС‚Р° Р·Р° С„РµРІСЂР°Р»СЊ"
     if (!isFirstMonth()) {
-        // 1. Проверка наличия предыдущего экземпляра отчета
+        // 1. РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РїСЂРµРґС‹РґСѓС‰РµРіРѕ СЌРєР·РµРјРїР»СЏСЂР° РѕС‚С‡РµС‚Р°
         if (rowOld == null) {
-            logger.error('Отсутствует предыдущий экземпляр отчета')
+            logger.error('РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РїСЂРµРґС‹РґСѓС‰РёР№ СЌРєР·РµРјРїР»СЏСЂ РѕС‚С‡РµС‚Р°')
             return false
         }
 
-        // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
+        // 2..11 РџСЂРѕРІРµСЂРєР° РїСЂРѕС†РµРЅС‚РЅРѕРіРѕ (РєСѓРїРѕРЅРЅРѕРіРѕ) РґРѕС…РѕРґР° РїРѕ РІРёРґР°Рј РІР°Р»СЋС‚РЅС‹С… С†РµРЅРЅС‹С… Р±СѓРјР°Рі (РіСЂР°С„С‹ 3..12)
         for (def column : requiredColumns) {
             if (row.getCell(column).getValue() < rowOld.getCell(column).getValue()) {
                 def securitiesType = row.securitiesType
-                def message = "Процентный (купонный) доход по $securitiesType уменьшился!"
+                def message = "РџСЂРѕС†РµРЅС‚РЅС‹Р№ (РєСѓРїРѕРЅРЅС‹Р№) РґРѕС…РѕРґ РїРѕ $securitiesType СѓРјРµРЅСЊС€РёР»СЃСЏ!"
                 if (column in warnColumns) {
                     logger.warn(message)
                 } else {
@@ -153,11 +153,11 @@ def logicalCheck(def useLog) {
         }
     }
 
-    // 12..21. Проверка на неотрицательные значения (графы 3..12)
+    // 12..21. РџСЂРѕРІРµСЂРєР° РЅР° РЅРµРѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ (РіСЂР°С„С‹ 3..12)
     for (def column : requiredColumns) {
         if (row.getCell(column).getValue() < 0) {
             def columnName = getColumnName(row, column)
-            def message = "Значения графы \"$columnName\" по строке 1 отрицательное!"
+            def message = "Р—РЅР°С‡РµРЅРёСЏ РіСЂР°С„С‹ \"$columnName\" РїРѕ СЃС‚СЂРѕРєРµ 1 РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕРµ!"
             if (column in warnColumns) {
                 logger.warn(message)
             } else {
@@ -170,14 +170,14 @@ def logicalCheck(def useLog) {
 }
 
 /**
- * Консолидация.
+ * РљРѕРЅСЃРѕР»РёРґР°С†РёСЏ.
  */
 void consolidation() {
-    // занулить данные и просуммировать из источников
+    // Р·Р°РЅСѓР»РёС‚СЊ РґР°РЅРЅС‹Рµ Рё РїСЂРѕСЃСѓРјРјРёСЂРѕРІР°С‚СЊ РёР· РёСЃС‚РѕС‡РЅРёРєРѕРІ
 
     def row = formData.getDataRow('total')
 
-    // графа 3..12
+    // РіСЂР°С„Р° 3..12
     def columns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
             'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
             'eurobondsRF', 'itherEurobonds', 'corporateBonds']
@@ -197,19 +197,19 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    logger.info('Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РєРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅРѕР№ С„РѕСЂРјС‹ РїСЂРѕС€Р»Рѕ СѓСЃРїРµС€РЅРѕ.')
 }
 
 /**
- * Проверка при создании формы.
+ * РџСЂРѕРІРµСЂРєР° РїСЂРё СЃРѕР·РґР°РЅРёРё С„РѕСЂРјС‹.
  */
 void checkCreation() {
-    // отчётный период
+    // РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-    //проверка периода ввода остатков
+    //РїСЂРѕРІРµСЂРєР° РїРµСЂРёРѕРґР° РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ
     if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
-        logger.error('Налоговая форма не может быть в периоде ввода остатков.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІ РїРµСЂРёРѕРґРµ РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ.')
         return
     }
 
@@ -217,36 +217,36 @@ void checkCreation() {
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
 }
 
 /*
- * Вспомогательные методы.
+ * Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹.
  */
 
 /**
- * Проверка является ли строка итоговой.
+ * РџСЂРѕРІРµСЂРєР° СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЃС‚СЂРѕРєР° РёС‚РѕРіРѕРІРѕР№.
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /**
- * Проверка пустое ли значение.
+ * РџСЂРѕРІРµСЂРєР° РїСѓСЃС‚РѕРµ Р»Рё Р·РЅР°С‡РµРЅРёРµ.
  */
 def isEmpty(def value) {
     return value == null || value == ''
 }
 
 /**
- * Получить данные за предыдущий отчетный период
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ
  */
 def getFormDataOld() {
-    // предыдущий отчётный период
+    // РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def reportPeriodOld = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
 
-    // РНУ-31 за предыдущий отчетный период
+    // Р РќРЈ-31 Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡РµС‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def formDataOld = null
     if (reportPeriodOld != null) {
         formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
@@ -256,10 +256,10 @@ def getFormDataOld() {
 }
 
 /**
- * Первый ли это месяц (январь)
+ * РџРµСЂРІС‹Р№ Р»Рё СЌС‚Рѕ РјРµСЃСЏС† (СЏРЅРІР°СЂСЊ)
  */
 def isFirstMonth() {
-    // отчётный период
+    // РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     if (reportPeriod != null && reportPeriod.getOrder() == 1) {
@@ -269,19 +269,19 @@ def isFirstMonth() {
 }
 
 /**
- * Получить номер строки в таблице.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ.
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
 }
 
 /**
- * Проверить заполненость обязательных полей.
+ * РџСЂРѕРІРµСЂРёС‚СЊ Р·Р°РїРѕР»РЅРµРЅРѕСЃС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
  *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
+ * @param row СЃС‚СЂРѕРєР°
+ * @param columns СЃРїРёСЃРѕРє РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РіСЂР°С„РѕРІ
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РІ Р»РѕРі
+ * @return true - РІСЃРµ С…РѕСЂРѕС€Рѕ, false - РµСЃС‚СЊ РЅРµР·Р°РїРѕР»РЅРµРЅРЅС‹Рµ РїРѕР»СЏ
  */
 def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
@@ -299,10 +299,10 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ \"в„– РїРї\" СЂР°РІРЅРѕР№ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         } else {
             index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         }
         return false
     }
@@ -310,10 +310,10 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 }
 
 /**
- * Получить название графы по псевдониму.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ РіСЂР°С„С‹ РїРѕ РїСЃРµРІРґРѕРЅРёРјСѓ.
  *
- * @param row строка
- * @param alias псевдоним графы
+ * @param row СЃС‚СЂРѕРєР°
+ * @param alias РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹
  */
 def getColumnName(def row, def alias) {
     if (row != null && alias != null) {

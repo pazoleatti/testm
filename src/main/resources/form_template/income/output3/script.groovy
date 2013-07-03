@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 
 /**
- * 6.3.3    Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
+ * 6.3.3    РЎСѓРјРјР° РЅР°Р»РѕРіР°, РїРѕРґР»РµР¶Р°С‰Р°СЏ СѓРїР»Р°С‚Рµ РІ Р±СЋРґР¶РµС‚, РїРѕ РґР°РЅРЅС‹Рј РЅР°Р»РѕРіРѕРїР»Р°С‚РµР»СЊС‰РёРєР°
  */
 
 switch (formDataEvent) {
@@ -65,44 +65,44 @@ void addRow() {
     row = formData.createDataRow()
     for (alias in ['paymentType', 'dateOfPayment', 'sumTax']) {
         row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+        row.getCell(alias).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
     formData.dataRows.add(row)
 }
 /**
- * Проверяет уникальность в отчётном периоде и вид
+ * РџСЂРѕРІРµСЂСЏРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РІ РѕС‚С‡С‘С‚РЅРѕРј РїРµСЂРёРѕРґРµ Рё РІРёРґ
  */
 void checkUniq() {
 
     FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error('РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}')
     }
 }
 
 /**
- * Проверка наличия декларации для текущего department
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё РґР»СЏ С‚РµРєСѓС‰РµРіРѕ department
  */
 void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
+    declarationType = 2;    // РўРёРї РґРµРєР»Р°СЂР°С†РёРё РєРѕС‚РѕСЂСѓСЋ РїСЂРѕРІРµСЂСЏРµРј(РќР°Р»РѕРі РЅР° РїСЂРёР±С‹Р»СЊ)
     declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+        logger.error("Р”РµРєР»Р°СЂР°С†РёСЏ Р±Р°РЅРєР° РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ РїСЂРёРЅСЏС‚Р°")
     }
 }
 
 /**
- * Логические проверки
+ * Р›РѕРіРёС‡РµСЃРєРёРµ РїСЂРѕРІРµСЂРєРё
  */
 void logicCheck() {
     for (row in formData.dataRows) {
         for (alias in ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('РџРѕР»Рµ ' + row.getCell(alias).column.name.replace('%', '') + ' РЅРµ Р·Р°РїРѕР»РЅРµРЅРѕ')
             }
         }
     }

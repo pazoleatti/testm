@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
+ * 6.3.2    Р Р°СЃС‡РµС‚ РЅР°Р»РѕРіР° РЅР° РїСЂРёР±С‹Р»СЊ СЃ РґРѕС…РѕРґРѕРІ, СѓРґРµСЂР¶РёРІР°РµРјРѕРіРѕ РЅР°Р»РѕРіРѕРІС‹Рј Р°РіРµРЅС‚РѕРј
  */
 
 switch (formDataEvent) {
@@ -39,7 +39,7 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
+    // @todo СѓР±СЂР°С‚СЊ indexOf РїРѕСЃР»Рµ http://jira.aplana.com/browse/SBRFACCTAX-2702
     if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
         formData.dataRows.remove(currentDataRow)
     }
@@ -50,33 +50,33 @@ void addRow() {
     for (alias in ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
             'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']) {
         row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+        row.getCell(alias).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
     formData.dataRows.add(row)
 }
 /**
- * Проверяет уникальность в отчётном периоде и вид
+ * РџСЂРѕРІРµСЂСЏРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РІ РѕС‚С‡С‘С‚РЅРѕРј РїРµСЂРёРѕРґРµ Рё РІРёРґ
  */
 void checkUniq() {
 
     FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error('РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}')
     }
 }
 
 /**
- * Проверка наличия декларации для текущего department
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё РґР»СЏ С‚РµРєСѓС‰РµРіРѕ department
  */
 void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
+    declarationType = 2;    // РўРёРї РґРµРєР»Р°СЂР°С†РёРё РєРѕС‚РѕСЂСѓСЋ РїСЂРѕРІРµСЂСЏРµРј(РќР°Р»РѕРі РЅР° РїСЂРёР±С‹Р»СЊ)
     declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+        logger.error("Р”РµРєР»Р°СЂР°С†РёСЏ Р±Р°РЅРєР° РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ РїСЂРёРЅСЏС‚Р°")
     }
 }
 
@@ -85,17 +85,17 @@ void logicCheck() {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('РџРѕР»Рµ ' + row.getCell(alias).column.name.replace('%', '') + ' РЅРµ Р·Р°РїРѕР»РЅРµРЅРѕ')
             }
         }
 
         String zipCode = (String) row.zipCode;
         if (zipCode == null || zipCode.length() != 6 || !zipCode.matches('[0-9]*')) {
-            logger.error('Неправильно указан почтовый индекс!')
+            logger.error('РќРµРїСЂР°РІРёР»СЊРЅРѕ СѓРєР°Р·Р°РЅ РїРѕС‡С‚РѕРІС‹Р№ РёРЅРґРµРєСЃ!')
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!dictionaryRegionService.isValidCode((String) row.subdivisionRF)) {
-                logger.error('Неверное наименование субъекта РФ!')
+                logger.error('РќРµРІРµСЂРЅРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ СЃСѓР±СЉРµРєС‚Р° Р Р¤!')
             }
         }
     }

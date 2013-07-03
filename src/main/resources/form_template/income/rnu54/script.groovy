@@ -1,12 +1,12 @@
 /**
- * Скрипт для РНУ-54 (rnu54.groovy).
- * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
+ * РЎРєСЂРёРїС‚ РґР»СЏ Р РќРЈ-54 (rnu54.groovy).
+ * Р¤РѕСЂРјР° "(Р РќРЈ-54) Р РµРіРёСЃС‚СЂ РЅР°Р»РѕРіРѕРІРѕРіРѕ СѓС‡С‘С‚Р° РѕС‚РєСЂС‹С‚С‹С… СЃРґРµР»РѕРє Р Р•РџРћ СЃ РѕР±СЏР·Р°С‚РµР»СЊСЃС‚РІРѕРј РїРѕРєСѓРїРєРё РїРѕ 2-Р№ С‡Р°СЃС‚Рё".
  *
  * @version 65
  *
  * TODO:
- *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - откуда брать курс ЦБ РФ на отчётную дату для подсчета графы 12 и для 5ой и 6ой логической проверки
+ *      - РЅРµС‚ СѓСЃР»РѕРІРёРё РІ РїСЂРѕРІРµСЂРєР°С… СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ РќРЎР (РїРѕС‚РѕРјСѓ С‡С‚Рѕ РЅРµС‚Сѓ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ)
+ *      - РѕС‚РєСѓРґР° Р±СЂР°С‚СЊ РєСѓСЂСЃ Р¦Р‘ Р Р¤ РЅР° РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ РґР»СЏ РїРѕРґСЃС‡РµС‚Р° РіСЂР°С„С‹ 12 Рё РґР»СЏ 5РѕР№ Рё 6РѕР№ Р»РѕРіРёС‡РµСЃРєРѕР№ РїСЂРѕРІРµСЂРєРё
  *
  * @author rtimerbaev
  */
@@ -32,12 +32,12 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    // после принятия из подготовлена
+    // РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚РёСЏ РёР· РїРѕРґРіРѕС‚РѕРІР»РµРЅР°
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         checkNSI()
         break
-    // обобщить
+    // РѕР±РѕР±С‰РёС‚СЊ
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -46,51 +46,51 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1  - tadeNumber
-// графа 2  - securityName
-// графа 3  - currencyCode
-// графа 4  - nominalPriceSecurities
-// графа 5  - salePrice
-// графа 6  - acquisitionPrice
-// графа 7  - part1REPODate
-// графа 8  - part2REPODate
-// графа 9  - income
-// графа 10 - outcome
-// графа 11 - rateBR
-// графа 12 - outcome269st
-// графа 13 - outcomeTax
+// РіСЂР°С„Р° 1  - tadeNumber
+// РіСЂР°С„Р° 2  - securityName
+// РіСЂР°С„Р° 3  - currencyCode
+// РіСЂР°С„Р° 4  - nominalPriceSecurities
+// РіСЂР°С„Р° 5  - salePrice
+// РіСЂР°С„Р° 6  - acquisitionPrice
+// РіСЂР°С„Р° 7  - part1REPODate
+// РіСЂР°С„Р° 8  - part2REPODate
+// РіСЂР°С„Р° 9  - income
+// РіСЂР°С„Р° 10 - outcome
+// РіСЂР°С„Р° 11 - rateBR
+// РіСЂР°С„Р° 12 - outcome269st
+// РіСЂР°С„Р° 13 - outcomeTax
 
 /**
- * Добавить новую строку.
+ * Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ.
  */
 def addNewRow() {
     def newRow = formData.createDataRow()
     formData.dataRows.add(newRow)
 
-    // графа 1..10
+    // РіСЂР°С„Р° 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
             'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate'].each {
         newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
 }
 
 /**
- * Удалить строку.
+ * РЈРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ.
  */
 def deleteRow() {
     formData.dataRows.remove(currentDataRow)
 }
 
 /**
- * Расчеты. Алгоритмы заполнения полей формы.
+ * Р Р°СЃС‡РµС‚С‹. РђР»РіРѕСЂРёС‚РјС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ С„РѕСЂРјС‹.
  */
 void calc() {
     /*
-     * Проверка объязательных полей.
+     * РџСЂРѕРІРµСЂРєР° РѕР±СЉСЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
      */
 
-    // список проверяемых столбцов (графа 1..10)
+    // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 1..10)
     def requiredColumns = ['tadeNumber', 'securityName', 'currencyCode',
             'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
             'part1REPODate', 'part2REPODate']
@@ -102,10 +102,10 @@ void calc() {
     }
 
     /*
-     * Расчеты
+     * Р Р°СЃС‡РµС‚С‹
      */
 
-    // удалить строку "итого"
+    // СѓРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєСѓ "РёС‚РѕРіРѕ"
     def delRow = []
     formData.dataRows.each { row ->
         if (isTotal(row)) {
@@ -116,24 +116,24 @@ void calc() {
         formData.dataRows.remove(getIndex(row))
     }
 
-    /** Отчетная дата. */
+    /** РћС‚С‡РµС‚РЅР°СЏ РґР°С‚Р°. */
     def reportDate = getReportDate()
 
-    /** Дата нужная при подсчете графы 12. */
+    /** Р”Р°С‚Р° РЅСѓР¶РЅР°СЏ РїСЂРё РїРѕРґСЃС‡РµС‚Рµ РіСЂР°С„С‹ 12. */
     def someDate = getDate('01.11.2009')
 
-    /** Количество дней в году. */
+    /** РљРѕР»РёС‡РµСЃС‚РІРѕ РґРЅРµР№ РІ РіРѕРґСѓ. */
     def daysInYear = getCountDaysInYaer(new Date())
 
-    /** Курс ЦБ РФ на отчётную дату. */
-    def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+    /** РљСѓСЂСЃ Р¦Р‘ Р Р¤ РЅР° РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ. */
+    def course = 1 // TODO (Ramil Timerbaev) РѕС‚РєСѓРґР° Р±СЂР°С‚СЊ РєСѓСЂСЃ Р¦Р‘ Р Р¤ РЅР° РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ
 
     def tmp
     def a, b ,c
 
     formData.dataRows.eachWithIndex { row, i ->
 
-        // графа 9, 10
+        // РіСЂР°С„Р° 9, 10
         a = calcAForColumn9or10(row, reportDate, course)
         b = 0
         c = 0
@@ -145,17 +145,17 @@ void calc() {
         row.income = b
         row.outcome = c
 
-        // графа 11
+        // РіСЂР°С„Р° 11
         if (row.outcome == 0 || isEmpty(row.currencyCode)) {
             tmp = null
         } else if (row.currencyCode == '810') {
-            // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
+            // TODO (Ramil Timerbaev) В«РіСЂР°С„Р° 11В» = СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В» РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
             tmp = 0
         } else {
             if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                 tmp = 22
             } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
+                // TODO (Ramil Timerbaev) СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В»  РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
                 tmp = 0
             } else {
                 tmp = 15
@@ -163,7 +163,7 @@ void calc() {
         }
         row.rateBR = round(tmp, 2)
 
-        // графа 12
+        // РіСЂР°С„Р° 12
         if (row.outcome == 0) {
             tmp = 0
         } else if (row.outcome > 0 && row.currencyCode == '810') {
@@ -185,7 +185,7 @@ void calc() {
         }
         row.outcome269st = tmp
 
-        // графа 13
+        // РіСЂР°С„Р° 13
         if (row.outcome == 0) {
             tmp = 0
         } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
@@ -196,11 +196,11 @@ void calc() {
         row.outcomeTax = tmp
     }
 
-    // строка итого
+    // СЃС‚СЂРѕРєР° РёС‚РѕРіРѕ
     def totalRow = formData.createDataRow()
     formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
-    totalRow.tadeNumber = 'Итого'
+    totalRow.tadeNumber = 'РС‚РѕРіРѕ'
     totalRow.getCell('tadeNumber').colSpan = 2
     setTotalStyle(totalRow)
     ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
@@ -209,27 +209,27 @@ void calc() {
 }
 
 /**
- * Логические проверки.
+ * Р›РѕРіРёС‡РµСЃРєРёРµ РїСЂРѕРІРµСЂРєРё.
  *
- * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ РІ Р»РѕРі СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ РЅРµР·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
  */
 def logicalCheck(def useLog) {
     if (!formData.dataRows.isEmpty()) {
 
-        // список проверяемых столбцов (графа 12, 13)
+        // СЃРїРёСЃРѕРє РїСЂРѕРІРµСЂСЏРµРјС‹С… СЃС‚РѕР»Р±С†РѕРІ (РіСЂР°С„Р° 12, 13)
         def requiredColumns = ['outcome269st', 'outcomeTax']
 
-        /** Отчетная дата. */
+        /** РћС‚С‡РµС‚РЅР°СЏ РґР°С‚Р°. */
         def reportDate = getReportDate()
 
-        /** Дата нужная при подсчете графы 12. */
+        /** Р”Р°С‚Р° РЅСѓР¶РЅР°СЏ РїСЂРё РїРѕРґСЃС‡РµС‚Рµ РіСЂР°С„С‹ 12. */
         def someDate = getDate('01.11.2009')
 
-        /** Количество дней в году. */
+        /** РљРѕР»РёС‡РµСЃС‚РІРѕ РґРЅРµР№ РІ РіРѕРґСѓ. */
         def daysInYear = getCountDaysInYaer(new Date())
 
-        /** Курс ЦБ РФ на отчётную дату. */
-        def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+        /** РљСѓСЂСЃ Р¦Р‘ Р Р¤ РЅР° РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ. */
+        def course = 1 // TODO (Ramil Timerbaev) РѕС‚РєСѓРґР° Р±СЂР°С‚СЊ РєСѓСЂСЃ Р¦Р‘ Р Р¤ РЅР° РѕС‚С‡С‘С‚РЅСѓСЋ РґР°С‚Сѓ
 
         def hasTotalRow = false
         def hasError
@@ -242,47 +242,47 @@ def logicalCheck(def useLog) {
                 continue
             }
 
-            // 1. Обязательность заполнения поля графы 12 и 13
+            // 1. РћР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»СЏ РіСЂР°С„С‹ 12 Рё 13
             if (!checkRequiredColumns(row, requiredColumns, true)) {
                 return false
             }
 
-            // 2. Проверка даты первой части РЕПО (графа 7)
+            // 2. РџСЂРѕРІРµСЂРєР° РґР°С‚С‹ РїРµСЂРІРѕР№ С‡Р°СЃС‚Рё Р Р•РџРћ (РіСЂР°С„Р° 7)
             if (row.part1REPODate > reportDate) {
-                logger.error('Неверно указана дата первой части сделки!')
+                logger.error('РќРµРІРµСЂРЅРѕ СѓРєР°Р·Р°РЅР° РґР°С‚Р° РїРµСЂРІРѕР№ С‡Р°СЃС‚Рё СЃРґРµР»РєРё!')
                 return false
             }
-            // 3. Проверка даты второй части РЕПО (графа 8)
+            // 3. РџСЂРѕРІРµСЂРєР° РґР°С‚С‹ РІС‚РѕСЂРѕР№ С‡Р°СЃС‚Рё Р Р•РџРћ (РіСЂР°С„Р° 8)
             if (row.part2REPODate <= reportDate) {
-                logger.error('Неверно указана дата второй части сделки!')
+                logger.error('РќРµРІРµСЂРЅРѕ СѓРєР°Р·Р°РЅР° РґР°С‚Р° РІС‚РѕСЂРѕР№ С‡Р°СЃС‚Рё СЃРґРµР»РєРё!')
                 return false
             }
 
-            // 4. Проверка финансового результата (графа 9, 10, 12, 13)
+            // 4. РџСЂРѕРІРµСЂРєР° С„РёРЅР°РЅСЃРѕРІРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р° (РіСЂР°С„Р° 9, 10, 12, 13)
             if (row.income != 0 && row.outcome != 0) {
-                logger.error('Задвоение финансового результата!')
+                logger.error('Р—Р°РґРІРѕРµРЅРёРµ С„РёРЅР°РЅСЃРѕРІРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°!')
                 return false
             }
 
-            // 5. Проверка финансого результата
+            // 5. РџСЂРѕРІРµСЂРєР° С„РёРЅР°РЅСЃРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°
             if (row.outcome != 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
-                logger.error('Задвоение финансового результата!')
+                logger.error('Р—Р°РґРІРѕРµРЅРёРµ С„РёРЅР°РЅСЃРѕРІРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°!')
                 return false
             }
 
-            // 6. Проверка финансового результата
+            // 6. РџСЂРѕРІРµСЂРєР° С„РёРЅР°РЅСЃРѕРІРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°
             tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
             if (tmp < 0 && row.income != round(Math.abs(tmp), 2)) {
-                logger.warn('Неверно определены доходы')
+                logger.warn('РќРµРІРµСЂРЅРѕ РѕРїСЂРµРґРµР»РµРЅС‹ РґРѕС…РѕРґС‹')
             }
 
-            // 7. Проверка финансового результата
+            // 7. РџСЂРѕРІРµСЂРєР° С„РёРЅР°РЅСЃРѕРІРѕРіРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°
             if (tmp > 0 && row.outcome != round(Math.abs(tmp), 2)) {
-                logger.warn('Неверно определены расходы')
+                logger.warn('РќРµРІРµСЂРЅРѕ РѕРїСЂРµРґРµР»РµРЅС‹ СЂР°СЃС…РѕРґС‹')
             }
 
-            // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Начало
-            // графа 9, 10
+            // 8. РђСЂРёС„РјРµС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 9, 10, 11, 12, 13 ===============================РќР°С‡Р°Р»Рѕ
+            // РіСЂР°С„Р° 9, 10
             a = calcAForColumn9or10(row, reportDate, course)
             b = 0
             c = 0
@@ -291,28 +291,28 @@ def logicalCheck(def useLog) {
             } else if (a > 0) {
                 b = round(a, 2)
             }
-            // графа 9
+            // РіСЂР°С„Р° 9
             if (row.income != b) {
                 name = getColumnName(row, 'income')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
-            // графа 10
+            // РіСЂР°С„Р° 10
             if (row.outcome != c) {
                 name = getColumnName(row, 'outcome')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 11
+            // РіСЂР°С„Р° 11
             if (row.outcome == 0 || isEmpty(row.currencyCode)) {
                 tmp = null
             } else if (row.currencyCode == '810') {
-                // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
+                // TODO (Ramil Timerbaev) В«РіСЂР°С„Р° 11В» = СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В» РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
                 tmp = 0
             } else {
                 if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                     tmp = 22
                 } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                    // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
+                    // TODO (Ramil Timerbaev) СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В»  РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
                     tmp = 0
                 } else {
                     tmp = 15
@@ -320,10 +320,10 @@ def logicalCheck(def useLog) {
             }
             if (row.rateBR != round(tmp, 2)) {
                 name = getColumnName(row, 'rateBR')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 12
+            // РіСЂР°С„Р° 12
             if (row.outcome == 0) {
                 tmp = 0
             } else if (row.outcome > 0 && row.currencyCode == '810') {
@@ -345,10 +345,10 @@ def logicalCheck(def useLog) {
             }
             if (row.outcome269st != tmp) {
                 name = getColumnName(row, 'outcome269st')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
 
-            // графа 13
+            // РіСЂР°С„Р° 13
             if (row.outcome == 0) {
                 tmp = 0
             } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
@@ -358,19 +358,19 @@ def logicalCheck(def useLog) {
             }
             if (row.outcomeTax != tmp) {
                 name = getColumnName(row, 'outcomeTax')
-                logger.warn("Неверно рассчитана графа «$name»!")
+                logger.warn("РќРµРІРµСЂРЅРѕ СЂР°СЃСЃС‡РёС‚Р°РЅР° РіСЂР°С„Р° В«$nameВ»!")
             }
-            // 8. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
+            // 8. РђСЂРёС„РјРµС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° РіСЂР°С„С‹ 9, 10, 11, 12, 13 ===============================РљРѕРЅРµС†
         }
 
-        // 9. Проверка итоговых значений формы  Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
+        // 9. РџСЂРѕРІРµСЂРєР° РёС‚РѕРіРѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ С„РѕСЂРјС‹  Р—Р°РїРѕР»РЅСЏРµС‚СЃСЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё (РіСЂР°С„Р° 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
             def totalRow = formData.getDataRow('total')
             def totalSumColumns = ['salePrice', 'acquisitionPrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
-                    logger.error('Итоговые значения формы рассчитаны неверно!')
+                    logger.error('РС‚РѕРіРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ С„РѕСЂРјС‹ СЂР°СЃСЃС‡РёС‚Р°РЅС‹ РЅРµРІРµСЂРЅРѕ!')
                     return false
                 }
             }
@@ -380,11 +380,11 @@ def logicalCheck(def useLog) {
 }
 
 /**
- * Проверки соответствия НСИ.
+ * РџСЂРѕРІРµСЂРєРё СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ РќРЎР.
  */
 def checkNSI() {
     if (!formData.dataRows.isEmpty()) {
-        /** Отчетная дата. */
+        /** РћС‚С‡РµС‚РЅР°СЏ РґР°С‚Р°. */
         def reportDate = getReportDate()
 
         def hasError
@@ -393,34 +393,34 @@ def checkNSI() {
                 continue
             }
 
-            // 1. Проверка кода валюты со справочным (графа 3)
+            // 1. РџСЂРѕРІРµСЂРєР° РєРѕРґР° РІР°Р»СЋС‚С‹ СЃРѕ СЃРїСЂР°РІРѕС‡РЅС‹Рј (РіСЂР°С„Р° 3)
             if (false) {
-                logger.warn('Неверный код валюты!')
+                logger.warn('РќРµРІРµСЂРЅС‹Р№ РєРѕРґ РІР°Р»СЋС‚С‹!')
             }
 
-            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
+            // 2. РџСЂРѕРІРµСЂРєР° СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ СЃС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ (РіСЂР°С„Р° 11) РєРѕРґСѓ РІР°Р»СЋС‚С‹ (РіСЂР°С„Р° 3)
             hasError = false
             if (((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR == null)) {
                 hasError = false
             } else if ((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR != null) {
                 hasError = true
             } else if (row.currencyCode == '810' && true) {
-                // TODO (Ramil Timerbaev) условие: «графа 11» != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-                // row.rateBR != значнеие из справочника
+                // TODO (Ramil Timerbaev) СѓСЃР»РѕРІРёРµ: В«РіСЂР°С„Р° 11В» != СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В» РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
+                // row.rateBR != Р·РЅР°С‡РЅРµРёРµ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР°
                 hasError = true
             } else if (row.currencyCode != '810') {
                 if (inPeriod(reportDate, '01.09.2008', '31.12.2009') && row.rateBR != 22) {
                     hasError = true
                 } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012') && true) {
-                    // TODO (Ramil Timerbaev) условие: графа 11 != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                    // row.rateBR != значнеие из справочника
+                    // TODO (Ramil Timerbaev) СѓСЃР»РѕРІРёРµ: РіСЂР°С„Р° 11 != СЃС‚Р°РІРєР° СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р‘Р°РЅРєР° Р РѕСЃСЃРёРё РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° В«РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤В»  РЅР° В«РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚СѓВ»
+                    // row.rateBR != Р·РЅР°С‡РЅРµРёРµ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР°
                     hasError = true
                 } else if (row.rateBR != 15) {
                     hasError = true
                 }
             }
             if (hasError) {
-                logger.error('Неверно указана ставка Банка России!')
+                logger.error('РќРµРІРµСЂРЅРѕ СѓРєР°Р·Р°РЅР° СЃС‚Р°РІРєР° Р‘Р°РЅРєР° Р РѕСЃСЃРёРё!')
                 return false
             }
         }
@@ -429,10 +429,10 @@ def checkNSI() {
 }
 
 /**
- * Консолидация.
+ * РљРѕРЅСЃРѕР»РёРґР°С†РёСЏ.
  */
 void consolidation() {
-    // удалить все строки и собрать из источников их строки
+    // СѓРґР°Р»РёС‚СЊ РІСЃРµ СЃС‚СЂРѕРєРё Рё СЃРѕР±СЂР°С‚СЊ РёР· РёСЃС‚РѕС‡РЅРёРєРѕРІ РёС… СЃС‚СЂРѕРєРё
     formData.dataRows.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -447,19 +447,19 @@ void consolidation() {
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    logger.info('Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РєРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅРѕР№ С„РѕСЂРјС‹ РїСЂРѕС€Р»Рѕ СѓСЃРїРµС€РЅРѕ.')
 }
 
 /**
- * Проверка при создании формы.
+ * РџСЂРѕРІРµСЂРєР° РїСЂРё СЃРѕР·РґР°РЅРёРё С„РѕСЂРјС‹.
  */
 void checkCreation() {
-    // отчётный период
+    // РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-    //проверка периода ввода остатков
+    //РїСЂРѕРІРµСЂРєР° РїРµСЂРёРѕРґР° РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ
     if (reportPeriod != null && reportPeriod.isBalancePeriod()) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° РЅРµ РјРѕР¶РµС‚ СЃРѕР·РґР°РІР°С‚СЊСЃСЏ РІ РїРµСЂРёРѕРґРµ РІРІРѕРґР° РѕСЃС‚Р°С‚РєРѕРІ.')
         return
     }
 
@@ -467,30 +467,30 @@ void checkCreation() {
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
 }
 
 /*
- * Вспомогательные методы.
+ * Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹.
  */
 
 /**
- * Проверка является ли строка итоговой.
+ * РџСЂРѕРІРµСЂРєР° СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЃС‚СЂРѕРєР° РёС‚РѕРіРѕРІРѕР№.
  */
 def isTotal(def row) {
     return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /**
- * Проверка пустое ли значение.
+ * РџСЂРѕРІРµСЂРєР° РїСѓСЃС‚РѕРµ Р»Рё Р·РЅР°С‡РµРЅРёРµ.
  */
 def isEmpty(def value) {
     return value == null || value == '' || value == 0
 }
 
 /**
- * Проверить попадает ли указанная дата в период
+ * РџСЂРѕРІРµСЂРёС‚СЊ РїРѕРїР°РґР°РµС‚ Р»Рё СѓРєР°Р·Р°РЅРЅР°СЏ РґР°С‚Р° РІ РїРµСЂРёРѕРґ
  */
 def inPeriod(def date, def from, to) {
     if (date == null) {
@@ -503,7 +503,7 @@ def inPeriod(def date, def from, to) {
 }
 
 /**
- * Получить дату по строковому представлению (формата дд.ММ.гггг)
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°С‚Сѓ РїРѕ СЃС‚СЂРѕРєРѕРІРѕРјСѓ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЋ (С„РѕСЂРјР°С‚Р° РґРґ.РњРњ.РіРіРіРі)
  */
 def getDate(def value) {
     if (isEmpty(value)) {
@@ -514,12 +514,12 @@ def getDate(def value) {
 }
 
 /**
- * Посчитать значение для графы 12.
+ * РџРѕСЃС‡РёС‚Р°С‚СЊ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РіСЂР°С„С‹ 12.
  *
- * @paam row строка нф
- * @paam coef коэфициент
- * @paam reportDate отчетная дата
- * @paam days количество дней в году
+ * @paam row СЃС‚СЂРѕРєР° РЅС„
+ * @paam coef РєРѕСЌС„РёС†РёРµРЅС‚
+ * @paam reportDate РѕС‚С‡РµС‚РЅР°СЏ РґР°С‚Р°
+ * @paam days РєРѕР»РёС‡РµСЃС‚РІРѕ РґРЅРµР№ РІ РіРѕРґСѓ
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
     def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
@@ -527,7 +527,7 @@ def calc12Value(def row, def coef, def reportDate, def days) {
 }
 
 /**
- * Получить сумму столбца.
+ * РџРѕР»СѓС‡РёС‚СЊ СЃСѓРјРјСѓ СЃС‚РѕР»Р±С†Р°.
  */
 def getSum(def columnAlias) {
     def from = 0
@@ -539,25 +539,25 @@ def getSum(def columnAlias) {
 }
 
 /**
- * Устаносить стиль для итоговых строк.
+ * РЈСЃС‚Р°РЅРѕСЃРёС‚СЊ СЃС‚РёР»СЊ РґР»СЏ РёС‚РѕРіРѕРІС‹С… СЃС‚СЂРѕРє.
  */
 void setTotalStyle(def row) {
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
             'salePrice', 'acquisitionPrice', 'part1REPODate', 'part2REPODate',
             'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax'].each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
+        row.getCell(it).setStyleAlias('РљРѕРЅС‚СЂРѕР»СЊРЅС‹Рµ СЃСѓРјРјС‹')
     }
 }
 
 /**
- * Получить номер строки в таблице.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ.
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
 }
 
 /**
- * Получить количество дней в году по указанной дате.
+ * РџРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РґРЅРµР№ РІ РіРѕРґСѓ РїРѕ СѓРєР°Р·Р°РЅРЅРѕР№ РґР°С‚Рµ.
  */
 def getCountDaysInYaer(def date) {
     if (date == null) {
@@ -571,12 +571,12 @@ def getCountDaysInYaer(def date) {
 }
 
 /**
- * Проверить заполненость обязательных полей.
+ * РџСЂРѕРІРµСЂРёС‚СЊ Р·Р°РїРѕР»РЅРµРЅРѕСЃС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
  *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
+ * @param row СЃС‚СЂРѕРєР°
+ * @param columns СЃРїРёСЃРѕРє РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РіСЂР°С„РѕРІ
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РІ Р»РѕРі
+ * @return true - РІСЃРµ С…РѕСЂРѕС€Рѕ, false - РµСЃС‚СЊ РЅРµР·Р°РїРѕР»РЅРµРЅРЅС‹Рµ РїРѕР»СЏ
  */
 def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
@@ -594,10 +594,10 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
-            logger.error("В строке \"Номер сделки\" равной $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ \"РќРѕРјРµСЂ СЃРґРµР»РєРё\" СЂР°РІРЅРѕР№ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         } else {
             index = getIndex(row) + 1
-            logger.error("В строке $index не заполнены колонки : $errorMsg.")
+            logger.error("Р’ СЃС‚СЂРѕРєРµ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         }
         return false
     }
@@ -605,7 +605,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 }
 
 /**
- * Получить отчетную дату.
+ * РџРѕР»СѓС‡РёС‚СЊ РѕС‚С‡РµС‚РЅСѓСЋ РґР°С‚Сѓ.
  */
 def getReportDate() {
     def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
@@ -613,10 +613,10 @@ def getReportDate() {
 }
 
 /**
- * Получить название графы по псевдониму.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ РіСЂР°С„С‹ РїРѕ РїСЃРµРІРґРѕРЅРёРјСѓ.
  *
- * @param row строка
- * @param alias псевдоним графы
+ * @param row СЃС‚СЂРѕРєР°
+ * @param alias РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹
  */
 def getColumnName(def row, def alias) {
     if (row != null && alias != null) {
@@ -626,14 +626,14 @@ def getColumnName(def row, def alias) {
 }
 
 /**
- * Получить значение для графы 9 и графы 10
+ * РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РіСЂР°С„С‹ 9 Рё РіСЂР°С„С‹ 10
  *
- * @param row строка
- * @param reportDate отчетная дата
- * @param course курс
+ * @param row СЃС‚СЂРѕРєР°
+ * @param reportDate РѕС‚С‡РµС‚РЅР°СЏ РґР°С‚Р°
+ * @param course РєСѓСЂСЃ
  */
 def calcAForColumn9or10(def row, def reportDate, def course) {
-    // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
+    // ((В«РіСЂР°С„Р° 6В» - В«РіСЂР°С„Р° 5В») С… (РѕС‚С‡РµС‚РЅР°СЏ РґР°С‚Р° вЂ“ В«РіСЂР°С„Р° 7В») / (В«РіСЂР°С„Р° 8В» - В«РіСЂР°С„Р° 7В»)) С… РєСѓСЂСЃ Р¦Р‘ Р Р¤
     def tmp = ((row.acquisitionPrice - row.salePrice) *
             (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
     return tmp

@@ -1,73 +1,73 @@
 /**
- * Форма "Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)".
+ * Р¤РѕСЂРјР° "Р Р°СЃС€РёС„СЂРѕРІРєР° РІРёРґРѕРІ СЂР°СЃС…РѕРґРѕРІ, СѓС‡РёС‚С‹РІР°РµРјС‹С… РІ РїСЂРѕСЃС‚С‹С… Р РќРЈ (СЂР°СЃС…РѕРґС‹ РїСЂРѕСЃС‚С‹Рµ)".
  *
  * @version 46
  */
 
 switch (formDataEvent) {
-    // создать
+    // СЃРѕР·РґР°С‚СЊ
     case FormDataEvent.CREATE :
         checkCreation()
         break
-    // расчитать
+    // СЂР°СЃС‡РёС‚Р°С‚СЊ
     case FormDataEvent.CALCULATE :
         checkAndCalc()
         break
-    // обобщить
+    // РѕР±РѕР±С‰РёС‚СЊ
     case FormDataEvent.COMPOSE :
         consolidation()
         break
-    // проверить
+    // РїСЂРѕРІРµСЂРёС‚СЊ
     case FormDataEvent.CHECK :
         checkAndCalc()
         break
-    // проверить при переводе в утверждена
+    // РїСЂРѕРІРµСЂРёС‚СЊ РїСЂРё РїРµСЂРµРІРѕРґРµ РІ СѓС‚РІРµСЂР¶РґРµРЅР°
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         checkAndCalc()
         break
-    // принять из утверждена
+    // РїСЂРёРЅСЏС‚СЊ РёР· СѓС‚РІРµСЂР¶РґРµРЅР°
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
         checkAndCalc()
         break
-    // принять из создана
+    // РїСЂРёРЅСЏС‚СЊ РёР· СЃРѕР·РґР°РЅР°
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         checkAndCalc()
         checkDeclarationBankOnAcceptance()
         break
-    // вернуть из принята в создана
+    // РІРµСЂРЅСѓС‚СЊ РёР· РїСЂРёРЅСЏС‚Р° РІ СЃРѕР·РґР°РЅР°
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         checkDeclarationBankOnCancelAcceptance()
         break
-    // после вернуть из "Принята" в "Утверждена"
+    // РїРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· "РџСЂРёРЅСЏС‚Р°" РІ "РЈС‚РІРµСЂР¶РґРµРЅР°"
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED :
         checkDeclarationBankOnCancelAcceptance()
         break
 }
 
-// графа  1 - consumptionTypeId
-// графа  2 - consumptionGroup
-// графа  3 - consumptionTypeByOperation
-// графа  4 - consumptionAccountNumber
-// графа  5 - rnu7Field10Sum
-// графа  6 - rnu7Field12Accepted
-// графа  7 - rnu7Field12PrevTaxPeriod
-// графа  8 - rnu5Field5Accepted
-// графа  9 - logicalCheck
-// графа 10 - accountingRecords
-// графа 11 - opuSumByEnclosure2
-// графа 12 - opuSumByTableP
-// графа 13 - opuSumTotal
-// графа 14 - difference
+// РіСЂР°С„Р°  1 - consumptionTypeId
+// РіСЂР°С„Р°  2 - consumptionGroup
+// РіСЂР°С„Р°  3 - consumptionTypeByOperation
+// РіСЂР°С„Р°  4 - consumptionAccountNumber
+// РіСЂР°С„Р°  5 - rnu7Field10Sum
+// РіСЂР°С„Р°  6 - rnu7Field12Accepted
+// РіСЂР°С„Р°  7 - rnu7Field12PrevTaxPeriod
+// РіСЂР°С„Р°  8 - rnu5Field5Accepted
+// РіСЂР°С„Р°  9 - logicalCheck
+// РіСЂР°С„Р° 10 - accountingRecords
+// РіСЂР°С„Р° 11 - opuSumByEnclosure2
+// РіСЂР°С„Р° 12 - opuSumByTableP
+// РіСЂР°С„Р° 13 - opuSumTotal
+// РіСЂР°С„Р° 14 - difference
 
 /**
- * Проверить и расчитать.
+ * РџСЂРѕРІРµСЂРёС‚СЊ Рё СЂР°СЃС‡РёС‚Р°С‚СЊ.
  */
 void checkAndCalc() {
     calculationBasicSum()
 }
 
 /**
- * Вычисление сумм.
+ * Р’С‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРј.
  */
 void calculationBasicSum() {
 
@@ -82,7 +82,7 @@ void calculationBasicSum() {
 //    }
 
     /*
-     * Проверка объязательных полей
+     * РџСЂРѕРІРµСЂРєР° РѕР±СЉСЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
      */
     def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
     for (def row : formData.dataRows) {
@@ -92,12 +92,12 @@ void calculationBasicSum() {
     }
 
     /*
-     * Расчет сумм
+     * Р Р°СЃС‡РµС‚ СЃСѓРјРј
      */
     def row50001 = formData.getDataRow('R107')
     def row50002 = formData.getDataRow('R212')
 
-    // суммы для графы 5..8
+    // СЃСѓРјРјС‹ РґР»СЏ РіСЂР°С„С‹ 5..8
     ['rnu7Field10Sum', 'rnu7Field12Accepted',
             'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
         row50001.getCell(alias).setValue(getSum(alias, 'R2', 'R106'))
@@ -108,39 +108,39 @@ void calculationBasicSum() {
 }
 
 /**
- * Скрипт для заполнения контрольных полей.
+ * РЎРєСЂРёРїС‚ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РєРѕРЅС‚СЂРѕР»СЊРЅС‹С… РїРѕР»РµР№.
  *
- * В текущей таблице нет 10й графы, следственно
- * нужно учесть что графы > 10 считаются "-1"
+ * Р’ С‚РµРєСѓС‰РµР№ С‚Р°Р±Р»РёС†Рµ РЅРµС‚ 10Р№ РіСЂР°С„С‹, СЃР»РµРґСЃС‚РІРµРЅРЅРѕ
+ * РЅСѓР¶РЅРѕ СѓС‡РµСЃС‚СЊ С‡С‚Рѕ РіСЂР°С„С‹ > 10 СЃС‡РёС‚Р°СЋС‚СЃСЏ "-1"
  *
  * @author rtimerbaev
  * @since 21.03.2013 13:00
  * @version 14 05.03.2013
  */
 void calculationControlGraphs() {
-    def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
+    def message = 'РўР Р•Р‘РЈР•РўРЎРЇ РћР‘РЄРЇРЎРќР•РќРР•'
     def tmp
     def value
     def formDataComplex = getFormDataComplex()
     def income102NotFound = []
     for (def row : formData.dataRows) {
-        // исключить итоговые строки
+        // РёСЃРєР»СЋС‡РёС‚СЊ РёС‚РѕРіРѕРІС‹Рµ СЃС‚СЂРѕРєРё
         if (row.getAlias() in ['R107', 'R212']) {
             continue
         }
         if (!isEmpty(row.rnu7Field10Sum) && !isEmpty(row.rnu7Field12Accepted) &&
                 !isEmpty(row.rnu7Field12PrevTaxPeriod)) {
-            // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
+            // РіСЂР°С„С‹ 9 = РћРљР РЈР“Р›(В«РіСЂР°С„Р° 5В» - (В«РіСЂР°С„Р° 6В» - В«РіСЂР°С„Р° 7В»); 2)
             tmp = round(row.rnu7Field10Sum - (row.rnu7Field10Sum - row.rnu7Field12Accepted), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
 
-        // графа 11
+        // РіСЂР°С„Р° 11
         row.opuSumByEnclosure2 = getSumFromComplex(formDataComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
 
-        // графа 12
+        // РіСЂР°С„Р° 12
         if (row.getAlias() in ['R105', 'R209']) {
             tmp = calcColumn6(['R105', 'R209'])
         } else if (row.getAlias() in ['R106', 'R211']) {
@@ -152,7 +152,7 @@ void calculationControlGraphs() {
         }
         row.opuSumByTableP = tmp
 
-        // графа 13
+        // РіСЂР°С„Р° 13
         def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords, formData.departmentId)
         if (income102 == null || income102.isEmpty()) {
             income102NotFound += getIndex(row)
@@ -162,18 +162,18 @@ void calculationControlGraphs() {
         }
         row.opuSumTotal = tmp
 
-        // графа 14
+        // РіСЂР°С„Р° 14
         row.difference = (getValue(row.opuSumByEnclosure2) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal)
     }
 
     if (!income102NotFound.isEmpty()) {
         def rows = income102NotFound.join(', ')
-        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
+        logger.warn("РќРµ РЅР°Р№РґРµРЅС‹ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРµ РґР°РЅРЅС‹Рµ РІ РѕС‚С‡РµС‚Рµ Рѕ РїСЂРёР±С‹Р»СЏС… Рё СѓР±С‹С‚РєР°С… РґР»СЏ СЃС‚СЂРѕРє: $rows")
     }
 }
 
 /**
- * Скрипт для проверки создания.
+ * РЎРєСЂРёРїС‚ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРѕР·РґР°РЅРёСЏ.
  *
  * @author rtimerbaev
  * @since 21.02.2013 13:40
@@ -182,16 +182,16 @@ void checkCreation() {
     def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
 
     if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
+        logger.error("РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}")
     }
 }
 
 /**
- * Проверки наличия декларации Банка при принятии нф.
+ * РџСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё Р‘Р°РЅРєР° РїСЂРё РїСЂРёРЅСЏС‚РёРё РЅС„.
  *
  * @author rtimerbaev
  * @since 21.03.2013 11:00
@@ -203,13 +203,13 @@ void checkDeclarationBankOnAcceptance() {
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
         def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
         if (bank != null && bank.accepted) {
-            logger.error('Принятие налоговой формы невозможно, т.к. уже принята декларация Банка.')
+            logger.error('РџСЂРёРЅСЏС‚РёРµ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ РЅРµРІРѕР·РјРѕР¶РЅРѕ, С‚.Рє. СѓР¶Рµ РїСЂРёРЅСЏС‚Р° РґРµРєР»Р°СЂР°С†РёСЏ Р‘Р°РЅРєР°.')
         }
     }
 }
 
 /**
- * Проверки наличия декларации Банка при отмене принятия нф.
+ * РџСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё Р‘Р°РЅРєР° РїСЂРё РѕС‚РјРµРЅРµ РїСЂРёРЅСЏС‚РёСЏ РЅС„.
  *
  * @author rtimerbaev
  * @since 21.03.2013 11:00
@@ -221,13 +221,13 @@ void checkDeclarationBankOnCancelAcceptance() {
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
         def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
         if (bank != null && bank.accepted) {
-            logger.error('Отмена принятия налоговой формы невозможно, т.к. уже принята декларация Банка.')
+            logger.error('РћС‚РјРµРЅР° РїСЂРёРЅСЏС‚РёСЏ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ РЅРµРІРѕР·РјРѕР¶РЅРѕ, С‚.Рє. СѓР¶Рµ РїСЂРёРЅСЏС‚Р° РґРµРєР»Р°СЂР°С†РёСЏ Р‘Р°РЅРєР°.')
         }
     }
 }
 
 /**
- * Скрипт для консолидации.
+ * РЎРєСЂРёРїС‚ РґР»СЏ РєРѕРЅСЃРѕР»РёРґР°С†РёРё.
  *
  * @author rtimerbaev
  * @since 21.02.2013 13:50
@@ -236,7 +236,7 @@ void consolidation() {
     if (isTerBank()) {
         return
     }
-    // очистить форму
+    // РѕС‡РёСЃС‚РёС‚СЊ С„РѕСЂРјСѓ
     formData.getDataRows().each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias->
             row.getCell(alias).setValue(null)
@@ -245,7 +245,7 @@ void consolidation() {
 
     def needCalc = false
 
-    // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    // РїРѕР»СѓС‡РёС‚СЊ РєРѕРЅСЃРѕР»РёРґРёСЂРѕРІР°РЅРЅС‹Рµ С„РѕСЂРјС‹ РІ РґРѕС‡РµСЂРЅРёС… РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏС… РІ С‚РµРєСѓС‰РµРј РЅР°Р»РѕРіРѕРІРѕРј РїРµСЂРёРѕРґРµ
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
         def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
@@ -266,16 +266,16 @@ void consolidation() {
     if (needCalc) {
         checkAndCalc()
     }
-    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
+    logger.info('Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃРІРѕРґРЅРѕР№ С„РѕСЂРјС‹ СѓСЂРѕРІРЅСЏ Р‘Р°РЅРєР° РїСЂРѕС€Р»Рѕ СѓСЃРїРµС€РЅРѕ.')
 }
 
 
 /*
- * Вспомогательные методы.
+ * Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹.
  */
 
 /**
- * Проверка на банк.
+ * РџСЂРѕРІРµСЂРєР° РЅР° Р±Р°РЅРє.
  */
 def isBank() {
     boolean isBank = true
@@ -288,7 +288,7 @@ def isBank() {
 }
 
 /**
- * Проверка на террбанк.
+ * РџСЂРѕРІРµСЂРєР° РЅР° С‚РµСЂСЂР±Р°РЅРє.
  */
 def isTerBank() {
     boolean isTerBank = false
@@ -301,7 +301,7 @@ def isTerBank() {
 }
 
 /**
- * Получить сумму диапазона строк определенного столбца.
+ * РџРѕР»СѓС‡РёС‚СЊ СЃСѓРјРјСѓ РґРёР°РїР°Р·РѕРЅР° СЃС‚СЂРѕРє РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ СЃС‚РѕР»Р±С†Р°.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
     def from = formData.getDataRowIndex(rowFromAlias) + 1
@@ -313,10 +313,10 @@ def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
 }
 
 /**
- * Получить название графы по псевдониму.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ РіСЂР°С„С‹ РїРѕ РїСЃРµРІРґРѕРЅРёРјСѓ.
  *
- * @param row строка
- * @param alias псевдоним графы
+ * @param row СЃС‚СЂРѕРєР°
+ * @param alias РїСЃРµРІРґРѕРЅРёРј РіСЂР°С„С‹
  */
 def getColumnName(def row, def alias) {
     if (row != null && alias != null) {
@@ -326,12 +326,12 @@ def getColumnName(def row, def alias) {
 }
 
 /**
- * Проверить заполненость обязательных полей.
+ * РџСЂРѕРІРµСЂРёС‚СЊ Р·Р°РїРѕР»РЅРµРЅРѕСЃС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№.
  *
- * @param row строка
- * @param columns список обязательных графов
- * @param useLog нужно ли записывать сообщения в лог
- * @return true - все хорошо, false - есть незаполненные поля
+ * @param row СЃС‚СЂРѕРєР°
+ * @param columns СЃРїРёСЃРѕРє РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РіСЂР°С„РѕРІ
+ * @param useLog РЅСѓР¶РЅРѕ Р»Рё Р·Р°РїРёСЃС‹РІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ РІ Р»РѕРі
+ * @return true - РІСЃРµ С…РѕСЂРѕС€Рѕ, false - РµСЃС‚СЊ РЅРµР·Р°РїРѕР»РЅРµРЅРЅС‹Рµ РїРѕР»СЏ
  */
 def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
@@ -350,33 +350,33 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         }
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
+        logger.error("Р’ СЃС‚СЂРѕРєРµ $index РЅРµ Р·Р°РїРѕР»РЅРµРЅС‹ РєРѕР»РѕРЅРєРё : $errorMsg.")
         return false
     }
     return true
 }
 
 /**
- * Получить номер строки в таблице.
+ * РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ.
  */
 def getIndex(def row) {
     formData.dataRows.indexOf(row)
 }
 
 /**
- * Проверка пустое ли значение.
+ * РџСЂРѕРІРµСЂРєР° РїСѓСЃС‚РѕРµ Р»Рё Р·РЅР°С‡РµРЅРёРµ.
  */
 def isEmpty(def value) {
     return value == null || value == ''
 }
 
 /**
- * Получить сумму значений из расходов сложных.
+ * РџРѕР»СѓС‡РёС‚СЊ СЃСѓРјРјСѓ Р·РЅР°С‡РµРЅРёР№ РёР· СЂР°СЃС…РѕРґРѕРІ СЃР»РѕР¶РЅС‹С….
  *
- * @param data данные формы
- * @param columnAliasCheck алиас графы, по которой отбираются строки для суммирования
- * @param columnAliasSum алиас графы, значения которой суммируются
- * @param value значение, по которому отбираются строки для суммирования
+ * @param data РґР°РЅРЅС‹Рµ С„РѕСЂРјС‹
+ * @param columnAliasCheck Р°Р»РёР°СЃ РіСЂР°С„С‹, РїРѕ РєРѕС‚РѕСЂРѕР№ РѕС‚Р±РёСЂР°СЋС‚СЃСЏ СЃС‚СЂРѕРєРё РґР»СЏ СЃСѓРјРјРёСЂРѕРІР°РЅРёСЏ
+ * @param columnAliasSum Р°Р»РёР°СЃ РіСЂР°С„С‹, Р·РЅР°С‡РµРЅРёСЏ РєРѕС‚РѕСЂРѕР№ СЃСѓРјРјРёСЂСѓСЋС‚СЃСЏ
+ * @param value Р·РЅР°С‡РµРЅРёРµ, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ РѕС‚Р±РёСЂР°СЋС‚СЃСЏ СЃС‚СЂРѕРєРё РґР»СЏ СЃСѓРјРјРёСЂРѕРІР°РЅРёСЏ
  */
 def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
     def sum = 0
@@ -391,9 +391,9 @@ def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
 }
 
 /**
- * Получить значение для графы 12. Сумма значении графы 6 указанных строк
+ * РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РіСЂР°С„С‹ 12. РЎСѓРјРјР° Р·РЅР°С‡РµРЅРёРё РіСЂР°С„С‹ 6 СѓРєР°Р·Р°РЅРЅС‹С… СЃС‚СЂРѕРє
  *
- * @param aliasRows список алиасов значения которых надо просуммировать
+ * @param aliasRows СЃРїРёСЃРѕРє Р°Р»РёР°СЃРѕРІ Р·РЅР°С‡РµРЅРёСЏ РєРѕС‚РѕСЂС‹С… РЅР°РґРѕ РїСЂРѕСЃСѓРјРјРёСЂРѕРІР°С‚СЊ
  */
 def calcColumn6(def aliasRows) {
     def sum = 0
@@ -404,16 +404,16 @@ def calcColumn6(def aliasRows) {
 }
 
 /**
- * Получить данные формы "расходы сложные" (id = 303)
+ * РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ С„РѕСЂРјС‹ "СЂР°СЃС…РѕРґС‹ СЃР»РѕР¶РЅС‹Рµ" (id = 303)
  */
 def getFormDataComplex() {
     return FormDataService.find(303, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
 /**
- * Получить значение или ноль.
+ * РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РёР»Рё РЅРѕР»СЊ.
  *
- * @param value значение которое надо проверить
+ * @param value Р·РЅР°С‡РµРЅРёРµ РєРѕС‚РѕСЂРѕРµ РЅР°РґРѕ РїСЂРѕРІРµСЂРёС‚СЊ
  */
 def getValue(def value) {
     return value ?: 0

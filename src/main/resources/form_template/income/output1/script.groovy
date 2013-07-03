@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
- * 6.3.1    Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях, созданных на территории Российской Федерации)
+ * 6.3.1    РЎРІРµРґРµРЅРёСЏ РґР»СЏ СЂР°СЃС‡С‘С‚Р° РЅР°Р»РѕРіР° СЃ РґРѕС…РѕРґРѕРІ РІ РІРёРґРµ РґРёРІРёРґРµРЅРґРѕРІ (РґРѕС…РѕРґРѕРІ РѕС‚ РґРѕР»РµРІРѕРіРѕ СѓС‡Р°СЃС‚РёСЏ РІ РґСЂСѓРіРёС… РѕСЂРіР°РЅРёР·Р°С†РёСЏС…, СЃРѕР·РґР°РЅРЅС‹С… РЅР° С‚РµСЂСЂРёС‚РѕСЂРёРё Р РѕСЃСЃРёР№СЃРєРѕР№ Р¤РµРґРµСЂР°С†РёРё)
  */
 
 switch (formDataEvent) {
@@ -45,7 +45,7 @@ switch (formDataEvent) {
         break
 }
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
+    // @todo СѓР±СЂР°С‚СЊ indexOf РїРѕСЃР»Рµ http://jira.aplana.com/browse/SBRFACCTAX-2702
     if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
         formData.dataRows.remove(currentDataRow)
     }
@@ -60,35 +60,35 @@ void addRow() {
             'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax', 'dividendAgentAll',
             'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll']) {
         row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+        row.getCell(alias).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
     formData.dataRows.add(row)
 
 }
 
 /**
- * Проверяет уникальность в отчётном периоде и вид
+ * РџСЂРѕРІРµСЂСЏРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РІ РѕС‚С‡С‘С‚РЅРѕРј РїРµСЂРёРѕРґРµ Рё РІРёРґ
  */
 void checkUniq() {
 
     FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error('РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}')
     }
 }
 
 /**
- * Проверка наличия декларации для текущего department
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё РґР»СЏ С‚РµРєСѓС‰РµРіРѕ department
  */
 void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
+    declarationType = 2;    // РўРёРї РґРµРєР»Р°СЂР°С†РёРё РєРѕС‚РѕСЂСѓСЋ РїСЂРѕРІРµСЂСЏРµРј(РќР°Р»РѕРі РЅР° РїСЂРёР±С‹Р»СЊ)
     declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+        logger.error("Р”РµРєР»Р°СЂР°С†РёСЏ Р±Р°РЅРєР° РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ РїСЂРёРЅСЏС‚Р°")
     }
 }
 
@@ -100,12 +100,12 @@ void logicalCheck() {
         formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
     }
     if (formPrev == null) {
-        logger.warn('Форма за предыдущий отчётный период не создавалась!')
+        logger.warn('Р¤РѕСЂРјР° Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ РЅРµ СЃРѕР·РґР°РІР°Р»Р°СЃСЊ!')
     }
 }
 
 /**
- * Проверка полей которые обязательно надо заполнить пользователю
+ * РџСЂРѕРІРµСЂРєР° РїРѕР»РµР№ РєРѕС‚РѕСЂС‹Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РЅР°РґРѕ Р·Р°РїРѕР»РЅРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
  */
 void logicCheck() {
     for (row in formData.dataRows) {
@@ -115,7 +115,7 @@ void logicCheck() {
                 'dividendMembersNotRussianTax', 'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll'
         ]) {
             if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                logger.error('РџРѕР»Рµ ' + row.getCell(alias).column.name.replace('%', '') + ' РЅРµ Р·Р°РїРѕР»РЅРµРЅРѕ')
             }
         }
     }
@@ -131,7 +131,7 @@ void calc() {
             row.dividendSumForTaxStavka9 = (row.dividendRussianOrgStavka9 ?: 0)
             row.dividendSumForTaxStavka0 = (row.dividendRussianOrgStavka0 ?: 0)
 
-            // Подсчёт поля 22 Сумма налога, начисленная с дивидендов, выплаченных в предыдущие отчетные (налоговые) периоды
+            // РџРѕРґСЃС‡С‘С‚ РїРѕР»СЏ 22 РЎСѓРјРјР° РЅР°Р»РѕРіР°, РЅР°С‡РёСЃР»РµРЅРЅР°СЏ СЃ РґРёРІРёРґРµРЅРґРѕРІ, РІС‹РїР»Р°С‡РµРЅРЅС‹С… РІ РїСЂРµРґС‹РґСѓС‰РёРµ РѕС‚С‡РµС‚РЅС‹Рµ (РЅР°Р»РѕРіРѕРІС‹Рµ) РїРµСЂРёРѕРґС‹
             def period = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
             def result = 0
 
@@ -148,6 +148,6 @@ void calc() {
             row.taxSumFromPeriod = result
         }
     } else {
-        logger.error('Не могу заполнить поля, есть ошибки')
+        logger.error('РќРµ РјРѕРіСѓ Р·Р°РїРѕР»РЅРёС‚СЊ РїРѕР»СЏ, РµСЃС‚СЊ РѕС€РёР±РєРё')
     }
 }

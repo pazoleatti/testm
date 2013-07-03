@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 
 /**
- * 6.3.4    Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
+ * 6.3.4    Р Р°СЃС‡С‘С‚ СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЏ Р°РІР°РЅСЃРѕРІС‹С… РїР»Р°С‚РµР¶РµР№ Рё РЅР°Р»РѕРіР° РЅР° РїСЂРёР±С‹Р»СЊ РїРѕ РѕР±РѕСЃРѕР±Р»РµРЅРЅС‹Рј РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏРј РѕСЂРіР°РЅРёР·Р°С†РёРё
  */
 
 switch (formDataEvent) {
@@ -57,7 +57,7 @@ void deleteRow() {
     }
     formData.dataRows.remove(currentDataRow)
 
-// Обновим индексы http://jira.aplana.com/browse/SBRFACCTAX-1759
+// РћР±РЅРѕРІРёРј РёРЅРґРµРєСЃС‹ http://jira.aplana.com/browse/SBRFACCTAX-1759
     i = 0;
     for (row in formData.dataRows) {
         i++
@@ -67,19 +67,19 @@ void deleteRow() {
 
 void addRow() {
     row = formData.createDataRow()
-    // Если есть строка итого, удалим её
+    // Р•СЃР»Рё РµСЃС‚СЊ СЃС‚СЂРѕРєР° РёС‚РѕРіРѕ, СѓРґР°Р»РёРј РµС‘
     if (formData.dataRows.size() != 0
             && formData.dataRows.get(formData.dataRows.size() - 1).getAlias() == 'total') {
         formData.dataRows.remove(formData.dataRows.size() - 1)
     }
     row = formData.appendDataRow()
 
-    // Сделаем некоторые колонки изменяемыми
+    // РЎРґРµР»Р°РµРј РЅРµРєРѕС‚РѕСЂС‹Рµ РєРѕР»РѕРЅРєРё РёР·РјРµРЅСЏРµРјС‹РјРё
     for (alias in [
             'divisionName', 'stringCode', 'propertyPrice', 'workersCount', 'labalAboutPaymentTax', 'delta21', 'delta28'
     ]) {
         row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+        row.getCell(alias).setStyleAlias('Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ')
     }
     row.number = formData.dataRows.size()
     row.delta21 = 0
@@ -90,53 +90,53 @@ void checkAfterCalc() {
     for (row in formData.dataRows) {
         if (row.getAlias() != 'total') {
             if (row.kpp == row.subjectCode && row.subjectCode == '0') {
-                logger.error("Все суммы по операции нулевые!")
+                logger.error("Р’СЃРµ СЃСѓРјРјС‹ РїРѕ РѕРїРµСЂР°С†РёРё РЅСѓР»РµРІС‹Рµ!")
             }
         }
     }
 }
 
 /**
- * Проверяет уникальность в отчётном периоде и вид
+ * РџСЂРѕРІРµСЂСЏРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РІ РѕС‚С‡С‘С‚РЅРѕРј РїРµСЂРёРѕРґРµ Рё РІРёРґ
  */
 void checkUniq() {
 
     FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error('РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}')
     }
 }
 
 /**
- * Проверка наличия декларации для текущего department
+ * РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё РґР»СЏ С‚РµРєСѓС‰РµРіРѕ department
  */
 void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
+    declarationType = 2;    // РўРёРї РґРµРєР»Р°СЂР°С†РёРё РєРѕС‚РѕСЂСѓСЋ РїСЂРѕРІРµСЂСЏРµРј(РќР°Р»РѕРі РЅР° РїСЂРёР±С‹Р»СЊ)
     declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+        logger.error("Р”РµРєР»Р°СЂР°С†РёСЏ Р±Р°РЅРєР° РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ СЃС‚Р°С‚СѓСЃРµ РїСЂРёРЅСЏС‚Р°")
     }
 }
 
 BigDecimal getTaxBase() {
-    // Расчитываем распределяемая налоговая база за отчётный период
-    formIncomeId = 302  // Сводная форма начисленных доходов (доходы сложные)
-    formIncomePHYId = 301 // Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)
-    formCostId = 303    // Сводная форма начисленных расходов (расходы сложные)
-    formCostPHYId = 304 //Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)
+    // Р Р°СЃС‡РёС‚С‹РІР°РµРј СЂР°СЃРїСЂРµРґРµР»СЏРµРјР°СЏ РЅР°Р»РѕРіРѕРІР°СЏ Р±Р°Р·Р° Р·Р° РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
+    formIncomeId = 302  // РЎРІРѕРґРЅР°СЏ С„РѕСЂРјР° РЅР°С‡РёСЃР»РµРЅРЅС‹С… РґРѕС…РѕРґРѕРІ (РґРѕС…РѕРґС‹ СЃР»РѕР¶РЅС‹Рµ)
+    formIncomePHYId = 301 // Р Р°СЃС€РёС„СЂРѕРІРєР° РІРёРґРѕРІ РґРѕС…РѕРґРѕРІ, СѓС‡РёС‚С‹РІР°РµРјС‹С… РІ РїСЂРѕСЃС‚С‹С… Р РќРЈ (РґРѕС…РѕРґС‹ РїСЂРѕСЃС‚С‹Рµ)
+    formCostId = 303    // РЎРІРѕРґРЅР°СЏ С„РѕСЂРјР° РЅР°С‡РёСЃР»РµРЅРЅС‹С… СЂР°СЃС…РѕРґРѕРІ (СЂР°СЃС…РѕРґС‹ СЃР»РѕР¶РЅС‹Рµ)
+    formCostPHYId = 304 //Р Р°СЃС€РёС„СЂРѕРІРєР° РІРёРґРѕРІ СЂР°СЃС…РѕРґРѕРІ, СѓС‡РёС‚С‹РІР°РµРјС‹С… РІ РїСЂРѕСЃС‚С‹С… Р РќРЈ (СЂР°СЃС…РѕРґС‹ РїСЂРѕСЃС‚С‹Рµ)
     formIncome = FormDataService.find(formIncomeId, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
     formIncomePHY = FormDataService.find(formIncomePHYId, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
     formCost = FormDataService.find(formCostId, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
     formCostPHY = FormDataService.find(formCostPHYId, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
     BigDecimal taxBase = 0
-    // доходы сложные
+    // РґРѕС…РѕРґС‹ СЃР»РѕР¶РЅС‹Рµ
     if (formIncome != null) {
         for (value in formIncome.dataRows) {
-            // Если ячейка не объеденена то она должна быть в списке
+            // Р•СЃР»Рё СЏС‡РµР№РєР° РЅРµ РѕР±СЉРµРґРµРЅРµРЅР° С‚Рѕ РѕРЅР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РІ СЃРїРёСЃРєРµ
             String khy = value.getCell('incomeTypeId').hasValueOwner() ? value.getCell('incomeTypeId').getValueOwner().value : value.getCell('incomeTypeId').value
 
             BigDecimal incomeTaxSumS = (BigDecimal)(value.getCell('incomeTaxSumS').hasValueOwner() ? value.getCell('incomeTaxSumS').getValueOwner().value : value.getCell('incomeTaxSumS').value)
@@ -183,20 +183,20 @@ BigDecimal getTaxBase() {
             }
         }
     }
-    // Доходы простые
+    // Р”РѕС…РѕРґС‹ РїСЂРѕСЃС‚С‹Рµ
     if (formIncomePHY != null) {
         for (value in formIncomePHY.dataRows) {
             String khy = value.getCell('incomeTypeId').hasValueOwner() ? value.getCell('incomeTypeId').getValueOwner().value : value.getCell('incomeTypeId').value
 
-            // графа 8
+            // РіСЂР°С„Р° 8
             BigDecimal rnu4Field5Accepted = (BigDecimal)(value.getCell('rnu4Field5Accepted').hasValueOwner() ? value.getCell('rnu4Field5Accepted').getValueOwner().value : value.getCell('rnu4Field5Accepted').value)
             rnu4Field5Accepted = rnu4Field5Accepted ?: 0
 
-            // графа 5
+            // РіСЂР°С„Р° 5
             BigDecimal rnu6Field10Sum = (BigDecimal)(value.getCell('rnu6Field10Sum').hasValueOwner() ? value.getCell('rnu6Field10Sum').getValueOwner().value : value.getCell('rnu6Field10Sum').value)
             rnu6Field10Sum = rnu6Field10Sum ?: 0
 
-            // графа 6
+            // РіСЂР°С„Р° 6
             BigDecimal rnu6Field12Accepted = (BigDecimal)(value.getCell('rnu6Field12Accepted').hasValueOwner() ? value.getCell('rnu6Field12Accepted').getValueOwner().value : value.getCell('rnu6Field12Accepted').value)
             rnu6Field12Accepted = rnu6Field12Accepted ?: 0
             //k2
@@ -233,7 +233,7 @@ BigDecimal getTaxBase() {
             }
         }
     }
-    // Расходы сложные
+    // Р Р°СЃС…РѕРґС‹ СЃР»РѕР¶РЅС‹Рµ
     if (formCost != null) {
         for (value in formCost.dataRows) {
             String khy = value.getCell('consumptionTypeId').hasValueOwner() ? value.getCell('consumptionTypeId').getValueOwner().value : value.getCell('consumptionTypeId').value
@@ -316,7 +316,7 @@ BigDecimal getTaxBase() {
             }
         }
     }
-    // Расходы простые
+    // Р Р°СЃС…РѕРґС‹ РїСЂРѕСЃС‚С‹Рµ
     if (formCostPHY != null) {
         for (value in formCostPHY.dataRows) {
             String khy = value.getCell('consumptionTypeId').hasValueOwner() ? value.getCell('consumptionTypeId').getValueOwner().value : value.getCell('consumptionTypeId').value
@@ -359,12 +359,12 @@ BigDecimal getTaxBase() {
             }
         }
     }
-    // taxBase = распределяемая налоговая база за отчётный период
+    // taxBase = СЂР°СЃРїСЂРµРґРµР»СЏРµРјР°СЏ РЅР°Р»РѕРіРѕРІР°СЏ Р±Р°Р·Р° Р·Р° РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ
     return taxBase
 }
 
 /**
- * ЧТЗ выходные налоговые формы Ф2 Э1-2 П6.3.1.9.1  Алгоритмы заполнения полей формы
+ * Р§РўР— РІС‹С…РѕРґРЅС‹Рµ РЅР°Р»РѕРіРѕРІС‹Рµ С„РѕСЂРјС‹ Р¤2 Р­1-2 Рџ6.3.1.9.1  РђР»РіРѕСЂРёС‚РјС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ С„РѕСЂРјС‹
  */
 void calc() {
     for (row in formData.dataRows) {
@@ -377,14 +377,14 @@ void calc() {
 
             ]) {
                 if (row.getCell(alias).value == null) {
-                    logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                    logger.error('РџРѕР»Рµ ' + row.getCell(alias).column.name.replace('%', '') + ' РЅРµ Р·Р°РїРѕР»РЅРµРЅРѕ')
                 }
             }
             if (row.stringCode == null || ![1, 2, 3, 4].contains(row.stringCode.intValue())) {
-                logger.error("Код строки 002 неверный!")
+                logger.error("РљРѕРґ СЃС‚СЂРѕРєРё 002 РЅРµРІРµСЂРЅС‹Р№!")
             }
             if (row.labalAboutPaymentTax == null || ![1, 0].contains(row.labalAboutPaymentTax.intValue())) {
-                logger.error("Код строки «Отметка о возложении обязанности по уплате налога» неверный!")
+                logger.error("РљРѕРґ СЃС‚СЂРѕРєРё В«РћС‚РјРµС‚РєР° Рѕ РІРѕР·Р»РѕР¶РµРЅРёРё РѕР±СЏР·Р°РЅРЅРѕСЃС‚Рё РїРѕ СѓРїР»Р°С‚Рµ РЅР°Р»РѕРіР°В» РЅРµРІРµСЂРЅС‹Р№!")
             }
         }
     }
@@ -392,14 +392,14 @@ void calc() {
 
         if (formData.dataRows.size() != 0) {
 
-            // Строка итого
+            // РЎС‚СЂРѕРєР° РёС‚РѕРіРѕ
             rowTotal = formData.createDataRow()
             if (formData.dataRows.get(formData.dataRows.size() - 1).getAlias() != 'total') {
                 rowTotal = formData.appendDataRow('total')
             } else {
                 rowTotal = formData.getDataRow('total')
             }
-            rowTotal.bankName = "Итого: "
+            rowTotal.bankName = "РС‚РѕРіРѕ: "
             rowTotal.propertyPrice = summ(formData, new ColumnRange('propertyPrice', 0, formData.dataRows.size() - 2))
             rowTotal.workersCount = summ(formData, new ColumnRange('workersCount', 0, formData.dataRows.size() - 2))
 
@@ -409,14 +409,14 @@ void calc() {
                 formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
             }
 
-            // Заполним поля автоматически какие сможем на основе графы5
+            // Р—Р°РїРѕР»РЅРёРј РїРѕР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РєР°РєРёРµ СЃРјРѕР¶РµРј РЅР° РѕСЃРЅРѕРІРµ РіСЂР°С„С‹5
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     department = departmentService.get(row.divisionName.toString())
                     departmentParent = departmentService.getTB(department.getTbIndex())
 
                     if (department.id == 113) {
-                        row.bankName = 'Центральный аппарат'
+                        row.bankName = 'Р¦РµРЅС‚СЂР°Р»СЊРЅС‹Р№ Р°РїРїР°СЂР°С‚'
                         row.bankCode = '790000'
                     } else {
                         row.bankName = departmentParent.name
@@ -432,66 +432,66 @@ void calc() {
                 }
             }
 
-            // !!!!!!!! Нужно именно цикл по каждой строки для каждой колонки или потом проблемы с расчётами некоторых полей будут
+            // !!!!!!!! РќСѓР¶РЅРѕ РёРјРµРЅРЅРѕ С†РёРєР» РїРѕ РєР°Р¶РґРѕР№ СЃС‚СЂРѕРєРё РґР»СЏ РєР°Р¶РґРѕР№ РєРѕР»РѕРЅРєРё РёР»Рё РїРѕС‚РѕРј РїСЂРѕР±Р»РµРјС‹ СЃ СЂР°СЃС‡С‘С‚Р°РјРё РЅРµРєРѕС‚РѕСЂС‹С… РїРѕР»РµР№ Р±СѓРґСѓС‚
 
-            //графа1
+            //РіСЂР°С„Р°1
             i = 0;
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     i++
                     row.number = i
                 }
             }
 
-            //графа12
+            //РіСЂР°С„Р°12
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.propertyWeight = (BigDecimal) ((row.propertyPrice / rowTotal.propertyPrice) * 100).setScale(8, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
-            //графа13
+            //РіСЂР°С„Р°13
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.countWeight = (BigDecimal) ((row.workersCount / rowTotal.workersCount) * 100).setScale(8, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
-            //графа14
+            //РіСЂР°С„Р°14
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.baseTaxOf = (BigDecimal) ((row.propertyWeight + row.countWeight) / 2).setScale(8, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
-            //графа28
+            //РіСЂР°С„Р°28
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     //noinspection GroovyVariableNotAssigned
                     row.taxSumOutside = (BigDecimal) (departmentService.getDepartmentParamIncome(formData.departmentId).externalTaxSum * 18 / (18 + 2)).setScale(0, BigDecimal.ROUND_HALF_UP) *
                             (BigDecimal) (row.baseTaxOf / 100).setScale(0, BigDecimal.ROUND_HALF_UP) - row.delta28
-                    // externalTaxSum у каждого периода будет своя версия (Версионирование формы настроек)
+                    // externalTaxSum Сѓ РєР°Р¶РґРѕРіРѕ РїРµСЂРёРѕРґР° Р±СѓРґРµС‚ СЃРІРѕСЏ РІРµСЂСЃРёСЏ (Р’РµСЂСЃРёРѕРЅРёСЂРѕРІР°РЅРёРµ С„РѕСЂРјС‹ РЅР°СЃС‚СЂРѕРµРє)
                 }
             }
 
-            //графа15
+            //РіСЂР°С„Р°15
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.baseTaxOfRub = (BigDecimal) (taxBase * row.baseTaxOf / 100).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
-            // Графа17
+            // Р“СЂР°С„Р°17
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     temp = (BigDecimal) (row.baseTaxOfRub * row.subjectTaxStavka / 100).setScale(0, BigDecimal.ROUND_HALF_UP)
                     row.subjectTaxSum = temp > 0 ? temp : 0
                 }
             }
 
-            //графа18
+            //РіСЂР°С„Р°18
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     subjectTaxSumPrev = 0
                     everyMontherPaymentAfterPeriodPrev = 0
                     taxSumOutsidePrev = 0
@@ -508,9 +508,9 @@ void calc() {
                 }
             }
 
-            //графа19
+            //РіСЂР°С„Р°19
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     if (row.subjectTaxSum > row.subjectTaxCredit + row.taxSumOutside) {
                         row.taxSumToPay = row.subjectTaxSum - row.subjectTaxCredit - row.taxSumOutside
                     } else {
@@ -519,9 +519,9 @@ void calc() {
                 }
             }
 
-            //графа20
+            //РіСЂР°С„Р°20
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     if (row.subjectTaxCredit + row.taxSumOutside > row.subjectTaxSum) {
                         row.taxSumToReduction = row.subjectTaxCredit - row.subjectTaxSum + row.taxSumOutside
                     } else {
@@ -530,7 +530,7 @@ void calc() {
                 }
             }
 
-            // Подсчитываем суммы по графам, возможно стоит это сделать в одном цикле.
+            // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј СЃСѓРјРјС‹ РїРѕ РіСЂР°С„Р°Рј, РІРѕР·РјРѕР¶РЅРѕ СЃС‚РѕРёС‚ СЌС‚Рѕ СЃРґРµР»Р°С‚СЊ РІ РѕРґРЅРѕРј С†РёРєР»Рµ.
             rowTotal.propertyWeight = summ(formData, new ColumnRange('propertyWeight', 0, formData.dataRows.size() - 2))
             rowTotal.countWeight = summ(formData, new ColumnRange('countWeight', 0, formData.dataRows.size() - 2))
             rowTotal.baseTaxOf = summ(formData, new ColumnRange('baseTaxOf', 0, formData.dataRows.size() - 2))
@@ -540,10 +540,10 @@ void calc() {
             rowTotal.taxSumToPay = summ(formData, new ColumnRange('taxSumToPay', 0, formData.dataRows.size() - 2))
             rowTotal.taxSumToReduction = summ(formData, new ColumnRange('taxSumToReduction', 0, formData.dataRows.size() - 2))
 
-            //графа21
+            //РіСЂР°С„Р°21
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
-                    subjectTaxSumPrevItogo = 0  // Может изменится
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
+                    subjectTaxSumPrevItogo = 0  // РњРѕР¶РµС‚ РёР·РјРµРЅРёС‚СЃСЏ
                     if (formPrev != null) {
                         subjectTaxSumPrevItogo = formPrev.dataRows.get(formPrev.dataRows.size() - 1).subjectTaxSum
                     }
@@ -562,9 +562,9 @@ void calc() {
                 }
             }
 
-            //графа22
+            //РіСЂР°С„Р°22
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     if (reportPeriodService.get(formData.reportPeriodId).order == 3) {
                         row.everyMonthForKvartalNextPeriod = row.everyMontherPaymentAfterPeriod
                     } else {
@@ -573,10 +573,10 @@ void calc() {
                 }
             }
 
-            //графа23
+            //РіСЂР°С„Р°23
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
-                    if ((BigDecimal) (row.everyMontherPaymentAfterPeriod - 3 * (row.everyMontherPaymentAfterPeriod / 3)).setScale(0, BigDecimal.ROUND_HALF_UP)) {  // графа23
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
+                    if ((BigDecimal) (row.everyMontherPaymentAfterPeriod - 3 * (row.everyMontherPaymentAfterPeriod / 3)).setScale(0, BigDecimal.ROUND_HALF_UP)) {  // РіСЂР°С„Р°23
                         row.avansPayments1 = (BigDecimal) (row.everyMontherPaymentAfterPeriod / 3).setScale(0, BigDecimal.ROUND_HALF_UP) + (row.everyMontherPaymentAfterPeriod - 3 * (row.everyMontherPaymentAfterPeriod / 3).setScale(0, BigDecimal.ROUND_HALF_UP))
                     } else {
                         row.avansPayments1 = (BigDecimal) (row.everyMontherPaymentAfterPeriod / 3).setScale(0, BigDecimal.ROUND_HALF_UP)
@@ -584,16 +584,16 @@ void calc() {
                 }
             }
 
-            //графа24
+            //РіСЂР°С„Р°24
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.avansPayments2 = (BigDecimal) (row.everyMontherPaymentAfterPeriod / 3).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
-            //графа25
+            //РіСЂР°С„Р°25
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     if ((BigDecimal) (row.everyMontherPaymentAfterPeriod - 3 * (row.everyMontherPaymentAfterPeriod / 3)).setScale(0, BigDecimal.ROUND_HALF_UP)) {
                         row.avansPayments3 = (BigDecimal) (row.everyMontherPaymentAfterPeriod / 3).setScale(0, BigDecimal.ROUND_HALF_UP)
                     } else {
@@ -603,7 +603,7 @@ void calc() {
                 }
             }
 
-            //графа27
+            //РіСЂР°С„Р°27
             for (row in formData.dataRows) {
                 if (reportPeriodService.get(formData.reportPeriodId).order != 1) {
                     baseTaxOfPrev = 0
@@ -619,23 +619,23 @@ void calc() {
                 }
             }
 
-            //графа29
+            //РіСЂР°С„Р°29
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.thisFond = row.propertyPrice
                 }
             }
 
-            //графа30
+            //РіСЂР°С„Р°30
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     row.thisQuantity = row.workersCount
                 }
             }
 
-            //графа31
+            //РіСЂР°С„Р°31
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     propertyPricePrev = 0
                     if (formPrev != null) {
                         for (rowPrev in formData.dataRows) {
@@ -648,9 +648,9 @@ void calc() {
                 }
             }
 
-            //графа32
+            //РіСЂР°С„Р°32
             for (row in formData.dataRows) {
-                if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
+                if (!rowTotal.getAlias().equals(row.getAlias())) {   // РџСЂРѕРїСѓСЃС‚РёРј СЃС‚СЂРѕРєСѓ РёС‚РѕРіРѕ
                     workersCountPrev = 0
                     if (formPrev != null) {
                         for (rowPrev in formData.dataRows) {
@@ -663,7 +663,7 @@ void calc() {
                 }
             }
 
-            // Досчитаем строки итого
+            // Р”РѕСЃС‡РёС‚Р°РµРј СЃС‚СЂРѕРєРё РёС‚РѕРіРѕ
             rowTotal.everyMontherPaymentAfterPeriod = summ(formData, new ColumnRange('everyMontherPaymentAfterPeriod', 0, formData.dataRows.size() - 2))
             rowTotal.everyMonthForKvartalNextPeriod = summ(formData, new ColumnRange('everyMonthForKvartalNextPeriod', 0, formData.dataRows.size() - 2))
             rowTotal.avansPayments1 = summ(formData, new ColumnRange('avansPayments1', 0, formData.dataRows.size() - 2))
@@ -674,7 +674,7 @@ void calc() {
         }
 
     } else {
-        logger.error('Не могу заполнить поля, есть ошибки')
+        logger.error('РќРµ РјРѕРіСѓ Р·Р°РїРѕР»РЅРёС‚СЊ РїРѕР»СЏ, РµСЃС‚СЊ РѕС€РёР±РєРё')
     }
 }
 
@@ -686,6 +686,6 @@ void logicCheck() {
         formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
     }
     if (formPrev == null) {
-        logger.warn('Форма за предыдущий отчётный период не создавалась!')
+        logger.warn('Р¤РѕСЂРјР° Р·Р° РїСЂРµРґС‹РґСѓС‰РёР№ РѕС‚С‡С‘С‚РЅС‹Р№ РїРµСЂРёРѕРґ РЅРµ СЃРѕР·РґР°РІР°Р»Р°СЃСЊ!')
     }
 }
