@@ -10,10 +10,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
@@ -21,7 +18,7 @@ import java.util.*;
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class NewDepartmentPicker extends Composite implements NewDepartmentPickerView, SelectDepartmentsEventHandler {
+public class NewDepartmentPicker extends Composite implements HasEnabled, NewDepartmentPickerView, SelectDepartmentsEventHandler {
 
 	private PopupPanel popup;
 
@@ -31,6 +28,20 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 
 	@UiField
 	public TextBox selected;
+
+	@UiField
+	public Button selectButton;
+
+	@Override
+	public boolean isEnabled() {
+		return (selectButton.isEnabled() && selected.isEnabled());
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		selectButton.setEnabled(enabled);
+		selected.setEnabled(enabled);
+	}
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, NewDepartmentPicker> {
 	}

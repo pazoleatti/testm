@@ -35,4 +35,19 @@ public interface ReportPeriodDao {
 	 * @return список отчётных периодов, входящий в данный налоговый период, отсортированный по порядковому номеру
 	 */
 	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
+
+	/**
+	 *
+	 * @param taxPeriodId
+	 * @param departmentId
+	 * @return
+	 */
+	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId);
+
+	/**
+	 *
+	 * @param reportPeriodId
+	 * @param active
+	 */
+	void changeActive(int reportPeriodId, boolean active);
 }

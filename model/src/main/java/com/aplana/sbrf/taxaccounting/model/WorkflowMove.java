@@ -10,16 +10,31 @@ import static com.aplana.sbrf.taxaccounting.model.WorkflowState.PREPARED;
  * Переход между стадиями жизненного цикла
  */
 public enum WorkflowMove {
+	/** Из "Создана" в "Утверждена" */
 	CREATED_TO_APPROVED(1, "Утвердить", CREATED, APPROVED, MOVE_CREATED_TO_APPROVED, false),
+	/** Вернуть из "Утверждена" в "Создана" */
 	APPROVED_TO_CREATED(2, "Вернуть в \"Создана\"", APPROVED, CREATED, MOVE_APPROVED_TO_CREATED, true),
+	/** Из "Утверждена" в "Принята" */
 	APPROVED_TO_ACCEPTED(3, "Принять", APPROVED, ACCEPTED, MOVE_APPROVED_TO_ACCEPTED, AFTER_MOVE_APPROVED_TO_ACCEPTED, false),
+	/** Вернуть из "Принята" в "Утверждена" */
 	ACCEPTED_TO_APPROVED(4, "Вернуть в \"Утверждена\"", ACCEPTED, APPROVED, MOVE_ACCEPTED_TO_APPROVED, AFTER_MOVE_ACCEPTED_TO_APPROVED, true),
+	/** Из "Создана" в "Принята" */
 	CREATED_TO_ACCEPTED(5, "Принять", CREATED, ACCEPTED, MOVE_CREATED_TO_ACCEPTED, AFTER_MOVE_CREATED_TO_ACCEPTED, false),
+	/** Вернуть из "Принята" в "Создана" */
 	ACCEPTED_TO_CREATED(6, "Вернуть в \"Создана\"", ACCEPTED, CREATED, MOVE_ACCEPTED_TO_CREATED, AFTER_MOVE_ACCEPTED_TO_CREATED, true),
+	/** Из "Создана" в "Подготовлена" */
 	CREATED_TO_PREPARED(7, "Подготовить", CREATED, PREPARED, MOVE_CREATED_TO_PREPARED, false),
+	/** Вернуть из "Подготовлена" в "Создана" */
 	PREPARED_TO_CREATED(8, "Вернуть в \"Создана\"", PREPARED, CREATED, MOVE_PREPARED_TO_CREATED, true),
+	/** Из "Подготовлена" в "Принята" */
 	PREPARED_TO_ACCEPTED(9, "Принять", PREPARED, ACCEPTED, MOVE_PREPARED_TO_ACCEPTED, AFTER_MOVE_PREPARED_TO_ACCEPTED, false),
-	ACCEPTED_TO_PREPARED(10, "Вернуть в \"Подготовлена\"", ACCEPTED, PREPARED, MOVE_ACCEPTED_TO_PREPARED, AFTER_MOVE_ACCEPTED_TO_PREPARED, true);
+	/** Вернуть из "Принята" в "Подготовлена" */
+	ACCEPTED_TO_PREPARED(10, "Вернуть в \"Подготовлена\"", ACCEPTED, PREPARED, MOVE_ACCEPTED_TO_PREPARED, AFTER_MOVE_ACCEPTED_TO_PREPARED, true),
+	/** Из "Подготовлена" в "Утверждена" */
+	PREPARED_TO_APPROVED(11, "Утвердить", PREPARED, APPROVED, MOVE_PREPARED_TO_APPROVED, AFTER_MOVE_PREPARED_TO_APPROVED, false),
+	/** Вернуть из "Утверждена" в "Подготовлена" */
+	APPROVED_TO_PREPARED(12, "Вернуть в \"Подготовлена\"", APPROVED, PREPARED, MOVE_APPROVED_TO_PREPARED, AFTER_MOVE_APPROVED_TO_PREPARED, true);
+
 
 	private final int id;
 	private final String name;

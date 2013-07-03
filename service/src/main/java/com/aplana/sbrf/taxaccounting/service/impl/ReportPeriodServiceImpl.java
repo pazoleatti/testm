@@ -31,4 +31,19 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
 	}
+
+	@Override
+	public List<ReportPeriod> listByTaxPeriodAndDepartment(int taxPeriodId, long departmentId) {
+		return reportPeriodDao.listByTaxPeriodAndDepartmentId(taxPeriodId, departmentId);
+	}
+
+	@Override
+	public void closePeriod(int reportPeriodId) {
+		reportPeriodDao.changeActive(reportPeriodId, false);
+	}
+
+	@Override
+	public void openPeriod(int reportPeriodId) {
+		reportPeriodDao.changeActive(reportPeriodId, true);
+	}
 }

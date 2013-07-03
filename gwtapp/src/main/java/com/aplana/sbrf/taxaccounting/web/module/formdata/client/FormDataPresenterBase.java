@@ -20,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersP
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.web.bindery.event.shared.EventBus;
@@ -134,9 +136,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	@Override
 	protected void onReveal() {
 		super.onReveal();
-		closeFormDataHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
+		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
 			@Override
-			public void onWindowClosing(Window.ClosingEvent event) {
+			public void onClose(CloseEvent<Window> event) {
 				unlockForm(formData.getId());
 				closeFormDataHandlerRegistration.removeHandler();
 			}
@@ -217,6 +219,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
 		view.setSelectedRow(null, true);
+
+		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 	}
 
 

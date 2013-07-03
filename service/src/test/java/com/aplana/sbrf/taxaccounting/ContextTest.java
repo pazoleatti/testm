@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting;
 
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -4,7 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateTestEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateScriptCodeUiHandlers;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -23,7 +25,18 @@ public class FormTemplateScriptCodePresenter
 		Presenter<FormTemplateScriptCodePresenter.MyView, FormTemplateScriptCodePresenter.MyProxy>
 		implements FormTemplateScriptCodeUiHandlers,
 		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
-	/**
+
+    @Override
+    public void executeScript() {
+        if(formTemplate.getScript().hashCode() != getView().getScriptCode().hashCode()){
+            Window.confirm("Сначала нажмите кнопку \"Сохранить\"");
+            return;
+        }
+        formTemplate.setScript(getView().getScriptCode());
+        FormTemplateTestEvent.fire(FormTemplateScriptCodePresenter.this, formTemplate);
+    }
+
+    /**
 	 * {@link FormTemplateMainPresenter}'s proxy.
 	 */
 	@Title("Шаблоны налоговых форм")
