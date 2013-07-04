@@ -461,10 +461,10 @@ public class FormDataAccessServiceImplTest {
 		//Перевести из состояния "Подготовлена" в "Создана" и из "Подготовлена" в "Принята" может контролер текущего уровня,
 		// контролер вышестоящего уровня или контролер УНП.
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
 				service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED },
+		assertArrayEquals(new Object[] { WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED },
 				service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPERATOR));
 		assertArrayEquals(new Object[] {},service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
@@ -586,14 +586,14 @@ public class FormDataAccessServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		// Проверяем только один случай, так как этот метод просто аггрегирует результаты других методов,
+		// Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
 		// а мы их уже оттестировали отдельно
 		FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
 		assertTrue(params.isCanRead());
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
 		assertArrayEquals(
-			new Object[] {WorkflowMove.PREPARED_TO_ACCEPTED, WorkflowMove.PREPARED_TO_CREATED},
+			new Object[] {WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED},
 			params.getAvailableWorkflowMoves().toArray()
 		);
 	}

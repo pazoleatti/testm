@@ -21,8 +21,12 @@ public enum TaxType {
 	/**
 	 * НДС
 	 */
-	VAT('V', "НДС", "NO_VAT");
-	
+	VAT('V', "НДС", "NO_VAT"),
+	/**
+	 * ТЦО
+	 */
+	DEAL('D', "Учет контролируемых сделок", "NO_DEAL");
+
 	private final char code;
 	private final String name;
 	private final String declarationPrefix;

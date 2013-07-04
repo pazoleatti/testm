@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 import java.io.Serializable;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.ApplicationContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
@@ -12,9 +13,6 @@ import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 
@@ -29,9 +27,6 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T extends Serializable>
 		extends AsyncDataProvider<DictionaryItem<T>> implements HasHandlers {
 
-	@Inject Provider<EventBus> eventBusProvider;
-	@Inject Provider<DispatchAsync> dispatcherAsyncProvider;
-	
 	private final EventBus eventBus;
 	private final DispatchAsync dispatcher;
 	
@@ -43,8 +38,8 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 	 * @param dictionaryCode Код справочника.
 	 */
 	public DictionaryDataProvider(String dictionaryCode) {
-		this.eventBus = eventBusProvider.get();
-		this.dispatcher = dispatcherAsyncProvider.get();
+		this.eventBus = ApplicationContextHolder.getEventBus();
+		this.dispatcher = ApplicationContextHolder.getDispatchAsync();
 		this.dictionaryCode = dictionaryCode;
 	}
 

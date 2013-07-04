@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
@@ -25,6 +26,9 @@ import java.util.*;
 public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.MyView> implements AuditFilterUIHandlers {
 
     private final DispatchAsync dispatchAsync;
+
+    private static String formType1 = "Налоговые формы";
+    private static String formType2 = "Декларации";
 
     @Inject
     public AuditFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
@@ -53,14 +57,19 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     @Override
     public void onPrintButtonClicked() {
-        PrintAuditDataAction dataAction = new PrintAuditDataAction();
-        dataAction.setLogSystemFilter(getView().getFilterData());
-        dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
-            @Override
-            public void onSuccess(PrintAuditDataResult result) {
-                getView().getBlobFromServer(result.getUuid());
-            }
-        });
+        try{
+            PrintAuditDataAction dataAction = new PrintAuditDataAction();
+            dataAction.setLogSystemFilter(getView().getFilterData());
+            dispatchAsync.execute(dataAction, new AbstractCallback<PrintAuditDataResult>() {
+                @Override
+                public void onSuccess(PrintAuditDataResult result) {
+                    getView().getBlobFromServer(result.getUuid());
+                }
+            });
+        }catch (Exception e){
+            MessageEvent.fire(this,
+                    "Не удалось напечатать журнал аудита", e);
+        }
     }
 
 
@@ -72,10 +81,14 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setFormDataTaxType(List<TaxType> taxTypeList);
         void setUserLogins(Map<Integer, String> userLoginsMap);
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
+        void setFormTypeHandler(ValueChangeHandler<String> handler);
         void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods);
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
         LogSystemFilter getFilterData();
         void getBlobFromServer(String uuid);
+        void setVisibleTaxFields();
+        void setVisibleDeclarationFields();
+        void hideAll();
     }
 
     public void initFilterData(){
@@ -160,5 +173,19 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             }
         };
         getView().setValueListBoxHandler(taxTypeValueChangeHandler);
+
+        final ValueChangeHandler<String> formTypeValueChangeHandler = new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> stringValueChangeEvent) {
+                if(stringValueChangeEvent.getValue().equals(formType1)){
+                    getView().setVisibleTaxFields();
+                }else if((stringValueChangeEvent.getValue().equals(formType2))) {
+                    getView().setVisibleDeclarationFields();
+                } else {
+                    getView().hideAll();
+                }
+            }
+        };
+        getView().setFormTypeHandler(formTypeValueChangeHandler);
     }
 }

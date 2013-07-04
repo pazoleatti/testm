@@ -30,10 +30,10 @@
 						</div>
 						<g:HTMLPanel ui:field="signInContentPanel" />
                         <div class="{style.about}">
-                            <b:ButtonLink href="resources/About.pdf" title="Руководство пользователя" />
+                            <b:ButtonLink href="resources/About.pdf" target="_blank" title="Руководство пользователя" />
                         </div>
                         <div class="{style.about}">
-                            <b:ButtonLink ui:field="aboutLink" title="О программе" />
+                            <b:ButtonLink ui:field="aboutLink" target="_blank" title="О программе" />
                         </div>
 						<g:HTMLPanel ui:field="mainMenuContentPanel" />
 

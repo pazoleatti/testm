@@ -48,7 +48,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
     public LogSystemReportBuilder(List<LogSystemSearchResultItem> items) {
         super();
-        this.workBook = new SXSSFWorkbook();
+        this.workBook = new SXSSFWorkbook(50);
         this.sheet = workBook.createSheet("Журнал аудита");
         this.sheet.setColumnWidth(2, cellWidth * 256);
         sheet.getLastRowNum();
@@ -137,7 +137,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
     @Override
     protected void createDataForTable() {
-        logger.info("Fill data for table. " + getClass());
+        logger.info("Fill data for table. " + getClass() + "Data size: " + items.size());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setWrapText(true);
@@ -183,13 +183,13 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getFormKind().getName());
+            cell.setCellValue(item.getFormKind() != null?item.getFormKind().getName():"");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getFormType().getName());
+            cell.setCellValue(item.getFormType() != null?item.getFormType().getName():"");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

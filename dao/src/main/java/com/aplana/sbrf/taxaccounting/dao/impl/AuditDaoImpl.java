@@ -28,9 +28,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private FormTypeDao formTypeDao;
 
 	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
-	private static final String dateFormat = "yyyyMMdd HH:MM:SS";
+	private static final String dateFormat = "yyyyMMdd HH:mm:ss";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-	private static final long oneDayTime = 1000 * 60 * 60 * 24;
 
 	@Override
 	public PaginatedSearchResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
@@ -98,9 +97,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	private void appendSelectFromAndWhereClause(StringBuilder sql, LogSystemFilter filter) {
 		sql.append(" FROM log_system WHERE log_date BETWEEN TO_DATE('").append
-				(formatter.format(new Date(filter.getFromSearchDate().getTime() - oneDayTime)))
+				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
+				(formatter.format(filter.getToSearchDate()))
 				.append("', '").append(dbDateFormat).append("')");
 
 		if (filter.getUserId() != 0) {
