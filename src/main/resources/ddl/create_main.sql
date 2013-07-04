@@ -1024,10 +1024,10 @@ comment on column ref_book_attribute.width is 'Ширина столбца. Ис
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(9) not null,
+  record_id number(9) not null,
   ref_book_id number(9) not null,
   version date not null,
-  status number(1) default 0 not null,
-  ord number(14,5) not null
+  status number(1) default 0 not null
 );
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
@@ -1036,12 +1036,14 @@ alter table ref_book_record add constraint ref_book_record_chk_status check (sta
 
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 
+create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
+
 comment on table ref_book_record is 'Запись справочника';
 comment on column ref_book_record.id is 'Уникальный идентификатор';
+comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
 comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
-comment on column ref_book_record.ord is 'Порядок следования';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_value (
   record_id number(9) not null,
