@@ -1,3 +1,5 @@
+package form_template.income.rnu27
+
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
@@ -70,11 +72,10 @@ void log(String message, Object... args) {
 void logicalCheck() {
     formPrev
     // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-    // todo закомментил для тестов
-/*    if (formPrev == null || formPrev.getState().id != 4) {
+    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
         return
-    }*/
+    }
 
     for (DataRow row in formData.dataRows) {
         if (row.getAlias() == null) {
@@ -170,7 +171,7 @@ void logicalCheck() {
             // @author ivildanov
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
             List checks = ['currency', 'reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
-            Map<String, BigDecimal> value = [:]
+            Map<String, Object> value = [:]
             value.put('currency', calc5(row))
             value.put('reserveCalcValuePrev', calc8(row))
             value.put('marketQuotation', calc11(row))
@@ -246,7 +247,7 @@ void logicalCheck() {
         }
     }
 
-    /** @todo LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+    /** LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
     if (formPrev != null) {
@@ -299,6 +300,7 @@ DataRow getPrevRowWithoutAlias(DataRow row) {
             return row
         }
     }
+    throw new IllegalArgumentException()
 }
 
 // todo Проверки НСИ: нет справочников
@@ -354,7 +356,7 @@ def calcItogIssuer(int i) {
     newRow.getCell('issuer').colSpan = 2
     newRow.setAlias('itogoIssuer#'.concat(i.toString()))
 
-    String tIssuer
+    String tIssuer = 'Эмитет'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
             tIssuer = getRow(j).issuer
@@ -398,7 +400,7 @@ def calcItogRegNumber(int i) {
     newRow.getCell('regNumber').colSpan = 2
     newRow.setAlias('itogoRegNumber#'.concat(i.toString()))
 
-    String tRegNumber
+    String tRegNumber = 'ГРН'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
             tRegNumber = getRow(j).regNumber
@@ -481,6 +483,12 @@ DataRow<Cell> getRow(int i) {
  */
 
 void calc() {
+    formPrev
+    // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return
+    }
     for (row in formData.dataRows) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
@@ -511,8 +519,9 @@ void calc() {
 /**
  * Расчет графы 5
  */
-def calc5(DataRow row) {
-    'RUR'    // @todo  Расчёт графы 5 после http://jira.aplana.com/browse/SBRFACCTAX-2376 сейчаз проставим принудительно
+@SuppressWarnings("GroovyUnusedDeclaration")
+String calc5(DataRow row) {
+    return 'RUR'    // @todo  Расчёт графы 5 после http://jira.aplana.com/browse/SBRFACCTAX-2376 сейчаз проставим принудительно
 }
 
 /**
@@ -611,8 +620,6 @@ BigDecimal calc15(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc16(DataRow row) {
-    //todo графа 12 или 16 в ЧТЗ?
-
     if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
         return round((BigDecimal) (row.marketQuotation - row.prev), 2)
     } else {
@@ -768,7 +775,8 @@ FormData getFormPrev() {
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = FormDataService.find(formData.getFormType().id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        FormDataService.test()
+        formPrev = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
     }
     return formPrev
 }
@@ -780,7 +788,7 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
