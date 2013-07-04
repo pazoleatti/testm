@@ -358,7 +358,8 @@ create table report_period (
   tax_period_id number(9) not null,
   ord      number(2) not null,
   department_id number(15) not null,
-  is_balance_period number(1) default 0 not null
+  is_balance_period number(1) default 0 not null,
+  dict_tax_period_id number(9) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
@@ -376,6 +377,7 @@ comment on column report_period.tax_period_id is 'Налоговый перио�
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
 comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
 comment on column report_period.department_id is 'Подразделение';
+comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
