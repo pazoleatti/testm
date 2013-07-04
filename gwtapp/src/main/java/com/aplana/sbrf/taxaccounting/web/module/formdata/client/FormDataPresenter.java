@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.ArrayList;
+
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
@@ -221,7 +224,9 @@ public class FormDataPresenter extends
 	private void processFormDataResult(FormDataResult result) {
 		formData = result.getFormData();
 		LogAddEvent.fire(this, result.getLogEntries());
-		getView().setRowsData(formData.getDataRows());
+		// TODO: Тут было получение строк из FormData
+		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
+		getView().setRowsData(new ArrayList<DataRow<Cell>>());
 	}
 
 	@Override
@@ -259,7 +264,9 @@ public class FormDataPresenter extends
 						}
 
 					},this));
-			getView().setRowsData(formData.getDataRows());
+			// TODO: Тут было получение строк из FormData
+			// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
+			getView().setRowsData(new ArrayList<DataRow<Cell>>());
 		}
 	}
 
@@ -396,8 +403,10 @@ public class FormDataPresenter extends
                                         formData.getFormColumns(),
                                         readOnlyMode,
                                         forceEditMode);
+                        		// TODO: Тут было получение строк из FormData
+                        		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
                                 getView().setRowsData(
-                                        formData.getDataRows());
+                                        new ArrayList<DataRow<Cell>>());
                                 getView().addCustomHeader(
                                         formData.getHeaders());
                                 getView().addCustomTableStyles(

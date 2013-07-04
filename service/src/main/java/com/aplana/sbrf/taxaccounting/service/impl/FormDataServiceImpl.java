@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private LogBusinessService logBusinessService;
 	@Autowired
 	private AuditService auditService;
+	@Autowired
+	private DataRowDao dataRowDao;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -136,16 +139,17 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	public FormData createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
-		FormTemplate form = formTemplateDao.get(formTemplateId);
-		FormData result = new FormData(form);
+		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+		FormData formData = new FormData(formTemplate);
 		
-		result.setState(WorkflowState.CREATED);
-		result.setDepartmentId(departmentId);
-		result.setKind(kind);
-		result.setReportPeriodId(reportPeriodId);
+		formData.setState(WorkflowState.CREATED);
+		formData.setDepartmentId(departmentId);
+		formData.setKind(kind);
+		formData.setReportPeriodId(reportPeriodId);
 
-		for (DataRow<Cell> predefinedRow : form.getRows()) {
-			DataRow<Cell> dataRow = result.appendDataRow(predefinedRow.getAlias());
+		for (DataRow<Cell> predefinedRow : formTemplate.getRows()) {
+			DataRow<Cell> dataRow = formData.createDataRow();
+			dataRow.setAlias(predefinedRow.getAlias());
 			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
 				String columnAlias = entry.getKey();
 				dataRow.put(columnAlias, entry.getValue());
@@ -157,9 +161,10 @@ public class FormDataServiceImpl implements FormDataService {
 				cell.setEditable(predefinedCell.isEditable());
 			}
 		}
+		
 
 		// Execute scripts for the form event CREATE
-		formDataScriptingService.executeScript(userInfo, result,
+		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
@@ -167,7 +172,7 @@ public class FormDataServiceImpl implements FormDataService {
 					logger.getEntries());
 		}
 
-		return result;
+		return formData;
 	}
 
 	/**

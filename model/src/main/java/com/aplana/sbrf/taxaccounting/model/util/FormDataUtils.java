@@ -121,5 +121,19 @@ public class FormDataUtils {
 		return cells;
 	}
 	
+	public static <T extends AbstractCell> DataRow<T> getDataRowByAlias(List<DataRow<T>> dataRows, String rowAlias){
+
+			if (rowAlias == null) {
+				throw new NullPointerException("Row alias cannot be null");
+			}
+			for (DataRow<T> row : dataRows) {
+				if (rowAlias.equals(row.getAlias())) {
+					return row;
+				}
+			}
+			throw new IllegalArgumentException("Wrong row alias requested: "
+					+ rowAlias);
+	}
+	
 
 }
