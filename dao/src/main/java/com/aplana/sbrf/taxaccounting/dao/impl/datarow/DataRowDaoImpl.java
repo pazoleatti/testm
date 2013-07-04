@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +28,12 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+/**
+ * Реализация ДАО для работы со строками НФ
+ * 
+ * @author sgoryachkin
+ * 
+ */
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
@@ -179,7 +185,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		index--;
 		Long ordBegin = getOrd(fd,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index);
-		if (ordBegin == null){
+		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
 		insertRows(fd, index, ordBegin, rows);
@@ -210,8 +216,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		Long ordEnd = getOrd(fd,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index + 1);
-		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP : DataRowDaoImplUtils.calcOrdStep(ordBegin, ordEnd,
-				rows.size());
+		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
+				: DataRowDaoImplUtils
+						.calcOrdStep(ordBegin, ordEnd, rows.size());
 
 		if (ordStep == 0) {
 			// TODO: Реализовать перепаковку п
@@ -280,7 +287,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				String rowAlias = dr.getAlias();
 				ps.setLong(1, fd.getId());
 				ps.setString(2, rowAlias);
-				ps.setLong(3, index * ordStep + ordBegin);
+				ps.setLong(3, (index + 1) * ordStep + ordBegin);
 				ps.setInt(4, TypeFlag.ADD.getKey());
 			}
 
@@ -295,18 +302,18 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"insert into data_row (id, form_data_id, alias, ord, type) values (seq_data_row.nextval, ?, ?, ?, ?)",
 						bpss);
 
-		// Получаем массив идентификаторов строк, индекс записи в массиве
-		// соответствует порядковому номеру строки (меньше на единицу)
-		final List<Long> rowIds = getJdbcTemplate()
-				.queryForList(
-						"select ID from DATA_ROW where TYPE in (?) and FORM_DATA_ID = ? order by ORD",
-						new Object[] { TypeFlag.ADD.getKey(), formDataId },
-						new int[] { Types.NUMERIC, Types.NUMERIC }, Long.class);
-
-		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
-		for (int i = 0; i < rowIds.size(); i++) {
-			rowIdMap.put(rowIds.get(i), dataRows.get(i));
-		}
+		final Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
+		getJdbcTemplate()
+				.query("select ID from DATA_ROW where TYPE in (?,?) and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
+						new Object[] { TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey(), formDataId, ordStep + ordBegin, ordStep * (dataRows.size()) + ordBegin },
+						new RowCallbackHandler() {
+							@Override
+							public void processRow(ResultSet rs)
+									throws SQLException {
+								Long id = rs.getLong("ID");
+								rowIdMap.put(id, dataRows.get(rowIdMap.size()));
+							}
+						});
 
 		cellValueDao.saveCellValue(rowIdMap);
 		cellStyleDao.saveCellStyle(rowIdMap);
@@ -329,8 +336,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("formDataId", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		params.put("dataRowIndex", dataRowIndex);
-		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
-		return list.isEmpty() ? null : DataAccessUtils.requiredSingleResult(list);
+		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql,
+				params, Long.class);
+		return list.isEmpty() ? null : DataAccessUtils
+				.requiredSingleResult(list);
 	}
 
 	private Pair<Long, Integer> getOrdAndIndex(FormData fd, TypeFlag[] types,

@@ -97,6 +97,14 @@ public class DataRowDaoImplTest {
 		return result;
 	}
 	
+	private void checkIndexCorrect(List<DataRow<Cell>> dataRows) {
+		Integer i = 1;
+		for (DataRow<Cell> dataRow : dataRows) {
+			 Assert.assertEquals(i, dataRow.getIndex());
+			 i++;
+		}
+	}
+	
 	private Date getDate(int year, int month, int day) {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, year);
@@ -183,7 +191,37 @@ public class DataRowDaoImplTest {
 		dataRows.add(dr);
 		
 		dataRowDao.insertRows(fd, 3, dataRows); 
-		Assert.assertArrayEquals(new int[]{1, 2, 21, 22, 3, 4, 5}, dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		dataRows = dataRowDao.getRows(fd, null, null);
+		Assert.assertArrayEquals(new int[]{1, 2, 21, 22, 3, 4, 5}, dataRowsToStringColumnValues(dataRows));
+		checkIndexCorrect(dataRows);
+	}
+	
+	@Test
+	public void insertRowsRepeatedlySuccess(){
+		
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+		
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "21");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+		dataRows.add(dr);
+
+		dr = fd.createDataRow();
+		dr.setAlias("newAlias0");
+		dr.put("stringColumn", "22");
+		dr.put("numericColumn", 2.02);
+		date = getDate(2013, 0, 1);
+		dr.put("dateColumn", date);
+		dataRows.add(dr);
+		
+		dataRowDao.insertRows(fd, 3, dataRows); 
+		dataRowDao.insertRows(fd, 3, dataRows); 
+		dataRows = dataRowDao.getRows(fd, null, null);
+		Assert.assertArrayEquals(new int[]{1, 2, 21, 22, 21, 22, 3, 4, 5}, dataRowsToStringColumnValues(dataRows));
+		checkIndexCorrect(dataRows);
 	}
 	
 	@Test
