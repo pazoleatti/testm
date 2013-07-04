@@ -72,6 +72,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     Panel declarationTypePanel;
 
+	private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> userLoginMap;
@@ -142,7 +143,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setDeclarationTypeId((null == declarationTypeId.getValue()) ? 0 : declarationTypeId.getValue());
         lsf.setFormKind(formKind.getValue());
         lsf.setFromSearchDate(fromSearchDate.getValue());
-        lsf.setToSearchDate(toSearchDate.getValue());
+        lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         lsf.setUserId(null == userId.getValue()? 0 : userId.getValue());
         return lsf;
     }

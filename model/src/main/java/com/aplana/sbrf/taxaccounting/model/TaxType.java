@@ -25,7 +25,7 @@ public enum TaxType {
 	/**
 	 * ТЦО
 	 */
-	TCO('D', "Учет контролируемых сделок", "NO_TCO");
+	DEAL('D', "Учет контролируемых сделок", "NO_DEAL");
 
 	private final char code;
 	private final String name;

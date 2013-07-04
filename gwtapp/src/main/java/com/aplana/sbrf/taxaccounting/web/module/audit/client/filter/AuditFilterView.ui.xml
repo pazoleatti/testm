@@ -29,13 +29,13 @@
                         </g:cell>
                         <g:cell>
                             <g:HorizontalPanel>
-                                <g:Label width="30px" text="От" />
+                                <g:Label width="30px" text="С" />
                                 <d:CustomDateBox ui:field="fromSearchDate"/>
                             </g:HorizontalPanel>
                         </g:cell>
                         <g:cell>
                             <g:HorizontalPanel>
-                                <g:Label width="30px" text="до" />
+                                <g:Label width="30px" text="по" />
                                 <d:CustomDateBox ui:field="toSearchDate" />
                             </g:HorizontalPanel>
                         </g:cell>
@@ -80,7 +80,7 @@
                         <g:cell>
                             <g:VerticalPanel>
                                 <g:Label width="200px" text="Подразделение" />
-                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="false"/>
+                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="true"/>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="250px">

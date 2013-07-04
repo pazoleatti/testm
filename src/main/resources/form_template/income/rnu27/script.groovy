@@ -1,9 +1,6 @@
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.Column
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
+package form_template.income.rnu27
+
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
@@ -74,6 +71,12 @@ void log(String message, Object... args) {
  */
 void logicalCheck() {
     formPrev
+    // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return
+    }
+
     for (DataRow row in formData.dataRows) {
         if (row.getAlias() == null) {
             if (row.currency == 0) {
@@ -164,9 +167,69 @@ void logicalCheck() {
                     && row.marketQuotationInRub != round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)) {
                 logger.error("Неверно рассчитана графа «Рыночная котировка одной ценной бумаги в рублях»!")
             }
-            // @todo LC 20 - 22
+
+            // @author ivildanov
+            // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
+            List checks = ['currency', 'reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+            Map<String, Object> value = [:]
+            value.put('currency', calc5(row))
+            value.put('reserveCalcValuePrev', calc8(row))
+            value.put('marketQuotation', calc11(row))
+            value.put('rubCourse', calc12(row))
+            value.put('marketQuotationInRub', calc13(row))
+            value.put('costOnMarketQuotation', calc14(row))
+            value.put('reserveCalcValue', calc15(row))
+            value.put('reserveCreation', calc16(row))
+            value.put('recovery', calc17(row))
+
+            for (String check in checks) {
+                if (row.getCell(check).value != value.get(check)) {
+                    log("calc = " + value.get(check).toString())
+                    log("row = " + row.getCell(check).value.toString())
+                    logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
+                }
+            }
+
         }
+
+        // LC 20
+        if (row.getAlias() != null && row.getAlias().indexOf('itogoRegNumber') != -1) {
+            srow = calcItogRegNumber(formData.dataRows.indexOf(row))
+
+            for (column in itogoColumns) {
+                if (row.get(column) != srow.get(column)) {
+                    logger.error("Итоговые значения по «<"+ getPrevRowWithoutAlias(row).regNumber+">» рассчитаны неверно!")
+                    break
+                }
+            }
+        }
+
+        // LC 21
+        if (row.getAlias() != null && row.getAlias().indexOf('itogoIssuer') != -1) {
+            srow = calcItogIssuer(formData.dataRows.indexOf(row))
+
+            for (column in itogoColumns) {
+                if (row.get(column) != srow.get(column)) {
+                    logger.error("Итоговые значения для «"+ getPrevRowWithoutAlias(row).issuer+"» рассчитаны неверно!")
+                    break
+                }
+            }
+        }
+
+        // LC 22
+        if (row.getAlias() != null && row.getAlias() == 'itogo') {
+            srow = calcItogo()
+
+            for (column in itogoColumns) {
+                if (row.get(column) != srow.get(column)) {
+                    logger.error("Итоговые значения рассчитаны неверно!")
+                    break
+                }
+            }
+        }
+
     }
+
     // LC • Проверка корректности заполнения РНУ
     if (formPrev != null) {
         DataRow itogoPrev = formPrev.getDataRow('itogo')
@@ -184,7 +247,7 @@ void logicalCheck() {
         }
     }
 
-    /** @todo LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+    /** LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
     if (formPrev != null) {
@@ -225,101 +288,207 @@ void logicalCheck() {
     }
 }
 
+/**
+ * @author ivildanov
+ * Ищем вверх по форме первую строку без альяса
+ */
+DataRow getPrevRowWithoutAlias(DataRow row) {
+    int pos = formData.dataRows.indexOf(row)
+    for (int i = pos; i >= 0; i++) {
+
+        if ( getRow(i).getAlias() == null) {
+            return row
+        }
+    }
+    throw new IllegalArgumentException()
+}
+
+// todo Проверки НСИ: нет справочников
+void checkNSI() {
+
+}
+
 void allCheck() {
     logicalCheck()
+}
+
+// список столбцов, для которых нужно считать итоги
+List getItogoColumns() {
+    return ['prev', 'current', 'reserveCalcValuePrev', 'cost', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 }
 
 /**
  * Проставляет статические строки
  */
 void addAllStatic() {
-    itogoColumns = ['prev', 'current', 'reserveCalcValuePrev', 'cost', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        clearItogo = { Map<String, BigDecimal> itogo ->
-            for (String column in itogoColumns) {
-                itogo.put(column, new BigDecimal(0))
-            }
-        }
-        addItogo = { Map<String, BigDecimal> itogo, int position ->
-            DataRow<Cell> newRow = formData.createDataRow()
-            for (column in itogoColumns) {
-                newRow.getCell(column).value = itogo.get(column)
-            }
-            formData.dataRows.add(position, newRow)
-            return newRow
-        }
-        sumItogo = { Map<String, BigDecimal> itogo, DataRow<Cell> row ->
-            for (column in itogoColumns) {
-                if (row.get(column) != null) {
-                    itogo.put(column, itogo.get(column) + (BigDecimal) row.get(column))
-                }
-            }
-        }
-        getNextRow = { int from ->
-            result = null
-            int size = formData.dataRows.size()
-            for (int i = from; i < size; i++) {
-                DataRow row = formData.dataRows.get(i)
-                if (row.getAlias() == null) {
-                    return row
-                }
-            }
-            return result
-        }
-        Map<String, BigDecimal> itogoRegNumber = [:]
-        Map<String, BigDecimal> itogoIssuer = [:]
-        clearItogo(itogoIssuer)
-        clearItogo(itogoRegNumber)
-        DataRow<Cell> rowItogo = formData.createDataRow()
-        rowItogo.issuer = "Общий итого"
-        rowItogo.setAlias('itogo')
-        for (column in itogoColumns) {
-            rowItogo.getCell(column).value = new BigDecimal(0)
-        }
+
         for (int i = 0; i < formData.dataRows.size(); i++) {
             DataRow<Cell> row = formData.dataRows.get(i)
-            DataRow<Cell> nextRow = getNextRow(i + 1)
+            DataRow<Cell> nextRow = getRow(i + 1)
             int j = 0
 
-            sumItogo(itogoRegNumber, row)
-            sumItogo(itogoIssuer, row)
-            for (column in itogoColumns) {
-                if (row.getCell(column).value != null) {
-                    rowItogo.getCell(column).value += row.getCell(column).value
-                }
-            }
-
             if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
-                DataRow<Cell> newRow = addItogo(itogoIssuer, i + 1)
-                newRow.getCell('issuer').colSpan = 2
-                newRow.issuer = row.issuer.toString().concat(' Итог')
-                newRow.setAlias('itogoIssuer#'.concat(i.toString()))
-                clearItogo(itogoIssuer)
+                def itogIssuerRow = calcItogIssuer(i)
+                formData.dataRows.add(i + 1, itogIssuerRow)
                 j++
             }
 
             if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
-                DataRow<Cell> newRow = addItogo(itogoRegNumber, i + 1)
-                newRow.getCell('regNumber').colSpan = 2
-                newRow.regNumber = row.regNumber.toString().concat(' Итог')
-                newRow.setAlias('itogoRegNumber#'.concat(i.toString()))
-                clearItogo(itogoRegNumber)
+                def itogRegNumberRow = calcItogRegNumber(i)
+                formData.dataRows.add(i + 1, itogRegNumberRow)
                 j++
             }
-
             i += j  // Обязательно чтобы избежать зацикливания в простановке
-
         }
+
+        def rowItogo = calcItogo()
         formData.dataRows.add(rowItogo)
     }
 }
 
 /**
- * 3.1.1.1  Алгоритмы заполнения полей формы
+ * Расчет итога Эмитета
+ * @author ivildanov
+ */
+def calcItogIssuer(int i) {
+    def newRow = formData.createDataRow()
+    newRow.getCell('issuer').colSpan = 2
+    newRow.setAlias('itogoIssuer#'.concat(i.toString()))
+
+    String tIssuer = 'Эмитет'
+    for (int j = i; j >= 0; j--) {
+        if (getRow(j).getAlias() == null) {
+            tIssuer = getRow(j).issuer
+            break
+        }
+    }
+
+    newRow.issuer = tIssuer.concat(' Итог')
+
+    for (column in itogoColumns) {
+        newRow.getCell(column).value = new BigDecimal(0)
+    }
+
+    for (int j = i; j >= 0; j--) {
+
+        srow = getRow(j)
+
+        if (srow.getAlias() == null) {
+            if (((getRow(j).issuer != tIssuer))) {
+                break
+            }
+
+            for (column in itogoColumns) {
+                if (srow.get(column) != null) {
+                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                }
+            }
+        }
+
+    }
+    newRow
+}
+
+/**
+ * Расчет итога ГРН
+ * @author ivildanov
+ */
+def calcItogRegNumber(int i) {
+    // создаем итоговую строку ГРН
+    def newRow = formData.createDataRow()
+    newRow.getCell('regNumber').colSpan = 2
+    newRow.setAlias('itogoRegNumber#'.concat(i.toString()))
+
+    String tRegNumber = 'ГРН'
+    for (int j = i; j >= 0; j--) {
+        if (getRow(j).getAlias() == null) {
+            tRegNumber = getRow(j).regNumber
+            break
+        }
+    }
+
+    newRow.regNumber = tRegNumber.concat(' Итог')
+
+    for (column in itogoColumns) {
+        newRow.getCell(column).value = new BigDecimal(0)
+    }
+
+    // идем от текущей позиции вверх и ищем нужные строки
+    for (int j = i; j >= 0; j--) {
+
+        srow = getRow(j)
+
+        if (srow.getAlias() == null) {
+
+            if (((getRow(j).regNumber != tRegNumber))) {
+                break
+            }
+
+            for (column in itogoColumns) {
+                if (srow.get(column) != null) {
+                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                }
+            }
+        }
+    }
+    newRow
+}
+
+/**
+ * Расчет итоговой строки
+ * @author ivildanov
+ */
+def calcItogo() {
+    // создаем строку
+    def rowItogo = formData.createDataRow()
+    rowItogo.setAlias('itogo')
+    rowItogo.issuer = "Общий итог"
+
+    // заполняем начальными данными-нулями
+    for (column in itogoColumns) {
+        rowItogo.getCell(column).value = new BigDecimal(0)
+    }
+
+    // ищем снизу вверх итоговую строку по эмитету
+    for (int j = formData.dataRows.size() - 1; j >= 0; j--) {
+        DataRow<Cell> srow = formData.dataRows.get(j)
+        if ((srow.getAlias() != null) && (srow.getAlias().indexOf('itogoIssuer') != -1)) {
+            for (column in itogoColumns) {
+                if (srow.get(column) != null) {
+                    rowItogo.getCell(column).value = rowItogo.getCell(column).value + (BigDecimal) srow.get(column)
+                }
+            }
+        }
+    }
+
+    rowItogo
+}
+
+/**
+ * Получение строки по номеру
+ * @author ivildanov
+ */
+DataRow<Cell> getRow(int i) {
+    if ((i < formData.dataRows.size()) && (i >= 0)) {
+        return formData.dataRows.get(i)
+    } else {
+        return null
+    }
+}
+
+/**
+ * 3.1.1.1	Алгоритмы заполнения полей формы
  * Табл. 59 Алгоритмы заполнения полей формы «Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения»
  */
 
 void calc() {
+    formPrev
+    // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return
+    }
     for (row in formData.dataRows) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
@@ -334,40 +503,152 @@ void calc() {
         for (DataRow row in formData.dataRows) {
             i++
             row.number = i  // @todo http://jira.aplana.com/browse/SBRFACCTAX-2548 блокирует
-            row.currency = 'RUR'// @todo  Расчёт графы 5 после http://jira.aplana.com/browse/SBRFACCTAX-2376 сейчаз проставим принудительно
-
-            // Расчет графы 8 в соответсвие коментарию Аванесова http://jira.aplana.com/browse/SBRFACCTAX-2562
-            temp = new BigDecimal(0)
-            tempCount = 0
-            if (formPrev != null) {
-                for (DataRow rowPrev in formPrev.dataRows) {
-                    if (row.tradeNumber == rowPrev.tradeNumber) {
-                        temp = rowPrev.reserveCalcValue
-                        tempCount++
-                    }
-                }
-            }
-            if (tempCount == 1) {
-                row.reserveCalcValuePrev = temp
-            } else {
-                row.reserveCalcValuePrev = 0
-            }
-
-            if (row.currency == 'RUR') {
-                row.marketQuotation = null
-            }
-            if (row.currency == 'RUR') {
-                row.rubCourse = null
-            }
-            if (row.marketQuotation != null && row.rubCourse != null) {
-                row.marketQuotationInRub = round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
-            }
+            row.currency = calc5(row)
+            row.reserveCalcValuePrev = calc8(row)
+            row.marketQuotation = calc11(row)
+            row.rubCourse = calc12(row)
+            row.marketQuotationInRub = calc13(row)
+            row.costOnMarketQuotation = calc14(row)
+            row.reserveCalcValue = calc15(row)
+            row.reserveCreation = calc16(row)
+            row.recovery = calc17(row)
         }
     }
 }
 
 /**
- * Сортирует форму в соответвие с требованиями 6.11.2.1 Перечень полей формы
+ * Расчет графы 5
+ */
+@SuppressWarnings("GroovyUnusedDeclaration")
+String calc5(DataRow row) {
+    return 'RUR'    // @todo  Расчёт графы 5 после http://jira.aplana.com/browse/SBRFACCTAX-2376 сейчаз проставим принудительно
+}
+
+/**
+ * Расчет графы 8
+ */
+BigDecimal calc8(DataRow row) {
+    // Расчет графы 8 в соответсвие коментарию Аванесова http://jira.aplana.com/browse/SBRFACCTAX-2562
+    temp = new BigDecimal(0)
+    tempCount = 0
+    if (formPrev != null) {
+        for (DataRow rowPrev in formPrev.dataRows) {
+            if (row.tradeNumber == rowPrev.tradeNumber) {
+                temp = rowPrev.reserveCalcValue
+                tempCount++
+            }
+        }
+    }
+    if (tempCount == 1) {
+        return round(temp, 2)
+    } else {
+        return (BigDecimal) 0
+    }
+}
+
+/**
+ * Расчет графы 11
+ * @author ivildanov
+ */
+def calc11(DataRow row) {
+    if (row.currency == 'RUR') {
+        return null
+    }
+}
+
+/**
+ * Расчет графы 12
+ * @author ivildanov
+ */
+def calc12(DataRow row) {
+    if (row.currency == 'RUR') {
+        return null
+    }
+}
+
+/**
+ * Расчет графы 13
+ * @author ivildanov
+ */
+def calc13(DataRow row) {
+    if (row.marketQuotation != null && row.rubCourse != null) {
+        return round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
+    }
+}
+
+/**
+ * Расчет графы 14
+ * @author ivildanov
+ */
+BigDecimal calc14(DataRow row) {
+
+    if (row.marketQuotationInRub == null) {
+        return (BigDecimal) 0
+    } else {
+        return round((BigDecimal) (row.current * row.marketQuotationInRub), 2)
+    }
+}
+
+/**
+ * Расчет графы 15
+ * @author ivildanov
+ */
+BigDecimal calc15(DataRow row) {
+
+    BigDecimal a
+
+    if (row.cost != null) {
+        a = row.cost
+    } else {
+        a = 0
+    }
+
+    if (row.signSecurity == "+") {
+        if (a - row.costOnMarketQuotation > 0) {
+            return a - row.costOnMarketQuotation
+        } else {
+            return (BigDecimal) 0
+        }
+
+    } else {
+        return (BigDecimal) 0
+    }
+}
+
+/**
+ * Расчет графы 16
+ * @author ivildanov
+ */
+BigDecimal calc16(DataRow row) {
+    if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
+        return round((BigDecimal) (row.marketQuotation - row.prev), 2)
+    } else {
+        return (BigDecimal) 0
+    }
+}
+
+/**
+ * Расчет графы 17
+ * @author ivildanov
+ */
+BigDecimal calc17(DataRow row) {
+
+    BigDecimal a
+    if (row.reserveCalcValue - row.reserveCalcValuePrev < 0) {
+        a = row.reserveCalcValue - row.reserveCalcValuePrev
+    } else {
+        a = 0
+    }
+    // abs
+    if (a < 0) {
+        a = -a
+    }
+
+    return round((BigDecimal) (a), 2)
+}
+
+/**
+ * Сортирует форму в соответвие с требованиями 6.11.2.1	Перечень полей формы
  */
 void sort() {
     formData.dataRows.sort({ DataRow a, DataRow b ->
@@ -494,7 +775,8 @@ FormData getFormPrev() {
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = FormDataService.find(formData.getFormType().id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        FormDataService.test()
+        formPrev = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
     }
     return formPrev
 }
@@ -506,11 +788,11 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                source.getDataRows().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         formData.dataRows.add(row)
                     }
