@@ -15,7 +15,7 @@ public class DataRowDaoImplUtils {
 	/**
 	 * Массив содержит названия таблиц со значениями ячеек
 	 */
-	static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
+	public static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
 			"STRING_VALUE", "DATE_VALUE" };
 
 	/**
@@ -55,7 +55,7 @@ public class DataRowDaoImplUtils {
 		}
 	}
 
-	static String getCellValueTableName(Column c) {
+	public static String getCellValueTableName(Column c) {
 		return getCellValueComponent(c, CELL_VALUE_TABLE_NAMES);
 	}
 
@@ -71,5 +71,5 @@ public class DataRowDaoImplUtils {
 		public Object getValue(ResultSet rs, String columnLabel)
 				throws SQLException;
 	}
-
+	
 }
