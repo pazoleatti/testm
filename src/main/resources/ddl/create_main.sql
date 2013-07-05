@@ -568,7 +568,7 @@ create table data_row (
   id number(18) not null,
   form_data_id number(18) not null,
   alias varchar(20),
-  ord number(14,5) not null,
+  ord number(14,0) not null,
   type number(1) not null
 );
 alter table data_row add constraint data_row_pk primary key (id);
