@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Предоставление права пользования товарным знаком
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -55,8 +57,7 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    // TODO
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
+    for (alias in ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -91,10 +92,9 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        // TODO
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'dealDate']) {
-            if (row.getCell(alias).value == null) {
+        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber',
+                'docDate', 'price', 'cost', 'dealDate']) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }
@@ -105,8 +105,7 @@ void logicCheck() {
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()
-{
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -117,7 +116,10 @@ void checkNSI()
  */
 void calc() {
     for (row in formData.dataRows) {
-        // TODO расчет зависимых полей
+        // Расчет поля "Цена"
+        row.getCell('price').value = row.getCell('sum').value
+        // Расчет поля "Стоимость"
+        row.getCell('cost').value = row.getCell('sum').value
         // TODO расчет полей по справочникам
     }
 }

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Предоставление гарантий
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -90,9 +92,9 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullName', 'inn', 'countryCode', 'docNumber', 'docDate', 'dealNumber', 'dealDate',
+        for (alias in ['rowNumber', 'fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber', 'dealDate',
                 'sum', 'price', 'total', 'dealDoneDate']) {
-            if (row.getCell(alias).value == null) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }

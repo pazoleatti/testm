@@ -1,4 +1,4 @@
-package form_template.deal.purchase_sale_metals
+package form_template.deal.precious_metals_trade
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -92,7 +92,7 @@ void logicCheck() {
     for (row in formData.dataRows) {
         for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
                 'serviceType', 'price', 'cost', 'dealDate']) {
-            if (row.getCell(alias).value == null) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }

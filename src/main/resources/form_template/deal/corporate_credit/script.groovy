@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Предоставление корпоративного кредита
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -60,6 +62,9 @@ void addRow() {
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
+
+    row.getCell('count').value = 1
+
     row.getCell('rowNumber').value = formData.dataRows.size()
 }
 /**
@@ -90,9 +95,9 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate',
+        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryName', 'sum', 'docNumber', 'docDate',
                 'count', 'price', 'cost', 'dealDate']) {
-            if (row.getCell(alias).value == null) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }

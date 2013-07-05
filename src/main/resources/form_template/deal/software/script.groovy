@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -92,7 +94,7 @@ void logicCheck() {
     for (row in formData.dataRows) {
         for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
                 'serviceType', 'price', 'cost', 'dealDate']) {
-            if (row.getCell(alias).value == null) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }

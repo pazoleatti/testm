@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Купля-продажа иностранной валюты
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -93,7 +95,7 @@ void logicCheck() {
     for (row in formData.dataRows) {
         for (alias in ['rowNumber', 'fullName', 'inn','countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber', 'dealDate'
                 , 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']) {
-            if (row.getCell(alias).value == null) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }
@@ -101,13 +103,13 @@ void logicCheck() {
         if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
             logger.error('Поля «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
                     'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке '+
-                    formData.dataRows.indexOf(row)+' не могут быть одновременно заполнены!')
+                    (formData.dataRows.indexOf(row)+1)+' не могут быть одновременно заполнены!')
         }
 
         if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
             logger.error('Одно из полей «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
                     'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке ' +
-                    formData.dataRows.indexOf(row)+' должно быть заполнено!')
+                    (formData.dataRows.indexOf(row)+1)+' должно быть заполнено!')
         }
     }
 

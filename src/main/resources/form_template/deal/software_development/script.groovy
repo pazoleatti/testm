@@ -3,27 +3,29 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 /**
  * 5.2.3 Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkUniq()
-        checkDecl()
         break
     case FormDataEvent.CALCULATE:
-        logicCheck()
+        calc()
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkDecl()
+        checkMatrix()
         logicCheck()
+        calc()
         break
     case FormDataEvent.MOVE_PREPARED_TO_CREATED:
         break
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkDecl()
+        checkMatrix()
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
@@ -37,9 +39,17 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
+    if (currentDataRow != null) {
+        recalcRowNum()
         formData.dataRows.remove(currentDataRow)
+    }
+}
+
+void recalcRowNum() {
+    def i = formData.dataRows.indexOf(currentDataRow)
+
+    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+        row.getCell('rowNumber').value = i++
     }
 }
 
@@ -50,32 +60,30 @@ void addRow() {
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
+    row.getCell('rowNumber').value = formData.dataRows.size()
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
+ * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
-
+    // TODO
+    FormData findForm = null
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
-    }
-    if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
 }
 
 /**
- * Проверка наличия декларации для текущего department
+ * Cформирована ли для выбранного пользователем отчета форма-приемник (консолидированный отчет или «Матрица»)
  */
-void checkDecl() {
-    declarationType = 2;    // Тип декларации которую проверяем(Налог на прибыль)
-    declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
-    if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+void checkMatrix() {
+    // TODO
+    if (false) {
+        // сформирована и имеет статус, отличный от «Создана»
+        logger.error("Принятие отчета невозможно, т.к. уже подготовлена форма-приемник.")
     }
 }
-
 /**
  * Логические проверки
  */
@@ -87,5 +95,29 @@ void logicCheck() {
                 logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
             }
         }
+    }
+    checkNSI()
+}
+
+/**
+ * Проверка соответствия НСИ
+ */
+void checkNSI() {
+    for (row in formData.dataRows) {
+        // TODO добавить проверки НСИ
+    }
+}
+
+
+/**
+ * Алгоритмы заполнения полей формы.
+ */
+void calc() {
+    for (row in formData.dataRows) {
+        // Расчет поля "Цена"
+        row.getCell('price').value = row.getCell('expensesSum').value
+        // Расчет поля "Стоимость"
+        row.getCell('cost').value = row.getCell('expensesSum').value
+        // TODO расчет полей по справочникам
     }
 }

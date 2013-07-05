@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Приобретение и реализация ценных бумаг (долей в уставном капитале)
+ *
+ * @author Stanislav Yasinskiy
  */
 
 switch (formDataEvent) {
@@ -55,7 +57,7 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
+    for (alias in ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count' ,'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -90,21 +92,36 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'dealDate']) {
-            if (row.getCell(alias).value == null) {
+        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate',
+                'okeiCode', 'count', 'price', 'cost', 'dealDate']) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }
+
+        if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
+            logger.error('Поля «Сумма доходов (стоимость реализации) Банка, руб.» ' +
+                    'и «Сумма расходов (стоимость приобретения) Банка, руб.» в строке ' +
+                    (formData.dataRows.indexOf(row)+1)+' не могут быть одновременно заполнены!')
+        }
+
+        if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
+            logger.error('Одно из полей «Сумма доходов (стоимость реализации) Банка, руб.» ' +
+                    'и «Сумма расходов (стоимость приобретения) Банка, руб.» в строке ' +
+                    (formData.dataRows.indexOf(row)+1)+' должно быть заполнено!')
+        }
+        if (! row.getCell('okeiCode').value in ['796', '744']) {
+            logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт., процент!')
+        }
     }
+
     checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()
-{
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -116,9 +133,15 @@ void checkNSI()
 void calc() {
     for (row in formData.dataRows) {
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('expensesSum').value
+        pricaValue = row.getCell('incomeSum').value!=null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
+        if (row.getCell('okeiCode').value == '744'){
+            row.getCell('price').value = pricaValue
+        } else if (row.getCell('okeiCode').value == '796'){
+            row.getCell('price').value = pricaValue +' / '+ row.getCell('count').value
+        }
         // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('expensesSum').value
+        row.getCell('cost').value =  pricaValue
+
         // TODO расчет полей по справочникам
     }
 }
