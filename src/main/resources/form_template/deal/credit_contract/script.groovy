@@ -1,10 +1,10 @@
-package form_template.deal.rent_provision
+package form_template.deal.credit_contract
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление нежилых помещений в аренду
+ * Уступка прав требования по кредитным договорам
  *
  * @author Dmitriy Levykin
  */
@@ -28,7 +28,7 @@ switch (formDataEvent) {
 void addRow() {
     row = formData.createDataRow()
 
-    for (alias in ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
+    for (alias in ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -61,8 +61,8 @@ void recalcRowNum() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
+        for (alias in ['rowNum', 'name', 'innKio', 'country', 'contractNum', 'contractDate', 'okeiCode', 'count',
+                'price', 'totalCost', 'transactionDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 msg = row.getCell(alias).column.name
                 logger.error("Поле «$msg» не заполнено!")
@@ -70,6 +70,17 @@ void logicCheck() {
         }
     }
 
+    // Проверка выбранной единицы измерения
+    for (row in formData.dataRows) {
+        // TODO поле справочника "код"
+        // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+    }
+    // Проверка количества
+    for (row in formData.dataRows) {
+        if (row.getCell('count').value != 1) {
+            logger.error('В поле «Количество» может быть указано только значение «1»!')
+        }
+    }
     checkNSI()
 }
 
@@ -86,9 +97,16 @@ void checkNSI() {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+
     for (row in formData.dataRows) {
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('incomeBankSum').value
+        // Расчет поля "Цена за 1 шт., руб."
+        transactionSumRub = row.getCell('transactionSumRub').value
+        bondCount = row.getCell('bondCount').value
+
+        if (transactionSumRub != null && bondCount != null && bondCount != 0)
+        {
+            row.getCell('priceOne').value = transactionSumRub / bondCount;
+        }
         // TODO расчет полей по справочникам
     }
 }

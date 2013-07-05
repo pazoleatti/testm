@@ -1,10 +1,10 @@
-package form_template.deal.rent_provision
+package form_template.deal.bonds_trade
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление нежилых помещений в аренду
+ * Реализация и приобретение ценных бумаг
  *
  * @author Dmitriy Levykin
  */
@@ -28,7 +28,9 @@ switch (formDataEvent) {
 void addRow() {
     row = formData.createDataRow()
 
-    for (alias in ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
+    for (alias in ['transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency', 'currency',
+            'courseCB', 'transactionSumRub', 'contractNum', 'contractDate', 'transactionDate', 'bondRegCode',
+            'bondCount', 'transactionType']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -44,7 +46,6 @@ void deleteRow() {
         formData.dataRows.remove(currentDataRow)
     }
 }
-
 /**
  * Пересчет индексов строк перед удалением строки
  */
@@ -61,8 +62,10 @@ void recalcRowNum() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
+        for (alias in ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'innKio', 'contraCountry',
+                'contraCountryCode', 'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
+                'contractNum', 'contractDate', 'transactionDate', 'bondRegCode', 'bondCount', 'priceOne',
+                'transactionType']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 msg = row.getCell(alias).column.name
                 logger.error("Поле «$msg» не заполнено!")
@@ -86,9 +89,16 @@ void checkNSI() {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+
     for (row in formData.dataRows) {
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('incomeBankSum').value
+        // Расчет поля "Цена за 1 шт., руб."
+        transactionSumRub = row.getCell('transactionSumRub').value
+        bondCount = row.getCell('bondCount').value
+
+        if (transactionSumRub != null && bondCount != null && bondCount != 0)
+        {
+            row.getCell('priceOne').value = transactionSumRub / bondCount;
+        }
         // TODO расчет полей по справочникам
     }
 }

@@ -1,10 +1,10 @@
-package form_template.deal.rent_provision
+package form_template.deal.bank_service
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление нежилых помещений в аренду
+ * Оказание банковских услуг
  *
  * @author Dmitriy Levykin
  */
@@ -28,7 +28,7 @@ switch (formDataEvent) {
 void addRow() {
     row = formData.createDataRow()
 
-    for (alias in ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
+    for (alias in ['jurName', 'serviceName', 'bankIncomeSum', 'contractNum', 'contractDate', 'transactionDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -61,8 +61,8 @@ void recalcRowNum() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
+        for (alias in ['rowNum', 'jurName', 'innKio', 'country', 'countryCode', 'serviceName', 'bankIncomeSum',
+                'contractNum', 'contractDate', 'price', 'cost', 'transactionDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 msg = row.getCell(alias).column.name
                 logger.error("Поле «$msg» не заполнено!")
@@ -86,9 +86,12 @@ void checkNSI() {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+
     for (row in formData.dataRows) {
+        // Расчет поля "Цена"
+        row.getCell('price').value = row.getCell('bankIncomeSum').value
         // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('incomeBankSum').value
+        row.getCell('cost').value = row.getCell('bankIncomeSum').value
         // TODO расчет полей по справочникам
     }
 }
