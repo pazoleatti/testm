@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 /**
@@ -14,6 +15,19 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 public interface RefBookDao {
 
+	/**
+	 * Загружает метаданные справочника
+	 * @param id код справочника
+	 * @return
+	 */
+	RefBook get(Long id);
+
+	/**
+	 * Загружает данные справочника на определенную дату актуальности
+	 * @param refBookId код справочника
+	 * @param version дата актуальности
+	 * @return
+	 */
 	List<Map<String, RefBookValue>> getData(Long refBookId, Date version);
 
 }
