@@ -1,4 +1,4 @@
-package form_template.deal.letter_of_сredit
+package form_template.deal.letter_of_credit
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
