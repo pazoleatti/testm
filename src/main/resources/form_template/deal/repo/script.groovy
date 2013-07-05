@@ -1,10 +1,10 @@
-package form_template.deal.rent_provision
+package form_template.deal.repo
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Предоставление нежилых помещений в аренду
+ * Сделки РЕПО
  *
  * @author Dmitriy Levykin
  */
@@ -28,7 +28,9 @@ switch (formDataEvent) {
 void addRow() {
     row = formData.createDataRow()
 
-    for (alias in ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
+    for (alias in ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'dealsMode',
+            'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode',
+            'courseCB', 'priceFirstRub', 'transactionDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -61,8 +63,10 @@ void recalcRowNum() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
+        for (alias in ['rowNum', 'jurName', 'innKio', 'country', 'countryCode', 'contractNum', 'contractDate',
+                'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'percentIncomeSum',
+                'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub',
+                'transactionDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
                 msg = row.getCell(alias).column.name
                 logger.error("Поле «$msg» не заполнено!")
@@ -87,8 +91,6 @@ void checkNSI() {
  */
 void calc() {
     for (row in formData.dataRows) {
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('incomeBankSum').value
         // TODO расчет полей по справочникам
     }
 }
