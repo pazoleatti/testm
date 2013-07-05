@@ -1,10 +1,10 @@
-package form_template.deal.software
+package form_template.deal.foreign_currency
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Купля-продажа иностранной валюты
  */
 
 switch (formDataEvent) {

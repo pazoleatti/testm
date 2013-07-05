@@ -1,10 +1,10 @@
-package form_template.deal.software
+package form_template.deal.corporate_credit
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Предоставление корпоративного кредита
  */
 
 switch (formDataEvent) {

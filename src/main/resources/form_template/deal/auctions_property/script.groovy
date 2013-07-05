@@ -1,10 +1,10 @@
-package form_template.deal.software
+package form_template.deal.auctions_property
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Приобретение услуг по организации и проведению торгов по реализации имущества
  */
 
 switch (formDataEvent) {

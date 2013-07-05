@@ -1,10 +1,10 @@
-package form_template.deal.software
+package form_template.deal.trademark
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Предоставление права пользования товарным знаком
  */
 
 switch (formDataEvent) {
@@ -55,6 +55,7 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
+    // TODO
     for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
@@ -90,6 +91,7 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
+        // TODO
         for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
                 'serviceType', 'price', 'cost', 'dealDate']) {
             if (row.getCell(alias).value == null) {
@@ -115,10 +117,7 @@ void checkNSI()
  */
 void calc() {
     for (row in formData.dataRows) {
-        // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('expensesSum').value
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('expensesSum').value
+        // TODO расчет зависимых полей
         // TODO расчет полей по справочникам
     }
 }

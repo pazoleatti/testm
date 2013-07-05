@@ -1,10 +1,10 @@
-package form_template.deal.software
+package form_template.deal.forward_contracts
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Поставочные срочные сделки, базисным активом которых является иностранная валюта
  */
 
 switch (formDataEvent) {
