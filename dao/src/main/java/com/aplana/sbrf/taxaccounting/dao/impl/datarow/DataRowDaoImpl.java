@@ -295,9 +295,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
 		getJdbcTemplate()
-				.query("select ID from DATA_ROW where TYPE in (?,?) and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
-						new Object[] { TypeFlag.ADD.getKey(),
-								TypeFlag.SAME.getKey(), formDataId,
+				.query("select ID from DATA_ROW where TYPE = ? and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
+						new Object[] { TypeFlag.ADD.getKey(), formDataId,
 								ordStep + ordBegin,
 								ordStep * (dataRows.size()) + ordBegin },
 						new RowCallbackHandler() {
