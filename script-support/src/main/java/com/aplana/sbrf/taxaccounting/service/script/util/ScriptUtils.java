@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,13 +44,13 @@ public final class ScriptUtils {
 	 * @param range диапазон ячеек для суммирования
 	 * @return сумма диапазона
 	 */
-	public static double summ(FormData formData, Range range) {
-		checkNumericColumns(formData, range);
+	public static double summ(FormData formData, List<DataRow<Cell>> dataRows, Range range) {
+		checkNumericColumns(formData, dataRows, range);
 
 		double sum = 0;
-		List<DataRow<Cell>> rows = formData.getDataRows();
+		List<DataRow<Cell>> rows = dataRows;
 		List<Column> cols = formData.getFormColumns();
-		Rect rect = range.getRangeRect(formData);
+		Rect rect = range.getRangeRect(formData, dataRows);
 		for (int i = rect.y1; i <= rect.y2; i++) {
 			for (int j = rect.x1; j <= rect.x2; j++) {
 				BigDecimal value = (BigDecimal) rows.get(i).get(cols.get(j).getAlias());
@@ -80,9 +81,9 @@ public final class ScriptUtils {
 	 * @param range проверяемый диапазон ячеек
 	 * @throws IllegalArgumentException если в диапазоне есть нечисловые столбцы
 	 */
-	static void checkNumericColumns(FormData formData, Range range) {
+	static void checkNumericColumns(FormData formData, List<DataRow<Cell>> dataRows, Range range) {
 		List<Column> cols = formData.getFormColumns();
-		Rect rect = range.getRangeRect(formData);
+		Rect rect = range.getRangeRect(formData, dataRows);
 		for (int j = rect.x1; j <= rect.x2; j++) {
 			Column col = cols.get(j);
 			if (!(col instanceof NumericColumn))
@@ -106,16 +107,16 @@ public final class ScriptUtils {
 	 * @return сумма ячеек
 	 * @throws IllegalArgumentException диапазоны имеют разную размерность
 	 */
-	public static double summIfEquals(FormData formData, Range conditionRange, Object filterValue, Range summRange) {
-		Rect summRect = summRange.getRangeRect(formData);
-		Rect condRect = conditionRange.getRangeRect(formData);
+	public static double summIfEquals(FormData formData, List<DataRow<Cell>> dataRows, Range conditionRange, Object filterValue, Range summRange) {
+		Rect summRect = summRange.getRangeRect(formData, dataRows);
+		Rect condRect = conditionRange.getRangeRect(formData, dataRows);
 		if (!summRect.isSameSize(condRect))
 			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
 		double sum = 0;
-		List<DataRow<Cell>> summRows = formData.getDataRows();
+		List<DataRow<Cell>> summRows = dataRows;
 		List<Column> summCols = formData.getFormColumns();
-		List<DataRow<Cell>> condRows = formData.getDataRows();
+		List<DataRow<Cell>> condRows = dataRows;
 		List<Column> condCols = formData.getFormColumns();
 		for (int i = 0; i < condRect.getHeight(); i++) {
 			for (int j = 0; j < condRect.getWidth(); j++) {
@@ -167,8 +168,8 @@ public final class ScriptUtils {
 	 * @throws IllegalArgumentException указаны неправильные алиасы
 	 *
 	 */
-	public static Cell getCell(FormData formData, String columnAlias, String rowAlias) {
-		DataRow<Cell> row = formData.getDataRow(rowAlias);
+	public static Cell getCell(FormData formData, List<DataRow<Cell>> dataRows,  String columnAlias, String rowAlias) {
+		DataRow<Cell> row = FormDataUtils.getDataRowByAlias(dataRows, rowAlias);
 		if (row != null) {
 			Cell cell = row.getCell(columnAlias);
 			if (cell != null) {
@@ -186,15 +187,15 @@ public final class ScriptUtils {
 	 *	@param toRange диапазон для
 	 *  @throws IllegalArgumentException указаны неправильные диапазоны ячеек
 	 */
-	public static void copyCellValues(FormData fromFrom, FormData toForm, Range fromRange, Range toRange){
-		Rect fromRect = fromRange.getRangeRect(fromFrom);
-		Rect toRect = toRange.getRangeRect(toForm);
+	public static void copyCellValues(FormData fromFrom, List<DataRow<Cell>> fromDataRows,  FormData toForm, List<DataRow<Cell>> toDataRows, Range fromRange, Range toRange){
+		Rect fromRect = fromRange.getRangeRect(fromFrom, fromDataRows);
+		Rect toRect = toRange.getRangeRect(toForm, toDataRows);
 		if (!fromRect.isSameSize(toRect))
 			throw new IllegalArgumentException(NOT_SAME_RANGES);
 
-		List<DataRow<Cell>> fromRows = fromFrom.getDataRows();
+		List<DataRow<Cell>> fromRows = fromDataRows;
 		List<Column> fromCols = fromFrom.getFormColumns();
-		List<DataRow<Cell>> toRows = toForm.getDataRows();
+		List<DataRow<Cell>> toRows = toDataRows;
 		List<Column> toCols = toForm.getFormColumns();
 		for (int i = 0; i < fromRect.getHeight(); i++) {
 			for (int j = 0; j < fromRect.getWidth(); j++) {

@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -27,9 +28,15 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+/**
+ * Реализация ДАО для работы со строками НФ
+ * 
+ * @author sgoryachkin
+ * 
+ */
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
-	
+
 	@Autowired
 	private CellEditableDao cellEditableDao;
 	@Autowired
@@ -147,88 +154,49 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						+ ") and TYPE=:updType", params);
 
 	}
-	
+
 	@Override
 	public void removeRows(FormData fd) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
 
-		getJdbcTemplate().update("delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?", new Object[]{fd.getId(), TypeFlag.ADD.getKey()}); 
-		getJdbcTemplate().update("update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?", new Object[]{TypeFlag.DEL.getKey(), fd.getId(), TypeFlag.SAME.getKey()});		
+		getJdbcTemplate().update(
+				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
+				new Object[] { fd.getId(), TypeFlag.ADD.getKey() });
+		getJdbcTemplate().update(
+				"update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
+				new Object[] { TypeFlag.DEL.getKey(), fd.getId(),
+						TypeFlag.SAME.getKey() });
 	}
-	
+
 	@Override
 	public void saveRows(final FormData fd, final List<DataRow<Cell>> dataRows) {
 		// Полностью чистим временный срез строк.
 		removeRows(fd);
-		
-		if (dataRows.isEmpty()) {
-			return;
-		}
-		
-		// SBRFACCTAX-2201, SBRFACCTAX-2082
-		FormDataUtils.cleanValueOners(dataRows);
-
-		final long formDataId = fd.getId();
-
-		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
-			@Override
-			public void setValues(PreparedStatement ps, int orderIndex)
-					throws SQLException {
-				DataRow<Cell> dr = dataRows.get(orderIndex);
-				String rowAlias = dr.getAlias();
-				ps.setLong(1, fd.getId());
-				ps.setString(2, rowAlias);
-				ps.setBigDecimal(3, BigDecimal.valueOf(orderIndex));
-				ps.setInt(4, TypeFlag.ADD.getKey());
-			}
-
-			@Override
-			public int getBatchSize() {
-				return dataRows.size();
-			}
-		};
-
-		getJdbcTemplate().batchUpdate(
-				"insert into data_row (id, form_data_id, alias, ord, type) values (seq_data_row.nextval, ?, ?, ?, ?)", bpss);
-
-		// Получаем массив идентификаторов строк, индекс записи в массиве
-		// соответствует порядковому номеру строки (меньше на единицу)
-		final List<Long> rowIds = getJdbcTemplate().queryForList(
-				"select ID from DATA_ROW where TYPE in (?) and FORM_DATA_ID = ? order by ORD",
-				new Object[] { TypeFlag.ADD.getKey(), formDataId }, new int[] { Types.NUMERIC, Types.NUMERIC },
-				Long.class);
-
-		Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
-		for (int i = 0; i < rowIds.size(); i ++) {
-			rowIdMap.put(rowIds.get(i), dataRows.get(i));
-		}
-
-		cellValueDao.saveCellValue(rowIdMap);
-		cellStyleDao.saveCellStyle(rowIdMap);
-		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
-		cellEditableDao.saveCellEditable(rowIdMap);
-		
+		// Вставляем строки
+		phisicalInsertRows(fd, dataRows,
+				DataRowDaoImplUtils.DEFAULT_ORDER_STEP,
+				DataRowDaoImplUtils.DEFAULT_ORDER_STEP);
 	}
 
 	@Override
-	public DataRow<Cell> insertRows(FormData fd, int index,
-			List<DataRow<Cell>> rows) {
-		// Получаем значение ORD для текущей (index) и следующей строки
-		// Если строка помечена как ADD, то физическое удаление
-		// Если строка помесена как DELETE, то ничего не делаем
-		// Если строка помечена как SAME, то помечаем как DELETE
-		// TODO Auto-generated method stub
-		return null;
+	public void insertRows(FormData fd, int index, List<DataRow<Cell>> rows) {
+		index--;
+		Long ordBegin = getOrd(fd,
+				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index);
+		if (ordBegin == null) {
+			ordBegin = 0l;
+		}
+		insertRows(fd, index, ordBegin, rows);
 	}
 
 	@Override
-	public DataRow<Cell> insertRowsAfter(FormData fd, DataRow<Cell> afterRow,
+	public void insertRows(FormData fd, DataRow<Cell> afterRow,
 			List<DataRow<Cell>> rows) {
-		// Получаем текущую и следующую строку
-		// TODO Auto-generated method stub
-		return null;
+		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(fd, new TypeFlag[] {
+				TypeFlag.ADD, TypeFlag.SAME }, afterRow.getId());
+		insertRows(fd, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
 	}
 
 	@Override
@@ -241,6 +209,25 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void rollback(FormData fd) {
 		phisicalRemoveRows(fd, TypeFlag.ADD);
 		phisicalUpdateRowsType(fd, TypeFlag.DEL, TypeFlag.SAME);
+	}
+
+	private void insertRows(FormData fd, int index, long ordBegin,
+			List<DataRow<Cell>> rows) {
+
+		Long ordEnd = getOrd(fd,
+				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index + 1);
+		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
+				: DataRowDaoImplUtils
+						.calcOrdStep(ordBegin, ordEnd, rows.size());
+
+		if (ordStep == 0) {
+			// TODO: Реализовать перепаковку п
+			// Слишком маленькие значения ORD. В промежуток нельзя вставить
+			// такое количество строк
+			throw new IllegalAccessError("Необходима перепаковка поля ORD");
+		}
+
+		phisicalInsertRows(fd, rows, ordBegin, ordStep);
 	}
 
 	private void phisicalRemoveRows(FormData fd, TypeFlag type) {
@@ -261,8 +248,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		DataRowMapper dataRowMapper = new DataRowMapper(fd, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
-		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(sql.getFirst(),
-				sql.getSecond(), dataRowMapper);
+		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
+				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082
 		FormDataUtils.setValueOners(dataRows);
 		return dataRows;
@@ -278,29 +265,100 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types)",
 						params);
 	}
-	
-	private BigDecimal getOrd(FormData fd, TypeFlag[] types, int dataRowIndex){
+
+	private void phisicalInsertRows(final FormData fd,
+			final List<DataRow<Cell>> dataRows, final long ordBegin,
+			final long ordStep) {
+
+		if (dataRows.isEmpty()) {
+			return;
+		}
+
+		// SBRFACCTAX-2201, SBRFACCTAX-2082
+		FormDataUtils.cleanValueOners(dataRows);
+
+		final long formDataId = fd.getId();
+
+		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int index)
+					throws SQLException {
+				DataRow<Cell> dr = dataRows.get(index);
+				String rowAlias = dr.getAlias();
+				ps.setLong(1, fd.getId());
+				ps.setString(2, rowAlias);
+				ps.setLong(3, (index + 1) * ordStep + ordBegin);
+				ps.setInt(4, TypeFlag.ADD.getKey());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return dataRows.size();
+			}
+		};
+
+		getJdbcTemplate()
+				.batchUpdate(
+						"insert into data_row (id, form_data_id, alias, ord, type) values (seq_data_row.nextval, ?, ?, ?, ?)",
+						bpss);
+
+		final Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
+		getJdbcTemplate()
+				.query("select ID from DATA_ROW where TYPE in (?,?) and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
+						new Object[] { TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey(), formDataId, ordStep + ordBegin, ordStep * (dataRows.size()) + ordBegin },
+						new RowCallbackHandler() {
+							@Override
+							public void processRow(ResultSet rs)
+									throws SQLException {
+								Long id = rs.getLong("ID");
+								rowIdMap.put(id, dataRows.get(rowIdMap.size()));
+							}
+						});
+
+		cellValueDao.saveCellValue(rowIdMap);
+		cellStyleDao.saveCellStyle(rowIdMap);
+		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
+		cellEditableDao.saveCellEditable(rowIdMap);
+
+	}
+
+	/**
+	 * Получаем значение ORD для строки по индексу
+	 * 
+	 * @param fd
+	 * @param types
+	 * @param dataRowIndex
+	 * @return
+	 */
+	private Long getOrd(FormData fd, TypeFlag[] types, int dataRowIndex) {
 		String sql = "select ORD from (select rownum as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX = :dataRowIndex";
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		params.put("dataRowIndex", dataRowIndex);
-		return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate().queryForList(sql, params, BigDecimal.class));
+		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql,
+				params, Long.class);
+		return list.isEmpty() ? null : DataAccessUtils
+				.requiredSingleResult(list);
 	}
-	
-	private BigDecimal getOrd(FormData fd, TypeFlag[] types, DataRow<Cell> dataRow){
-		String sql = "select ORD from DATA_ROW where ID = :dataRowId and TYPE in (:types) and FORM_DATA_ID=:formDataId";
+
+	private Pair<Long, Integer> getOrdAndIndex(FormData fd, TypeFlag[] types,
+			long dataRowId) {
+		String sql = "select ORD, IDX from (select rownum as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where ID = :dataRowId";
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
-		params.put("dataRowId", fd.getId());
-		return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate().queryForList(sql, params, BigDecimal.class));
+		params.put("dataRowId", dataRowId);
+		return DataAccessUtils
+				.requiredSingleResult(getNamedParameterJdbcTemplate().query(
+						sql, params, new RowMapper<Pair<Long, Integer>>() {
+							@Override
+							public Pair<Long, Integer> mapRow(ResultSet rs,
+									int rowNum) throws SQLException {
+								return new Pair<Long, Integer>(rs
+										.getLong("ORD"), rs.getInt("IDX"));
+							}
+						}));
 	}
-
-
-
-
-	
-	
 
 }

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.script.range;
 import java.io.Serializable;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -38,7 +39,7 @@ public class Range implements Serializable {
 	 * @param rowTo индекс нижней строки
 	 */
 	public Range(String colFromAlias, int rowFrom, String colToAlias, int rowTo) {
-		this.colFromAlias = colFromAlias;
+		this.colFromAlias = colFromAlias; 
 		this.rowFrom = rowFrom;
 		this.colToAlias = colToAlias;
 		this.rowTo = rowTo;
@@ -90,11 +91,11 @@ public class Range implements Serializable {
 	 * @param formData таблица данных
 	 * @return прямоугольник
 	 */
-	public Rect getRangeRect(FormData formData) {
+	public Rect getRangeRect(FormData formData,  List<DataRow<Cell>> dataRows) {
 		int colFrom = getColumnIndex(formData, getColFromAlias());
 		int colTo = getColumnIndex(formData, getColToAlias());
-		if (rowTo >= formData.getDataRows().size())
-			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo, formData.getDataRows().size()));
+		if (rowTo >= dataRows.size())
+			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo, dataRows.size()));
 		return new Rect(colFrom, rowFrom, colTo, rowTo);
 	}
 

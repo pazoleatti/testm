@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -157,6 +158,7 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	}
 	
 	private FormData data;
+	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
 	private FormTemplate formTemplate;
 	private Department department;
 	private ReportPeriod reportPeriod;
@@ -346,8 +348,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 	}
 
 	protected void createDataForTable(){
-		sheet.shiftRows(rowNumber + 1, sheet.getLastRowNum(), data.getDataRows().size() + 2);
-		for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : data.getDataRows()) {
+		sheet.shiftRows(rowNumber + 1, sheet.getLastRowNum(), dataRows.size() + 2);
+		for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
 			Row row = sheet.createRow(++rowNumber);
 			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {

@@ -9,11 +9,13 @@ import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 
 public class DataRowDaoImplUtils {
+	
+	static final int DEFAULT_ORDER_STEP = 100000;
 
 	/**
 	 * Массив содержит названия таблиц со значениями ячеек
 	 */
-	static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
+	public static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
 			"STRING_VALUE", "DATE_VALUE" };
 
 	/**
@@ -53,17 +55,21 @@ public class DataRowDaoImplUtils {
 		}
 	}
 
-	static String getCellValueTableName(Column c) {
+	public static String getCellValueTableName(Column c) {
 		return getCellValueComponent(c, CELL_VALUE_TABLE_NAMES);
 	}
 
 	static CellValueExtractor getCellValueExtractor(Column c) {
 		return getCellValueComponent(c, CELL_VALUE_TABLE_EXTRACTORS);
 	}
-
+	
+	static long calcOrdStep(Long ordBegin, Long ordEnd, int number){
+		return (ordEnd - ordBegin) / (number + 1);
+	}
+	
 	static interface CellValueExtractor {
 		public Object getValue(ResultSet rs, String columnLabel)
 				throws SQLException;
 	}
-
+	
 }
