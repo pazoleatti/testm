@@ -55,7 +55,7 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
+    for (alias in ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'date']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -90,8 +90,8 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'dealDate']) {
+        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate',
+                'count', 'price', 'cost', 'date']) {
             if (row.getCell(alias).value == null) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
@@ -103,8 +103,7 @@ void logicCheck() {
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()
-{
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -116,9 +115,9 @@ void checkNSI()
 void calc() {
     for (row in formData.dataRows) {
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('expensesSum').value
+        row.getCell('price').value = row.getCell('sum').value
         // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('expensesSum').value
+        row.getCell('cost').value = row.getCell('sum').value
         // TODO расчет полей по справочникам
     }
 }

@@ -55,7 +55,8 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
+    for (alias in ['fullName', 'docNum', 'docDate', 'dealNumber', 'dealDate' ,'currencyCode',
+            'countryDealCode','incomeSum','outcomeSum','dealDoneDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -90,21 +91,33 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'dealDate']) {
+        for (alias in ['rowNumber', 'fullName', 'inn','countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber', 'dealDate'
+                , 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']) {
             if (row.getCell(alias).value == null) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }
+
+        if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
+            logger.error('Поля «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
+                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке '+
+                    formData.dataRows.indexOf(row)+' не могут быть одновременно заполнены!')
+        }
+
+        if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
+            logger.error('Одно из полей «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
+                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке ' +
+                    formData.dataRows.indexOf(row)+' должно быть заполнено!')
+        }
     }
+
     checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()
-{
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -116,9 +129,9 @@ void checkNSI()
 void calc() {
     for (row in formData.dataRows) {
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('expensesSum').value
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('expensesSum').value
+        row.getCell('price').value = row.getCell('incomeSum').value!=null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
+        // Расчет поля "Итого"
+        row.getCell('total').value = row.getCell('price').value
         // TODO расчет полей по справочникам
     }
 }

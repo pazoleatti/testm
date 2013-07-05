@@ -55,11 +55,16 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
+    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate' ,'sum', 'dealDoneDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
+
+    row.getCell('count').value = 1
+    row.getCell('price').value = 1
+    row.getCell('total').value = 1
+
     row.getCell('rowNumber').value = formData.dataRows.size()
 }
 /**
@@ -90,11 +95,15 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'dealDate']) {
+        for (alias in ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
+                'dealNumber', 'dealDate' , 'count', 'sum', 'price', 'total', 'dealDoneDate']) {
             if (row.getCell(alias).value == null) {
                 logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
+        }
+
+        if (row.getCell('count').value != 1) {
+            logger.error('В поле «Количество» может  быть указано только  значение «1»!')
         }
     }
     checkNSI()
@@ -103,8 +112,7 @@ void logicCheck() {
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()
-{
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -115,10 +123,12 @@ void checkNSI()
  */
 void calc() {
     for (row in formData.dataRows) {
+        // Расчет поля " Количество"
+        row.getCell('count').value = 1
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('expensesSum').value
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('expensesSum').value
+        row.getCell('price').value = 1
+        // Расчет поля "Итого"
+        row.getCell('total').value = 1
         // TODO расчет полей по справочникам
     }
 }
