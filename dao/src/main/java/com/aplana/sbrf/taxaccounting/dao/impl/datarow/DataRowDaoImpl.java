@@ -3,11 +3,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -16,13 +17,11 @@ import org.springframework.stereotype.Repository;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellEditableDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellSpanInfoDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellStyleDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.datarow.cell.CellValueDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -36,15 +35,6 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
  */
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
-
-	@Autowired
-	private CellEditableDao cellEditableDao;
-	@Autowired
-	private CellValueDao cellValueDao;
-	@Autowired
-	private CellStyleDao cellStyleDao;
-	@Autowired
-	private CellSpanInfoDao cellSpanInfoDao;
 
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
@@ -289,6 +279,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				ps.setString(2, rowAlias);
 				ps.setLong(3, (index + 1) * ordStep + ordBegin);
 				ps.setInt(4, TypeFlag.ADD.getKey());
+				// System.out.println(ps.getResultSet().getObject(0));
 			}
 
 			@Override
@@ -302,23 +293,22 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"insert into data_row (id, form_data_id, alias, ord, type) values (seq_data_row.nextval, ?, ?, ?, ?)",
 						bpss);
 
-		final Map<Long, DataRow<Cell>> rowIdMap = new HashMap<Long, DataRow<Cell>>();
+		final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
 		getJdbcTemplate()
 				.query("select ID from DATA_ROW where TYPE in (?,?) and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
-						new Object[] { TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey(), formDataId, ordStep + ordBegin, ordStep * (dataRows.size()) + ordBegin },
+						new Object[] { TypeFlag.ADD.getKey(),
+								TypeFlag.SAME.getKey(), formDataId,
+								ordStep + ordBegin,
+								ordStep * (dataRows.size()) + ordBegin },
 						new RowCallbackHandler() {
 							@Override
 							public void processRow(ResultSet rs)
 									throws SQLException {
-								Long id = rs.getLong("ID");
-								rowIdMap.put(id, dataRows.get(rowIdMap.size()));
+								iterator.next().setId(rs.getLong("ID"));
 							}
 						});
 
-		cellValueDao.saveCellValue(rowIdMap);
-		cellStyleDao.saveCellStyle(rowIdMap);
-		cellSpanInfoDao.saveCellSpanInfo(rowIdMap);
-		cellEditableDao.saveCellEditable(rowIdMap);
+		batchInsertCells(dataRows);
 
 	}
 
@@ -359,6 +349,94 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 										.getLong("ORD"), rs.getInt("IDX"));
 							}
 						}));
+	}
+
+	/**
+	 * Метод сохраняет параметры Cell
+	 * 
+	 * @param dataRows
+	 */
+	private void batchInsertCells(List<DataRow<Cell>> dataRows) {
+
+		// Values
+		Map<String, List<Object[]>> valueParamsMap = new HashMap<String, List<Object[]>>();
+		for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
+			valueParamsMap.put(tableName, new ArrayList<Object[]>());
+		}
+		// SpanInfo
+		List<Object[]> spanInfoParams = new ArrayList<Object[]>();
+		// Editable
+		List<Object[]> editableParams = new ArrayList<Object[]>();
+		// Styles
+		List<Object[]> stylesParams = new ArrayList<Object[]>();
+
+		for (DataRow<Cell> dataRow : dataRows) {
+			for (String alias : dataRow.keySet()) {
+				Cell cell = dataRow.getCell(alias);
+				Column c = cell.getColumn();
+				Object val = cell.getValue();
+				// Values
+				if (val != null) {
+					String tableName = DataRowDaoImplUtils
+							.getCellValueTableName(c);
+					List<Object[]> batchList = valueParamsMap.get(tableName);
+					batchList.add(new Object[] { dataRow.getId(), c.getId(),
+							val });
+				}
+				// Span Info
+				if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
+					spanInfoParams.add(new Object[] { dataRow.getId(),
+							c.getId(), cell.getColSpan(), cell.getRowSpan() });
+				}
+				// Editable
+				if (cell.isEditable()) {
+					editableParams.add(new Object[] { dataRow.getId(),
+							c.getId() });
+				}
+				// Styles
+				FormStyle style = cell.getStyle();
+				if (style != null) {
+					stylesParams.add(new Object[] { dataRow.getId(), c.getId(),
+							style.getId() });
+				}
+
+			}
+		}
+
+		// Values
+		for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
+			List<Object[]> batchList = valueParamsMap.get(tableName);
+			if (!batchList.isEmpty()) {
+				getJdbcTemplate()
+						.batchUpdate(
+								"insert into "
+										+ tableName
+										+ " (row_id, column_id, value) values (?, ?, ?)",
+								valueParamsMap.get(tableName));
+			}
+		}
+		// Span Info
+		if (!spanInfoParams.isEmpty()) {
+			getJdbcTemplate()
+					.batchUpdate(
+							"insert into cell_span_info (row_id, column_id, colspan, rowspan) values (?, ?, ?, ?)",
+							spanInfoParams);
+		}
+		// Editable
+		if (!editableParams.isEmpty()) {
+			getJdbcTemplate()
+					.batchUpdate(
+							"insert into cell_editable (row_id, column_id) values (?, ?)",
+							editableParams);
+		}
+		// Styles
+		if (!stylesParams.isEmpty()) {
+			getJdbcTemplate()
+					.batchUpdate(
+							"insert into cell_style (row_id, column_id, style_id) values (?, ?, ?)",
+							stylesParams);
+		}
+
 	}
 
 }

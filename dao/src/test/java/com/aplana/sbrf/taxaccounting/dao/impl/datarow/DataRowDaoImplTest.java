@@ -48,6 +48,9 @@ public class DataRowDaoImplTest {
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
+		// Editable
+		dr.getCell("stringColumn").setEditable(true);
+		dr.getCell("numericColumn").setEditable(false);
 
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias0");
@@ -56,6 +59,9 @@ public class DataRowDaoImplTest {
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
+		// Span Info
+		dr.getCell("stringColumn").setColSpan(2);
+		dr.getCell("numericColumn").setRowSpan(2);
 		
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias1");
@@ -64,7 +70,9 @@ public class DataRowDaoImplTest {
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
-		
+		// Style
+		dr.getCell("stringColumn").setStyleAlias(fd.getFormStyles().get(0).getAlias());
+
 		dr = fd.createDataRow();
 		dr.setAlias("newAlias2");
 		dr.put("stringColumn", "4");
