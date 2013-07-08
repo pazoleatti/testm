@@ -33,8 +33,17 @@ public class RefBookDaoTest {
 	RefBookDao refBookDao;
 
 	@Test
-	public void testGet() {
-		RefBook refBook = refBookDao.get(1L);
+	public void testGet1() {
+		RefBook refBook1 = refBookDao.get(1L);
+		Assert.assertEquals(1, refBook1.getId().longValue());
+		Assert.assertEquals(3, refBook1.getAttributes().size());
+	}
+
+	@Test
+	public void testGet2() {
+		RefBook refBook2 = refBookDao.get(2L);
+		Assert.assertEquals(2, refBook2.getId().longValue());
+		Assert.assertEquals(1, refBook2.getAttributes().size());
 	}
 
 }

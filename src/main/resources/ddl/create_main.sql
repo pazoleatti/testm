@@ -545,12 +545,12 @@ create table form_data_signer (
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
 
-comment on table form_data_signer is 'подписанты налоговых форм';
-comment on column form_data_signer.id is 'идентфикатор записи (первичный ключ)';
-comment on column form_data_signer.form_data_id is 'идентификатор налоговой формы';
+comment on table form_data_signer is 'Подписанты налоговых форм';
+comment on column form_data_signer.id is 'Идентфикатор записи (первичный ключ)';
+comment on column form_data_signer.form_data_id is 'Идентификатор налоговой формы';
 comment on column form_data_signer.name is 'ФИО';
-comment on column form_data_signer.position is 'должность';
-comment on column form_data_signer.ord is 'номер подписанта по порядку';
+comment on column form_data_signer.position is 'Должность';
+comment on column form_data_signer.ord is 'Номер подписанта по порядку';
 
 create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -1004,9 +1004,11 @@ alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (alias <> 'id');
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
-alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and precision not null);
+alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
+alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book (id);
