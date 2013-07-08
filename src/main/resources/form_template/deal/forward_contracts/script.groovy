@@ -20,7 +20,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-       // logicCheck()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -48,8 +48,8 @@ switch (formDataEvent) {
 
 void deleteRow() {
     if (currentDataRow != null) {
-        recalcRowNum()
         formData.dataRows.remove(currentDataRow)
+        recalcRowNum()
     }
 }
 
@@ -185,12 +185,11 @@ def calcItog(int i) {
     newRow.getCell('fullName').value = 'Подитог:'
 
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fullName').colSpan = 9
+    newRow.getCell('fullName').colSpan = 11
 
     // Расчеты подитоговых значений
     BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
     for (int j = i; j >= 0 && formData.dataRows.get(j).getAlias() == null; j--) {
-        logger.info('j = '+j)
         row = formData.dataRows.get(j)
 
         incomeSum = row.getCell('incomeSum').value
