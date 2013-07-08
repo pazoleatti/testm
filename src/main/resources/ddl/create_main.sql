@@ -465,7 +465,7 @@ create table declaration_template (
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
-alter table declaration_template add constraint declaration_template_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -938,7 +938,7 @@ alter table log_system add constraint log_system_fk_department_id foreign key (d
 alter table log_system add constraint log_system_fk_report_period_id foreign key (report_period_id) references report_period(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type (id);
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
-alter table log_system add constraint log_system_fk_user_department_id foreign key (user_department_id) references department (id);
+alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department (id);
 
 comment on table log_system is  'Системный журнал';
 
