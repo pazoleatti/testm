@@ -56,10 +56,10 @@ public class RefBookValue implements Serializable {
 		return null;
 	}
 
-	private Object getValue() {
-		return value;
-	}
-
+	/**
+	 * Установка значения. При этом происходит проверка на тип значения.
+	 * @param value устанавливаемое значение
+	 */
 	private void setValue(Object value) {
 		if (value == null ||
 				(attributeType == RefBookAttributeType.NUMBER && value instanceof Number) ||
