@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,12 +13,15 @@ import java.util.Map;
 
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -64,7 +69,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void updateRows(FormData fd, List<DataRow<Cell>> rows) {
-		// TODO Auto-generated method stub
+		// Если строка помечена как ADD, необходимо обновление
+		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
+		// тем же значением ORD
+		List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
+		List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
+		List<Long> forCreateOrder = new ArrayList<Long>();
+		for (DataRow<Cell> dataRow : rows) {
+			Long id = dataRow.getId();
+			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd,
+					new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, id);
+			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
+				forUpdate.add(dataRow);
+			} else {
+				forCreate.add(dataRow);
+				forCreateOrder.add(typeAndOrd.getSecond());
+			}
+		}
+
+		batchRemoveCells(forUpdate);
+		batchInsertCells(forUpdate);
+
+		phisicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
+		phisicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
 
@@ -167,7 +194,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// Вставляем строки
 		phisicalInsertRows(fd, dataRows,
 				DataRowDaoImplUtils.DEFAULT_ORDER_STEP,
-				DataRowDaoImplUtils.DEFAULT_ORDER_STEP);
+				DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
 	}
 
 	@Override
@@ -217,7 +244,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			throw new IllegalAccessError("Необходима перепаковка поля ORD");
 		}
 
-		phisicalInsertRows(fd, rows, ordBegin, ordStep);
+		phisicalInsertRows(fd, rows, ordBegin, ordStep, null);
 	}
 
 	private void phisicalRemoveRows(FormData fd, TypeFlag type) {
@@ -231,6 +258,30 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		getJdbcTemplate()
 				.update("update DATA_ROW set TYPE = ? where FORM_DATA_ID = ? and TYPE = ?",
 						toType.getKey(), fd.getId(), fromType.getKey());
+	}
+
+	private void phisicalUpdateRowsType(FormData fd,
+			final List<DataRow<Cell>> dataRows, final TypeFlag toType) {
+
+		if (!dataRows.isEmpty()) {
+
+			getJdbcTemplate().batchUpdate(
+					"update DATA_ROW set TYPE = ? where ID = ?",
+					new BatchPreparedStatementSetter() {
+
+						@Override
+						public void setValues(PreparedStatement ps, int i)
+								throws SQLException {
+							ps.setInt(1, toType.getKey());
+							ps.setLong(2, dataRows.get(i).getId());
+						}
+
+						@Override
+						public int getBatchSize() {
+							return dataRows.size();
+						}
+					});
+		}
 	}
 
 	private List<DataRow<Cell>> phisicalGetRows(FormData fd, TypeFlag[] types,
@@ -257,8 +308,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	private void phisicalInsertRows(final FormData fd,
-			final List<DataRow<Cell>> dataRows, final long ordBegin,
-			final long ordStep) {
+			final List<DataRow<Cell>> dataRows, final Long ordBegin,
+			final Long ordStep, final List<Long> orders) {
 
 		if (dataRows.isEmpty()) {
 			return;
@@ -266,8 +317,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		// SBRFACCTAX-2201, SBRFACCTAX-2082
 		FormDataUtils.cleanValueOners(dataRows);
-
-		final long formDataId = fd.getId();
 
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
@@ -277,9 +326,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				String rowAlias = dr.getAlias();
 				ps.setLong(1, fd.getId());
 				ps.setString(2, rowAlias);
-				ps.setLong(3, (index + 1) * ordStep + ordBegin);
+				Long order = null;
+				if (orders != null) {
+					order = orders.get(index);
+				} else {
+					order = (index + 1) * ordStep + ordBegin;
+				}
+				ps.setLong(3, order);
 				ps.setInt(4, TypeFlag.ADD.getKey());
-				// System.out.println(ps.getResultSet().getObject(0));
 			}
 
 			@Override
@@ -288,24 +342,26 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			}
 		};
 
-		getJdbcTemplate()
-				.batchUpdate(
-						"insert into data_row (id, form_data_id, alias, ord, type) values (seq_data_row.nextval, ?, ?, ?, ?)",
-						bpss);
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		SqlUtils.batchUpdate(getJdbcTemplate(), new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con)
+					throws SQLException {
+				return con
+						.prepareStatement(
+								"insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (SEQ_DATA_ROW.NEXTVAL, ?, ?, ?, ?)",
+								new String[] { "ID" });
+			}
+		}, bpss, generatedKeyHolder);
 
+		List<Map<String, Object>> keysList = generatedKeyHolder.getKeyList();
+		if (keysList.size() != dataRows.size()) {
+			throw new IllegalStateException();
+		}
 		final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
-		getJdbcTemplate()
-				.query("select ID from DATA_ROW where TYPE = ? and FORM_DATA_ID = ? and ORD between ? and ? order by ORD  ",
-						new Object[] { TypeFlag.ADD.getKey(), formDataId,
-								ordStep + ordBegin,
-								ordStep * (dataRows.size()) + ordBegin },
-						new RowCallbackHandler() {
-							@Override
-							public void processRow(ResultSet rs)
-									throws SQLException {
-								iterator.next().setId(rs.getLong("ID"));
-							}
-						});
+		for (Map<String, Object> map : keysList) {
+			iterator.next().setId(((BigDecimal) map.get("ID")).longValue());
+		}
 
 		batchInsertCells(dataRows);
 
@@ -348,6 +404,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 										.getLong("ORD"), rs.getInt("IDX"));
 							}
 						}));
+	}
+
+	private Pair<Integer, Long> getTypeAndOrdById(FormData fd,
+			TypeFlag[] types, long dataRowId) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", fd.getId());
+		params.put("types", TypeFlag.rtsToKeys(types));
+		params.put("dataRowId", dataRowId);
+
+		return DataAccessUtils
+				.requiredSingleResult(getNamedParameterJdbcTemplate()
+						.query("select TYPE, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and ID = :dataRowId",
+								params, new RowMapper<Pair<Integer, Long>>() {
+
+									@Override
+									public Pair<Integer, Long> mapRow(
+											ResultSet rs, int rowNum)
+											throws SQLException {
+										return new Pair<Integer, Long>(rs
+												.getInt("TYPE"), rs
+												.getLong("ORD"));
+									}
+								}));
 	}
 
 	/**
@@ -436,6 +515,35 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 							stylesParams);
 		}
 
+	}
+
+	private void batchRemoveCells(final List<DataRow<Cell>> dataRows) {
+		if (!dataRows.isEmpty()) {
+			BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
+
+				@Override
+				public void setValues(PreparedStatement ps, int i)
+						throws SQLException {
+					ps.setLong(1, dataRows.get(i).getId());
+				}
+
+				@Override
+				public int getBatchSize() {
+					return dataRows.size();
+				}
+			};
+
+			for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
+				getJdbcTemplate().batchUpdate(
+						"delete from " + tableName + " where row_id = ?", bpss);
+			}
+			getJdbcTemplate().batchUpdate(
+					"delete from cell_span_info where row_id = ?", bpss);
+			getJdbcTemplate().batchUpdate(
+					"delete from cell_editable where row_id = ?", bpss);
+			getJdbcTemplate().batchUpdate(
+					"delete from cell_style where row_id = ?", bpss);
+		}
 	}
 
 }
