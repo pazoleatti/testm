@@ -11,9 +11,21 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK:
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         allCheck()
         break
     case FormDataEvent.CALCULATE:
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         deleteAllStatic()
         sort()
         calc()
@@ -30,10 +42,22 @@ switch (formDataEvent) {
         break
     // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         allCheck()
         break
     // обобщить
     case FormDataEvent.COMPOSE :
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         consolidation()
         deleteAllStatic()
         sort()
@@ -41,11 +65,6 @@ switch (formDataEvent) {
         addAllStatic()
         allCheck()
         break
-}
-
-
-void log(String message, Object... args) {
-    logger.warn(message, args)
 }
 
 // графа 1  - число  number № пп
@@ -70,12 +89,6 @@ void log(String message, Object... args) {
  * 6.11.2.4.1   Логические проверки
  */
 void logicalCheck() {
-    formPrev
-    // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
-        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-        return
-    }
 
     for (DataRow row in formData.dataRows) {
         if (row.getAlias() == null) {
@@ -483,12 +496,6 @@ DataRow<Cell> getRow(int i) {
  */
 
 void calc() {
-    formPrev
-    // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-    if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
-        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-        return
-    }
     for (row in formData.dataRows) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
@@ -775,7 +782,6 @@ FormData getFormPrev() {
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        FormDataService.test()
         formPrev = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
     }
     return formPrev
