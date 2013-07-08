@@ -20,12 +20,12 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.CALCULATE:
-        formPrev
-        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
-            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-            return
-        }
+//        formPrev
+//        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+//        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+//            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+//            return
+//        }
         deleteAllStatic()
         sort()
         calc()
@@ -151,15 +151,8 @@ void logicalCheck() {
             }
 
             // LC Проверка на заполнение поля «<Наименование поля>»
-            // @FIXME ниже production версия кода, сейчаз часть проверок отключим чтобы тестировать
-//            for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-//                    'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation']) {
-//                if (row.getCell(alias).value == null) {
-//                    setError(row.getCell(alias).column)
-//                }
-//            }
             for (alias in ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
-                    'reserveCalcValue', 'reserveCreation']) {
+                    'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']) {
                 if (row.getCell(alias).value == null) {
                     setError(row.getCell(alias).column)
                 }
@@ -197,8 +190,6 @@ void logicalCheck() {
 
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    log("calc = " + value.get(check).toString())
-                    log("row = " + row.getCell(check).value.toString())
                     logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
                 }
             }
@@ -561,6 +552,7 @@ def calc11(DataRow row) {
     if (row.currency == 'RUR') {
         return null
     }
+    return row.marketQuotation
 }
 
 /**
@@ -571,6 +563,7 @@ def calc12(DataRow row) {
     if (row.currency == 'RUR') {
         return null
     }
+    return row.rubCourse
 }
 
 /**
@@ -578,6 +571,7 @@ def calc12(DataRow row) {
  * @author ivildanov
  */
 def calc13(DataRow row) {
+    // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2995
     if (row.marketQuotation != null && row.rubCourse != null) {
         return round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
     }
@@ -722,50 +716,38 @@ void addNewRowwarnrmData() {
     if (formData.dataRows.size() > 0) {
         DataRow<Cell> selectRow
         // Форма не пустая
-        log("Форма не пустая")
-        log("size = " + formData.dataRows.size())
         if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
             // Значит выбрал строку куда добавлять
-            log("Строка вставки выбрана")
-            log("indexOf = " + formData.dataRows.indexOf(currentDataRow))
             selectRow = currentDataRow
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
-            log("Строка вставки не выбрана, поставим в конец формы")
             selectRow = formData.dataRows.get(formData.dataRows.size() - 1) // Вставим в конец
         }
 
         int indexSelected = formData.dataRows.indexOf(selectRow)
-        log("indexSelected = " + indexSelected.toString())
 
         // Определим индекс для выбранного места
         if (selectRow.getAlias() == null) {
             // Выбрана строка не итого
-            log("Выбрана строка не итого")
             index = indexSelected // Поставим на то место новую строку
         } else {
             // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-            log("Выбрана строка итого")
 
             for (index = indexSelected; index >= 0; index--) {
                 log("loop index = " + index.toString())
                 if (formData.dataRows.get(index).getAlias() == null) {
-                    log("Нашел строку отличную от итого")
                     index++
                     break
                 }
             }
             if (index < 0) {
                 // Значит выше строки итого нет строк, добавим новую в начало
-                log("выше строки итого нет строк")
                 index = 0
             }
-            log("result index = " + index.toString())
         }
     } else {
         // Форма пустая поэтому поставим строку в начало
-        log("Форма пустая поэтому поставим строку в начало")
         index = 0
     }
     formData.dataRows.add(index, newRow)
