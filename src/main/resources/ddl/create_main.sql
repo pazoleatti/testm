@@ -547,12 +547,12 @@ create table form_data_signer (
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
 
-comment on table form_data_signer is 'подписанты налоговых форм';
-comment on column form_data_signer.id is 'идентфикатор записи (первичный ключ)';
-comment on column form_data_signer.form_data_id is 'идентификатор налоговой формы';
+comment on table form_data_signer is 'Подписанты налоговых форм';
+comment on column form_data_signer.id is 'Идентфикатор записи (первичный ключ)';
+comment on column form_data_signer.form_data_id is 'Идентификатор налоговой формы';
 comment on column form_data_signer.name is 'ФИО';
-comment on column form_data_signer.position is 'должность';
-comment on column form_data_signer.ord is 'номер подписанта по порядку';
+comment on column form_data_signer.position is 'Должность';
+comment on column form_data_signer.ord is 'Номер подписанта по порядку';
 
 create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -977,3 +977,102 @@ comment on column blob_data.creation_date is 'Дата создания';
 comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
 comment on column blob_data.data_size is 'Размер файла в байтах';
 ------------------------------------------------------------------------------------------------------
+create table ref_book (
+  id number(9,0) not null,
+  name varchar2(200) not null
+);
+
+alter table ref_book add constraint ref_book_pk primary key (id);
+
+comment on table ref_book is 'Справочник';
+comment on column ref_book.id is 'Уникальный идентификатор';
+comment on column ref_book.name is 'Название справочника';
+------------------------------------------------------------------------------------------------------
+create table ref_book_attribute (
+  id number(9) not null,
+  ref_book_id number(9) not null,
+  name varchar2(200) not null,
+  alias varchar2(30) not null,
+  type number(1) not null,
+  ord number(9) not null,
+  reference_id number(9),
+  attribute_id number(9),
+  visible number(1) default 1 not null,
+  precision number(2),
+  width number(9) default 15 not null
+);
+
+alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
+
+alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
+alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (alias <> 'id');
+alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
+alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
+alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
+alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
+
+alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book (id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+
+comment on table ref_book_attribute is 'Атрибут справочника';
+comment on column ref_book_attribute.id is 'Уникальный идентификатор';
+comment on column ref_book_attribute.ref_book_id is 'Ссылка на справочник';
+comment on column ref_book_attribute.name is 'Название';
+comment on column ref_book_attribute.alias is 'Псевдоним. Используется для обращения из скриптов бизнес-логики';
+comment on column ref_book_attribute.type is 'Типа атрибута (1-строка; 2-число; 3-дата-время; 4-ссылка)';
+comment on column ref_book_attribute.ord is 'Порядок следования';
+comment on column ref_book_attribute.reference_id is 'Ссылка на справочник, на элемент которого ссылаемся. Только для атрибутов-ссылок';
+comment on column ref_book_attribute.attribute_id is 'Код отображаемого атрибута. Только для атрибутов-ссылок';
+comment on column ref_book_attribute.visible is 'Признак видимости';
+comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
+comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
+------------------------------------------------------------------------------------------------------
+create table ref_book_record (
+  id number(9) not null,
+  record_id number(9) not null,
+  ref_book_id number(9) not null,
+  version date not null,
+  status number(1) default 0 not null
+);
+
+alter table ref_book_record add constraint ref_book_record_pk primary key (id);
+
+alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1));
+
+alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+
+create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
+
+comment on table ref_book_record is 'Запись справочника';
+comment on column ref_book_record.id is 'Уникальный идентификатор';
+comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
+comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
+------------------------------------------------------------------------------------------------------
+create table ref_book_value (
+  record_id number(9) not null,
+  attribute_id number(9) not null,
+  string_value varchar2(4000),
+  number_value number(27,10),
+  date_value date,
+  reference_value number(9)
+);
+
+alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
+
+alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
+alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_value add constraint ref_book_value_fk_reference foreign key (reference_value) references ref_book_record (id);
+
+comment on table ref_book_value is 'Значение записи справочника';
+comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
+comment on column ref_book_value.attribute_id is 'Ссылка на атрибут справочника';
+comment on column ref_book_value.string_value is 'Строковое значение';
+comment on column ref_book_value.number_value is 'Численное значение';
+comment on column ref_book_value.date_value is 'Значение даты';
+comment on column ref_book_value.reference_value is 'Значение ссылки';
+------------------------------------------------------------------------------------------------------
+
