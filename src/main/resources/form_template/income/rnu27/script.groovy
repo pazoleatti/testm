@@ -20,12 +20,12 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.CALCULATE:
-//        formPrev
-//        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
-//        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
-//            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-//            return
-//        }
+        formPrev
+        // Проверка: Форма РНУ-27 предыдущего отчетного периода существует и находится в статусе «Принята»
+        if (formPrev == null || formPrev.state != WorkflowState.ACCEPTED) {
+            logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+            return
+        }
         deleteAllStatic()
         sort()
         calc()
