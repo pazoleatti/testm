@@ -1,3 +1,5 @@
+package form_template.income.output3
+
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -13,8 +15,8 @@ switch (formDataEvent) {
         checkDecl()
         break
     case FormDataEvent.CALCULATE:
-        logicCheck()
         calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -42,7 +44,7 @@ switch (formDataEvent) {
 }
 void calc() {
     for(DataRow row in formData.dataRows) {
-        row.okatoCode = 45293554000
+        row.okatoCode = "45293554000"
         if (row.paymentType == '1') {
             row.budgetClassificationCode = '18210101040011000110'
         }
