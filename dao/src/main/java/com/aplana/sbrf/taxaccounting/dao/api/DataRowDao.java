@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
@@ -67,12 +68,13 @@ public interface DataRowDao {
 	int getSize(FormData fd, DataRowFilter filter);
 
 	/**
-	 * Обновляет строки НФ
+	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
+	 * При этом поле id у DataRow может быть обновлено.
 	 * 
 	 * @param fd
 	 * @param row
 	 */
-	void updateRows(FormData fd, List<DataRow<Cell>> rows);
+	void updateRows(FormData fd, Collection<DataRow<Cell>> rows);
 
 	/**
 	 * Удалет строки. При этом используется иденитфикатор DataRow.id 
