@@ -11,7 +11,7 @@ import java.util.List;
  * @author dsultanbekov
  * @param <T> - тип запрашиваемых записей
  */
-public class PaginatedSearchResult<T extends Serializable> {
+public class PaginatedSearchResult<T extends Serializable> implements Serializable{
 	List<T> records;
 	long totalRecordCount;
 	

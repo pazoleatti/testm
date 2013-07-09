@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.google.gwt.dom.client.TableCellElement;
@@ -17,13 +18,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.NoSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
@@ -36,10 +34,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
 
+	private MyDataProvider dataProvider = new MyDataProvider();
+
 	@UiField
 	DockLayoutPanel dockPanel;
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
+	@UiField
+	FlexiblePager pager = new FlexiblePager();
 	@UiField
 	Button addRowButton;
 	@UiField
@@ -117,7 +119,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			@Override
 			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
 				if ("mouseover".equals(event.getNativeEvent().getType())) {
-					TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+					long index = (event.getIndex() - (pager.getPage() * formDataTable.getPageSize()));
+					TableCellElement cellElement = formDataTable.getRowElement((int) index).getCells().getItem(event.getColumn());
 					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
 						cellElement.removeAttribute("title");
 					} else {
@@ -126,6 +129,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
+		pager.setDisplay(formDataTable);
 
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
@@ -180,15 +184,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void setRowsData(List<DataRow<Cell>> rowsData) {
-		if (rowsData != null) {
-			formDataTable.setRowCount(rowsData.size());
-			formDataTable.setRowData(rowsData);
-		} else {
-			formDataTable.setRowCount(0);
-			formDataTable.setRowData(new ArrayList<DataRow<Cell>>(0));
-		}
-		formDataTable.redraw();
+	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
+		formDataTable.setRowCount(totalCount);
+		formDataTable.setRowData(start, rowsData);
 	}
 
 	@Override
@@ -438,6 +436,32 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public boolean getCheckedColumnsClicked() {
 		return showCheckedColumns.getValue();
+	}
+
+	@Override
+	public void assignDataProvider(int pageSize) {
+		formDataTable.setPageSize(pageSize);
+		dataProvider.addDataDisplay(formDataTable);
+	}
+
+	@Override
+	public void updateData() {
+		dataProvider.update();
+	}
+
+	private class MyDataProvider extends AsyncDataProvider<DataRow<Cell>> {
+
+		public void update() {
+			for (HasData<DataRow<Cell>> display: getDataDisplays()) {
+				onRangeChanged(display);
+			}
+		}
+
+		@Override
+		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
+			final Range range = display.getVisibleRange();
+			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+		}
 	}
 
 }
