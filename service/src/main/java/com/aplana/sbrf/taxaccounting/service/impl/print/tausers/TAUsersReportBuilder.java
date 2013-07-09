@@ -26,12 +26,12 @@ public class TAUsersReportBuilder extends AbstractXlsxReportBuilder {
     private int rowNumber = 5;
     private int cellNumber = 0;
 
-    private String FIRST_COLUMN = "Логин";
-    private String SECOND_COLUMN = "Имя";
-    private String THIRD_COLUMN = "Департамент";
-    private String FOURTH_COLUMN = "Активность";
-    private String FIFTH_COLUMN = "Почта";
-    private String SIXTH_COLUMN = "Роль";
+    private static final String FIRST_COLUMN = "Логин";
+    private static final String SECOND_COLUMN = "Имя";
+    private static final String THIRD_COLUMN = "Департамент";
+    private static final String FOURTH_COLUMN = "Активность";
+    private static final String FIFTH_COLUMN = "Почта";
+    private static final String SIXTH_COLUMN = "Роль";
 
 
     public TAUsersReportBuilder(List<TAUserFull> taUserList) {

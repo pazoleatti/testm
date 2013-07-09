@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.cache;
 
-public class CacheConstants {
+public final class CacheConstants {
 	
 	private CacheConstants(){	
 	}

@@ -28,22 +28,22 @@ public interface BlobDataService {
 
     /**
      * Удаление записи.
-     * @param blob_id
+     * @param blobId
      */
-    void delete(String blob_id);
+    void delete(String blobId);
 
     /**
      * Обновление записи в базе
-     * @param blob_id
+     * @param blobId
      * @param is
      */
-    void save(String blob_id, InputStream is);
+    void save(String blobId, InputStream is);
 
     /**
      * ПОлучение данных из фйалового хранилища
      *
-     * @param blob_id
+     * @param blobId
      * @return
      */
-    BlobData get(String blob_id);
+    BlobData get(String blobId);
 }

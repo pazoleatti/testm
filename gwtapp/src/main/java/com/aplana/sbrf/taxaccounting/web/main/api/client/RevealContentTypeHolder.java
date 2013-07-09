@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 
-public class RevealContentTypeHolder {
+public final class RevealContentTypeHolder {
 	
 	private RevealContentTypeHolder(){
 		super();

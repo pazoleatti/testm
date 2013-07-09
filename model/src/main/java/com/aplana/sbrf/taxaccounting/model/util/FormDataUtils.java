@@ -20,7 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
  * @author sgoryachkin
  *
  */
-public class FormDataUtils {
+public final class FormDataUtils {
 	
 	private FormDataUtils(){	
 	}
