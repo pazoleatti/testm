@@ -16,7 +16,7 @@ import org.apache.pdfbox.util.ImageIOUtil;
  * @author sgoryachkin
  * 
  */
-public class PDFImageUtils {
+public final class PDFImageUtils {
 
 	private PDFImageUtils() {
 	}

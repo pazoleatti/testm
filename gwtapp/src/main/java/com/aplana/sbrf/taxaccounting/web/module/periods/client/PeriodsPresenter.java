@@ -44,10 +44,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	private final DispatchAsync dispatcher;
 	protected final OpenDialogPresenter openDialogPresenter;
 	private List<Department> departments;
-	private final TaPlaceManager placeManager;
 	private List<DictionaryTaxPeriod> dictionaryTaxPeriods;
-	private long declarationId;
-	private String taxName;
 
 	@Inject
 	public PeriodsPresenter(final EventBus eventBus, final MyView view,
@@ -56,7 +53,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.openDialogPresenter = openDialogPresenter;
-		this.placeManager = (TaPlaceManager) placeManager;
 		getView().setUiHandlers(this);
 	}
 
@@ -91,9 +87,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				.defaultCallback(new AbstractCallback<ClosePeriodResult>() {
 					@Override
 					public void onSuccess(ClosePeriodResult result) {
-						System.out.println("Close: " + result);
-
-
 					}
 				}, PeriodsPresenter.this)
 		);

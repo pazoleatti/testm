@@ -42,7 +42,7 @@ public class DeclarationTemplateController {
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		
-		String fileName = "declarationTemplate_" + declarationTemplateId + ".dect";
+		String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
 		resp.setContentType("application/dect");
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		resp.setCharacterEncoding("UTF-8");
@@ -58,7 +58,8 @@ public class DeclarationTemplateController {
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
-		declarationTemplateImpexService.importDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
+		declarationTemplateImpexService.importDeclarationTemplate
+				(securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
 	}
 

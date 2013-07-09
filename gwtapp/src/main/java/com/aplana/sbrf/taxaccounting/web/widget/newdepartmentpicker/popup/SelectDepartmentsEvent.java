@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class SelectDepartmentsEvent extends GwtEvent<SelectDepartmentsEventHandler> {
 
-	public static Type<SelectDepartmentsEventHandler> TYPE = new Type<SelectDepartmentsEventHandler>();
+	public static final Type<SelectDepartmentsEventHandler> TYPE = new Type<SelectDepartmentsEventHandler>();
 
 	private final Map<String, Integer> selectedItems;
 

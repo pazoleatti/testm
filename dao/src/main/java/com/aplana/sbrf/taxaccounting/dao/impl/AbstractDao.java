@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 /**
  * Абстрактный класс, позволяющий делать автовайринг с DataSource'ом
- * и содержащий вспомогательные методы, востребованные насле
+ * и содержащий вспомогательные методы, востребованные наследниками
  */
 public abstract class AbstractDao {
 	protected Log logger = LogFactory.getLog(getClass());

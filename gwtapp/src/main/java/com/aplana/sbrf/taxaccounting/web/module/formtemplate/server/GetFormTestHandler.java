@@ -27,8 +27,7 @@ public class GetFormTestHandler extends AbstractActionHandler<GetFormTestAction,
     @Override
     public GetFormTestResult execute(GetFormTestAction action, ExecutionContext executionContext) throws ActionException {
         formTemplateService.executeTestScript(action.getFormTemplate());
-        GetFormTestResult result = new GetFormTestResult();
-        return result;
+        return new GetFormTestResult();
     }
 
     @Override

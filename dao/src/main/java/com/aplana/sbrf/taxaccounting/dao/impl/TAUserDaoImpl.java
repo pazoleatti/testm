@@ -251,8 +251,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Override
 	public List<Integer> getUserIds() {
 		try {
-			List<Integer> result = getJdbcTemplate().queryForList("select id from sec_user", Integer.class);
-			return result;
+			return getJdbcTemplate().queryForList("select id from sec_user", Integer.class);
 		} catch (DataAccessException e) {
 			throw new DaoException("Ошибка при получении пользователей. ");
 		}

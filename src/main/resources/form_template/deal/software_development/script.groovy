@@ -1,8 +1,11 @@
-import com.aplana.sbrf.taxaccounting.model.FormData
+package form_template.deal.software_development
+
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
+
 /**
- * 5.2.3 Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ *
+ * похож на  trademark (Предоставление права пользования товарным знаком)
  *
  * @author Stanislav Yasinskiy
  */
@@ -48,14 +51,14 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNumber').value = i++
     }
 }
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'transactionDate']) {
+    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -67,8 +70,7 @@ void addRow() {
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    // TODO
-    FormData findForm = null
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -84,16 +86,49 @@ void checkMatrix() {
         logger.error("Принятие отчета невозможно, т.к. уже подготовлена форма-приемник.")
     }
 }
+
 /**
  * Логические проверки
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'transactionDate']) {
-            if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+        rowNum = row.getCell('rowNumber').value
+        docDateCell = row.getCell('docDate')docDateCell = row.getCell('docDate')
+        for (alias in [ 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
+                'serviceType', 'price', 'cost', 'dealDate']) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
+        }
+        //  Корректность даты договора
+        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def dFrom = taxPeriod.getStartDate()
+        def dTo = taxPeriod.getEndDate()
+        dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            msg = docDateCell.column.name
+            if (dt > dTo) {
+                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt < dFrom) {
+                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+            }
+        }
+        // Проверка расходов
+        sumCell = row.getCell('expensesSum')
+        priceCell = row.getCell('price')
+        costCell = row.getCell('cost')
+        if (priceCell.value != sumCell.value) {
+            logger.error('«' + priceCell.column.name + '» в строке ' + rowNum + ' не может отличаться от «' + sumCell.column.name + '»!')
+        }
+        if (costCell.value != sumCell.value) {
+            logger.error('«' + costCell.column.name + '» в строке ' + rowNum + ' не может отличаться от «' + sumCell.column.name + '»!')
+        }
+        // Корректность даты совершения сделки
+        dealDateCell = row.getCell('dealDate')
+        if (docDateCell.value > dealDateCell.value) {
+            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' +
+                    docDateCell.column.name + '» в строке ' + rowNum + '!')
         }
     }
     checkNSI()
@@ -107,7 +142,6 @@ void checkNSI() {
         // TODO добавить проверки НСИ
     }
 }
-
 
 /**
  * Алгоритмы заполнения полей формы.

@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionExcept
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class MessageOnFailureCallback<T> implements AsyncCallback<T> {
+public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 
 	private HasHandlers hasHandlers;
 
