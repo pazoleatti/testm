@@ -13,6 +13,8 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
+	public final static String RECORD_ID_ALIAS = "id";
+
 	/** Код справочника */
 	private Long id;
 

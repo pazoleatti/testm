@@ -128,7 +128,7 @@ public class RefBookDaoTest {
 
 	/**
 	 * Сортирует записи по коду
-	 * @param data
+	 * @param data данные для сортировки
 	 */
 	private void sort(List<Map<String, RefBookValue>> data) {
 		Collections.sort(data, new Comparator<Map<String, RefBookValue>>() {
@@ -139,6 +139,21 @@ public class RefBookDaoTest {
 				return l1.compareTo(l2);
 			}
 		});
+	}
+
+	@Test
+	public void testGetAll() {
+		List<RefBook> refBooks = refBookDao.getAll();
+		Assert.assertEquals(2, refBooks.size());
+	}
+
+	@Test
+	public void testGetRecordData(){
+		Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
+		Assert.assertEquals(4, record.get("id").getNumberValue().intValue());
+		Assert.assertEquals("Вий", record.get("name").getStringValue());
+		Assert.assertEquals(425, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
+		Assert.assertEquals(6, record.get("author").getReferenceValue().intValue());
 	}
 
 }

@@ -8,7 +8,11 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 /**
- * Дао для версионных справочников
+ * Дао для версионных справочников.
+ * <br />
+ * При получении данные справочника оформляются в виде списка строк. Каждая строка
+ * представляет собой набор пар "псевдоним атрибута"-"значение справочника". В списке атрибутов есть предопределенный -
+ * это "id" - уникальный код строки. В рамках одного справочника псевдонимы повторяться не могут.
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 04.07.13 12:25
  */
@@ -23,6 +27,12 @@ public interface RefBookDao {
 	RefBook get(Long id);
 
 	/**
+	 * Загружает список всех справочников
+	 * @return
+	 */
+	List<RefBook> getAll();
+
+	/**
 	 * Загружает данные справочника на определенную дату актуальности
 	 * @param refBookId код справочника
 	 * @param version дата актуальности
@@ -30,4 +40,11 @@ public interface RefBookDao {
 	 */
 	List<Map<String, RefBookValue>> getData(Long refBookId, Date version);
 
+	/**
+	 * По коду возвращает строку справочника
+	 * @param refBookId код справочника
+	 * @param recordId код строки справочника
+	 * @return
+	 */
+	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 }

@@ -26,8 +26,6 @@ import java.util.Map;
 @Repository("refBookDao")
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-	private final static String RECORD_ID_ALIAS = "id";
-
 	@Override
 	public RefBook get(Long refBookId) {
 		try {
@@ -38,6 +36,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(String.format("Не найден справочник с id = %d", refBookId));
 		}
+	}
+
+	@Override
+	public List<RefBook> getAll() {
+		return getJdbcTemplate().query(
+			"select id, name from ref_book order by name",
+			new RefBookRowMapper());
 	}
 
 	/**
@@ -96,6 +101,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
 	}
 
+	@Override
+	public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
+		String sql = getRefBookRecordSql(refBookId, recordId);
+		RefBook refBook = get(refBookId);
+		return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
+	}
+
 	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy");
 
 	private static final String WITH_STATEMENT =
@@ -122,7 +134,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		StringBuilder sql = new StringBuilder(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
 		sql.append("select\n");
 		sql.append("  r.id as ");
-		sql.append(RECORD_ID_ALIAS);
+		sql.append(RefBook.RECORD_ID_ALIAS);
 		sql.append(",\n");
 		List<RefBookAttribute> attributes = refBook.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
@@ -154,6 +166,51 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return sql.toString();
 	}
 
+	/**
+	 * Динамически формирует запрос для справочника
+	 * @param refBookId код справочника
+	 * @param recordId код строки справочника
+	 * @return
+	 */
+	private String getRefBookRecordSql(Long refBookId, Long recordId) {
+		RefBook refBook = get(refBookId);
+		StringBuilder fromSql = new StringBuilder("\nfrom\n");
+		fromSql.append("  ref_book_record r\n");
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select\n");
+		sql.append("  r.id as ");
+		sql.append(RefBook.RECORD_ID_ALIAS);
+		sql.append(",\n");
+		List<RefBookAttribute> attributes = refBook.getAttributes();
+		for (int i = 0; i < attributes.size(); i++) {
+			RefBookAttribute attribute = attributes.get(i);
+			sql.append("  a");
+			sql.append(i);
+			sql.append(".");
+			sql.append(attribute.getAttributeType().toString());
+			sql.append("_value as ");
+			sql.append(attribute.getAlias());
+			if (i < attributes.size() - 1) {
+				sql.append(",\n");
+			}
+
+			fromSql.append("  left join ref_book_value a");
+			fromSql.append(i);
+			fromSql.append(" on a");
+			fromSql.append(i);
+			fromSql.append(".record_id = r.id and a");
+			fromSql.append(i);
+			fromSql.append(".attribute_id = ");
+			fromSql.append(attribute.getId());
+			fromSql.append("\n");
+		}
+		sql.append(fromSql);
+		sql.append("where\n  r.id = ");
+		sql.append(recordId);
+		return sql.toString();
+	}
+
 	private class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> {
 
 		private final RefBook refBook;
@@ -163,26 +220,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		}
 		public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
 			Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-			result.put(RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
+			result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
 			List<RefBookAttribute> attributes = refBook.getAttributes();
 			for (int i = 0; i < attributes.size(); i++) {
 				RefBookAttribute attribute = attributes.get(i);
 				Object value = null;
 				switch (attribute.getAttributeType()) {
 					case STRING: {
-						value = rs.getString(i+2);
+						value = rs.getString(i + 2);
 					}
 					break;
 					case NUMBER: {
-						value = rs.getDouble(i+2);
+						value = rs.getDouble(i + 2);
 					}
 					break;
 					case DATE: {
-						value = rs.getDate(i+2);
+						value = rs.getDate(i + 2);
 					}
 					break;
 					case REFERENCE: {
-						value = rs.getLong(i+2);
+						value = rs.getLong(i + 2);
 					}
 					break;
 				}
