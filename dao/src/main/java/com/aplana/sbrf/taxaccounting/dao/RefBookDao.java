@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 /**
@@ -36,9 +37,10 @@ public interface RefBookDao {
 	 * Загружает данные справочника на определенную дату актуальности
 	 * @param refBookId код справочника
 	 * @param version дата актуальности
+	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	List<Map<String, RefBookValue>> getData(Long refBookId, Date version);
+	List<Map<String, RefBookValue>> getData(Long refBookId, Date version, RefBookAttribute sortAttribute);
 
 	/**
 	 * По коду возвращает строку справочника

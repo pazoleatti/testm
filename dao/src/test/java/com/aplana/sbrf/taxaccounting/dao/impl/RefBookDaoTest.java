@@ -57,7 +57,8 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData1() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2013"));
+		RefBook refBook = refBookDao.get(1L);
+		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2013"), refBook.getAttributeByAlias("name"));
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.size());
@@ -85,7 +86,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData2() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.02.2013"));
+		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.02.2013"), null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.size());
@@ -99,7 +100,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData3() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.03.2013"));
+		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.03.2013"), null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.size());
@@ -112,7 +113,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData4() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2012"));
+		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2012"), null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(0, data.size());
@@ -120,7 +121,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData5() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2014"));
+		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2014"), null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.size());

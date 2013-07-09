@@ -95,8 +95,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
 	@Override
-	public List<Map<String, RefBookValue>> getData(Long refBookId, Date version) {
-		String sql = getRefBookSql(refBookId, version);
+	public List<Map<String, RefBookValue>> getData(Long refBookId, Date version, RefBookAttribute sortAttribute) {
+		String sql = getRefBookSql(refBookId, version, sortAttribute);
 		RefBook refBook = get(refBookId);
 		return getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
 	}
@@ -124,10 +124,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * Динамически формирует запрос для справочника
 	 * @param refBookId код справочника
 	 * @param version дата актуальности данных справочника
+	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	private String getRefBookSql(Long refBookId, Date version) {
+	private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute) {
 		RefBook refBook = get(refBookId);
+		List<RefBookAttribute> attributes = refBook.getAttributes();
+
+		if (sortAttribute != null && !attributes.contains(sortAttribute)) {
+			throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
+					refBookId, sortAttribute.getAlias()));
+		}
+
 		StringBuilder fromSql = new StringBuilder("\nfrom\n");
 		fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
 
@@ -136,7 +144,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append("  r.id as ");
 		sql.append(RefBook.RECORD_ID_ALIAS);
 		sql.append(",\n");
-		List<RefBookAttribute> attributes = refBook.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			RefBookAttribute attribute = attributes.get(i);
 			sql.append("  a");
@@ -162,7 +169,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append(fromSql);
 		sql.append("where\n  r.ref_book_id = ");
 		sql.append(refBookId);
-		sql.append(" and\n  status <> -1");
+		sql.append(" and\n  status <> -1\n");
+		if (sortAttribute != null) {
+			sql.append("order by\n");
+			sql.append(sortAttribute.getAlias());
+		}
 		return sql.toString();
 	}
 
