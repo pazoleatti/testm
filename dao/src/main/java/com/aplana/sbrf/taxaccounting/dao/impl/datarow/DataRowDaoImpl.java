@@ -318,6 +318,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// SBRFACCTAX-2201, SBRFACCTAX-2082
 		FormDataUtils.cleanValueOners(dataRows);
 
+		// TODO: Необходимо оптимизировать insert. Oracle не поддерживает
+		// получение ключей при использовании батч операции
+		// http://stackoverflow.com/questions/9065894/jdbc-preparedstatement-batch-update-and-generated-keys
+		// Функция SqlUtils.batchUpdate работает как последовательный вызов
+		// executeUpdate, а не batchUpdate.
+		// Хотя с запросе на stackoverflow написано, что падение
+		// производительности не значительное.
+
 		BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int index)
@@ -347,6 +355,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
+
 				return con
 						.prepareStatement(
 								"insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (SEQ_DATA_ROW.NEXTVAL, ?, ?, ?, ?)",
