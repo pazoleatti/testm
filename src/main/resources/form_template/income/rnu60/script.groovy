@@ -1,7 +1,11 @@
+package form_template.income.rnu60
+
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.service.script.FormDataService
 
 /**
  * 6.41 (РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части
@@ -39,10 +43,6 @@ switch (formDataEvent) {
         addAllStatic()
         allCheck()
         break
-}
-
-void log(String message, Object... args) {
-    //logger.warn(message, args)
 }
 
 /**
@@ -83,18 +83,16 @@ void logicalCheck() {
             }
             // 2. Проверка даты первой части РЕПО
             if (row.part1REPODate != null && reportDate.time.before((Date) row.part1REPODate)) {
-                log(reportDate.time.toString())
                 logger.error("Неверно указана дата первой части сделки!")
             }
             // 3. Проверка даты второй части РЕПО
             if (row.part2REPODate != null
                     && (reportPeriodService.getStartDate(formData.reportPeriodId).time.after((Date) row.part2REPODate) || reportPeriodService.getEndDate(formData.reportPeriodId).time.before((Date) row.part2REPODate)
             )) {
-                log(reportPeriodService.getStartDate(formData.reportPeriodId).time.toString())
-                log(reportPeriodService.getEndDate(formData.reportPeriodId).time.toString())
                 logger.error("Неверно указана дата второй части сделки!")
             }
 
+            // 4. Проверка финансового  результата на основе http://jira.aplana.com/browse/SBRFACCTAX-2870
             if (row.outcome > 0 && row.income > 0) {
                 logger.error("Задвоение финансового результата!")
             }
@@ -112,8 +110,6 @@ void logicalCheck() {
 
             // 8. Проверка финансового результата
             if (temp > 0 && !(temp == row.outcome)) {
-                log("temp = " + temp.toString())
-                log("outcome = " + row.outcome.toString())
                 logger.warn("Неверно определены расходы")
             }
 
@@ -127,8 +123,6 @@ void logicalCheck() {
             value.put('outcomeTax', calc13(row))
             for (String check in checks) {
                 if (row.getCell(check).value != value.get(check)) {
-                    log("calc = " + value.get(check).toString())
-                    log("row = " + row.getCell(check).value.toString())
                     logger.error("Неверно рассчитана графа " + row.getCell(check).column.name.replace('%', '') + "!")
                 }
             }
@@ -140,9 +134,6 @@ void logicalCheck() {
     itogo
     for (String alias in itogoSum) {
         if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
-            log("columnn = " + itogo.getCell(alias).column.name.toString())
-            log("real = " + realItogo.getCell(alias).value.toString())
-            log("calc = " + itogo.getCell(alias).value.toString())
             logger.error("Итоговые значения рассчитаны неверно!")
             break
         }
@@ -310,6 +301,7 @@ BigDecimal calc12(DataRow row) {
     Date date01_11_2009 = new Date(1257012000000)       // 1257012000000 - 01.11.2009 00:00 GMT
     BigDecimal result = null
     if (row.outcome != null && row.outcome > 0) {
+        // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2848 убедиться что я правильно понял
         long difference = row.part2REPODate.getTime() - row.part1REPODate.getTime() / (1000 * 60 * 60 * 24) // необходимо получить кол-во в днях
         difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
         // @todo Возможно надо исправить 365 на 366 смотри и какой год проверять на высокостность http://jira.aplana.com/browse/SBRFACCTAX-2844
@@ -437,50 +429,37 @@ void addNewRowwarnrmData() {
     if (formData.dataRows.size() > 0) {
         DataRow<Cell> selectRow
         // Форма не пустая
-        log("Форма не пустая")
-        log("size = " + formData.dataRows.size())
         if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
             // Значит выбрал строку куда добавлять
-            log("Строка вставки выбрана")
-            log("indexOf = " + formData.dataRows.indexOf(currentDataRow))
             selectRow = currentDataRow
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
-            log("Строка вставки не выбрана, поставим в конец формы")
             selectRow = formData.dataRows.get(formData.dataRows.size() - 1) // Вставим в конец
         }
 
         int indexSelected = formData.dataRows.indexOf(selectRow)
-        log("indexSelected = " + indexSelected.toString())
 
         // Определим индекс для выбранного места
         if (selectRow.getAlias() == null) {
             // Выбрана строка не итого
-            log("Выбрана строка не итого")
             index = indexSelected // Поставим на то место новую строку
         } else {
             // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-            log("Выбрана строка итого")
 
             for (index = indexSelected; index >= 0; index--) {
-                log("loop index = " + index.toString())
                 if (formData.dataRows.get(index).getAlias() == null) {
-                    log("Нашел строку отличную от итого")
                     index++
                     break
                 }
             }
             if (index < 0) {
                 // Значит выше строки итого нет строк, добавим новую в начало
-                log("выше строки итого нет строк")
                 index = 0
             }
-            log("result index = " + index.toString())
         }
     } else {
         // Форма пустая поэтому поставим строку в начало
-        log("Форма пустая поэтому поставим строку в начало")
         index = 0
     }
     formData.dataRows.add(index, newRow)
@@ -499,7 +478,7 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     formData.dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {

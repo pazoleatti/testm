@@ -1,7 +1,8 @@
 package form_template.deal.tech_service
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
+import java.math.RoundingMode
 
 /**
  * Техническое обслуживание нежилых помещений
@@ -9,7 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
-
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -23,6 +26,18 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+            formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+    }
 }
 
 void addRow() {
@@ -51,7 +66,7 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNum').value = i++
     }
 }
@@ -61,25 +76,142 @@ void recalcRowNum() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'bankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
-            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                msg = row.getCell(alias).column.name
-                logger.error("Поле «$msg» не заполнено!")
+        if (row.getAlias() == null) {
+            for (alias in ['jurName', 'innKio', 'countryCode', 'bankSum', 'contractNum', 'contractDate',
+                    'country', 'price', 'cost', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    msg = row.getCell(alias).column.name
+                    rowNum = row.getCell('rowNum').value
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
             }
         }
     }
 
     // Проверка стоимости
     for (row in formData.dataRows) {
-        cost = row.getCell('cost').value
-        price = row.getCell('price').value
-        count = row.getCell('count').value
+        if (row.getAlias() == null) {
 
-        if (price == null || count || cost !=  price * count) {
-           logger.warn('Стоимость не равна произведению цены и количества!')
+            cost = row.getCell('cost').value
+            price = row.getCell('price').value
+            count = row.getCell('count').value
+
+            if (price == null || count == null && cost != price * count) {
+                msg1 = row.getCell('cost').column.name
+                msg2 = row.getCell('price').column.name
+                msg3 = row.getCell('count').column.name
+                rowNum = row.getCell('rowNum').value
+                logger.warn("«$msg1» не равна произведению «$msg2» и «$msg3» в строке $rowNum!")
+            }
         }
     }
+
+    // Отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // Налоговый период
+    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
+    // Корректность даты договора
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+
+            dt = row.getCell('contractDate').value
+            if (dt != null && (dt < dFrom || dt > dTo)) {
+                msg = row.getCell('contractDate').column.name
+                rowNum = row.getCell('rowNum').value
+
+                if (dt > dTo) {
+                    logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
+                }
+
+                if (dt < dFrom) {
+                    logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
+                }
+            }
+        }
+    }
+
+    // Корректность даты совершения сделки
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            transactionDate = row.getCell('transactionDate').value
+            contractDate = row.getCell('contractDate').value
+
+            if (transactionDate < contractDate) {
+                msg1 = row.getCell('transactionDate').column.name
+                msg2 = row.getCell('contractDate').column.name
+                rowNum = row.getCell('rowNum').value
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            }
+        }
+    }
+
+    // Проверка цены сделки
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            count = row.getCell('count').value
+            price = row.getCell('price').value
+            bankSum = row.getCell('bankSum').value
+
+            if (count != null) {
+                res = null
+
+                if (bankSum != null && count != null) {
+                    res = (bankSum/count).setScale(2, RoundingMode.HALF_UP)
+                }
+
+                if (bankSum == null || count == null || price != res) {
+                    msg1 = row.getCell('price').column.name
+                    msg2 = row.getCell('bankSum').column.name
+                    msg3 = row.getCell('count').column.name
+                    rowNum = row.getCell('rowNum').value
+                    logger.error("«$msg1» не равно отношению «$msg2» и «$msg3» в строке $rowNum!")
+                }
+            }
+            else {
+                if (price != bankSum) {
+                    msg1 = row.getCell('price').column.name
+                    msg2 = row.getCell('bankSum').column.name
+                    rowNum = row.getCell('rowNum').value
+                    logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
+                }
+            }
+        }
+    }
+
+    // Проверка расходов
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            cost = row.getCell('cost').value
+            bankSum = row.getCell('bankSum').value
+
+            if (cost != bankSum) {
+                msg1 = row.getCell('cost').column.name
+                msg2 = row.getCell('bankSum').column.name
+                rowNum = row.getCell('rowNum').value
+                logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
+            }
+        }
+    }
+
+    // Проверка заполнения региона
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            country = row.getCell('country').value
+
+            if (country != null) {
+                 // TODO проверки для страны по коду справочника
+            }
+            else {
+                // TODO проверки для страны по коду справочника
+            }
+        }
+    }
+
+    // Проверка населенного пункта
 
     checkNSI()
 }
@@ -89,7 +221,9 @@ void logicCheck() {
  */
 void checkNSI() {
     for (row in formData.dataRows) {
-        // TODO добавить проверки НСИ
+        if (row.getAlias() == null) {
+            // TODO добавить проверки НСИ
+        }
     }
 }
 
@@ -98,8 +232,17 @@ void checkNSI() {
  */
 void calc() {
     for (row in formData.dataRows) {
-        // Расчет поля "Стоимость"
-        row.getCell('cost').value = row.getCell('bankSum').value
-        // TODO расчет полей по справочникам
+        if (row.getAlias() == null) {
+
+            // TODO Расчет поля "Населенный пункт"
+            count = row.getCell('count').value
+            bankSum = row.getCell('bankSum').value
+            // Расчет поля "Цена"
+            row.getCell('price').value = count == null ? bankSum : bankSum / count
+            // Расчет поля "Стоимость"
+            row.getCell('cost').value = bankSum
+
+            // TODO расчет полей по справочникам
+        }
     }
 }
