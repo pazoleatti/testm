@@ -49,4 +49,12 @@ public interface RefBookDao {
 	 * @return
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+
+	/**
+	 * Возвращает список версий элементов справочника за указанный период времени
+	 * @param startDate начальная дата
+	 * @param endDate конечная дата
+	 * @return
+	 */
+	List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
 }

@@ -157,4 +157,22 @@ public class RefBookDaoTest {
 		Assert.assertEquals(6, record.get("author").getReferenceValue().intValue());
 	}
 
+	@Test
+	public void testGetVersions1() throws Exception {
+		List<Date> versions = refBookDao.getVersions(1L, sdf.parse("01.01.2013"), sdf.parse("01.01.2014"));
+		Assert.assertEquals(3, versions.size());
+	}
+
+	@Test
+	public void testGetVersions2() throws Exception {
+		List<Date> versions = refBookDao.getVersions(2L, sdf.parse("01.01.2013"), sdf.parse("01.01.2014"));
+		Assert.assertEquals(2, versions.size());
+	}
+
+	@Test
+	public void testGetVersions3() throws Exception {
+		List<Date> versions = refBookDao.getVersions(1L, sdf.parse("01.01.2013"), sdf.parse("01.02.2013"));
+		Assert.assertEquals(2, versions.size());
+	}
+
 }
