@@ -1,7 +1,8 @@
 package form_template.deal.securities
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
+import java.math.RoundingMode
 
 /**
  * Приобретение и реализация ценных бумаг (долей в уставном капитале)
@@ -50,14 +51,14 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNumber').value = i++
     }
 }
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count' ,'dealDate']) {
+    for (alias in ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -91,26 +92,60 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate',
+        rowNum = row.getCell('rowNumber').value
+        docDateCell = row.getCell('docDate')
+        okeiCodeCell = row.getCell('okeiCode')
+        for (alias in ['fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate',
                 'okeiCode', 'count', 'price', 'cost', 'dealDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
         }
-
-        if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
-            logger.error('Поля «Сумма доходов (стоимость реализации) Банка, руб.» ' +
-                    'и «Сумма расходов (стоимость приобретения) Банка, руб.» в строке ' +
-                    (formData.dataRows.indexOf(row)+1)+' не могут быть одновременно заполнены!')
+        // Проверка доходов и расходов
+        incomeSumCell = row.getCell('incomeSum')
+        outcomeSumCell = row.getCell('outcomeSum')
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            logger.error('«' + incomeSumCell.column.name + '» и «' + outcomeSumCell.column.name + '» в строке ' +
+                    rowNum + ' не могут быть одновременно заполнены!')
         }
-
-        if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
-            logger.error('Одно из полей «Сумма доходов (стоимость реализации) Банка, руб.» ' +
-                    'и «Сумма расходов (стоимость приобретения) Банка, руб.» в строке ' +
-                    (formData.dataRows.indexOf(row)+1)+' должно быть заполнено!')
+        if (incomeSumCell.value == null && outcomeSumCell.value == null) {
+            logger.error('Одна из граф «' + incomeSumCell.column.name + '» и «' + outcomeSumCell.column.name + '» в строке ' +
+                    rowNum + ' должна быть заполнена!')
         }
-        if (! row.getCell('okeiCode').value in ['796', '744']) {
-            logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт., процент!')
+        // Проверка выбранной единицы измерения
+        if (okeiCodeCell.value!= '796' && okeiCodeCell.value!= '744') {
+            logger.error('В графе «' + okeiCodeCell.column.name + '» могут быть указаны только следующие элементы: шт., процент!')
+        }
+        //  Корректность даты договора
+        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def dFrom = taxPeriod.getStartDate()
+        def dTo = taxPeriod.getEndDate()
+        dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            msg = docDateCell.column.name
+            if (dt > dTo) {
+                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt < dFrom) {
+                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+            }
+        }
+        // Проверка цены
+        sumCell = row.getCell('incomeSum').value != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
+        countCell = row.getCell('count')
+        priceCell = row.getCell('price')
+
+        if (okeiCodeCell.value == '796' && countCell.value!=null && countCell.value!=0
+                && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
+            logger.error('«' + priceCell.column.name + '» в строке ' + rowNum + ' не равно отношению «' +
+                    sumCell.column.name + '» и «' + countCell.column.name + '»!')
+        } else if (okeiCodeCell.value == '744' && priceCell.value != sumCell.value) {
+            logger.error('«' + priceCell.column.name + '» в строке ' + rowNum + ' не равно «' + sumCell.column.name + '»!')
+        }
+        // Корректность даты совершения сделки
+        dealDateCell = row.getCell('dealDate')
+        if (docDateCell.value > dealDateCell.value) {
+            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' + docDateCell.column.name + '» в строке ' + rowNum + '!')
         }
     }
 
@@ -132,14 +167,17 @@ void checkNSI() {
 void calc() {
     for (row in formData.dataRows) {
         // Расчет поля "Цена"
-        pricaValue = row.getCell('incomeSum').value!=null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
-        if (row.getCell('okeiCode').value == '744'){
-            row.getCell('price').value = pricaValue
-        } else if (row.getCell('okeiCode').value == '796'){
-            row.getCell('price').value = pricaValue +' / '+ row.getCell('count').value
+        priceValue = row.getCell('incomeSum').value != null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
+        okeiCode = row.getCell('okeiCode').value
+        if (okeiCode == '744') {
+            row.getCell('price').value = priceValue
+        } else if (okeiCode == '796' && row.getCell('count').value!=0 && row.getCell('count').value!=null) {
+            row.getCell('price').value = (priceValue / row.getCell('count').value).setScale(2, RoundingMode.HALF_UP)
+        } else{
+            row.getCell('price').value = null
         }
         // Расчет поля "Стоимость"
-        row.getCell('cost').value =  pricaValue
+        row.getCell('cost').value = priceValue
 
         // TODO расчет полей по справочникам
     }
