@@ -46,7 +46,6 @@ switch (formDataEvent) {
         break
 }
 
-
 void deleteRow() {
     if (currentDataRow != null) {
         formData.dataRows.remove(currentDataRow)
@@ -80,8 +79,7 @@ void addRow() {
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    // TODO
-    FormData findForm = null
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }

@@ -1,8 +1,10 @@
+package form_template.deal.software_development
+
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
+
 /**
- * 5.2.3 Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
+ * Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий
  *
  * @author Stanislav Yasinskiy
  */
@@ -55,7 +57,7 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'transactionDate']) {
+    for (alias in ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -67,8 +69,7 @@ void addRow() {
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    // TODO
-    FormData findForm = null
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -84,15 +85,16 @@ void checkMatrix() {
         logger.error("Принятие отчета невозможно, т.к. уже подготовлена форма-приемник.")
     }
 }
+
 /**
  * Логические проверки
  */
 void logicCheck() {
     for (row in formData.dataRows) {
         for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
-                'serviceType', 'price', 'cost', 'transactionDate']) {
-            if (row.getCell(alias).value == null) {
-                logger.error('Поле ' + row.getCell(alias).column.name.replace('%', '') + ' не заполнено')
+                'serviceType', 'price', 'cost', 'dealDate']) {
+            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
             }
         }
     }
@@ -102,12 +104,12 @@ void logicCheck() {
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
+void checkNSI()
+{
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
 }
-
 
 /**
  * Алгоритмы заполнения полей формы.

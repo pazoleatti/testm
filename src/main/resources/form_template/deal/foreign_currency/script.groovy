@@ -1,10 +1,13 @@
 package form_template.deal.foreign_currency
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 /**
  * Купля-продажа иностранной валюты
+ * (похож на nondeliverable " Беспоставочные срочные сделки")
  *
  * @author Stanislav Yasinskiy
  */
@@ -14,7 +17,10 @@ switch (formDataEvent) {
         checkUniq()
         break
     case FormDataEvent.CALCULATE:
+        deleteAllStatic()
         calc()
+        addAllStatic()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -42,16 +48,20 @@ switch (formDataEvent) {
 
 void deleteRow() {
     if (currentDataRow != null) {
-        recalcRowNum()
         formData.dataRows.remove(currentDataRow)
+        recalcRowNum()
     }
 }
 
+/**
+ * Пересчет индексов строк перед удалением строки
+ */
 void recalcRowNum() {
-    def i = formData.dataRows.indexOf(currentDataRow)
-
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
-        row.getCell('rowNumber').value = i++
+    int i = 1
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            row.getCell('rowNumber').value = i++
+        }
     }
 }
 
@@ -63,15 +73,14 @@ void addRow() {
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
-    row.getCell('rowNumber').value = formData.dataRows.size()
+    recalcRowNum()
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    // TODO
-    FormData findForm = null
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -93,23 +102,42 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullName', 'inn','countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber', 'dealDate'
+        if (row.getAlias() != null) {
+            continue
+        }
+        rowNum = row.getCell('rowNumber').value
+        for (alias in ['fullName', 'inn','countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber', 'dealDate'
                 , 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
         }
-
+        // Проверка заполнения доходов и расходов Банка
         if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
-            logger.error('Поля «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
-                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке '+
-                    (formData.dataRows.indexOf(row)+1)+' не могут быть одновременно заполнены!')
+            logger.error('«' + row.getCell('incomeSum').column.name + '»' +
+                    ' и «'+row.getCell('outcomeSum').column.name+'» в строке '+
+                    rowNum + ' не могут быть одновременно заполнены!')
         }
-
+        // Проверка заполнения доходов и расходов Банка
         if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
-            logger.error('Одно из полей «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
-                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке ' +
-                    (formData.dataRows.indexOf(row)+1)+' должно быть заполнено!')
+            logger.error('Одна из граф «' + row.getCell('incomeSum').column.name + '»' +
+                    ' и «'+ row.getCell('outcomeSum').column.name + '»'+
+                    rowNum + ' должна быть заполнена!')
+        }
+        //  Корректность даты договора
+        // TODO docDate должна относиться к календарному году, указанному для отчётного периода
+        if (false){
+            logger.error('«' + row.getCell('docDate').column.name + '» в строке ' + rowNum + ' не может быть больше даты окончания отчётного периода!')
+        }
+        // Корректность даты заключения сделки
+        if (row.getCell('docDate').value > row.getCell('dealDate').value){
+            logger.error('«' + row.getCell('dealDate').column.name + '» не может быть меньше «' +
+                    row.getCell('docDate').column.name + '» в строке ' + rowNum+'!')
+        }
+        // Проверка заполнения стоимости сделки
+        if (row.getCell('total').value != row.getCell('price').value){
+            logger.error('«' + row.getCell('price').column.name + '» не может отличаться от  «' +
+                    row.getCell('total').column.name + '» в строке ' + rowNum+'!')
         }
     }
 
@@ -135,5 +163,50 @@ void calc() {
         // Расчет поля "Итого"
         row.getCell('total').value = row.getCell('price').value
         // TODO расчет полей по справочникам
+    }
+}
+
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+        def newRow = formData.createDataRow()
+
+        newRow.getCell('fullName').value = 'Подитог:'
+        newRow.setAlias('itg')
+        newRow.getCell('fullName').colSpan = 10
+
+        // Расчеты подитоговых значений
+        BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
+        for (row in formData.dataRows) {
+
+            incomeSum = row.getCell('incomeSum').value
+            outcomeSum = row.getCell('outcomeSum').value
+            total = row.getCell('total').value
+
+            incomeSumItg += incomeSum != null ? incomeSum : 0
+            outcomeSumItg += outcomeSum != null ? outcomeSum : 0
+            totalItg += total != null ? total : 0
+        }
+
+        newRow.getCell('incomeSum').value = incomeSumItg
+        newRow.getCell('outcomeSum').value = outcomeSumItg
+        newRow.getCell('total').value = totalItg
+
+        formData.dataRows.add(newRow)
+    }
+}
+
+/**
+ * Удаление всех статическиех строк "Подитог" из списка строк
+ */
+void deleteAllStatic() {
+    for (Iterator<DataRow> iter = formData.dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            iter.remove()
+        }
     }
 }
