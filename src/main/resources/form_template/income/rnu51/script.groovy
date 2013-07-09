@@ -28,12 +28,12 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-    // после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+// после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         allCheck()
         break
-    // обобщить
-    case FormDataEvent.COMPOSE :
+// обобщить
+    case FormDataEvent.COMPOSE:
         consolidation()
         deleteAllStatic()
         sort()
@@ -128,7 +128,7 @@ void logicalCheck() {
              * 1
              * Неверно определены расходы!
              */
-            if (row.expensesTotal != row.costOfAcquisition + row.acquisitionPriceTax + row.expensesOnSale) {
+            if (row.expensesTotal != (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)) {
                 logger.error('Неверно определены расходы!')
             }
 
@@ -138,7 +138,7 @@ void logicalCheck() {
              * 1
              * Неверно определен финансовый результат реализации (выбытия)!
              */
-            if (row.profit != row.salePriceTax - row.expensesTotal) {
+            if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
                 logger.error('Неверно определен финансовый результат реализации (выбытия)!')
             }
 
@@ -149,8 +149,13 @@ void logicalCheck() {
              3.	значение «графы 22» ≥ 0
              1
              Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!
-             @todo block http://jira.aplana.com/browse/SBRFACCTAX-2883
              */
+            if ((row.tradeNumber != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
+                    || (row.tradeNumber == 4 && row.excessSalePriceTax != 0)
+                    || row.excessSalePriceTax < 0
+            ) {
+                logger.error('Неверно определено превышение цены реализации для целей налогообложения над фактической ценой реализации!')
+            }
 
             /**
              * Арифметическая проверка графы 12, 16, 17, 18, 20, 21, 22	•
@@ -218,50 +223,37 @@ void addNewRowwarnrmData() {
     if (formData.dataRows.size() > 0) {
         DataRow<Cell> selectRow
         // Форма не пустая
-        log("Форма не пустая")
-        log("size = " + formData.dataRows.size())
         if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
             // Значит выбрал строку куда добавлять
-            log("Строка вставки выбрана")
-            log("indexOf = " + formData.dataRows.indexOf(currentDataRow))
             selectRow = currentDataRow
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
-            log("Строка вставки не выбрана, поставим в конец формы")
             selectRow = formData.dataRows.get(formData.dataRows.size() - 1) // Вставим в конец
         }
 
         int indexSelected = formData.dataRows.indexOf(selectRow)
-        log("indexSelected = " + indexSelected.toString())
 
         // Определим индекс для выбранного места
         if (selectRow.getAlias() == null) {
             // Выбрана строка не итого
-            log("Выбрана строка не итого")
             index = indexSelected // Поставим на то место новую строку
         } else {
             // Выбрана строка итого, для статических строг итого тут проще и надо фиксить под свою форму
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
-            log("Выбрана строка итого")
 
             for (index = indexSelected; index >= 0; index--) {
-                log("loop index = " + index.toString())
                 if (formData.dataRows.get(index).getAlias() == null) {
-                    log("Нашел строку отличную от итого")
                     index++
                     break
                 }
             }
             if (index < 0) {
                 // Значит выше строки итого нет строк, добавим новую в начало
-                log("выше строки итого нет строк")
                 index = 0
             }
-            log("result index = " + index.toString())
         }
     } else {
         // Форма пустая поэтому поставим строку в начало
-        log("Форма пустая поэтому поставим строку в начало")
         index = 0
     }
     formData.dataRows.add(index, newRow)
@@ -355,7 +347,8 @@ BigDecimal calc16(DataRow row) {
     if (row.redemptionValue > 0) {
         result = 100
     }
-    return round(result, 3)
+    if (result != null) result = round(result, 3)
+    return result
 }
 
 /**
@@ -368,7 +361,8 @@ BigDecimal calc17(DataRow row) {
     if (row.redemptionValue > 0) {
         result = row.redemptionValue
     }
-    return round(result, 3)
+    if (result != null) result = round(result, 3)
+    return result
 }
 /**
  Если «графа 2» = 1 или 2 или 5, И («графа 14» > «графа 16» И «графа 15» > «графа 17»), то «графа 18» = «графа 15»
@@ -388,7 +382,8 @@ BigDecimal calc18(DataRow row) {
     if ((row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
-    return round(result, 3)
+    if (result != null) result = round(result, 3)
+    return result
 }
 
 /**
@@ -397,7 +392,7 @@ BigDecimal calc18(DataRow row) {
  * @return
  */
 BigDecimal calc20(DataRow row) {
-    BigDecimal result = row.costOfAcquisition + row.acquisitionPriceTax + row.expensesOnSale
+    BigDecimal result = (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)
     return round(result, 3)
 }
 
@@ -407,7 +402,7 @@ BigDecimal calc20(DataRow row) {
  * @return
  */
 BigDecimal calc21(DataRow row) {
-    BigDecimal result = row.salePriceTax - row.expensesTotal
+    BigDecimal result = (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)
     return round(result, 3)
 }
 
@@ -420,11 +415,11 @@ BigDecimal calc21(DataRow row) {
  * @return
  */
 BigDecimal calc22(DataRow row) {
-    BigDecimal result
+    BigDecimal result = null
     if (row.tradeNumber == 4) {
         result = 0
     } else {
-        result = row.salePriceTax - row.priceInFactRub
+        result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
     }
     return round(result, 3)
 }
@@ -454,13 +449,14 @@ void calc() {
  * @return
  */
 BigDecimal calc12(DataRow row) {
-    BigDecimal result
+    BigDecimal result = null
     if (row.acquisitionPrice > row.marketPriceInRub) {
         result = row.marketPriceInRub
     } else {
         result = row.acquisitionPrice
     }
-    return round(result, 2)
+    if (result != null) result = round(result, 2)
+    return result
 }
 
 /**
@@ -507,6 +503,7 @@ void allCheck() {
  * @return
  */
 BigDecimal round(BigDecimal value, int newScale) {
+    logger.info(value.toString())
     if (value != null) {
         return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
     } else {
@@ -543,7 +540,7 @@ void consolidation() {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { DataRow row->
+                source.getDataRows().each { DataRow row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         formData.dataRows.add(row)
                     }
