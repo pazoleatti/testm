@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * Предоставление права пользования товарным знаком
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
- *
+ * похож на corporate_credit (Предоставление корпоративного кредита)
  * @author Stanislav Yasinskiy
  */
 

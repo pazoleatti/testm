@@ -13,6 +13,8 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
+	public final static String RECORD_ID_ALIAS = "id";
+
 	/** Код справочника */
 	private Long id;
 
@@ -68,6 +70,24 @@ public class RefBook implements Serializable {
 	 */
 	public void setAttributes(List<RefBookAttribute> attributes) {
 		this.attributes = attributes;
+	}
+
+	/**
+	 * Возвращает атрибут по его псевдониму
+	 * @param alias
+	 * @return
+	 */
+	public RefBookAttribute getAttributeByAlias(String alias) {
+		if (alias == null) {
+			throw new IllegalArgumentException("Attribute alias must be defined");
+		}
+
+		for(RefBookAttribute attribute : attributes) {
+			if (alias.equals(attribute.getAlias())) {
+				return attribute;
+			}
+		}
+		return null;
 	}
 
 	@Override

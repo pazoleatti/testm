@@ -194,6 +194,32 @@ public class RefBookAttribute implements Serializable {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		RefBookAttribute that = (RefBookAttribute) o;
+
+		if (precision != that.precision) return false;
+		if (visible != that.visible) return false;
+		if (width != that.width) return false;
+		if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
+		if (attributeType != that.attributeType) return false;
+		if (id != null ? !id.equals(that.id) : that.id != null) return false;
+		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+		if (refBookAttributeId != null ? !refBookAttributeId.equals(that.refBookAttributeId) : that.refBookAttributeId != null)
+			return false;
+		if (refBookId != null ? !refBookId.equals(that.refBookId) : that.refBookId != null) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return id != null ? id.hashCode() : 0;
+	}
+
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RefBookAttribute{");
 		sb.append("alias='").append(alias).append('\'');

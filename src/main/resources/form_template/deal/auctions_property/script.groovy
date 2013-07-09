@@ -1,6 +1,5 @@
 package form_template.deal.auctions_property
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
@@ -50,7 +49,7 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNumber').value = i++
     }
 }
@@ -91,11 +90,41 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate',
-                'count', 'price', 'cost', 'date']) {
+        rowNum = row.getCell('rowNumber').value
+        docDateCell = row.getCell('docDate')
+        for (alias in [ 'fullNamePerson', 'inn', 'countryCode', 'sum', 'docNumber', 'docDate','count', 'price', 'cost', 'date']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
+        }
+        //  Корректность даты договора
+        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def dFrom = taxPeriod.getStartDate()
+        def dTo = taxPeriod.getEndDate()
+        dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            msg = docDateCell.column.name
+            if (dt > dTo) {
+                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt < dFrom) {
+                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+            }
+        }
+        // Проверка доходов
+        sumCell = row.getCell('sum')
+        priceCell = row.getCell('price')
+        costCell = row.getCell('cost')
+        if (priceCell.value != sumCell.value) {
+            logger.error('«' + priceCell.column.name + '» в строке ' + rowNum + ' не может отличаться от «' + sumCell.column.name + '»!')
+        }
+        if (costCell.value != sumCell.value) {
+            logger.error('«' + costCell.column.name + '» в строке ' + rowNum + ' не может отличаться от «' + sumCell.column.name + '»!')
+        }
+        // Корректность даты совершения сделки
+        dealDateCell = row.getCell('date')
+        if (docDateCell.value > dealDateCell.value) {
+            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' + docDateCell.column.name + '» в строке ' + rowNum + '!')
         }
     }
     checkNSI()

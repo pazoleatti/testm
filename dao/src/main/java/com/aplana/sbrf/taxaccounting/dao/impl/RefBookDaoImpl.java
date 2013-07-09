@@ -26,8 +26,6 @@ import java.util.Map;
 @Repository("refBookDao")
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-	private final static String RECORD_ID_ALIAS = "id";
-
 	@Override
 	public RefBook get(Long refBookId) {
 		try {
@@ -38,6 +36,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(String.format("Не найден справочник с id = %d", refBookId));
 		}
+	}
+
+	@Override
+	public List<RefBook> getAll() {
+		return getJdbcTemplate().query(
+			"select id, name from ref_book order by name",
+			new RefBookRowMapper());
 	}
 
 	/**
@@ -90,10 +95,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
 	@Override
-	public List<Map<String, RefBookValue>> getData(Long refBookId, Date version) {
-		String sql = getRefBookSql(refBookId, version);
+	public List<Map<String, RefBookValue>> getData(Long refBookId, Date version, RefBookAttribute sortAttribute) {
+		String sql = getRefBookSql(refBookId, version, sortAttribute);
 		RefBook refBook = get(refBookId);
 		return getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
+	}
+
+	@Override
+	public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
+		String sql = getRefBookRecordSql(refBookId, recordId);
+		RefBook refBook = get(refBookId);
+		return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
 	}
 
 	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy");
@@ -112,19 +124,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * Динамически формирует запрос для справочника
 	 * @param refBookId код справочника
 	 * @param version дата актуальности данных справочника
+	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	private String getRefBookSql(Long refBookId, Date version) {
+	private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute) {
 		RefBook refBook = get(refBookId);
+		List<RefBookAttribute> attributes = refBook.getAttributes();
+
+		if (sortAttribute != null && !attributes.contains(sortAttribute)) {
+			throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
+					refBookId, sortAttribute.getAlias()));
+		}
+
 		StringBuilder fromSql = new StringBuilder("\nfrom\n");
 		fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
 
 		StringBuilder sql = new StringBuilder(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
 		sql.append("select\n");
 		sql.append("  r.id as ");
-		sql.append(RECORD_ID_ALIAS);
+		sql.append(RefBook.RECORD_ID_ALIAS);
 		sql.append(",\n");
-		List<RefBookAttribute> attributes = refBook.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			RefBookAttribute attribute = attributes.get(i);
 			sql.append("  a");
@@ -150,7 +169,56 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append(fromSql);
 		sql.append("where\n  r.ref_book_id = ");
 		sql.append(refBookId);
-		sql.append(" and\n  status <> -1");
+		sql.append(" and\n  status <> -1\n");
+		if (sortAttribute != null) {
+			sql.append("order by\n");
+			sql.append(sortAttribute.getAlias());
+		}
+		return sql.toString();
+	}
+
+	/**
+	 * Динамически формирует запрос для справочника
+	 * @param refBookId код справочника
+	 * @param recordId код строки справочника
+	 * @return
+	 */
+	private String getRefBookRecordSql(Long refBookId, Long recordId) {
+		RefBook refBook = get(refBookId);
+		StringBuilder fromSql = new StringBuilder("\nfrom\n");
+		fromSql.append("  ref_book_record r\n");
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select\n");
+		sql.append("  r.id as ");
+		sql.append(RefBook.RECORD_ID_ALIAS);
+		sql.append(",\n");
+		List<RefBookAttribute> attributes = refBook.getAttributes();
+		for (int i = 0; i < attributes.size(); i++) {
+			RefBookAttribute attribute = attributes.get(i);
+			sql.append("  a");
+			sql.append(i);
+			sql.append(".");
+			sql.append(attribute.getAttributeType().toString());
+			sql.append("_value as ");
+			sql.append(attribute.getAlias());
+			if (i < attributes.size() - 1) {
+				sql.append(",\n");
+			}
+
+			fromSql.append("  left join ref_book_value a");
+			fromSql.append(i);
+			fromSql.append(" on a");
+			fromSql.append(i);
+			fromSql.append(".record_id = r.id and a");
+			fromSql.append(i);
+			fromSql.append(".attribute_id = ");
+			fromSql.append(attribute.getId());
+			fromSql.append("\n");
+		}
+		sql.append(fromSql);
+		sql.append("where\n  r.id = ");
+		sql.append(recordId);
 		return sql.toString();
 	}
 
@@ -163,26 +231,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		}
 		public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
 			Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-			result.put(RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
+			result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
 			List<RefBookAttribute> attributes = refBook.getAttributes();
 			for (int i = 0; i < attributes.size(); i++) {
 				RefBookAttribute attribute = attributes.get(i);
 				Object value = null;
 				switch (attribute.getAttributeType()) {
 					case STRING: {
-						value = rs.getString(i+2);
+						value = rs.getString(i + 2);
 					}
 					break;
 					case NUMBER: {
-						value = rs.getDouble(i+2);
+						value = rs.getDouble(i + 2);
 					}
 					break;
 					case DATE: {
-						value = rs.getDate(i+2);
+						value = rs.getDate(i + 2);
 					}
 					break;
 					case REFERENCE: {
-						value = rs.getLong(i+2);
+						value = rs.getLong(i + 2);
 					}
 					break;
 				}
@@ -190,6 +258,31 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			}
 			return result;
 		}
+	}
+
+	private static final String RECORD_VERSION =
+		"select\n"+
+		"  version\n"+
+		"from\n"+
+		"  ref_book_record\n"+
+		"where\n"+
+		"  ref_book_id = %d and\n" +
+		"  version >= to_date('%s', 'DD.MM.YYYY') and\n"+
+		"  version <= to_date('%s', 'DD.MM.YYYY')\n"+
+		"group by\n"+
+		"  version\n"+
+		"order by\n" +
+		"  version";
+	@Override
+	public List<Date> getVersions(Long refBookId, Date startDate, Date endDate) {
+		String sql = String.format(RECORD_VERSION, refBookId, sdf.format(startDate), sdf.format(endDate));
+		return getJdbcTemplate().query(sql, new RowMapper<Date>() {
+
+			@Override
+			public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getDate(1);
+			}
+		});
 	}
 
 }

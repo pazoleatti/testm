@@ -1,10 +1,12 @@
 package form_template.deal.interbank_credits
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
  * Предоставление межбанковских кредитов
+ *
+ * (похож на letter_of_credit "Предоставление инструментов торгового финансирования и непокрытых аккредитивов")
+ * (похож на  guarantees "Предоставление гарантий")
  *
  * @author Stanislav Yasinskiy
  */
@@ -50,22 +52,20 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNumber').value = i++
     }
 }
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate' ,'sum', 'dealDoneDate']) {
+    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
 
     row.getCell('count').value = 1
-    row.getCell('price').value = 1
-    row.getCell('total').value = 1
 
     row.getCell('rowNumber').value = formData.dataRows.size()
 }
@@ -96,15 +96,51 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
-                'dealNumber', 'dealDate' , 'count', 'sum', 'price', 'total']) {
+        rowNum = row.getCell('rowNumber').value
+        docDateCell = row.getCell('docDate')
+        dealDateCell = row.getCell('dealDate')
+        for (alias in ['fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
+                'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
         }
-
+        // Проверка количества
         if (row.getCell('count').value != 1) {
-            logger.error('В поле «Количество» может  быть указано только  значение «1»!')
+            logger.error('В поле «' + row.getCell('count').column.name + '» может  быть указано только  значение «1»!')
+        }
+        //  Корректность даты договора
+        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def dFrom = taxPeriod.getStartDate()
+        def dTo = taxPeriod.getEndDate()
+        dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            msg = docDateCell.column.name
+            if (dt > dTo) {
+                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt < dFrom) {
+                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+            }
+        }
+        // Корректность даты заключения сделки
+        if (docDateCell.value > dealDateCell.value) {
+            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' + docDateCell.column.name + '» в строке ' + rowNum + '!')
+        }
+        // Проверка доходности
+        if (row.getCell('price').value != row.getCell('sum').value){
+            logger.error('«' + row.getCell('price').column.name + '» не может отличаться от  «' +
+                    row.getCell('sum').column.name + '» в строке ' + rowNum+'!')
+        }
+        // Проверка доходности
+        if (row.getCell('total').value != row.getCell('sum').value){
+            logger.error('«' + row.getCell('total').column.name + '» не может отличаться от  «' +
+                    row.getCell('sum').column.name + '» в строке ' + rowNum+'!')
+        }
+        // Корректность даты совершения сделки
+        if (dealDateCell.value > row.getCell('dealDoneDate').value){
+            logger.error('«' + row.getCell('dealDoneDate').column.name + '» не может быть меньше «' +
+                    dealDateCell.column.name + '» в строке ' + rowNum+'!')
         }
     }
     checkNSI()
@@ -127,9 +163,9 @@ void calc() {
         // Расчет поля " Количество"
         row.getCell('count').value = 1
         // Расчет поля "Цена"
-        row.getCell('price').value = 1
+        row.getCell('price').value = row.getCell('sum').value
         // Расчет поля "Итого"
-        row.getCell('total').value = 1
+        row.getCell('total').value = row.getCell('sum').value
         // TODO расчет полей по справочникам
     }
 }

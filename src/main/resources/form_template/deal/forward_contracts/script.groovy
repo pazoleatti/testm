@@ -2,7 +2,6 @@ package form_template.deal.forward_contracts
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
@@ -67,8 +66,8 @@ void recalcRowNum() {
 
 void addRow() {
     row = formData.createDataRow()
-    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate' ,'dealType',
-            'currencyCode', 'countryDealCode','incomeSum','outcomeSum','dealDoneDate']) {
+    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealType',
+            'currencyCode', 'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
@@ -76,7 +75,6 @@ void addRow() {
 
     recalcRowNum()
 }
-
 
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -105,23 +103,53 @@ void checkMatrix() {
  */
 void logicCheck() {
     for (row in formData.dataRows) {
-        for (alias in ['rowNumber', 'fullName', 'inn','countryName', 'countryCode', 'docNumber', 'docDate', 'dealNumber', 'dealDate'
-                , 'dealType' , 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        rowNum = row.getCell('rowNumber').value
+        dealDateCell = row.getCell('dealDate')
+        docDateCell = row.getCell('docDate')
+        for (alias in ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate', 'dealNumber', 'dealDate'
+                , 'dealType', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']) {
             if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Поле «' + row.getCell(alias).column.name + '» не заполнено!')
+                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
             }
         }
 
-        if ( row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
-            logger.error('Поля «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
-                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке '+
-                    row.getCell('rowNumber').value+' не могут быть одновременно заполнены!')
+        // Проверка доходов и расходов
+        incomeSumCell = row.getCell('incomeSum')
+        outcomeSum = row.getCell('outcomeSum')
+        if (incomeSumCell.value != null && row.getCell('outcomeSum').value != null) {
+            logger.error('«' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
+                    rowNum + ' не могут быть одновременно заполнены!')
         }
-
-        if ( row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
-            logger.error('Одно из полей «Сумма доходов Банка по данным бухгалтерского учета, руб.» ' +
-                    'и «Сумма расходов Банка по данным бухгалтерского учета, руб.» в строке ' +
-                    row.getCell('rowNumber').value+' должно быть заполнено!')
+        if (incomeSumCell.value == null && row.getCell('outcomeSum').value == null) {
+            logger.error('Одна из граф «' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
+                    rowNum + ' должна быть заполнена!')
+        }
+        //  Корректность даты договора
+        def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+        def dFrom = taxPeriod.getStartDate()
+        def dTo = taxPeriod.getEndDate()
+        dt = docDateCell.value
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            msg = docDateCell.column.name
+            if (dt > dTo) {
+                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt < dFrom) {
+                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+            }
+        }
+        // Корректность даты заключения сделки
+        if (docDateCell.value > dealDateCell.value) {
+            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' +
+                    docDateCell.column.name + '» в строке ' + rowNum + '!')
+        }
+        // Корректность даты совершения сделки
+        if (row.getCell('dealDoneDate').value < dealDateCell.value) {
+            logger.error('«' + row.getCell('dealDoneDate').column.name + '» в строке ' + rowNum + ' не может быть меньше «' +
+                    dealDateCell.column.name + '» в строке ' + rowNum + '!')
         }
     }
     checkNSI()
@@ -130,7 +158,7 @@ void logicCheck() {
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI()  {
+void checkNSI() {
     for (row in formData.dataRows) {
         // TODO добавить проверки НСИ
     }
@@ -142,7 +170,7 @@ void checkNSI()  {
 void calc() {
     for (row in formData.dataRows) {
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('incomeSum').value!=null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
+        row.getCell('price').value = row.getCell('incomeSum').value != null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
         // Расчет поля "Итого"
         row.getCell('total').value = row.getCell('price').value
     }
@@ -206,7 +234,6 @@ def calcItog(int i) {
 
     newRow
 }
-
 
 /**
  * Сортировка строк

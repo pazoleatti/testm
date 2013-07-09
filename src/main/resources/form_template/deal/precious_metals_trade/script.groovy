@@ -157,14 +157,14 @@ void logicCheck() {
             logger.error(' Если указан «' + localityCell.column.name + '», не должен быть указан ' + cityCell.column.name + '» в строке ' + rowNum + '!')
         }
         // Проверка доходов и расходов
-        if (row.getCell('incomeSum').value != null && row.getCell('outcomeSum').value != null) {
-            logger.error('«' + row.getCell('incomeSum').column.name + '»' +
-                    ' и «' + row.getCell('outcomeSum').column.name + '» в строке ' +
+        incomeSumCell = row.getCell('incomeSum')
+        outcomeSum = row.getCell('outcomeSum')
+        if (incomeSumCell.value != null && row.getCell('outcomeSum').value != null) {
+            logger.error('«' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
                     rowNum + ' не могут быть одновременно заполнены!')
         }
-        if (row.getCell('incomeSum').value == null && row.getCell('outcomeSum').value == null) {
-            logger.error('Одна из граф «' + row.getCell('incomeSum').column.name + '»' +
-                    ' и «' + row.getCell('outcomeSum').column.name + '»' +
+        if (incomeSumCell.value == null && row.getCell('outcomeSum').value == null) {
+            logger.error('Одна из граф «' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
                     rowNum + ' должна быть заполнена!')
         }
         // Проверка на заполнение поля
