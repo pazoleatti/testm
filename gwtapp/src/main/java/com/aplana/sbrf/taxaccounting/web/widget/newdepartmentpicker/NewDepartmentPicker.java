@@ -55,9 +55,13 @@ public class NewDepartmentPicker extends Composite implements HasEnabled, NewDep
 		this.popup = new PopupPanel(true, true);
 		popup.setPixelSize(300, 370);
 		popUpWithTreeView = new PopUpWithTree(header, withCheckBox);
-		popUpWithTreeView.addDepartmentsReceivedEventHandler(this);
+		addDepartmentsReceivedEventHandler(this);
 
 		popup.add((PopUpWithTree)popUpWithTreeView);
+	}
+
+	public void addDepartmentsReceivedEventHandler(SelectDepartmentsEventHandler handler) {
+		popUpWithTreeView.addDepartmentsReceivedEventHandler(handler);
 	}
 
 	@Override
@@ -80,6 +84,12 @@ public class NewDepartmentPicker extends Composite implements HasEnabled, NewDep
 	@Override
 	public void setTreeValues(List<Department> departments, Set<Integer> availableDepartments) {
 		popUpWithTreeView.setItems(departments, availableDepartments);
+	}
+
+	@Override
+	public void setWidth(int width) {
+		selected.setWidth(new String(width + "px"));
+		popup.setPixelSize(width, 370);
 	}
 
 	@UiHandler("selectButton")

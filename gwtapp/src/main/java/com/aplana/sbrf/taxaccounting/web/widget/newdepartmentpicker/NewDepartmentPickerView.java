@@ -17,4 +17,6 @@ public interface NewDepartmentPickerView {
 
 	void setTreeValues(List<Department> departments, Set<Integer> availableDepartments);
 
+	void setWidth(int width);
+
 }
