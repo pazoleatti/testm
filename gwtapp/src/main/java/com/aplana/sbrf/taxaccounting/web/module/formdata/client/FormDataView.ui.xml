@@ -1,7 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:p="urn:import:com.google.gwt.user.cellview.client"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
+             xmlns:cellview="urn:import:com.google.gwt.user.cellview.client">
     <ui:style>
         .lockInformation {
             height: 30px;
@@ -51,6 +54,11 @@
 
         .attrPanel {
             float: right;
+        }
+
+        .pager {
+            margin-right: auto;
+            margin-left: auto;
         }
 
     </ui:style>
@@ -147,6 +155,11 @@
                 <style:GenericDataGrid height="100%" ui:field="formDataTable" />
             </g:ResizeLayoutPanel>
         </g:center>
+        <g:south size="30">
+            <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                 showFastForwardButton="false" fastForwardRows="0"
+                                 showLastPageButton="true" rangeLimited="true" styleName="{style.pager}" />
+        </g:south>
 	</g:DockLayoutPanel>
 
 

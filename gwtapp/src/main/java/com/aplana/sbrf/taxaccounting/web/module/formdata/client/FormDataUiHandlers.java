@@ -42,4 +42,6 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onUploadClickedFail(String message);
 
     String jsoninit();
+
+	void onRangeChange(final int start, int length);
 }

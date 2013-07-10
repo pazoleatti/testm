@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import java.util.ArrayList;
-
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -15,18 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
@@ -43,10 +29,13 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
+
 public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
 		FormDataUiHandlers {
 
+	public static int PAGE_SIZE = 15;
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -62,6 +51,7 @@ public class FormDataPresenter extends
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
 		getView().setUiHandlers(this);
+		getView().assignDataProvider(PAGE_SIZE);
 	}
 
 	@Override
@@ -92,6 +82,27 @@ public class FormDataPresenter extends
 			getProxy().manualRevealFailed();
 			MessageEvent.fire(this,
 					"Не удалось открыть/создать налоговую форму", e);
+		}
+	}
+
+	@Override
+	public void onRangeChange(final int start, int length) {
+		if (formData != null) {
+			GetRowsDataAction action = new GetRowsDataAction();
+			action.setFormDataId(formData.getId());
+			action.setRange(new DataRowRange(start, length));
+			dispatcher.execute(action, CallbackUtils
+					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
+						@Override
+						public void onSuccess(GetRowsDataResult result) {
+							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
+								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
+							else
+								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
+
+
+						}
+					}, FormDataPresenter.this));
 		}
 	}
 
@@ -226,7 +237,7 @@ public class FormDataPresenter extends
 		LogAddEvent.fire(this, result.getLogEntries());
 		// TODO: Тут было получение строк из FormData
 		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-		getView().setRowsData(new ArrayList<DataRow<Cell>>());
+//		getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
 	}
 
 	@Override
@@ -266,7 +277,7 @@ public class FormDataPresenter extends
 					},this));
 			// TODO: Тут было получение строк из FormData
 			// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-			getView().setRowsData(new ArrayList<DataRow<Cell>>());
+//			getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
 		}
 	}
 
@@ -405,8 +416,9 @@ public class FormDataPresenter extends
                                         forceEditMode);
                         		// TODO: Тут было получение строк из FormData
                         		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
-                                getView().setRowsData(
-                                        new ArrayList<DataRow<Cell>>());
+//                                getView().setRowsData(0, 0,
+//                                        new ArrayList<DataRow<Cell>>());
+	                            getView().updateData();
                                 getView().addCustomHeader(
                                         formData.getHeaders());
                                 getView().addCustomTableStyles(

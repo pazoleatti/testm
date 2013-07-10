@@ -3,15 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -22,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -43,7 +36,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode);
 
-		void setRowsData(List<DataRow<Cell>> rowsData);
+		void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData);
 
 		void addCustomHeader(List<DataRow<HeaderCell>> headers);
 
@@ -84,6 +77,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void enableRemoveRowButton(boolean enable);
 		
 		boolean getCheckedColumnsClicked();
+
+		void assignDataProvider(int pageSize);
+
+		void updateData();
 	}
 
 	public static final String NAME_TOKEN = "!formData";
