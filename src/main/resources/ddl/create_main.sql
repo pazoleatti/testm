@@ -889,7 +889,8 @@ alter table log_business add constraint log_business_fk_user_id foreign key (use
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data (id) on delete cascade;
 
-alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 207, 301, 302, 303));
+alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 101, 102,
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department (id);
 
@@ -929,7 +930,8 @@ create table log_system (
   user_department_id  number(9,0)
 );
 alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
-alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103,104,105,106,107,108,109,110, 203,204,205,206,207, 301,302,303));
+alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 101, 102,
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303));
 
 alter table log_system add constraint log_system_chk_dcl_form check (declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
 
