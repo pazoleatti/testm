@@ -37,7 +37,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     private DepartmentFormTypeDao departmentFormTypeDao;
 
 	@Override
-	public PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
+	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
 		FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
 
 		formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentId());
@@ -86,7 +86,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 		}
 
 		return formDataSearchDao.findPage(formDataDaoFilter, formDataFilter.getSearchOrdering(),
-				formDataFilter.isAscSorting(), new PaginatedSearchParams(formDataFilter.getStartIndex(),
+				formDataFilter.isAscSorting(), new PagingParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));
 	}
 

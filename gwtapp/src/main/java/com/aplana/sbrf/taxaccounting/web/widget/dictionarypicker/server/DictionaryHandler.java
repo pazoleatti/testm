@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.server;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.DictionaryDataProvider;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryResult;
@@ -30,9 +30,9 @@ public abstract class DictionaryHandler<A extends DictionaryAction<T>, T extends
 	@Override
 	public DictionaryResult<T> execute(A action, ExecutionContext context) throws ActionException {
 		DictionaryDataProvider<T> dictionaryDataProvider = getDictionaryDataProvider(action.getDictionaryCode());
-		PaginatedSearchResult<DictionaryItem<T>> items = dictionaryDataProvider.getValues(
+		PagingResult<DictionaryItem<T>> items = dictionaryDataProvider.getValues(
 					action.getSearchPattern()!=null ? action.getSearchPattern() : "",
-					new PaginatedSearchParams(action.getOffset(), action.getMax())
+					new PagingParams(action.getOffset(), action.getMax())
 		);
 
 		DictionaryResult<T> result = new DictionaryResult<T>();

@@ -15,6 +15,8 @@ public class RefBook implements Serializable {
 
 	public final static String RECORD_ID_ALIAS = "id";
 
+	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
+
 	/** Код справочника */
 	private Long id;
 
@@ -88,6 +90,20 @@ public class RefBook implements Serializable {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Проверяет, что справочник иерархичный. Проверка осуществляется по псевдонимам. Если есть атрибут
+	 * с предопределнным для иерархии псевдонимом, то справочник считается иерархичным.
+	 * @return
+	 */
+	public boolean isHierarchic() {
+		for(RefBookAttribute attribute : attributes) {
+			if (RECORD_PARENT_ID_ALIAS.equals(attribute.getAlias())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

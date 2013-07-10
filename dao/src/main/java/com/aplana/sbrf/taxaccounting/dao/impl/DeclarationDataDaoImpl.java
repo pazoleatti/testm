@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -25,8 +26,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -217,8 +217,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	public PaginatedSearchResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
-	                                                 boolean ascSorting,PaginatedSearchParams pageParams) {
+	public PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
+	                                                 boolean ascSorting,PagingParams pageParams) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, declarationFilter);
@@ -238,7 +238,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				new DeclarationDataSearchResultItemMapper()
 		);
 		long count = getCount(declarationFilter);
-		PaginatedSearchResult<DeclarationDataSearchResultItem>  result = new PaginatedSearchResult<DeclarationDataSearchResultItem>();
+		PagingResult<DeclarationDataSearchResultItem> result = new PagingResult<DeclarationDataSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(count);
 		return result;
