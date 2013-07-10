@@ -10,9 +10,13 @@
         }
 
         .searchLabel {
-            margin-left: 5px;
             margin-right: 5px;
+            margin-left: 5px;
             font-weight: bold;
+        }
+
+        .taxTypePanel {
+            margin-left: 30px;
         }
 
         .destinationLabel {
@@ -37,15 +41,15 @@
         <g:Label addStyleNames="{style.titleLabel}">Указание форм источников</g:Label>
 
         <g:HorizontalPanel height="45px">
-            <g:HorizontalPanel width="240px">
-                <g:Label addStyleNames="{style.searchLabel}">Назанчение </g:Label>
+            <g:HorizontalPanel width="210px">
+                <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
                 <g:VerticalPanel>
                     <g:Anchor href="#!sources;isForm=false">Декларации</g:Anchor>
                     <g:Anchor href="#!sources;isForm=true">Налоговые формы</g:Anchor>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
 
-            <g:FlowPanel width="400px">
+            <g:FlowPanel width="400px" addStyleNames="{style.taxTypePanel}">
                 <g:Label styleName="{style.searchLabel}">Вид налога</g:Label>
                 <g:ValueListBox ui:field="taxTypePicker" />
             </g:FlowPanel>

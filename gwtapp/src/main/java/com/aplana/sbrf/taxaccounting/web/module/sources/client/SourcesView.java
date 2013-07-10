@@ -101,7 +101,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		};
 
 		sourceTable.addColumn(sourceKindColumn, "Вид налоговой формы");
-		sourceTable.setColumnWidth(sourceKindColumn, 100, Style.Unit.PX);
+		sourceTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
 		sourceTable.addColumn(sourceTypeColumn, "Тип налоговой формы");
 		sourceTable.setRowCount(0);
 
@@ -128,7 +128,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		};
 
 		receiverTable.addColumn(receiverKindColumn, "Вид налоговой формы");
-		receiverTable.setColumnWidth(receiverKindColumn, 100, Style.Unit.PX);
+		receiverTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
 		receiverTable.addColumn(receiverTypeColumn, "Тип налоговой формы");
 		receiverTable.setRowCount(0);
 	}
