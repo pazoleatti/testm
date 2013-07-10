@@ -291,44 +291,32 @@ void deleteAllStatic() {
 }
 
 /**
- * Сортировка строк по гр. 2 / гр. 3, гр. 5 / гр. 6, гр. 9, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15.
+ * Сортировка строк по гр.
  */
 void sort() {
     formData.dataRows.sort({ DataRow a, DataRow b ->
-        // name - innKio - contractNum - contractDate - transactionType
-        if (a.name == b.name) {
-            if (a.innKio == b.innKio) {
-                if (a.countryCode1 == b.countryCode1) {
-                    if (a.contractNum == b.contractNum) {
-                        if (a.transactionDeliveryDate == b.transactionDeliveryDate) {
-                            if (a.innerCode == b.innerCode) {
-                                if (a.okpCode == b.okpCode) {
-                                    if (a.unitCountryCode == b.unitCountryCode) {
-                                        if (a.signPhis == b.signPhis) {
-                                            if (a.signTransaction == b.signTransaction) {
-                                                return a.countryCode2 <=> b.countryCode2
-                                            }
-                                            return a.signTransaction <=> b.signTransaction
-                                        }
-                                        return a.signPhis <=> b.signPhis
-                                    }
-                                    return a.unitCountryCode <=> b.unitCountryCode
-                                }
-                                return a.okpCode <=> b.okpCode
-                            }
-                            return a.innerCode <=> b.innerCode
-                        }
-                        return a.transactionDeliveryDate <=> b.transactionDeliveryDate
-                    }
-                    return a.contractNum <=> b.contractNum
-                }
-                return a.countryCode1 <=> b.countryCode1
-            }
-            return a.innKio <=> b.innKio
-        }
-        return a.name <=> b.name;
+        // гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
+        // гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
+        sortRow(['name','innKio', 'contractNum', 'contractDate', 'innerCode','okpCode', 'unitCountryCode','signPhis',
+                'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
+                'city2', 'settlement2', 'conditionCode', 'count'], a, b)
     })
     recalcRowNum()
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        aD = a.getCell(param).value
+        bD = b.getCell(param).value
+
+        if (aD == bD) {
+            continue
+        }
+        else {
+            return  aD <=> bD
+        }
+    }
+    return 0
 }
 
 /**
@@ -348,15 +336,23 @@ void addAllStatic() {
             if (row.getAlias() == null && nextRow == null
                     || row.name != nextRow.name
                     || row.innKio != nextRow.innKio
-                    || row.countryCode1 != nextRow.countryCode1
                     || row.contractNum != nextRow.contractNum
-                    || row.transactionDeliveryDate != nextRow.transactionDeliveryDate
+                    || row.contractDate != nextRow.contractDate
                     || row.innerCode != nextRow.innerCode
                     || row.okpCode != nextRow.okpCode
                     || row.unitCountryCode != nextRow.unitCountryCode
                     || row.signPhis != nextRow.signPhis
                     || row.signTransaction != nextRow.signTransaction
-                    || row.countryCode2 != nextRow.countryCode2) {
+                    || row.countryCode2 != nextRow.countryCode2
+                    || row.region1 != nextRow.region1
+                    || row.city1 != nextRow.city1
+                    || row.settlement1 != nextRow.settlement1
+                    || row.countryCode3 != nextRow.countryCode3
+                    || row.region2 != nextRow.region2
+                    || row.city2 != nextRow.city2
+                    || row.settlement2 != nextRow.settlement2
+                    || row.conditionCode != nextRow.conditionCode
+                    || row.count != nextRow.count) {
                 def itogRow = calcItog(i)
                 formData.dataRows.add(i + 1, itogRow)
                 i++
