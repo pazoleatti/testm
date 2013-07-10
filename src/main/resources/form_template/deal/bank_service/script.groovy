@@ -24,6 +24,20 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
 }
 
 /**
@@ -39,7 +53,7 @@ void checkCreation() {
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
 
     for (alias in ['jurName', 'serviceName', 'bankIncomeSum', 'contractNum', 'contractDate', 'transactionDate']) {
         row.getCell(alias).editable = true
@@ -73,19 +87,6 @@ void recalcRowNum() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            for (alias in ['rowNum', 'jurName', 'innKio', 'country', 'countryCode', 'serviceName', 'bankIncomeSum',
-                    'contractNum', 'contractDate', 'price', 'cost', 'transactionDate']) {
-                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                    msg = row.getCell(alias).column.name
-                    rowNum = row.getCell('rowNum').value
-                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
-                }
-            }
-        }
-    }
-
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -94,14 +95,29 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    // Корректность даты договора
     for (row in formData.dataRows) {
         if (row.getAlias() == null) {
 
-            dt = row.getCell('contractDate').value
+            def rowNum = row.getCell('rowNum').value
+
+            for (alias in ['jurName', 'innKio', 'country', 'countryCode', 'serviceName', 'bankIncomeSum',
+                    'contractNum', 'contractDate', 'price', 'cost', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    def msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            def bankIncomeSum = row.getCell('bankIncomeSum').value
+            def price = row.getCell('price').value
+            def cost = row.getCell('cost').value
+            def transactionDate = row.getCell('transactionDate').value
+            def contractDate = row.getCell('contractDate').value
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
             if (dt != null && (dt < dFrom || dt > dTo)) {
-                msg = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg = row.getCell('contractDate').column.name
 
                 if (dt > dTo) {
                     logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
@@ -111,49 +127,25 @@ void logicCheck() {
                     logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Проверка доходности
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            bankIncomeSum = row.getCell('bankIncomeSum').value
-            price = row.getCell('price').value
-
+            // Проверка доходности
             if (bankIncomeSum != price) {
-                msg1 = row.getCell('bankIncomeSum').column.name
-                msg2 = row.getCell('price').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('bankIncomeSum').column.name
+                def msg2 = row.getCell('price').column.name
                 logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
             }
-        }
-    }
 
-    // Проверка доходности
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            bankIncomeSum = row.getCell('bankIncomeSum').value
-            cost = row.getCell('cost').value
-
-            if (bankIncomeSum != price) {
-                msg1 = row.getCell('bankIncomeSum').column.name
-                msg2 = row.getCell('cost').column.name
-                rowNum = row.getCell('rowNum').value
+            // Проверка доходности
+            if (bankIncomeSum != cost) {
+                def msg1 = row.getCell('bankIncomeSum').column.name
+                def msg2 = row.getCell('cost').column.name
                 logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
             }
-        }
-    }
 
-    // Корректность даты сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            transactionDate = row.getCell('transactionDate').value
-            contractDate = row.getCell('contractDate').value
-
+            // Корректность даты сделки
             if (transactionDate < contractDate) {
-                msg1 = row.getCell('transactionDate').column.name
-                msg2 = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
         }
@@ -183,4 +175,38 @@ void calc() {
         row.getCell('cost').value = row.getCell('bankIncomeSum').value
         // TODO расчет полей по справочникам
     }
+}
+
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }

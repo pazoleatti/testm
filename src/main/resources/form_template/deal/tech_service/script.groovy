@@ -1,7 +1,6 @@
 package form_template.deal.tech_service
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 
 import java.math.RoundingMode
 
@@ -27,15 +26,15 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-    // После принятия из Утверждено
+// После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
         acceptance()
         break
-    // После принятия из Подготовлена
+// После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         acceptance()
         break
-    // Консолидация
+// Консолидация
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
@@ -55,7 +54,7 @@ void checkCreation() {
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
 
     for (alias in ['jurName', 'bankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
         row.getCell(alias).editable = true
@@ -89,37 +88,6 @@ void recalcRowNum() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            for (alias in ['jurName', 'innKio', 'countryCode', 'bankSum', 'contractNum', 'contractDate',
-                    'country', 'price', 'cost', 'transactionDate']) {
-                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                    msg = row.getCell(alias).column.name
-                    rowNum = row.getCell('rowNum').value
-                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
-                }
-            }
-        }
-    }
-
-    // Проверка стоимости
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-
-            cost = row.getCell('cost').value
-            price = row.getCell('price').value
-            count = row.getCell('count').value
-
-            if (price == null || count == null && cost != price * count) {
-                msg1 = row.getCell('cost').column.name
-                msg2 = row.getCell('price').column.name
-                msg3 = row.getCell('count').column.name
-                rowNum = row.getCell('rowNum').value
-                logger.warn("«$msg1» не равна произведению «$msg2» и «$msg3» в строке $rowNum!")
-            }
-        }
-    }
-
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -128,14 +96,38 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    // Корректность даты договора
     for (row in formData.dataRows) {
         if (row.getAlias() == null) {
 
-            dt = row.getCell('contractDate').value
+            def rowNum = row.getCell('rowNum').value
+
+            for (alias in ['jurName', 'innKio', 'countryCode', 'bankSum', 'contractNum', 'contractDate',
+                    'country', 'price', 'cost', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    def msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            // Проверка стоимости
+            def cost = row.getCell('cost').value
+            def price = row.getCell('price').value
+            def count = row.getCell('count').value
+            def bankSum = row.getCell('bankSum').value
+            def transactionDate = row.getCell('transactionDate').value
+            def contractDate = row.getCell('contractDate').value
+
+            if (price == null || count == null && cost != price * count) {
+                def msg1 = row.getCell('cost').column.name
+                def msg2 = row.getCell('price').column.name
+                def msg3 = row.getCell('count').column.name
+                logger.warn("«$msg1» не равна произведению «$msg2» и «$msg3» в строке $rowNum!")
+            }
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
             if (dt != null && (dt < dFrom || dt > dTo)) {
-                msg = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg = row.getCell('contractDate').column.name
 
                 if (dt > dTo) {
                     logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
@@ -145,87 +137,55 @@ void logicCheck() {
                     logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Корректность даты совершения сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            transactionDate = row.getCell('transactionDate').value
-            contractDate = row.getCell('contractDate').value
-
+            // Корректность даты совершения сделки
             if (transactionDate < contractDate) {
-                msg1 = row.getCell('transactionDate').column.name
-                msg2 = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
-        }
-    }
 
-    // Проверка цены сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            count = row.getCell('count').value
-            price = row.getCell('price').value
-            bankSum = row.getCell('bankSum').value
-
+            // Проверка цены сделки
             if (count != null) {
-                res = null
+                def res = null
 
                 if (bankSum != null && count != null) {
-                    res = (bankSum/count).setScale(2, RoundingMode.HALF_UP)
+                    res = (bankSum / count).setScale(2, RoundingMode.HALF_UP)
                 }
 
                 if (bankSum == null || count == null || price != res) {
-                    msg1 = row.getCell('price').column.name
-                    msg2 = row.getCell('bankSum').column.name
-                    msg3 = row.getCell('count').column.name
-                    rowNum = row.getCell('rowNum').value
+                    def msg1 = row.getCell('price').column.name
+                    def msg2 = row.getCell('bankSum').column.name
+                    def msg3 = row.getCell('count').column.name
                     logger.error("«$msg1» не равно отношению «$msg2» и «$msg3» в строке $rowNum!")
                 }
-            }
-            else {
+            } else {
                 if (price != bankSum) {
-                    msg1 = row.getCell('price').column.name
-                    msg2 = row.getCell('bankSum').column.name
-                    rowNum = row.getCell('rowNum').value
+                    def msg1 = row.getCell('price').column.name
+                    def msg2 = row.getCell('bankSum').column.name
                     logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Проверка расходов
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            cost = row.getCell('cost').value
-            bankSum = row.getCell('bankSum').value
-
+            // Проверка расходов
             if (cost != bankSum) {
-                msg1 = row.getCell('cost').column.name
-                msg2 = row.getCell('bankSum').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('cost').column.name
+                def msg2 = row.getCell('bankSum').column.name
                 logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
             }
-        }
-    }
 
-    // Проверка заполнения региона
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            country = row.getCell('country').value
+            // Проверка заполнения региона
+            def country = row.getCell('country').value
 
             if (country != null) {
-                 // TODO проверки для страны по коду справочника
-            }
-            else {
+                // TODO проверки для страны по коду справочника
+            } else {
                 // TODO проверки для страны по коду справочника
             }
+
+            // TODO Проверка населенного пункта
         }
     }
-
-    // Проверка населенного пункта
 
     checkNSI()
 }

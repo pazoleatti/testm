@@ -1,7 +1,8 @@
 package form_template.deal.rent_provision
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
+import java.math.RoundingMode
 
 /**
  * Предоставление нежилых помещений в аренду
@@ -9,7 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
-
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -23,10 +26,35 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+    }
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
 
     for (alias in ['jurName', 'incomeBankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
         row.getCell(alias).editable = true
@@ -51,7 +79,7 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNum').value = i++
     }
 }
@@ -60,12 +88,74 @@ void recalcRowNum() {
  * Логические проверки
  */
 void logicCheck() {
+    // Отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // Налоговый период
+    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
     for (row in formData.dataRows) {
-        for (alias in ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
-                'country', 'count', 'price', 'cost', 'transactionDate']) {
-            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                msg = row.getCell(alias).column.name
-                logger.error("Поле «$msg» не заполнено!")
+        if (row.getAlias() == null) {
+
+            def rowNum = row.getCell('rowNum').value
+
+            for (alias in ['jurName', 'innKio', 'countryCode', 'incomeBankSum', 'contractNum', 'contractDate',
+                    'country', 'count', 'price', 'cost', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            def count = row.getCell('count').value
+            def price = row.getCell('price').value
+            def cost = row.getCell('cost').value
+            def incomeBankSum = row.getCell('incomeBankSum').value
+            def transactionDate = row.getCell('transactionDate').value
+            def contractDate = row.getCell('contractDate').value
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
+            if (dt != null && (dt < dFrom || dt > dTo)) {
+                def msg = row.getCell('contractDate').column.name
+
+                if (dt > dTo) {
+                    logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
+                }
+
+                if (dt < dFrom) {
+                    logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
+                }
+            }
+
+            // Проверка цены
+            def res = null
+
+            if (incomeBankSum != null && count != null) {
+                res = (incomeBankSum / count).setScale(2, RoundingMode.HALF_UP)
+            }
+
+            if (incomeBankSum == null || count == null || price != res) {
+                def msg1 = row.getCell('price').column.name
+                def msg2 = row.getCell('incomeBankSum').column.name
+                def msg3 = row.getCell('count').column.name
+                logger.error("«$msg1» не равно отношению «$msg2» и «$msg3» в строке $rowNum!")
+            }
+
+            // Проверка доходности
+            if (cost != incomeBankSum) {
+                def msg1 = row.getCell('cost').column.name
+                def msg2 = row.getCell('incomeBankSum').column.name
+                logger.error("«$msg1» не равно «$msg2» в строке $rowNum!")
+            }
+
+            // Корректность даты совершения сделки
+            if (transactionDate < contractDate) {
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
         }
     }
@@ -87,6 +177,12 @@ void checkNSI() {
  */
 void calc() {
     for (row in formData.dataRows) {
+        incomeBankSum = row.getCell('incomeBankSum').value
+        count = row.getCell('count').value
+        // Расчет поля "Цена"
+        if (count != null && count != 0) {
+            row.getCell('price').value = incomeBankSum / count
+        }
         // Расчет поля "Стоимость"
         row.getCell('cost').value = row.getCell('incomeBankSum').value
         // TODO расчет полей по справочникам
