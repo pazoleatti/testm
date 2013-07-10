@@ -30,6 +30,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
@@ -104,6 +105,21 @@ public class FormDataPresenter extends
 						}
 					}, FormDataPresenter.this));
 		}
+	}
+
+	@Override
+	public void onCellModified(DataRow<Cell> dataRow) {
+		CellModifiedAction action = new CellModifiedAction();
+		action.setFormDataId(formData.getId());
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+		dataRows.add(dataRow);
+		action.setDataRows(dataRows);
+		dispatcher.execute(action, CallbackUtils
+				.wrongStateCallback(new AbstractCallback<CellModifiedResult>() {
+					@Override
+					public void onSuccess(CellModifiedResult result) {
+					}
+				}, FormDataPresenter.this));
 	}
 
 	@Override

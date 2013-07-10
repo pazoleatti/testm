@@ -90,6 +90,11 @@ public class FormTemplateRowPresenter
 		}
 	}
 
+	@Override
+	public void onCellModified(DataRow<Cell> row) {
+		System.out.println("Mod: " + row);
+	}
+
 	private void setViewData() {
 		FormDataUtils.setValueOners(formTemplate.getHeaders());
 		getView().setStylesData(formTemplate.getStyles());

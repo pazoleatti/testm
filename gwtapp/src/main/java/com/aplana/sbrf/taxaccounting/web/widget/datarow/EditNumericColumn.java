@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ValidatedInputCell;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -41,6 +42,8 @@ public class EditNumericColumn extends DataRowColumn<String> {
 				} catch (NumberFormatException e) {
 					dataRow.put(getAlias(), null);
 				}
+				CellModifiedEvent event = new CellModifiedEvent(dataRow);
+				fireEvent(event);
 			}
 		});
 	}

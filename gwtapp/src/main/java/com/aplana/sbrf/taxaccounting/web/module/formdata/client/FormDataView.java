@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Bar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
@@ -174,6 +176,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory
 						.createTableColumn(col, formDataTable);
 				formDataTable.addColumn(tableCol, col.getName());
+				((DataRowColumn)tableCol).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+					@Override
+					public void onCellModified(CellModifiedEvent event) {
+						if(getUiHandlers()!=null){
+							getUiHandlers().onCellModified(event.getDataRow());
+						}
+					}
+				});
 				if (col.getWidth() >= 0) {
 					formDataTable.setColumnWidth(tableCol, col.getWidth() + "em");
 				}
