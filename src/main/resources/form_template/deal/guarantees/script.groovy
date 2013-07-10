@@ -26,24 +26,25 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkMatrix()
-        logicCheck()
-        calc()
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_CREATED:
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkMatrix()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        break
     case FormDataEvent.ADD_ROW:
         addRow()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
         break
 }
 
@@ -67,7 +68,7 @@ void recalcRowNum() {
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
     for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
@@ -87,17 +88,6 @@ void checkUniq() {
 }
 
 /**
- * Cформирована ли для выбранного пользователем отчета форма-приемник (консолидированный отчет или «Матрица»)
- */
-void checkMatrix() {
-    // TODO
-    if (false) {
-        // сформирована и имеет статус, отличный от «Создана»
-        logger.error("Принятие отчета невозможно, т.к. уже подготовлена форма-приемник.")
-    }
-}
-
-/**
  * Логические проверки
  */
 void logicCheck() {
@@ -105,38 +95,55 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum = row.getCell('rowNumber').value
-        for (alias in ['fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber', 'dealDate',
-                'sum', 'price', 'total', 'dealDoneDate']) {
-
-            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
+        def rowNum = row.getCell('rowNumber').value
+        def docDateCell = row.getCell('docDate')
+        def dealDateCell = row.getCell('dealDate')
+        for (alias in ['fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber',
+                'dealDate', 'sum', 'price', 'total', 'dealDoneDate']) {
+            def rowCell = row.getCell(alias)
+            if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
+                def msg = rowCell.column.name
+                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
             }
-
             //  Корректность даты договора
-            // TODO docDate должна относиться к календарному году, указанному для отчётного периода
-            if (false) {
-                logger.error('«' + row.getCell('docDate').column.name + '» в строке ' + rowNum + ' не может быть больше даты окончания отчётного периода!')
+            def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
+            def dFrom = taxPeriod.getStartDate()
+            def dTo = taxPeriod.getEndDate()
+            def dt = docDateCell.value
+            if (dt != null && (dt < dFrom || dt > dTo)) {
+                def msg = docDateCell.column.name
+                if (dt > dTo) {
+                    logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+                }
+                if (dt < dFrom) {
+                    logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+                }
             }
-            // Корректность даты сделки
-            if (row.getCell('docDate').value > row.getCell('dealDate').value) {
-                logger.error('«' + row.getCell('dealDate').column.name + '» не может быть меньше «' +
-                        row.getCell('docDate').column.name + '» в строке ' + rowNum + '!')
+            // Корректность даты заключения сделки
+            if (docDateCell.value > dealDateCell.value) {
+                def msg1 = dealDateCell.column.name
+                def msg2 = docDateCell.column.name
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
             // Проверка доходности
-            if (row.getCell('price').value != row.getCell('sum').value) {
-                logger.error('«' + row.getCell('price').column.name + '» не может отличаться от  «' +
-                        row.getCell('sum').column.name + '» в строке ' + rowNum + '!')
+            def sumCell = row.getCell('sum')
+            def priceCell = row.getCell('price')
+            def totalCell = row.getCell('total')
+            def msgSum = sumCell.column.name
+            if (priceCell.value != sumCell.value) {
+                def msg = priceCell.column.name
+                logger.error("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
             }
-            // Проверка доходности
-            if (row.getCell('total').value != row.getCell('sum').value) {
-                logger.error('«' + row.getCell('total').column.name + '» не может отличаться от  «' +
-                        row.getCell('sum').column.name + '» в строке ' + rowNum + '!')
+            if (totalCell.value != sumCell.value) {
+                def msg = totalCell.column.name
+                logger.error("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
             }
             // Корректность даты совершения сделки
-            if (row.getCell('dealDate').value > row.getCell('dealDoneDate').value) {
-                logger.error('«' + row.getCell('dealDoneDate').column.name + '» не может быть меньше «' +
-                        row.getCell('dealDate').column.name + '» в строке ' + rowNum + '!')
+            def dealDoneDateCell = row.getCell('dealDoneDate')
+            if (dealDoneDateCell.value < dealDateCell.value) {
+                def msg1 = dealDoneDateCell.column.name
+                def msg2 = dealDateCell.column.name
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
         }
     }
@@ -205,4 +212,37 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
+}
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
