@@ -12,9 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.Fo
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.TableCellElement;
