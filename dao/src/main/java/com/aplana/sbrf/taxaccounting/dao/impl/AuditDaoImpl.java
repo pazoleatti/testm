@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -32,7 +31,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
 	@Override
-	public PaginatedSearchResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
+	public PagingResult<LogSystemSearchResultItem> getLogs(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select * ");
 		appendSelectFromAndWhereClause(sql, filter);
 		sql.append(" order by id");
@@ -59,7 +58,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
         }
 
-		PaginatedSearchResult<LogSystemSearchResultItem> result = new PaginatedSearchResult<LogSystemSearchResultItem>();
+		PagingResult<LogSystemSearchResultItem> result = new PagingResult<LogSystemSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(getCount(filter));
 

@@ -106,8 +106,8 @@ public interface DeclarationDataDao {
 	 * @param paginatedSearchParams - диапазон индексов, задающий страницу
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
 	 */
-	PaginatedSearchResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering,
-	                                          boolean ascSorting, PaginatedSearchParams paginatedSearchParams);
+	PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering,
+	                                          boolean ascSorting, PagingParams paginatedSearchParams);
 
 	/**
 	 * Ищет декларацию по заданным параметрам.

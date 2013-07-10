@@ -29,9 +29,9 @@ public interface FormDataSearchDao {
 	 * @param ordering - способ сортировки
 	 * @param ascSorting - true, если сортируем по возрастанию, false - по убыванию
 	 * @param pageParams - диапазон индексов, задающий страницу
-	 * @return возвращает объект {@link PaginatedSearchResult}, содержащий информацию о результатах запроса
+	 * @return возвращает объект {@link com.aplana.sbrf.taxaccounting.model.PagingResult}, содержащий информацию о результатах запроса
 	 */
-	PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams);
+	PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams);
 	
 	/**
 	 * Получить количество записей, удовлетворяющих запросу

@@ -20,7 +20,7 @@ public interface FormDataSearchService {
 	 * @return список идентификаторов данных по отчётным формам, соответствующие критериям поиска.
 	 * @throws AccessDeniedException если у пользователя нет роли, разрешающей поиск по налоговым формам
 	 */
-	PaginatedSearchResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter);
+	PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter);
 
 	/**
 	 * Получить список, включающий в себя департамент и его дочернии департаменты

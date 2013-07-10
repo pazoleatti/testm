@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
@@ -32,7 +32,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 			return null;
 		}
 		GetFormDataListResult res = new GetFormDataListResult();
-		PaginatedSearchResult<FormDataSearchResultItem> resultPage = formDataSearchService
+		PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
 				.findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
 		res.setTotalCountOfRecords(resultPage.getTotalRecordCount());
 		res.setRecords(resultPage.getRecords());

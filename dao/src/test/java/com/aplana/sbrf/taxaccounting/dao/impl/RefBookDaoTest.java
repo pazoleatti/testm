@@ -1,16 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
-import com.aplana.sbrf.taxaccounting.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -22,9 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -58,26 +47,26 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData1() throws Exception {
 		RefBook refBook = refBookDao.get(1L);
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2013"), refBook.getAttributeByAlias("name"));
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2013"), null, null, refBook.getAttributeByAlias("name"));
 		System.out.println(data);
 		// проверяем кол-во строк
-		Assert.assertEquals(2, data.size());
+		Assert.assertEquals(2, data.getRecords().size());
 		// проверяем типы значений
 		for (int i = 0; i < 2; i++) {
-			Map<String, RefBookValue> record = data.get(0);
+			Map<String, RefBookValue> record = data.getRecords().get(0);
 			Assert.assertEquals(RefBookAttributeType.NUMBER, record.get("id").getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.STRING, record.get("name").getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.NUMBER, record.get("pagecount").getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.REFERENCE, record.get("author").getAttributeType());
 		}
-		sort(data);
-		Map<String, RefBookValue> record = data.get(0);
+		sort(data.getRecords());
+		Map<String, RefBookValue> record = data.getRecords().get(0);
 		Assert.assertEquals(1, record.get("id").getNumberValue().intValue());
 		Assert.assertEquals("Алиса в стране чудес", record.get("name").getStringValue());
 		Assert.assertEquals(1113, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(5, record.get("author").getReferenceValue().intValue());
 
-		Map<String, RefBookValue> record2 = data.get(1);
+		Map<String, RefBookValue> record2 = data.getRecords().get(1);
 		Assert.assertEquals(4, record2.get("id").getNumberValue().intValue());
 		Assert.assertEquals("Вий", record2.get("name").getStringValue());
 		Assert.assertEquals(425, record2.get("pagecount").getNumberValue().doubleValue(), 1e-5);
@@ -86,12 +75,12 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData2() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.02.2013"), null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.02.2013"), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
-		Assert.assertEquals(2, data.size());
-		sort(data);
-		Map<String, RefBookValue> record = data.get(0);
+		Assert.assertEquals(2, data.getRecords().size());
+		sort(data.getRecords());
+		Map<String, RefBookValue> record = data.getRecords().get(0);
 		Assert.assertEquals(2, record.get("id").getNumberValue().intValue());
 		Assert.assertEquals("Алиса в стране", record.get("name").getStringValue());
 		Assert.assertEquals(1213, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
@@ -100,11 +89,11 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData3() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.03.2013"), null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.03.2013"), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
-		Assert.assertEquals(1, data.size());
-		Map<String, RefBookValue> record2 = data.get(0);
+		Assert.assertEquals(1, data.getRecords().size());
+		Map<String, RefBookValue> record2 = data.getRecords().get(0);
 		Assert.assertEquals(4, record2.get("id").getNumberValue().intValue());
 		Assert.assertEquals("Вий", record2.get("name").getStringValue());
 		Assert.assertEquals(425, record2.get("pagecount").getNumberValue().doubleValue(), 1e-5);
@@ -113,18 +102,18 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData4() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2012"), null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2012"), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
-		Assert.assertEquals(0, data.size());
+		Assert.assertEquals(0, data.getRecords().size());
 	}
 
 	@Test
 	public void testGetData5() throws Exception {
-		List<Map<String, RefBookValue>> data = refBookDao.getData(1L, sdf.parse("01.01.2014"), null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2014"), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
-		Assert.assertEquals(1, data.size());
+		Assert.assertEquals(1, data.getRecords().size());
 	}
 
 	/**

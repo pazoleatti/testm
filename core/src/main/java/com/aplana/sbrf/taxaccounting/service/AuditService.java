@@ -11,7 +11,7 @@ public interface AuditService {
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
 	 * @return объект, представляющий искомую информацию из журанала аудита
 	 * */
-	PaginatedSearchResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
+	PagingResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании

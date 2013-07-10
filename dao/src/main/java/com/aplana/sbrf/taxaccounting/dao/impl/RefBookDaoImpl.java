@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -95,10 +97,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
 	@Override
-	public List<Map<String, RefBookValue>> getData(Long refBookId, Date version, RefBookAttribute sortAttribute) {
+	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+															  String filter, RefBookAttribute sortAttribute) {
 		String sql = getRefBookSql(refBookId, version, sortAttribute);
 		RefBook refBook = get(refBookId);
-		return getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
+		List<Map<String, RefBookValue>> records = getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
+		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+		result.setRecords(records);
+		result.setTotalRecordCount(1000); //TODO: не реализовано (Marat Fayzullin 2013-07-10)
+		return result;
 	}
 
 	@Override
@@ -285,4 +292,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		});
 	}
 
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
+	}
 }

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
@@ -117,8 +117,8 @@ public class FormDataSearchDaoTest {
 		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
 		filter.setAccessFilterType(AccessFilterType.ALL);
 		
-		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 0);
-		PaginatedSearchResult<FormDataSearchResultItem> res;
+		PagingParams pageParams = new PagingParams(0, 0);
+		PagingResult<FormDataSearchResultItem> res;
 		final long TOTAL_RECORDS_COUNT = formDataSearchDao.getCount(filter);
 
 		for(int requestedCount = 0; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 5){
@@ -140,9 +140,9 @@ public class FormDataSearchDaoTest {
 		filter.setUserDepartmentId(Department.ROOT_BANK_ID);
 		filter.setAccessFilterType(AccessFilterType.ALL);
 		
-		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 5);
+		PagingParams pageParams = new PagingParams(0, 5);
 		
-		PaginatedSearchResult<FormDataSearchResultItem> res;
+		PagingResult<FormDataSearchResultItem> res;
 		
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.ID, true, pageParams);
 		assertIdsEquals(new long[] {1, 2, 3, 4, 5}, res.getRecords());

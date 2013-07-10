@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,7 +30,7 @@ public class AuditServiceImpl implements AuditService {
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
-	public PaginatedSearchResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
+	public PagingResult<LogSystemSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
 		if (filter.getFromSearchDate() == null || filter.getToSearchDate() == null) {
 			throw new ServiceException("Необходимо ввести поисковые даты \"От\" и \"До\"");
 		}
