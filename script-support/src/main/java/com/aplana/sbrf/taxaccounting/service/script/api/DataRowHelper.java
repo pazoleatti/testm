@@ -1,0 +1,100 @@
+package com.aplana.sbrf.taxaccounting.service.script.api;
+
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+
+/**
+ * Работа со строками НФ.
+ * 
+ * Для более подробной информации о работе методов см. DataRowDao интерфейс
+ * 
+ * @author sgoryachkin
+ * 
+ */
+public interface DataRowHelper {
+
+	/**
+	 * Получение списка сохраненных строк формы
+	 * 
+	 * @return
+	 */
+	List<DataRow<Cell>> getAllSaved();
+
+	/**
+	 * Получение количества сохранненых строк формы
+	 * 
+	 * @return
+	 */
+	int getSavedCount();
+
+	/**
+	 * Получение текущих рабочих строк НФ
+	 * 
+	 * @return
+	 */
+	List<DataRow<Cell>> getAll();
+
+	/**
+	 * Получение количества текущих рабочих строк НФ
+	 * 
+	 * @return
+	 */
+	int getCount();
+
+	/**
+	 * Вставка строки
+	 * 
+	 * @param dataRow
+	 * @param index
+	 */
+	void insert(DataRow<Cell> dataRow, int index);
+
+	/**
+	 * Вставка списка строк
+	 * 
+	 * @param dataRows
+	 * @param index
+	 */
+	void insert(List<DataRow<Cell>> dataRows, int index);
+
+	/**
+	 * Обновление строки
+	 * 
+	 * @param dataRow
+	 */
+	void update(DataRow<Cell> dataRow);
+
+	/**
+	 * Обновление списка строк
+	 * 
+	 * @param dataRows
+	 */
+	void update(List<DataRow<Cell>> dataRows);
+
+	/**
+	 * Удаление строки
+	 * 
+	 * @param dataRow
+	 */
+	void delete(DataRow<Cell> dataRow);
+
+	/**
+	 * Удаление списка строк
+	 * 
+	 * @param dataRows
+	 */
+	void delete(List<DataRow<Cell>> dataRows);
+
+	/**
+	 * Сохранение строк НФ
+	 */
+	void save();
+
+	/**
+	 * Отмена изменений сток НФ
+	 */
+	void cancel();
+
+}

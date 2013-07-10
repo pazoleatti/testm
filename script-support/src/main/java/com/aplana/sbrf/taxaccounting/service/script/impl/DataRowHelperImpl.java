@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,17 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 
 
+/**
+ * 
+ * @author sgoryachkin
+ *
+ */
 @Component
 @Scope(value="prototype")
-public class DataRowServiceImpl implements DataRowService, ScriptComponentContextHolder{
+public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextHolder{
 	
 	private FormData fd;
 	
@@ -61,50 +67,49 @@ public class DataRowServiceImpl implements DataRowService, ScriptComponentContex
 
 	@Override
 	public void insert(DataRow<Cell> dataRow, int index) {
-		// TODO Auto-generated method stub
+		@SuppressWarnings("unchecked")
+		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
+		dataRowDao.insertRows(fd, index, asList);
 		
 	}
 
 	@Override
 	public void insert(List<DataRow<Cell>> dataRows, int index) {
-		// TODO Auto-generated method stub
-		
+		dataRowDao.insertRows(fd, index, dataRows);
 	}
 
 	@Override
 	public void update(DataRow<Cell> dataRow) {
-		// TODO Auto-generated method stub
-		
+		@SuppressWarnings("unchecked")
+		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
+		dataRowDao.updateRows(fd, asList);
 	}
 
 	@Override
 	public void update(List<DataRow<Cell>> dataRows) {
-		// TODO Auto-generated method stub
-		
+		dataRowDao.updateRows(fd, dataRows);
 	}
 
 	@Override
 	public void delete(DataRow<Cell> dataRow) {
-		// TODO Auto-generated method stub
-		
+		@SuppressWarnings("unchecked")
+		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
+		dataRowDao.removeRows(fd, asList);
 	}
 
 	@Override
 	public void delete(List<DataRow<Cell>> dataRows) {
-		// TODO Auto-generated method stub
-		
+		dataRowDao.removeRows(fd, dataRows);
 	}
 
 	@Override
 	public void save() {
-		// TODO Auto-generated method stub
-		
+		dataRowDao.commit(fd);
 	}
 
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
-		
+		dataRowDao.rollback(fd);
 	}
 
 }

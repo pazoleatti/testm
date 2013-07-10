@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 
 /*
  * Реализация FormDataService
@@ -30,7 +30,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 	private FormDataDao dao;
 	
 	@Autowired
-	private DataRowServiceImpl dataRowServiceImpl;
+	private DataRowHelperImpl dataRowServiceImpl;
 	
 	@Override
 	public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
@@ -38,7 +38,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 	}
 
 	@Override
-	public DataRowService getDataRowService(FormData formData) {
+	public DataRowHelper getDataRowService(FormData formData) {
 		dataRowServiceImpl.setFormData(formData);
 		dataRowServiceImpl.setScriptComponentContext(scriptComponentContext);
 		return dataRowServiceImpl;
