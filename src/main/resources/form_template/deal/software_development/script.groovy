@@ -16,6 +16,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -83,7 +84,7 @@ void checkUniq() {
 void logicCheck() {
     for (row in formData.dataRows) {
         def rowNum = row.getCell('rowNumber').value
-        def docDateCell = row.getCell('docDate') docDateCell = row.getCell('docDate')
+        def docDateCell = row.getCell('docDate')
         for (alias in ['fullNamePerson', 'inn', 'countryCode', 'expensesSum', 'docNumber', 'docDate',
                 'serviceType', 'price', 'cost', 'dealDate']) {
             def rowCell = row.getCell(alias)

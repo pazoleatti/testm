@@ -16,6 +16,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -126,7 +127,7 @@ void logicCheck() {
             def msg = costCell.column.name
             logger.error("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
         }
-        // Корректность даты совершения сделки
+        // Корректность даты совершения сделки                                   FormTemplateService
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name

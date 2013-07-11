@@ -17,6 +17,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()

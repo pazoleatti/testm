@@ -75,6 +75,9 @@ void addRow() {
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
+
+    row.getCell('count').value = 1
+
     recalcRowNum()
 }
 /**

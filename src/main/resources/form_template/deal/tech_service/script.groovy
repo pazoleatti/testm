@@ -15,7 +15,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calc()
-        logicCheck()
+        //logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -38,7 +38,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        logicCheck()
+        //logicCheck()
         break
 }
 
