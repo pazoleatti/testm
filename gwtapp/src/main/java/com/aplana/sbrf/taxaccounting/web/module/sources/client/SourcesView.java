@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -18,8 +19,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -30,37 +31,49 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	interface Binder extends UiBinder<Widget, SourcesView> { }
 
+	interface LinkStyle extends CssResource {
+		String enabled();
+		String disabled();
+	}
+
 	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
 
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
 	private Map<Integer, FormType> receiverSourcesFormType;
-	private final NoSelectionModel<DepartmentFormType> selectionModel = new NoSelectionModel<DepartmentFormType>();;
+	private final SingleSelectionModel<DepartmentFormType> receiverSelectionModel =
+			new SingleSelectionModel<DepartmentFormType>();
+	private final SingleSelectionModel<DepartmentFormType> sourcesSelectionModel =
+			new SingleSelectionModel<DepartmentFormType>();
 
+	@UiField LinkStyle css;
 
 	@UiField(provided = true)
 	ValueListBox<TaxType> taxTypePicker;
-
 	@UiField
 	GenericDataGrid<DepartmentFormType> sourcesTable;
-
 	@UiField
 	GenericDataGrid<DepartmentFormType> receiversTable;
-
 	@UiField
 	GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
 
 	@UiField
 	NewDepartmentPicker departmentReceiverPicker;
-
 	@UiField
 	NewDepartmentPicker departmentSourcePicker;
 
 	@UiField
-	Anchor moveToForm;
-
+	Anchor formAnchor;
 	@UiField
-	Anchor moveToDeclaration;
+	Anchor declarationAnchor;
+	@UiField
+	Anchor assignButton;
+	@UiField
+	Anchor cancelButton;
+	@UiField
+	Label formLabel;
+	@UiField
+	Label declarationLabel;
 
 	@Inject
 	@UiConstructor
@@ -93,6 +106,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
 		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
+		enableAnchor(assignButton, false);
+		enableAnchor(cancelButton, false);
+		setForms(true);
 	}
 
 	private void setupTables() {
@@ -123,6 +139,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
 		sourcesTable.addColumn(sourceTypeColumn, "Тип налоговой формы");
 		sourcesTable.setRowCount(0);
+		sourcesTable.setSelectionModel(sourcesSelectionModel);
+		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+				enableAnchor(assignButton, true);
+			}
+		});
 
 		// Receivers
 		TextColumn<DepartmentFormType> receiverKindColumn = new TextColumn<DepartmentFormType>() {
@@ -151,11 +174,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		receiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
 		receiversTable.addColumn(receiverTypeColumn, "Тип налоговой формы");
 		receiversTable.setRowCount(0);
-		receiversTable.setSelectionModel(selectionModel);
-		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+		receiversTable.setSelectionModel(receiverSelectionModel);
+		receiverSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-				getUiHandlers().setFormReceiverSources(selectionModel.getLastSelectedObject());
+				getUiHandlers().setFormReceiverSources(receiverSelectionModel.getSelectedObject());
+				enableAnchor(assignButton, true);
 			}
 		});
 
@@ -207,6 +231,15 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
 		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Тип налоговой формы");
 		receiverSourcesTable.setRowCount(0);
+	}
+
+	private void enableAnchor(Anchor anchor, boolean enabled) {
+		if (enabled) {
+			anchor.setStyleName(css.enabled());
+		} else {
+			anchor.setStyleName(css.disabled());
+		}
+
 	}
 
 	@Override
@@ -275,6 +308,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			getUiHandlers().setFormReceivers(
 					departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
 		}
+	}
+
+	private void setForms(boolean isForm) {
+		formLabel.setVisible(isForm);
+		formAnchor.setVisible(!isForm);
+		declarationLabel.setVisible(!isForm);
+		declarationAnchor.setVisible(isForm);
 	}
 
 	private class CheckedDepartmentFormType {
