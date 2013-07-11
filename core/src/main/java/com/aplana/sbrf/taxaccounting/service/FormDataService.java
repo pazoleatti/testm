@@ -29,7 +29,7 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
 	 *		обязательных параметров
 	 */
-	FormData createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
+	long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod);
 
 
     /**
@@ -123,7 +123,7 @@ public interface FormDataService {
 	 * @param reportPeriodId идентифиуатор отчетного периода
 	 * @return созданный объект FormData (еще не сохранённый в БД)
 	 */
-	FormData createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId,
+	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId,
 	                                    int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData);
 
 	/**

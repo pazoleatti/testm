@@ -1,5 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.creationdialog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
@@ -11,9 +18,13 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
 import com.google.inject.Inject;
@@ -23,15 +34,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
 public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> implements DialogUiHandlers {
 
@@ -78,20 +81,20 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	public void onConfirm() {
 		FormDataFilter filterFormData = getView().getFilterData();
 		if(isFilterDataCorrect(filterFormData)){
-			getView().hide();
-			getView().clearInput();
-
-			placeManager.revealPlace(new PlaceRequest(FormDataPresenter.NAME_TOKEN)
-					.with(FormDataPresenter.READ_ONLY, "false")
-					.with(FormDataPresenter.FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))
-					.with(FormDataPresenter.FORM_DATA_KIND_ID, String.valueOf(filterFormData.getFormDataKind() != null
-							? filterFormData.getFormDataKind().getId() : null))
-					.with(FormDataPresenter.DEPARTMENT_ID, String.valueOf(filterFormData.getDepartmentId() != null
-							? filterFormData.getDepartmentId().iterator().next() : null))
-					.with(FormDataPresenter.FORM_DATA_TYPE_ID, String.valueOf(filterFormData.getFormTypeId() != null
-							? filterFormData.getFormTypeId() : null))
-					.with(FormDataPresenter.FORM_DATA_RPERIOD_ID, String.valueOf(filterFormData.getReportPeriodIds()
-							.iterator().next()))
+			LogCleanEvent.fire(this);
+			LogShowEvent.fire(this, false);
+			CreateFormData action = new CreateFormData();
+			action.setDepartmentId(filterFormData.getDepartmentId().iterator().next());
+			action.setFormDataKindId(filterFormData.getFormDataKind().getId());
+			action.setFormDataTypeId(filterFormData.getFormTypeId());
+			action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
+			dispatchAsync.execute(action, CallbackUtils
+					.defaultCallback(new AbstractCallback<CreateFormDataResult>() {
+						@Override
+						public void onSuccess(final CreateFormDataResult checkResult) {
+							placeManager.revealPlace(new Builder().with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(checkResult.getFormDataId())).build());
+						}
+					}, DialogPresenter.this)
 			);
 		}
 

@@ -4,19 +4,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
@@ -56,7 +60,7 @@ public class GetFormDataHandler extends
 			ExecutionContext context) throws ActionException {
 
 		TAUserInfo userInfo = securityService.currentUserInfo();
-		checkAction(action);
+
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
 
@@ -87,20 +91,14 @@ public class GetFormDataHandler extends
 	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
 			Logger logger, GetFormDataResult result) {
 		FormData formData;
-		if (action.getFormDataId() == Long.MAX_VALUE) {
-			formData = formDataService.createFormData(logger, userInfo,
-					formTemplateService.getActiveFormTemplateId(action
-							.getFormDataTypeId().intValue()), action
-							.getDepartmentId(), FormDataKind.fromId(action
-							.getFormDataKind().intValue()),
-							reportPeriodDao.get(action.getReportPeriodId().intValue()));
-		} else {
-			if (!action.isReadOnly()) {
-				formDataService.lock(action.getFormDataId(), userInfo);
-			}
-			formData = formDataService.getFormData(userInfo,
-					action.getFormDataId(), logger);
+		
+		if (!action.isReadOnly()) {
+			formDataService.lock(action.getFormDataId(), userInfo);
 		}
+		
+		formData = formDataService.getFormData(userInfo,
+				action.getFormDataId(), logger);
+		
 		FormTemplate formTemplate = formTemplateService.get(formData
 				.getFormTemplateId());
 
@@ -139,30 +137,6 @@ public class GetFormDataHandler extends
 		result.setFormDataAccessParams(accessParams);
 	}
 
-	private void checkAction(GetFormData action) throws ActionException {
-		String errorMessage = "";
-		if (action.getFormDataId() == Long.MAX_VALUE) {
-			if (action.getFormDataTypeId() == null) {
-				errorMessage += " не указан вид формы";
-			}
-			if (action.getFormDataKind() == null) {
-				errorMessage += ", не указан тип формы";
-			}
-			if (action.getDepartmentId() == null) {
-				errorMessage += ", не указано подразделение";
-			}
-			if (action.getReportPeriodId() == null) {
-				errorMessage += ", не указан отчетный период";
-			}
-			if (!errorMessage.isEmpty()) {
-				errorMessage = errorMessage.startsWith(",") ? errorMessage
-						.substring(1) : errorMessage;
-				throw new TaActionException(
-						"Не удалось создать налоговую форму:" + errorMessage);
-			}
-		}
-	}
-
 	/**
 	 * Блокирует форму при необходимости, заполняет состояние блокировки
 	 * 
@@ -189,16 +163,13 @@ public class GetFormDataHandler extends
 				}
 			}
 		} else {
-			// Если данная форма никем не заблокирована или это новая форма
-			if (action.getFormDataId() == Long.MAX_VALUE) {
-				formMode = FormMode.EDIT;
-			} else {
+
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;
 				} else {
 					formMode = FormMode.EDIT;
 				}
-			}
+			
 		}
 		result.setFormMode(formMode);
 	}
