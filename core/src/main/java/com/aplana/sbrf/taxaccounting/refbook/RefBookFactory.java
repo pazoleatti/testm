@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+
+import java.util.List;
+
 /**
  * Фабрика для получения адаптеров справочников
  *
@@ -9,6 +13,24 @@ package com.aplana.sbrf.taxaccounting.refbook;
 
 public interface RefBookFactory {
 
-	RefBookAdapter getRefBook(Long refBookId);
+	/**
+	 * Загружает метаданные справочника
+	 * @param refBookId код справочника
+	 * @return
+	 */
+	RefBook get(Long refBookId);
+
+	/**
+	 * Загружает список всех справочников
+	 * @return
+	 */
+	List<RefBook> getAll();
+
+	/**
+	 * Возвращает провайдер данных для конкретного справочника
+	 * @param refBookId код справочника
+	 * @return провайдер данных
+	 */
+	RefBookDataProvider getDataProvider(long refBookId);
 
 }

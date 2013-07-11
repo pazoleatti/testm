@@ -25,7 +25,7 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 04.07.13 18:48
  */
-@Repository("refBookDao")
+@Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	@Override
