@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -31,8 +29,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
-		void setSourcesFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes);
-		void setReceiversFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setDepartments(List<Department> departments);
 	}
 
@@ -76,10 +75,10 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	/**
-	 * accept
+	 * assign
 	 */
 	@Override
-	public void accept() {
+	public void assign() {
 		/*UpdateSourcesAction action = new UpdateSourcesAction();
 		action.setDeclarationTemplate(declarationTemplate);
 		dispatcher.execute(action, CallbackUtils
@@ -93,7 +92,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void setSources(int departmentId, TaxType taxType) {
+	public void setFormSources(int departmentId, TaxType taxType) {
 		GetFormSourcesAction action = new GetFormSourcesAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -101,13 +100,13 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<GetFormSourcesResult>() {
 					@Override
 					public void onSuccess(GetFormSourcesResult result) {
-						getView().setSourcesFormTypes(result.getFormTypeNames(), result.getSourcesDepartmentFormTypes());
+						getView().setFormSources(result.getFormTypes(), result.getFormSources());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(SourcesPresenter.this)));
 	}
 
 	@Override
-	public void setReceivers(int departmentId, TaxType taxType) {
+	public void setFormReceivers(int departmentId, TaxType taxType) {
 		GetFormReceiversAction action = new GetFormReceiversAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -115,9 +114,24 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<GetFormReceiversResult>() {
 					@Override
 					public void onSuccess(GetFormReceiversResult result) {
-						getView().setReceiversFormTypes(result.getFormTypeNames(), result.getReceiversDepartmentFormTypes());
+						getView().setFormReceivers(result.getFormTypes(), result.getFormReceivers());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(SourcesPresenter.this)));
+	}
+
+	@Override
+	public void setFormReceiverSources(DepartmentFormType departmentFormType) {
+		GetFormReceiverSourcesAction action = new GetFormReceiverSourcesAction();
+		action.setDepartmentId(departmentFormType.getDepartmentId());
+		action.setFormTypeId(departmentFormType.getFormTypeId());
+		action.setKind(departmentFormType.getKind());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetFormReceiverSourcesResult>() {
+					@Override
+					public void onSuccess(GetFormReceiverSourcesResult result) {
+						getView().setFormReceiverSources(result.getFormTypes(), result.getFormReceiverSources());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(SourcesPresenter.this)));
 	}
 
 	private void setDepartments() {

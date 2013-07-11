@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class RefBookDataProviderImpl implements RefBookDataProvider {
 
 	@Autowired
-	private RefBookDaoImpl refBookDao;
+	private RefBookDao refBookDao;
 
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,

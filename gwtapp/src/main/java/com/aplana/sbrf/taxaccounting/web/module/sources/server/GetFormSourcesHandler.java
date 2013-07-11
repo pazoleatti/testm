@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormSourcesResult;
@@ -33,17 +34,17 @@ public class GetFormSourcesHandler extends AbstractActionHandler<GetFormSourcesA
     @Override
     public GetFormSourcesResult execute(GetFormSourcesAction action, ExecutionContext context) throws ActionException {
 		GetFormSourcesResult result = new GetFormSourcesResult();
-		List<DepartmentFormType> departmentFormTypes =
+		List<DepartmentFormType> sources =
 				departmentFormTypeService.getDepartmentFormSources(action.getDepartmentId(), action.getTaxType());
-		result.setSourcesDepartmentFormTypes(departmentFormTypes);
+		result.setFormSources(sources);
 
-		Map<Integer, String> formTypeNames = new HashMap<Integer, String>();
-		for (DepartmentFormType departmentFormType : departmentFormTypes) {
-			formTypeNames.put(departmentFormType.getFormTypeId(),
-					formTypeDao.getType(departmentFormType.getFormTypeId()).getName());
+		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
+		for (DepartmentFormType departmentFormType : sources) {
+			formTypes.put(departmentFormType.getFormTypeId(),
+					formTypeDao.getType(departmentFormType.getFormTypeId()));
 		}
 
-		result.setFormTypeNames(formTypeNames);
+		result.setFormTypes(formTypes);
 
 		return result;
     }

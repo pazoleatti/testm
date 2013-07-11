@@ -44,8 +44,8 @@
             <g:HorizontalPanel width="210px">
                 <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
                 <g:VerticalPanel>
-                    <g:Anchor href="#!sources;isForm=false">Декларации</g:Anchor>
-                    <g:Anchor href="#!sources;isForm=true">Налоговые формы</g:Anchor>
+                    <g:Anchor ui:field="moveToForm" href="#!formSources;isForm=true">Налоговые формы</g:Anchor>
+                    <g:Anchor ui:field="moveToDeclaration"  href="#!formSources;isForm=false">Декларации</g:Anchor>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
 
@@ -55,7 +55,7 @@
             </g:FlowPanel>
 
             <g:cell width="100px" verticalAlignment="bottom">
-                <style:ButtonLink ui:field="acceptButton" text="Назанчить" />
+                <style:ButtonLink ui:field="assignButton" text="Назанчить" />
             </g:cell>
 
             <g:cell verticalAlignment="bottom">
@@ -63,7 +63,7 @@
             </g:cell>
         </g:HorizontalPanel>
 
-        <g:HorizontalPanel width="100%">
+        <g:HorizontalPanel height="400px" width="100%">
             <g:FlowPanel addStyleNames="{style.receiversTable}">
                 <g:Label text="Приёмник" addStyleNames="{style.destinationLabel}" />
                 <g:HorizontalPanel height="30px">
@@ -88,5 +88,7 @@
                 <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px" />
             </g:FlowPanel>
         </g:HorizontalPanel>
+
+        <style:GenericDataGrid ui:field="receiverSourcesTable" width="100%" height="400px" />
 	</g:FlowPanel>
 </ui:UiBinder>

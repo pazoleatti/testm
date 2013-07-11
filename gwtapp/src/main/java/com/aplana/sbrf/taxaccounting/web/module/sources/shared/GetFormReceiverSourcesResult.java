@@ -7,16 +7,16 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 import java.util.Map;
 
-public class GetFormReceiversResult implements Result {
+public class GetFormReceiverSourcesResult implements Result {
 	private Map<Integer, FormType> formTypes;
-	private List<DepartmentFormType> formReceivers;
+	private List<DepartmentFormType> formReceiverSources;
 
-	public List<DepartmentFormType> getFormReceivers() {
-		return formReceivers;
+	public List<DepartmentFormType> getFormReceiverSources() {
+		return formReceiverSources;
 	}
 
-	public void setFormReceivers(List<DepartmentFormType> formReceivers) {
-		this.formReceivers = formReceivers;
+	public void setFormReceiverSources(List<DepartmentFormType> formReceiverSources) {
+		this.formReceiverSources = formReceiverSources;
 	}
 
 	public Map<Integer, FormType> getFormTypes() {
