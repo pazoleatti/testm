@@ -93,7 +93,7 @@ public class DataRowDaoImplTest {
 		dataRows.add(dr);
 
 		dataRowDao.saveRows(fd, dataRows);
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 
 	}
 
@@ -135,11 +135,11 @@ public class DataRowDaoImplTest {
 		Assert.assertEquals(5, dataRowDao.getSize(fd, null));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(4, dataRowDao.getSize(fd, null));
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 		Assert.assertEquals(4, dataRowDao.getSize(fd, null));
 		dataRowDao.removeRows(fd);
 		Assert.assertEquals(0, dataRowDao.getSize(fd, null));
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 		Assert.assertEquals(0, dataRowDao.getSize(fd, null));
 	}
 
@@ -149,11 +149,11 @@ public class DataRowDaoImplTest {
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd, null));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd, null));
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 		Assert.assertEquals(4, dataRowDao.getSavedSize(fd, null));
 		dataRowDao.removeRows(fd);
 		Assert.assertEquals(4, dataRowDao.getSavedSize(fd, null));
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 		Assert.assertEquals(0, dataRowDao.getSavedSize(fd, null));
 	}
 
@@ -621,12 +621,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.updateRows(fd, dataRowsForUpdate);
 		dataRowDao.removeRows(fd, 4, 5);
 		dataRowDao.insertRows(fd, 4, dataRows);
-		dataRowDao.commit(fd);
-		dataRowDao.rollback(fd);
-		dataRowDao.commit(fd);
-		dataRowDao.rollback(fd);
-		dataRowDao.commit(fd);
-		dataRowDao.rollback(fd);
+		dataRowDao.commit(fd.getId());
+		dataRowDao.rollback(fd.getId());
+		dataRowDao.commit(fd.getId());
+		dataRowDao.rollback(fd.getId());
+		dataRowDao.commit(fd.getId());
+		dataRowDao.rollback(fd.getId());
 
 		
 
@@ -675,12 +675,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.updateRows(fd, dataRowsForUpdate);
 		dataRowDao.removeRows(fd, 4, 5);
 		dataRowDao.insertRows(fd, 4, dataRows);
-		dataRowDao.rollback(fd);
-		dataRowDao.rollback(fd);
-		dataRowDao.rollback(fd);
-		dataRowDao.commit(fd);
-		dataRowDao.commit(fd);
-		dataRowDao.commit(fd);
+		dataRowDao.rollback(fd.getId());
+		dataRowDao.rollback(fd.getId());
+		dataRowDao.rollback(fd.getId());
+		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd.getId());
 
 		dataRows = dataRowDao.getRows(fd, null, null);
 		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
@@ -713,7 +713,7 @@ public class DataRowDaoImplTest {
 		dataRowDao.insertRows(fd, 1, dataRows);
 		dataRowDao.updateRows(fd, dataRows);
 		//dataRowDao.rollback(fd);
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 		//dataRowDao.rollback(fd);
 		dataRows = dataRowDao.getRows(fd, null, null);
 		checkIndexCorrect(dataRows);

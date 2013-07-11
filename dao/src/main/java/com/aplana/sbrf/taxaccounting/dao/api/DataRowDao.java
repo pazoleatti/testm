@@ -128,13 +128,13 @@ public interface DataRowDao {
 	 * 
 	 * @param fd
 	 */
-	void commit(FormData fd);
+	void commit(long formDataId);
 
 	/**
 	 * Откатывает временный срез формы к постоянному.
 	 * 
 	 * @param fd
 	 */
-	void rollback(FormData fd);
+	void rollback(long formDataId);
 
 }

@@ -104,12 +104,12 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void save() {
-		dataRowDao.commit(fd);
+		dataRowDao.commit(fd.getId());
 	}
 
 	@Override
 	public void cancel() {
-		dataRowDao.rollback(fd);
+		dataRowDao.rollback(fd.getId());
 	}
 
 }

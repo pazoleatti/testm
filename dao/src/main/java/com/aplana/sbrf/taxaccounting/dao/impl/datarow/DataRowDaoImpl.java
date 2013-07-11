@@ -219,15 +219,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void commit(FormData fd) {
-		phisicalRemoveRows(fd, TypeFlag.DEL);
-		phisicalUpdateRowsType(fd, TypeFlag.ADD, TypeFlag.SAME);
+	public void commit(long fdId) {
+		phisicalRemoveRows(fdId, TypeFlag.DEL);
+		phisicalUpdateRowsType(fdId, TypeFlag.ADD, TypeFlag.SAME);
 	}
 
 	@Override
-	public void rollback(FormData fd) {
-		phisicalRemoveRows(fd, TypeFlag.ADD);
-		phisicalUpdateRowsType(fd, TypeFlag.DEL, TypeFlag.SAME);
+	public void rollback(long fdId) {
+		phisicalRemoveRows(fdId, TypeFlag.ADD);
+		phisicalUpdateRowsType(fdId, TypeFlag.DEL, TypeFlag.SAME);
 	}
 
 	private void insertRows(FormData fd, int index, long ordBegin,
@@ -249,17 +249,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		phisicalInsertRows(fd, rows, ordBegin, ordStep, null);
 	}
 
-	private void phisicalRemoveRows(FormData fd, TypeFlag type) {
+	private void phisicalRemoveRows(long fdId, TypeFlag type) {
 		getJdbcTemplate().update(
 				"delete from DATA_ROW where FORM_DATA_ID = ? and TYPE = ?",
-				fd.getId(), type.getKey());
+				fdId, type.getKey());
 	}
 
-	private void phisicalUpdateRowsType(FormData fd, TypeFlag fromType,
+	private void phisicalUpdateRowsType(long fdId, TypeFlag fromType,
 			TypeFlag toType) {
 		getJdbcTemplate()
 				.update("update DATA_ROW set TYPE = ? where FORM_DATA_ID = ? and TYPE = ?",
-						toType.getKey(), fd.getId(), fromType.getKey());
+						toType.getKey(), fdId, fromType.getKey());
 	}
 
 	private void phisicalUpdateRowsType(FormData fd,
