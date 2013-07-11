@@ -623,6 +623,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.insertRows(fd, 4, dataRows);
 		dataRowDao.commit(fd);
 		dataRowDao.rollback(fd);
+		dataRowDao.commit(fd);
+		dataRowDao.rollback(fd);
+		dataRowDao.commit(fd);
+		dataRowDao.rollback(fd);
+
+		
 
 		dataRows = dataRowDao.getRows(fd, null, null);
 		Assert.assertArrayEquals(new int[] { 111, 2, 3, 111, 2, 3, 41, 5 },
@@ -670,6 +676,10 @@ public class DataRowDaoImplTest {
 		dataRowDao.removeRows(fd, 4, 5);
 		dataRowDao.insertRows(fd, 4, dataRows);
 		dataRowDao.rollback(fd);
+		dataRowDao.rollback(fd);
+		dataRowDao.rollback(fd);
+		dataRowDao.commit(fd);
+		dataRowDao.commit(fd);
 		dataRowDao.commit(fd);
 
 		dataRows = dataRowDao.getRows(fd, null, null);
@@ -690,9 +700,9 @@ public class DataRowDaoImplTest {
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < 5000; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
-			dr.put("stringColumn", String.valueOf(i++));
+			dr.put("stringColumn", String.valueOf(i + 1));
 			dr.put("numericColumn", 1.01);
 			Date date = getDate(2012, 11, 31);
 			dr.put("dateColumn", date);
@@ -702,8 +712,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.removeRows(fd);
 		dataRowDao.insertRows(fd, 1, dataRows);
 		dataRowDao.updateRows(fd, dataRows);
+		//dataRowDao.rollback(fd);
+		dataRowDao.commit(fd);
+		//dataRowDao.rollback(fd);
 		dataRows = dataRowDao.getRows(fd, null, null);
 		checkIndexCorrect(dataRows);
+		Assert.assertEquals(5000, dataRows.size());
 	}
 
 }

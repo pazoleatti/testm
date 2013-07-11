@@ -23,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -134,8 +133,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();
-			jt.update("delete from data_row where form_data_id = ?",
-					new Object[] { formDataId }, new int[] { Types.NUMERIC });
 		}
 		if (formData.getPerformer() != null &&
 				(!formData.getPerformer().getName().isEmpty() || !formData.getPerformer().getPhone().isEmpty())
