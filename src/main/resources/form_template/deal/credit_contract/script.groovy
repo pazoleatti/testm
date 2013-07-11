@@ -24,6 +24,20 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
 }
 
 /**
@@ -39,7 +53,7 @@ void checkCreation() {
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
 
     for (alias in ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate']) {
         row.getCell(alias).editable = true
@@ -73,38 +87,6 @@ void recalcRowNum() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            for (alias in ['name', 'innKio', 'country', 'contractNum', 'contractDate', 'okeiCode', 'count',
-                    'price', 'totalCost', 'transactionDate']) {
-                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                    msg = row.getCell(alias).column.name
-                    rowNum = row.getCell('rowNum').value
-                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
-                }
-            }
-        }
-    }
-
-    // Проверка выбранной единицы измерения
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            // TODO поле справочника "код"
-            // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
-        }
-    }
-
-    // Проверка количества
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            if (row.getCell('count').value != 1) {
-                msg = row.getCell('transactionDate').column.name
-                rowNum = row.getCell('rowNum').value
-                logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
-            }
-        }
-    }
-
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -113,14 +95,36 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    // Корректность даты договора
     for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
 
-            dt = row.getCell('contractDate').value
+        def rowNum = row.getCell('rowNum').value
+
+        if (row.getAlias() == null) {
+            for (alias in ['name', 'innKio', 'country', 'contractNum', 'contractDate', 'okeiCode', 'count',
+                    'price', 'totalCost', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    def msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            def transactionDate = row.getCell('transactionDate').value
+            def contractDate = row.getCell('contractDate').value
+
+            // Проверка выбранной единицы измерения
+            // TODO поле справочника "код"
+            // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+
+            // Проверка количества
+            if (row.getCell('count').value != 1) {
+                def msg = row.getCell('transactionDate').column.name
+                logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
+            }
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
             if (dt != null && (dt < dFrom || dt > dTo)) {
-                msg = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg = row.getCell('contractDate').column.name
 
                 if (dt > dTo) {
                     logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
@@ -130,19 +134,11 @@ void logicCheck() {
                     logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Корректность даты совершения сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            transactionDate = row.getCell('transactionDate').value
-            contractDate = row.getCell('contractDate').value
-
+            // Корректность даты совершения сделки
             if (transactionDate < contractDate) {
-                msg1 = row.getCell('transactionDate').column.name
-                msg2 = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
         }
@@ -172,4 +168,37 @@ void calc() {
         row.getCell('totalCost').value = row.getCell('price').value
         // TODO расчет полей по справочникам
     }
+}
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }

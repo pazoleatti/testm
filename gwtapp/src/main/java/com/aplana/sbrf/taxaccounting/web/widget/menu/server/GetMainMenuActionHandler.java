@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -86,8 +87,10 @@ public class GetMainMenuActionHandler extends
 		}
 		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки");
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
 			settingMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
 
 			menuItems.add(settingMenuItem);
@@ -98,6 +101,17 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             menuItems.add(settingMenuItem);
         }
+
+		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_ADMIN)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+			MenuItem settingMenuItem = new MenuItem("Администрирование");
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Назначение форм и деклараций", NUMBER_SIGN + "!destination"));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Указание форм-источников", NUMBER_SIGN + SourcesTokens.sources));
+			menuItems.add(settingMenuItem);
+		}
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);

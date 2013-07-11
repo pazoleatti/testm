@@ -1,0 +1,92 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+    xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
+
+    <ui:style>
+        .titleLabel {
+            margin: 10px;
+            font-size: 26px;
+        }
+
+        .searchLabel {
+            margin-right: 5px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .taxTypePanel {
+            margin-left: 30px;
+        }
+
+        .destinationLabel {
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .sourcesTable {
+            float: right;
+            width: 100%;
+            padding-left: 10px;
+        }
+
+        .receiversTable {
+            float: left;
+            width: 100%;
+            padding-right: 10px;
+        }
+    </ui:style>
+
+	<g:FlowPanel>
+        <g:Label addStyleNames="{style.titleLabel}">Указание форм источников</g:Label>
+
+        <g:HorizontalPanel height="45px">
+            <g:HorizontalPanel width="210px">
+                <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
+                <g:VerticalPanel>
+                    <g:Anchor href="#!sources;isForm=false">Декларации</g:Anchor>
+                    <g:Anchor href="#!sources;isForm=true">Налоговые формы</g:Anchor>
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
+
+            <g:FlowPanel width="400px" addStyleNames="{style.taxTypePanel}">
+                <g:Label styleName="{style.searchLabel}">Вид налога</g:Label>
+                <g:ValueListBox ui:field="taxTypePicker" />
+            </g:FlowPanel>
+
+            <g:cell width="100px" verticalAlignment="bottom">
+                <style:ButtonLink ui:field="acceptButton" text="Назанчить" />
+            </g:cell>
+
+            <g:cell verticalAlignment="bottom">
+                <style:ButtonLink text="Оменить назначение" />
+            </g:cell>
+        </g:HorizontalPanel>
+
+        <g:HorizontalPanel width="100%">
+            <g:FlowPanel addStyleNames="{style.receiversTable}">
+                <g:Label text="Приёмник" addStyleNames="{style.destinationLabel}" />
+                <g:HorizontalPanel height="30px">
+                    <g:cell verticalAlignment="middle">
+                        <g:Label text="Подразделение: " styleName="{style.searchLabel}" />
+                    </g:cell>
+                    <d:NewDepartmentPicker ui:field="departmentReceiverPicker"
+                                           header="Выберите приёмник" withCheckBox="false"/>
+                </g:HorizontalPanel>
+                <style:GenericDataGrid ui:field="receiverTable" width="100%" height="350px" />
+            </g:FlowPanel>
+            <g:FlowPanel width="15px" />
+            <g:FlowPanel addStyleNames="{style.sourcesTable}">
+                <g:Label text="Источники" addStyleNames="{style.destinationLabel}" />
+                <g:HorizontalPanel height="30px">
+                    <g:cell verticalAlignment="middle">
+                        <g:Label text="Подразделение: " styleName="{style.searchLabel}" />
+                    </g:cell>
+                    <d:NewDepartmentPicker ui:field="departmentSourcePicker"
+                                           header="Выберите источник" withCheckBox="false"/>
+                </g:HorizontalPanel>
+                <style:GenericDataGrid ui:field="sourceTable" width="100%" height="350px" />
+            </g:FlowPanel>
+        </g:HorizontalPanel>
+	</g:FlowPanel>
+</ui:UiBinder>

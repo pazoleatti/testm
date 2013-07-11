@@ -24,6 +24,20 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
 }
 
 /**
@@ -39,7 +53,7 @@ void checkCreation() {
 }
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
 
     for (alias in ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'dealsMode',
             'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode',
@@ -66,7 +80,7 @@ void deleteRow() {
 void recalcRowNum() {
     def i = formData.dataRows.indexOf(currentDataRow)
 
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
+    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
         row.getCell('rowNum').value = i++
     }
 }
@@ -75,21 +89,6 @@ void recalcRowNum() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            for (alias in ['jurName', 'innKio', 'country', 'countryCode', 'contractNum', 'contractDate',
-                    'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'percentIncomeSum',
-                    'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub',
-                    'transactionDate']) {
-                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                    msg = row.getCell(alias).column.name
-                    rowNum = row.getCell('rowNum').value
-                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
-                }
-            }
-        }
-    }
-
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -98,14 +97,29 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    // Корректность даты договора
     for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
 
-            dt = row.getCell('contractDate').value
+        def rowNum = row.getCell('rowNum').value
+
+        if (row.getAlias() == null) {
+            for (alias in ['jurName', 'innKio', 'country', 'countryCode', 'contractNum', 'contractDate',
+                    'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'percentIncomeSum',
+                    'percentConsumptionSum', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub',
+                    'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    def msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            def contractDate = row.getCell('contractDate').value
+            def transactionDate = row.getCell('transactionDate').value
+            def transactionDeliveryDate = row.getCell('transactionDeliveryDate').value
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
             if (dt != null && (dt < dFrom || dt > dTo)) {
-                msg = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg = row.getCell('contractDate').column.name
 
                 if (dt > dTo) {
                     logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
@@ -115,54 +129,32 @@ void logicCheck() {
                     logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Корректность даты (заключения) сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            contractDate = row.getCell('contractDate').value
-            transactionDeliveryDate = row.getCell('transactionDeliveryDate').value
-
+            // Корректность даты (заключения) сделки
             if (transactionDeliveryDate < contractDate) {
-                msg1 = row.getCell('transactionDate').column.name
-                msg2 = row.getCell('contractDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
-        }
-    }
 
-    // Корректность даты исполнения 1–ой части сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
+            // Корректность даты исполнения 1–ой части сделки
+            def dt1 = row.getCell('date1').value
+            if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
+                def msg = row.getCell('date1').column.name
 
-            dt = row.getCell('date1').value
-            if (dt != null && (dt < dFrom || dt > dTo)) {
-                msg = row.getCell('date1').column.name
-                rowNum = row.getCell('rowNum').value
-
-                if (dt > dTo) {
+                if (dt1 > dTo) {
                     logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
                 }
 
-                if (dt < dFrom) {
+                if (dt1 < dFrom) {
                     logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
                 }
             }
-        }
-    }
 
-    // Корректность даты совершения сделки
-    for (row in formData.dataRows) {
-        if (row.getAlias() == null) {
-            transactionDate = row.getCell('transactionDate').value
-            transactionDeliveryDate = row.getCell('transactionDeliveryDate').value
-
+            // Корректность даты совершения сделки
             if (transactionDeliveryDate < transactionDate) {
-                msg1 = row.getCell('transactionDeliveryDate').column.name
-                msg2 = row.getCell('transactionDate').column.name
-                rowNum = row.getCell('rowNum').value
+                def msg1 = row.getCell('transactionDeliveryDate').column.name
+                def msg2 = row.getCell('transactionDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
         }
@@ -187,4 +179,37 @@ void calc() {
     for (row in formData.dataRows) {
         // TODO расчет полей по справочникам
     }
+}
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }

@@ -23,24 +23,25 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:
-        checkMatrix()
-        logicCheck()
-        calc()
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_CREATED:
-        break
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
-        checkMatrix()
-        logicCheck()
-        break
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
-        break
     case FormDataEvent.ADD_ROW:
         addRow()
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
         break
 }
 
@@ -65,7 +66,7 @@ void recalcRowNum() {
 
 
 void addRow() {
-    row = formData.createDataRow()
+    def row = formData.createDataRow()
     for (alias in ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate',
             'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
             'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2',
@@ -74,6 +75,9 @@ void addRow() {
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
     formData.dataRows.add(row)
+
+    row.getCell('count').value = 1
+
     recalcRowNum()
 }
 /**
@@ -88,17 +92,6 @@ void checkUniq() {
 }
 
 /**
- * Cформирована ли для выбранного пользователем отчета форма-приемник (консолидированный отчет или «Матрица»)
- */
-void checkMatrix() {
-    // TODO
-    if (false) {
-        // сформирована и имеет статус, отличный от «Создана»
-        logger.error("Принятие отчета невозможно, т.к. уже подготовлена форма-приемник.")
-    }
-}
-
-/**
  * Логические проверки
  */
 void logicCheck() {
@@ -106,22 +99,24 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        rowNum = row.getCell('rowNum').value
-        dealDateCell = row.getCell('dealDate')
-        for (alias in ['fullName', 'interdependence', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
-                'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal',
-                'count', 'price', 'total', 'dealDoneDate']) {
-            if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                logger.error('Графа «' + row.getCell(alias).column.name + '» в строке ' + rowNum + ' не заполнена!')
+        def rowNum = row.getCell('rowNum').value
+        def docDateCell = row.getCell('docDate')
+        def  dealDateCell = row.getCell('dealDate')
+        for (alias in ['fullName', 'interdependence', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate', 'dealNumber',
+                'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']) {
+            def rowCell = row.getCell(alias)
+            if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
+                def msg = rowCell.column.name
+                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
         //  Корректность даты договора
         def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
         def dFrom = taxPeriod.getStartDate()
         def dTo = taxPeriod.getEndDate()
-        dt = row.getCell('docDate').value
+        def dt = docDateCell.value
         if (dt != null && (dt < dFrom || dt > dTo)) {
-            msg = row.getCell('docDate').column.name
+            def msg = docDateCell.column.name
             if (dt > dTo) {
                 logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
             }
@@ -130,9 +125,10 @@ void logicCheck() {
             }
         }
         // Корректность даты заключения сделки
-        if (row.getCell('docDate').value > dealDateCell.value) {
-            logger.error('«' + dealDateCell.column.name + '» не может быть меньше «' +
-                    row.getCell('docDate').column.name + '» в строке ' + rowNum + '!')
+        if (docDateCell.value > dealDateCell.value) {
+            def msg1 = dealDateCell.column.name
+            def msg2 = docDateCell.column.name
+            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
         // Зависимости от признака физической поставки
         // TODO (проверка связана со справочниками) if (row.getCell('deliverySign').value == 1 ){
@@ -157,15 +153,15 @@ void logicCheck() {
             logger.error(' Если указан «' + localityCell.column.name + '», не должен быть указан ' + cityCell.column.name + '» в строке ' + rowNum + '!')
         }
         // Проверка доходов и расходов
-        incomeSumCell = row.getCell('incomeSum')
-        outcomeSum = row.getCell('outcomeSum')
-        if (incomeSumCell.value != null && row.getCell('outcomeSum').value != null) {
-            logger.error('«' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
-                    rowNum + ' не могут быть одновременно заполнены!')
+        def incomeSumCell = row.getCell('incomeSum')
+        def outcomeSumCell = row.getCell('outcomeSum')
+        def msgIn = incomeSumCell.column.name
+        def msgOut = outcomeSumCell.column.name
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            logger.error("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
         }
-        if (incomeSumCell.value == null && row.getCell('outcomeSum').value == null) {
-            logger.error('Одна из граф «' + incomeSumCell.column.name + '» и «' + outcomeSum.column.name + '» в строке ' +
-                    rowNum + ' должна быть заполнена!')
+        if (incomeSumCell.value == null && outcomeSumCell.value == null) {
+            logger.error("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
         }
         // Проверка на заполнение поля
         // TODO (проверка связана со справочниками) if ('поставочная сделка'.equals( row.getCell('deliverySign').value))
@@ -174,27 +170,32 @@ void logicCheck() {
                     'region2', 'city2', 'locality2', 'deliveryCode']) {
                 cell = row.getCell(alias)
                 if (cell.value == null || cell.value.toString().isEmpty()) {
-                    logger.error('Графа «' + cell.column.name + '» в строке ' + rowNum + ' не заполнена по поставочной сделке!')
+                    def msg = cell.column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена по поставочной сделке!")
                 }
             }
         }
         // Проверка количества
         if (row.getCell('count').value != 1) {
-            logger.error('В графе «' + row.getCell('count').column.name + '» в строке ' + rowNum + ' может  быть указано только  значение «1»!')
+            def msg = row.getCell('count').column.name
+            logger.error("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
         }
         // Проверка внешнеторговой сделки
         // TODO (проверки связаны со справочниками)
         // Проверка стоимости
-        total = row.getCell('total')
-        count = row.getCell('count')
-        price = row.getCell('price')
+        def total = row.getCell('total')
+        def count = row.getCell('count')
+        def price = row.getCell('price')
         if (total.value != count.value * price.value) {
-            logger.error('«' + total.column.name + '» в строке ' + rowNum + ' не равна произведению цены и количества!')
+            def msg = total.column.name
+            logger.error("«$msg» в строке $rowNum не равна произведению цены и количества!")
         }
         // Корректность даты совершения сделки
-        if (row.getCell('dealDoneDate').value < dealDateCell.value) {
-            logger.error('«' + row.getCell('dealDoneDate').column.name + '» в строке ' + rowNum + ' не может быть меньше «' +
-                    dealDateCell.column.name + '» в строке ' + rowNum + '!')
+        def dealDoneDateCell = row.getCell('dealDoneDate')
+        if (dealDoneDateCell.value < dealDateCell.value) {
+            def msg1 = dealDoneDateCell.column.name
+            def msg2 = dealDateCell.column.name
+            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
     }
     checkNSI()
@@ -267,4 +268,37 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
+}
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
