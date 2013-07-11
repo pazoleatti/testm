@@ -294,7 +294,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082
-		FormDataUtils.setValueOners(dataRows);
+		//FormDataUtils.setValueOners(dataRows);
 		return dataRows;
 	}
 
