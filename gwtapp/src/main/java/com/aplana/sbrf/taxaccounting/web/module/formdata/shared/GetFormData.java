@@ -7,14 +7,6 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	
 	private Long formDataId;
 
-	private Long formDataTypeId;
-
-	private Integer departmentId;
-
-	private Long formDataKind;
-
-	private Long reportPeriodId;
-
 	private boolean readOnly;
 
 	public Long getFormDataId() {
@@ -25,30 +17,6 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 		this.formDataId = formDataId;
 	}
 
-	public Integer getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	public Long getFormDataKind() {
-		return formDataKind;
-	}
-
-	public void setFormDataKind(Long formDataKind) {
-		this.formDataKind = formDataKind;
-	}
-
-	public Long getFormDataTypeId() {
-		return formDataTypeId;
-	}
-
-	public void setFormDataTypeId(Long formDataTypeId) {
-		this.formDataTypeId = formDataTypeId;
-	}
-
 	public boolean isReadOnly() {
 		return readOnly;
 	}
@@ -57,17 +25,9 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 		this.readOnly = lockFormData;
 	}
 
-	public Long getReportPeriodId() {
-		return reportPeriodId;
-	}
-
-	public void setReportPeriodId(Long reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
-
 	@Override
 	public String getName() {
-		return "Получение данных о выбранной налоговой форме";
+		return "Получение налоговой формы";
 	}
 
 

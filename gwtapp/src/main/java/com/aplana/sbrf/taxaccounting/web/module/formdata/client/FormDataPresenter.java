@@ -61,17 +61,9 @@ public class FormDataPresenter extends
 
             //TODO: Возможно переписать придется, если новый пейджинг сделают, т.к. данные в какой-то временной таблице будут.
 			final GetFormData action = new GetFormData();
-			// WTF? Почему Long.MAX_VALUE?
+
 			action.setFormDataId(Long.parseLong(request.getParameter(
-					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
-			action.setDepartmentId(ParamUtils
-					.getInteger(request, DEPARTMENT_ID));
-			action.setFormDataKind(ParamUtils.getLong(request,
-					FORM_DATA_KIND_ID));
-			action.setFormDataTypeId(ParamUtils.getLong(request,
-					FORM_DATA_TYPE_ID));
-			action.setReportPeriodId(ParamUtils.getLong(request,
-					FORM_DATA_RPERIOD_ID));
+					FORM_DATA_ID, null)));
 			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
 					READ_ONLY, "true")));
 
@@ -123,10 +115,6 @@ public class FormDataPresenter extends
 
             final GetFormData action = new GetFormData();
             action.setFormDataId(formData.getId());
-            action.setDepartmentId(formData.getDepartmentId());
-            action.setFormDataKind(Long.valueOf(formData.getKind().getId()));
-            action.setFormDataTypeId(Long.valueOf(formData.getFormType().getId()));
-            action.setReportPeriodId(Long.valueOf(formData.getReportPeriodId()));
             action.setReadOnly(readOnlyMode);
 
             executeAction(action);

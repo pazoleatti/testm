@@ -84,7 +84,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *             отсутствием обязательных параметров
 	 */
 	@Override
-	public FormData createFormData(Logger logger, TAUserInfo userInfo,
+	public long createFormData(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod) {
 		if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
 				departmentId, reportPeriod.getId())) {
@@ -100,16 +100,13 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void importFormDataTest(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId) {
 		Date serviceStart = new Date();
-		FormData fd =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
-		Date saveDate = new Date();
-		formDataDao.save(fd);
+		long formDataId =  createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriodId, true);
 		Date getDate = new Date();
-		formDataDao.get(fd.getId());
+		FormData fd = formDataDao.get(formDataId);
 		logger.info("Старт сервиса: " + serviceStart);
-		logger.info("Сохранение: " + saveDate);
 		logger.info("Получение: " + getDate);
 		logger.info("Текущая: " + new Date());
-		logBusinessService.add(fd.getId(), null, userInfo, FormDataEvent.IMPORT, null);
+		logBusinessService.add(formDataId, null, userInfo, FormDataEvent.IMPORT, null);
 		auditService.add(FormDataEvent.IMPORT, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
 				null, fd.getFormType().getId(), fd.getKind().getId(), null);
 	}
@@ -137,7 +134,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-	public FormData createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
+	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, int reportPeriodId, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 		FormData formData = new FormData(formTemplate);
@@ -146,33 +143,26 @@ public class FormDataServiceImpl implements FormDataService {
 		formData.setDepartmentId(departmentId);
 		formData.setKind(kind);
 		formData.setReportPeriodId(reportPeriodId);
-
-		for (DataRow<Cell> predefinedRow : formTemplate.getRows()) {
-			DataRow<Cell> dataRow = formData.createDataRow();
-			dataRow.setAlias(predefinedRow.getAlias());
-			for (Map.Entry<String, Object> entry : predefinedRow.entrySet()) {
-				String columnAlias = entry.getKey();
-				dataRow.put(columnAlias, entry.getValue());
-				Cell cell = dataRow.getCell(columnAlias);
-				Cell predefinedCell = predefinedRow.getCell(columnAlias);
-				cell.setColSpan(predefinedCell.getColSpan());
-				cell.setRowSpan(predefinedCell.getRowSpan());
-				cell.setStyleAlias(predefinedCell.getStyleAlias());
-				cell.setEditable(predefinedCell.isEditable());
-			}
-		}
 		
-
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger,null);
+		
+		formDataDao.save(formData);
+		// Заполняем начальные строки (но не сохраняем)
+		dataRowDao.saveRows(formData, formTemplate.getRows());
+		
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
+		
+		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
-		return formData;
+		return formData.getId();
 	}
 
 	/**
@@ -299,7 +289,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		if (canDo) {
-			Long oldId = formData.getId();
+
 			formDataScriptingService.executeScript(userInfo, formData,
 					FormDataEvent.SAVE, logger, null);
 
@@ -309,15 +299,10 @@ public class FormDataServiceImpl implements FormDataService {
 				lock(id, userInfo);
 			}
 
-			if (oldId != null) {
-				logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
-				auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-						null, formData.getFormType().getId(), formData.getKind().getId(), null);
-			} else {
-				logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-				auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-						null, formData.getFormType().getId(), formData.getKind().getId(), null);
-			}
+			logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
+			auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+					null, formData.getFormType().getId(), formData.getKind().getId(), null);
+
 
 			return id;
 		} else {

@@ -622,6 +622,7 @@ public class DataRowDaoImplTest {
 		dataRowDao.removeRows(fd, 4, 5);
 		dataRowDao.insertRows(fd, 4, dataRows);
 		dataRowDao.commit(fd);
+		dataRowDao.rollback(fd);
 
 		dataRows = dataRowDao.getRows(fd, null, null);
 		Assert.assertArrayEquals(new int[] { 111, 2, 3, 111, 2, 3, 41, 5 },
@@ -669,6 +670,7 @@ public class DataRowDaoImplTest {
 		dataRowDao.removeRows(fd, 4, 5);
 		dataRowDao.insertRows(fd, 4, dataRows);
 		dataRowDao.rollback(fd);
+		dataRowDao.commit(fd);
 
 		dataRows = dataRowDao.getRows(fd, null, null);
 		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
