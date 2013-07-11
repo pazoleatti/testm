@@ -6,4 +6,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface SourcesUiHandlers extends UiHandlers {
 	void accept();
 	void setSources(int departmentId, TaxType taxType);
+	void setReceivers(int departmentId, TaxType taxType);
 }

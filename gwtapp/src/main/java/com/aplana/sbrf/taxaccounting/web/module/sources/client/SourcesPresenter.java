@@ -32,6 +32,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 		void setSourcesFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setReceiversFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setDepartments(List<Department> departments);
 	}
 
@@ -103,6 +104,20 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 						getView().setSourcesFormTypes(result.getFormTypeNames(), result.getSourcesDepartmentFormTypes());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(SourcesPresenter.this)));
+	}
+
+	@Override
+	public void setReceivers(int departmentId, TaxType taxType) {
+		GetFormReceiversAction action = new GetFormReceiversAction();
+		action.setDepartmentId(departmentId);
+		action.setTaxType(taxType);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetFormReceiversResult>() {
+					@Override
+					public void onSuccess(GetFormReceiversResult result) {
+						getView().setReceiversFormTypes(result.getFormTypeNames(), result.getReceiversDepartmentFormTypes());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(SourcesPresenter.this)));
 	}
 
 	private void setDepartments() {

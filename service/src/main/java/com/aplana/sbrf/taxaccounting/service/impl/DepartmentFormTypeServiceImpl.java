@@ -41,11 +41,16 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType) {
+    public List<DepartmentFormType> getDepartmentFormSources(int departmentId, TaxType taxType) {
         return departmentFormTypeDao.getDepartmentSources(departmentId, taxType);
     }
 
-    @Override
+	@Override
+	public List<DepartmentFormType> getDepartmentFormDestinations(int departmentId, TaxType taxType) {
+		return departmentFormTypeDao.getByTaxType(departmentId, taxType);
+	}
+
+	@Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
         return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
     }

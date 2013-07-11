@@ -77,7 +77,18 @@ public interface DepartmentFormTypeService {
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType);
+    List<DepartmentFormType> getDepartmentFormSources(int departmentId, TaxType taxType);
+
+	/**
+	 * Возвращает информацию о всех формах-потребителях
+	 * @param departmentId
+	 *            идентификатор подразделения
+	 * @param taxType
+	 *            вид налога
+	 * @return информация о формах-источниках в виде списка
+	 *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+	 */
+	List<DepartmentFormType> getDepartmentFormDestinations(int departmentId, TaxType taxType);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать

@@ -73,7 +73,7 @@
                     <d:NewDepartmentPicker ui:field="departmentReceiverPicker"
                                            header="Выберите приёмник" withCheckBox="false"/>
                 </g:HorizontalPanel>
-                <style:GenericDataGrid ui:field="receiverTable" width="100%" height="350px" />
+                <style:GenericDataGrid ui:field="receiversTable" width="100%" height="350px" />
             </g:FlowPanel>
             <g:FlowPanel width="15px" />
             <g:FlowPanel addStyleNames="{style.sourcesTable}">
@@ -85,7 +85,7 @@
                     <d:NewDepartmentPicker ui:field="departmentSourcePicker"
                                            header="Выберите источник" withCheckBox="false"/>
                 </g:HorizontalPanel>
-                <style:GenericDataGrid ui:field="sourceTable" width="100%" height="350px" />
+                <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px" />
             </g:FlowPanel>
         </g:HorizontalPanel>
 	</g:FlowPanel>

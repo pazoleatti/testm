@@ -35,10 +35,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	ValueListBox<TaxType> taxTypePicker;
 
 	@UiField
-	GenericDataGrid<DepartmentFormType> sourceTable;
+	GenericDataGrid<DepartmentFormType> sourcesTable;
 
 	@UiField
-	GenericDataGrid<DepartmentFormType> receiverTable;
+	GenericDataGrid<DepartmentFormType> receiversTable;
 
 	@UiField
 	NewDepartmentPicker departmentReceiverPicker;
@@ -63,6 +63,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			@Override
 			public void onValueChange(ValueChangeEvent<TaxType> event) {
 				setSources();
+				setReceivers();
 			}
 		});
 
@@ -100,10 +101,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		sourceTable.addColumn(sourceKindColumn, "Вид налоговой формы");
-		sourceTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
-		sourceTable.addColumn(sourceTypeColumn, "Тип налоговой формы");
-		sourceTable.setRowCount(0);
+		sourcesTable.addColumn(sourceKindColumn, "Вид налоговой формы");
+		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
+		sourcesTable.addColumn(sourceTypeColumn, "Тип налоговой формы");
+		sourcesTable.setRowCount(0);
 
 		TextColumn<DepartmentFormType> receiverKindColumn = new TextColumn<DepartmentFormType>() {
 			@Override
@@ -127,16 +128,22 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		receiverTable.addColumn(receiverKindColumn, "Вид налоговой формы");
-		receiverTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
-		receiverTable.addColumn(receiverTypeColumn, "Тип налоговой формы");
-		receiverTable.setRowCount(0);
+		receiversTable.addColumn(receiverKindColumn, "Вид налоговой формы");
+		receiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
+		receiversTable.addColumn(receiverTypeColumn, "Тип налоговой формы");
+		receiversTable.setRowCount(0);
 	}
 
 	@Override
 	public void setSourcesFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes) {
 		sourcesFormTypes = formTypes;
-		sourceTable.setRowData(departmentFormTypes);
+		sourcesTable.setRowData(departmentFormTypes);
+	}
+
+	@Override
+	public void setReceiversFormTypes(Map<Integer, String> formTypes, List<DepartmentFormType> departmentFormTypes) {
+		receiversFormTypes = formTypes;
+		receiversTable.setRowData(departmentFormTypes);
 	}
 
 	@Override
@@ -156,7 +163,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	@Override
 	public void onDepartmentsReceived(SelectDepartmentsEvent event) {
-		setSources();
+		if ("Выберите источник".equals(event.getHeader())) {
+			setSources();
+		} else if ("Выберите приёмник".equals(event.getHeader())) {
+			setReceivers();
+		}
 	}
 
 	private void setSources() {
@@ -164,6 +175,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 				&& departmentSourcePicker.getSelectedItems().values().iterator().hasNext()) {
 			getUiHandlers().setSources(
 					departmentSourcePicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+		}
+	}
+
+	private void setReceivers() {
+		if (taxTypePicker.getValue() != null
+				&& departmentReceiverPicker.getSelectedItems().values().iterator().hasNext()) {
+			getUiHandlers().setReceivers(
+					departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
 		}
 	}
 }
