@@ -157,7 +157,7 @@ public class FormDataServiceImpl implements FormDataService {
 					"Произошли ошибки в скрипте создания налоговой формы",
 					logger.getEntries());
 		}
-		dataRowDao.commit(formData);
+		dataRowDao.commit(formData.getId());
 		
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -296,7 +296,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 			boolean needLock = formData.getId() == null;
 			long id = formDataDao.save(formData);
-			dataRowDao.commit(formData);
+			dataRowDao.commit(formData.getId());
 			
 			if (needLock) {
 				lock(id, userInfo);
