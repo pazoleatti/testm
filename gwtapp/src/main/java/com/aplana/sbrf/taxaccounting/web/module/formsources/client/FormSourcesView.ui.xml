@@ -53,10 +53,8 @@
             <g:HorizontalPanel width="210px">
                 <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
                 <g:VerticalPanel>
-                    <g:Anchor ui:field="formAnchor" href="#!sources;isForm=true">Налоговые формы</g:Anchor>
                     <g:Label ui:field="formLabel">Налоговые формы</g:Label>
-                    <g:Anchor ui:field="declarationAnchor" href="#!sources;isForm=false">Декларации</g:Anchor>
-                    <g:Label ui:field="declarationLabel">Декларации</g:Label>
+                    <g:Anchor ui:field="declarationAnchor" href="#!declarationSources">Декларации</g:Anchor>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
 

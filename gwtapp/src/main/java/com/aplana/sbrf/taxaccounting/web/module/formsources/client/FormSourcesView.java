@@ -64,17 +64,11 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 	NewDepartmentPicker departmentSourcePicker;
 
 	@UiField
-	Anchor formAnchor;
-	@UiField
-	Anchor declarationAnchor;
-	@UiField
 	Anchor assignButton;
 	@UiField
 	Anchor cancelButton;
 	@UiField
 	Label formLabel;
-	@UiField
-	Label declarationLabel;
 
 	@Inject
 	@UiConstructor
@@ -109,7 +103,6 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
 		enableAnchor(assignButton, false);
 		enableAnchor(cancelButton, false);
-		setForms(true);
 	}
 
 	private void setupTables() {
@@ -338,13 +331,6 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			getUiHandlers().setFormReceivers(
 					departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
 		}
-	}
-
-	private void setForms(boolean isForm) {
-		formLabel.setVisible(isForm);
-		formAnchor.setVisible(!isForm);
-		declarationLabel.setVisible(!isForm);
-		declarationAnchor.setVisible(isForm);
 	}
 
 	private class CheckedDepartmentFormType {
