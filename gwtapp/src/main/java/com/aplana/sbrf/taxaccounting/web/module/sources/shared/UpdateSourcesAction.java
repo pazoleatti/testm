@@ -1,16 +1,26 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.List;
+
 public class UpdateSourcesAction extends UnsecuredActionImpl<UpdateSourcesResult> {
-    private DeclarationTemplate declaration;
+	private Long departmentFormTypeId;
+	private List<Long> sourceDepartmentFormTypeIds;
 
-    public DeclarationTemplate getDeclarationTemplate() {
-        return declaration;
-    }
+	public Long getDepartmentFormTypeId() {
+		return departmentFormTypeId;
+	}
 
-    public void setDeclarationTemplate(DeclarationTemplate declaration) {
-        this.declaration = declaration;
-    }
+	public void setDepartmentFormTypeId(Long departmentFormTypeId) {
+		this.departmentFormTypeId = departmentFormTypeId;
+	}
+
+	public List<Long> getSourceDepartmentFormTypeIds() {
+		return sourceDepartmentFormTypeIds;
+	}
+
+	public void setSourceDepartmentFormTypeIds(List<Long> sourceDepartmentFormTypeIds) {
+		this.sourceDepartmentFormTypeIds = sourceDepartmentFormTypeIds;
+	}
 }
