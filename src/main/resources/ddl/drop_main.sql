@@ -1,8 +1,3 @@
-drop table ref_book_value;
-drop table ref_book_record;
-drop table ref_book_attribute;
-drop table ref_book;
-
 drop table string_value;
 drop table numeric_value;
 drop table date_value;
@@ -12,6 +7,11 @@ drop table cell_editable;
 drop table cell_style;
 drop table form_column;
 drop sequence seq_form_column;
+
+drop table ref_book_value;
+drop table ref_book_record;
+drop table ref_book_attribute;
+drop table ref_book;
 
 drop table data_row;
 drop sequence seq_data_row;
