@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -75,20 +76,21 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	/**
-	 * assign
+	 * updateFormSources
 	 */
 	@Override
-	public void assign() {
-		/*UpdateSourcesAction action = new UpdateSourcesAction();
-		action.setDeclarationTemplate(declarationTemplate);
+	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
+		UpdateSourcesAction action = new UpdateSourcesAction();
+		action.setDepartmentFormTypeId(departmentFormType.getId());
+		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Декларация сохранена");
-						setSourcesAndReceivers();
+						MessageEvent.fire(SourcesPresenter.this, "Источник назначен");
+						setFormReceiverSources(departmentFormType);
 					}
-				}, this));*/
+				}, this));
 	}
 
 	@Override

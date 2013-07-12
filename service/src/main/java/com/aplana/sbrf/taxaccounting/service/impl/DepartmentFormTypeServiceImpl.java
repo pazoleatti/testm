@@ -35,7 +35,12 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
         return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind);
     }
 
-    @Override
+	@Override
+	public void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds) {
+		departmentFormTypeDao.saveFormSources(departmentFormTypeId, sourceDepartmentFormTypeIds);
+	}
+
+	@Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
         return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
     }

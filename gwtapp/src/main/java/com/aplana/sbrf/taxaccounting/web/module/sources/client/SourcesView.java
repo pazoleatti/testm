@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.SelectDepart
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup.SelectDepartmentsEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -190,8 +191,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			public Boolean getValue(CheckedDepartmentFormType object) {
 				return object.isChecked();
 			}
-
 		};
+		checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
+			@Override
+			public void update(int index, CheckedDepartmentFormType object, Boolean value) {
+				receiverSourcesTable.getVisibleItem(index).setChecked(value);
+			}
+		});
 
 		TextColumn<CheckedDepartmentFormType> indexColumn = new TextColumn<CheckedDepartmentFormType>() {
 			@Override
@@ -281,8 +287,29 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@UiHandler("assignButton")
-	public void assign(ClickEvent event){
-		getUiHandlers().assign();
+	public void assign(ClickEvent event) {
+		List<Long> sourceIds = new ArrayList<Long>();
+		sourceIds.add(sourcesSelectionModel.getSelectedObject().getId());
+
+		for (CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
+			sourceIds.add(source.getDepartmentFormType().getId());
+		}
+
+		getUiHandlers().updateFormSources(receiverSelectionModel.getSelectedObject(), sourceIds);
+	}
+
+	@UiHandler("cancelButton")
+	public void cancel(ClickEvent event) {
+		List<Long> sources = new ArrayList<Long>();
+
+		for (CheckedDepartmentFormType source: receiverSourcesTable.getVisibleItems()) {
+			System.out.println("source.isChecked() " + source.isChecked());
+			if (!source.isChecked()) {
+				sources.add(source.getDepartmentFormType().getId());
+			}
+		}
+
+		getUiHandlers().updateFormSources(receiverSelectionModel.getSelectedObject(), sources);
 	}
 
 	@Override

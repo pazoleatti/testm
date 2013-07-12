@@ -49,6 +49,16 @@ public interface DepartmentFormTypeService {
      */
     List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
+	/**
+	 * Обновляет информацию об источниках формы
+	 *
+	 * @param departmentFormTypeId
+	 *            идентификатор связки для которой нужно обновить источники
+	 * @param sourceDepartmentFormTypeIds
+	 *			  идентификаторы форм-источников в виде списка
+	 */
+	void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
+
     /**
      * Возвращает информацию о формах-потребителях, которые должны использовать
      * информацию из данной налоговой формы в качестве источника
