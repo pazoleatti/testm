@@ -226,6 +226,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append(fromSql);
 		sql.append("where\n  r.id = ");
 		sql.append(recordId);
+		sql.append(" and\n");
+		sql.append("  r.ref_book_id =");
+		sql.append(refBookId);
 		return sql.toString();
 	}
 
