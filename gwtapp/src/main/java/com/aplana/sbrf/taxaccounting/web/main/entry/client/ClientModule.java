@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
@@ -81,5 +82,6 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new PeriodsModule());
 		install(new SourcesModule());
         install(new DepartmentConfigModule());
+        install(new TaxFormNominationModule());
 	}
 }

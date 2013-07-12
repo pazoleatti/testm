@@ -20,6 +20,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdataimport.FormDataImport"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">
