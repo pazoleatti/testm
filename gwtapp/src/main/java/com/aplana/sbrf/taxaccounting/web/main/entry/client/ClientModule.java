@@ -4,10 +4,12 @@ import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPageView;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogView;
+import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditClientUIModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportModule;
@@ -16,6 +18,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminMod
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
@@ -59,6 +63,7 @@ public class ClientModule extends AbstractPresenterModule {
 				MessageDialogPresenter.MyView.class, MessageDialogView.class);
 
 		install(new HomeModule());
+		install(new AboutModule());
 		install(new FormDataListClientModule());
 		install(new FormDataModule());
 		install(new SignInClientModule());
@@ -75,5 +80,8 @@ public class ClientModule extends AbstractPresenterModule {
         install(new FormDataImportModule());
         install(new AuditClientUIModule());
 		install(new PeriodsModule());
+		install(new SourcesModule());
+        install(new DepartmentConfigModule());
+        install(new TaxFormNominationModule());
 	}
 }

@@ -16,9 +16,9 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
         fileName = "Список_ошибок_";
     }
 	
-	private static String FIRST_COLUMN = "№ п/п";
-	private static String SECOND_COLUMN = "Тип сообщения";
-	private static String THIRD_COLUMN = "Текст сообщения";
+	private static final String FIRST_COLUMN = "№ п/п";
+	private static final String SECOND_COLUMN = "Тип сообщения";
+	private static final String THIRD_COLUMN = "Текст сообщения";
 	
 	private List<LogEntry> list;
 

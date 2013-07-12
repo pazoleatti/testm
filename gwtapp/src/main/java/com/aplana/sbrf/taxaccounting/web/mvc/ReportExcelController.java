@@ -17,9 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 
-
 /**
- * Контроллер для формирования отчетов в формате Excel АС Учкет налогов
+ * Контроллер для формирования отчетов в формате Excel АС Учет налогов
  */
 
 //TODO: Переделать в дальнейшем всю генерацию отчетов через временное хранилище com.aplana.sbrf.taxaccounting.web.mvc.ReportController
@@ -38,12 +37,6 @@ public class ReportExcelController {
 
     @Autowired
     AuditService auditService;
-	
-	private static String REQUEST_JATTR = "jsonobject";
-	private static String LOG_ENTRIES = "listLogEntries";
-	private static String JSON_ENTRY_1 = "errorCode";
-	private static String JSON_ENTRY_2 = "message";
-
 
     /**
      * Обработка запроса на формирование отчета для налоговых форм

@@ -451,15 +451,14 @@ public class DateInputCell extends
 	}
 
 	private String getFormattedDate(Date date){
-		final String DATE_SHORT_START = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)
-				.format(date);
+		final String dateShortStart = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format(date);
 
-		int startDayIndex = DATE_SHORT_START.lastIndexOf('-');
-		int startMonthIndex = DATE_SHORT_START.indexOf('-');
+		int startDayIndex = dateShortStart.lastIndexOf('-');
+		int startMonthIndex = dateShortStart.indexOf('-');
 
-		String startDate =  DATE_SHORT_START.substring(startDayIndex + 1, DATE_SHORT_START.length()) + '.' +
-				DATE_SHORT_START.substring(startMonthIndex + 1, startDayIndex) + '.' +
-				DATE_SHORT_START.substring(0, startMonthIndex);
+		String startDate =  dateShortStart.substring(startDayIndex + 1, dateShortStart.length()) + '.' +
+				dateShortStart.substring(startMonthIndex + 1, startDayIndex) + '.' +
+				dateShortStart.substring(0, startMonthIndex);
 
 		return startDate;
 	}

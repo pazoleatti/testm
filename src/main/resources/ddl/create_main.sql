@@ -36,7 +36,8 @@ create table dict_tax_period (
   I    number(1,0) default 0 not null,
   T    number(1,0) default 0 not null,
   P    number(1,0) default 0 not null,
-  V    number(1,0) default 0 not null
+  V    number(1,0) default 0 not null,
+  D    number(1,0) default 0 not null
 );
 alter table dict_tax_period add constraint dict_tax_period_pk primary key (code);
 
@@ -44,6 +45,7 @@ alter table dict_tax_period add constraint dict_tax_period_chk_i check (I in (0,
 alter table dict_tax_period add constraint dict_tax_period_chk_t check (T in (0, 1));
 alter table dict_tax_period add constraint dict_tax_period_chk_p check (P in (0, 1));
 alter table dict_tax_period add constraint dict_tax_period_chk_v check (V in (0, 1));
+alter table dict_tax_period add constraint dict_tax_period_chk_d check (D in (0, 1));
 
 comment on table dict_tax_period is 'Коды, определяющие налоговый (отчётный) период';
 comment on column dict_tax_period.code is 'Код';
@@ -52,6 +54,7 @@ comment on column dict_tax_period.I is 'Принадлежность к нало
 comment on column dict_tax_period.T is 'Принадлежность к налогу на транспорт';
 comment on column dict_tax_period.P is 'Принадлежность к налогу на имущество';
 comment on column dict_tax_period.V is 'Принадлежность к налогу ндс';
+comment on column dict_tax_period.D is 'Принадлежность к ТЦО';
 ---------------------------------------------------------------------------------------------
 create table dict_region (
   code varchar2(2) not null,
@@ -192,12 +195,12 @@ create table form_type (
   tax_type char(1) not null
 );
 alter table form_type add constraint form_type_pk primary key (id);
-alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
-comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -206,11 +209,11 @@ create table tax_period (
   end_date date not null
 );
 alter table tax_period add constraint tax_period_pk primary key (id);
-alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V'));
+alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
-comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС)';
+comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.start_date is 'Дата начала (включительно)';
 comment on column tax_period.end_date is 'Дата окончания (включительно)';
 ---------------------------------------------------------------------------------------------------
@@ -280,6 +283,105 @@ comment on column form_style.bold is 'Признак жирного шрифта
 
 create sequence seq_form_style start with 10000;
 ----------------------------------------------------------------------------------------------------
+create table ref_book (
+  id number(9,0) not null,
+  name varchar2(200) not null
+);
+
+alter table ref_book add constraint ref_book_pk primary key (id);
+
+comment on table ref_book is 'Справочник';
+comment on column ref_book.id is 'Уникальный идентификатор';
+comment on column ref_book.name is 'Название справочника';
+------------------------------------------------------------------------------------------------------
+create table ref_book_attribute (
+  id number(9) not null,
+  ref_book_id number(9) not null,
+  name varchar2(200) not null,
+  alias varchar2(30) not null,
+  type number(1) not null,
+  ord number(9) not null,
+  reference_id number(9),
+  attribute_id number(9),
+  visible number(1) default 1 not null,
+  precision number(2),
+  width number(9) default 15 not null
+);
+
+alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
+
+alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
+alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (alias <> 'id' and alias <> 'parent_id');
+alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
+alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
+alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
+alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
+
+alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book (id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+
+comment on table ref_book_attribute is 'Атрибут справочника';
+comment on column ref_book_attribute.id is 'Уникальный идентификатор';
+comment on column ref_book_attribute.ref_book_id is 'Ссылка на справочник';
+comment on column ref_book_attribute.name is 'Название';
+comment on column ref_book_attribute.alias is 'Псевдоним. Используется для обращения из скриптов бизнес-логики';
+comment on column ref_book_attribute.type is 'Типа атрибута (1-строка; 2-число; 3-дата-время; 4-ссылка)';
+comment on column ref_book_attribute.ord is 'Порядок следования';
+comment on column ref_book_attribute.reference_id is 'Ссылка на справочник, на элемент которого ссылаемся. Только для атрибутов-ссылок';
+comment on column ref_book_attribute.attribute_id is 'Код отображаемого атрибута. Только для атрибутов-ссылок';
+comment on column ref_book_attribute.visible is 'Признак видимости';
+comment on column ref_book_attribute.precision is 'Точность, количество знаков после запятой. Только для атрибутов-чисел';
+comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
+------------------------------------------------------------------------------------------------------
+create table ref_book_record (
+  id number(9) not null,
+  record_id number(9) not null,
+  ref_book_id number(9) not null,
+  version date not null,
+  status number(1) default 0 not null
+);
+
+alter table ref_book_record add constraint ref_book_record_pk primary key (id);
+
+alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1));
+
+alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+
+create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
+
+comment on table ref_book_record is 'Запись справочника';
+comment on column ref_book_record.id is 'Уникальный идентификатор';
+comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_record.ref_book_id is 'Ссылка на справочник, к которому относится запись';
+comment on column ref_book_record.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_record.status is 'Статус записи (0-обычная запись; -1-помеченная на удаление)';
+------------------------------------------------------------------------------------------------------
+create table ref_book_value (
+  record_id number(9) not null,
+  attribute_id number(9) not null,
+  string_value varchar2(4000),
+  number_value number(27,10),
+  date_value date,
+  reference_value number(9)
+);
+
+alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
+
+alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
+alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_value add constraint ref_book_value_fk_reference foreign key (reference_value) references ref_book_record (id);
+
+comment on table ref_book_value is 'Значение записи справочника';
+comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
+comment on column ref_book_value.attribute_id is 'Ссылка на атрибут справочника';
+comment on column ref_book_value.string_value is 'Строковое значение';
+comment on column ref_book_value.number_value is 'Численное значение';
+comment on column ref_book_value.date_value is 'Значение даты';
+comment on column ref_book_value.reference_value is 'Значение ссылки';
+------------------------------------------------------------------------------------------------------
+--2013-07-12 Марат: удалить dictionary_code
 create table form_column (
   id number(9) not null,
   name varchar(1000) not null,
@@ -293,6 +395,7 @@ create table form_column (
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
+  ref_book_id number(9),
   format number(2)
 );
 alter table form_column add constraint form_column_pk primary key (id);
@@ -303,8 +406,10 @@ alter table form_column add constraint form_column_uniq_alias unique(form_templa
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length
-check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 25) or (type ='D' and max_length is null));
+check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or (type ='D' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
+
+alter table form_column add constraint form_column_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -318,6 +423,7 @@ comment on column form_column.precision is 'Количество знаков п
 comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
+comment on column form_column.ref_book_id is 'Код справочника для столбцов-ссылок';
 comment on column form_column.format is 'Формат';
 ---------------------------------------------------------------------------------------------------
 create table department (
@@ -355,7 +461,8 @@ create table report_period (
   tax_period_id number(9) not null,
   ord      number(2) not null,
   department_id number(15) not null,
-  is_balance_period number(1) default 0 not null
+  is_balance_period number(1) default 0 not null,
+  dict_tax_period_id number(9) not null
 );
 
 alter table report_period add constraint report_period_pk primary key(id);
@@ -373,6 +480,7 @@ comment on column report_period.tax_period_id is 'Налоговый перио�
 comment on column report_period.ord is 'Номер отчетного периода в налоговом';
 comment on column report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков';
 comment on column report_period.department_id is 'Подразделение';
+comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
@@ -425,11 +533,11 @@ create table declaration_type (
   name      varchar(80) not null
 );
 alter table declaration_type add constraint declaration_type_pk primary key (id);
-alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V'));
+alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'Тип налога';
+comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
@@ -453,14 +561,14 @@ create table declaration_template (
   edition    number(9) not null,
   version    varchar2(20) not null,
   is_active   number(1) not null,
-  create_script CLOB,
-  jrxml     CLOB,
-  jasper     BLOB,
+  create_script       clob,
+  jrxml               clob,
+  jasper              blob,
   declaration_type_id number(9) not null
 );
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
-alter table declaration_template add constraint declaration_template_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
@@ -542,12 +650,12 @@ create table form_data_signer (
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
 
-comment on table form_data_signer is 'подписанты налоговых форм';
-comment on column form_data_signer.id is 'идентфикатор записи (первичный ключ)';
-comment on column form_data_signer.form_data_id is 'идентификатор налоговой формы';
+comment on table form_data_signer is 'Подписанты налоговых форм';
+comment on column form_data_signer.id is 'Идентфикатор записи (первичный ключ)';
+comment on column form_data_signer.form_data_id is 'Идентификатор налоговой формы';
 comment on column form_data_signer.name is 'ФИО';
-comment on column form_data_signer.position is 'должность';
-comment on column form_data_signer.ord is 'номер подписанта по порядку';
+comment on column form_data_signer.position is 'Должность';
+comment on column form_data_signer.ord is 'Номер подписанта по порядку';
 
 create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -615,7 +723,7 @@ comment on column cell_editable.column_id is 'Идентификатор сто�
 create table numeric_value (
   row_id number(18) not null,
   column_id number(9) not null,
-  value decimal(25, 8)
+  value     decimal(27, 10)
 );
 alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
 alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
@@ -628,7 +736,7 @@ comment on column numeric_value.value is 'Значение';
 create table string_value (
   row_id number(18) not null,
   column_id number(9) not null,
-  value varchar2(700 char)
+  value     varchar2(2000 char)
 );
 alter table string_value add constraint string_value_pk primary key (row_id, column_id);
 alter table string_value add constraint string_value_fk_column_id foreign key (column_id) references form_column(id);
@@ -887,7 +995,8 @@ alter table log_business add constraint log_business_fk_user_id foreign key (use
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data (id) on delete cascade;
 
-alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 203, 204, 205, 206, 207, 301, 302, 303));
+alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 101, 102,
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department (id);
 
@@ -927,7 +1036,8 @@ create table log_system (
   user_department_id  number(9,0)
 );
 alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
-alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 101, 102, 103,104,105,106,107,108,109,110, 203,204,205,206,207, 301,302,303));
+alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 101, 102,
+  103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303));
 
 alter table log_system add constraint log_system_chk_dcl_form check (declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
 
@@ -936,7 +1046,7 @@ alter table log_system add constraint log_system_fk_department_id foreign key (d
 alter table log_system add constraint log_system_fk_report_period_id foreign key (report_period_id) references report_period(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type (id);
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
-alter table log_system add constraint log_system_fk_user_department_id foreign key (user_department_id) references department (id);
+alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department (id);
 
 comment on table log_system is  'Системный журнал';
 

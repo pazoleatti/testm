@@ -19,6 +19,11 @@ import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 
+	public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
+	public static final String LOG_EVENT_READ = "READ";
+	public static final String LOG_EVENT_EDIT = "EDIT";
+	public static final String LOG_EVENT_CREATE = "CREATE";
+
 	private Log logger = LogFactory.getLog(getClass());
 
 	private final static String FORMDATA_KIND_STATE_ERROR = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
@@ -47,6 +52,29 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 	}
 
 	private boolean canRead(FormDataAccessRoles formDataAccess, FormData formData) {
+		if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
+				formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Подготовлена |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   +    |     +      |      +      |      +      |
+             ---------------|--------------------------------------------------
+			 */
+			return true;
+		}
 		if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
 				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
@@ -116,7 +144,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 			return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
 					formDataAccess.isControllerOfUNP();
 		}
-		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "READ", formData.getKind().getName(), formData.getState().getName()));
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_READ, formData.getKind().getName(), formData.getState().getName()));
 		return false;
 	}
 
@@ -148,8 +176,40 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}
-			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
-		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
+		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
+				formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма;
+             ------------------------------------------------------------------
+             |              |                Пользователь                     |
+             |  Состояние   |-------------------------------------------------|
+             |              |Оператор|Контролер ТУ|Контролер ВСУ|Контролер УНП|
+             ------------------------------------------------------------------
+             | Создана      |   +    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Подготовлена |   -    |     +      |      +      |      +      |
+             ---------------|-------------------------------------------------|
+             | Принята      |   -    |     -      |      -      |      -      |
+             ---------------|--------------------------------------------------
+             *Контролер ТУ - Контролер текущего уровня
+             *Контролер ВСУ - Контролер вышестоящего уровня
+			 */
+			switch (formData.getState()){
+				case CREATED:
+					return true;
+				case PREPARED:
+					return formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP();
+				case ACCEPTED:
+					return false; //Нельзя редактировать НФ в состоянии "Принята"
+			}
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
+		}else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
 				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и НЕ передаваемых на вышестоящий уровень.
@@ -167,7 +227,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
              ---------------|-------------------------------------------------|
              | Подготовлена |   -    |     +      |      +      |      +      |
              ---------------|-------------------------------------------------|
-             | Принята      |   -    |     -      |      -      |      -      |-> это состояние хэндлится в начале функции
+             | Принята      |   -    |     -      |      -      |      -      |
              ---------------|--------------------------------------------------
              *Контролер ТУ - Контролер текущего уровня
              *Контролер ВСУ - Контролер вышестоящего уровня
@@ -181,7 +241,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}
-			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
 				!formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -208,7 +268,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}
-			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
 				formDataAccess.isFormDataHasDestinations()){
 			/*Жизненный цикл налоговых форм, формируемых автоматически
@@ -238,9 +298,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				case ACCEPTED:
 					return false; //Нельзя редактировать НФ в состоянии "Принята"
 			}
-			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		}
-		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "EDIT", formData.getKind().getName(), state.getName()));
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_EDIT, formData.getKind().getName(), state.getName()));
 		return false;
 	}
 
@@ -277,7 +337,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		if (reportPeriod.isBalancePeriod()) {
 			return formDataAccess.isControllerOfCurrentLevel() ||
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
-		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY ||
+		} else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY) &&
+				formDataAccess.isFormDataHasDestinations()){
+			 /* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма; */
+			return formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
+		}else if((kind == FormDataKind.ADDITIONAL || kind == FormDataKind.PRIMARY ||
 				kind == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
 			 /* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и НЕ передаваемых на вышестоящий уровень.
@@ -310,7 +380,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP();
 			//return false; //TODO: (Marat Fayzullin 19.02.2013) расскомментить после реализации первичных форм, так как автоматически создаваемые НФ создает система
 		}
-		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "CREATE", kind.getName(), WorkflowState.CREATED.getName()));
+		logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_CREATE, kind.getName(), WorkflowState.CREATED.getName()));
 		return false;
 	}
 
@@ -337,7 +407,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				formData.getFormType().getId(), formData.getKind());
 		List<WorkflowMove> result = getAvailableMoves(formDataAccess,  formData, reportPeriodDao.get(formData.getReportPeriodId()));
 		if (logger.isDebugEnabled()) {
-			logger.debug("AvailableMoves: " + result.toString());
+			logger.debug(LOG_EVENT_AVAILABLE_MOVES + ": " + result.toString());
 		}
 		return result;
 	}
@@ -361,7 +431,43 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					result.add(WorkflowMove.APPROVED_TO_CREATED);
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
+			}
+		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY) &&
+				formDataAccess.isFormDataHasDestinations()){
+			/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
+			 и передаваемых на вышестоящий уровень.
+
+			 Виды форм:
+				 Первичная налоговая форма;
+				 Выходная налоговая форма*/
+			switch (state){
+				case CREATED:
+					if (formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+							formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()) {
+						result.add(WorkflowMove.CREATED_TO_PREPARED);
+					}
+					break;
+				case PREPARED:
+					if (formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel() ||
+							formDataAccess.isControllerOfUNP()) {
+						result.add(WorkflowMove.PREPARED_TO_CREATED);
+						result.add(WorkflowMove.PREPARED_TO_APPROVED);
+					}
+					break;
+				case APPROVED:
+					if (formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()) {
+						result.add(WorkflowMove.APPROVED_TO_PREPARED);
+						result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
+					}
+					break;
+				case ACCEPTED:
+					if(formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()){
+						result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
+					}
+					break;
+				default:
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
 		} else if((formData.getKind() == FormDataKind.ADDITIONAL || formData.getKind() == FormDataKind.PRIMARY ||
 				formData.getKind() == FormDataKind.UNP) && !formDataAccess.isFormDataHasDestinations()){
@@ -374,13 +480,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 				 Форма УНП.*/
 			switch (state){
 				case CREATED:
-					result.add(WorkflowMove.CREATED_TO_PREPARED);
+					if (formDataAccess.isOperatorOfCurrentLevel() || formDataAccess.isControllerOfCurrentLevel() ||
+							formDataAccess.isControllerOfUpLevel() || formDataAccess.isControllerOfUNP()) {
+						result.add(WorkflowMove.CREATED_TO_PREPARED);
+					}
 					break;
 				case PREPARED:
 					if (formDataAccess.isControllerOfCurrentLevel() || formDataAccess.isControllerOfUpLevel()
 							|| formDataAccess.isControllerOfUNP()) {
-						result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
 						result.add(WorkflowMove.PREPARED_TO_CREATED);
+						result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
 					}
 					break;
 				case ACCEPTED:
@@ -389,7 +498,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
 				!formDataAccess.isFormDataHasDestinations()){
@@ -414,7 +523,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
 		} else if ((formData.getKind() == FormDataKind.SUMMARY || formData.getKind() == FormDataKind.CONSOLIDATED) &&
 				formDataAccess.isFormDataHasDestinations()){
@@ -443,10 +552,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 					}
 					break;
 				default:
-					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
+					logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 			}
 		} else
-			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, "AVAILABLE_MOVES", formData.getKind().getName(), state.getName()));
+			logger.warn(String.format(FORMDATA_KIND_STATE_ERROR, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), state.getName()));
 		return result;
 	}
 

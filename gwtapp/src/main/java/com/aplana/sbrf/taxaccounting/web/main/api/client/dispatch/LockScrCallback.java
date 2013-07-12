@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
-public class LockScrCallback<T> implements AsyncCallback<T>{
+public final class LockScrCallback<T> implements AsyncCallback<T>{
 
 	private HasHandlers hasHandlers;
 	

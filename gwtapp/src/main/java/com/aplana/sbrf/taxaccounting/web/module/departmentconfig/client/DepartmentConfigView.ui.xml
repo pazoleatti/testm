@@ -1,0 +1,58 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+
+    <ui:style>
+        .titleLabel {
+            font-size: 26px;
+            margin: 10px;
+        }
+
+        .boldLabel {
+            font-weight: bold;
+        }
+
+        .sectorLabel {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit='PX' height="100%" width="100%">
+        <g:north size="130" width="100%">
+            <g:VerticalPanel>
+                <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
+                <g:HorizontalPanel spacing="5">
+                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
+                    <g:ListBox width="300px"/>
+                </g:HorizontalPanel>
+                <g:HorizontalPanel spacing="5">
+                    <style:ButtonLink ui:field="editButton" text="Редактировать"/>
+                    <g:Button ui:field="saveButton" text="Сохранить"/>
+                    <g:Button ui:field="cancelButton" text="Отмена"/>
+                </g:HorizontalPanel>
+            </g:VerticalPanel>
+        </g:north>
+        <g:center>
+            <g:HorizontalPanel spacing="5">
+                <g:cell width="500px">
+                    <g:VerticalPanel>
+                        <g:Label styleName="{style.sectorLabel}" text="Общие сведения:"/>
+                        <g:Label styleName="{style.boldLabel}" text="Реквизиты подразделения"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="500px">
+                    <g:VerticalPanel>
+                        <g:HorizontalPanel>
+                            <g:Label styleName="{style.sectorLabel}" text="Вид налога:"/>
+                            <g:ListBox width="200px"/>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:HorizontalPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

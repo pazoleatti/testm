@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class CompositeCallback<T> implements AsyncCallback<T> {
+public final class CompositeCallback<T> implements AsyncCallback<T> {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static CompositeCallback create() {

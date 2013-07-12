@@ -2,17 +2,19 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
 import java.io.Serializable;
 
-public class TableRow implements Serializable{
-	private long id;
+public class TableRow implements Serializable {
+
+	private int id;
 	private String periodKind;
 	private String periodName;
-	private boolean periodCondition;
+	private Boolean periodCondition;
+	private boolean isSubHeader;
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -32,11 +34,19 @@ public class TableRow implements Serializable{
 		this.periodName = periodName;
 	}
 
-	public boolean isPeriodCondition() {
+	public Boolean isOpen() {
 		return periodCondition;
 	}
 
-	public void setPeriodCondition(boolean periodCondition) {
+	public void setPeriodCondition(Boolean periodCondition) {
 		this.periodCondition = periodCondition;
+	}
+
+	public boolean isSubHeader() {
+		return isSubHeader;
+	}
+
+	public void setSubHeader(boolean subHeader) {
+		isSubHeader = subHeader;
 	}
 }

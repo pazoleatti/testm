@@ -29,8 +29,6 @@ public class QuarterServiceImpl implements QuarterService {
     public ReportPeriod getPrevReportPeriod(int reportPeriodId) {
         // текущий отчетный период
         ReportPeriod thisReportPeriod= reportPeriodDao.get(reportPeriodId);
-        // текущий налоговый период
-        TaxPeriod thisTaxPeriod = taxPeriodDao.get(thisReportPeriod.getTaxPeriodId());
         // список отчетных периодов в текущем налоговом периоде
         List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriodId());
         for (int i = 0; i < reportPeriodlist.size(); i++){

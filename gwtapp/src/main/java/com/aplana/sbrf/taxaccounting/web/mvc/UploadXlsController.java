@@ -41,11 +41,11 @@ public class UploadXlsController {
     @Autowired
     private SecurityService securityService;
 
-    private static String JSON_ATTR1 = "formDataId";
-    private static String JSON_ATTR2 = "formTemplateId";
-    private static String JSON_ATTR3 = "departmentId";
-    private static String JSON_ATTR4 = "formDataKindId";
-    private static String JSON_ATTR5 = "formDataRPId";
+    private static final String JSON_ATTR1 = "formDataId";
+    private static final String JSON_ATTR2 = "formTemplateId";
+    private static final String JSON_ATTR3 = "departmentId";
+    private static final String JSON_ATTR4 = "formDataKindId";
+    private static final String JSON_ATTR5 = "formDataRPId";
     @RequestMapping(value = "/xls", method = RequestMethod.POST)
     public void processUpload(HttpServletRequest request, HttpServletResponse response) throws FileUploadException, IOException, JSONException {
 

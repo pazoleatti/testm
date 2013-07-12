@@ -11,12 +11,14 @@ import java.util.Map;
 
 public class SelectDepartmentsEvent extends GwtEvent<SelectDepartmentsEventHandler> {
 
-	public static Type<SelectDepartmentsEventHandler> TYPE = new Type<SelectDepartmentsEventHandler>();
+	public static final Type<SelectDepartmentsEventHandler> TYPE = new Type<SelectDepartmentsEventHandler>();
 
 	private final Map<String, Integer> selectedItems;
+	private final String header;
 
-	public SelectDepartmentsEvent(Map<String, Integer> selectedItems) {
+	public SelectDepartmentsEvent(Map<String, Integer> selectedItems, String header) {
 		this.selectedItems = selectedItems;
+		this.header = header;
 	}
 
 	@Override
@@ -31,5 +33,9 @@ public class SelectDepartmentsEvent extends GwtEvent<SelectDepartmentsEventHandl
 
 	public Map<String, Integer> getItems() {
 		return selectedItems;
+	}
+
+	public String getHeader() {
+		return header;
 	}
 }

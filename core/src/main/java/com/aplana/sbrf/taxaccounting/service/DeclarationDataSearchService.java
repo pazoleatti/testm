@@ -14,7 +14,7 @@ public interface DeclarationDataSearchService {
 	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
 	 */
-	PaginatedSearchResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter);
+	PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter);
 	
 	/**
 	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога

@@ -1,0 +1,398 @@
+package form_template.deal.precious_metals_deliver
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
+/**
+ * Поставочные срочные сделки с драгоценными металлами
+ *
+ * @author Dmitriy Levykin
+ */
+switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
+    case FormDataEvent.CALCULATE:
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        logicCheck()
+        break
+    case FormDataEvent.CHECK:
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW:
+        addRow()
+        break
+    case FormDataEvent.DELETE_ROW:
+        deleteRow()
+        break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
+        acceptance()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        acceptance()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
+}
+
+/**
+ * Проверка при создании формы.
+ */
+void checkCreation() {
+    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+            formData.reportPeriodId)
+
+    if (findForm != null) {
+        logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
+    }
+}
+
+void addRow() {
+    def row = formData.createDataRow()
+
+    for (alias in ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
+            'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1',
+            'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum',
+            'transactionDate']) {
+        row.getCell(alias).editable = true
+        row.getCell(alias).setStyleAlias('Редактируемая')
+    }
+
+    formData.dataRows.add(row)
+
+    recalcRowNum()
+}
+
+void deleteRow() {
+    if (currentDataRow != null) {
+        formData.dataRows.remove(currentDataRow)
+        recalcRowNum()
+    }
+}
+
+/**
+ * Пересчет индексов строк перед удалением строки
+ */
+void recalcRowNum() {
+    int i = 1
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+            row.getCell('rowNum').value = i++
+        }
+    }
+}
+
+/**
+ * Логические проверки
+ */
+void logicCheck() {
+    // Отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // Налоговый период
+    def taxPeriod = taxPeriodService.get(reportPeriod.taxPeriodId)
+
+    def dFrom = taxPeriod.getStartDate()
+    def dTo = taxPeriod.getEndDate()
+
+    for (row in formData.dataRows) {
+        if (row.getAlias() == null) {
+
+            def rowNum = row.getCell('rowNum').value
+
+            for (alias in ['name', 'innKio', 'country', 'countryCode1', 'contractNum', 'contractDate',
+                    'transactionNum', 'transactionDeliveryDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
+                    'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']) {
+                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
+                    msg = row.getCell(alias).column.name
+                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                }
+            }
+
+            def transactionDeliveryDate = row.getCell('transactionDeliveryDate').value
+            def contractDate = row.getCell('contractDate').value
+            // def countryCode2 = row.getCell('countryCode2').value
+            // def countryCode3 = row.getCell('countryCode3').value
+            def settlement1 = row.getCell('settlement1').value
+            def city1 = row.getCell('city1').value
+            def settlement2 = row.getCell('settlement2').value
+            def city2 = row.getCell('city2').value
+            def incomeSum = row.getCell('incomeSum').value
+            def consumptionSum = row.getCell('consumptionSum').value
+            def count = row.getCell('count').value
+            def transactionDate = row.getCell('transactionDate').value
+
+            // Проверка зависимости от признака физической поставки
+            def signPhis = row.getCell('signPhis').value
+            // TODO Если графа 13 = элемент с кодом «1», заменить условие когда будет справочник!
+            if (signPhis == 1) {
+                for (alias in ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2',
+                        'settlement2', 'conditionCode']) {
+                    if (row.getCell(alias).value != null && !row.getCell(alias).value.toString().isEmpty()) {
+                        def msg1 = row.getCell('signPhis').column.name
+                        def msg2 = row.getCell(alias).column.name
+                        logger.error("«$msg1» указан «ОМС», графа «$msg2» строки $rownum заполняться не должна!")
+                    }
+                }
+            }
+
+            // Корректность даты договора
+            def dt = row.getCell('contractDate').value
+            if (dt != null && (dt < dFrom || dt > dTo)) {
+                def msg = row.getCell('contractDate').column.name
+
+                if (dt > dTo) {
+                    logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
+                }
+
+                if (dt < dFrom) {
+                    logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
+                }
+            }
+
+            // Корректность даты заключения сделки
+            if (transactionDeliveryDate < contractDate) {
+                def msg1 = row.getCell('transactionDeliveryDate').column.name
+                def msg2 = row.getCell('contractDate').column.name
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            }
+
+            // Корректность заполнения признака внешнеторговой сделки
+            def signTransaction = row.getCell('signTransaction').value
+            // TODO Проверка по справочникам
+            // Если графа 15 = графе 19, то графа 14 должна иметь значение «Нет», иначе – «Да»
+
+            // Проверка населенного пункта 1
+            if (settlement1 != null && !settlement1.toString().isEmpty() && city1 != null && !city1.toString().isEmpty()) {
+                def msg1 = row.getCell('settlement1').column.name
+                def msg2 = row.getCell('city1').column.name
+                logger.error("Если указан «$msg1», не должен быть указан «$msg2» в строке $rowNum")
+            }
+
+            // Проверка населенного пункта 2
+            if (settlement2 != null && !settlement2.toString().isEmpty() && city2 != null && !city2.toString().isEmpty()) {
+                def msg1 = row.getCell('settlement2').column.name
+                def msg2 = row.getCell('city2').column.name
+                logger.error("Если указан «$msg1», не должен быть указан «$msg2» в строке $rowNum")
+            }
+
+            // Проверка доходов и расходов
+            if (incomeSum != null && consumptionSum != null) {
+                def msg1 = row.getCell('incomeSum').column.name
+                def msg2 = row.getCell('consumptionSum').column.name
+                logger.error("«$msg1» и «$msg2» в строке $rowNum не могут быть одновременно заполнены!")
+            }
+
+            if (incomeSum == null && consumptionSum == null) {
+                def msg1 = row.getCell('incomeSum').column.name
+                def msg2 = row.getCell('consumptionSum').column.name
+                logger.error("Одна из граф «$msg1» и «$msg2» в строке $rowNum должна быть заполнена!")
+            }
+
+            // Проверка количества
+            if (count != null && count != 1) {
+                def msg = row.getCell('count').column.name
+                logger.error('В графе «$msg» может быть указано только значение «1» в строке $rowNum!')
+            }
+
+            // Корректность дат сделки
+            if (transactionDate < transactionDeliveryDate) {
+                def msg1 = row.getCell('transactionDate').column.name
+                def msg2 = row.getCell('transactionDeliveryDate').column.name
+                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            }
+        }
+    }
+
+    checkNSI()
+}
+
+/**
+ * Проверка соответствия НСИ
+ */
+void checkNSI() {
+    for (row in formData.dataRows) {
+        // TODO добавить проверки НСИ
+    }
+}
+
+/**
+ * Расчеты. Алгоритмы заполнения полей формы.
+ */
+void calc() {
+    for (row in formData.dataRows) {
+        // TODO расчет полей по справочникам
+
+        // Графы 27 и 28 из 25 и 26
+        incomeSum = row.getCell('incomeSum').value
+        consumptionSum = row.getCell('incomeSum').value
+
+        if (incomeSum != null) {
+            row.getCell('priceOne').value = incomeSum
+            row.getCell('totalNds').value = incomeSum
+        }
+
+        if (consumptionSum != null) {
+            row.getCell('priceOne').value = consumptionSum
+            row.getCell('totalNds').value = consumptionSum
+        }
+    }
+}
+
+/**
+ * Удаление всех статическиех строк "Подитог" из списка строк
+ */
+void deleteAllStatic() {
+    for (Iterator<DataRow> iter = formData.dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            iter.remove()
+        }
+    }
+    recalcRowNum()
+}
+
+/**
+ * Сортировка строк по гр.
+ */
+void sort() {
+    formData.dataRows.sort({ DataRow a, DataRow b ->
+        // гр. 2, гр. 3, гр. 6, гр. 7, гр. 10, гр. 11, гр. 12, гр. 13, гр. 14, гр. 15, гр. 16, гр. 17, гр. 18, гр. 19,
+        // гр. 20, гр. 21, гр. 22, гр. 23, гр. 24.
+        sortRow(['name', 'innKio', 'contractNum', 'contractDate', 'innerCode', 'okpCode', 'unitCountryCode', 'signPhis',
+                'signTransaction', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
+                'city2', 'settlement2', 'conditionCode', 'count'], a, b)
+    })
+    recalcRowNum()
+}
+
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        aD = a.getCell(param).value
+        bD = b.getCell(param).value
+
+        if (aD == bD) {
+            continue
+        } else {
+            return aD <=> bD
+        }
+    }
+    return 0
+}
+
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+        for (int i = 0; i < formData.dataRows.size(); i++) {
+            DataRow<Cell> row = formData.dataRows.get(i)
+            DataRow<Cell> nextRow = null
+
+            if (i < formData.dataRows.size() - 1) {
+                nextRow = formData.dataRows.get(i + 1)
+            }
+
+            if (row.getAlias() == null && nextRow == null
+                    || row.name != nextRow.name
+                    || row.innKio != nextRow.innKio
+                    || row.contractNum != nextRow.contractNum
+                    || row.contractDate != nextRow.contractDate
+                    || row.innerCode != nextRow.innerCode
+                    || row.okpCode != nextRow.okpCode
+                    || row.unitCountryCode != nextRow.unitCountryCode
+                    || row.signPhis != nextRow.signPhis
+                    || row.signTransaction != nextRow.signTransaction
+                    || row.countryCode2 != nextRow.countryCode2
+                    || row.region1 != nextRow.region1
+                    || row.city1 != nextRow.city1
+                    || row.settlement1 != nextRow.settlement1
+                    || row.countryCode3 != nextRow.countryCode3
+                    || row.region2 != nextRow.region2
+                    || row.city2 != nextRow.city2
+                    || row.settlement2 != nextRow.settlement2
+                    || row.conditionCode != nextRow.conditionCode
+                    || row.count != nextRow.count) {
+                def itogRow = calcItog(i)
+                formData.dataRows.add(i + 1, itogRow)
+                i++
+            }
+        }
+        recalcRowNum()
+    }
+}
+
+/**
+ * Расчет подитогового значения
+ * @param i
+ * @return
+ */
+def calcItog(int i) {
+    def newRow = formData.createDataRow()
+
+    newRow.name = 'Подитог:'
+
+    newRow.setAlias('itg#'.concat(i.toString()))
+    newRow.getCell('name').colSpan = 9
+
+    // Расчеты подитоговых значений
+    BigDecimal incomeSumItg = 0, consumptionSumItg = 0, costItg = 0
+    for (int j = i; j >= 0 && formData.dataRows.get(j).getAlias() == null; j--) {
+        row = formData.dataRows.get(j)
+
+        incomeSum = row.getCell('incomeSum').value
+        consumptionSum = row.getCell('consumptionSum').value
+
+
+        incomeSumItg += incomeSum != null ? incomeSum : 0
+        consumptionSumItg += consumptionSum != null ? consumptionSum : 0
+    }
+
+    newRow.getCell('incomeSum').value = incomeSumItg
+    newRow.getCell('consumptionSum').value = consumptionSumItg
+
+    newRow
+}
+
+/**
+ * Инициация консолидации
+ */
+void acceptance() {
+    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+            formData.getFormType().getId(), formData.getKind()).each() {
+        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
+    }
+}
+
+/**
+ * Консолидация
+ */
+void consolidation() {
+    // Удалить все строки и собрать из источников их строки
+    formData.dataRows.clear()
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
+            formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                source.getDataRows().each { row ->
+                    if (row.getAlias() == null) {
+                        formData.dataRows.add(row)
+                    }
+                }
+            }
+        }
+    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}

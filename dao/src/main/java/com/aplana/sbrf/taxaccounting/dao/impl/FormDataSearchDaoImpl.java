@@ -130,7 +130,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	}
 	
 	@Override
-	public PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams) {
+	public PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
 		appendSelectClause(sql);
 		appendFromAndWhereClause(sql, filter);
@@ -150,7 +150,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				new FormDataSearchResultItemMapper()
 		);
 		long count = getCount(filter);
-		PaginatedSearchResult<FormDataSearchResultItem>  result = new PaginatedSearchResult<FormDataSearchResultItem>();
+		PagingResult<FormDataSearchResultItem> result = new PagingResult<FormDataSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(count);
 		return result;

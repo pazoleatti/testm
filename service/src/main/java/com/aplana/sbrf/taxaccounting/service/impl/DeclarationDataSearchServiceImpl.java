@@ -26,9 +26,9 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	private DepartmentDao departmentDao;
 
 	@Override
-	public PaginatedSearchResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
+	public PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
 		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),
-				declarationFilter.isAscSorting(), new PaginatedSearchParams(declarationFilter.getStartIndex(),
+				declarationFilter.isAscSorting(), new PagingParams(declarationFilter.getStartIndex(),
 				declarationFilter.getCountOfRecords()));
 	}
 	

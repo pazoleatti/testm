@@ -4,6 +4,9 @@
 <module>
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.logging.Logging" />
-	<source path='client' />
+    <inherits name="com.gwtplatform.dispatch.DispatchShared"/>
+    <inherits name="com.gwtplatform.mvp.Mvp"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.Model"/>
+    <source path='client' />
 	<source path='shared' />
 </module>

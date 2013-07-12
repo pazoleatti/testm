@@ -22,8 +22,8 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 
 	private static IncrementButtonUiBinder ourUiBinder = GWT.create(IncrementButtonUiBinder.class);
 
-	private final Integer MIN_VALUE;
-	private final Integer MAX_VALUE;
+	private final Integer minValue;
+	private final Integer maxValue;
 
 	@UiField
 	TextBox textBox;
@@ -37,8 +37,8 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 	@UiConstructor
 	public IncrementButton(Integer minValue, Integer maxValue) {
 		initWidget(ourUiBinder.createAndBindUi(this));
-		MIN_VALUE = minValue;
-		MAX_VALUE = maxValue;
+		this.minValue = minValue;
+		this.maxValue = maxValue;
 	}
 
 	@Override
@@ -71,19 +71,19 @@ public class IncrementButton extends Composite implements IncrementButtonView, H
 
 	@Override
 	public Integer getValue() {
-		return Integer.parseInt(textBox.getValue().isEmpty() ? MIN_VALUE.toString() : textBox.getValue());
+		return Integer.parseInt(textBox.getValue().isEmpty() ? minValue.toString() : textBox.getValue());
 	}
 
 	@Override
 	public void setValue(Integer value) {
-		if (value>=MIN_VALUE && value<=MAX_VALUE) {
+		if (value>= minValue && value<= maxValue) {
 			textBox.setValue(value.toString());
 		}
 	}
 
 	@Override
 	public void setValue(Integer value, boolean fireEvents) {
-		if (value>=MIN_VALUE && value<=MAX_VALUE) {
+		if (value>= minValue && value<= maxValue) {
 			textBox.setValue(value.toString(), fireEvents);
 		}
 	}

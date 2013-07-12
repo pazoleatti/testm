@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
@@ -33,9 +33,9 @@ public class StringDictionaryDataProvider extends JdbcDictionaryDataProvider<Str
 	 * @return отфильтрованный список значений справочника
 	 */
 	@Override
-	public PaginatedSearchResult<DictionaryItem<String>> getValues(String pattern, PaginatedSearchParams pageParams) {
+	public PagingResult<DictionaryItem<String>> getValues(String pattern, PagingParams pageParams) {
 		String preparedPattern = preparePattern(pattern);
-		PaginatedSearchResult<DictionaryItem<String>> result = new PaginatedSearchResult<DictionaryItem<String>>();
+		PagingResult<DictionaryItem<String>> result = new PagingResult<DictionaryItem<String>>();
 		result.setRecords(
 				getJdbcTemplate().query(
 						"select value, name from (select rownum as r, value, name from ( " +

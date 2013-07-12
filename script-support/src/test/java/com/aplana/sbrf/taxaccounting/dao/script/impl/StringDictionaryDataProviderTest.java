@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.DictionaryManagerImpl;
 import com.aplana.sbrf.taxaccounting.dao.dataprovider.impl.StringDictionaryDataProvider;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,7 +24,7 @@ public class StringDictionaryDataProviderTest {
 	@Autowired
 	private DictionaryManagerImpl stringDictionaryData;
 
-	private PaginatedSearchParams page = new PaginatedSearchParams(0, 5);
+	private PagingParams page = new PagingParams(0, 5);
 
 	private  StringDictionaryDataProvider dp;
 
@@ -41,7 +41,7 @@ public class StringDictionaryDataProviderTest {
 	@Test
 	public void testSize() {
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("", page);
+		PagingResult<DictionaryItem<String>> result = dp.getValues("", page);
 		Assert.assertEquals(result.getTotalRecordCount(), 10);
 		Assert.assertEquals(result.getRecords().size(), 5);
 	}
@@ -50,7 +50,7 @@ public class StringDictionaryDataProviderTest {
 	public void testValueSearch() {
 
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("value5", page);
+		PagingResult<DictionaryItem<String>> result = dp.getValues("value5", page);
 		Assert.assertEquals(result.getRecords().size(), 1);
 		Assert.assertEquals(result.getTotalRecordCount(), 1);
 	}
@@ -58,14 +58,14 @@ public class StringDictionaryDataProviderTest {
 	@Test
 	public void testNameSearch() {
 
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("name5", page);
+		PagingResult<DictionaryItem<String>> result = dp.getValues("name5", page);
 		Assert.assertEquals(result.getRecords().size(), 1);
 		Assert.assertEquals(result.getTotalRecordCount(), 1);
 	}
 
 	@Test
 	public void testEmptySearch() {
-		PaginatedSearchResult<DictionaryItem<String>> result = dp.getValues("Нет такого значения", page);
+		PagingResult<DictionaryItem<String>> result = dp.getValues("Нет такого значения", page);
 		Assert.assertEquals(result.getRecords().size(), 0);
 		Assert.assertEquals(result.getTotalRecordCount(), 0);
 	}

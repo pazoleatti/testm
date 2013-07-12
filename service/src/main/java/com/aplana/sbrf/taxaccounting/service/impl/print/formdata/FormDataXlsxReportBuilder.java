@@ -351,7 +351,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		sheet.shiftRows(rowNumber + 1, sheet.getLastRowNum(), dataRows.size() + 2);
 		for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
 			Row row = sheet.createRow(++rowNumber);
-			//System.out.println("----cell" + dataRow + "-----" + dataRow.getAlias());
 			for (Map.Entry<Integer, String> alias : aliasMap.entrySet()) {
 				Object obj = dataRow.get(alias.getValue());
 				Cell cell = mergedDataCells(dataRow.getCell(alias.getValue()), row, alias.getKey());
@@ -414,7 +413,6 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
         printDate = (data.getState() == WorkflowState.ACCEPTED && acceptanceDate!=null)?acceptanceDate:creationDate;
 
-        System.out.println(printDate);
 		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
 		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
 				XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("август"))

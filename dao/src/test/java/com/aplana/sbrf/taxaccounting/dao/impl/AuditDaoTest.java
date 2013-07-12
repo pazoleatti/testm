@@ -10,7 +10,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -35,7 +34,7 @@ public class AuditDaoTest {
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date(1369911365000l));
 
-		PaginatedSearchResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
+		PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
 		LogSystemSearchResultItem logSystem = records.getRecords().get(0);
 		assertEquals(Long.valueOf(1), logSystem.getId());
 		assertEquals("192.168.72.16", logSystem.getIp());
@@ -79,7 +78,7 @@ public class AuditDaoTest {
 		filter.setFromSearchDate(new Date(1304247365000l));
 		filter.setToSearchDate(new Date());
 
-		PaginatedSearchResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
+		PagingResult<LogSystemSearchResultItem> records = auditDao.getLogs(filter);
 		LogSystemSearchResultItem logSystemSearchResultItem = records.getRecords().get(1);
 		assertEquals(Long.valueOf(3), logSystemSearchResultItem.getId());
 		assertEquals(formatter.format(date), formatter.format(logSystemSearchResultItem.getLogDate()));

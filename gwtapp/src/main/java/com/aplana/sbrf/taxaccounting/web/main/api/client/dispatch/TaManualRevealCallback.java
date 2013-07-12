@@ -16,7 +16,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
  *
  * @param <T>
  */
-public class TaManualRevealCallback<T> extends ManualRevealCallback<T> {
+public final class TaManualRevealCallback<T> extends ManualRevealCallback<T> {
 	
 	private final TaPlaceManager placeManager;
 	

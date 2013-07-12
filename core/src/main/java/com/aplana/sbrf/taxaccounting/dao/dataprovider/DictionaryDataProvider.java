@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.dataprovider;
 import java.io.Serializable;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
 
 /**
@@ -28,10 +28,10 @@ public interface DictionaryDataProvider<ValueType extends Serializable> {
 	 * Возвращает отфильтрованные значения из справочника. В качестве фильтра выступает паттерн поиска. Ищутся его
 	 * вхождения как в значении из справочника, так и в описании (name) этого значения.
 	 * @param pattern паттерн поиска, если null, то фильтрация не производится
-	 * @param pageParams {@link PaginatedSearchParams параметры} для выбора диапазона записей
+	 * @param pageParams {@link com.aplana.sbrf.taxaccounting.model.PagingParams параметры} для выбора диапазона записей
 	 * @return отфильтрованный список значений справочника
 	 */	
-	PaginatedSearchResult<DictionaryItem<ValueType>> getValues(String pattern, PaginatedSearchParams pageParams);
+	PagingResult<DictionaryItem<ValueType>> getValues(String pattern, PagingParams pageParams);
 
 	/**
 	 * Возвращает запись св справочнике по значению. Запись может содержать так же и название значения.

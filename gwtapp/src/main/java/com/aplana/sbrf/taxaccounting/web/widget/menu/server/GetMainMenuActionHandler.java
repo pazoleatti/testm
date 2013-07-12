@@ -8,7 +8,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,6 +59,7 @@ public class GetMainMenuActionHandler extends
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.VAT.getName(), "", TaxType.VAT.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
 			taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
+			taxMenu.getSubMenu().add(new MenuItem(TaxType.DEAL.getName(), "", TaxType.DEAL.name()));
 
 			for (MenuItem menu : taxMenu.getSubMenu()) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
@@ -70,6 +74,7 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(taxMenu);
 
 			MenuItem settingMenuItem = new MenuItem("Настройки");
+            settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
 			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
 			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
@@ -84,8 +89,10 @@ public class GetMainMenuActionHandler extends
 		}
 		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONF)) {
 			MenuItem settingMenuItem = new MenuItem("Настройки");
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
-			settingMenuItem.getSubMenu().add(new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
 			settingMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
 
 			menuItems.add(settingMenuItem);
@@ -96,6 +103,17 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             menuItems.add(settingMenuItem);
         }
+
+		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_ADMIN)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL)
+				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+			MenuItem settingMenuItem = new MenuItem("Администрирование");
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Назначение форм и деклараций", NUMBER_SIGN + TaxFormNominationToken.taxFormNomination));
+			settingMenuItem.getSubMenu().add(
+					new MenuItem("Указание форм-источников", NUMBER_SIGN + SourcesTokens.sources));
+			menuItems.add(settingMenuItem);
+		}
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);

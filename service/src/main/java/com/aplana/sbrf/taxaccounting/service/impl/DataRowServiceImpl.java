@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
@@ -27,10 +27,10 @@ public class DataRowServiceImpl implements DataRowService {
 	private FormDataDao formDataDao;
 
 	@Override
-	public PaginatedSearchResult<DataRow<Cell>> getDataRows(
+	public PagingResult<DataRow<Cell>> getDataRows(
 			TAUserInfo userInfo, long formDataId, DataRowRange range,
 			boolean saved) {
-		PaginatedSearchResult<DataRow<Cell>> result = new PaginatedSearchResult<DataRow<Cell>>();
+		PagingResult<DataRow<Cell>> result = new PagingResult<DataRow<Cell>>();
 		FormData fd = formDataDao.get(formDataId);
 		result.setRecords(saved ? dataRowDao.getSavedRows(fd, null, range) : dataRowDao.getRows(fd, null, range));
 		result.setTotalRecordCount(saved ? dataRowDao.getSavedSize(fd, null) : dataRowDao.getSize(fd, null));

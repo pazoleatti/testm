@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystemSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -11,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataResul
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -44,7 +42,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     @Override
     public PrintAuditDataResult execute(PrintAuditDataAction printAuditDataAction, ExecutionContext executionContext) throws ActionException {
         try {
-            PaginatedSearchResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
+            PagingResult<LogSystemSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
             String filePath = printingService.generateExcelLogSystem(records.getRecords());
             InputStream fileInputStream = new FileInputStream(filePath);
 

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 
@@ -19,7 +19,7 @@ public interface DataRowService {
 	 * @param saved
 	 * @return
 	 */
-	PaginatedSearchResult<DataRow<Cell>> getDataRows(TAUserInfo userInfo, long formDataId, DataRowRange range, boolean saved);
+	PagingResult<DataRow<Cell>> getDataRows(TAUserInfo userInfo, long formDataId, DataRowRange range, boolean saved);
 	
 	/**
 	 * Получени количество строк НФ

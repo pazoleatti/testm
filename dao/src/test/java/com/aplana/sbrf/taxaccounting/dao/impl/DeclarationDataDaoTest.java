@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -163,8 +163,8 @@ public class DeclarationDataDaoTest {
 	@Test
 	public void findPageTest(){
 		DeclarationDataFilter filter = new DeclarationDataFilter();
-		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 0);
-		PaginatedSearchResult<DeclarationDataSearchResultItem> res;
+		PagingParams pageParams = new PagingParams(0, 0);
+		PagingResult<DeclarationDataSearchResultItem> res;
 		final long TOTAL_RECORDS_COUNT = declarationDataDao.getCount(filter);
 
 		for(int requestedCount = 0; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 2){
@@ -179,9 +179,9 @@ public class DeclarationDataDaoTest {
 	@Test
 	public void findPageSortingTest() {
 		DeclarationDataFilter filter = new DeclarationDataFilter();
-		PaginatedSearchParams pageParams = new PaginatedSearchParams(0, 5);
+		PagingParams pageParams = new PagingParams(0, 5);
 
-		PaginatedSearchResult<DeclarationDataSearchResultItem> res;
+		PagingResult<DeclarationDataSearchResultItem> res;
 
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
 		assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res.getRecords());

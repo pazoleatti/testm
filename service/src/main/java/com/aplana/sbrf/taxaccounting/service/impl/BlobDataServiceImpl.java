@@ -36,22 +36,21 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
-    public void delete(String blob_id) {
-        blobDataDao.delete(blob_id);
+    public void delete(String blobId) {
+        blobDataDao.delete(blobId);
     }
 
     @Override
-    public void save(String blob_id, InputStream is) {
-        blobDataDao.save(initBlob(blob_id, is, "", 0));
+    public void save(String blobId, InputStream is) {
+        blobDataDao.save(initBlob(blobId, is, "", 0));
     }
 
     @Override
-    public BlobData get(String blob_id) {
-        BlobData blobData = blobDataDao.get(blob_id);
-        return blobData;
+    public BlobData get(String blobId) {
+        return blobDataDao.get(blobId);
     }
 
-    private BlobData initBlob(String blob_id, InputStream is, String name, int isTemp){
+    private BlobData initBlob(String blobId, InputStream is, String name, int isTemp){
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {
@@ -61,7 +60,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         }
         blobData.setInputStream(is);
         blobData.setCreationDate(new Date());
-        blobData.setUuid(blob_id.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blob_id);
+        blobData.setUuid(blobId.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blobId);
         blobData.setType(isTemp);
         return blobData;
     }

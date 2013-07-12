@@ -1,13 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.model.*;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchParams;
-import com.aplana.sbrf.taxaccounting.model.PaginatedSearchResult;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import java.util.List;
 
 /**
  * Интерфейс для поиска по базе
@@ -34,9 +29,9 @@ public interface FormDataSearchDao {
 	 * @param ordering - способ сортировки
 	 * @param ascSorting - true, если сортируем по возрастанию, false - по убыванию
 	 * @param pageParams - диапазон индексов, задающий страницу
-	 * @return возвращает объект {@link PaginatedSearchResult}, содержащий информацию о результатах запроса
+	 * @return возвращает объект {@link com.aplana.sbrf.taxaccounting.model.PagingResult}, содержащий информацию о результатах запроса
 	 */
-	PaginatedSearchResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PaginatedSearchParams pageParams);
+	PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams);
 	
 	/**
 	 * Получить количество записей, удовлетворяющих запросу

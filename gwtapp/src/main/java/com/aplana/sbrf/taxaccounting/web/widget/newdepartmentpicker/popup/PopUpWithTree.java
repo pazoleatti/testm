@@ -99,7 +99,7 @@ public class PopUpWithTree extends Composite implements PopUpWithTreeView, HasHa
 				selectedItems.put(pair.second, pair.first);
 			}
 		}
-		SelectDepartmentsEvent selectEvent = new SelectDepartmentsEvent(selectedItems);
+		SelectDepartmentsEvent selectEvent = new SelectDepartmentsEvent(selectedItems, header.getText());
 		fireEvent(selectEvent);
 	}
 

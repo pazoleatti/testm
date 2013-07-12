@@ -10,10 +10,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
@@ -21,7 +18,7 @@ import java.util.*;
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class NewDepartmentPicker extends Composite implements NewDepartmentPickerView, SelectDepartmentsEventHandler {
+public class NewDepartmentPicker extends Composite implements HasEnabled, NewDepartmentPickerView, SelectDepartmentsEventHandler {
 
 	private PopupPanel popup;
 
@@ -31,6 +28,20 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 
 	@UiField
 	public TextBox selected;
+
+	@UiField
+	public Button selectButton;
+
+	@Override
+	public boolean isEnabled() {
+		return (selectButton.isEnabled() && selected.isEnabled());
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		selectButton.setEnabled(enabled);
+		selected.setEnabled(enabled);
+	}
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, NewDepartmentPicker> {
 	}
@@ -44,9 +55,13 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 		this.popup = new PopupPanel(true, true);
 		popup.setPixelSize(300, 370);
 		popUpWithTreeView = new PopUpWithTree(header, withCheckBox);
-		popUpWithTreeView.addDepartmentsReceivedEventHandler(this);
+		addDepartmentsReceivedEventHandler(this);
 
 		popup.add((PopUpWithTree)popUpWithTreeView);
+	}
+
+	public void addDepartmentsReceivedEventHandler(SelectDepartmentsEventHandler handler) {
+		popUpWithTreeView.addDepartmentsReceivedEventHandler(handler);
 	}
 
 	@Override
@@ -69,6 +84,12 @@ public class NewDepartmentPicker extends Composite implements NewDepartmentPicke
 	@Override
 	public void setTreeValues(List<Department> departments, Set<Integer> availableDepartments) {
 		popUpWithTreeView.setItems(departments, availableDepartments);
+	}
+
+	@Override
+	public void setWidth(int width) {
+		selected.setWidth(new String(width + "px"));
+		popup.setPixelSize(width, 370);
 	}
 
 	@UiHandler("selectButton")

@@ -36,24 +36,28 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 		GregorianCalendar from = new GregorianCalendar(action.getFrom(), 1, 1);
 		GregorianCalendar to = new GregorianCalendar(action.getTo(), 1, 1);
 		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndDate(action.getTaxType(), from.getTime(), to.getTime());
-		Map<TaxPeriod, List<ReportPeriod>> periods = new HashMap<TaxPeriod, List<ReportPeriod>>();
+		Map<TaxPeriod, List<ReportPeriod>> periods = new LinkedHashMap<TaxPeriod, List<ReportPeriod>>();
 		for (TaxPeriod taxPeriod : taxPeriods) {
 			periods.put(taxPeriod,
-					reportPeriodService.listByTaxPeriod(taxPeriod.getId()));
+					reportPeriodService.listByTaxPeriodAndDepartment(taxPeriod.getId(), action.getDepartmentId()));
 		}
 		List<TableRow> rows = new ArrayList<TableRow>();
 		for(TaxPeriod taxPeriod : periods.keySet()) {
+			List<ReportPeriod> reportPeriods = periods.get(taxPeriod);
+			if (reportPeriods.isEmpty()) {
+				continue;
+			}
 			TableRow rowDate = new TableRow();
-			rowDate.setPeriodName(taxPeriod.getStartDate().toString());
-			rowDate.setPeriodCondition(true);
-			rowDate.setPeriodKind("Налоговый"); //TODO
+			rowDate.setPeriodName(""+(1900 + taxPeriod.getStartDate().getYear())); //TODO
+			rowDate.setPeriodCondition(null);
+			rowDate.setSubHeader(true);
 			rows.add(rowDate);
-			for (ReportPeriod reportPeriod : periods.get(taxPeriod)) {
+			for (ReportPeriod reportPeriod : reportPeriods) {
 				TableRow row = new TableRow();
 				row.setId(reportPeriod.getId());
 				row.setPeriodName(reportPeriod.getName());
-				row.setPeriodCondition(true);
-				row.setPeriodKind("Отчетный"); //TODO
+				row.setPeriodCondition(reportPeriod.isActive());
+				row.setSubHeader(false);
 				rows.add(row);
 			}
 		}

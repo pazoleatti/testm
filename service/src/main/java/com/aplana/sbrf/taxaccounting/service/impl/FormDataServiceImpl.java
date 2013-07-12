@@ -10,6 +10,10 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,6 +52,12 @@ public class FormDataServiceImpl implements FormDataService {
 	private AuditService auditService;
 	@Autowired
 	private DataRowDao dataRowDao;
+    @Autowired
+    private DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    private FormDataCompositionService formDataCompositionService;
+    @Autowired
+    private ReportPeriodService reportPeriodService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -402,6 +412,14 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
+
+        if (!checkDestinations(formData)) {
+            String message = "Переход \"" + workflowMove.getName() + "\" из текущего состояния невозможен," +
+                    " т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.";
+            logger.error(message);
+            throw new ServiceException(message);
+        }
+
 		formDataScriptingService.executeScript(userInfo,
 				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -420,7 +438,33 @@ public class FormDataServiceImpl implements FormDataService {
 					throw new ServiceLoggerException(
 							"Произошли ошибки в скрипте, который выполняется после перехода",
 							logger.getEntries());
-				}
+				} else {
+                    // compose для приемников после принятия формы или отмены
+                    if (workflowMove.getToState() == WorkflowState.ACCEPTED ||
+                            workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+                        // отчётный период
+                        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+                        // признак периода ввода остатков
+                        boolean isBalancePeriod = (reportPeriod != null && reportPeriod.isBalancePeriod());
+                        if (!isBalancePeriod) {
+                            // вызвать compose у форм-приемников
+                            List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
+                                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                            if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
+                                for (DepartmentFormType i: departmentFormTypes) {
+
+                                    ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                                    scriptComponentContext.setUserInfo(userInfo);
+                                    scriptComponentContext.setLogger(logger);
+                                    ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+
+                                    formDataCompositionService.compose(formData, i.getDepartmentId(),
+                                            i.getFormTypeId(), i.getKind(), logger);
+                                }
+                            }
+                        }
+                    }
+                }
 			}
 
 			logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
@@ -518,4 +562,28 @@ public class FormDataServiceImpl implements FormDataService {
 					"Недостаточно прав для удаления строки из налоговой формы");
 		}
 	}
+
+    /**
+     * Проверка наличия и статуса приемника при осуществлении перевода формы
+     * в статус "Подготовлена"/"Утверждена"/"Принята".
+     *
+     * @param formData объект с данными по налоговой форме
+     * @return true - все нормально, false - есть приемники в статусе отличном от "создана"
+     */
+    private boolean checkDestinations(FormData formData) {
+        List<DepartmentFormType> departmentFormTypes =
+                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
+                        formData.getFormType().getId(), formData.getKind());
+        if (departmentFormTypes != null) {
+            for (DepartmentFormType department: departmentFormTypes) {
+                FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
+                        department.getDepartmentId(), formData.getReportPeriodId());
+                // если форма существует и статус отличен от "создана"
+                if (form != null && form.getState() != WorkflowState.CREATED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

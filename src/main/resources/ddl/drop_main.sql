@@ -8,13 +8,18 @@ drop table cell_style;
 drop table form_column;
 drop sequence seq_form_column;
 
+drop table ref_book_value;
+drop table ref_book_record;
+drop table ref_book_attribute;
+drop table ref_book;
+
 drop table data_row;
 drop sequence seq_data_row;
 
 drop table log_business;
 drop sequence seq_log_business;
-drop table LOG_SYSTEM;
-drop sequence SEQ_LOG_SYSTEM;
+drop table log_system;
+drop sequence seq_log_system;
 
 drop table form_data_signer;
 drop sequence seq_form_data_signer;

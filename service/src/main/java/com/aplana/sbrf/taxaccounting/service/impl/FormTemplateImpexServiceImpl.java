@@ -39,6 +39,7 @@ public class FormTemplateImpexServiceImpl implements
 	private final static String SCRIPT_FILE = "script.groovy";
 	private final static String ROWS_FILE = "rows.xml";
 	private final static String HEADERS_FILE = "headers.xml";
+	private final static String UNICODE = "UTF-8";
 
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
@@ -66,7 +67,7 @@ public class FormTemplateImpexServiceImpl implements
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
 			if (ft.getScript() != null) {
-				zos.write(ft.getScript().getBytes());
+				zos.write(ft.getScript().getBytes(UNICODE));
 			}
 			zos.closeEntry();
 			
