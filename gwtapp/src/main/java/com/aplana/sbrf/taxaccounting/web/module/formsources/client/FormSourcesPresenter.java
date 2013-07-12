@@ -69,7 +69,7 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 				.defaultCallback(new AbstractCallback<UpdateFormSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateFormSourcesResult result) {
-						MessageEvent.fire(FormSourcesPresenter.this, "Источник назначен");
+						MessageEvent.fire(FormSourcesPresenter.this, "Источники налоговой формы сохранены");
 						setFormReceiverSources(departmentFormType);
 					}
 				}, this));

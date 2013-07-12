@@ -101,8 +101,8 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
 		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
-		enableAnchor(assignButton, false);
-		enableAnchor(cancelButton, false);
+		enableButtonLink(assignButton, false);
+		enableButtonLink(cancelButton, false);
 	}
 
 	private void setupTables() {
@@ -137,7 +137,7 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-				enableAnchor(assignButton, true);
+				enableButtonLink(assignButton, true);
 			}
 		});
 
@@ -173,7 +173,9 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
 				getUiHandlers().setFormReceiverSources(receiverSelectionModel.getSelectedObject());
-				enableAnchor(assignButton, true);
+				if(sourcesSelectionModel.getSelectedObject() != null) {
+					enableButtonLink(assignButton, true);
+				}
 			}
 		});
 
@@ -188,7 +190,15 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
 			@Override
 			public void update(int index, CheckedDepartmentFormType object, Boolean value) {
+				enableButtonLink(cancelButton, false);
 				receiverSourcesTable.getVisibleItem(index).setChecked(value);
+
+				for(CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
+					if (source.isChecked()) {
+						enableButtonLink(cancelButton, true);
+						break;
+					}
+				}
 			}
 		});
 
@@ -232,7 +242,7 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		receiverSourcesTable.setRowCount(0);
 	}
 
-	private void enableAnchor(Anchor anchor, boolean enabled) {
+	private void enableButtonLink(Anchor anchor, boolean enabled) {
 		if (enabled) {
 			anchor.setStyleName(css.enabled());
 		} else {
@@ -267,6 +277,7 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			index++;
 		}
 		receiverSourcesTable.setRowData(types);
+		enableButtonLink(cancelButton, false);
 	}
 
 	@Override
@@ -281,9 +292,10 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 
 	@UiHandler("assignButton")
 	public void assign(ClickEvent event) {
-		if (receiverSelectionModel.getSelectedObject() != null && sourcesSelectionModel.getSelectedObject() != null) {
-
+		if (receiverSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+			return;
 		}
+
 		List<Long> sourceIds = new ArrayList<Long>();
 		sourceIds.add(sourcesSelectionModel.getSelectedObject().getId());
 
@@ -296,6 +308,10 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 
 	@UiHandler("cancelButton")
 	public void cancel(ClickEvent event) {
+		if (receiverSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+			return;
+		}
+
 		List<Long> sources = new ArrayList<Long>();
 
 		for (CheckedDepartmentFormType source: receiverSourcesTable.getVisibleItems()) {
