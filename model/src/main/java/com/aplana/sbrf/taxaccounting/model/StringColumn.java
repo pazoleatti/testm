@@ -17,7 +17,7 @@ public class StringColumn extends Column  implements Serializable {
 	 * Максимально допустимое значение поля {@link #setMaxLength}
 	 * (Ограничение накладывается параметрами таблицы STRING_VALUE в БД)
 	 */
-	public static final int MAX_LENGTH = 700;
+	public static final int MAX_LENGTH = 1000;
 	private String dictionaryCode;
 	private int maxLength = MAX_LENGTH;
 

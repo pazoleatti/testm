@@ -12,10 +12,6 @@ import java.util.List;
 
 /**
  * Реализация фабрики провайдеров данных для справочников
- * <br /><br />
- * <b><u>Примечание</u>: </b>Для предопределенных справочников предлагаю использовать отрицательные коды, чтобы
- * не возникло проблем с кодами универсальных. Например, к предопределенному справочнику можно отнести
- * справочник "Подразделение", "Отчетный период".
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 11.07.13 11:22
  */
@@ -30,13 +26,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	@Override
 	public RefBook get(Long refBookId) {
-		//здесь добавлять условия для учета нестандартных справочников
 		return refBookDao.get(refBookId);
 	}
 
 	@Override
 	public List<RefBook> getAll() {
-		//здесь добавлять условия для учета нестандартных справочников
 		return refBookDao.getAll();
 	}
 
