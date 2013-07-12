@@ -306,7 +306,7 @@ alter table form_column add constraint form_column_uniq_alias unique(form_templa
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length
-check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 500) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 25) or (type ='D' and max_length is null));
+check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or (type ='D' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
 comment on table form_column is 'Описания столбцов налоговых форм';
@@ -630,7 +630,7 @@ comment on column numeric_value.value is 'Значение';
 create table string_value (
   row_id    number(18) not null,
   column_id number(9) not null,
-  value     varchar2(700 char)
+  value     varchar2(2000 char)
 );
 alter table string_value add constraint string_value_pk primary key (row_id, column_id);
 alter table string_value add constraint string_value_fk_column_id foreign key (column_id) references form_column(id);
