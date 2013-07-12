@@ -3,7 +3,7 @@
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
     xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
 
-    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.LinkStyle">
+    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.formsources.client.FormSourcesView.LinkStyle">
         .enabled {
             cursor: pointer;
         }

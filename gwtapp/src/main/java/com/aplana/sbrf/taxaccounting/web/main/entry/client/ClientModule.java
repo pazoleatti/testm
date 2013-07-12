@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.client.FormSourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
@@ -18,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminMod
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
@@ -80,7 +80,7 @@ public class ClientModule extends AbstractPresenterModule {
         install(new FormDataImportModule());
         install(new AuditClientUIModule());
 		install(new PeriodsModule());
-		install(new SourcesModule());
+		install(new FormSourcesModule());
         install(new DepartmentConfigModule());
         install(new TaxFormNominationModule());
 	}

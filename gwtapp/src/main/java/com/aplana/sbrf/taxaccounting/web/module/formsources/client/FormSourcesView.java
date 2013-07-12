@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.client;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
@@ -27,10 +27,10 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
 
-public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
-		implements SourcesPresenter.MyView, SelectDepartmentsEventHandler {
+public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
+		implements FormSourcesPresenter.MyView, SelectDepartmentsEventHandler {
 
-	interface Binder extends UiBinder<Widget, SourcesView> { }
+	interface Binder extends UiBinder<Widget, FormSourcesView> { }
 
 	interface LinkStyle extends CssResource {
 		String enabled();
@@ -78,7 +78,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	@Inject
 	@UiConstructor
-	public SourcesView(final Binder uiBinder) {
+	public FormSourcesView(final Binder uiBinder) {
 		taxTypePicker = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
 			@Override
 			public String render(TaxType object) {
@@ -136,9 +136,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		sourcesTable.addColumn(sourceKindColumn, "Вид налоговой формы");
+		sourcesTable.addColumn(sourceKindColumn, "Тип налоговой формы");
 		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
-		sourcesTable.addColumn(sourceTypeColumn, "Тип налоговой формы");
+		sourcesTable.addColumn(sourceTypeColumn, "Вид налоговой формы");
 		sourcesTable.setRowCount(0);
 		sourcesTable.setSelectionModel(sourcesSelectionModel);
 		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -171,9 +171,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		receiversTable.addColumn(receiverKindColumn, "Вид налоговой формы");
+		receiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
 		receiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
-		receiversTable.addColumn(receiverTypeColumn, "Тип налоговой формы");
+		receiversTable.addColumn(receiverTypeColumn, "Вид налоговой формы");
 		receiversTable.setRowCount(0);
 		receiversTable.setSelectionModel(receiverSelectionModel);
 		receiverSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -233,9 +233,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		receiverSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 		receiverSourcesTable.addColumn(indexColumn, "№ пп");
 		receiverSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
-		receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Вид налоговой формы");
+		receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
 		receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Тип налоговой формы");
+		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 		receiverSourcesTable.setRowCount(0);
 	}
 
@@ -288,6 +288,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	@UiHandler("assignButton")
 	public void assign(ClickEvent event) {
+		if (receiverSelectionModel.getSelectedObject() != null && sourcesSelectionModel.getSelectedObject() != null) {
+
+		}
 		List<Long> sourceIds = new ArrayList<Long>();
 		sourceIds.add(sourcesSelectionModel.getSelectedObject().getId());
 

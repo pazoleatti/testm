@@ -1,13 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.client;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,15 +19,15 @@ import com.gwtplatform.mvp.client.proxy.*;
 import java.util.List;
 import java.util.Map;
 
-public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
-		implements SourcesUiHandlers {
+public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView, FormSourcesPresenter.MyProxy>
+		implements FormSourcesUiHandlers {
 
 	@ProxyCodeSplit
-	@NameToken(SourcesTokens.sources)
-	public interface MyProxy extends ProxyPlace<SourcesPresenter>, Place {
+	@NameToken(FormSourcesTokens.sources)
+	public interface MyProxy extends ProxyPlace<FormSourcesPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
+	public interface MyView extends View, HasUiHandlers<FormSourcesUiHandlers> {
 		void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
@@ -37,10 +35,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	private final DispatchAsync dispatcher;
-	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
 
 	@Inject
-	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
+	public FormSourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		getView().setUiHandlers(this);
@@ -52,14 +49,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-
-		closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
-			@Override
-			public void onWindowClosing(Window.ClosingEvent event) {
-				closeDeclarationTemplateHandlerRegistration.removeHandler();
-			}
-		});
-
 		setDepartments();
 	}
 
@@ -68,26 +57,19 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		return true;
 	}
 
-	@Override
-	public void onHide() {
-		super.onHide();
-		unlock();
-		closeDeclarationTemplateHandlerRegistration.removeHandler();
-	}
-
 	/**
 	 * updateFormSources
 	 */
 	@Override
 	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
-		UpdateSourcesAction action = new UpdateSourcesAction();
+		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
 		action.setDepartmentFormTypeId(departmentFormType.getId());
 		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
+				.defaultCallback(new AbstractCallback<UpdateFormSourcesResult>() {
 					@Override
-					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источник назначен");
+					public void onSuccess(UpdateFormSourcesResult result) {
+						MessageEvent.fire(FormSourcesPresenter.this, "Источник назначен");
 						setFormReceiverSources(departmentFormType);
 					}
 				}, this));
@@ -104,7 +86,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					public void onSuccess(GetFormSourcesResult result) {
 						getView().setFormSources(result.getFormTypes(), result.getFormSources());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(SourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(FormSourcesPresenter.this)));
 	}
 
 	@Override
@@ -118,7 +100,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					public void onSuccess(GetFormReceiversResult result) {
 						getView().setFormReceivers(result.getFormTypes(), result.getFormReceivers());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(SourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(FormSourcesPresenter.this)));
 	}
 
 	@Override
@@ -133,7 +115,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					public void onSuccess(GetFormReceiverSourcesResult result) {
 						getView().setFormReceiverSources(result.getFormTypes(), result.getFormReceiverSources());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(SourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(FormSourcesPresenter.this)));
 	}
 
 	private void setDepartments() {
@@ -144,13 +126,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					public void onSuccess(GetDepartmentsResult result) {
 						getView().setDepartments(result.getDepartments());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(FormSourcesPresenter.this)));
 	}
-
-	private void unlock(){
-		UnlockSourcesAction action = new UnlockSourcesAction();
-		dispatcher.execute(action, CallbackUtils.emptyCallback());
-	}
-
 
 }

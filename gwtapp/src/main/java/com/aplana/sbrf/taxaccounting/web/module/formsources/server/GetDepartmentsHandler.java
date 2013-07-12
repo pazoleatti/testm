@@ -1,8 +1,8 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.server;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.server;
 
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDepartmentsAction;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDepartmentsResult;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetDepartmentsAction;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetDepartmentsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

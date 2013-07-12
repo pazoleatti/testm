@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.server;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.server;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiverSourcesAction;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiverSourcesResult;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetFormReceiverSourcesAction;
+import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetFormReceiverSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

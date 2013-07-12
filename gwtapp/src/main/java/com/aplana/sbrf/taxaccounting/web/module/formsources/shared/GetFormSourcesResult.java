@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
@@ -7,16 +7,16 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 import java.util.Map;
 
-public class GetFormReceiverSourcesResult implements Result {
+public class GetFormSourcesResult implements Result {
 	private Map<Integer, FormType> formTypes;
-	private List<DepartmentFormType> formReceiverSources;
+	private List<DepartmentFormType> formSources;
 
-	public List<DepartmentFormType> getFormReceiverSources() {
-		return formReceiverSources;
+	public List<DepartmentFormType> getFormSources() {
+		return formSources;
 	}
 
-	public void setFormReceiverSources(List<DepartmentFormType> formReceiverSources) {
-		this.formReceiverSources = formReceiverSources;
+	public void setFormSources(List<DepartmentFormType> formSources) {
+		this.formSources = formSources;
 	}
 
 	public Map<Integer, FormType> getFormTypes() {

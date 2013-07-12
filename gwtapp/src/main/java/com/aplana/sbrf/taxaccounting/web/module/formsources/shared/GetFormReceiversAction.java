@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
+package com.aplana.sbrf.taxaccounting.web.module.formsources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
