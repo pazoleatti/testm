@@ -582,13 +582,11 @@ public class FormDataServiceImpl implements FormDataService {
                         formData.getFormType().getId(), formData.getKind());
         if (departmentFormTypes != null) {
             for (DepartmentFormType department: departmentFormTypes) {
-                if (department.getFormTypeId() == formData.getFormType().getId()) {
-                    FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
-                            department.getDepartmentId(), formData.getReportPeriodId());
-                    // если форма существует и статус отличен от "создана"
-                    if (form != null && form.getState() != WorkflowState.CREATED) {
-                        return false;
-                    }
+                FormData form = formDataDao.find(department.getFormTypeId(), department.getKind(),
+                        department.getDepartmentId(), formData.getReportPeriodId());
+                // если форма существует и статус отличен от "создана"
+                if (form != null && form.getState() != WorkflowState.CREATED) {
+                    return false;
                 }
             }
         }

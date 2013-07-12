@@ -23,7 +23,7 @@ public enum TaxType {
 	 */
 	VAT('V', "НДС", "NO_VAT"),
 	/**
-	 * ТЦО
+	 * УКС
 	 */
 	DEAL('D', "Учет контролируемых сделок", "NO_DEAL");
 

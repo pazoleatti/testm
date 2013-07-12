@@ -62,8 +62,7 @@ public class GetMainMenuActionHandler extends
 			for (MenuItem menu : taxMenu.getSubMenu()) {
 				menu.getSubMenu().add(new MenuItem("Налоговые формы", NUMBER_SIGN + FormDataListNameTokens.FORM_DATA_LIST
 					+ ";" + TYPE + "=" + menu.getMeta()));
-				if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_OPERATOR)
-						&& !menu.getName().equals(TaxType.DEAL.getName())) {
+				if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_OPERATOR)) {
 					menu.getSubMenu().add(new MenuItem("Декларации", NUMBER_SIGN + DeclarationListNameTokens.DECLARATION_LIST
 						+ ";" + TYPE + "=" + menu.getMeta()));
 				}
