@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -14,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -117,9 +118,17 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 	protected boolean fixedRows;
 
+	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
-	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
-								 PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
+
+	public FormDataPresenterBase(EventBus eventBus,
+	                             MyView view,
+	                             Proxy_ proxy,
+								 PlaceManager placeManager,
+								 DispatchAsync dispatcher,
+								 SignersPresenter signersPresenter,
+								 DialogPresenter dialogPresenter,
+								 HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;

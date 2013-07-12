@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.TextDictionaryCell;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.FieldUpdater;
 /**
  * 
@@ -20,6 +21,8 @@ public class EditStringDictionaryColumn extends DataRowColumn<String> {
 			@Override
 			public void update(int index, DataRow<Cell> dataRow, String value) {
 				dataRow.put(getAlias(), value);
+				CellModifiedEvent event = new CellModifiedEvent(dataRow);
+				fireEvent(event);
 			}
 		});
     }

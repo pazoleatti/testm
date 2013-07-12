@@ -84,6 +84,7 @@ public class FormDataPresenter extends
 			GetRowsDataAction action = new GetRowsDataAction();
 			action.setFormDataId(formData.getId());
 			action.setRange(new DataRowRange(start, length));
+			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 			dispatcher.execute(action, CallbackUtils
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
@@ -92,7 +93,7 @@ public class FormDataPresenter extends
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else
 								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
-
+						modifiedRows.clear();
 
 						}
 					}, FormDataPresenter.this));
@@ -101,17 +102,8 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
-		CellModifiedAction action = new CellModifiedAction();
-		action.setFormDataId(formData.getId());
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		dataRows.add(dataRow);
-		action.setDataRows(dataRows);
-		dispatcher.execute(action, CallbackUtils
-				.wrongStateCallback(new AbstractCallback<CellModifiedResult>() {
-					@Override
-					public void onSuccess(CellModifiedResult result) {
-					}
-				}, FormDataPresenter.this));
+		modifiedRows.add(dataRow);
+
 	}
 
 	@Override
@@ -217,6 +209,7 @@ public class FormDataPresenter extends
 			} else {
 				unlockForm(formData.getId());
 				revealForm(true);
+				modifiedRows.clear();
 			}
 		}
 	}
@@ -226,11 +219,13 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
+		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
 						processFormDataResult(result);
+						modifiedRows.clear();
 					}
 
 				}, this));

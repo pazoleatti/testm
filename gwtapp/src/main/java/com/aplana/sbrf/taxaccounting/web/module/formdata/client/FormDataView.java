@@ -134,14 +134,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		pager.setDisplay(formDataTable);
 
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if(!event.getResults().toLowerCase().contains("error")){
-                    getUiHandlers().onUploadClickedSuccess();
-                }else{
-                    getUiHandlers().onUploadClickedFail(event.getResults().replaceFirst("error ", ""));
-                }
-            }
+	        @Override
+	        public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+		        if (!event.getResults().toLowerCase().contains("error")) {
+			        getUiHandlers().onUploadClickedSuccess();
+		        } else {
+			        getUiHandlers().onUploadClickedFail(event.getResults().replaceFirst("error ", ""));
+		        }
+	        }
         });
 	}
 

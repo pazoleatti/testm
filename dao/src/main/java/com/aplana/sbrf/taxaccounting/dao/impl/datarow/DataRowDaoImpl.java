@@ -70,7 +70,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
-		System.out.println("Update");
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
 		// тем же значением ORD

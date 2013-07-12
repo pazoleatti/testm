@@ -29,6 +29,9 @@ public class GetRowsDataHandler extends
 	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
 		GetRowsDataResult result = new GetRowsDataResult();
 		TAUserInfo userInfo = securityService.currentUserInfo();
+		if (!action.getModifiedRows().isEmpty()) {
+			dataRowService.update(userInfo, action.getFormDataId(), action.getModifiedRows());
+		}
 		DataRowRange dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
 		result.setDataRows(dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, false));
 		return result;

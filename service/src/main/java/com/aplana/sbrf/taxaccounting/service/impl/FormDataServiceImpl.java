@@ -307,7 +307,7 @@ public class FormDataServiceImpl implements FormDataService {
 					null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 
-			return id;
+			return formData.getId();
 		} else {
 			throw new AccessDeniedException(
 					"Недостаточно прав для изменения налоговой формы");
@@ -470,6 +470,7 @@ public class FormDataServiceImpl implements FormDataService {
 			return false;
 		} else {
 			lockDao.unlockObject(formDataId, FormData.class, userInfo.getUser().getId());
+			dataRowDao.rollback(formDataId);
 			return true;
 		}
 

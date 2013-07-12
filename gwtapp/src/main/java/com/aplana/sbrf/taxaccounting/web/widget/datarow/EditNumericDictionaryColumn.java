@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.NumericDictionaryCell;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.FieldUpdater;
 
 import java.math.BigDecimal;
@@ -20,6 +21,8 @@ public class EditNumericDictionaryColumn extends DataRowColumn<BigDecimal> {
 			@Override
 			public void update(int index, DataRow<Cell> dataRow, BigDecimal value) {
 				dataRow.put(getAlias(), value);
+				CellModifiedEvent event = new CellModifiedEvent(dataRow);
+				fireEvent(event);
 			}
 		});
 	}
