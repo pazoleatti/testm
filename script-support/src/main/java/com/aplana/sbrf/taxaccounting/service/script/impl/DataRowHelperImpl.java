@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -11,18 +12,21 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 
 
 /**
+ * Компонент позволяет из скриптов работать с данными НФ
+ * Компонент не защищен.
  * 
  * @author sgoryachkin
  *
  */
 @Component
-@Scope(value="prototype")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextHolder{
 	
 	private FormData fd;
@@ -47,7 +51,9 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAllSaved() {
-		return dataRowDao.getSavedRows(fd, null, null);
+		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(fd, null, null);
+		FormDataUtils.setValueOners(rows);
+		return  rows;
 	}
 
 	@Override
@@ -57,7 +63,9 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
-		return dataRowDao.getRows(fd, null, null);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null, null);
+		FormDataUtils.setValueOners(rows);
+		return rows;
 	}
 
 	@Override
@@ -103,13 +111,19 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	}
 
 	@Override
-	public void save() {
+	public void commit() {
 		dataRowDao.commit(fd.getId());
 	}
 
 	@Override
-	public void cancel() {
+	public void rollback() {
 		dataRowDao.rollback(fd.getId());
+	}
+
+	@Override
+	public void save(List<DataRow<Cell>> dataRows) {
+		dataRowDao.saveRows(fd, dataRows);
+		
 	}
 
 }

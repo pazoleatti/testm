@@ -15,6 +15,6 @@ public interface FormDataService {
 	
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 	
-	DataRowHelper getDataRowService(FormData fd);
+	DataRowHelper getDataRowHelper(FormData fd);
 
 }

@@ -459,7 +459,7 @@ public class FormDataServiceImpl implements FormDataService {
                                     ((ScriptComponentContextHolder)formDataCompositionService).setScriptComponentContext(scriptComponentContext);
 
                                     formDataCompositionService.compose(formData, i.getDepartmentId(),
-                                            i.getFormTypeId(), i.getKind(), logger);
+                                            i.getFormTypeId(), i.getKind());
                                 }
                             }
                         }

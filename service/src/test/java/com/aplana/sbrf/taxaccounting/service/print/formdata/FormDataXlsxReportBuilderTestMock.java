@@ -39,6 +39,7 @@ public class FormDataXlsxReportBuilderTestMock {
 	
 	private List<Column> columns = new ArrayList<Column>();
 	private FormDataReport data = new FormDataReport();
+    private List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 	
 	
 	@Before
@@ -239,7 +240,6 @@ public class FormDataXlsxReportBuilderTestMock {
 		formDataSigner2.setName("Нина Васильевна");
 		formDataSigners.add(formDataSigner1);
 		formDataSigners.add(formDataSigner2);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		dataRows.add(dataRow);
 		dataRows.add(dataRow);
 		dataRows.add(dataRow);
@@ -257,16 +257,14 @@ public class FormDataXlsxReportBuilderTestMock {
         data.setAcceptanceDate(new Date());
         data.setCreationDate(new Date());
 	}
-	/*
-	 * TODO: Изправить (Задача http://jira.aplana.com/browse/SBRFACCTAX-2980)
+
 	@Test
 	public void testReport() throws IOException{
-		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,false);
+		FormDataXlsxReportBuilder builder = new FormDataXlsxReportBuilder(data,false, dataRows);
 		try {
 			builder.createReport();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	*/
 }
