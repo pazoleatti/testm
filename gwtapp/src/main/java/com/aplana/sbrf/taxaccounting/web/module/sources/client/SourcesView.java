@@ -40,6 +40,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	private boolean isForm;
+	private boolean canCancel;
 
 	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
 	private static final String SOURCE_DEPARTMENT_HEADER = "Выберите источник";
@@ -298,12 +299,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
 			@Override
 			public void update(int index, CheckedDepartmentFormType object, Boolean value) {
+				canCancel = false;
 				enableButtonLink(cancelButton, false);
 				receiverSourcesTable.getVisibleItem(index).setChecked(value);
 
 				for(CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
 					if (source.isChecked()) {
 						enableButtonLink(cancelButton, true);
+						canCancel = true;
 						break;
 					}
 				}
@@ -353,7 +356,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	public void assign(ClickEvent event) {
 		if ((formReceiversSelectionModel.getSelectedObject() == null &&
 				declarationReceiversSelectionModel.getSelectedObject() == null) ||
-			sourcesSelectionModel.getSelectedObject() == null) {
+				sourcesSelectionModel.getSelectedObject() == null) {
 			return;
 		}
 
@@ -373,19 +376,18 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	@UiHandler("cancelButton")
 	public void cancel(ClickEvent event) {
-		if ((formReceiversSelectionModel.getSelectedObject() == null &&
-			declarationReceiversSelectionModel.getSelectedObject() == null) ||
-			sourcesSelectionModel.getSelectedObject() == null) {
+		if (!canCancel || (formReceiversSelectionModel.getSelectedObject() == null &&
+				declarationReceiversSelectionModel.getSelectedObject() == null)) {
 			return;
 		}
 
 		List<Long> sourceIds = new ArrayList<Long>();
-
 		for (CheckedDepartmentFormType source: receiverSourcesTable.getVisibleItems()) {
 			if (!source.isChecked()) {
 				sourceIds.add(source.getDepartmentFormType().getId());
 			}
 		}
+
 		if (isForm) {
 			getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
 		} else {
