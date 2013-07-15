@@ -65,6 +65,12 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 public void onSuccess(PrintAuditDataResult result) {
                     getView().getBlobFromServer(result.getUuid());
                 }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    MessageEvent.fire(AuditFilterPresenter.this,
+                            "Не удалось напечатать журнал аудита", caught);
+                }
             });
         }catch (Exception e){
             MessageEvent.fire(this,

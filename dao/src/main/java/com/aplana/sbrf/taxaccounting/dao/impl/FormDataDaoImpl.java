@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -13,11 +14,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -39,8 +35,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	private FormPerformerDao formPerformerDao;
 	@Autowired
 	private FormTypeDao formTypeDao;
-	
-	private static class RowMapperResult {
+    @Autowired
+    private DepartmentDao departmentDao;
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
+
+    private static class RowMapperResult {
 		FormData formData;
 	}
 
@@ -192,11 +192,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			return null;
 		} catch (IncorrectResultSizeDataAccessException e) {
 			throw new DaoException(
-				"Для заданного сочетания параметров найдено несколько налоговых форм: formTypeId = %d, formDataKind = '%s', departmentId = %d, reportPeriodId = %d",
-				formTypeId,
-				kind.name(),
-				departmentId,
-				reportPeriodId
+				"Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", отчетный период \"%s\"",
+				formTypeDao.getType(formTypeId).getName(),
+				kind.getName(),
+				departmentDao.getDepartment(departmentId).getName(),
+				reportPeriodDao.get(reportPeriodId).getName()
 			);
 		}
 	}
