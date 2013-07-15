@@ -65,7 +65,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @CacheEvict(value = "BlobDataCache", key = "#uuid", beforeInvocation = true)
+    @CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)
     public void delete(String uuid) {
         try{
             getJdbcTemplate().update("delete from blob_data where id = ?",
@@ -77,7 +77,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @CacheEvict(value = "BlobDataCache", key = "#blobData.uuid", beforeInvocation = true)
+    @CacheEvict(value = "DataBlobsCache", key = "#blobData.uuid", beforeInvocation = true)
     public void save(final BlobData blobData) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
@@ -104,7 +104,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @Cacheable("BlobDataCache")
+    @Cacheable("DataBlobsCache")
     public BlobData get(String uuid) {
         try{
             return getJdbcTemplate().queryForObject("select * from blob_data where id = ?",

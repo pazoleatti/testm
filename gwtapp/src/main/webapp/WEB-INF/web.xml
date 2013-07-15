@@ -132,7 +132,7 @@
 	
 	<resource-ref>
 		<description>Хранилище для кэширования бинарных отчетов по данным декларации</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/DeclarationDataBlobs</res-ref-name>
+		<res-ref-name>services/cache/aplana/taxaccounting/DataBlobsCache</res-ref-name>
 		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>

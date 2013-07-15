@@ -84,7 +84,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	
 
 	@Override
-	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB_XLSX)
+	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB)
 	public byte[] getXlsxData(long id) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -98,7 +98,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB_PDF)
+	@Cacheable(CacheConstants.DECLARATION_DATA_BLOB)
 	public byte[] getPdfData(long id) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -113,8 +113,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
 	@Override
 	@Caching(evict = {
-			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true),
-			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB, key = "#id", beforeInvocation=true)
 	})
 	public void setXmlData(long id, String xmlData) {
 		int count = getJdbcTemplate().update(
@@ -134,7 +133,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 	
 	@Override
-	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB, key = "#id", beforeInvocation=true)
 	public void setXlsxData(long id, byte[] xlsxData) {
 		int count = getJdbcTemplate().update(
 				"update declaration_data set data_xlsx = ? where id = ?",
@@ -153,7 +152,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true)
+	@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB, key = "#id", beforeInvocation=true)
 	public void setPdfData(long id, byte[] pdfData) {
 		int count = getJdbcTemplate().update(
 				"update declaration_data set data_pdf = ? where id = ?",
@@ -173,8 +172,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
 	@Override
 	@Caching(evict = {
-			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_PDF, key = "#id", beforeInvocation=true),
-			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB_XLSX, key = "#id", beforeInvocation=true)
+			@CacheEvict(value = CacheConstants.DECLARATION_DATA_BLOB, key = "#id", beforeInvocation=true)
 	})
 	public void delete(long id) {
 		int count = getJdbcTemplate().update(
