@@ -33,7 +33,7 @@ public class GetRowsDataHandler extends
 			dataRowService.update(userInfo, action.getFormDataId(), action.getModifiedRows());
 		}
 		DataRowRange dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
-		result.setDataRows(dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, false));
+		result.setDataRows(dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, action.isReadOnly()));
 		return result;
 	}
 
