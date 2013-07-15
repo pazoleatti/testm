@@ -66,6 +66,10 @@
 					<constructor-arg value="DeclarationDataBlobPdf" />
 					<constructor-arg ref="declarationDataBlobsCacheStore" />
 				</bean>
+                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+                    <constructor-arg value="BlobDataCache" />
+                    <constructor-arg ref="declarationDataBlobsCacheStore" />
+                </bean>
 			</set>
 		</property>
 	</bean>
