@@ -38,13 +38,13 @@ public class GetFormReceiversHandler extends AbstractActionHandler<GetFormReceiv
 				departmentFormTypeService.getDepartmentFormDestinations(action.getDepartmentId(), action.getTaxType());
 		result.setFormReceivers(receivers);
 
-		Map<Integer, FormType> formTypeNames = new HashMap<Integer, FormType>();
+		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : receivers) {
-			formTypeNames.put(departmentFormType.getFormTypeId(),
+			formTypes.put(departmentFormType.getFormTypeId(),
 					formTypeDao.getType(departmentFormType.getFormTypeId()));
 		}
 
-		result.setFormTypes(formTypeNames);
+		result.setFormTypes(formTypes);
 
 		return result;
     }

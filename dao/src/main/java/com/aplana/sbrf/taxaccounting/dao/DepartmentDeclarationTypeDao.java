@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
@@ -35,6 +36,14 @@ public interface DepartmentDeclarationTypeDao {
 	 * @return набор идентификаторов подразделений
 	 */
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
+
+	/**
+	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+	 * @param departmentId идентификатор подразделения
+	 * @param taxType вид налога
+	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+	 */
+	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
 
 	/**
 	 * Обновляет/добавляет список назначенных подразделению деклараций (с учётом вида и типа)

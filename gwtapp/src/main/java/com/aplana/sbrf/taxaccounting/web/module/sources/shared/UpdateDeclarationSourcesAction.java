@@ -4,16 +4,16 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
 
-public class UpdateSourcesAction extends UnsecuredActionImpl<UpdateSourcesResult> {
-	private Long departmentFormTypeId;
+public class UpdateDeclarationSourcesAction extends UnsecuredActionImpl<UpdateSourcesResult> {
+	private Integer departmentDeclarationTypeId;
 	private List<Long> sourceDepartmentFormTypeIds;
 
-	public Long getDepartmentFormTypeId() {
-		return departmentFormTypeId;
+	public Integer getDepartmentDeclarationTypeId() {
+		return departmentDeclarationTypeId;
 	}
 
-	public void setDepartmentFormTypeId(Long departmentFormTypeId) {
-		this.departmentFormTypeId = departmentFormTypeId;
+	public void setDepartmentDeclarationTypeId(Integer departmentDeclarationTypeId) {
+		this.departmentDeclarationTypeId = departmentDeclarationTypeId;
 	}
 
 	public List<Long> getSourceDepartmentFormTypeIds() {
