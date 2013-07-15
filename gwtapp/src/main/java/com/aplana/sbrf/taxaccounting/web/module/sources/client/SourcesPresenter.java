@@ -152,7 +152,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
 						getFormReceiverSources(departmentFormType);
 					}
 				}, this));
@@ -168,7 +167,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источники декларации сохранены");
 						getDeclarationReceiverSources(departmentDeclarationType);
 					}
 				}, this));
