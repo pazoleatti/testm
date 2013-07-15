@@ -7,6 +7,7 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
+ *      - графа 7: алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
  *
  * @author rtimerbaev
  */
@@ -151,6 +152,14 @@ void calc() {
     formData.dataRows.eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
+
+        // графа 6
+        row.lotSizePrev = getValueForColumn6(row)
+
+        // графа 7
+        // TODO (Ramil Timerbaev) алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
+        // возможно алгоритм расчета будет аналогичен расчету графы 6
+        // row.lotSizeCurrent = getValueForColumn7(row)
 
         // графа 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
@@ -366,6 +375,23 @@ def logicalCheck(def useLog) {
             i += 1
 
             // 17. Арифметическая проверка графы 8, 14..17
+            // графа 6
+            row.lotSizePrev = getValueForColumn6(row)
+
+            // графа 6
+            if (row.lotSizePrev != getValueForColumn6(row)) {
+                name = getColumnName(row, 'lotSizePrev')
+                logger.warn("Неверно рассчитана графа «$name»!")
+            }
+
+            // графа 7
+            // TODO (Ramil Timerbaev) алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
+            // возможно алгоритм расчета будет аналогичен расчету графы 6
+            // if (row.lotSizeCurrent != getValueForColumn7(row)) {
+            //     name = getColumnName(row, 'lotSizeCurrent')
+            //     logger.warn("Неверно рассчитана графа «$name»!")
+            // }
+
             // графа 8
             if (row.reserveCalcValuePrev != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserveCalcValuePrev')
@@ -727,4 +753,27 @@ def checkPrevPeriod() {
         return true
     }
     return false
+}
+
+/**
+ * Получить значение за предыдущий отчетный период для графы 6
+ *
+ * @param row строка текущего периода
+ * @return возвращает найденое значение, иначе возвратит 0
+ */
+def getValueForColumn6(def row) {
+    def formDataOld = getFormDataOld()
+    def value = 0
+    def count = 0
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        for (def rowOld : formDataOld.dataRows) {
+            if (rowOld.tradeNumber == row.tradeNumber) {
+                value = (rowOld.signSecurity == '+' && row.reserveCalcValuePrev == '-' ? rowOld.lotSizePrev : 0)
+                count += 1
+            }
+        }
+    }
+    // если count не равно 1, то или нет формы за предыдущий период,
+    // или нет соответствующей записи в предыдущем периода или записей несколько
+    return (count == 1 ? value : 0)
 }

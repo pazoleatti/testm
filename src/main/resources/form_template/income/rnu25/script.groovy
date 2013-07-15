@@ -144,8 +144,11 @@ void calc() {
         // графа 1
         row.rowNumber = index + 1
 
+        // графа 4
+        row.lotSizePrev = getValueForColumn4(row)
+
         // графа 6
-        row.reserve = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
+        row.reserve = getValueForColumn6(row)
 
         // графа 10
         row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
@@ -379,8 +382,14 @@ def logicalCheck(def useLog) {
             i += 1
 
             // 17. Арифметические проверки граф 6, 10, 11, 12, 13 =========================
+            // графа 4
+            if (row.lotSizePrev != getValueForColumn4(row)) {
+                name = getColumnName(row, 'lotSizePrev')
+                logger.warn("Неверно рассчитана графа «$name»!")
+            }
+
             // графа 6
-            if (row.reserve != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
+            if (row.reserve != getValueForColumn6(row)) {
                 name = getColumnName(row, 'reserve')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
@@ -669,23 +678,26 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 }
 
 /**
- * Получить значение за предыдущий отчетный период.
+ * Получить значение за предыдущий отчетный период для графы 6.
  *
- * @param needColumnName псевдоним графы значение которой надо получить (графа значения)
- * @param searchColumnName псевдоним графы по которой нужно отобрать значение (графа поиска)
- * @param searchValue значение графы поиска
+ * @param row строка текущего периода
  * @return возвращает найденое значение, иначе возвратит 0
  */
-def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue) {
+def getValueForColumn6(def row) {
     def formDataOld = getFormDataOld()
+    def value = 0
+    def count = 0
     if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
-        for (def row : formDataOld.dataRows) {
-            if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return round(row.getCell(needColumnName).getValue(), 2)
+        for (def rowOld : formDataOld.dataRows) {
+            if (rowOld.tradeNumber == row.tradeNumber) {
+                value = round(rowOld.reserveCalcValue, 2)
+                count += 1
             }
         }
     }
-    return 0
+    // если count не равно 1, то или нет формы за предыдущий период,
+    // или нет соответствующей записи в предыдущем периода или записей несколько
+    return (count == 1 ? value : 0)
 }
 
 /**
@@ -711,4 +723,27 @@ def checkPrevPeriod() {
         return true
     }
     return false
+}
+
+/**
+ * Получить значение за предыдущий отчетный период для графы 4
+ *
+ * @param row строка текущего периода
+ * @return возвращает найденое значение, иначе возвратит 0
+ */
+def getValueForColumn4(def row) {
+    def formDataOld = getFormDataOld()
+    def value = 0
+    def count = 0
+    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        for (def rowOld : formDataOld.dataRows) {
+            if (rowOld.tradeNumber == row.tradeNumber) {
+                value = (rowOld.signSecurity == '+' && row.signSecurity == '-' ? rowOld.lotSizePrev : 0)
+                count += 1
+            }
+        }
+    }
+    // если count не равно 1, то или нет формы за предыдущий период,
+    // или нет соответствующей записи в предыдущем периода или записей несколько
+    return (count == 1 ? value : 0)
 }
