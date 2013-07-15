@@ -61,24 +61,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		return true;
 	}
 
-	/**
-	 * updateFormSources
-	 */
-	@Override
-	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
-		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
-		action.setDepartmentFormTypeId(departmentFormType.getId());
-		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateFormSourcesResult>() {
-					@Override
-					public void onSuccess(UpdateFormSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
-						getFormReceiverSources(departmentFormType);
-					}
-				}, this));
-	}
-
 	@Override
 	public void getFormSources(int departmentId, TaxType taxType) {
 		GetFormSourcesAction action = new GetFormSourcesAction();
@@ -161,4 +143,34 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
 	}
 
+	@Override
+	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
+		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
+		action.setDepartmentFormTypeId(departmentFormType.getId());
+		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
+					@Override
+					public void onSuccess(UpdateSourcesResult result) {
+						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
+						getFormReceiverSources(departmentFormType);
+					}
+				}, this));
+	}
+
+	@Override
+	public void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
+										 List<Long> sourceDepartmentFormTypeIds) {
+		UpdateDeclarationSourcesAction action = new UpdateDeclarationSourcesAction();
+		action.setDepartmentDeclarationTypeId(departmentDeclarationType.getId());
+		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
+					@Override
+					public void onSuccess(UpdateSourcesResult result) {
+						MessageEvent.fire(SourcesPresenter.this, "Источники декларации сохранены");
+						getDeclarationReceiverSources(departmentDeclarationType);
+					}
+				}, this));
+	}
 }

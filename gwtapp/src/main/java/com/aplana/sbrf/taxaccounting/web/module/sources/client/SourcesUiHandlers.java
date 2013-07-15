@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface SourcesUiHandlers extends UiHandlers {
 	void updateFormSources(DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds);
+	void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
+								  List<Long> sourceDepartmentFormTypeIds);
 	void getFormSources(int departmentId, TaxType taxType);
 	void getFormReceivers(int departmentId, TaxType taxType);
 	void getFormReceiverSources(DepartmentFormType departmentFormType);

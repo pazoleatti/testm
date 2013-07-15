@@ -20,12 +20,14 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
+import java.util.List;
 
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		implements SourcesPresenter.MyView, SelectDepartmentsEventHandler {
@@ -40,6 +42,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private boolean isForm;
 
 	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
+	private static final String SOURCE_DEPARTMENT_HEADER = "Выберите источник";
+	private static final String RECEIVER_DEPARTMENT_HEADER = "Выберите приёмник";
 
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
@@ -113,8 +117,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
 		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
-		enableButtonLink(assignButton, false);
-		enableButtonLink(cancelButton, false);
 
 		setupSourcesTables();
 		setupReceiversTables();
@@ -132,6 +134,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		taxTypePicker.setValue(TaxType.INCOME);
 		departmentReceiverPicker.setSelectedItems(null);
 		departmentSourcePicker.setSelectedItems(null);
+		enableButtonLink(assignButton, false);
+		enableButtonLink(cancelButton, false);
+		sourcesTable.setRowCount(0);
+		formReceiversTable.setRowCount(0);
+		declarationReceiversTable.setRowCount(0);
+		receiverSourcesTable.setRowCount(0);
 	}
 
 	@Override
@@ -207,7 +215,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		formReceiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
 		formReceiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
 		formReceiversTable.addColumn(receiverTypeColumn, "Вид налоговой формы");
-		formReceiversTable.setRowCount(0);
 		formReceiversTable.setSelectionModel(formReceiversSelectionModel);
 		formReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -231,7 +238,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		};
 
 		declarationReceiversTable.addColumn(declarationReceiverTypeColumn, "Вид декларации");
-		declarationReceiversTable.setRowCount(0);
 		declarationReceiversTable.setSelectionModel(declarationReceiversSelectionModel);
 		declarationReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -271,7 +277,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		sourcesTable.addColumn(sourceKindColumn, "Тип налоговой формы");
 		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
 		sourcesTable.addColumn(sourceTypeColumn, "Вид налоговой формы");
-		sourcesTable.setRowCount(0);
 		sourcesTable.setSelectionModel(sourcesSelectionModel);
 		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -340,12 +345,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
 		receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
 		receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
-		receiverSourcesTable.setRowCount(0);
 	}
 
 	@UiHandler("assignButton")
 	public void assign(ClickEvent event) {
-		if (formReceiversSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+		if ((formReceiversSelectionModel.getSelectedObject() == null &&
+				declarationReceiversSelectionModel.getSelectedObject() == null) ||
+			sourcesSelectionModel.getSelectedObject() == null) {
 			return;
 		}
 
@@ -356,32 +362,42 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			sourceIds.add(source.getDepartmentFormType().getId());
 		}
 
-		getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
+		if (isForm) {
+			getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
+		} else {
+			getUiHandlers().updateDeclarationSources(declarationReceiversSelectionModel.getSelectedObject(), sourceIds);
+		}
 	}
 
 	@UiHandler("cancelButton")
 	public void cancel(ClickEvent event) {
-		if (formReceiversSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+		if ((formReceiversSelectionModel.getSelectedObject() == null &&
+			declarationReceiversSelectionModel.getSelectedObject() == null) ||
+			sourcesSelectionModel.getSelectedObject() == null) {
 			return;
 		}
 
-		List<Long> sources = new ArrayList<Long>();
+		List<Long> sourceIds = new ArrayList<Long>();
 
 		for (CheckedDepartmentFormType source: receiverSourcesTable.getVisibleItems()) {
-			System.out.println("source.isChecked() " + source.isChecked());
 			if (!source.isChecked()) {
-				sources.add(source.getDepartmentFormType().getId());
+				sourceIds.add(source.getDepartmentFormType().getId());
 			}
 		}
+		if (isForm) {
+			getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
+		} else {
+			getUiHandlers().updateDeclarationSources(declarationReceiversSelectionModel.getSelectedObject(), sourceIds);
+		}
 
-		getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sources);
 	}
 
+	// Тут мы завязываемся на хидер как на id, тк у нас два пикера департаментов.
 	@Override
 	public void onDepartmentsReceived(SelectDepartmentsEvent event) {
-		if ("Выберите источник".equals(event.getHeader())) {
+		if (SOURCE_DEPARTMENT_HEADER.equals(event.getHeader())) {
 			setSources();
-		} else if ("Выберите приёмник".equals(event.getHeader())) {
+		} else if (RECEIVER_DEPARTMENT_HEADER.equals(event.getHeader())) {
 			setReceivers();
 			receiverSourcesTable.setRowCount(0);
 		}
