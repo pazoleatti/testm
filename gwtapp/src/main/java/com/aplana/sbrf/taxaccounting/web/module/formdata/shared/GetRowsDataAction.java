@@ -13,6 +13,7 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 	DataRowRange range;
 	boolean readOnly;
 	long formDataId;
+	int formDataTemplateId;
 	List<DataRow<Cell>> modifiedRows;
 
 	public DataRowRange getRange() {
@@ -37,6 +38,14 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 
 	public void setFormDataId(long formDataId) {
 		this.formDataId = formDataId;
+	}
+
+	public int getFormDataTemplateId() {
+		return formDataTemplateId;
+	}
+
+	public void setFormDataTemplateId(int formDataTemplateId) {
+		this.formDataTemplateId = formDataTemplateId;
 	}
 
 	public List<DataRow<Cell>> getModifiedRows() {

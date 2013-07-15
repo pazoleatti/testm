@@ -86,14 +86,18 @@ public class FormDataPresenter extends
 			action.setRange(new DataRowRange(start, length));
 			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 			action.setReadOnly(readOnlyMode);
+			action.setFormDataTemplateId(formData.getFormTemplateId());
 			dispatcher.execute(action, CallbackUtils
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
 							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
-							else
+							else {
 								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
+								getView().assignDataProvider(result.getDataRows().getRecords().size());
+							}
+
 						modifiedRows.clear();
 
 						}

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
@@ -20,6 +21,8 @@ public class GetRowsDataHandler extends
 	DataRowService dataRowService;
 	@Autowired
 	SecurityService securityService;
+	@Autowired
+	FormTemplateService formTemplateService;
 
 	public GetRowsDataHandler() {
 		super(GetRowsDataAction.class);
@@ -28,11 +31,18 @@ public class GetRowsDataHandler extends
 	@Override
 	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
 		GetRowsDataResult result = new GetRowsDataResult();
+		boolean fixedRows = formTemplateService.get(action.getFormDataTemplateId()).isFixedRows();
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		if (!action.getModifiedRows().isEmpty()) {
 			dataRowService.update(userInfo, action.getFormDataId(), action.getModifiedRows());
 		}
-		DataRowRange dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
+		DataRowRange dataRowRange;
+		if (fixedRows) {
+			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(userInfo, action.getFormDataId(), action.isReadOnly()));
+		} else {
+			 dataRowRange = new DataRowRange(action.getRange().getOffset() == 0 ? 1 : action.getRange().getOffset(), action.getRange().getLimit());
+		}
+
 		result.setDataRows(dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, action.isReadOnly()));
 		return result;
 	}
