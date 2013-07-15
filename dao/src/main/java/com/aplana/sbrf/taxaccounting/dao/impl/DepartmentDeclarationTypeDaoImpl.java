@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -159,5 +160,19 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 					}
 			);
 		}
+	}
+
+	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = ?" +
+			" and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
+	@Override
+	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
+		return getJdbcTemplate().query(
+				GET_SQL_BY_TAX_TYPE_SQL,
+				new Object[] {
+						departmentId,
+						String.valueOf(taxType.getCode())
+				},
+				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
+		);
 	}
 }

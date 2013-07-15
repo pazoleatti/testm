@@ -128,4 +128,13 @@ public interface DepartmentFormTypeService {
      */
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
 
+	/**
+	 * Обновляет информацию об источниках для декларации
+	 *
+	 * @param declarationTypeId
+	 *            идентификатор связки для которой нужно обновить источники
+	 * @param sourceDepartmentFormTypeIds
+	 *			  идентификаторы деклараций-источников в виде списка
+	 */
+	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
 }

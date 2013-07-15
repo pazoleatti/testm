@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -32,12 +30,14 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 		void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+									 List<DepartmentDeclarationType> departmentDeclarationTypes);
 		void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setDepartments(List<Department> departments);
+		void init(boolean isForm);
 	}
 
 	private final DispatchAsync dispatcher;
-	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
 
 	@Inject
 	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
@@ -52,15 +52,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-
-		closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
-			@Override
-			public void onWindowClosing(Window.ClosingEvent event) {
-				closeDeclarationTemplateHandlerRegistration.removeHandler();
-			}
-		});
-
-		setDepartments();
+		getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+		getDepartments();
 	}
 
 	@Override
@@ -69,32 +62,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void onHide() {
-		super.onHide();
-		unlock();
-		closeDeclarationTemplateHandlerRegistration.removeHandler();
-	}
-
-	/**
-	 * updateFormSources
-	 */
-	@Override
-	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
-		UpdateSourcesAction action = new UpdateSourcesAction();
-		action.setDepartmentFormTypeId(departmentFormType.getId());
-		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
-					@Override
-					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источник назначен");
-						setFormReceiverSources(departmentFormType);
-					}
-				}, this));
-	}
-
-	@Override
-	public void setFormSources(int departmentId, TaxType taxType) {
+	public void getFormSources(int departmentId, TaxType taxType) {
 		GetFormSourcesAction action = new GetFormSourcesAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -108,7 +76,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void setFormReceivers(int departmentId, TaxType taxType) {
+	public void getFormReceivers(int departmentId, TaxType taxType) {
 		GetFormReceiversAction action = new GetFormReceiversAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -122,7 +90,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void setFormReceiverSources(DepartmentFormType departmentFormType) {
+	public void getFormReceiverSources(DepartmentFormType departmentFormType) {
 		GetFormReceiverSourcesAction action = new GetFormReceiverSourcesAction();
 		action.setDepartmentId(departmentFormType.getDepartmentId());
 		action.setFormTypeId(departmentFormType.getFormTypeId());
@@ -136,7 +104,35 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(SourcesPresenter.this)));
 	}
 
-	private void setDepartments() {
+	@Override
+	public void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType) {
+		GetDeclarationReceiverSourcesAction action = new GetDeclarationReceiverSourcesAction();
+		action.setDepartmentId(departmentDeclarationType.getDepartmentId());
+		action.setDeclarationTypeId(departmentDeclarationType.getDeclarationTypeId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetDeclarationReceiverSourcesResult>() {
+					@Override
+					public void onSuccess(GetDeclarationReceiverSourcesResult result) {
+						getView().setFormReceiverSources(result.getFormTypes(), result.getFormReceiverSources());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetDeclarationReceiverSourcesResult>(SourcesPresenter.this)));
+	}
+
+	@Override
+	public void getDeclarationReceivers(int departmentId, TaxType taxType) {
+		GetDeclarationReceiversAction action = new GetDeclarationReceiversAction();
+		action.setDepartmentId(departmentId);
+		action.setTaxType(taxType);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetDeclarationReceiversResult>() {
+					@Override
+					public void onSuccess(GetDeclarationReceiversResult result) {
+						getView().setDeclarationReceivers(result.getDeclarationTypes(), result.getDeclarationReceivers());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetDeclarationReceiversResult>(SourcesPresenter.this)));
+	}
+
+	private void getDepartments() {
 		GetDepartmentsAction action = new GetDepartmentsAction();
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
@@ -147,10 +143,34 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
 	}
 
-	private void unlock(){
-		UnlockSourcesAction action = new UnlockSourcesAction();
-		dispatcher.execute(action, CallbackUtils.emptyCallback());
+	@Override
+	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
+		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
+		action.setDepartmentFormTypeId(departmentFormType.getId());
+		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
+					@Override
+					public void onSuccess(UpdateSourcesResult result) {
+						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
+						getFormReceiverSources(departmentFormType);
+					}
+				}, this));
 	}
 
-
+	@Override
+	public void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
+										 List<Long> sourceDepartmentFormTypeIds) {
+		UpdateDeclarationSourcesAction action = new UpdateDeclarationSourcesAction();
+		action.setDepartmentDeclarationTypeId(departmentDeclarationType.getId());
+		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
+					@Override
+					public void onSuccess(UpdateSourcesResult result) {
+						MessageEvent.fire(SourcesPresenter.this, "Источники декларации сохранены");
+						getDeclarationReceiverSources(departmentDeclarationType);
+					}
+				}, this));
+	}
 }

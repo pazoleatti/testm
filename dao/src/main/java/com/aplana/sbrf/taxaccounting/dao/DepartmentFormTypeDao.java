@@ -127,8 +127,8 @@ public interface DepartmentFormTypeDao {
 	 *
 	 * @param declarationTypeId
 	 *            идентификатор связки для которой нужно обновить источники
-	 * @param sourceDeclarationTypeIds
+	 * @param sourceDepartmentFormTypeIds
 	 *			  идентификаторы деклараций-источников в виде списка
 	 */
-	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDeclarationTypeIds);
+	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
 }
