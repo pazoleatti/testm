@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class SaveFormDataHandler extends
 	private SecurityService securityService;
 	@Autowired
 	private FormDataService formDataService;
+	@Autowired
+	private DataRowService dataRowService;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -33,6 +36,9 @@ public class SaveFormDataHandler extends
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
+		if (!action.getModifiedRows().isEmpty()) {
+			dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows());
+		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 
 		logger.info("Данные успешно записаны");

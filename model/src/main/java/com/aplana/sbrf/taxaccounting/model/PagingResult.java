@@ -11,7 +11,9 @@ import java.util.List;
  * @author dsultanbekov
  * @param <T> - тип запрашиваемых записей
  */
-public class PagingResult<T> {
+public class PagingResult<T> implements Serializable{
+	private static final long serialVersionUID = 4359122077734311449L;
+	
 	List<T> records;
 	long totalRecordCount;
 	
@@ -43,3 +45,4 @@ public class PagingResult<T> {
 		return sb.toString();
 	}
 }
+

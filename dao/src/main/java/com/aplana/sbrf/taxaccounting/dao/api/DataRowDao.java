@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -27,77 +30,111 @@ public interface DataRowDao {
 	 */
 
 	/**
-	 * Метод получает строки сохранненого состояния
+	 * Метод получает строки сохранненого среза строк НФ.
 	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param handler
-	 * @param filter
-	 * @param range
 	 */
-	void getSavedRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
+	List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 	
-	int getSavedSize(FormData fd, DataRowFilter filter,
-			DataRowRange range);
+	/**
+	 * Метод получает количество строк сохранненого среза.
+	 * 
+	 * @param fd
+	 * @param filter
+	 * @return
+	 */
+	int getSavedSize(FormData fd, DataRowFilter filter);
 
 	/*
 	 * Методы для работы с редактируемым срезом формы
 	 */
 
 	/**
-	 * Метод получает строки редактируемого в данный момент состояния формы.
+	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param handler
-	 * @param filter фильтр (возможно значение null)
-	 * @param range диапазон (возможно значение null)
 	 */
-	void getRows(FormData fd, DataRowHandler handler, DataRowFilter filter,
+	List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range);
 	
+
+	
 	/**
-	 * Метод получает строку редактируемого в данный момент состояния формы.
+	 * Метод получает количество строк редактируемого среза.
 	 * 
-	 * @param fd - FormData со строками которой идет работа
-	 * @param index
+	 * @param fd
 	 * @param filter
-	 * @param range
 	 * @return
 	 */
-	DataRow<Cell> getRow(FormData fd, int index, DataRowFilter filter,
-			DataRowRange range);
-	
-	int getSize(FormData fd, DataRowFilter filter,
-			DataRowRange range);
+	int getSize(FormData fd, DataRowFilter filter);
 
 	/**
-	 * Обновляет существующую строку НФ
+	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
+	 * При этом поле id у DataRow может быть обновлено.
 	 * 
 	 * @param fd
 	 * @param row
 	 */
-	void updateRow(FormData fd, DataRow<Cell> row);
+	void updateRows(FormData fd, Collection<DataRow<Cell>> rows);
 
-	void removeRow(FormData fd, DataRow<Cell> row);
+	/**
+	 * Удалет строки. При этом используется иденитфикатор DataRow.id 
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 * @param rows
+	 */
+	void removeRows(FormData fd, List<DataRow<Cell>> rows);
 
-	void removeRow(FormData fd, int index);
+	/**
+	 * Удаляет строки в диапазоне индексов. (Индексы от 1)
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 * @param idxFrom
+	 * @param idxTo
+	 */
+	void removeRows(FormData fd, int idxFrom, int idxTo);
+	
+	
+	/**
+	 * Удаляем все строки
+	 * Действие применяется к временному срезу строк
+	 * 
+	 * @param fd
+	 */
+	void removeRows(FormData fd);
+	
+	
+	/**
+	 * Сохраняет все строки во временном срезе формы, при этом сохраняется порядок, и 
+	 * удаляются все существующие строки. Фактически метод ведет себя как старый способ сохранения формы.
+	 * Поля DataRow.index и DataRow.id не принимаются во внимание. 
+	 * 
+	 * @param fd
+	 * @param rows
+	 */
+	void saveRows(FormData fd, List<DataRow<Cell>> rows);
 
-	DataRow<Cell> addRow(FormData fd, int index, DataRow<Cell> rowTemplate);
+	void insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
 
-	DataRow<Cell> addRow(FormData fd, DataRow<Cell> rowTemplate);
-
-	DataRow<Cell> addRowAfter(FormData fd, DataRow<Cell> afterRow,
-			DataRow<Cell> rowTemplate);
-
-	DataRow<Cell> addRowBefore(FormData fd, DataRow<Cell> beforeRow,
-			DataRow<Cell> rowTemplate);
+	void insertRows(FormData fd, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
 
 	/*
 	 * Сохранение/отмена
 	 */
 
-	void save(FormData fd);
+	/**
+	 * Делает временный срез строк формы - постоянным.
+	 * 
+	 * @param fd
+	 */
+	void commit(long formDataId);
 
-	void cancel(FormData fd);
+	/**
+	 * Откатывает временный срез формы к постоянному.
+	 * 
+	 * @param fd
+	 */
+	void rollback(long formDataId);
 
 }

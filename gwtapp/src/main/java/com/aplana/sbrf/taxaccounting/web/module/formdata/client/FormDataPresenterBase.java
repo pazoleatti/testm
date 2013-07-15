@@ -1,17 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -45,7 +39,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode);
 
-		void setRowsData(List<DataRow<Cell>> rowsData);
+		void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData);
 
 		void addCustomHeader(List<DataRow<HeaderCell>> headers);
 
@@ -86,6 +80,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void enableRemoveRowButton(boolean enable);
 		
 		boolean getCheckedColumnsClicked();
+
+		void assignDataProvider(int pageSize);
+
+		void updateData();
 	}
 
 	public static final String NAME_TOKEN = "!formData";
@@ -122,9 +120,17 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 	protected boolean fixedRows;
 
+	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
-	public FormDataPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
-								 PlaceManager placeManager, DispatchAsync dispatcher, SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
+
+	public FormDataPresenterBase(EventBus eventBus,
+	                             MyView view,
+	                             Proxy_ proxy,
+								 PlaceManager placeManager,
+								 DispatchAsync dispatcher,
+								 SignersPresenter signersPresenter,
+								 DialogPresenter dialogPresenter,
+								 HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;

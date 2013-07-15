@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Данные по отчётной форме
@@ -24,7 +24,6 @@ public class FormData extends IdentityObject<Long> {
 	private List<Column> formColumns;
 	private List<FormStyle> formStyles;
 
-	private List<DataRow<Cell>> dataRows;
 	private List<DataRow<HeaderCell>> headers;
 	private FormType formType;
 
@@ -131,7 +130,6 @@ public class FormData extends IdentityObject<Long> {
 		this.formColumns = formTemplate.getColumns();
 		this.formTemplateId = formTemplate.getId();
 		this.formType = formTemplate.getType();
-		dataRows = new ArrayList<DataRow<Cell>>();
 		this.formStyles = formTemplate.getStyles();
 		this.headers = formTemplate.getHeaders();
 	}
@@ -151,104 +149,7 @@ public class FormData extends IdentityObject<Long> {
 	public List<Column> getFormColumns() {
 		return formColumns;
 	}
-
-	public List<DataRow<Cell>> getDataRows() {
-		return dataRows;
-	}
-
-	/**
-	 * Добавляет строку в таблицу данных. Каждая строка может содержать
-	 * уникальный алиас, для возможности идентификации её в скриптах
-	 * 
-	 * @param i 
-	 *            индекс
-	 * @param rowAlias
-	 *            значение, задающее алиас. в большинстве случае должен быть
-	 *            строкой, но для удобства написания скриптов, принимает Object.
-	 *            Значением алиаса будет результат операции
-	 *            <code>rowAlias.toString()</code>
-	 * @return добавленная строка с установленным алиасом
-	 */
-	public DataRow<Cell> appendDataRow(int i, Object rowAlias) {
-		List<Cell> cells = new ArrayList<Cell>();
-		for (Column col : formColumns) {
-			cells.add(new Cell(col, formStyles));
-		}
-		DataRow<Cell> row = new DataRow<Cell>(
-				rowAlias == null ? null : rowAlias.toString(), cells);
-		dataRows.add(i, row);
-		return row;
-	}
 	
-	public DataRow<Cell> appendDataRow(int i) {
-		return appendDataRow(i, null);
-	}
-	
-	public DataRow<Cell> appendDataRow(DataRow<Cell> after, Object rowAlias) {
-		return appendDataRow(dataRows.indexOf(after) + 1, rowAlias);
-	}
-
-    /*	public DataRow appendDataRow(DataRow after) {
-		return appendDataRow(after);
-	}*/
-	
-	public DataRow<Cell> appendDataRow(Object rowAlias) {
-		return appendDataRow(dataRows.size(), rowAlias);
-	}
-
-	public DataRow<Cell> appendDataRow() {
-		return appendDataRow(null);
-	}
-	
-	/**
-	 * Удаляет строку из НФ
-	 * 
-	 * @param dataRow
-	 *            удаляемая строка
-	 * @return true, если удаляемая строка находилась в списке строк
-	 */
-	public boolean deleteDataRow(DataRow<Cell> dataRow) {
-		return dataRows.remove(dataRow);
-	}
-
-	public DataRow<Cell> getDataRow(String rowAlias) {
-		if (rowAlias == null) {
-			throw new NullPointerException("Row alias cannot be null");
-		}
-		for (DataRow<Cell> row : dataRows) {
-			if (rowAlias.equals(row.getAlias())) {
-				return row;
-			}
-		}
-		throw new IllegalArgumentException("Wrong row alias requested: "
-				+ rowAlias);
-	}
-
-	/**
-	 * Возвращает индекс строки, имеющий заданный алиас (с нуля).
-	 * 
-	 * @param rowAlias
-	 *            алиас строки
-	 * @return индекс строки
-	 * @throws NullPointerException
-	 *             если rowAlias null
-	 * @throws IllegalArgumentException
-	 *             если такого алиас не существует в объекте FormData
-	 */
-	public int getDataRowIndex(String rowAlias) {
-		if (rowAlias == null) {
-			throw new NullPointerException("Row alias cannot be null");
-		}
-		for (int index = 0; index < dataRows.size(); ++index) {
-			DataRow<Cell> row = dataRows.get(index);
-			if (rowAlias.equals(row.getAlias())) {
-				return index;
-			}
-		}
-		throw new IllegalArgumentException("Wrong row alias requested: "
-				+ rowAlias);
-	}
-
 	/**
 	 * Получить информацию об {@link FormDataPerformer исполнителе налоговой
 	 * формы}
@@ -324,8 +225,6 @@ public class FormData extends IdentityObject<Long> {
 		builder.append(formColumns);
 		builder.append(", formStyles=");
 		builder.append(formStyles);
-		builder.append(", dataRows=");
-		builder.append(dataRows);
 		builder.append(", formType=");
 		builder.append(formType);
 		builder.append(", performer=");

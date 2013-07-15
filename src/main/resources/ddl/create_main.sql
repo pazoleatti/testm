@@ -485,15 +485,15 @@ comment on column report_period.dict_tax_period_id is 'Ссылка на спр�
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
-  report_period_id       number(9) not null,
-  account                varchar2(255) not null,
-  income_debet_remains   number(22,4),
-  income_credit_remains  number(22,4),
-  debet_rate             number(22,4),
-  credit_rate            number(22,4),
-  outcome_debet_remains  number(22,4),
+  report_period_id number(9) not null,
+  account varchar2(255) not null,
+  income_debet_remains number(22,4),
+  income_credit_remains number(22,4),
+  debet_rate number(22,4),
+  credit_rate number(22,4),
+  outcome_debet_remains number(22,4),
   outcome_credit_remains number(22,4),
-  department_id          number(15) not null
+  department_id number(15) not null
 );
 
 alter table income_101 add constraint income_101_pk primary key (report_period_id, account,department_id);
@@ -513,9 +513,9 @@ comment on column income_101.department_id is 'Подразделение';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   report_period_id number(9) not null,
-  opu_code         varchar2(25) not null,
-  total_sum        number(22,4),
-  department_id    number(15) not null);
+  opu_code varchar2(25) not null,
+  total_sum number(22,4),
+  department_id number(15) not null);
 
 alter table income_102 add constraint income_102_pk primary key (report_period_id, opu_code,department_id);
 alter table income_102 add constraint income_102_fk_department_id foreign key (department_id) references department(id);
@@ -529,8 +529,8 @@ comment on column income_102.department_id is 'Подразделение';
 ---------------------------------------------------------------------------------------------------
 create table declaration_type (
   id       number(9) not null,
-  tax_type char(1) not null,
-  name     varchar(80) not null
+  tax_type    char(1) not null,
+  name      varchar(80) not null
 );
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -541,8 +541,8 @@ comment on column declaration_type.tax_type is 'Вид налога (I-на пр
 comment on column declaration_type.name is 'Наименование';
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
-  id                  number(9) not null,
-  department_id       number(9) not null,
+  id         number(9) not null,
+  department_id    number(9) not null,
   declaration_type_id number(9) not null
 );
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
@@ -557,10 +557,10 @@ comment on column department_declaration_type.declaration_type_id is 'Вид д�
 create sequence seq_dept_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_template (
-  id                  number(9) not null,
-  edition             number(9) not null,
-  version             varchar2(20) not null,
-  is_active           number(1) not null,
+  id       number(9) not null,
+  edition    number(9) not null,
+  version    varchar2(20) not null,
+  is_active   number(1) not null,
   create_script       clob,
   jrxml               clob,
   jasper              blob,
@@ -584,14 +584,14 @@ create sequence seq_declaration_template start with 10000;
 
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
-  id                      number(18) not null,
+  id number(18) not null,
   declaration_template_id number(9) not null,
-  report_period_id        number(9) not null,
-  department_id           number(9) not null,
-  data                    clob,
-  is_accepted             number(1) not null,
-  data_pdf                blob,
-  data_xlsx               blob
+  report_period_id    number(9) not null,
+  department_id      number(9) not null,
+  data          clob,
+  is_accepted       number(1) not null,
+  data_pdf        blob,
+  data_xlsx        blob
 );
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
@@ -613,14 +613,14 @@ comment on column declaration_data.data_xlsx is 'xlsx';
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
-  id               number(18) not null,
+  id number(18) not null,
   form_template_id number(9) not null,
-  department_id    number(9) not null,
-  state            number(9) not null,
-  kind             number(9) not null,
+  department_id number(9) not null,
+  state number(9) not null,
+  kind number(9) not null,
   report_period_id number(9) not null,
-  acceptance_date  date,
-  creation_date    date default sysdate not null
+  acceptance_date date,
+  creation_date date default sysdate not null
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -641,11 +641,11 @@ comment on column form_data.creation_date is 'Дата создания';
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_data_signer (
-  id           number(18) not null,
+  id      number(18) not null,
   form_data_id number(18) not null,
-  name         varchar2(200) not null,
-  position     varchar2(200) not null,
-  ord          number(3) not null
+  name     varchar2(200) not null,
+  position   varchar2(200) not null,
+  ord     number(3) not null
 );
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
@@ -661,8 +661,8 @@ create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_data_performer (
   form_data_id number(18) not null,
-  name         varchar2(200) not null,
-  phone        varchar2(20)
+  name varchar2(200) not null,
+  phone varchar2(20)
 );
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
 alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
@@ -673,27 +673,30 @@ comment on column form_data_performer.name is 'ФИО исполнителя';
 comment on column form_data_performer.phone is 'Телефон';
 --------------------------------------------------------------------------------------------------
 create table data_row (
-  id           number(18) not null,
+  id number(18) not null,
   form_data_id number(18) not null,
-  alias        varchar(20),
-  ord          number(9) not null
+  alias varchar(20),
+  ord number(14,0) not null,
+  type number(1) not null
 );
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id);
-alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord);
+alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord, type);
+alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
 
 comment on table data_row is 'Строки данных налоговых форм';
 comment on column data_row.alias is 'Идентификатор строки';
 comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
 comment on column data_row.id is 'Код строки для доступа из скриптов';
 comment on column data_row.ord is 'Номер строки в форме';
+comment on column data_row.type is 'тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table cell_style (
-  row_id    number(18) not null,
+  row_id  number(18) not null,
   column_id number(9) not null,
-  style_id  number(9) not null
+  style_id number(9) not null
 );
 alter table cell_style add constraint cell_style_pk primary key (row_id, column_id);
 alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column (id);
@@ -706,7 +709,7 @@ comment on column cell_style.column_id is 'Идентификатор столб
 comment on column cell_style.style_id is 'Идентификатор стиля';
 ---------------------------------------------------------------------------------------------------
 create table cell_editable(
-  row_id     number(18) not null,
+  row_id number(18) not null,
   column_id number(9) not null
 );
 alter table cell_editable add constraint cell_editable_pk primary key (row_id, column_id);
@@ -718,7 +721,7 @@ comment on column cell_editable.row_id is 'Идентификатор строк
 comment on column cell_editable.column_id is 'Идентификатор столбца налоговой формы';
 ---------------------------------------------------------------------------------------------------
 create table numeric_value (
-  row_id    number(18) not null,
+  row_id number(18) not null,
   column_id number(9) not null,
   value     decimal(27, 10)
 );
@@ -731,7 +734,7 @@ comment on column numeric_value.row_id is 'Идентификатор строк
 comment on column numeric_value.value is 'Значение';
 ---------------------------------------------------------------------------------------------------
 create table string_value (
-  row_id    number(18) not null,
+  row_id number(18) not null,
   column_id number(9) not null,
   value     varchar2(2000 char)
 );
@@ -744,9 +747,9 @@ comment on column string_value.row_id is 'Идентификатор строк�
 comment on column string_value.value is 'Значение';
 ---------------------------------------------------------------------------------------------------
 create table date_value (
-  row_id    number(18) not null,
+  row_id number(18) not null,
   column_id number(9) not null,
-  value     date
+  value date
 );
 alter table date_value add constraint date_value_pk primary key (row_id, column_id);
 alter table date_value add constraint date_value_fk_column_id foreign key (column_id) references form_column(id);
@@ -757,10 +760,10 @@ comment on column date_value.row_id is 'Идентификатор строки'
 comment on column date_value.value is 'Значение';
 ---------------------------------------------------------------------------------------------------
 create table department_form_type (
-  id            number(9) not null,
+  id      number(9) not null,
   department_id number(9) not null,
-  form_type_id  number(9) not null,
-  kind          number(9) not null
+  form_type_id number(9) not null,
+  kind     number(9) not null
 );
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
@@ -780,7 +783,7 @@ create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table declaration_source (
   department_declaration_type_id number(9) not null,
-  src_department_form_type_id    number(9) not null
+  src_department_form_type_id   number(9) not null
 );
 alter table declaration_source add constraint declaration_source_pk primary key (department_declaration_type_id,src_department_form_type_id );
 alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type (id);
@@ -791,7 +794,7 @@ comment on column declaration_source.department_declaration_type_id is 'Иден
 comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
 ----------------------------------------------------------------------------------------------------
 create table form_data_source (
-  department_form_type_id     number(9) not null,
+  department_form_type_id number(9) not null,
   src_department_form_type_id number(9) not null
 );
 alter table form_data_source add constraint form_data_source_pk primary key (department_form_type_id, src_department_form_type_id);
@@ -802,12 +805,12 @@ comment on column form_data_source.department_form_type_id is 'Идентифи�
 comment on column form_data_source.src_department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
-  id            number(9) not null,
-  login         varchar(255) not null,
-  name          varchar(50) not null,
+  id number(9) not null,
+  login varchar(255) not null,
+  name varchar(50) not null,
   department_id number(9) not null,
-  is_active     number(1) not null,
-  email         varchar2(128)
+  is_active number(1) not null,
+  email varchar2(128)
 );
 alter table sec_user add constraint sec_user_pk primary key (id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
@@ -825,8 +828,8 @@ create sequence seq_sec_user start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table object_lock (
   object_id number(20) not null,
-  class     varchar(100) not null,
-  user_id   number(9) not null,
+  class varchar(100) not null,
+  user_id number(9) not null,
   lock_time date not null
 );
 alter table object_lock add constraint object_lock_pk primary key (object_id, class);
@@ -839,9 +842,9 @@ comment on column object_lock.user_id is 'Идентифкатор пользо�
 comment on column object_lock.lock_time is 'Время блокировки';
 -------------------------------------------------------------------------------------------------------------------------------------
 create table sec_role (
-  id    number(9) not null,
+  id number(9) not null,
   alias varchar(20) not null,
-  name  varchar(50) not null
+  name varchar(50) not null
 );
 alter table sec_role add constraint sec_role_pk primary key (id);
 alter table sec_role add constraint sec_role_uniq_alias unique (alias);
@@ -865,10 +868,10 @@ comment on column sec_user_role.user_id is 'Идентификатор поль�
 comment on column sec_user_role.role_id is 'Идентификатор роли';
 ----------------------------------------------------------------------------------------------------
 create table cell_span_info (
-  row_id    number(18) not null,
+  row_id number(18) not null,
   column_id number(9) not null,
-  colspan   number(3),
-  rowspan   number(3)
+  colspan number(3),
+  rowspan number(3)
 );
 alter table cell_span_info add constraint cell_span_pk primary key (row_id, column_id);
 alter table cell_span_info add constraint cell_span_info_fk_row_id foreign key (row_id) references data_row (id) on delete cascade;
@@ -882,18 +885,18 @@ comment on column cell_span_info.colspan is 'Число ячеек, которы
 comment on column cell_span_info.rowspan is 'Число ячеек, которые должны быть объединены по вертикали';
 ----------------------------------------------------------------------------------------------------
 create table department_param (
-  department_id   number(9) not null,
-  dict_region_id  varchar2(2) not null,
-  okato           varchar2(11) not null,
-  inn             varchar2(10) not null,
-  kpp             varchar2(9) not null,
-  tax_organ_code  varchar2(4) not null,
-  okved_code      varchar2(8) not null,
-  phone           varchar2(20),
+  department_id number(9) not null,
+  dict_region_id varchar2(2) not null,
+  okato varchar2(11) not null,
+  inn varchar2(10) not null,
+  kpp varchar2(9) not null,
+  tax_organ_code varchar2(4) not null,
+  okved_code varchar2(8) not null,
+  phone varchar2(20),
   reorg_form_code varchar2(1),
-  reorg_inn       varchar2(10),
-  reorg_kpp       varchar2(9),
-  name            varchar2(2000)
+  reorg_inn varchar2(10),
+  reorg_kpp varchar2(9),
+  name varchar2(2000)
 );
 alter table department_param add constraint department_param_pk primary key (department_id);
 alter table department_param add constraint dept_param_fk_dict_region_id foreign key (dict_region_id) references dict_region(code);
@@ -914,20 +917,20 @@ comment on column department_param.reorg_kpp is 'КПП реорганизова
 comment on column department_param.name is 'Наименование обособленного подразделения';
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 create table department_param_income (
-  department_id       number(9) not null,
-  signatory_id        number(1) not null,
-  signatory_surname   varchar2(120) not null,
+  department_id    number(9) not null,
+  signatory_id    number(1) not null,
+  signatory_surname  varchar2(120) not null,
   signatory_firstname varchar2(120),
-  signatory_lastname  varchar2(120),
-  approve_doc_name    varchar2(240),
-  approve_org_name    varchar2(2000),
+  signatory_lastname varchar2(120),
+  approve_doc_name  varchar2(240),
+  approve_org_name  varchar2(2000),
   tax_place_type_code varchar2(3) not null,
-  tax_rate            number(4,2),
-  external_tax_sum    number(15),
-  sum_difference      number(15),
-  correction_sum      number(15),
-  app_version         varchar2(40),
-  format_version      varchar2(5)
+  tax_rate      number(4,2),
+  external_tax_sum  number(15),
+  sum_difference   number(15),
+  correction_sum   number(15),
+  app_version     varchar2(40),
+  format_version   varchar2(5)
 );
 alter table department_param_income add constraint department_param_income_pk primary key (department_id);
 alter table department_param_income add constraint dept_param_income_chk_taxplace check (tax_place_type_code in ('213','214','215','216','218','220','223','225','226','231'));

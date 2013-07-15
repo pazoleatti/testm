@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -12,18 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
@@ -40,10 +29,14 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
 		FormDataUiHandlers {
 
+	public static int PAGE_SIZE = 15;
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -59,6 +52,7 @@ public class FormDataPresenter extends
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
 		getView().setUiHandlers(this);
+		getView().assignDataProvider(PAGE_SIZE);
 	}
 
 	@Override
@@ -68,17 +62,9 @@ public class FormDataPresenter extends
 
             //TODO: Возможно переписать придется, если новый пейджинг сделают, т.к. данные в какой-то временной таблице будут.
 			final GetFormData action = new GetFormData();
-			// WTF? Почему Long.MAX_VALUE?
+
 			action.setFormDataId(Long.parseLong(request.getParameter(
-					FORM_DATA_ID, String.valueOf(Long.MAX_VALUE))));
-			action.setDepartmentId(ParamUtils
-					.getInteger(request, DEPARTMENT_ID));
-			action.setFormDataKind(ParamUtils.getLong(request,
-					FORM_DATA_KIND_ID));
-			action.setFormDataTypeId(ParamUtils.getLong(request,
-					FORM_DATA_TYPE_ID));
-			action.setReportPeriodId(ParamUtils.getLong(request,
-					FORM_DATA_RPERIOD_ID));
+					FORM_DATA_ID, null)));
 			action.setReadOnly(Boolean.parseBoolean(request.getParameter(
 					READ_ONLY, "true")));
 
@@ -90,6 +76,34 @@ public class FormDataPresenter extends
 			MessageEvent.fire(this,
 					"Не удалось открыть/создать налоговую форму", e);
 		}
+	}
+
+	@Override
+	public void onRangeChange(final int start, int length) {
+		if (formData != null) {
+			GetRowsDataAction action = new GetRowsDataAction();
+			action.setFormDataId(formData.getId());
+			action.setRange(new DataRowRange(start, length));
+			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+			dispatcher.execute(action, CallbackUtils
+					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
+						@Override
+						public void onSuccess(GetRowsDataResult result) {
+							if(result==null || result.getDataRows().getTotalRecordCount() == 0)
+								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
+							else
+								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
+						modifiedRows.clear();
+
+						}
+					}, FormDataPresenter.this));
+		}
+	}
+
+	@Override
+	public void onCellModified(DataRow<Cell> dataRow) {
+		modifiedRows.add(dataRow);
+
 	}
 
 	@Override
@@ -109,10 +123,6 @@ public class FormDataPresenter extends
 
             final GetFormData action = new GetFormData();
             action.setFormDataId(formData.getId());
-            action.setDepartmentId(formData.getDepartmentId());
-            action.setFormDataKind(Long.valueOf(formData.getKind().getId()));
-            action.setFormDataTypeId(Long.valueOf(formData.getFormType().getId()));
-            action.setReportPeriodId(Long.valueOf(formData.getReportPeriodId()));
             action.setReadOnly(readOnlyMode);
 
             executeAction(action);
@@ -183,28 +193,31 @@ public class FormDataPresenter extends
 
 	@Override
 	public void onReturnClicked() {
-		goToFormDataList();
-	}
+			goToFormDataList();
+		}
 
 	@Override
 	public void onCancelClicked() {
-		if(formData.getId() == null) {
-			goToFormDataList();
-		} else {
-			revealForm(true);
+			if(formData.getId() == null){
+				goToFormDataList();
+			} else {
+				revealForm(true);
+				modifiedRows.clear();
+			}
 		}
-	}
 
 	@Override
 	public void onSaveClicked() {
 		LogCleanEvent.fire(this);
 		SaveFormDataAction action = new SaveFormDataAction();
 		action.setFormData(formData);
+		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
 						processFormDataResult(result);
+						modifiedRows.clear();
 					}
 
 				}, this));
@@ -213,7 +226,9 @@ public class FormDataPresenter extends
 	private void processFormDataResult(FormDataResult result) {
 		formData = result.getFormData();
 		LogAddEvent.fire(this, result.getLogEntries());
-		getView().setRowsData(formData.getDataRows());
+		// TODO: Тут было получение строк из FormData
+		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
+//		getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
 	}
 
 	@Override
@@ -251,7 +266,9 @@ public class FormDataPresenter extends
 						}
 
 					},this));
-			getView().setRowsData(formData.getDataRows());
+			// TODO: Тут было получение строк из FormData
+			// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
+//			getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());
 		}
 	}
 
@@ -388,8 +405,11 @@ public class FormDataPresenter extends
                                         formData.getFormColumns(),
                                         readOnlyMode,
                                         forceEditMode);
-                                getView().setRowsData(
-                                        formData.getDataRows());
+                        		// TODO: Тут было получение строк из FormData
+                        		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
+//                                getView().setRowsData(0, 0,
+//                                        new ArrayList<DataRow<Cell>>());
+	                            getView().updateData();
                                 getView().addCustomHeader(
                                         formData.getHeaders());
                                 getView().addCustomTableStyles(

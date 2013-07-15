@@ -6,10 +6,10 @@ insert into dict_tax_period (code, name, I, T, P, V, D) values ('21', 'перв�
 insert into report_period (id, name, is_active, months, tax_period_id, ord, department_id, dict_tax_period_id) values (1, 'Transport report period 1', 1, 3, 1, 1, 1, 21);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id) values (1, 1, 1, 1, 3, 1);
 
-insert into data_row(id, form_data_id, alias, ord) values (1, 1, 'alias 1', 1);
-insert into data_row(id, form_data_id, alias, ord) values (2, 1, null, 2);
-insert into data_row(id, form_data_id, alias, ord) values (3, 1, 'alias 3', 3);
-insert into data_row(id, form_data_id, alias, ord) values (4, 1, 'alias 4', 4);
+insert into data_row(id, form_data_id, alias, ord, type) values (1, 1, 'testAlias', 1, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (2, 1, null, 2, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (3, 1, 'alias 3', 3, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (4, 1, 'alias 4', 4, 0);
 
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, dictionary_code, group_name, max_length, checking)
 	values (1, 'Строковый столбец', 1, 1, 'alias 1', 'S', 10, null, null, null, 500, 1);

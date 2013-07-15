@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.*;
 
 import java.util.*;
@@ -23,6 +24,8 @@ public class EditDateColumn extends DataRowColumn<Date> {
 			@Override
 			public void update(int index, DataRow dataRow, Date value) {
 				dataRow.put(getAlias(), value);
+				CellModifiedEvent event = new CellModifiedEvent(dataRow);
+				fireEvent(event);
 			}
 		});
 
