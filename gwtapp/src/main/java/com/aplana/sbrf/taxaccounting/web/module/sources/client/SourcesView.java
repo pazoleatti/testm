@@ -108,11 +108,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 				receiverSourcesTable.setRowCount(0);
 			}
 		});
-
 		taxTypePicker.setAcceptableValues(TAX_TYPES);
-		taxTypePicker.setValue(TaxType.INCOME);
 
 		initWidget(uiBinder.createAndBindUi(this));
+
 		departmentReceiverPicker.setWidth(500);
 		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
@@ -132,10 +131,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		formReceiversTable.setVisible(isForm);
 		declarationReceiversTable.setVisible(!isForm);
 		taxTypePicker.setValue(TaxType.INCOME);
+
 		departmentReceiverPicker.setSelectedItems(null);
 		departmentSourcePicker.setSelectedItems(null);
+
 		enableButtonLink(assignButton, false);
 		enableButtonLink(cancelButton, false);
+
 		sourcesTable.setRowCount(0);
 		formReceiversTable.setRowCount(0);
 		declarationReceiversTable.setRowCount(0);
