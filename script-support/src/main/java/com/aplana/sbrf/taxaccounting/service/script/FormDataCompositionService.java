@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.log.Logger;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED;
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED;
+
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
 
 /**
  * Сервис, отвечающий за интеграцию/дезинтеграцию форм. Поставляется в скрипты и позволяет формам посылать события
@@ -41,7 +45,6 @@ public interface FormDataCompositionService {
 	 *                     или подразделение формы-источника.
 	 * @param formTypeId   {@link com.aplana.sbrf.taxaccounting.model.FormType вид формы-потребителя}.
 	 * @param kind         тип формы-потребителя: консолидированная, сводная.
-	 * @param logger       логгер для сохранения результатов работы скриптов
 	 */
-	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind, Logger logger);
+	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind);
 }

@@ -184,9 +184,10 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 
 	}
 
-	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked) throws IOException {
+	public FormDataXlsxReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows) throws IOException {
 		this();
 		this.data = data.getData();
+        this.dataRows = dataRows;
 		formTemplate = data.getFormTemplate();
 		this.isShowChecked = isShowChecked;
 		department = data.getDepartment();

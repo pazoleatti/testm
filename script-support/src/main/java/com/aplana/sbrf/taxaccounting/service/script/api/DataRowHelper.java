@@ -42,6 +42,16 @@ public interface DataRowHelper {
 	 * @return
 	 */
 	int getCount();
+	
+	/**
+	 * Сохранить строки. Строки сохраняются. Старое временное
+	 * состояние удаляется. Порядок  сохраняется.
+	 * Метод нужен для легаси способа работы с офрмами
+	 * т.е. Получили все строки, обработали как список и сохранили.
+	 * 
+	 * @param dataRow
+	 */
+	void save(List<DataRow<Cell>> dataRows);
 
 	/**
 	 * Вставка строки
@@ -90,11 +100,11 @@ public interface DataRowHelper {
 	/**
 	 * Сохранение строк НФ
 	 */
-	void save();
+	void commit();
 
 	/**
 	 * Отмена изменений сток НФ
 	 */
-	void cancel();
+	void rollback();
 
 }

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -152,7 +151,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
 						getFormReceiverSources(departmentFormType);
 					}
 				}, this));
@@ -168,7 +166,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateSourcesResult result) {
-						MessageEvent.fire(SourcesPresenter.this, "Источники декларации сохранены");
 						getDeclarationReceiverSources(departmentDeclarationType);
 					}
 				}, this));
