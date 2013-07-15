@@ -85,6 +85,7 @@ public class FormDataPresenter extends
 			action.setFormDataId(formData.getId());
 			action.setRange(new DataRowRange(start, length));
 			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+			action.setReadOnly(readOnlyMode);
 			dispatcher.execute(action, CallbackUtils
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override

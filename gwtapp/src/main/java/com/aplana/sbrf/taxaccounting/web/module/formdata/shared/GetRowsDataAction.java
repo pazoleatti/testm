@@ -11,6 +11,7 @@ import java.util.List;
 public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> implements ActionName {
 
 	DataRowRange range;
+	boolean readOnly;
 	long formDataId;
 	List<DataRow<Cell>> modifiedRows;
 
@@ -20,6 +21,14 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 
 	public void setRange(DataRowRange range) {
 		this.range = range;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 	public long getFormDataId() {

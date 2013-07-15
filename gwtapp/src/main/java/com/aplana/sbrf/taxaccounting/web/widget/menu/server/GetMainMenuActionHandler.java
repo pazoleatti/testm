@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
-import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +111,8 @@ public class GetMainMenuActionHandler extends
 			settingMenuItem.getSubMenu().add(
 					new MenuItem("Назначение форм и деклараций", NUMBER_SIGN + TaxFormNominationToken.taxFormNomination));
 			settingMenuItem.getSubMenu().add(
-					new MenuItem("Указание форм-источников", NUMBER_SIGN + SourcesTokens.sources));
+					new MenuItem("Указание форм-источников",
+							NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));
 			menuItems.add(settingMenuItem);
 		}
 
