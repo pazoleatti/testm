@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.shared;
+package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 

@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.client;
+package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -19,25 +19,28 @@ import com.gwtplatform.mvp.client.proxy.*;
 import java.util.List;
 import java.util.Map;
 
-public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView, FormSourcesPresenter.MyProxy>
-		implements FormSourcesUiHandlers {
+public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
+		implements SourcesUiHandlers {
 
 	@ProxyCodeSplit
-	@NameToken(FormSourcesTokens.sources)
-	public interface MyProxy extends ProxyPlace<FormSourcesPresenter>, Place {
+	@NameToken(SourcesTokens.sources)
+	public interface MyProxy extends ProxyPlace<SourcesPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<FormSourcesUiHandlers> {
+	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 		void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
+		void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+									 List<DepartmentDeclarationType> departmentDeclarationTypes);
 		void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
 		void setDepartments(List<Department> departments);
+		void init(boolean isForm);
 	}
 
 	private final DispatchAsync dispatcher;
 
 	@Inject
-	public FormSourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
+	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		getView().setUiHandlers(this);
@@ -49,7 +52,8 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-		setDepartments();
+		getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+		getDepartments();
 	}
 
 	@Override
@@ -69,14 +73,14 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 				.defaultCallback(new AbstractCallback<UpdateFormSourcesResult>() {
 					@Override
 					public void onSuccess(UpdateFormSourcesResult result) {
-						MessageEvent.fire(FormSourcesPresenter.this, "Источники налоговой формы сохранены");
-						setFormReceiverSources(departmentFormType);
+						MessageEvent.fire(SourcesPresenter.this, "Источники налоговой формы сохранены");
+						getFormReceiverSources(departmentFormType);
 					}
 				}, this));
 	}
 
 	@Override
-	public void setFormSources(int departmentId, TaxType taxType) {
+	public void getFormSources(int departmentId, TaxType taxType) {
 		GetFormSourcesAction action = new GetFormSourcesAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -86,11 +90,11 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 					public void onSuccess(GetFormSourcesResult result) {
 						getView().setFormSources(result.getFormTypes(), result.getFormSources());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(FormSourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormSourcesResult>(SourcesPresenter.this)));
 	}
 
 	@Override
-	public void setFormReceivers(int departmentId, TaxType taxType) {
+	public void getFormReceivers(int departmentId, TaxType taxType) {
 		GetFormReceiversAction action = new GetFormReceiversAction();
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
@@ -100,11 +104,11 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 					public void onSuccess(GetFormReceiversResult result) {
 						getView().setFormReceivers(result.getFormTypes(), result.getFormReceivers());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(FormSourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiversResult>(SourcesPresenter.this)));
 	}
 
 	@Override
-	public void setFormReceiverSources(DepartmentFormType departmentFormType) {
+	public void getFormReceiverSources(DepartmentFormType departmentFormType) {
 		GetFormReceiverSourcesAction action = new GetFormReceiverSourcesAction();
 		action.setDepartmentId(departmentFormType.getDepartmentId());
 		action.setFormTypeId(departmentFormType.getFormTypeId());
@@ -115,10 +119,38 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 					public void onSuccess(GetFormReceiverSourcesResult result) {
 						getView().setFormReceiverSources(result.getFormTypes(), result.getFormReceiverSources());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(FormSourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetFormReceiverSourcesResult>(SourcesPresenter.this)));
 	}
 
-	private void setDepartments() {
+	@Override
+	public void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType) {
+		GetDeclarationReceiverSourcesAction action = new GetDeclarationReceiverSourcesAction();
+		action.setDepartmentId(departmentDeclarationType.getDepartmentId());
+		action.setDeclarationTypeId(departmentDeclarationType.getDeclarationTypeId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetDeclarationReceiverSourcesResult>() {
+					@Override
+					public void onSuccess(GetDeclarationReceiverSourcesResult result) {
+						getView().setFormReceiverSources(result.getFormTypes(), result.getFormReceiverSources());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetDeclarationReceiverSourcesResult>(SourcesPresenter.this)));
+	}
+
+	@Override
+	public void getDeclarationReceivers(int departmentId, TaxType taxType) {
+		GetDeclarationReceiversAction action = new GetDeclarationReceiversAction();
+		action.setDepartmentId(departmentId);
+		action.setTaxType(taxType);
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<GetDeclarationReceiversResult>() {
+					@Override
+					public void onSuccess(GetDeclarationReceiversResult result) {
+						getView().setDeclarationReceivers(result.getDeclarationTypes(), result.getDeclarationReceivers());
+					}
+				}, this).addCallback(new ManualRevealCallback<GetDeclarationReceiversResult>(SourcesPresenter.this)));
+	}
+
+	private void getDepartments() {
 		GetDepartmentsAction action = new GetDepartmentsAction();
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
@@ -126,7 +158,7 @@ public class FormSourcesPresenter extends Presenter<FormSourcesPresenter.MyView,
 					public void onSuccess(GetDepartmentsResult result) {
 						getView().setDepartments(result.getDepartments());
 					}
-				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(FormSourcesPresenter.this)));
+				}, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
 	}
 
 }

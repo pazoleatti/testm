@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdataimport.server.FormDataIm
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.server.AdminServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.server.FormSourcesServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.SourcesServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.userlist.server.UserListServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.server.DictionaryPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.server.HistoryServerModule;
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Import;
 		FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class, DictionaryPickerServerModule.class,
 		AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
 		DeclarationServerModule.class,ProjectVersionControlServerModule.class, HistoryServerModule.class, UserListServerModule.class, FormDataImportServerModule.class,
-        AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, FormSourcesServerModule.class})
+        AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

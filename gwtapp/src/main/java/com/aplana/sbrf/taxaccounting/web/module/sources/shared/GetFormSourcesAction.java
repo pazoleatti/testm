@@ -1,9 +1,9 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.shared;
+package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetFormReceiversAction extends UnsecuredActionImpl<GetFormReceiversResult> {
+public class GetFormSourcesAction extends UnsecuredActionImpl<GetFormSourcesResult> {
     private int departmentId;
 	private TaxType taxType;
 

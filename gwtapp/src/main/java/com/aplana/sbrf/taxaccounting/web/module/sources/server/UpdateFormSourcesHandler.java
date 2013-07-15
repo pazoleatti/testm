@@ -1,8 +1,8 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.server;
+package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.UpdateFormSourcesAction;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.UpdateFormSourcesResult;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateFormSourcesAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateFormSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

@@ -3,7 +3,7 @@
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
     xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
 
-    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.formsources.client.FormSourcesView.LinkStyle">
+    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.LinkStyle">
         .enabled {
             cursor: pointer;
         }
@@ -53,8 +53,10 @@
             <g:HorizontalPanel width="210px">
                 <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
                 <g:VerticalPanel>
+                    <g:Anchor ui:field="formAnchor" href="#!sources;isForm=true">Налоговые формы</g:Anchor>
                     <g:Label ui:field="formLabel">Налоговые формы</g:Label>
-                    <g:Anchor ui:field="declarationAnchor" href="#!declarationSources">Декларации</g:Anchor>
+                    <g:Anchor ui:field="declarationAnchor" href="#!sources;isForm=false">Декларации</g:Anchor>
+                    <g:Label ui:field="declarationLabel">Декларации</g:Label>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
 
@@ -82,7 +84,8 @@
                     <d:NewDepartmentPicker ui:field="departmentReceiverPicker"
                                            header="Выберите приёмник" withCheckBox="false"/>
                 </g:HorizontalPanel>
-                <style:GenericDataGrid ui:field="receiversTable" width="100%" height="350px" />
+                <style:GenericDataGrid ui:field="formReceiversTable" width="100%" height="350px" />
+                <style:GenericDataGrid ui:field="declarationReceiversTable" width="100%" height="350px" />
             </g:FlowPanel>
             <g:FlowPanel width="15px" />
             <g:FlowPanel addStyleNames="{style.sourcesTable}">

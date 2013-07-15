@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.client;
+package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
@@ -27,22 +27,27 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
 
-public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
-		implements FormSourcesPresenter.MyView, SelectDepartmentsEventHandler {
+public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
+		implements SourcesPresenter.MyView, SelectDepartmentsEventHandler {
 
-	interface Binder extends UiBinder<Widget, FormSourcesView> { }
+	interface Binder extends UiBinder<Widget, SourcesView> { }
 
 	interface LinkStyle extends CssResource {
 		String enabled();
 		String disabled();
 	}
 
+	private boolean isForm;
+
 	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
 
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
+	private Map<Integer, DeclarationType> receiversDeclarationTypes;
 	private Map<Integer, FormType> receiverSourcesFormType;
-	private final SingleSelectionModel<DepartmentFormType> receiverSelectionModel =
+	private final SingleSelectionModel<DepartmentDeclarationType> declarationReceiversSelectionModel =
+			new SingleSelectionModel<DepartmentDeclarationType>();
+	private final SingleSelectionModel<DepartmentFormType> formReceiversSelectionModel =
 			new SingleSelectionModel<DepartmentFormType>();
 	private final SingleSelectionModel<DepartmentFormType> sourcesSelectionModel =
 			new SingleSelectionModel<DepartmentFormType>();
@@ -54,7 +59,9 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 	@UiField
 	GenericDataGrid<DepartmentFormType> sourcesTable;
 	@UiField
-	GenericDataGrid<DepartmentFormType> receiversTable;
+	GenericDataGrid<DepartmentFormType> formReceiversTable;
+	@UiField
+	GenericDataGrid<DepartmentDeclarationType> declarationReceiversTable;
 	@UiField
 	GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
 
@@ -64,15 +71,21 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 	NewDepartmentPicker departmentSourcePicker;
 
 	@UiField
+	Anchor formAnchor;
+	@UiField
+	Anchor declarationAnchor;
+	@UiField
 	Anchor assignButton;
 	@UiField
 	Anchor cancelButton;
 	@UiField
 	Label formLabel;
+	@UiField
+	Label declarationLabel;
 
 	@Inject
 	@UiConstructor
-	public FormSourcesView(final Binder uiBinder) {
+	public SourcesView(final Binder uiBinder) {
 		taxTypePicker = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
 			@Override
 			public String render(TaxType object) {
@@ -96,16 +109,142 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		taxTypePicker.setValue(TaxType.INCOME);
 
 		initWidget(uiBinder.createAndBindUi(this));
-		setupTables();
 		departmentReceiverPicker.setWidth(500);
 		departmentSourcePicker.setWidth(500);
 		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
 		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
 		enableButtonLink(assignButton, false);
 		enableButtonLink(cancelButton, false);
+
+		setupSourcesTables();
+		setupReceiversTables();
 	}
 
-	private void setupTables() {
+	@Override
+	public void init(boolean isForm) {
+		this.isForm = isForm;
+		formLabel.setVisible(isForm);
+		formAnchor.setVisible(!isForm);
+		declarationLabel.setVisible(!isForm);
+		declarationAnchor.setVisible(isForm);
+		formReceiversTable.setVisible(isForm);
+		declarationReceiversTable.setVisible(!isForm);
+		taxTypePicker.setValue(TaxType.INCOME);
+		departmentReceiverPicker.setSelectedItems(null);
+		departmentSourcePicker.setSelectedItems(null);
+	}
+
+	@Override
+	public void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+		sourcesFormTypes = formTypes;
+		sourcesTable.setRowData(departmentFormTypes);
+	}
+
+	@Override
+	public void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+		receiversFormTypes = formTypes;
+		formReceiversTable.setRowData(departmentFormTypes);
+	}
+
+	@Override
+	public void setDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
+										List<DepartmentDeclarationType> departmentDeclarationTypes) {
+		receiversDeclarationTypes = declarationTypes;
+		declarationReceiversTable.setRowData(departmentDeclarationTypes);
+	}
+
+	@Override
+	public void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
+		receiverSourcesFormType = formTypes;
+		List<CheckedDepartmentFormType> types = new ArrayList<CheckedDepartmentFormType>();
+		int index = 1;
+		for (DepartmentFormType type : departmentFormTypes) {
+			CheckedDepartmentFormType model = new CheckedDepartmentFormType();
+			model.setChecked(false);
+			model.setIndex(index);
+			model.setDepartmentFormType(type);
+			types.add(model);
+			index++;
+		}
+		receiverSourcesTable.setRowData(types);
+		enableButtonLink(cancelButton, false);
+	}
+
+	@Override
+	public void setDepartments(List<Department> departments) {
+		Set<Integer> availableDepartments = new HashSet<Integer>(departments.size());
+		for (Department department : departments) {
+			availableDepartments.add(department.getId());
+		}
+		departmentReceiverPicker.setTreeValues(departments, availableDepartments);
+		departmentSourcePicker.setTreeValues(departments, availableDepartments);
+	}
+
+	public void setupReceiversTables() {
+		// Form Receivers
+		TextColumn<DepartmentFormType> receiverKindColumn = new TextColumn<DepartmentFormType>() {
+			@Override
+			public String getValue(DepartmentFormType object) {
+				if (object.getKind() != null) {
+					return object.getKind().getName();
+				} else {
+					return "";
+				}
+			}
+		};
+
+		TextColumn<DepartmentFormType> receiverTypeColumn = new TextColumn<DepartmentFormType>() {
+				@Override
+				public String getValue(DepartmentFormType object) {
+				if (!receiversFormTypes.isEmpty() && object.getFormTypeId() != 0) {
+					return receiversFormTypes.get(object.getFormTypeId()).getName();
+				} else {
+					return "";
+				}
+			}
+			};
+
+		formReceiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
+		formReceiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
+		formReceiversTable.addColumn(receiverTypeColumn, "Вид налоговой формы");
+		formReceiversTable.setRowCount(0);
+		formReceiversTable.setSelectionModel(formReceiversSelectionModel);
+		formReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+				getUiHandlers().getFormReceiverSources(formReceiversSelectionModel.getSelectedObject());
+				if (sourcesSelectionModel.getSelectedObject() != null) {
+					enableButtonLink(assignButton, true);
+				}
+			}
+		});
+		// Declaration Receivers
+		TextColumn<DepartmentDeclarationType> declarationReceiverTypeColumn = new TextColumn<DepartmentDeclarationType>() {
+			@Override
+			public String getValue(DepartmentDeclarationType object) {
+				if (!receiversDeclarationTypes.isEmpty() && object.getDeclarationTypeId() != 0) {
+					return receiversDeclarationTypes.get(object.getDeclarationTypeId()).getName();
+				} else {
+					return "";
+				}
+			}
+		};
+
+		declarationReceiversTable.addColumn(declarationReceiverTypeColumn, "Вид декларации");
+		declarationReceiversTable.setRowCount(0);
+		declarationReceiversTable.setSelectionModel(declarationReceiversSelectionModel);
+		declarationReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+				getUiHandlers().getDeclarationReceiverSources(declarationReceiversSelectionModel.getSelectedObject());
+				if (sourcesSelectionModel.getSelectedObject() != null) {
+					enableButtonLink(assignButton, true);
+				}
+			}
+		});
+	}
+
+	private void setupSourcesTables() {
 		// Sources
 		TextColumn<DepartmentFormType> sourceKindColumn = new TextColumn<DepartmentFormType>() {
 			@Override
@@ -141,52 +280,14 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			}
 		});
 
-		// Receivers
-		TextColumn<DepartmentFormType> receiverKindColumn = new TextColumn<DepartmentFormType>() {
-			@Override
-			public String getValue(DepartmentFormType object) {
-				if (object.getKind() != null) {
-					return object.getKind().getName();
-				} else {
-					return "";
-				}
-			}
-		};
-
-		TextColumn<DepartmentFormType> receiverTypeColumn = new TextColumn<DepartmentFormType>() {
-			@Override
-			public String getValue(DepartmentFormType object) {
-				if (!receiversFormTypes.isEmpty() && object.getFormTypeId() != 0) {
-					return receiversFormTypes.get(object.getFormTypeId()).getName();
-				} else {
-					return "";
-				}
-			}
-		};
-
-		receiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
-		receiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
-		receiversTable.addColumn(receiverTypeColumn, "Вид налоговой формы");
-		receiversTable.setRowCount(0);
-		receiversTable.setSelectionModel(receiverSelectionModel);
-		receiverSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-			@Override
-			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-				getUiHandlers().setFormReceiverSources(receiverSelectionModel.getSelectedObject());
-				if(sourcesSelectionModel.getSelectedObject() != null) {
-					enableButtonLink(assignButton, true);
-				}
-			}
-		});
-
 		// Receiver Sources
 		Column<CheckedDepartmentFormType, Boolean> checkBoxColumn =
 				new Column<CheckedDepartmentFormType, Boolean>(new CheckboxCell()) {
-			@Override
-			public Boolean getValue(CheckedDepartmentFormType object) {
-				return object.isChecked();
-			}
-		};
+					@Override
+					public Boolean getValue(CheckedDepartmentFormType object) {
+						return object.isChecked();
+					}
+				};
 		checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
 			@Override
 			public void update(int index, CheckedDepartmentFormType object, Boolean value) {
@@ -242,57 +343,9 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 		receiverSourcesTable.setRowCount(0);
 	}
 
-	private void enableButtonLink(Anchor anchor, boolean enabled) {
-		if (enabled) {
-			anchor.setStyleName(css.enabled());
-		} else {
-			anchor.setStyleName(css.disabled());
-		}
-
-	}
-
-	@Override
-	public void setFormSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
-		sourcesFormTypes = formTypes;
-		sourcesTable.setRowData(departmentFormTypes);
-	}
-
-	@Override
-	public void setFormReceivers(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
-		receiversFormTypes = formTypes;
-		receiversTable.setRowData(departmentFormTypes);
-	}
-
-	@Override
-	public void setFormReceiverSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
-		receiverSourcesFormType = formTypes;
-		List<CheckedDepartmentFormType> types = new ArrayList<CheckedDepartmentFormType>();
-		int index = 1;
-		for (DepartmentFormType type : departmentFormTypes) {
-			CheckedDepartmentFormType model = new CheckedDepartmentFormType();
-			model.setChecked(false);
-			model.setIndex(index);
-			model.setDepartmentFormType(type);
-			types.add(model);
-			index++;
-		}
-		receiverSourcesTable.setRowData(types);
-		enableButtonLink(cancelButton, false);
-	}
-
-	@Override
-	public void setDepartments(List<Department> departments) {
-		Set<Integer> availableDepartments = new HashSet<Integer>(departments.size());
-		for (Department department : departments) {
-			availableDepartments.add(department.getId());
-		}
-		departmentReceiverPicker.setTreeValues(departments, availableDepartments);
-		departmentSourcePicker.setTreeValues(departments, availableDepartments);
-	}
-
 	@UiHandler("assignButton")
 	public void assign(ClickEvent event) {
-		if (receiverSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+		if (formReceiversSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
 			return;
 		}
 
@@ -303,12 +356,12 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			sourceIds.add(source.getDepartmentFormType().getId());
 		}
 
-		getUiHandlers().updateFormSources(receiverSelectionModel.getSelectedObject(), sourceIds);
+		getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
 	}
 
 	@UiHandler("cancelButton")
 	public void cancel(ClickEvent event) {
-		if (receiverSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
+		if (formReceiversSelectionModel.getSelectedObject() == null || sourcesSelectionModel.getSelectedObject() == null) {
 			return;
 		}
 
@@ -321,7 +374,7 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			}
 		}
 
-		getUiHandlers().updateFormSources(receiverSelectionModel.getSelectedObject(), sources);
+		getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sources);
 	}
 
 	@Override
@@ -330,13 +383,14 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 			setSources();
 		} else if ("Выберите приёмник".equals(event.getHeader())) {
 			setReceivers();
+			receiverSourcesTable.setRowCount(0);
 		}
 	}
 
 	private void setSources() {
 		if (taxTypePicker.getValue() != null
 				&& departmentSourcePicker.getSelectedItems().values().iterator().hasNext()) {
-			getUiHandlers().setFormSources(
+			getUiHandlers().getFormSources(
 					departmentSourcePicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
 		}
 	}
@@ -344,9 +398,23 @@ public class FormSourcesView extends ViewWithUiHandlers<FormSourcesUiHandlers>
 	private void setReceivers() {
 		if (taxTypePicker.getValue() != null
 				&& departmentReceiverPicker.getSelectedItems().values().iterator().hasNext()) {
-			getUiHandlers().setFormReceivers(
-					departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+			if (isForm) {
+				getUiHandlers().getFormReceivers(
+						departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+			} else {
+				getUiHandlers().getDeclarationReceivers(
+						departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+			}
 		}
+	}
+
+	private void enableButtonLink(Anchor anchor, boolean enabled) {
+		if (enabled) {
+			anchor.setStyleName(css.enabled());
+		} else {
+			anchor.setStyleName(css.disabled());
+		}
+
 	}
 
 	private class CheckedDepartmentFormType {

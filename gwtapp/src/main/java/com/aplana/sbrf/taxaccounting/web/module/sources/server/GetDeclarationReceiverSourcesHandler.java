@@ -1,11 +1,13 @@
-package com.aplana.sbrf.taxaccounting.web.module.formsources.server;
+package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetFormReceiverSourcesAction;
-import com.aplana.sbrf.taxaccounting.web.module.formsources.shared.GetFormReceiverSourcesResult;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiverSourcesAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiverSourcesResult;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiverSourcesAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiverSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -19,7 +21,8 @@ import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetFormReceiverSourcesHandler extends AbstractActionHandler<GetFormReceiverSourcesAction, GetFormReceiverSourcesResult> {
+public class GetDeclarationReceiverSourcesHandler extends AbstractActionHandler<GetDeclarationReceiverSourcesAction,
+		GetDeclarationReceiverSourcesResult> {
 
 	@Autowired
 	private DepartmentFormTypeService departmentFormTypeService;
@@ -27,15 +30,15 @@ public class GetFormReceiverSourcesHandler extends AbstractActionHandler<GetForm
 	@Autowired
 	private FormTypeDao formTypeDao;
 
-    public GetFormReceiverSourcesHandler() {
-        super(GetFormReceiverSourcesAction.class);
+    public GetDeclarationReceiverSourcesHandler() {
+        super(GetDeclarationReceiverSourcesAction.class);
     }
 
     @Override
-    public GetFormReceiverSourcesResult execute(GetFormReceiverSourcesAction action, ExecutionContext context) throws ActionException {
-		GetFormReceiverSourcesResult result = new GetFormReceiverSourcesResult();
+    public GetDeclarationReceiverSourcesResult execute(GetDeclarationReceiverSourcesAction action, ExecutionContext context) throws ActionException {
+		GetDeclarationReceiverSourcesResult result = new GetDeclarationReceiverSourcesResult();
 		List<DepartmentFormType> departmentFormTypes =
-				departmentFormTypeService.getFormSources(action.getDepartmentId(), action.getFormTypeId(), action.getKind());
+				departmentFormTypeService.getDeclarationSources(action.getDepartmentId(), action.getDeclarationTypeId());
 		result.setFormReceiverSources(departmentFormTypes);
 
 		Map<Integer, FormType> formTypeNames = new HashMap<Integer, FormType>();
@@ -50,7 +53,8 @@ public class GetFormReceiverSourcesHandler extends AbstractActionHandler<GetForm
     }
 
     @Override
-    public void undo(GetFormReceiverSourcesAction action, GetFormReceiverSourcesResult result, ExecutionContext context) throws ActionException {
+    public void undo(GetDeclarationReceiverSourcesAction action, GetDeclarationReceiverSourcesResult result, ExecutionContext context)
+			throws ActionException {
         // Nothing!
     }
 }
