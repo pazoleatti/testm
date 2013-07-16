@@ -109,7 +109,9 @@ public class GetMainMenuActionHandler extends
 				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			MenuItem settingMenuItem = new MenuItem("Администрирование");
 			settingMenuItem.getSubMenu().add(
-					new MenuItem("Назначение форм и деклараций", NUMBER_SIGN + TaxFormNominationToken.taxFormNomination));
+					new MenuItem("Назначение форм и деклараций",
+                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination +
+                                    ";" + TaxFormNominationToken.isForm + "=" + true));
 			settingMenuItem.getSubMenu().add(
 					new MenuItem("Указание форм-источников",
 							NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));
