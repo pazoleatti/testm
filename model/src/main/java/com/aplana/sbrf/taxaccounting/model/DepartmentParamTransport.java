@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-public class DepartmentParamTransport {
+import java.io.Serializable;
+
+public class DepartmentParamTransport implements Serializable {
 	
 	private int departmentId;
 	private int signatoryId;

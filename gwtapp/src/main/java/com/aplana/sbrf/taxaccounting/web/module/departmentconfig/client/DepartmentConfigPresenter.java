@@ -1,6 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDeclarationCombinedAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDeclarationCombinedResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -9,16 +18,16 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.*;
+
+import java.util.List;
 
 /**
  * Presenter для формы настроек подразделений
  *
  * @author Dmitriy Levykin
  */
-public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresenter.MyView, DepartmentConfigPresenter.MyProxy> {
+public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresenter.MyView, DepartmentConfigPresenter.MyProxy> implements DepartmentConfigUiHandlers {
 
     @ProxyCodeSplit
     @NameToken(DepartmentConfigTokens.departamentConfig)
@@ -26,8 +35,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers> {
+        void updateVisibility(boolean isUnp);
+        void setDepartments(List<Department> departments);
+        void setDepartment(Department department);
+        void setDepartmentCombined(DepartmentCombined combinedDepartmentParam);
     }
 
+    //private List<TARole> userRoles;
     private final DispatchAsync dispatcher;
     private final PlaceManager placeManager;
 
@@ -36,5 +50,57 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
+        getView().setUiHandlers(this);
     }
+
+    @Override
+    public void save() {
+        // TODO сохранение
+    }
+
+    @Override
+    public void updateDepartment(Integer departmentId) {
+        GetDeclarationCombinedAction action = new GetDeclarationCombinedAction();
+        action.setDepartmentId(departmentId);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetDeclarationCombinedResult>() {
+                    @Override
+                    public void onSuccess(GetDeclarationCombinedResult result) {
+                        getView().setDepartmentCombined(result.getDepartmentCombined());
+                    }
+                }, this));
+    }
+
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        super.prepareFromRequest(request);
+
+        dispatcher.execute(new GetOpenDataAction(),
+                CallbackUtils.defaultCallback(
+                new AbstractCallback<GetOpenDataResult>()
+                {
+                    @Override
+                    public void onSuccess(GetOpenDataResult result)
+                    {
+                        if (result == null || result.getControlUNP() == null) {
+                            getProxy().manualRevealFailed();
+                            return;
+                        }
+
+                        getView().updateVisibility(result.getControlUNP());
+
+                        // Список подразделений для справочника
+                        getView().setDepartments(result.getDepartments());
+                        // Текущее подразделение пользователя
+                        getView().setDepartment(result.getDepartment());
+                    }
+                }, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(this)));
+    }
+
+    // TODO Unlock. Реализовать механизм блокировок.
 }
