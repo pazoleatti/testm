@@ -105,7 +105,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         /*formTemplateDao.save(formTemplate);
         logger.info("formTemplate is saved with body-text for testing");*/
         Logger log = new Logger();
-        scriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, log, null);
+        scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST, log, null);
         if(!log.getEntries().isEmpty())
         {
             StringBuilder sb = new StringBuilder("В скрипте найдены ошибки: ");
