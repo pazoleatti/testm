@@ -9,4 +9,5 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 public final class TaxFormNominationToken {
 
     public static final String taxFormNomination = "!destination";
+    public static final String isForm = "isForm";
 }

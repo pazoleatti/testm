@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 /**
@@ -9,5 +10,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  *
  */
 public interface TaxFormNominationUiHandlers extends UiHandlers {
-
+    void reloadTaxFormKind(TaxType taxType);
 }
