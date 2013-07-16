@@ -5,17 +5,20 @@
     <ui:style>
         .execute{
             position: fixed;
-            z-index: 10;
             text-align: right;
         }
 
     </ui:style>
 
-    <g:VerticalPanel>
-        <g:FlowPanel addStyleNames="{style.execute}">
-            <g:Button text="Тестъ" ui:field="executeScript" />
-        </g:FlowPanel>
-        <cm:CodeMirror ui:field="script"/>
-    </g:VerticalPanel>
+    <g:ScrollPanel width="100%" height="100%">
+        <g:VerticalPanel>
+            <g:cell height="30px">
+                <g:Button text="Тест" ui:field="executeScript" addStyleNames="{style.execute}"/>
+            </g:cell>
+            <g:cell>
+                <cm:CodeMirror ui:field="script"/>
+            </g:cell>
+        </g:VerticalPanel>
+    </g:ScrollPanel>
 
 </ui:UiBinder>
