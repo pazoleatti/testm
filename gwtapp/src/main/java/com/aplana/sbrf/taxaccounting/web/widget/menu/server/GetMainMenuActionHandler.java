@@ -74,8 +74,11 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(taxMenu);
 
 			MenuItem settingMenuItem = new MenuItem("Настройки");
-            settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
-			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
+            if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL)
+                    || securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+            }
+            settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
 			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
 					.append(FormDataImportPresenter.FDIMPORT)
