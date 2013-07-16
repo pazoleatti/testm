@@ -98,7 +98,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         FormData formData = new FormData(formTemplate);
         formData.setState(WorkflowState.CREATED);
-        formData.setDepartmentId(17);
+        formData.setDepartmentId(userInfo.getUser().getDepartmentId());
+        formData.setKind(FormDataKind.PRIMARY);
 
         /*formTemplateDao.save(formTemplate);
         logger.info("formTemplate is saved with body-text for testing");*/
