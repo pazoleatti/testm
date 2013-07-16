@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiversAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetFormReceiversResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +38,16 @@ public class GetFormReceiversHandler extends AbstractActionHandler<GetFormReceiv
 		GetFormReceiversResult result = new GetFormReceiversResult();
 		List<DepartmentFormType> receivers =
 				departmentFormTypeService.getDepartmentFormDestinations(action.getDepartmentId(), action.getTaxType());
-		result.setFormReceivers(receivers);
 
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : receivers) {
 			formTypes.put(departmentFormType.getFormTypeId(),
 					formTypeDao.getType(departmentFormType.getFormTypeId()));
 		}
-
 		result.setFormTypes(formTypes);
+
+		Collections.sort(receivers, new DepartmentFormTypeComparator(formTypes));
+		result.setFormReceivers(receivers);
 
 		return result;
     }
