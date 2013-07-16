@@ -1,7 +1,96 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:m="urn:import:com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client">
 
-    <g:FlowPanel>
-        <g:Label>Назначение форм и деклараций</g:Label>
-    </g:FlowPanel>
+
+    <ui:style field="css"
+              type="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationView.LinkStyle">
+        .enabled {
+            cursor: pointer;
+        }
+
+        .disabled {
+            cursor: default;
+        }
+    </ui:style>
+
+    <ui:style>
+        .titleLabel {
+            font-size: 26px;
+            margin: 10px;
+        }
+
+        .searchLabel {
+            margin-right: 5px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .taxTypePanel {
+            margin-left: 30px;
+        }
+
+    </ui:style>
+
+
+    <g:SplitLayoutPanel>
+        <g:north size="390">
+            <g:FlowPanel>
+
+                <g:Label addStyleNames="{style.titleLabel}">Назначение налоговых форм и деклараций</g:Label>
+
+                <g:HorizontalPanel height="45px">
+                    <g:HorizontalPanel width="210px">
+                        <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
+                        <g:VerticalPanel>
+                            <g:Anchor ui:field="formAnchor" href="#!destination;isForm=true">Налоговые формы</g:Anchor>
+                            <g:Label ui:field="formLabel">Налоговые формы</g:Label>
+                            <g:Anchor ui:field="declarationAnchor" href="#!destination;isForm=false">Декларации
+                            </g:Anchor>
+                            <g:Label ui:field="declarationLabel">Декларации</g:Label>
+                        </g:VerticalPanel>
+                    </g:HorizontalPanel>
+
+                    <g:FlowPanel width="400px" addStyleNames="{style.taxTypePanel}">
+                        <g:Label styleName="{style.searchLabel}">Вид налога</g:Label>
+                        <m:MyValueListBox ui:field="boxTaxType"/>
+                    </g:FlowPanel>
+
+                    <g:cell width="100px" verticalAlignment="bottom">
+                        <style:ButtonLink ui:field="assignButton" text="Назанчить"/>
+                    </g:cell>
+
+                    <g:cell verticalAlignment="bottom">
+                        <style:ButtonLink ui:field="cancelButton" text="Оменить назначение"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel height="350px" spacing="5">
+                    <g:VerticalPanel width="500px">
+                        <g:Label addStyleNames="{style.searchLabel}">Подразделение</g:Label>
+                        <g:SimplePanel ui:field="departmentPickerPanel"/>
+                    </g:VerticalPanel>
+
+                    <g:VerticalPanel width="200px" ui:field="panelFormDataKind">
+                        <g:Label addStyleNames="{style.searchLabel}">Тип налоговой формы</g:Label>
+                        <m:MyValueListBox ui:field="boxFormDataKind" width="200px" visibleItemCount="15"/>
+                    </g:VerticalPanel>
+
+                    <g:VerticalPanel width="600px">
+                        <g:Label addStyleNames="{style.searchLabel}" ui:field="lableTaxFormKind">Вид налоговой формы
+                        </g:Label>
+                        <g:Label addStyleNames="{style.searchLabel}" ui:field="lableDeclKind">Вид декларации</g:Label>
+                        <m:MyValueListBox ui:field="boxTaxFormKind" width="600px" visibleItemCount="15"/>
+                    </g:VerticalPanel>
+                </g:HorizontalPanel>
+            </g:FlowPanel>
+        </g:north>
+        <g:center>
+            <style:GenericDataGrid ui:field="receiverSourcesTable" width="100%" height="400px"/>
+        </g:center>
+
+
+    </g:SplitLayoutPanel>
+
 </ui:UiBinder>

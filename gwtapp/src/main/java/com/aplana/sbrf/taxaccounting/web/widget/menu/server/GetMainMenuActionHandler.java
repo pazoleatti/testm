@@ -74,8 +74,11 @@ public class GetMainMenuActionHandler extends
 			menuItems.add(taxMenu);
 
 			MenuItem settingMenuItem = new MenuItem("Настройки");
-            settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
-			settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
+            if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL)
+                    || securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
+            }
+            settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
 			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
 					.append(FormDataImportPresenter.FDIMPORT)
@@ -109,7 +112,9 @@ public class GetMainMenuActionHandler extends
 				|| securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			MenuItem settingMenuItem = new MenuItem("Администрирование");
 			settingMenuItem.getSubMenu().add(
-					new MenuItem("Назначение форм и деклараций", NUMBER_SIGN + TaxFormNominationToken.taxFormNomination));
+					new MenuItem("Назначение форм и деклараций",
+                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination +
+                                    ";" + TaxFormNominationToken.isForm + "=" + true));
 			settingMenuItem.getSubMenu().add(
 					new MenuItem("Указание форм-источников",
 							NUMBER_SIGN + SourcesTokens.sources + ";" + SourcesTokens.form + "=" + true));

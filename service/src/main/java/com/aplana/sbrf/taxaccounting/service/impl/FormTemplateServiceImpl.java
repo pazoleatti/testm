@@ -98,12 +98,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         FormData formData = new FormData(formTemplate);
         formData.setState(WorkflowState.CREATED);
-        formData.setDepartmentId(17);
+        formData.setDepartmentId(userInfo.getUser().getDepartmentId());
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setReportPeriodId(1);
 
         /*formTemplateDao.save(formTemplate);
         logger.info("formTemplate is saved with body-text for testing");*/
         Logger log = new Logger();
-        scriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, log, null);
+        scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST_SCRIPT, log, null);
         if(!log.getEntries().isEmpty())
         {
             StringBuilder sb = new StringBuilder("В скрипте найдены ошибки: ");
