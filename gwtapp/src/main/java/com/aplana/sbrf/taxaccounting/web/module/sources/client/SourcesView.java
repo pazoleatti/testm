@@ -213,7 +213,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 					return "";
 				}
 			}
-			};
+		};
 
 		formReceiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
 		formReceiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
@@ -361,11 +361,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		}
 
 		List<Long> sourceIds = new ArrayList<Long>();
-		sourceIds.add(sourcesSelectionModel.getSelectedObject().getId());
+		Long sourceId = sourcesSelectionModel.getSelectedObject().getId();
 
 		for (CheckedDepartmentFormType source : receiverSourcesTable.getVisibleItems()) {
+			if (sourceId.equals(source.getDepartmentFormType().getId())) {
+				getUiHandlers().showAssignErrorMessage(isForm);
+				return;
+			}
 			sourceIds.add(source.getDepartmentFormType().getId());
 		}
+
+		sourceIds.add(sourceId);
 
 		if (isForm) {
 			getUiHandlers().updateFormSources(formReceiversSelectionModel.getSelectedObject(), sourceIds);
