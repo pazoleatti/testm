@@ -21,7 +21,7 @@
             margin: 10px;
         }
 
-        .searchLabel {
+        .label {
             margin-right: 5px;
             margin-left: 5px;
             font-weight: bold;
@@ -42,7 +42,7 @@
 
                 <g:HorizontalPanel height="45px">
                     <g:HorizontalPanel width="210px">
-                        <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
+                        <g:Label addStyleNames="{style.label}">Назанчение:</g:Label>
                         <g:VerticalPanel>
                             <g:Anchor ui:field="formAnchor" href="#!destination;isForm=true">Налоговые формы</g:Anchor>
                             <g:Label ui:field="formLabel">Налоговые формы</g:Label>
@@ -53,43 +53,43 @@
                     </g:HorizontalPanel>
 
                     <g:FlowPanel width="400px" addStyleNames="{style.taxTypePanel}">
-                        <g:Label styleName="{style.searchLabel}">Вид налога</g:Label>
+                        <g:Label styleName="{style.label}">Вид налога</g:Label>
                         <m:MyValueListBox ui:field="boxTaxType"/>
                     </g:FlowPanel>
 
                     <g:cell width="100px" verticalAlignment="bottom">
-                        <style:ButtonLink ui:field="assignButton" text="Назанчить"/>
+                        <style:ButtonLink ui:field="assignAnchor" text="Назанчить"/>
                     </g:cell>
 
                     <g:cell verticalAlignment="bottom">
-                        <style:ButtonLink ui:field="cancelButton" text="Оменить назначение"/>
+                        <style:ButtonLink ui:field="cancelAnchor" text="Отменить назначение"/>
                     </g:cell>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel height="350px" spacing="5">
                     <g:VerticalPanel width="500px">
-                        <g:Label addStyleNames="{style.searchLabel}">Подразделение</g:Label>
+                        <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
                         <g:SimplePanel ui:field="departmentPickerPanel"/>
                     </g:VerticalPanel>
 
                     <g:VerticalPanel width="200px" ui:field="panelFormDataKind">
-                        <g:Label addStyleNames="{style.searchLabel}">Тип налоговой формы</g:Label>
+                        <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
                         <m:MyValueListBox ui:field="boxFormDataKind" width="200px" visibleItemCount="15"/>
                     </g:VerticalPanel>
 
                     <g:VerticalPanel width="600px">
-                        <g:Label addStyleNames="{style.searchLabel}" ui:field="lableTaxFormKind">Вид налоговой формы
+                        <g:Label addStyleNames="{style.label}" ui:field="labelTaxFormKind">Вид налоговой формы
                         </g:Label>
-                        <g:Label addStyleNames="{style.searchLabel}" ui:field="lableDeclKind">Вид декларации</g:Label>
+                        <g:Label addStyleNames="{style.label}" ui:field="labelDeclKind">Вид декларации</g:Label>
                         <m:MyValueListBox ui:field="boxTaxFormKind" width="600px" visibleItemCount="15"/>
                     </g:VerticalPanel>
                 </g:HorizontalPanel>
             </g:FlowPanel>
         </g:north>
-        <g:center>
-            <style:GenericDataGrid ui:field="receiverSourcesTable" width="100%" height="400px"/>
-        </g:center>
 
+        <g:center>
+            <style:GenericDataGrid ui:field="grid" width="100%" height="100%"/>
+        </g:center>
 
     </g:SplitLayoutPanel>
 

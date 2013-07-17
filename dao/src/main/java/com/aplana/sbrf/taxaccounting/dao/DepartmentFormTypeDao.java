@@ -2,14 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Интерфейс Dao для работы с источникам НФ
- * 
+ *
  * @author dsultanbekov, sgoryachkin
  */
 public interface DepartmentFormTypeDao {
@@ -36,12 +33,12 @@ public interface DepartmentFormTypeDao {
 	 * @param taxType вид налога
 	 * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
 	 */
-	List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType);	
+	List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType);
 
 	/**
 	 * Возвращает информацию об источниках, которые должны использоваться при
 	 * формировании налоговой формы назначения с заданными параметрами
-	 * 
+	 *
 	 * @param departmentId
 	 *            идентификатор подразделения формируемой налоговой формы
 	 *            назначения
@@ -69,7 +66,7 @@ public interface DepartmentFormTypeDao {
 	 * для налоговых форм или деклараций в заданном подразделении
 	 * Предполагается что метод будет использоваться для заполнения фильтра,
 	 * списком доступных для выбора департаментов, типов НФ, и видов НФ (kind)
-	 * 
+	 *
 	 * @param departmentId
 	 *            идентификатор подразделения
 	 * @param taxType
@@ -82,7 +79,7 @@ public interface DepartmentFormTypeDao {
 	/**
 	 * Возвращает информацию о формах-потребителях, которые должны использовать
 	 * информацию из данной налоговой формы в качестве источника
-	 * 
+	 *
 	 * @param sourceDepartmentId
 	 *            идентификатор подразделения формы-источника
 	 * @param sourceFormTypeId
@@ -112,7 +109,7 @@ public interface DepartmentFormTypeDao {
 	/**
 	 * Возвращает информацию о формах-источниках, которые должны использоваться
 	 * при формировании декларации
-	 * 
+	 *
 	 * @param departmentId
 	 *            идентификатор декларации
 	 * @param declarationTypeId
@@ -131,4 +128,28 @@ public interface DepartmentFormTypeDao {
 	 *			  идентификаторы деклараций-источников в виде списка
 	 */
 	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
+
+    /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
+     *
+     * @param departmentId
+     *            идентификатор подразделения
+     * @param taxType
+     *            идентификатор вида налога
+     * @return список назначенных налоговых форм для выбранного налога и подразделения
+     *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
+     */
+    List<FormTypeKind> getFormAssigned(Long departmentId, char taxType);
+
+    /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
+     *
+     * @param departmentId
+     *            идентификатор подразделения
+     * @param taxType
+     *            идентификатор вида налога
+     * @return список назначенных налоговых форм для выбранного налога и подразделения
+     *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
+     */
+    List<FormTypeKind>  getDeclarationAssigned(Long departmentId, char taxType);
 }
