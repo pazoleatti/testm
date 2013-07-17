@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.*;
 import com.google.gwt.safehtml.client.*;
 import com.google.gwt.safehtml.shared.*;
 import com.google.gwt.text.shared.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -20,6 +21,7 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
 public class DateInputCell extends
 		AbstractEditableCell<Date, DateInputCell.ViewData> {
 
+	private static final int popupRightOffset = 200;
 	private final PopupPanel datePickerPanel = new PopupPanel(true, true);
 	private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
 	private ValueUpdater<Date> valueUpdater;
@@ -178,7 +180,10 @@ public class DateInputCell extends
 			if(icon.hasAttribute("imageTypeCalendar")){
 				//Если мы нажали на календарь
 				updateDatePickerValue(value);
-				datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
+
+				int maxPopupX = Window.getClientWidth() - popupRightOffset;
+				int popupPosition = maxPopupX > event.getClientX() ? event.getClientX() : maxPopupX;
+				datePickerPanel.setPopupPosition(popupPosition, event.getClientY() + 10);
 				datePickerPanel.show();
 			} else {
 				if (vd != null && vd.isEditing()) {
