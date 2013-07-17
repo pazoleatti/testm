@@ -32,4 +32,25 @@ public class DepartmentParamDaoTest {
 		Assert.assertEquals(DEPARTMENT_ID_FOR_TEST, departmentParamTransport.getDepartmentId());
 	}
 
+    @Test
+    public void updateDepartmentParam()
+    {
+        DepartmentParam param = new DepartmentParam();
+        param.setDepartmentId(DEPARTMENT_ID_FOR_TEST);
+        param.setDictRegionId("01");
+        param.setOkato("T");
+        param.setInn("T");
+        param.setKpp("T");
+        param.setTaxOrganCode("T");
+        param.setOkvedCode("T");
+        param.setPhone("T");
+        param.setReorgFormCode("T");
+        param.setReorgInn("T");
+        param.setReorgKpp("T");
+        param.setName("T");
+
+        departmentParamDao.updateDepartmentParam(param);
+
+        Assert.assertEquals(departmentParamDao.getDepartmentParam(DEPARTMENT_ID_FOR_TEST), param);
+    }
 }

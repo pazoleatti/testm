@@ -99,7 +99,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     }
 
     @Override
-    public void undo(GetOpenDataAction formListAction, GetOpenDataResult formListResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetOpenDataAction action, GetOpenDataResult result, ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
 }

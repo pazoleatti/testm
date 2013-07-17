@@ -1,4 +1,10 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
+
+import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
+import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
+import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
+
+import java.io.Serializable;
 
 /**
  * Составная модель подразделения,
@@ -6,7 +12,7 @@ package com.aplana.sbrf.taxaccounting.model;
  *
  * @author Dmitriy Levykin
  */
-public class DepartmentCombined extends Department {
+public class DepartmentCombined implements Serializable {
 
     // Общие параметры
     private DepartmentParam commonParams;
@@ -19,23 +25,9 @@ public class DepartmentCombined extends Department {
         super();
     }
 
-    public DepartmentCombined(Department dep,
-                              DepartmentParam commonParams,
+    public DepartmentCombined(DepartmentParam commonParams,
                               DepartmentParamIncome incomeParams,
                               DepartmentParamTransport transportParams) {
-        super();
-
-        super.setDepartmentDeclarationTypes(dep.getDepartmentDeclarationTypes());
-        super.setDepartmentFormTypes(dep.getDepartmentFormTypes());
-        super.setDictRegionId(dep.getDictRegionId());
-        super.setId(dep.getId());
-        super.setName(dep.getName());
-        super.setParentId(dep.getParentId());
-        super.setSbrfCode(dep.getSbrfCode());
-        super.setShortName(dep.getShortName());
-        super.setTbIndex(dep.getTbIndex());
-        super.setType(dep.getType());
-
         this.commonParams = commonParams;
         this.incomeParams = incomeParams;
         this.transportParams = transportParams;
