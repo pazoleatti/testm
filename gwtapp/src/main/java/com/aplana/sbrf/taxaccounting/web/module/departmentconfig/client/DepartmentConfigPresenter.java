@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepar
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataResult;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -24,6 +23,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Presenter для формы настроек подразделений
@@ -40,17 +40,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers> {
         void updateVisibility(boolean isUnp);
 
-        void setDepartments(List<Department> departments);
+        void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
         void setDepartment(Department department);
 
         void setDepartmentCombined(DepartmentCombined combinedDepartmentParam);
 
         void setTaxTypes(List<TaxType> types);
-
-        boolean isEditMode();
-
-        boolean isDirty();
     }
 
     private final DispatchAsync dispatcher;
@@ -83,32 +79,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public boolean onTaxTypeChange(TaxType type) {
-
-        // Режим редактирования
-        boolean iem = getView().isEditMode();
-        // Наличие несохраненных изменений
-        boolean id = getView().isDirty();
-
-        // Смена типа налога и обновление секции только если небыло режима редактирования или не было изменений
-        // или если изменения были и эти изменения проигнорированы пользователем
-        if (!iem || !id || iem && id
-                && Window.confirm("Все не сохранённые данные будут потеряны. Перейти к выбранному налогу?")) {
-            reloadTaxSection();
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Обновление содержимого полей правой части
-     */
-    private void reloadTaxSection() {
-        // TODO
-    }
-
-    @Override
     public boolean useManualReveal() {
         return true;
     }
@@ -130,7 +100,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 getView().updateVisibility(result.getControlUNP());
 
                                 // Список подразделений для справочника
-                                getView().setDepartments(result.getDepartments());
+                                getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                                 // Текущее подразделение пользователя
                                 getView().setDepartment(result.getDepartment());
                                 // Доступные типы налогов

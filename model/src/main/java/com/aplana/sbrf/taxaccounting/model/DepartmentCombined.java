@@ -165,7 +165,7 @@ public class DepartmentCombined extends Department {
         return incomeParams.getSignatoryFirstName();
     }
 
-    public void setSignatoryFirstName(String signatoryFirstName) {
+    public void setIncomeSignatoryFirstName(String signatoryFirstName) {
         incomeParams.setSignatoryFirstName(signatoryFirstName);
     }
 
@@ -275,11 +275,11 @@ public class DepartmentCombined extends Department {
         transportParams.setSignatoryFirstname(signatoryFirstname);
     }
 
-    public String getTransportSignatoryLasttname() {
+    public String getTransportSignatoryLastname() {
         return transportParams.getSignatoryLasttname();
     }
 
-    public void setTransportSignatoryLasttname(String signatoryLasttname) {
+    public void setTransportSignatoryLastname(String signatoryLasttname) {
         transportParams.setSignatoryLasttname(signatoryLasttname);
     }
 

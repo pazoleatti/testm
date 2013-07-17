@@ -26,137 +26,186 @@
             margin-left: 10px;
         }
     </ui:style>
-    <g:VerticalPanel>
+    <g:ScrollPanel>
         <g:VerticalPanel>
-            <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
-            <g:HorizontalPanel spacing="5">
-                <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
-                <d:NewDepartmentPicker ui:field="departmentPicker" withCheckBox="false"
-                                       header="Выберите подразделение"/>
-            </g:HorizontalPanel>
-            <g:HorizontalPanel spacing="5" height="35px">
-                <style:ButtonLink ui:field="editButton" text="Редактировать"/>
-                <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
-                <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>
-            </g:HorizontalPanel>
+            <g:VerticalPanel>
+                <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
+                <g:HorizontalPanel spacing="5">
+                    <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
+                    <d:NewDepartmentPicker ui:field="departmentPicker" withCheckBox="false"
+                                           header="Выберите подразделение"/>
+                </g:HorizontalPanel>
+                <g:HorizontalPanel spacing="5" height="35px">
+                    <style:ButtonLink ui:field="editButton" text="Редактировать"/>
+                    <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
+                    <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>
+                </g:HorizontalPanel>
+            </g:VerticalPanel>
+            <g:FormPanel ui:field="formPanel">
+                <g:HorizontalPanel spacing="5">
+                    <!-- Общие сведения -->
+                    <g:cell width="610px">
+                        <g:VerticalPanel>
+                            <g:Label styleName="{style.sectorLabel}" text="Общие сведения"/>
+                            <g:Label styleName="{style.boldLabel}" text="Реквизиты подразделения"/>
+                            <g:HorizontalPanel>
+                                <g:Label text="Наименование" width="250px"/>
+                                <g:TextArea ui:field="commonName" width="350px" height="100px"
+                                            styleName="{style.noresize}"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="Субъект Российской Федерации (код)" width="250px"/>
+                                <g:ListBox width="106px"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="Номер контактного телефона" width="250px"/>
+                                <g:TextBox width="350px" ui:field="commonPhone"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="ИНН" width="40px"/>
+                                <g:TextBox width="100px" ui:field="commonInn"/>
+                                <g:Label text="ОКАТО" styleName="{style.sps}" width="60px"/>
+                                <g:ListBox width="115px"/>
+                                <g:Label text="Код налогового органа" width="160px" styleName="{style.sps}"/>
+                                <g:TextBox width="100px" ui:field="commonTaxOrganCode"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="КПП" width="40px"/>
+                                <g:TextBox width="100px" ui:field="commonKpp"/>
+                                <g:Label text="ОКВЭД" styleName="{style.sps}" width="60px"/>
+                                <g:ListBox width="115px"/>
+                            </g:HorizontalPanel>
+                            <!-- Сведения о реорганизации -->
+                            <g:Label styleName="{style.boldLabel}" text="Сведения о реорганизации"/>
+                            <g:HorizontalPanel>
+                                <g:Label text="Код формы реорганизации и ликвидации" width="250px"/>
+                                <g:ListBox width="105px"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="ИНН реорганизованной организации" width="250px"/>
+                                <g:TextBox width="100px" ui:field="commonReorgInn"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label text="КПП реорганизованной организации" width="250px"/>
+                                <g:TextBox width="100px" ui:field="commonReorgKpp"/>
+                            </g:HorizontalPanel>
+                        </g:VerticalPanel>
+                    </g:cell>
+                    <!-- Вид налога -->
+                    <g:cell width="610px">
+                        <g:VerticalPanel>
+                            <g:HorizontalPanel>
+                                <g:Label styleName="{style.sectorLabel}" text="Вид налога"/>
+                                <g:ListBox width="200px" styleName="{style.sps}" ui:field="taxType"/>
+                            </g:HorizontalPanel>
+                            <!-- Блок налога на прибыль -->
+                            <g:VerticalPanel ui:field="taxTypeIPanel">
+                                <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Признак лица подписавшего документ" width="250px"/>
+                                    <g:ListBox width="355px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Фамилия подписанта" width="250px"/>
+                                    <g:TextBox ui:field="incomeSignatorySurname" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Имя подписанта" width="250px"/>
+                                    <g:TextBox ui:field="incomeSignatoryFirstName" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Отчество подписанта" width="250px"/>
+                                    <g:TextBox ui:field="incomeSignatoryLastName" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Наименование документа, подтверждающего полномочия представителя"
+                                             width="250px"/>
+                                    <g:TextArea ui:field="incomeApproveDocName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Наименование организации-представителя налогоплательщика"
+                                             width="250px"/>
+                                    <g:TextArea ui:field="incomeApproveOrgName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                </g:HorizontalPanel>
+                                <!-- Прочие сведения -->
+                                <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Код места, по которому представляется документ" width="250px"/>
+                                    <g:ListBox width="145px"/>
+                                    <g:Label text="Ставка налога" width="110px" styleName="{style.sps}"/>
+                                    <g:DoubleBox ui:field="incomeTaxRate" width="75px"  styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Версия программы, с помощью которой сформирован файл" width="250px"/>
+                                    <g:TextBox ui:field="incomeAppVersion" width="140px"/>
+                                    <g:Label text="Версия формата" width="110px" styleName="{style.sps}"/>
+                                    <g:TextBox ui:field="incomeFormatVersion" width="75px" styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel ui:field="incomePayPanel">
+                                    <g:Label text="Обязанность по уплате налога" width="250px"/>
+                                    <g:ListBox width="145px"/>
+                                    <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
+                                    <g:ListBox width="80px" styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel ui:field="incomeExtTaxSumPanel">
+                                    <g:Label
+                                            text="Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
+                                            width="515px"/>
+                                    <g:LongBox ui:field="incomeExternalTaxSum" width="75px" styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel ui:field="incomeSumDiffPanel">
+                                    <g:Label
+                                            text="Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода"
+                                            width="515px"/>
+                                    <g:LongBox ui:field="incomeSumDifference" width="75px" styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                            </g:VerticalPanel>
+                            <!-- Блок транспортного налога -->
+                            <g:VerticalPanel ui:field="taxTypeTPanel" visible="false">
+                                <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Признак лица подписавшего документ" width="250px"/>
+                                    <g:ListBox width="355px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Фамилия подписанта" width="250px"/>
+                                    <g:TextBox ui:field="transportSignatorySurname" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Имя подписанта" width="250px"/>
+                                    <g:TextBox ui:field="transportSignatoryFirstname" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Отчество подписанта" width="250px"/>
+                                    <g:TextBox ui:field="transportSignatoryLastname" width="350px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Наименование документа, подтверждающего полномочия представителя"
+                                             width="250px"/>
+                                    <g:TextArea ui:field="transportApproveDocName"  width="350px" height="70px" styleName="{style.noresize}"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Наименование организации-представителя налогоплательщика"
+                                             width="250px"/>
+                                    <g:TextArea ui:field="transportApproveOrgName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                </g:HorizontalPanel>
+                                <!-- Прочие сведения -->
+                                <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Код места, по которому представляется документ" width="250px"/>
+                                    <g:ListBox width="145px"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel>
+                                    <g:Label text="Версия программы, с помощью которой сформирован файл" width="250px"/>
+                                    <g:TextBox ui:field="transportAppVersion" width="140px"/>
+                                    <g:Label text="Версия формата" width="110px" styleName="{style.sps}"/>
+                                    <g:TextBox ui:field="transportFormatVersion" width="75px" styleName="{style.sps}"/>
+                                </g:HorizontalPanel>
+                            </g:VerticalPanel>
+                        </g:VerticalPanel>
+                    </g:cell>
+                </g:HorizontalPanel>
+            </g:FormPanel>
         </g:VerticalPanel>
-        <g:FormPanel ui:field="formPanel">
-            <g:HorizontalPanel spacing="5">
-                <!-- Общие сведения -->
-                <g:cell width="610px">
-                    <g:VerticalPanel>
-                        <g:Label styleName="{style.sectorLabel}" text="Общие сведения"/>
-                        <g:Label styleName="{style.boldLabel}" text="Реквизиты подразделения"/>
-                        <g:HorizontalPanel>
-                            <g:Label text="Наименование" width="250px"/>
-                            <g:TextArea ui:field="commonName" width="350px" height="100px" styleName="{style.noresize}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Субъект Российской Федерации (код)" width="250px"/>
-                            <g:ListBox width="106px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Номер контактного телефона" width="250px"/>
-                            <g:TextBox width="350px" ui:field="commonPhone"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="ИНН" width="40px"/>
-                            <g:TextBox width="100px" ui:field="commonInn"/>
-                            <g:Label text="ОКАТО" styleName="{style.sps}" width="60px"/>
-                            <g:ListBox width="115px"/>
-                            <g:Label text="Код налогового органа" width="160px" styleName="{style.sps}"/>
-                            <g:TextBox width="100px" ui:field="commonTaxOrganCode"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="КПП" width="40px"/>
-                            <g:TextBox width="100px" ui:field="commonKpp"/>
-                            <g:Label text="ОКВЭД" styleName="{style.sps}" width="60px"/>
-                            <g:ListBox width="115px"/>
-                        </g:HorizontalPanel>
-                        <!-- Сведения о реорганизации -->
-                        <g:Label styleName="{style.boldLabel}" text="Сведения о реорганизации"/>
-                        <g:HorizontalPanel>
-                            <g:Label text="Код формы реорганизации и ликвидации" width="250px"/>
-                            <g:ListBox width="105px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="ИНН реорганизованной организации" width="250px"/>
-                            <g:TextBox width="100px" ui:field="commonReorgInn"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="КПП реорганизованной организации" width="250px"/>
-                            <g:TextBox width="100px" ui:field="commonReorgKpp"/>
-                        </g:HorizontalPanel>
-                    </g:VerticalPanel>
-                </g:cell>
-                <!-- Вид налога -->
-                <g:cell width="610px">
-                    <g:VerticalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label styleName="{style.sectorLabel}" text="Вид налога"/>
-                            <g:ListBox width="200px" styleName="{style.sps}" ui:field="taxType"/>
-                        </g:HorizontalPanel>
-                        <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
-                        <g:HorizontalPanel>
-                            <g:Label text="Признак лица подписавшего документ" width="250px"/>
-                            <g:ListBox width="355px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Фамилия подписанта" width="250px"/>
-                            <g:TextBox width="350px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Имя подписанта" width="250px"/>
-                            <g:TextBox width="350px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Отчество подписанта" width="250px"/>
-                            <g:TextBox width="350px"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Наименование документа, подтверждающего полномочия представителя"
-                                     width="250px"/>
-                            <g:TextArea width="350px" height="70px" styleName="{style.noresize}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Наименование организации-представителя налогоплательщика" width="250px"/>
-                            <g:TextArea width="350px" height="70px" styleName="{style.noresize}"/>
-                        </g:HorizontalPanel>
-                        <!-- Прочие сведения -->
-                        <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
-                        <g:HorizontalPanel>
-                            <g:Label text="Код места, по которому представляется документ" width="250px"/>
-                            <g:ListBox width="145px"/>
-                            <g:Label text="Ставка налога" width="110px" styleName="{style.sps}"/>
-                            <g:TextBox width="75px" styleName="{style.sps}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Версия программы, с помощью которой сформирован файл" width="250px"/>
-                            <g:TextBox width="140px"/>
-                            <g:Label text="Версия формата" width="110px" styleName="{style.sps}"/>
-                            <g:TextBox width="75px" styleName="{style.sps}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label text="Обязанность по уплате налога" width="250px"/>
-                            <g:ListBox width="145px"/>
-                            <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
-                            <g:ListBox width="80px" styleName="{style.sps}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label
-                                    text="Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
-                                    width="515px"/>
-                            <g:TextBox width="75px" styleName="{style.sps}"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel>
-                            <g:Label
-                                    text="Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода"
-                                    width="515px"/>
-                            <g:TextBox width="75px" styleName="{style.sps}"/>
-                        </g:HorizontalPanel>
-                    </g:VerticalPanel>
-                </g:cell>
-            </g:HorizontalPanel>
-        </g:FormPanel>
-    </g:VerticalPanel>
+    </g:ScrollPanel>
 </ui:UiBinder>
