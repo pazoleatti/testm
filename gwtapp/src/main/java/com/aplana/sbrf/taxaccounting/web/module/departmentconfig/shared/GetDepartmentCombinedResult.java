@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.Result;
 /**
  * @author Dmitriy Levykin
  */
-public class GetDeclarationCombinedResult implements Result {
+public class GetDepartmentCombinedResult implements Result {
 
     private DepartmentCombined departmentCombined;
 

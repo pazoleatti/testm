@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentCombined;
+import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDeclarationCombinedAction;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDeclarationCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -29,6 +26,9 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private RefBookDao rbDao;
 
     public GetOpenDataHandler() {
         super(GetOpenDataAction.class);

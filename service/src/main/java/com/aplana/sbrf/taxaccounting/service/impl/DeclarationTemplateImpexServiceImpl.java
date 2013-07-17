@@ -40,7 +40,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 	private final static String CONTENT_FILE = "content.xml";
 	private final static String SCRIPT_FILE = "script.groovy";
 	private final static String REPORT_FILE = "report.jrxml";
-	private final static String UNICODE = "UTF-8";
+	private final static String ENCODING = "UTF-8";
 
 	@Override
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
@@ -57,13 +57,13 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(dt.getCreateScript().getBytes(UNICODE));
+			zos.write(dt.getCreateScript().getBytes(ENCODING));
 			zos.closeEntry();
 			
 			// JasperTemplate
 			ze = new ZipEntry(REPORT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(declarationTemplateDao.getJrxml(id).getBytes(UNICODE));
+			zos.write(declarationTemplateDao.getJrxml(id).getBytes(ENCODING));
 			zos.closeEntry();
 
 			// content

@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
-
-import java.util.List;
 
 /**
  * Хендлеры формы настройки подразделений
@@ -13,4 +11,5 @@ import java.util.List;
 public interface DepartmentConfigUiHandlers extends UiHandlers {
     void save();
     void updateDepartment(Integer next);
+    boolean onTaxTypeChange(TaxType type);
 }

@@ -7,7 +7,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  *   Action формы настроек подразделений
  *   @author Dmitriy Levykin
  */
-public class GetDeclarationCombinedAction extends UnsecuredActionImpl<GetDeclarationCombinedResult> implements ActionName {
+public class GetDepartmentCombinedAction extends UnsecuredActionImpl<GetDepartmentCombinedResult> implements ActionName {
 
     // Код подразделения
     private Integer departmentId;

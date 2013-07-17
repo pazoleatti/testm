@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentDeclarationTypeComparator;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -60,15 +62,15 @@ public class GetDeclarationReceiversHandler
 			}
 		}
 
-		result.setDeclarationReceivers(receivers);
-
 		Map<Integer, DeclarationType> declarationTypes = new HashMap<Integer, DeclarationType>();
 		for (DepartmentDeclarationType receiver : receivers) {
 			declarationTypes.put(receiver.getDeclarationTypeId(),
 					declarationTypeDao.get(receiver.getDeclarationTypeId()));
 		}
-
 		result.setDeclarationTypes(declarationTypes);
+
+		Collections.sort(receivers, new DepartmentDeclarationTypeComparator(declarationTypes));
+		result.setDeclarationReceivers(receivers);
 
 		return result;
     }
