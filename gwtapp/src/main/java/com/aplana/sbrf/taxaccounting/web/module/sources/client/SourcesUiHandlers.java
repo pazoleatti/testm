@@ -16,4 +16,5 @@ public interface SourcesUiHandlers extends UiHandlers {
 	void getFormReceiverSources(DepartmentFormType departmentFormType);
 	void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType);
 	void getDeclarationReceivers(int departmentId, TaxType taxType);
+	void showAssignErrorMessage(boolean isForm);
 }
