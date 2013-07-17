@@ -91,8 +91,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			dispatchAsync.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<CreateFormDataResult>() {
 						@Override
-						public void onSuccess(final CreateFormDataResult checkResult) {
-							placeManager.revealPlace(new Builder().with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(checkResult.getFormDataId())).build());
+						public void onSuccess(final CreateFormDataResult createResult) {
+							getView().hide();
+							placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN).with(FormDataPresenter.READ_ONLY, "false").with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId())).build());
 						}
 					}, DialogPresenter.this)
 			);
