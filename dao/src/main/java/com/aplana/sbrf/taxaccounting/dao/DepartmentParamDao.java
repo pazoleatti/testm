@@ -30,4 +30,21 @@ public interface DepartmentParamDao {
 	 */
 	DepartmentParamTransport getDepartmentParamTransport(int departmentId);
 
+    /**
+     * Сохранение изменений в общих параметрах
+     * @param param Общие параметры подразделения
+     */
+    void updateDepartmentParam(DepartmentParam param);
+
+    /**
+     * Сохранение изменений в параметрах по налогу на прибыль
+     * @param param Параметры по налогу на прибыль
+     */
+    void updateDepartmentParamIncome(DepartmentParamIncome param);
+
+    /**
+     * Сохранение изменений в параметрах по транспортному налогу
+     * @param param Параметры по транспортному налогу
+     */
+    void updateDepartmentParamTransport(DepartmentParamTransport param);
 }

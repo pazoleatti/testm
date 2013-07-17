@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetOpenDataAction;
@@ -13,6 +13,11 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Dmitriy Levykin
@@ -26,6 +31,9 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    DepartmentFormTypeService departmentFormTypService;
 
     @Autowired
     private RefBookDao rbDao;
@@ -53,14 +61,36 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
             return result;
         }
 
-        // Подразделения
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            result.setDepartments(departmentService.listAll());
+        // Подразделения доступные пользователю
+        Set<Integer> avSet = new HashSet<Integer>();
+        if (!currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // Первичные и консолид. отчеты
+            List<DepartmentFormType> formIncomeSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.INCOME);
+            List<DepartmentFormType> formTransportSrcList = departmentFormTypService.getDepartmentFormSources(currUser.getDepartmentId(), TaxType.TRANSPORT);
+
+            for (DepartmentFormType ft : formIncomeSrcList) {
+                avSet.add(ft.getDepartmentId());
+            }
+
+            for (DepartmentFormType ft : formTransportSrcList) {
+                avSet.add(ft.getDepartmentId());
+            }
+
+            // Подразделение пользователя
+            avSet.add(currUser.getDepartmentId());
+
+            // Необходимые для дерева подразделения
+            result.setDepartments(new ArrayList(departmentService.getRequiredForTreeDepartments(avSet).values()));
+
         } else {
-            // TODO (Dmitriy Levykin) Грузить только доступные пользователю подразделения
-            // См. GetFormDataListHandler
-            result.setDepartments(departmentService.listDepartments());
+            // Все подразделения
+            result.setDepartments(departmentService.listAll());
+
+            for (Department dep : result.getDepartments()) {
+                avSet.add(dep.getId());
+            }
         }
+        result.setAvailableDepartments(avSet);
 
         // Подразделение текущего пользователя
         result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
@@ -69,7 +99,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     }
 
     @Override
-    public void undo(GetOpenDataAction formListAction, GetOpenDataResult formListResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetOpenDataAction action, GetOpenDataResult result, ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
 }

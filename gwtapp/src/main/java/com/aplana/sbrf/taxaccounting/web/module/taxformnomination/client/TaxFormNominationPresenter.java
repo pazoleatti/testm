@@ -1,10 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleResult;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
 import com.google.inject.Inject;
@@ -37,9 +43,10 @@ public class TaxFormNominationPresenter
     }
 
     public interface MyView extends View, HasUiHandlers<TaxFormNominationUiHandlers> {
-        void setTaxFormKind(List<FormType> formTypes);
         void init(Boolean isForm);
         boolean isForm();
+        void setTaxFormKind(List<FormType> formTypes);
+        void setTableData(List<FormTypeKind> departmentFormTypes);
     }
 
     private final DispatchAsync dispatcher;
@@ -52,14 +59,61 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void prepareFromRequest(PlaceRequest request) {
-        super.prepareFromRequest(request);
-        getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+    public void prepareFromRequest(final PlaceRequest request) {
+        // Проверка прав доступа
+        dispatcher.execute(
+                new DetectUserRoleAction(),
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<DetectUserRoleResult>() {
+                            @Override
+                            public void onSuccess(DetectUserRoleResult result) {
+                                if (!isControl(result.getUserRole())) {
+                                    getProxy().manualRevealFailed();
+                                    return;
+                                }
+                                // С правами доступа всё окей
+                                getView().init(Boolean.valueOf(request.getParameter("isForm", "")));
+                                getProxy().manualReveal(TaxFormNominationPresenter.this);
+                            }
 
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getProxy().manualRevealFailed();
+                            }
+                        }, this));
+
+        // TODO реализовать анлоки (пока не надо)
     }
 
     @Override
-    public void reloadTaxFormKind(TaxType taxType) {
+    public boolean useManualReveal() {
+        return true;
+    }
+
+    /**
+     * Контролер
+     *
+     * @param userRoles
+     * @return Да/Нет
+     */
+    private boolean isControl(List<TARole> userRoles) {
+        // TODO вопрос в аналитике (УВиСАС), нужно ли сюда добавить администратора
+        if (userRoles != null) {
+            for (TARole taRole : userRoles) {
+                if (taRole.getAlias().equals(TARole.ROLE_CONTROL_UNP) || taRole.getAlias().equals(TARole.ROLE_CONTROL)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Перезагруска бокса "Вид налоговой формы"/"Вид декларации"
+     * @param taxType
+     */
+    @Override
+    public void getTaxFormKind(TaxType taxType) {
         GetTaxFormTypesAction action = new GetTaxFormTypesAction();
         action.setTaxType(taxType);
         action.setForm(getView().isForm());
@@ -69,7 +123,27 @@ public class TaxFormNominationPresenter
                     public void onSuccess(GetTaxFormTypesResult result) {
                         getView().setTaxFormKind(result.getFormTypeList());
                     }
-                }, this).addCallback(new ManualRevealCallback<GetTaxFormTypesResult>(TaxFormNominationPresenter.this)));
+                }, this));
+    }
+
+    /**
+     * Перезагрузка таблицы
+     * @param depoId идентификатор подразделения
+     * @param taxTypeCode код вида налога
+     */
+    @Override
+    public void getTableData(Long depoId, char taxTypeCode) {
+        GetTableDataAction action = new GetTableDataAction();
+        action.setDepoId(depoId);
+        action.setTaxType(taxTypeCode);
+        action.setForm(getView().isForm());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setTableData(result.getTableData());
+                    }
+                }, this).addCallback(new ManualRevealCallback<GetTableDataResult>(TaxFormNominationPresenter.this)));
     }
 
 }

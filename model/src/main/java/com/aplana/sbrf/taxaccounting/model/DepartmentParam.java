@@ -155,5 +155,26 @@ public class DepartmentParam implements Serializable {
 		return builder.toString();
 	}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        DepartmentParam that = (DepartmentParam) o;
+
+        if (departmentId != that.departmentId) return false;
+        if (dictRegionId != null ? !dictRegionId.equals(that.dictRegionId) : that.dictRegionId != null) return false;
+        if (inn != null ? !inn.equals(that.inn) : that.inn != null) return false;
+        if (kpp != null ? !kpp.equals(that.kpp) : that.kpp != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (okato != null ? !okato.equals(that.okato) : that.okato != null) return false;
+        if (okvedCode != null ? !okvedCode.equals(that.okvedCode) : that.okvedCode != null) return false;
+        if (phone != null ? !phone.equals(that.phone) : that.phone != null) return false;
+        if (reorgFormCode != null ? !reorgFormCode.equals(that.reorgFormCode) : that.reorgFormCode != null)return false;
+        if (reorgInn != null ? !reorgInn.equals(that.reorgInn) : that.reorgInn != null) return false;
+        if (reorgKpp != null ? !reorgKpp.equals(that.reorgKpp) : that.reorgKpp != null) return false;
+        if (taxOrganCode != null ? !taxOrganCode.equals(that.taxOrganCode) : that.taxOrganCode != null) return false;
+
+        return true;
+    }
 }

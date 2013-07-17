@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,9 +19,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @Repository
 @Transactional(readOnly = true)
@@ -161,8 +158,65 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 				"insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (?, ?)", bpss);
 	}
 
+    private static final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+        @Override
+        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+            FormTypeKind formTypeKind = new FormTypeKind();
+            formTypeKind.setId(rs.getLong("id"));
+            formTypeKind.setKind(FormDataKind.fromId(rs.getInt("kind")));
+            formTypeKind.setName(rs.getString("name"));
+            return formTypeKind;
+        }
+    };
 
-	private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
+    private static final String GET_FORM_ASSIGNED_SQL =
+            "select dft.id, dft.kind, tf.name " +
+            " from form_type tf " +
+            " join department_form_type dft on dft.department_id = ? and dft.form_type_id = tf.id " +
+            " where tf.tax_type = ?";
+
+    @Override
+    public List<FormTypeKind> getFormAssigned(Long departmentId, char taxType) {
+        return getJdbcTemplate().query(
+                GET_FORM_ASSIGNED_SQL,
+                new Object[] {
+                        departmentId,
+                        String.valueOf(taxType)
+                },
+                FORM_ASSIGN_MAPPER
+        );
+    }
+
+    private static final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+        @Override
+        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+            FormTypeKind formTypeKind = new FormTypeKind();
+            formTypeKind.setId(rs.getLong("id"));
+            formTypeKind.setName(rs.getString("name"));
+            return formTypeKind;
+        }
+    };
+
+    private static final String GET_DECLARATION_ASSIGNED_SQL =
+            " select ddt.id, dt.name" +
+                    "    from declaration_type dt" +
+                    "    join department_declaration_type ddt on ddt.department_id = ? and ddt.declaration_type_id = dt.id" +
+                    "    where dt.tax_type = ?";
+
+    @Override
+    public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {
+        return getJdbcTemplate().query(
+                GET_DECLARATION_ASSIGNED_SQL,
+                new Object[] {
+                        departmentId,
+                        String.valueOf(taxType)
+                },
+                DECLARATION_ASSIGN_MAPPER
+        );
+    }
+
+
+    private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
 		+ "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
 		+ "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
 		+ "and dft.department_id=? and src_ft.tax_type = ?) "

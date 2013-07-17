@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -23,9 +23,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * View для формы форма «Согласование организации»
@@ -35,8 +33,12 @@ import java.util.Map;
 public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationUiHandlers>
         implements TaxFormNominationPresenter.MyView {
 
-
+    // признак формы: true - налоговые формы, false - декларации
     private Boolean isForm;
+
+    // изменяемые колонки в таблице
+    private TextColumn<TableModel> receiverSourcesKindColumn;
+    private TextColumn<TableModel> receiverSourcesTypeColumn;
 
     interface Binder extends UiBinder<Widget, TaxFormNominationView> {
     }
@@ -46,8 +48,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         String disabled();
     }
-
-    private Map<Integer, FormType> receiverSourcesFormType;
 
     @UiField
     LinkStyle css;
@@ -66,24 +66,22 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField(provided = true)
     MyValueListBox<FormType> boxTaxFormKind;
     @UiField
-    Anchor assignButton;
+    Anchor assignAnchor;
     @UiField
-    Anchor cancelButton;
-
+    Anchor cancelAnchor;
     @UiField
-    GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
-
+    GenericDataGrid<TableModel> grid;
     @UiField
     Panel departmentPickerPanel;
     @UiField
     VerticalPanel panelFormDataKind;
     @UiField
-    Label lableTaxFormKind;
+    Label labelTaxFormKind;
     @UiField
-    Label lableDeclKind;
+    Label labelDeclKind;
 
     private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
-    private static final List<FormDataKind> FORMDATA_KIND = Arrays.asList(FormDataKind.values());
+    private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
 
     @Inject
     @UiConstructor
@@ -96,43 +94,57 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         initTable();
     }
 
-    @UiHandler("assignButton")
+    @UiHandler("assignAnchor")
     void onClickedAssign(ClickEvent event) {
-        // TODO
+        // TODO получить depoId
+        if (depoId != null && boxFormDataKind.getValue() != null && boxTaxFormKind.getValue() != null) {
+            // TODO
+        }
     }
 
-    @UiHandler("cancelButton")
+    @UiHandler("cancelAnchor")
     void onClickedCancel(ClickEvent event) {
-        // TODO
+        if (isCanCancel()) {
+            // TODO
+        }
     }
 
+    private boolean isCanCancel() {
+        for (TableModel source : grid.getVisibleItems()) {
+            if (source.isChecked()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void initTable() {
-        Column<CheckedDepartmentFormType, Boolean> checkBoxColumn =
-                new Column<CheckedDepartmentFormType, Boolean>(new CheckboxCell()) {
+        Column<TableModel, Boolean> checkBoxColumn =
+                new Column<TableModel, Boolean>(new CheckboxCell()) {
                     @Override
-                    public Boolean getValue(CheckedDepartmentFormType object) {
+                    public Boolean getValue(TableModel object) {
                         return object.isChecked();
                     }
                 };
-        checkBoxColumn.setFieldUpdater(new FieldUpdater<CheckedDepartmentFormType, Boolean>() {
+        checkBoxColumn.setFieldUpdater(new FieldUpdater<TableModel, Boolean>() {
             @Override
-            public void update(int index, CheckedDepartmentFormType object, Boolean value) {
-                receiverSourcesTable.getVisibleItem(index).setChecked(value);
+            public void update(int index, TableModel object, Boolean value) {
+                grid.getVisibleItem(index).setChecked(value);
+                enableAnchor(cancelAnchor, isCanCancel());
             }
         });
 
-        TextColumn<CheckedDepartmentFormType> indexColumn = new TextColumn<CheckedDepartmentFormType>() {
+        TextColumn<TableModel> indexColumn = new TextColumn<TableModel>() {
             @Override
-            public String getValue(CheckedDepartmentFormType object) {
+            public String getValue(TableModel object) {
                 return "" + object.getIndex();
             }
         };
         indexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<CheckedDepartmentFormType> receiverSourcesKindColumn = new TextColumn<CheckedDepartmentFormType>() {
+        receiverSourcesKindColumn = new TextColumn<TableModel>() {
             @Override
-            public String getValue(CheckedDepartmentFormType object) {
+            public String getValue(TableModel object) {
                 if (object.getDepartmentFormType().getKind() != null) {
                     return object.getDepartmentFormType().getKind().getName();
                 } else {
@@ -141,25 +153,28 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             }
         };
 
-        TextColumn<CheckedDepartmentFormType> receiverSourcesTypeColumn = new TextColumn<CheckedDepartmentFormType>() {
+        receiverSourcesTypeColumn = new TextColumn<TableModel>() {
             @Override
-            public String getValue(CheckedDepartmentFormType object) {
-                if (!receiverSourcesFormType.isEmpty()
-                        && object.getDepartmentFormType().getFormTypeId() != 0) {
-                    return receiverSourcesFormType.get(object.getDepartmentFormType().getFormTypeId()).getName();
+            public String getValue(TableModel object) {
+                FormTypeKind departmentFormType = object.getDepartmentFormType();
+                if (departmentFormType != null && departmentFormType.getId() != 0) {
+                    return departmentFormType.getName();
                 } else {
                     return "";
                 }
             }
         };
-        receiverSourcesTable.addColumn(checkBoxColumn);
-        receiverSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
-        receiverSourcesTable.addColumn(indexColumn, "№ пп");
-        receiverSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
-        receiverSourcesTable.addColumn(receiverSourcesKindColumn, "Вид налоговой формы");
-        receiverSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-        receiverSourcesTable.addColumn(receiverSourcesTypeColumn, "Тип налоговой формы");
-        receiverSourcesTable.setRowCount(0);
+        grid.addColumn(checkBoxColumn);
+        grid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
+
+        grid.addColumn(indexColumn, "№ пп");
+        grid.setColumnWidth(indexColumn, 40, Style.Unit.PX);
+
+        grid.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+
+        grid.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+
+        clearTable();
     }
 
     // Выбор "Вид налога"
@@ -171,47 +186,30 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     // Выбор "Подразделения"
     private void onDepoChange() {
         if (isForm) {
-            boxFormDataKind.setAcceptableValues(FORMDATA_KIND);
+            boxFormDataKind.setAcceptableValues(FORM_DATA_KIND);
         }
         reloadGrid();
         reloadTaxFormKind();
     }
 
-    // Выбор "Тип налоговой формы"
-    private void onFormDataKindChange() {
-        reloadTaxFormKind();
-    }
-
     // Изменение выбранного значения "Вид налоговой формы"
     private void onTaxFormKindChange() {
-        enableAnchor(assignButton, boxTaxFormKind.getValue() != null);
-    }
-
-    private void onTableSelectedChange() {
-        // TODO если выбрана хоть 1 запись в таблице
-        boolean hasSelected = false;
-        if (isForm) {
-        } else {
-        }
-        enableAnchor(cancelButton, hasSelected);
+        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem());
     }
 
     // Перезаполнение комбика "Вид налоговой формы"/"Вид декларации"
     private void reloadTaxFormKind() {
-        getUiHandlers().reloadTaxFormKind(boxTaxType.getValue());
+        getUiHandlers().getTaxFormKind(boxTaxType.getValue());
     }
 
-    // Перезаполнение таблицы 1/2
+    // Перезаполнение таблицы 1,2
     private void reloadGrid() {
-        // фильтруем по виду налога
-        char taxTypeCode = boxTaxType.getValue().getCode();
         // TODO фильтруем по выбранногму подразделению
-        int formDataKind = 0;
-        if (isForm) {
-            // TODO Перезаполнение таблицы 1
-        } else {
-            // TODO Перезаполнение таблицы 2
+        if (depoId == null) {
+            clearTable();
+            return;
         }
+        getUiHandlers().getTableData(depoId, boxTaxType.getValue().getCode());
     }
 
     private void initBoxes() {
@@ -252,6 +250,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
                 return object.getName();
             }
         });
+
+        boxTaxFormKind.addValueChangeHandler(new ValueChangeHandler<FormType>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<FormType> event) {
+
+                onTaxFormKindChange();
+            }
+        });
+
     }
 
     private void enableAnchor(Anchor anchor, boolean enabled) {
@@ -260,13 +267,12 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         } else {
             anchor.setStyleName(css.disabled());
         }
-
     }
 
-    private class CheckedDepartmentFormType {
+    private class TableModel {
         private boolean checked;
         private int index;
-        private DepartmentFormType departmentFormType;
+        private FormTypeKind departmentFormType;
 
         public boolean isChecked() {
             return checked;
@@ -276,11 +282,11 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             this.checked = checked;
         }
 
-        public DepartmentFormType getDepartmentFormType() {
+        public FormTypeKind getDepartmentFormType() {
             return departmentFormType;
         }
 
-        public void setDepartmentFormType(DepartmentFormType departmentFormType) {
+        public void setDepartmentFormType(FormTypeKind departmentFormType) {
             this.departmentFormType = departmentFormType;
         }
 
@@ -297,37 +303,102 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void init(Boolean isForm) {
         this.isForm = isForm;
+
         // видимость частных полей
         formLabel.setVisible(isForm);
         formAnchor.setVisible(!isForm);
         declarationLabel.setVisible(!isForm);
         declarationAnchor.setVisible(isForm);
         panelFormDataKind.setVisible(isForm);
-        lableTaxFormKind.setVisible(isForm);
-        lableDeclKind.setVisible(!isForm);
-        // "Тип налоговой формы": не заполняется
-        boxFormDataKind.setValue(null);
-        // "Вид налоговой формы": не заполняется
-        boxTaxFormKind.setValue(null);
+        labelTaxFormKind.setVisible(isForm);
+        labelDeclKind.setVisible(!isForm);
+
         // Таблица "Список назначенных налоговых форм на подразделение": не заполняется
-        receiverSourcesTable.setRowCount(0);
+        clearTable();
+        initTableHeader();
+
         // "Вид налога": "Налог на прибыль"
         boxTaxType.setValue(TaxType.INCOME, true);
-        //onTaxTypeChange();
-        // TODO  фокус на конкретное подразделение не установлен
+
         // Кнопки "Назначить" и "Отменить назначение" — неактивны
-        enableAnchor(assignButton, false);
-        enableAnchor(cancelButton, false);
+        enableAnchor(assignAnchor, false);
+        enableAnchor(cancelAnchor, false);
+
+        // TODO пока не работает дерево, потом убрать
+        onDepoChange();
     }
+
+    private void initTableHeader() {
+        if (grid.getColumnIndex(receiverSourcesKindColumn) > 0) {
+            grid.removeColumn(receiverSourcesKindColumn);
+        }
+        grid.removeColumn(receiverSourcesTypeColumn);
+        if (isForm) {
+            grid.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+            grid.setColumnWidth(receiverSourcesKindColumn, "150px");
+            grid.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+        } else {
+            grid.addColumn(receiverSourcesTypeColumn, "Вид декларации");
+            grid.setColumnWidth(receiverSourcesTypeColumn, "100%");
+        }
+    }
+
+
+    private void clearTable() {
+        grid.setRowCount(0);
+    }
+
+    // TODO пока не работает дерево, потом убрать
+    Long depoId = 2L;
 
     @Override
     public boolean isForm() {
         return isForm;
     }
 
-
     @Override
     public void setTaxFormKind(List<FormType> formTypes) {
+        Collections.sort(formTypes, new Comparator<FormType>() {
+            public int compare(FormType o1, FormType o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         boxTaxFormKind.setAcceptableValues(formTypes);
+        onTaxFormKindChange();
+    }
+
+    @Override
+    public void setTableData(List<FormTypeKind> departmentFormTypes) {
+        List<TableModel> types = new ArrayList<TableModel>();
+
+        Collections.sort(departmentFormTypes, new Comparator<FormTypeKind>() {
+            public int compare(FormTypeKind o1, FormTypeKind o2) {
+                Integer s11 = isForm ? o1.getKind().getId() : -1;
+                Integer s12 = isForm ? o2.getKind().getId() : -1;
+
+                if (s11.equals(s12)) {
+                    String s21 = o1.getName();
+                    String s22 = o2.getName();
+                    if (s21.equals(s22)) {
+                        return 0;
+                    }
+                    return s21.compareTo(s22);
+                }
+                return s11.compareTo(s12);
+            }
+        });
+
+        int index = 1;
+        for (FormTypeKind type : departmentFormTypes) {
+            TableModel model = new TableModel();
+            model.setChecked(false);
+            model.setIndex(index++);
+            model.setDepartmentFormType(type);
+            types.add(model);
+        }
+
+        grid.setRowData(types);
+
+        enableAnchor(cancelAnchor, false);
     }
 }

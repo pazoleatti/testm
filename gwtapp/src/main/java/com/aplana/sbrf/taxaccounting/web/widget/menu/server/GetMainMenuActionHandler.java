@@ -1,31 +1,29 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
-import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
-import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
+import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class GetMainMenuActionHandler extends
@@ -78,8 +76,7 @@ public class GetMainMenuActionHandler extends
                     || securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                 settingMenuItem.getSubMenu().add(new MenuItem("Настройка подразделений", NUMBER_SIGN + DepartmentConfigTokens.departamentConfig));
             }
-            settingMenuItem.getSubMenu().add(new MenuItem("Движение документов"));
-			settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
+			/*settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
 					.append(FormDataImportPresenter.FDIMPORT)
 					.append(";").append(FormDataImportPresenter.DEPARTMENT_ID).append("=4")
@@ -87,7 +84,7 @@ public class GetMainMenuActionHandler extends
 					.append(";").append(FormDataImportPresenter.FORM_DATA_RPERIOD_ID).append("=101")
 					.append(";").append(FormDataImportPresenter.FORM_DATA_KIND_ID).append("=1")
 					.toString()
-					));
+					));*/
 			menuItems.add(settingMenuItem);
 		}
 		if (securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONF)) {
