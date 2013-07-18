@@ -499,11 +499,11 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		//Fill performer
 		if(data.getPerformer()!=null){
 			r = sheet.getRow(sheet.getLastRowNum());
-			c = r.getCell(0);
+			c = r.createCell(0);
+            c.setCellValue("Исполнитель:");
+            c = r.createCell(1);
 			c.setCellValue(data.getPerformer().getName() + "/" + data.getPerformer().getPhone());
 		}
-
-		;
 
 	}
 	
