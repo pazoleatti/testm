@@ -30,7 +30,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
         DepartmentCombined departmentCombined = action.getDepartmentCombined();
         departmentParamDao.updateDepartmentParam(departmentCombined.getCommonParams());
-        // TODO Прочие параметры (Income и Transport)
+        departmentParamDao.updateDepartmentParamIncome(departmentCombined.getIncomeParams());
+        departmentParamDao.updateDepartmentParamTransport(departmentCombined.getTransportParams());
 
         return new SaveDepartmentCombinedResult();
     }

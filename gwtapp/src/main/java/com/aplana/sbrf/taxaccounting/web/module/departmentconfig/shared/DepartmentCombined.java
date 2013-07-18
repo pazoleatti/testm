@@ -259,20 +259,20 @@ public class DepartmentCombined implements Serializable {
         transportParams.setSignatorySurname(signatorySurname);
     }
 
-    public String getTransportSignatoryFirstname() {
-        return transportParams.getSignatoryFirstname();
+    public String getTransportSignatoryFirstName() {
+        return transportParams.getSignatoryFirstName();
     }
 
-    public void setTransportSignatoryFirstname(String signatoryFirstname) {
-        transportParams.setSignatoryFirstname(signatoryFirstname);
+    public void setTransportSignatoryFirstName(String signatoryFirstName) {
+        transportParams.setSignatoryFirstName(signatoryFirstName);
     }
 
-    public String getTransportSignatoryLastname() {
-        return transportParams.getSignatoryLasttname();
+    public String getTransportSignatoryLastName() {
+        return transportParams.getSignatoryLastName();
     }
 
-    public void setTransportSignatoryLastname(String signatoryLasttname) {
-        transportParams.setSignatoryLasttname(signatoryLasttname);
+    public void setTransportSignatoryLastName(String signatoryLastName) {
+        transportParams.setSignatoryLastName(signatoryLastName);
     }
 
     public String getTransportApproveDocName() {

@@ -53,4 +53,48 @@ public class DepartmentParamDaoTest {
 
         Assert.assertEquals(departmentParamDao.getDepartmentParam(DEPARTMENT_ID_FOR_TEST), param);
     }
+
+    @Test
+    public void updateDepartmentParamIncome()
+    {
+        DepartmentParamIncome param = new DepartmentParamIncome();
+        param.setDepartmentId(DEPARTMENT_ID_FOR_TEST);
+        param.setSignatoryId(7);
+        param.setSignatorySurname("T");
+        param.setSignatoryFirstName("T");
+        param.setSignatoryLastName("T");
+        param.setApproveDocName("T");
+        param.setApproveOrgName("T");
+        param.setTaxPlaceTypeCode("213");
+        param.setTaxRate(7d);
+        param.setExternalTaxSum(7L);
+        param.setSumDifference(7L);
+        param.setCorrectionSum(7L);
+        param.setAppVersion("T");
+        param.setFormatVersion("T");
+
+        departmentParamDao.updateDepartmentParamIncome(param);
+
+        Assert.assertEquals(departmentParamDao.getDepartmentParamIncome(DEPARTMENT_ID_FOR_TEST), param);
+    }
+
+    @Test
+    public void updateDepartmentParamTransport()
+    {
+        DepartmentParamTransport param = new DepartmentParamTransport();
+        param.setDepartmentId(DEPARTMENT_ID_FOR_TEST);
+        param.setSignatoryId(7);
+        param.setSignatorySurname("T");
+        param.setSignatoryFirstName("T");
+        param.setSignatoryLastName("T");
+        param.setApproveDocName("T");
+        param.setApproveOrgName("T");
+        param.setTaxPlaceTypeCode("213");
+        param.setAppVersion("T");
+        param.setFormatVersion("T");
+
+        departmentParamDao.updateDepartmentParamTransport(param);
+
+        Assert.assertEquals(departmentParamDao.getDepartmentParamTransport(DEPARTMENT_ID_FOR_TEST), param);
+    }
 }

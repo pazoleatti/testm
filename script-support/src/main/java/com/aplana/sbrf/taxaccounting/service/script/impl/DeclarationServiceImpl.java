@@ -131,7 +131,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		return formDataCollection;
 	}
 
-	@Override
+    @Override
+    public String getXmlData(long declarationDataId) {
+        return declarationDataDao.getXmlData(declarationDataId);
+    }
+
+    @Override
 	public void setScriptComponentContext(ScriptComponentContext context) {
 		this.context = context;
 	}

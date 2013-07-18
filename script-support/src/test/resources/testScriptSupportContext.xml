@@ -9,15 +9,17 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
 
-	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
-	</bean>
-	
-	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataScriptingService"/>
-	</bean>
-	
-    <import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>
+	<!--<bean class="org.mockito.Mockito" factory-method="mock">-->
+		<!--<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>-->
+	<!--</bean>-->
+	<!---->
+	<!--<bean class="org.mockito.Mockito" factory-method="mock">-->
+		<!--<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataScriptingService"/>-->
+	<!--</bean>-->
+
+
+    <!-- Sevices -->
+    <!--<import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>-->
 
     <!-- NamedJdbcTemplate, используемый в jdbc-Dao (в частности - в наследниках AbstractDao) -->
     <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
@@ -44,16 +46,17 @@
 
     <jdbc:initialize-database ignore-failures="DROPS">
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
-        <jdbc:script location="file:../src/main/resources/ddl/drop_income.sql" encoding="UTF-8"/>
-        <!-- <jdbc:script location="file:../src/main/resources/ddl/drop_transport.sql" encoding="UTF-8"/> -->
+        <!--<jdbc:script location="file:../src/main/resources/ddl/drop_income.sql" encoding="UTF-8"/>
+         <jdbc:script location="file:../src/main/resources/ddl/drop_transport.sql" encoding="UTF-8"/>-->
         <jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
-        <!-- <jdbc:script location="file:../src/main/resources/ddl/create_transport.sql" encoding="UTF-8"/> -->
-        <jdbc:script location="file:../src/main/resources/ddl/create_income.sql" encoding="UTF-8"/>
+        <!--<jdbc:script location="file:../src/main/resources/ddl/create_transport.sql" encoding="UTF-8"/>
+        <jdbc:script location="file:../src/main/resources/ddl/create_income.sql" encoding="UTF-8"/>-->
     </jdbc:initialize-database>
     
     <!-- JDBC-based DAOs -->
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
-    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.cell.impl"/>
+    <!--<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.cell.impl"/>-->
+
 
 </beans>
