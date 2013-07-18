@@ -51,6 +51,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     // Выбранное подразделение
     private Integer departmentId;
+    private String departmentName;
 
     @UiField
     TextArea commonName,
@@ -72,8 +73,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             incomeAppVersion,
             incomeFormatVersion,
             transportSignatorySurname,
-            transportSignatoryFirstname,
-            transportSignatoryLastname,
+            transportSignatoryFirstName,
+            transportSignatoryLastName,
             transportAppVersion,
             transportFormatVersion;
 
@@ -140,21 +141,29 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     return;
                 }
 
+                Integer departmentId = event.getItems().values().iterator().next();
+                String departmentName = event.getItems().keySet().iterator().next();
+
                 if (driver.isDirty() && isEditMode) {
-                    if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?"))
+                    if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?")) {
+                        // Вернуть старое подразделение
+                        departmentPicker.setSelectedItems(new HashMap<String, Integer>() {{
+                            put(DepartmentConfigView.this.departmentName, DepartmentConfigView.this.departmentId);
+                        }});
+
                         return;
+                    }
                 }
 
                 setEditMode(false);
 
                 // Проверка совпадения выбранного подразделения с текущим
-                Integer departmentId = event.getItems().values().iterator().next();
-
                 if (DepartmentConfigView.this.departmentId != null && DepartmentConfigView.this.departmentId.equals(departmentId)) {
                     return;
                 }
 
                 DepartmentConfigView.this.departmentId = departmentId;
+                DepartmentConfigView.this.departmentName = departmentName;
 
                 // Загрузка параметров
                 getUiHandlers().updateDepartment(departmentId);
@@ -182,6 +191,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
         getUiHandlers().save(driver.flush());
+        driver.edit(data);
     }
 
     @UiHandler("cancelButton")
@@ -237,7 +247,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
     @Override
-    public void setDepartments(List<Department> departments,  Set<Integer> availableDepartments) {
+    public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
         departmentPicker.setTreeValues(departments, availableDepartments);
     }
 
@@ -250,6 +260,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             }});
         }
         this.departmentId = department != null ? department.getId() : null;
+        this.departmentName = department != null ? department.getName() : null;
     }
 
     @Override

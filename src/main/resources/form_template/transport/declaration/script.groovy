@@ -103,8 +103,8 @@ def bildXml(){
                 Подписант(ПрПодп: departmentParamTransport.signatoryId){
                     ФИО(
                             "Фамилия": departmentParamTransport.signatorySurname,
-                            "Имя": departmentParamTransport.signatoryFirstname,
-                            "Отчество": departmentParamTransport.signatoryLasttname
+                            "Имя": departmentParamTransport.getSignatoryFirstName,
+                            "Отчество": departmentParamTransport.getSignatoryLastName
                     )
                     // СвПред - Сведения о представителе налогоплательщика
                     if (departmentParam.name == 2)

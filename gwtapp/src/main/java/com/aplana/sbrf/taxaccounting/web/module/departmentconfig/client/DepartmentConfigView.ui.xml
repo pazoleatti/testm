@@ -173,11 +173,11 @@
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Имя подписанта" width="250px"/>
-                                    <g:TextBox ui:field="transportSignatoryFirstname" width="350px"/>
+                                    <g:TextBox ui:field="transportSignatoryFirstName" width="350px"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Отчество подписанта" width="250px"/>
-                                    <g:TextBox ui:field="transportSignatoryLastname" width="350px"/>
+                                    <g:TextBox ui:field="transportSignatoryLastName" width="350px"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Наименование документа, подтверждающего полномочия представителя"

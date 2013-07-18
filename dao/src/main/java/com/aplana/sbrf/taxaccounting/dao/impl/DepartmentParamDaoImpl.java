@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,9 +109,9 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 							departmentParamTransport.setDepartmentId(rs.getInt("DEPARTMENT_ID"));
 							departmentParamTransport.setApproveDocName(rs.getString("APPROVE_DOC_NAME"));
 							departmentParamTransport.setApproveOrgName(rs.getString("APPROVE_ORG_NAME"));
-							departmentParamTransport.setSignatoryFirstname(rs.getString("SIGNATORY_FIRSTNAME"));
+							departmentParamTransport.setSignatoryFirstName(rs.getString("SIGNATORY_FIRSTNAME"));
 							departmentParamTransport.setSignatoryId(rs.getInt("SIGNATORY_ID"));
-							departmentParamTransport.setSignatoryLasttname(rs.getString("SIGNATORY_LASTNAME"));
+							departmentParamTransport.setSignatoryLastName(rs.getString("SIGNATORY_LASTNAME"));
 							departmentParamTransport.setSignatorySurname(rs.getString("SIGNATORY_SURNAME"));
 							departmentParamTransport.setTaxPlaceTypeCode(rs.getString("TAX_PLACE_TYPE_CODE"));
 							departmentParamTransport.setAppVersion(rs.getString("APP_VERSION"));
@@ -164,11 +163,67 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 
     @Override
     public void updateDepartmentParamIncome(DepartmentParamIncome param) {
-        // TODO Левыкин. Сохранение параметров для налога на доход.
+        int cnt = getJdbcTemplate().update("UPDATE DEPARTMENT_PARAM_INCOME SET " +
+                "SIGNATORY_ID = ?, " +
+                "SIGNATORY_SURNAME = ?, " +
+                "SIGNATORY_FIRSTNAME = ?, " +
+                "SIGNATORY_LASTNAME = ?, " +
+                "APPROVE_DOC_NAME = ?, " +
+                "APPROVE_ORG_NAME = ?, " +
+                "TAX_PLACE_TYPE_CODE = ?, " +
+                "TAX_RATE = ?, " +
+                "EXTERNAL_TAX_SUM = ?, " +
+                "SUM_DIFFERENCE = ?, " +
+                "CORRECTION_SUM = ?, " +
+                "APP_VERSION = ?, " +
+                "FORMAT_VERSION = ? " +
+                "WHERE DEPARTMENT_ID = ?",
+                param.getSignatoryId(),
+                param.getSignatorySurname(),
+                param.getSignatoryFirstName(),
+                param.getSignatoryLastName(),
+                param.getApproveDocName(),
+                param.getApproveOrgName(),
+                param.getTaxPlaceTypeCode(),
+                param.getTaxRate(),
+                param.getExternalTaxSum(),
+                param.getSumDifference(),
+                param.getCorrectionSum(),
+                param.getAppVersion(),
+                param.getFormatVersion(),
+                param.getDepartmentId());
+
+        if (cnt != 1) {
+            throw new DaoException("Не удалось сохранить изменения настроек подразделения с id = %d", param.getDepartmentId());
+        }
     }
 
     @Override
     public void updateDepartmentParamTransport(DepartmentParamTransport param) {
-        // TODO Левыкин. Сохранение параметров для транспортного налога.
+        int cnt = getJdbcTemplate().update("UPDATE DEPARTMENT_PARAM_TRANSPORT SET " +
+                "SIGNATORY_ID = ?, " +
+                "SIGNATORY_SURNAME = ?, " +
+                "SIGNATORY_FIRSTNAME = ?, " +
+                "SIGNATORY_LASTNAME = ?, " +
+                "APPROVE_DOC_NAME = ?, " +
+                "APPROVE_ORG_NAME = ?, " +
+                "TAX_PLACE_TYPE_CODE = ?, " +
+                "APP_VERSION = ?, " +
+                "FORMAT_VERSION = ? " +
+                "WHERE DEPARTMENT_ID = ?",
+                param.getSignatoryId(),
+                param.getSignatorySurname(),
+                param.getSignatoryFirstName(),
+                param.getSignatoryLastName(),
+                param.getApproveDocName(),
+                param.getApproveOrgName(),
+                param.getTaxPlaceTypeCode(),
+                param.getAppVersion(),
+                param.getFormatVersion(),
+                param.getDepartmentId());
+
+        if (cnt != 1) {
+            throw new DaoException("Не удалось сохранить изменения настроек подразделения с id = %d", param.getDepartmentId());
+        }
     }
 }
