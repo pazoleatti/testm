@@ -24,7 +24,7 @@ import java.util.HashMap;
  * @author auldanov
  */
 @Transactional(readOnly = true)
-@Component("FormDataService")
+@Component("formDataService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FormDataServiceImpl implements FormDataService, ScriptComponentContextHolder, ApplicationContextAware {
 	
