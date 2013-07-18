@@ -6,6 +6,7 @@ public class FormTypeKind implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private Long formTypeId;
     private FormDataKind kind;
     private String name;
 
@@ -52,5 +53,13 @@ public class FormTypeKind implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getFormTypeId() {
+        return formTypeId;
+    }
+
+    public void setFormTypeId(Long formTypeId) {
+        this.formTypeId = formTypeId;
     }
 }

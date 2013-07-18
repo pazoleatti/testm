@@ -96,16 +96,21 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @UiHandler("assignAnchor")
     void onClickedAssign(ClickEvent event) {
-        // TODO получить depoId
-        if (depoId != null && boxFormDataKind.getValue() != null && boxTaxFormKind.getValue() != null) {
-            // TODO
+        if (depoId != null && (boxFormDataKind.getValue() != null || !isForm) && boxTaxFormKind.getValue() != null) {
+            getUiHandlers().save(null);
         }
     }
 
     @UiHandler("cancelAnchor")
     void onClickedCancel(ClickEvent event) {
         if (isCanCancel()) {
-            // TODO
+            Set<Long> set = new HashSet<Long>();
+            for (TableModel source : grid.getVisibleItems()) {
+                if (source.isChecked()) {
+                    set.add(source.getDepartmentFormType().getId());
+                }
+            }
+            getUiHandlers().save(set);
         }
     }
 
@@ -194,22 +199,21 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     // Изменение выбранного значения "Вид налоговой формы"
     private void onTaxFormKindChange() {
-        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem());
+        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem() && (boxFormDataKind.hasSelectedItem() || !isForm));
     }
 
     // Перезаполнение комбика "Вид налоговой формы"/"Вид декларации"
     private void reloadTaxFormKind() {
-        getUiHandlers().getTaxFormKind(boxTaxType.getValue());
+        getUiHandlers().getTaxFormKind();
     }
 
-    // Перезаполнение таблицы 1,2
+    // Перезаполнение таблицы
     private void reloadGrid() {
-        // TODO фильтруем по выбранногму подразделению
         if (depoId == null) {
             clearTable();
             return;
         }
-        getUiHandlers().getTableData(depoId, boxTaxType.getValue().getCode());
+        getUiHandlers().getTableData();
     }
 
     private void initBoxes() {
@@ -349,12 +353,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     // TODO пока не работает дерево, потом убрать
-    Long depoId = 2L;
+    private Long depoId = 2L;
 
-    @Override
-    public boolean isForm() {
-        return isForm;
-    }
 
     @Override
     public void setTaxFormKind(List<FormType> formTypes) {
@@ -400,5 +400,31 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         grid.setRowData(types);
 
         enableAnchor(cancelAnchor, false);
+    }
+
+
+    @Override
+    public boolean isForm() {
+        return isForm;
+    }
+
+    @Override
+    public Long departmentId() {
+        return depoId;
+    }
+
+    @Override
+    public Integer getTypeId() {
+        return isForm && boxFormDataKind.hasSelectedItem() ? boxFormDataKind.getValue().getId() : null;
+    }
+
+    @Override
+    public Integer getFormId() {
+        return boxTaxFormKind.hasSelectedItem() ? boxTaxFormKind.getValue().getId(): null;
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return boxTaxType.getValue();
     }
 }

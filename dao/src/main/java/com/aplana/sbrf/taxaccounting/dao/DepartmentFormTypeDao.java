@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
@@ -18,14 +19,19 @@ public interface DepartmentFormTypeDao {
 	List<DepartmentFormType> get(int departmentId);
 
 	/**
-	 * Обновляет/добавляет список назначенных подразделению форм (с учётом вида и типа)
-	 * @param departmentId
-	 *            идентификатор подразделения формируемой налоговой формы
-	 *            назначения
-	 * @param departmentFormTypes
-	 *            новые данные для обновления/сохранения
-	 */
-	void save(int departmentId, List<DepartmentFormType> departmentFormTypes);
+	 * Добавляет/удаляет налоговые формы, назначенные подразделению
+     *
+     * @param deleteIds ids на удаление
+     * @param departmentId
+     * @param typeId
+     * @param formId
+     */
+    void saveForm(Set<Long> deleteIds, Long departmentId, int typeId, int formId);
+
+    /**
+     * Добавляет/удаляет декларации, назначенные подразделению
+     */
+    void saveDecl(Set<Long> deleteIds, Long departmentId, int formId);
 
 	/**
 	 * Возвращает информацию он назначенных подразделению формах по заданному виду налога

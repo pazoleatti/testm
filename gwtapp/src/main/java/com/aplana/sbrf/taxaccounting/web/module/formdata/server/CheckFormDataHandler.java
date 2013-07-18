@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ public class CheckFormDataHandler extends
 	@Autowired
 	private SecurityService securityService;
 
+	@Autowired
+	private DataRowService dataRowService;
+
 	public CheckFormDataHandler() {
 		super(CheckFormDataAction.class);
 	}
@@ -36,12 +41,16 @@ public class CheckFormDataHandler extends
 	public FormDataResult execute(CheckFormDataAction action,
 			ExecutionContext context) throws ActionException {
 
-			Logger logger = new Logger();
-			FormData formData = action.getFormData();
-			formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
-			FormDataResult result = new FormDataResult();
-			result.setLogEntries(logger.getEntries());
-			return result;
+		Logger logger = new Logger();
+		FormData formData = action.getFormData();
+		TAUserInfo userInfo = securityService.currentUserInfo();
+		if (!action.getModifiedRows().isEmpty()) {
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+		}
+		formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
+		FormDataResult result = new FormDataResult();
+		result.setLogEntries(logger.getEntries());
+		return result;
 	}
 
 	@Override

@@ -91,18 +91,28 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public void executeTestScript(FormTemplate formTemplate) {
+		// Создаем тестового пользователя
+		TAUser user = new TAUser();
+		user.setId(1);
+		user.setName("Василий Пупкин");
+		user.setActive(true);
+		user.setDepartmentId(1);
+		user.setLogin("vpupkin");
+		user.setEmail("vpupkin@aplana.com");
+
         //Формируем контекст выполнения скрипта(userInfo)
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser("controlUnp"));
-        userInfo.setIp("192.168.0.1");
+		userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
 
+		// Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
         FormData formData = new FormData(formTemplate);
         formData.setState(WorkflowState.CREATED);
         formData.setDepartmentId(userInfo.getUser().getDepartmentId());
         formData.setKind(FormDataKind.PRIMARY);
         formData.setReportPeriodId(1);
 
-        /*formTemplateDao.save(formTemplate);
+        /*formTemplateDao.saveForm(formTemplate);
         logger.info("formTemplate is saved with body-text for testing");*/
         Logger log = new Logger();
         scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST, log, null);
