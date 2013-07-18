@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
@@ -158,4 +159,9 @@ public interface DepartmentFormTypeService {
      *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
      */
     List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
+
+    /**
+     *  Добавляет/удаляет налоговые формы/декларации, назначенные подразделению
+     */
+    List<FormTypeKind> save(Set<Long> ids, Long departmentId, int typeId, int formId, char taxType, boolean isForm);
 }

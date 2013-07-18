@@ -112,7 +112,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         formData.setKind(FormDataKind.PRIMARY);
         formData.setReportPeriodId(1);
 
-        /*formTemplateDao.save(formTemplate);
+        /*formTemplateDao.saveForm(formTemplate);
         logger.info("formTemplate is saved with body-text for testing");*/
         Logger log = new Logger();
         scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST, log, null);

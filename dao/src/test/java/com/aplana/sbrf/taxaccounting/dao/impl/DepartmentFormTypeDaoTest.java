@@ -82,7 +82,7 @@ public class DepartmentFormTypeDaoTest {
 
 		links.add(newLink);
 
-		departmentFormTypeDao.save(1, links);
+		// departmentFormTypeDao.saveForm(1, links);
 
 		link = departmentFormTypeDao.get(1).get(1);
 		newLink = departmentFormTypeDao.get(1).get(0);
