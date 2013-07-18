@@ -24,15 +24,15 @@ public interface TAUserDao {
 	 * @return userId
 	 * @throws DaoException если пользователя с таким логином не существует
 	 */	
-	int getUserIdbyLogin(String login);
+	int getUserIdByLogin(String login);
 	
 	/**
-	 * Добавляет нового пользователя
+	 * Создает нового пользователя
 	 */
 	int createUser(TAUser user);
 	
 	/**
-	 * Активирует/деактивирует существующего пользователя
+	 * Активирует/блокирует существующего пользователя
 	 * @param {@link TAUser} user идентификатор пользователя
 	 */
 	void setUserIsActive(int userId, boolean isActive);
@@ -45,7 +45,7 @@ public interface TAUserDao {
 	void updateUser(TAUser user);
 	
 	/**
-	 * Возвращает полный список пользователей, включая неактивный.
+	 * Возвращает полный список пользователей, включая заблокированных.
 	 * @return {@link List<TAUser>}
 	 */
 	List<Integer> getUserIds();

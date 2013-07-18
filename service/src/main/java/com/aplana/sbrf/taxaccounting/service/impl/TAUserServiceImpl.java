@@ -30,7 +30,7 @@ public class TAUserServiceImpl implements TAUserService {
 	@Override
 	public TAUser getUser(String login) {
 		try {
-			int userId = userDao.getUserIdbyLogin(login);
+			int userId = userDao.getUserIdByLogin(login);
 			return userDao.getUser(userId);
 		} catch (DaoException e) {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_004, "Ошибка при получении пользователя по логину." + e.toString());
@@ -46,7 +46,7 @@ public class TAUserServiceImpl implements TAUserService {
 	@Override
 	public void setUserIsActive(String login, boolean isActive) {
 		try {
-			int userId = userDao.getUserIdbyLogin(login);
+			int userId = userDao.getUserIdByLogin(login);
 			userDao.setUserIsActive(userId, isActive);
 		} catch (DaoException e) {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_004,
@@ -57,7 +57,7 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Override
 	public void updateUser(TAUser user) {
-		if(userDao.getUserIdbyLogin(user.getLogin()) != 0)
+		if(userDao.getUserIdByLogin(user.getLogin()) != 0)
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_005,
 					"Пользователь с таким логином уже существует.");
 		for(TARole role : user.getRoles()){

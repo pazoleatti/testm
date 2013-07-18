@@ -137,4 +137,39 @@ public class DepartmentParamIncome implements Serializable {
 	public void setFormatVersion(String formatVersion) {
 		this.formatVersion = formatVersion;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DepartmentParamIncome that = (DepartmentParamIncome) o;
+
+        if (departmentId != that.departmentId) return false;
+        if (signatoryId != that.signatoryId) return false;
+        if (appVersion != null ? !appVersion.equals(that.appVersion) : that.appVersion != null) return false;
+        if (approveDocName != null ? !approveDocName.equals(that.approveDocName) : that.approveDocName != null)
+            return false;
+        if (approveOrgName != null ? !approveOrgName.equals(that.approveOrgName) : that.approveOrgName != null)
+            return false;
+        if (correctionSum != null ? !correctionSum.equals(that.correctionSum) : that.correctionSum != null)
+            return false;
+        if (externalTaxSum != null ? !externalTaxSum.equals(that.externalTaxSum) : that.externalTaxSum != null)
+            return false;
+        if (formatVersion != null ? !formatVersion.equals(that.formatVersion) : that.formatVersion != null)
+            return false;
+        if (signatoryFirstName != null ? !signatoryFirstName.equals(that.signatoryFirstName) : that.signatoryFirstName != null)
+            return false;
+        if (signatoryLastName != null ? !signatoryLastName.equals(that.signatoryLastName) : that.signatoryLastName != null)
+            return false;
+        if (signatorySurname != null ? !signatorySurname.equals(that.signatorySurname) : that.signatorySurname != null)
+            return false;
+        if (sumDifference != null ? !sumDifference.equals(that.sumDifference) : that.sumDifference != null)
+            return false;
+        if (taxPlaceTypeCode != null ? !taxPlaceTypeCode.equals(that.taxPlaceTypeCode) : that.taxPlaceTypeCode != null)
+            return false;
+        if (taxRate != null ? !taxRate.equals(that.taxRate) : that.taxRate != null) return false;
+
+        return true;
+    }
 }

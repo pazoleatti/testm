@@ -1,5 +1,5 @@
 /**
- * Формирование XML для декларации налога на прибыль уровня обособленного подразделения (declarationOP.groovy).
+ * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
  * @version 4
  *
@@ -7,21 +7,21 @@
  */
 
 switch (formDataEvent) {
-// создать / обновить
+    // создать / обновить
     case FormDataEvent.CREATE :
         break
-// проверить
+    // проверить
     case FormDataEvent.CHECK :
         return
         break
-// принять из создана
+    // принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         return
         break
-// после принять из создана
+    // после принять из создана
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED :
         break
-// из принять в создана
+    // из принять в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         return
         break
@@ -262,8 +262,8 @@ xmlbuilder.Файл(
 
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
                     def rowForNalPu = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
-                    tmpValue2 = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
-                    def nalPu = tmpValue2
+                    tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
+                    nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
                     // 0..1
                     СубБдж(
                             КБК : kbk2,
@@ -299,16 +299,15 @@ xmlbuilder.Файл(
                                 АвПлат3 : avPlat3)
 
                         if (!isTaxPeriod) {
-                            def appl5List02Row120
                             // при формировании декларации банка надо брать appl5List02Row120 относящегося к ЦА
                             // (как определять пока не ясно, толи по id, толи по id сбербанка,
-                            // толи по КПП = 775001001), при формировании декларации подразделения надо брать
-                            // строку appl5List02Row120 относящегося к этому подразделению
+                            // толи по КПП = 775001001), при формировании декларации подразделения
+                            // надо брать строку appl5List02Row120 относящегося к этому подразделению
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat3 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat3
-                            avPlat1 = avPlat3 + getTail(appl5List02Row120, 3)
+                            avPlat1 = (long) appl5List02Row120 / 3
+                            avPlat2 = avPlat1
+                            avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
                         }
                         // 0..1
                         СубБдж(
@@ -405,13 +404,6 @@ def getLong(def value) {
 }
 
 /**
- * Получить остаток (целое и дробное) от деления вдух чисел (например 16,5 / 3 = 1,5).
- */
-def getTail(def value, def div) {
-    return getLong(value - (long) value + (long) value % div)
-}
-
-/**
  * Получить значение или ноль, если значения нет.
  */
 def getValue(def value) {
@@ -482,7 +474,7 @@ def getSimpleConsumptionSumRows8(def form, def codes) {
 }
 
 /**
- * Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 9 - графа 6).
+ * Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6).
  */
 def getCalculatedSimpleConsumption(def formSimple, def codes) {
     def result = 0

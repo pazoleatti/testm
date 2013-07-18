@@ -282,10 +282,12 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		RecalculateFormDataAction action = new RecalculateFormDataAction();
 		action.setFormData(formData);
+		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
+						modifiedRows.clear();
 						processFormDataResult(result);
 					}
 
@@ -297,10 +299,12 @@ public class FormDataPresenter extends
 		LogCleanEvent.fire(this);
 		CheckFormDataAction checkAction = new CheckFormDataAction();
 		checkAction.setFormData(formData);
+		checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(checkAction, CallbackUtils
 				.defaultCallbackNoModalError(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
+						modifiedRows.clear();
 						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
 						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
 					}

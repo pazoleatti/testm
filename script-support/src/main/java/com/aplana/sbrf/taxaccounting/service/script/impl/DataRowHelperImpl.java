@@ -1,13 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -16,6 +8,13 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -30,6 +29,8 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextHolder{
 	
 	private FormData fd;
+
+    private List<DataRow<Cell>> dataRows;
 	
 	private ScriptComponentContext context;
 	
@@ -125,5 +126,28 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 		dataRowDao.saveRows(fd, dataRows);
 		
 	}
+
+    @Override
+    public DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
+        if (rowAlias == null) {
+            throw new NullPointerException("Row alias cannot be null");
+        }
+        for (DataRow<Cell> row : dataRows) {
+            if (rowAlias.equals(row.getAlias())) {
+                return row;
+            }
+        }
+        throw new IllegalArgumentException("Wrong row alias requested: "
+                + rowAlias);
+    }
+
+    @Override
+    public List<DataRow<Cell>> getAllCached() {
+        if (dataRows == null){
+            dataRows = getAll();
+        }
+
+        return dataRows;
+    }
 
 }
