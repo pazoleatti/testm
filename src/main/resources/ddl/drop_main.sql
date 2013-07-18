@@ -58,6 +58,7 @@ drop table report_period;
 drop table department;
 drop sequence seq_report_period;
 drop table tax_period;
+drop sequence seq_tax_period
 drop table dict_okato;
 drop table transport_tax_rate;
 drop table transport_type_code;

@@ -216,6 +216,8 @@ comment on column tax_period.id is 'Идентификатор (первичны
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.start_date is 'Дата начала (включительно)';
 comment on column tax_period.end_date is 'Дата окончания (включительно)';
+
+create sequence seq_tax_period start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_template (
   id number(9) not null,
