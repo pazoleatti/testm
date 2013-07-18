@@ -37,6 +37,11 @@ public interface DeclarationService {
 	 * @return список НФ-источников в статусе "Принята"
 	 */
 	FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData);
-	
-	
+
+    /**
+     * Получить данные декларации в формате законодателя (XML)
+     * @param declarationDataId идентификатор декларации
+     * @return данные декларации в формате законодателя
+     */
+    String getXmlData(long declarationDataId);
 }
