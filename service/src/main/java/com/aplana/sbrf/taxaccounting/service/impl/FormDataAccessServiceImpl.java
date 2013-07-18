@@ -418,6 +418,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		// Для того, чтобы иметь возможность изменить статус, у пользователя должны быть права
 		// на чтение соответствующей карточки данных и отчетный период должен быть активным
 		if (!canRead(formDataAccess, formData) || !formDataReportPeriod.isActive()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Report period is closed");
+			}
 			return result;
 		}
 		WorkflowState state = formData.getState();

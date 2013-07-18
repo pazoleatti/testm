@@ -79,7 +79,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
-	public int getUserIdbyLogin(String login) {
+	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForInt("select id from sec_user where login = ?", login);
 		} catch (EmptyResultDataAccessException e) {
