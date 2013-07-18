@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 	private RefBookDao refBookDao;
 
 	@Autowired
-	private RefBookDataProvider refBookDataProvider;
+	private ApplicationContext applicationContext;
 
 	@Override
 	public RefBook get(Long refBookId) {
@@ -36,6 +37,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	@Override
 	public RefBookDataProvider getDataProvider(long refBookId) {
+		RefBookDataProvider refBookDataProvider = (RefBookDataProvider) applicationContext.getBean(RefBookDataProvider.class);
+		refBookDataProvider.setRefBookId(refBookId);
 		//здесь добавлять условия для учета нестандартных справочников
 		return refBookDataProvider;
 	}
