@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Dmitriy Levykin
@@ -14,8 +15,11 @@ public class GetOpenDataResult implements Result {
     // true - контролера УНП, false - контролер, null - не контролер
     private Boolean isControlUNP;
 
-    // Список подразделений, доступных пользователю
+    // Список всех подразделений
     private List<Department> departments;
+
+    // Список id подразделений, доступных пользователю
+    private Set<Integer> availableDepartments;
 
     // Подразделение текущего пользователя
     private Department department;
@@ -42,5 +46,13 @@ public class GetOpenDataResult implements Result {
 
     public void setControlUNP(Boolean controlUNP) {
         isControlUNP = controlUNP;
+    }
+
+    public Set<Integer> getAvailableDepartments() {
+        return availableDepartments;
+    }
+
+    public void setAvailableDepartments(Set<Integer> availableDepartments) {
+        this.availableDepartments = availableDepartments;
     }
 }

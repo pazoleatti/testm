@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -137,4 +134,28 @@ public interface DepartmentFormTypeService {
 	 *			  идентификаторы деклараций-источников в виде списка
 	 */
 	void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
+
+    /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
+     *
+     * @param departmentId
+     *            идентификатор подразделения
+     * @param taxType
+     *            идентификатор вида налога
+     * @return список назначенных налоговых форм для выбранного налога и подразделения
+     *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
+     */
+    List<FormTypeKind> getFormAssigned(Long departmentId, char taxType);
+
+    /**
+     * Возвращает список назначенных деклараций для выбранного налога и подразделения
+     *
+     * @param departmentId
+     *            идентификатор подразделения
+     * @param taxType
+     *            идентификатор вида налога
+     * @return список назначенных деклараций для выбранного налога и подразделения
+     *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
+     */
+    List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
 }

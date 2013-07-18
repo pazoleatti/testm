@@ -12,7 +12,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -84,25 +83,14 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 			}
 		}
 
-		try {
-			ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
-			logger.setMessageDecorator(d);
+
+		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
+		logger.setMessageDecorator(d);
 			
-			executeScript(b, script, logger, d);
+		executeScript(b, script, logger, d);
 			
-			logger.setMessageDecorator(null);
-		} finally {
-			b.remove("logger");
-			b.remove("formData");
-			b.remove("user");
-			b.remove("userDepartment");
-			b.remove("formDataDepartment");
-			if (additionalParameters != null) {
-				for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
-					b.remove(entry.getKey());
-				}
-			}
-		}
+		logger.setMessageDecorator(null);
+
 	}
 
 	/**

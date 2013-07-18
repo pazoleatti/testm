@@ -7,8 +7,8 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * Хэндлеры для формы "Назначение форм и деклараций"
  *
  * @author Stanislav Yasinskiy
- *
  */
 public interface TaxFormNominationUiHandlers extends UiHandlers {
-    void reloadTaxFormKind(TaxType taxType);
+    void getTaxFormKind(TaxType taxType);
+    void getTableData(Long depoId, char taxTypeCode);
 }

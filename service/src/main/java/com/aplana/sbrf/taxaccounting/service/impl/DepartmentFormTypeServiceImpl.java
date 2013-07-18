@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,4 +66,14 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
 	public void saveDeclarationSources(Long declarationTypeId, List<Long> sourceDepartmentFormTypeIds) {
 		departmentFormTypeDao.saveDeclarationSources(declarationTypeId, sourceDepartmentFormTypeIds);
 	}
+
+    @Override
+    public List<FormTypeKind> getFormAssigned(Long departmentId, char taxType) {
+        return departmentFormTypeDao.getFormAssigned(departmentId, taxType);
+    }
+
+    @Override
+    public List<FormTypeKind> getDeclarationAssigned(Long departmentId,  char taxType) {
+        return departmentFormTypeDao.getDeclarationAssigned(departmentId, taxType);
+    }
 }

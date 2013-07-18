@@ -46,7 +46,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void setScriptComponentContext(ScriptComponentContext context) {
-		this.setScriptComponentContext(context);
+		this.context = context;
 	}
 
 	@Override

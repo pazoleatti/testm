@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
 import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,4 +128,47 @@ public class DepartmentParamDaoImpl extends AbstractDao implements DepartmentPar
 		}
 		
 	}
+
+    @Override
+    public void updateDepartmentParam(DepartmentParam param) {
+        int cnt = getJdbcTemplate().update("UPDATE DEPARTMENT_PARAM SET " +
+                "DICT_REGION_ID = ?, " +
+                "OKATO = ?, " +
+                "INN = ?, " +
+                "KPP = ?, " +
+                "TAX_ORGAN_CODE = ?, " +
+                "OKVED_CODE = ?, " +
+                "PHONE = ?, " +
+                "REORG_FORM_CODE = ?, " +
+                "REORG_INN = ?, " +
+                "REORG_KPP = ?, " +
+                "NAME = ? " +
+                "WHERE DEPARTMENT_ID = ?",
+                param.getDictRegionId(),
+                param.getOkato(),
+                param.getInn(),
+                param.getKpp(),
+                param.getTaxOrganCode(),
+                param.getOkvedCode(),
+                param.getPhone(),
+                param.getReorgFormCode(),
+                param.getReorgInn(),
+                param.getReorgKpp(),
+                param.getName(),
+                param.getDepartmentId());
+
+        if (cnt != 1) {
+            throw new DaoException("Не удалось сохранить изменения настроек подразделения с id = %d", param.getDepartmentId());
+        }
+    }
+
+    @Override
+    public void updateDepartmentParamIncome(DepartmentParamIncome param) {
+        // TODO Левыкин. Сохранение параметров для налога на доход.
+    }
+
+    @Override
+    public void updateDepartmentParamTransport(DepartmentParamTransport param) {
+        // TODO Левыкин. Сохранение параметров для транспортного налога.
+    }
 }

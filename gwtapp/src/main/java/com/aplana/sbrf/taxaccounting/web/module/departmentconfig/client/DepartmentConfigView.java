@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentCombined;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.SelectDepartmentsEventHandler;
@@ -17,11 +17,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * View для формы настроек подразделений
@@ -42,11 +46,18 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     private final MyDriver driver = GWT.create(MyDriver.class);
 
-    // Выбранный тип налога
-    private int taxTypeIndex = 1;
+    // Параметры выбранного подразделения
+    private DepartmentCombined data;
+
+    // Выбранное подразделение
+    private Integer departmentId;
 
     @UiField
-    TextArea commonName;
+    TextArea commonName,
+            incomeApproveDocName,
+            incomeApproveOrgName,
+            transportApproveDocName,
+            transportApproveOrgName;
 
     @UiField
     TextBox commonPhone,
@@ -54,27 +65,55 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             commonKpp,
             commonTaxOrganCode,
             commonReorgInn,
-            commonReorgKpp;
+            commonReorgKpp,
+            incomeSignatorySurname,
+            incomeSignatoryFirstName,
+            incomeSignatoryLastName,
+            incomeAppVersion,
+            incomeFormatVersion,
+            transportSignatorySurname,
+            transportSignatoryFirstname,
+            transportSignatoryLastname,
+            transportAppVersion,
+            transportFormatVersion;
 
     @UiField
-    @Editor.Ignore
+    DoubleBox incomeTaxRate;
+
+    @UiField
+    LongBox incomeExternalTaxSum,
+            incomeSumDifference;
+
+    @UiField
+    @Ignore
+    VerticalPanel taxTypeIPanel,
+            taxTypeTPanel;
+
+    @UiField
+    @Ignore
+    HorizontalPanel incomeExtTaxSumPanel,
+            incomeSumDiffPanel,
+            incomePayPanel;
+
+    @UiField
+    @Ignore
     Button saveButton,
-           cancelButton;
+            cancelButton;
 
     @UiField
-    @Editor.Ignore
+    @Ignore
     ButtonLink editButton;
 
     @UiField
-    @Editor.Ignore
+    @Ignore
     FormPanel formPanel;
 
     @UiField
-    @Editor.Ignore
+    @Ignore
     NewDepartmentPicker departmentPicker;
 
     @UiField
-    @Editor.Ignore
+    @Ignore
     ListBox taxType;
 
     @Inject
@@ -101,41 +140,60 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     return;
                 }
 
-                getUiHandlers().updateDepartment(event.getItems().values().iterator().next());
+                if (driver.isDirty() && isEditMode) {
+                    if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?"))
+                        return;
+                }
+
+                setEditMode(false);
+
+                // Проверка совпадения выбранного подразделения с текущим
+                Integer departmentId = event.getItems().values().iterator().next();
+
+                if (DepartmentConfigView.this.departmentId != null && DepartmentConfigView.this.departmentId.equals(departmentId)) {
+                    return;
+                }
+
+                DepartmentConfigView.this.departmentId = departmentId;
+
+                // Загрузка параметров
+                getUiHandlers().updateDepartment(departmentId);
             }
         });
 
         // Вид налога
         taxType.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event) {
-                int index = taxType.getSelectedIndex();
-                if (getUiHandlers().onTaxTypeChange(index == -1 ? null : TaxType.fromCode(taxType.getValue(index).charAt(0)))) {
-                    // Смена типа
-                    taxTypeIndex = index;
-                } else {
-                    // Откат смены
-                    event.stopPropagation();
-                    taxType.setSelectedIndex(taxTypeIndex);
-                }
+                // Переключение панелей
+                TaxType type = TaxType.fromCode(taxType.getValue(taxType.getSelectedIndex()).charAt(0));
+                taxTypeIPanel.setVisible(type == TaxType.INCOME);
+                taxTypeTPanel.setVisible(type == TaxType.TRANSPORT);
             }
         });
     }
 
     @Override
     public void updateVisibility(boolean isUnp) {
-        // TODO обновление видимости полей
+        incomeExtTaxSumPanel.setVisible(isUnp);
+        incomeSumDiffPanel.setVisible(isUnp);
+        incomePayPanel.setVisible(!isUnp);
     }
 
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
-        // driver.flush();
-        // TODO Сохранение
+        getUiHandlers().save(driver.flush());
     }
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        // TODO Отмена и переход в режим чтения
+
+        if (driver.isDirty() && isEditMode) {
+            if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?"))
+                return;
+        }
+
         setEditMode(false);
+        driver.edit(data);
     }
 
     @UiHandler("editButton")
@@ -179,12 +237,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
     @Override
-    public void setDepartments(List<Department> departments) {
-        Set<Integer> availableDepartments = new HashSet<Integer>(departments.size());
-        for (Department department : departments) {
-            // TODO убрать недоступные
-            availableDepartments.add(department.getId());
-        }
+    public void setDepartments(List<Department> departments,  Set<Integer> availableDepartments) {
         departmentPicker.setTreeValues(departments, availableDepartments);
     }
 
@@ -196,11 +249,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 getUiHandlers().updateDepartment(department.getId());
             }});
         }
+        this.departmentId = department != null ? department.getId() : null;
     }
 
     @Override
     public void setDepartmentCombined(DepartmentCombined combinedDepartmentParam) {
-        driver.edit(combinedDepartmentParam);
+        data = combinedDepartmentParam;
+        driver.edit(data);
     }
 
     @Override
@@ -211,15 +266,5 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 taxType.addItem(type.getName(), String.valueOf(type.getCode()));
             }
         }
-    }
-
-    @Override
-    public boolean isEditMode() {
-        return isEditMode;
-    }
-
-    @Override
-    public boolean isDirty() {
-        return driver.isDirty();
     }
 }

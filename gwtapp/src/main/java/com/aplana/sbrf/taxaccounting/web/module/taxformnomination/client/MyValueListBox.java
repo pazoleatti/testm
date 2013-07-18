@@ -7,27 +7,31 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import java.util.Collection;
 
 /**
- * Created with IntelliJ IDEA.
- * User: SYasinskiy
- * Date: 15.07.13
- * Time: 12:35
- * To change this template use File | Settings | File Templates.
+ * ValueListBox без пустого значения
+ *
+ * @author Stanislav Yasinskiy
  */
+
 public class MyValueListBox<T> extends ValueListBox<T> {
+
+    ListBox listBox = (ListBox) getWidget();
 
     public MyValueListBox(Renderer<T> renderer) {
         super(renderer);
     }
 
     public void setVisibleItemCount(int count) {
-        ((ListBox) getWidget()).setVisibleItemCount(count);
-
+        listBox.setVisibleItemCount(count);
     }
 
     @Override
     public void setAcceptableValues(Collection<T> newValues) {
         super.setAcceptableValues(newValues);
-        ((ListBox) getWidget()).removeItem(((ListBox) getWidget()).getItemCount()-1);
+        listBox.removeItem(listBox.getItemCount() - 1);
+    }
+
+    public boolean hasSelectedItem() {
+        return listBox.getSelectedIndex() != -1;
     }
 
 

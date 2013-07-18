@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentCombined;
 import com.gwtplatform.dispatch.shared.Result;
 
 /**
