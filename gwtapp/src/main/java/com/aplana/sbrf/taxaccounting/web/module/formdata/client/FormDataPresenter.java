@@ -243,10 +243,12 @@ public class FormDataPresenter extends
 		AddRowAction action = new AddRowAction();
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
+		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
+						modifiedRows.clear();
 						getView().updateData();
 						processFormDataResult(result);
 						getView().setSelectedRow(result.getCurrentRow(), true);
@@ -262,11 +264,13 @@ public class FormDataPresenter extends
 		DeleteRowAction action = new DeleteRowAction();
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
+		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		if (dataRow != null) {
 			dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<FormDataResult>() {
 						@Override
 						public void onSuccess(FormDataResult result) {
+							modifiedRows.clear();
 							getView().updateData();
 							processFormDataResult(result);
 							getView().setSelectedRow(null, true); // clear selection
