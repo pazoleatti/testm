@@ -68,35 +68,6 @@ public class DepartmentFormTypeDaoTest {
 	}
 
 	@Test
-	public void testSave() {
-		List<DepartmentFormType> links = departmentFormTypeDao.get(1);
-		// changing
-		DepartmentFormType link = links.get(0);
-		link.setFormTypeId(2);
-		link.setKind(FormDataKind.PRIMARY);
-		//adding
-		DepartmentFormType newLink = new DepartmentFormType();
-		newLink.setFormTypeId(1);
-		newLink.setKind(FormDataKind.ADDITIONAL);
-		newLink.setDepartmentId(1);
-
-		links.add(newLink);
-
-		departmentFormTypeDao.save(1, links);
-
-		link = departmentFormTypeDao.get(1).get(1);
-		newLink = departmentFormTypeDao.get(1).get(0);
-
-		assertEquals(2, link.getFormTypeId());
-		assertEquals(1, link.getDepartmentId());
-		assertEquals(FormDataKind.PRIMARY, link.getKind());
-
-		assertEquals(1, newLink.getFormTypeId());
-		assertEquals(1, newLink.getDepartmentId());
-		assertEquals(FormDataKind.ADDITIONAL, newLink.getKind());
-	}
-
-	@Test
 	public void testSaveFormSources() {
 		List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
 		List<Long> sourceIds = new ArrayList<Long>();

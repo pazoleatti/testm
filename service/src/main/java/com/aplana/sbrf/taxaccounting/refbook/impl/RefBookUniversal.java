@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,30 +22,37 @@ import java.util.Map;
  * @since 11.07.13 11:32
  */
 @Service
-public class RefBookDataProviderImpl implements RefBookDataProvider {
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class RefBookUniversal implements RefBookDataProvider {
 
 	@Autowired
 	private RefBookDao refBookDao;
 
+	protected Long refBookId;
+
+	public void setRefBookId(Long refBookId) {
+		this.refBookId = refBookId;
+	}
+
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
+	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
 		return refBookDao.getChildrenRecords(refBookId, parentRecordId, version, pagingParams, filter, sortAttribute);
 	}
 
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute) {
 		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute);
 	}
 
 	@Override
-	public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
+	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
 	}
 
 	@Override
-	public List<Date> getVersions(Long refBookId, Date startDate, Date endDate) {
+	public List<Date> getVersions(Date startDate, Date endDate) {
 		return refBookDao.getVersions(refBookId, startDate, endDate);
 	}
 }

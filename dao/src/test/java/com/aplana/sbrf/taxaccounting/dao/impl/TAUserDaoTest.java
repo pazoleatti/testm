@@ -47,7 +47,7 @@ public class TAUserDaoTest {
 	
 	@Test
 	public void testGetUserIdByLogin() {
-		Assert.assertEquals(1, userDao.getUserIdbyLogin(LOGIN_CONTROL_BANK));
+		Assert.assertEquals(1, userDao.getUserIdByLogin(LOGIN_CONTROL_BANK));
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class TAUserDaoTest {
 		user.setRoles(roles);
 		
 		userDao.createUser(user);
-		int userId = userDao.getUserIdbyLogin(LOGIN_TEST_BANK);
+		int userId = userDao.getUserIdByLogin(LOGIN_TEST_BANK);
 		user.setId(userId);
 		Assert.assertEquals(user.getDepartmentId(), userDao.getUser(userId).getDepartmentId());
 		Assert.assertEquals(user.getLogin(), userDao.getUser(userId).getLogin());
@@ -81,7 +81,7 @@ public class TAUserDaoTest {
 		user.setActive(false);
 		user.setLogin("controlBank");
 		
-		int userId = userDao.getUserIdbyLogin(LOGIN_CONTROL_BANK);
+		int userId = userDao.getUserIdByLogin(LOGIN_CONTROL_BANK);
 		TAUser userDB = userDao.getUser(userId);
 		Assert.assertEquals(1, userDB.getDepartmentId());
 		
@@ -114,13 +114,13 @@ public class TAUserDaoTest {
 		Assert.assertEquals(1,userDao.getUser(user.getId()).getDepartmentId());
 		Assert.assertEquals("controlBank@bank.ru",userDao.getUser(user.getId()).getEmail());
 		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
-		Assert.assertEquals("ROLE_CONTROL",userDao.getUser(userDao.getUserIdbyLogin(user.getLogin())).getRoles().get(0).getAlias());
+		Assert.assertEquals("ROLE_CONTROL",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
 		userDao.updateUser(user);
 		Assert.assertEquals(3,userDao.getUser(user.getId()).getDepartmentId());
 		Assert.assertEquals("@sard",userDao.getUser(user.getId()).getEmail());
 		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
-		Assert.assertEquals("ROLE_OPER",userDao.getUser(userDao.getUserIdbyLogin(user.getLogin())).getRoles().get(0).getAlias());
-		Assert.assertEquals(2,userDao.getUser(userDao.getUserIdbyLogin(user.getLogin())).getRoles().size());
+		Assert.assertEquals("ROLE_OPER",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
+		Assert.assertEquals(2,userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().size());
 	}
 	
 	@Test

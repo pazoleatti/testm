@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -22,9 +23,9 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-	public List<DepartmentFormType> getSources(int departmentId, int formTypeId, FormDataKind kind) {
-		return getFormSources(departmentId, formTypeId, kind);
-	}
+    public List<DepartmentFormType> getSources(int departmentId, int formTypeId, FormDataKind kind) {
+        return getFormSources(departmentId, formTypeId, kind);
+    }
 
 
     @Override
@@ -32,12 +33,12 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
         return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind);
     }
 
-	@Override
-	public void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds) {
-		departmentFormTypeDao.saveFormSources(departmentFormTypeId, sourceDepartmentFormTypeIds);
-	}
+    @Override
+    public void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds) {
+        departmentFormTypeDao.saveFormSources(departmentFormTypeId, sourceDepartmentFormTypeIds);
+    }
 
-	@Override
+    @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
         return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
     }
@@ -47,12 +48,12 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
         return departmentFormTypeDao.getDepartmentSources(departmentId, taxType);
     }
 
-	@Override
-	public List<DepartmentFormType> getDepartmentFormDestinations(int departmentId, TaxType taxType) {
-		return departmentFormTypeDao.getByTaxType(departmentId, taxType);
-	}
+    @Override
+    public List<DepartmentFormType> getDepartmentFormDestinations(int departmentId, TaxType taxType) {
+        return departmentFormTypeDao.getByTaxType(departmentId, taxType);
+    }
 
-	@Override
+    @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
         return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
     }
@@ -62,10 +63,10 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
         return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId);
     }
 
-	@Override
-	public void saveDeclarationSources(Long declarationTypeId, List<Long> sourceDepartmentFormTypeIds) {
-		departmentFormTypeDao.saveDeclarationSources(declarationTypeId, sourceDepartmentFormTypeIds);
-	}
+    @Override
+    public void saveDeclarationSources(Long declarationTypeId, List<Long> sourceDepartmentFormTypeIds) {
+        departmentFormTypeDao.saveDeclarationSources(declarationTypeId, sourceDepartmentFormTypeIds);
+    }
 
     @Override
     public List<FormTypeKind> getFormAssigned(Long departmentId, char taxType) {
@@ -73,7 +74,27 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public List<FormTypeKind> getDeclarationAssigned(Long departmentId,  char taxType) {
+    public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {
         return departmentFormTypeDao.getDeclarationAssigned(departmentId, taxType);
+    }
+
+    @Override
+    public void saveForm(Long departmentId, int typeId, int formId) {
+        departmentFormTypeDao.createDepartmentFormType(departmentId,typeId,formId);
+    }
+
+    @Override
+    public void deleteForm(Set<Long> ids) {
+        departmentFormTypeDao.deleteDepartmentFormType(ids);
+    }
+
+    @Override
+    public void saveDeclaration(Long departmentId, int declarationId) {
+        departmentFormTypeDao.createDepartmentDeclType(departmentId, declarationId);
+    }
+
+    @Override
+    public void deleteDeclaration(Set<Long> ids) {
+        departmentFormTypeDao.deleteDepartmentDeclType(ids);
     }
 }

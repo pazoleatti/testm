@@ -299,4 +299,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
 		return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
 	}
+
+	@Override
+	public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+	}
+
+	@Override
+	public void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+	}
+
+	@Override
+	public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
+		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+	}
 }

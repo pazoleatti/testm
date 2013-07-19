@@ -14,7 +14,7 @@ import java.util.Collection;
 
 public class MyValueListBox<T> extends ValueListBox<T> {
 
-    ListBox listBox = (ListBox) getWidget();
+    private ListBox listBox = (ListBox) getWidget();
 
     public MyValueListBox(Renderer<T> renderer) {
         super(renderer);

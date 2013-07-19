@@ -44,11 +44,11 @@ public interface RefBookDao {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+		String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
-	 *
 	 *
 	 * @param refBookId код справочника
 	 * @param parentRecordId код родительского элемента
@@ -59,7 +59,7 @@ public interface RefBookDao {
 	 * @return
 	 */
 	PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
-															   PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+		PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * По коду возвращает строку справочника
@@ -76,4 +76,28 @@ public interface RefBookDao {
 	 * @return
 	 */
 	List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
+
+	/**
+	 * Создает новые записи в справочнике
+	 * @param refBookId код справочника
+	 * @param version дата актуальности новых записей
+	 * @param records список новых записей
+	 */
+	void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Обновляет значения в справочнике
+	 * @param refBookId код справочника
+	 * @param version задает дату актуальности
+	 * @param records список обновленных записей
+	 */
+	void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Удаляет записи из справочника
+	 * @param refBookId код справочника
+	 * @param version задает дату удаления данных
+	 * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+	 */
+	void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
 }

@@ -19,9 +19,9 @@ public class DateInputWithModesCell extends DateInputCell {
 	public DateInputWithModesCell(final ColumnContext columnContext) {
 		super(new SafeHtmlRenderer<String>() {
 			@Override
-			public SafeHtml render(String s) {
+			public SafeHtml render(String stringDate) {
 				SafeHtmlBuilder builder = new SafeHtmlBuilder();
-				Date date = DateTimeFormat.getFormat(STORE_DATE_FORMAT).parse(s);
+				Date date = DateTimeFormat.getFormat(STORE_DATE_FORMAT).parse(stringDate);
 				int formatId = ((DateColumn)columnContext.getColumn()).getFormatId();
 				formatId = formatId == Formats.NONE.getId() ? Formats.DD_MM_YYYY.getId() : formatId;
 				String format = Formats.getById(formatId).getFormat().replace("MMMM", Formats.getRussianMonthName(date.getMonth()));
@@ -30,8 +30,8 @@ public class DateInputWithModesCell extends DateInputCell {
 			}
 
 			@Override
-			public void render(String s, SafeHtmlBuilder safeHtmlBuilder) {
-				Date date = DateTimeFormat.getFormat(STORE_DATE_FORMAT).parse(s);
+			public void render(String stringDate, SafeHtmlBuilder safeHtmlBuilder) {
+				Date date = DateTimeFormat.getFormat(STORE_DATE_FORMAT).parse(stringDate);
 				int formatId = ((DateColumn)columnContext.getColumn()).getFormatId();
 				formatId = formatId == Formats.NONE.getId() ? Formats.DD_MM_YYYY.getId() : formatId;
 				String format = Formats.getById(formatId).getFormat().replace("MMMM", Formats.getRussianMonthName(date.getMonth()));
@@ -43,6 +43,16 @@ public class DateInputWithModesCell extends DateInputCell {
 	}
 
 	@Override
+	public void render(Context context, Date value, SafeHtmlBuilder sb) {
+		if (columnContext.getMode() == ColumnContext.Mode.DEFAULT_MODE ||
+				columnContext.getMode() == ColumnContext.Mode.EDIT_MODE) {
+			super.render(context, value, sb);
+		} else if (value != null && !value.toString().isEmpty()) {
+			sb.appendEscaped(columnContext.getColumn().getFormatter().format(getFormattedDate(value)));
+		}
+	}
+
+	@Override
 	public void onBrowserEvent(Context context, Element parent, Date value,
 	                           NativeEvent event, ValueUpdater<Date> valueUpdater) {
 		DataRow<Cell> dataRow = (DataRow<Cell>)context.getKey();
@@ -51,5 +61,18 @@ public class DateInputWithModesCell extends DateInputCell {
 						dataRow.getCell(columnContext.getColumn().getAlias()).isEditable())) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		}
+	}
+
+	private String getFormattedDate(Date date){
+		final String dateShortStart = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format(date);
+
+		int startDayIndex = dateShortStart.lastIndexOf('-');
+		int startMonthIndex = dateShortStart.indexOf('-');
+
+		String startDate =  dateShortStart.substring(startDayIndex + 1, dateShortStart.length()) + '.' +
+				dateShortStart.substring(startMonthIndex + 1, startDayIndex) + '.' +
+				dateShortStart.substring(0, startMonthIndex);
+
+		return startDate;
 	}
 }

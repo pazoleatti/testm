@@ -1,5 +1,5 @@
 /**
- * Формирование XML для декларации налога на прибыль уровня обособленного подразделения (declarationOP.groovy).
+ * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
  * @version 4
  *
@@ -7,21 +7,21 @@
  */
 
 switch (formDataEvent) {
-// создать / обновить
+    // создать / обновить
     case FormDataEvent.CREATE :
         break
-// проверить
+    // проверить
     case FormDataEvent.CHECK :
         return
         break
-// принять из создана
+    // принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         return
         break
-// после принять из создана
+    // после принять из создана
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED :
         break
-// из принять в создана
+    // из принять в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         return
         break
@@ -81,7 +81,7 @@ def formDataComplexConsumption = formDataCollection.find(departmentId, 303, Form
 def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
 
 /** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-def formDataAdvance = formDataCollection.find(departmentId, 309, FormDataKind.ADDITIONAL)
+def formDataAdvance = formDataCollection.find(departmentId, 500, FormDataKind.SUMMARY)
 
 /*
  * Расчет значений для текущей декларации.
@@ -262,8 +262,8 @@ xmlbuilder.Файл(
 
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
                     def rowForNalPu = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
-                    tmpValue2 = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
-                    def nalPu = tmpValue2
+                    tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
+                    nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
                     // 0..1
                     СубБдж(
                             КБК : kbk2,
@@ -299,16 +299,15 @@ xmlbuilder.Файл(
                                 АвПлат3 : avPlat3)
 
                         if (!isTaxPeriod) {
-                            def appl5List02Row120
                             // при формировании декларации банка надо брать appl5List02Row120 относящегося к ЦА
                             // (как определять пока не ясно, толи по id, толи по id сбербанка,
-                            // толи по КПП = 775001001), при формировании декларации подразделения надо брать
-                            // строку appl5List02Row120 относящегося к этому подразделению
+                            // толи по КПП = 775001001), при формировании декларации подразделения
+                            // надо брать строку appl5List02Row120 относящегося к этому подразделению
                             def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat3 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat3
-                            avPlat1 = avPlat3 + getTail(appl5List02Row120, 3)
+                            avPlat1 = (long) appl5List02Row120 / 3
+                            avPlat2 = avPlat1
+                            avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
                         }
                         // 0..1
                         СубБдж(
@@ -322,49 +321,49 @@ xmlbuilder.Файл(
             }
 
             // Приложение № 5 к Листу 02
-            /** ОбРасч. Столбец «Код строки 002». */
+            /** ОбРасч. Столбец «Признак расчёта». */
             def obRasch = emptyNull
-            /** НаимОП. Столбец «Наименование подразделения». */
+            /** НаимОП. Столбец «Подразделение территориального банка». */
             def naimOP = emptyNull
             /** КППОП. Столбец «КПП». */
             def kppop = emptyNull
-            /** ОбязУплНалОП. Столбец «Отметка о возложении обязанности по уплате налога». */
+            /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
             def obazUplNalOP = emptyNull
-            /** ДоляНалБаз. Столбец «Доля налоговой базы (%) [040]». */
+            /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
             def dolaNalBaz = emptyNull
-            /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.) [050]». */
+            /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
             def nalBazaDola = emptyNull
-            /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта РФ [060]». */
+            /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
             def stavNalSubRF = emptyNull
-            /** СумНал. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
+            /** СумНал. Столбец «Сумма налога». */
             def sumNal = emptyNull
-            /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта РФ. Расчётный [080]». */
+            /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
             def nalNachislSubRF = emptyNull
-            /** СумНалП. Столбец «Сумма налога к доплате [100]». */
+            /** СумНалП. Столбец «Сумма налога к доплате». */
             def sumNalP = emptyNull
-            /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами РФ [090]». */
+            /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
             def nalViplVneRF = emptyNull
-            /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом [120]». */
+            /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
             def mesAvPlat = emptyNull
-            /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на 1 квартал следующего налогового периода [121]». */
+            /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
             def mesAvPlat1CvSled = emptyNull
 
             // получение из нф авансовых платежей строки соответствующей текущему подразделению
             def tmpRow = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
             if (tmpRow != null) {
-                obRasch = tmpRow.stringCode
-                naimOP = tmpRow.divisionName
-                kppop = tmpRow.kpp
-                obazUplNalOP = tmpRow.labalAboutPaymentTax
-                dolaNalBaz = tmpRow.baseTaxOf
-                nalBazaDola = getLong(tmpRow.baseTaxOfRub)
-                stavNalSubRF = tmpRow.subjectTaxStavka
-                sumNal = getLong(tmpRow.subjectTaxSum)
-                nalNachislSubRF = getLong(tmpRow.subjectTaxCredit)
-                sumNalP = getLong(tmpRow.taxSumToPay)
-                nalViplVneRF = getLong(tmpRow.taxSumOutside)
-                mesAvPlat = getLong(tmpRow.everyMontherPaymentAfterPeriod)
-                mesAvPlat1CvSled = getLong(tmpRow.everyMonthForKvartalNextPeriod)
+                obRasch = row.calcFlag
+                naimOP = row.regionBankDivision
+                kppop = row.kpp
+                obazUplNalOP = row.obligationPayTax
+                dolaNalBaz = row.baseTaxOf
+                nalBazaDola = row.baseTaxOfRub
+                stavNalSubRF = row.subjectTaxStavka
+                sumNal = row.taxSum
+                nalNachislSubRF = row.subjectTaxCredit
+                sumNalP = row.taxSumToPay
+                nalViplVneRF = row.taxSumOutside
+                mesAvPlat = row.everyMontherPaymentAfterPeriod
+                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
             }
 
             // 0..n - всегда один
@@ -402,13 +401,6 @@ def getLong(def value) {
         return 0
     }
     return (long) round(value, 0)
-}
-
-/**
- * Получить остаток (целое и дробное) от деления вдух чисел (например 16,5 / 3 = 1,5).
- */
-def getTail(def value, def div) {
-    return getLong(value - (long) value + (long) value % div)
 }
 
 /**
@@ -482,7 +474,7 @@ def getSimpleConsumptionSumRows8(def form, def codes) {
 }
 
 /**
- * Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 9 - графа 6).
+ * Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6).
  */
 def getCalculatedSimpleConsumption(def formSimple, def codes) {
     def result = 0

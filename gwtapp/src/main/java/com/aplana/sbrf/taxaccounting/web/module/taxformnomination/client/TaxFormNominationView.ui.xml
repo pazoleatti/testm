@@ -1,7 +1,8 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:m="urn:import:com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client">
+             xmlns:m='urn:import:com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup'>
 
 
     <ui:style field="css"
@@ -33,16 +34,15 @@
 
     </ui:style>
 
-
     <g:SplitLayoutPanel>
-        <g:north size="390">
-            <g:FlowPanel>
 
+        <g:north size="100">
+            <g:VerticalPanel>
                 <g:Label addStyleNames="{style.titleLabel}">Назначение налоговых форм и деклараций</g:Label>
 
                 <g:HorizontalPanel height="45px">
                     <g:HorizontalPanel width="210px">
-                        <g:Label addStyleNames="{style.label}">Назанчение:</g:Label>
+                        <g:Label addStyleNames="{style.label}" text="Назанчение:"/>
                         <g:VerticalPanel>
                             <g:Anchor ui:field="formAnchor" href="#!destination;isForm=true">Налоговые формы</g:Anchor>
                             <g:Label ui:field="formLabel">Налоговые формы</g:Label>
@@ -65,32 +65,54 @@
                         <style:ButtonLink ui:field="cancelAnchor" text="Отменить назначение"/>
                     </g:cell>
                 </g:HorizontalPanel>
-
-                <g:HorizontalPanel height="350px" spacing="5">
-                    <g:VerticalPanel width="500px">
-                        <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
-                        <g:SimplePanel ui:field="departmentPickerPanel"/>
-                    </g:VerticalPanel>
-
-                    <g:VerticalPanel width="200px" ui:field="panelFormDataKind">
-                        <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
-                        <m:MyValueListBox ui:field="boxFormDataKind" width="200px" visibleItemCount="15"/>
-                    </g:VerticalPanel>
-
-                    <g:VerticalPanel width="600px">
-                        <g:Label addStyleNames="{style.label}" ui:field="labelTaxFormKind">Вид налоговой формы
-                        </g:Label>
-                        <g:Label addStyleNames="{style.label}" ui:field="labelDeclKind">Вид декларации</g:Label>
-                        <m:MyValueListBox ui:field="boxTaxFormKind" width="600px" visibleItemCount="15"/>
-                    </g:VerticalPanel>
-                </g:HorizontalPanel>
-            </g:FlowPanel>
+            </g:VerticalPanel>
         </g:north>
 
         <g:center>
-            <style:GenericDataGrid ui:field="grid" width="100%" height="100%"/>
+            <g:SplitLayoutPanel>
+                <g:west size="600">
+                    <g:DockLayoutPanel>
+                        <g:north size="30">
+                            <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
+                        </g:north>
+                        <g:center>
+                            <t:PopUpWithTree ui:field="tree"/>
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:west>
+                <g:center>
+                    <g:DockLayoutPanel>
+                        <g:west size="200">
+                            <g:DockLayoutPanel ui:field="panelFormDataKind">
+                                <g:north size="30">
+                                    <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
+                                </g:north>
+                                <g:center>
+                                    <m:MyValueListBox ui:field="boxFormDataKind" visibleItemCount="15"/>
+                                </g:center>
+                            </g:DockLayoutPanel>
+                        </g:west>
+                        <g:center>
+                            <g:DockLayoutPanel>
+                                <g:north size="30">
+                                    <g:Label addStyleNames="{style.label}" ui:field="labelKind"/>
+                                </g:north>
+                                <g:center>
+                                    <m:MyValueListBox ui:field="boxTaxFormKind" visibleItemCount="15"/>
+                                </g:center>
+                            </g:DockLayoutPanel>
+                        </g:center>
+
+                    </g:DockLayoutPanel>
+                </g:center>
+            </g:SplitLayoutPanel>
         </g:center>
 
+        <g:south size="400">
+            <style:GenericDataGrid ui:field="grid" width="100%" height="100%"/>
+        </g:south>
+
     </g:SplitLayoutPanel>
+
 
 </ui:UiBinder>

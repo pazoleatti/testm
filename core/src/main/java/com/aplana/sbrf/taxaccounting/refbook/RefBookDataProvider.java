@@ -20,21 +20,19 @@ public interface RefBookDataProvider {
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
-	 * @param refBookId код справочника
 	 * @param version дата актуальности
 	 * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
 	 * @param filter условие фильтрации строк. Может быть не задано
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+	PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *
 	 *
-	 * @param refBookId код справочника
 	 * @param parentRecordId код родительского элемента
 	 * @param version дата актуальности
 	 * @param pagingParams определяет параметры запрашиваемой страницы данных
@@ -42,16 +40,15 @@ public interface RefBookDataProvider {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
+	PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
 		PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * По коду возвращает строку справочника
-	 * @param refBookId код справочника
 	 * @param recordId код строки справочника
 	 * @return
 	 */
-	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+	Map<String, RefBookValue> getRecordData(Long recordId);
 
 	/**
 	 * Возвращает список версий элементов справочника за указанный период времени
@@ -59,5 +56,5 @@ public interface RefBookDataProvider {
 	 * @param endDate конечная дата
 	 * @return
 	 */
-	List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
+	List<Date> getVersions(Date startDate, Date endDate);
 }

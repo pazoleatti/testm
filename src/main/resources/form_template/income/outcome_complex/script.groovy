@@ -4,6 +4,9 @@
  * @version 46
  */
 
+
+dataRowsHelper = formDataService.getDataRowHelper(formData)
+
 switch (formDataEvent) {
     // создать
     case FormDataEvent.CREATE :
@@ -100,7 +103,7 @@ void calculation() {
      * Проверка объязательных полей
      */
     def requiredColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS']
-    for (def row : formData.dataRows) {
+    for (def row : dataRowsHelper.getAllCached()) {
         if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -109,8 +112,8 @@ void calculation() {
     /*
      * Расчет сумм
      */
-    def totalRow1 = formData.getDataRow('R67')
-    def totalRow2 = formData.getDataRow('R93')
+    def totalRow1 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R67')
+    def totalRow2 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R93')
 
     // суммы для графы 9
     ['consumptionTaxSumS'].each { alias ->
@@ -119,6 +122,7 @@ void calculation() {
     }
 
     calculationControlGraphs()
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**
@@ -138,7 +142,7 @@ void calculationControlGraphs() {
     def value
     def formDataSimple = getFormDataSimple()
     def income102NotFound = []
-    for (def row : formData.dataRows) {
+    for (def row : dataRowsHelper.getAllCached()) {
         // исключить итоговые строки
         if (row.getAlias() in ['R67', 'R93']) {
             continue
@@ -192,7 +196,7 @@ void calculationControlGraphs() {
  * @since 22.02.2013 12:30
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
@@ -250,7 +254,7 @@ void consolidation() {
         return
     }
     // очистить форму
-    formData.getDataRows().each { row ->
+    dataRowsHelper.getAllCached().each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { it ->
             row.getCell(it).setValue(null)
         }
@@ -260,14 +264,14 @@ void consolidation() {
 
     // получить консолидированные формы из источников
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
-        def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 303) {
             needCalc = true
-            for (def row : child.getDataRows()) {
+            for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
                 if (row.getAlias() == null) {
                     continue
                 }
-                def rowResult = formData.getDataRow(row.getAlias())
+                def rowResult = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), row.getAlias())
                 ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                     if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
@@ -314,12 +318,12 @@ def isTerBank() {
 }
 
 double summ(String columnName, String fromRowA, String toRowA) {
-    def from = formData.getDataRowIndex(fromRowA)
-    def to = formData.getDataRowIndex(toRowA)
+    def from = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), fromRowA)
+    def to = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), toRowA)
     if (from > to) {
         return 0
     }
-    def result = summ(formData, new ColumnRange(columnName, from, to))
+    def result = summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnName, from, to))
     return result ?: 0;
 }
 
@@ -358,12 +362,12 @@ def checkRequiredColumns(def row, def columns, def useLog) {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = formData.getDataRowIndex(rowFromAlias) + 1
-    def to = formData.getDataRowIndex(rowToAlias) - 1
+    def from = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowFromAlias) + 1
+    def to = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowToAlias) - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -392,7 +396,7 @@ def getValue(def value) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    dataRowsHelper.getAllCached().indexOf(row)
 }
 
 /**
@@ -410,7 +414,7 @@ def isEmpty(def value) {
 def calcColumn6(def aliasRows) {
     def sum = 0
     aliasRows.each { alias ->
-        sum += formData.getDataRow(alias).consumptionBuhSumAccepted
+        sum += dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), alias).consumptionBuhSumAccepted
     }
     return sum
 }
@@ -419,7 +423,7 @@ def calcColumn6(def aliasRows) {
  * Получить данные формы "расходы простые" (id = 304)
  */
 def getFormDataSimple() {
-    return FormDataService.find(304, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.find(304, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
 /**
@@ -433,7 +437,7 @@ def getFormDataSimple() {
 def getSumFromSimple(data, columnAliasCheck, columnAliasSum, value) {
     def sum = 0
     if (data != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
-        for (def row : data.dataRows) {
+        for (def row : formDataService.getDataRowHelper(data).getAllCached()) {
             if (row.getCell(columnAliasCheck).getValue() == value) {
                 sum += (row.getCell(columnAliasSum).getValue() ?: 0)
             }

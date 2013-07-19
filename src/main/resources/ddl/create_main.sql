@@ -216,6 +216,8 @@ comment on column tax_period.id is 'Идентификатор (первичны
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.start_date is 'Дата начала (включительно)';
 comment on column tax_period.end_date is 'Дата окончания (включительно)';
+
+create sequence seq_tax_period start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_template (
   id number(9) not null,
@@ -634,7 +636,7 @@ comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
 comment on column form_data.state is 'Код состояния';
-comment on column form_data.kind is 'Тип налоговой формы';
+comment on column form_data.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.creation_date is 'Дата создания';
 
@@ -680,7 +682,7 @@ create table data_row (
   type number(1) not null
 );
 alter table data_row add constraint data_row_pk primary key (id);
-alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id);
+alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord, type);
 alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
 
@@ -777,7 +779,7 @@ comment on table department_form_type is 'Связь подразделения 
 comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
-comment on column department_form_type.kind is 'Тип налоговой формы';
+comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------

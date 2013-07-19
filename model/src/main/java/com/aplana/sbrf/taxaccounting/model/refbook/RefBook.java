@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Cправочник
@@ -104,6 +106,20 @@ public class RefBook implements Serializable {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Создает "рыбу" для строки справочника
+	 * @return
+	 */
+	public Map<String, RefBookValue> createRecord() {
+		Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+		result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		for (RefBookAttribute attribute : getAttributes()) {
+			result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), null));
+		}
+		return result;
 	}
 
 	@Override

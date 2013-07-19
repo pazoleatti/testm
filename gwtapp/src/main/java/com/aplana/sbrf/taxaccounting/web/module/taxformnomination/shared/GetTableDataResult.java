@@ -9,6 +9,7 @@ import java.util.List;
 public class GetTableDataResult implements Result {
 
     private List<FormTypeKind> tableData;
+    private String errorOnSave;
 
 
     public List<FormTypeKind> getTableData() {
@@ -17,5 +18,13 @@ public class GetTableDataResult implements Result {
 
     public void setTableData(List<FormTypeKind> tableData) {
         this.tableData = tableData;
+    }
+
+    public String getErrorOnSave() {
+        return errorOnSave;
+    }
+
+    public void setErrorOnSave(String errorOnSave) {
+        this.errorOnSave = errorOnSave;
     }
 }

@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.script.api;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+
+import java.util.List;
 
 /**
  * Работа со строками НФ.
@@ -49,7 +49,7 @@ public interface DataRowHelper {
 	 * Метод нужен для легаси способа работы с офрмами
 	 * т.е. Получили все строки, обработали как список и сохранили.
 	 * 
-	 * @param dataRow
+	 * @param dataRows
 	 */
 	void save(List<DataRow<Cell>> dataRows);
 
@@ -107,4 +107,30 @@ public interface DataRowHelper {
 	 */
 	void rollback();
 
+    /**
+     * Возвращает DataRow по алиасу
+     * @param dataRows
+     * @param rowAlias
+     * @return
+     */
+    DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias);
+
+    /**
+     * Функция для получения данных формы
+     * Используется ленивая загрузка + кэш
+     */
+    List<DataRow<Cell>> getAllCached();
+
+    /**
+     * Возвращает индекс строки, имеющий заданный алиас.
+     *
+     * @param rowAlias
+     *            алиас строки
+     * @return индекс строки (с нуля)
+     * @throws NullPointerException
+     *             если rowAlias null
+     * @throws IllegalArgumentException
+     *             если такого алиас не существует в объекте FormData
+     */
+    int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias);
 }
