@@ -120,4 +120,17 @@ public interface DataRowHelper {
      * Используется ленивая загрузка + кэш
      */
     List<DataRow<Cell>> getAllCached();
+
+    /**
+     * Возвращает индекс строки, имеющий заданный алиас.
+     *
+     * @param rowAlias
+     *            алиас строки
+     * @return индекс строки (с нуля)
+     * @throws NullPointerException
+     *             если rowAlias null
+     * @throws IllegalArgumentException
+     *             если такого алиас не существует в объекте FormData
+     */
+    int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias);
 }
