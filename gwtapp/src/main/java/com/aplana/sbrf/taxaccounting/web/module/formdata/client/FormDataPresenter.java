@@ -247,6 +247,7 @@ public class FormDataPresenter extends
 				.defaultCallback(new AbstractCallback<FormDataResult>() {
 					@Override
 					public void onSuccess(FormDataResult result) {
+						getView().updateData();
 						processFormDataResult(result);
 						getView().setSelectedRow(result.getCurrentRow(), true);
 					}
@@ -266,6 +267,7 @@ public class FormDataPresenter extends
 					.defaultCallback(new AbstractCallback<FormDataResult>() {
 						@Override
 						public void onSuccess(FormDataResult result) {
+							getView().updateData();
 							processFormDataResult(result);
 							getView().setSelectedRow(null, true); // clear selection
 						}
