@@ -1,163 +1,181 @@
+package form_template.income.income_simple
+
 /**
- * Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения
+ * РЎРІРѕРґРЅР°СЏ С„РѕСЂРјР° " Р”РѕС…РѕРґС‹, СѓС‡РёС‚С‹РІР°РµРјС‹Рµ РІ РїСЂРѕСЃС‚С‹С… Р РќРЈ" СѓСЂРѕРІРЅСЏ РѕР±РѕСЃРѕР±Р»РµРЅРЅРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ
  *
  * @since 6.06.2013
  * @author auldanov
  */
 
 /**
- * Состав графов
- * 1. КНУ - incomeTypeId
- * 2. Группа доходов - incomeGroup
- * 3. Вид дохода по операции - incomeTypeByOperation
- * 4. Балансовый счёт по учёту дохода - accountNo
- * 5. РНУ-6 (графа 10) cумма - rnu6Field10Sum
- * 6. сумма - rnu6Field12Accepted
- * 7. в т.ч. учтено в предыдущих налоговых периодах по графе 10 - rnu6Field12PrevTaxPeriod
- * 8. РНУ-4 (графа 5) сумма - rnu4Field5Accepted
- * 9. Логическая проверка - logicalCheck
- * 10. Счёт бухгалтерского учёта - accountingRecords
- * 11. в Приложении №5 - opuSumByEnclosure2
- * 12. в Таблице "Д" - opuSumByTableD
- * 13. в бухгалтерской отчётности - opuSumTotal
- * 14. Расхождение - difference
+ * РЎРѕСЃС‚Р°РІ РіСЂР°С„РѕРІ
+ * 1. РљРќРЈ - incomeTypeId
+ * 2. Р“СЂСѓРїРїР° РґРѕС…РѕРґРѕРІ - incomeGroup
+ * 3. Р’РёРґ РґРѕС…РѕРґР° РїРѕ РѕРїРµСЂР°С†РёРё - incomeTypeByOperation
+ * 4. Р‘Р°Р»Р°РЅСЃРѕРІС‹Р№ СЃС‡С‘С‚ РїРѕ СѓС‡С‘С‚Сѓ РґРѕС…РѕРґР° - accountNo
+ * 5. Р РќРЈ-6 (РіСЂР°С„Р° 10) cСѓРјРјР° - rnu6Field10Sum
+ * 6. СЃСѓРјРјР° - rnu6Field12Accepted
+ * 7. РІ С‚.С‡. СѓС‡С‚РµРЅРѕ РІ РїСЂРµРґС‹РґСѓС‰РёС… РЅР°Р»РѕРіРѕРІС‹С… РїРµСЂРёРѕРґР°С… РїРѕ РіСЂР°С„Рµ 10 - rnu6Field12PrevTaxPeriod
+ * 8. Р РќРЈ-4 (РіСЂР°С„Р° 5) СЃСѓРјРјР° - rnu4Field5Accepted
+ * 9. Р›РѕРіРёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° - logicalCheck
+ * 10. РЎС‡С‘С‚ Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕРіРѕ СѓС‡С‘С‚Р° - accountingRecords
+ * 11. РІ РџСЂРёР»РѕР¶РµРЅРёРё в„–5 - opuSumByEnclosure2
+ * 12. РІ РўР°Р±Р»РёС†Рµ "Р”" - opuSumByTableD
+ * 13. РІ Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕР№ РѕС‚С‡С‘С‚РЅРѕСЃС‚Рё - opuSumTotal
+ * 14. Р Р°СЃС…РѕР¶РґРµРЅРёРµ - difference
  *
  */
 
+dataRowsHelper = formDataService.getDataRowHelper(formData)
 
 /**
- * Роутинг приложения
+ * Р РѕСѓС‚РёРЅРі РїСЂРёР»РѕР¶РµРЅРёСЏ
  * formDataEvent (com.aplana.sbrf.taxaccounting.model.FormDataEvent)
  */
 switch (formDataEvent){
-// TODO написать роутинг
-// создать
+    // TODO РЅР°РїРёСЃР°С‚СЊ СЂРѕСѓС‚РёРЅРі
+    // СЃРѕР·РґР°С‚СЊ
     case FormDataEvent.CREATE :
         checkCreation()
         break
-// расчитать
+    // СЂР°СЃС‡РёС‚Р°С‚СЊ
     case FormDataEvent.CALCULATE :
         logicalCheck()
         calcForm()
         break
-// обобщить
+    // РѕР±РѕР±С‰РёС‚СЊ
     case FormDataEvent.COMPOSE :
         consolidation()
         logicalCheck()
         calcForm()
         break
-// проверить
+    // РїСЂРѕРІРµСЂРёС‚СЊ
     case FormDataEvent.CHECK :
         logicalCheck()
         calcForm()
         break
-// утвердить
+    // СѓС‚РІРµСЂРґРёС‚СЊ
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         logicalCheck()
         calcForm()
         break
-// принять из утверждена
+    // РїСЂРёРЅСЏС‚СЊ РёР· СѓС‚РІРµСЂР¶РґРµРЅР°
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
         logicalCheck()
         calcForm()
         break
-// вернуть из принята в утверждена
+    // РІРµСЂРЅСѓС‚СЊ РёР· РїСЂРёРЅСЏС‚Р° РІ СѓС‚РІРµСЂР¶РґРµРЅР°
     case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED :
         break
-// принять из создана
+    // РїСЂРёРЅСЏС‚СЊ РёР· СЃРѕР·РґР°РЅР°
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         logicalCheck()
         calcForm()
         break
-// вернуть из принята в создана
+    // РІРµСЂРЅСѓС‚СЊ РёР· РїСЂРёРЅСЏС‚Р° РІ СЃРѕР·РґР°РЅР°
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         checkDeclarationBankOnCancelAcceptance()
         break
-// после принятия из утверждена
+    // РїРѕСЃР»Рµ РїСЂРёРЅСЏС‚РёСЏ РёР· СѓС‚РІРµСЂР¶РґРµРЅР°
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED :
         break
-// после вернуть из "Принята" в "Утверждена"
+    // РїРѕСЃР»Рµ РІРµСЂРЅСѓС‚СЊ РёР· "РџСЂРёРЅСЏС‚Р°" РІ "РЈС‚РІРµСЂР¶РґРµРЅР°"
     case FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED :
         checkDeclarationBankOnCancelAcceptance()
         break
 }
 
 /**
- * 6.1.2.8.2    Алгоритмы заполнения полей формы при расчете данных формы
+ * 6.1.2.8.2	РђР»РіРѕСЂРёС‚РјС‹ Р·Р°РїРѕР»РЅРµРЅРёСЏ РїРѕР»РµР№ С„РѕСЂРјС‹ РїСЂРё СЂР°СЃС‡РµС‚Рµ РґР°РЅРЅС‹С… С„РѕСЂРјС‹
  */
 def calcForm(){
-    /** КНУ 40001 */
-    def row40001 = formData.getDataRow("R53")
+//    dataRowsHelper.getAllCached().each { row ->
+//        ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each {
+//            def cell = row.getCell(it)
+//            if (cell.isEditable()) {
+//                cell.setValue(1)
+//            }
+//        }
+//    }
+
+    /** РљРќРЈ 40001 */
+    def row40001 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R53')
     (2..52).each{ n ->
-        // «графа 5» =сумма значений  «графы 5» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum?:0)  + (formData.getDataRow("R"+n).rnu6Field10Sum?:0)
+        def row = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R' + n)
+        // В«РіСЂР°С„Р° 5В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 5В» РґР»СЏ СЃС‚СЂРѕРє СЃ 2 РїРѕ 52 (СЂР°Р·РґРµР» В«Р”РѕС…РѕРґС‹ РѕС‚ СЂРµР°Р»РёР·Р°С†РёРёВ»)
 
-        // «графа 6» =сумма значений  «графы 6» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted?:0) + (formData.getDataRow("R"+n).rnu6Field12Accepted ?:0)
+        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum?:0)  + (row.rnu6Field10Sum?:0)
 
-        // «графа 7» =сумма значений  «графы 7» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod?:0) + (formData.getDataRow("R"+n).rnu6Field12PrevTaxPeriod ?:0)
+        // В«РіСЂР°С„Р° 6В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 6В» РґР»СЏ СЃС‚СЂРѕРє СЃ 2 РїРѕ 52 (СЂР°Р·РґРµР» В«Р”РѕС…РѕРґС‹ РѕС‚ СЂРµР°Р»РёР·Р°С†РёРёВ»)
+        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted?:0) + (row.rnu6Field12Accepted ?:0)
 
-        // «графа 8» =сумма значений  «графы 8» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted?:0) + (formData.getDataRow("R"+n).rnu4Field5Accepted ?:0)
+        // В«РіСЂР°С„Р° 7В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 7В» РґР»СЏ СЃС‚СЂРѕРє СЃ 2 РїРѕ 52 (СЂР°Р·РґРµР» В«Р”РѕС…РѕРґС‹ РѕС‚ СЂРµР°Р»РёР·Р°С†РёРёВ»)
+        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod?:0) + (row.rnu6Field12PrevTaxPeriod ?:0)
+
+        // В«РіСЂР°С„Р° 8В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 8В» РґР»СЏ СЃС‚СЂРѕРє СЃ 2 РїРѕ 52 (СЂР°Р·РґРµР» В«Р”РѕС…РѕРґС‹ РѕС‚ СЂРµР°Р»РёР·Р°С†РёРёВ»)
+        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted?:0) + (row.rnu4Field5Accepted ?:0)
     }
 
 
-    /** КНУ 40002 */
-    def row40002 = formData.getDataRow("R156")
+    /** РљРќРЈ 40002 */
+    def row40002 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R156')
     (55..155).each{ n ->
-        // «графа 5» =сумма значений  «графы 5» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum?:0) + (formData.getDataRow("R"+n).rnu6Field10Sum?:0)
+        def row = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R' + n)
 
-        // «графа 6» =сумма значений  «графы 6» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted?:0) + (formData.getDataRow("R"+n).rnu6Field12Accepted?:0)
+        // В«РіСЂР°С„Р° 5В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 5В» РґР»СЏ СЃС‚СЂРѕРє СЃ 55 РїРѕ 155 (СЂР°Р·РґРµР» В«Р’РЅРµСЂРµР°Р»РёР·Р°С†РёРѕРЅРЅС‹Рµ РґРѕС…РѕРґС‹В»)
+        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum?:0) + (row.rnu6Field10Sum?:0)
 
-        // «графа 7» =сумма значений  «графы 7» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod?:0) + (formData.getDataRow("R"+n).rnu6Field12PrevTaxPeriod?:0)
+        // В«РіСЂР°С„Р° 6В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 6В» РґР»СЏ СЃС‚СЂРѕРє СЃ 55 РїРѕ 155 (СЂР°Р·РґРµР» В«Р’РЅРµСЂРµР°Р»РёР·Р°С†РёРѕРЅРЅС‹Рµ РґРѕС…РѕРґС‹В»)
+        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted?:0) + (row.rnu6Field12Accepted?:0)
 
-        // «графа 8» =сумма значений  «графы 8» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted?:0) + (formData.getDataRow("R"+n).rnu4Field5Accepted?:0)
+        // В«РіСЂР°С„Р° 7В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 7В» РґР»СЏ СЃС‚СЂРѕРє СЃ 55 РїРѕ 155 (СЂР°Р·РґРµР» В«Р’РЅРµСЂРµР°Р»РёР·Р°С†РёРѕРЅРЅС‹Рµ РґРѕС…РѕРґС‹В»)
+        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod?:0) + (row.rnu6Field12PrevTaxPeriod?:0)
+
+        // В«РіСЂР°С„Р° 8В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№  В«РіСЂР°С„С‹ 8В» РґР»СЏ СЃС‚СЂРѕРє СЃ 55 РїРѕ 155 (СЂР°Р·РґРµР» В«Р’РЅРµСЂРµР°Р»РёР·Р°С†РёРѕРЅРЅС‹Рµ РґРѕС…РѕРґС‹В»)
+        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted?:0) + (row.rnu4Field5Accepted?:0)
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**
- * 6.1.2.8.3.1  Логические проверки
- * Завяжемся на цвета а не на номера строк,
- * а-ля точное отображение аналитики
+ * 6.1.2.8.3.1	Р›РѕРіРёС‡РµСЃРєРёРµ РїСЂРѕРІРµСЂРєРё
+ * Р—Р°РІСЏР¶РµРјСЃСЏ РЅР° С†РІРµС‚Р° Р° РЅРµ РЅР° РЅРѕРјРµСЂР° СЃС‚СЂРѕРє,
+ * Р°-Р»СЏ С‚РѕС‡РЅРѕРµ РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ Р°РЅР°Р»РёС‚РёРєРё
  */
-def logicalCheck(){
+def logicalCheck() {
     logger.info('-->');
-    formData.dataRows.each{ row ->
+    dataRowsHelper.getAllCached().each{ row ->
         /**
-         * Графа 9
-         * Номера строк: Все строки. Для ячеек, обозначенных как вычисляемые (см. Табл. 12)
+         * Р“СЂР°С„Р° 9
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє: Р’СЃРµ СЃС‚СЂРѕРєРё. Р”Р»СЏ СЏС‡РµРµРє, РѕР±РѕР·РЅР°С‡РµРЅРЅС‹С… РєР°Рє РІС‹С‡РёСЃР»СЏРµРјС‹Рµ (СЃРј. РўР°Р±Р». 12)
          *
-         * Алгоритм заполннеия:
-         * Если Сумма <0, то «графа 9»= «ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ » Иначе «графа 9»= Сумма ,где
-         * Сумма= ОКРУГЛ( «графа5»-(«графа 6»-«графа 7»);2)
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         * Р•СЃР»Рё РЎСѓРјРјР° <0, С‚Рѕ В«РіСЂР°С„Р° 9В»= В«РўР Р•Р‘РЈР•РўРЎРЇ РћР‘РЄРЇРЎРќР•РќРР• В» РРЅР°С‡Рµ В«РіСЂР°С„Р° 9В»= РЎСѓРјРјР° ,РіРґРµ
+         * РЎСѓРјРјР°= РћРљР РЈР“Р›( В«РіСЂР°С„Р°5В»-(В«РіСЂР°С„Р° 6В»-В«РіСЂР°С„Р° 7В»);2)
          */
-        if (isCalcField(row.getCell("logicalCheck"))){
-            row.logicalCheck = ((BigDecimal) ((row.rnu6Field10Sum?:0) - (row.rnu6Field12Accepted?:0) + (row.rnu6Field12PrevTaxPeriod?:0))).setScale(2, BigDecimal.ROUND_HALF_UP).toString() ?: "Требуется объяснение"
+        if (isCalcField(row.getCell('logicalCheck'))) {
+            row.logicalCheck = ((BigDecimal) ((row.rnu6Field10Sum?:0) - (row.rnu6Field12Accepted?:0) + (row.rnu6Field12PrevTaxPeriod?:0))).setScale(2, BigDecimal.ROUND_HALF_UP).toString() ?: "РўСЂРµР±СѓРµС‚СЃСЏ РѕР±СЉСЏСЃРЅРµРЅРёРµ"
         }
 
 
         /**
-         * Графа 11
-         * Номера строк: Все строки. Все строки. Для ячеек, обозначенных как вычисляемые (см. Табл. 12)
+         * Р“СЂР°С„Р° 11
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє: Р’СЃРµ СЃС‚СЂРѕРєРё. Р’СЃРµ СЃС‚СЂРѕРєРё. Р”Р»СЏ СЏС‡РµРµРє, РѕР±РѕР·РЅР°С‡РµРЅРЅС‹С… РєР°Рє РІС‹С‡РёСЃР»СЏРµРјС‹Рµ (СЃРј. РўР°Р±Р». 12)
          *
-         * Алгоритм заполннеия:
-         * «графа 11» = сумма значений «графы 6» формы «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
-         * для тех строк, для которых значение «графы 4»  равно значению «графы 4» текущей строки
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         * В«РіСЂР°С„Р° 11В» = СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№ В«РіСЂР°С„С‹ 6В» С„РѕСЂРјС‹ В«РЎРІРѕРґРЅР°СЏ С„РѕСЂРјР° РЅР°С‡РёСЃР»РµРЅРЅС‹С… РґРѕС…РѕРґРѕРІ СѓСЂРѕРІРЅСЏ РѕР±РѕСЃРѕР±Р»РµРЅРЅРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏВ»(СЃРј. СЂР°Р·РґРµР» 6.1.1)
+         * РґР»СЏ С‚РµС… СЃС‚СЂРѕРє, РґР»СЏ РєРѕС‚РѕСЂС‹С… Р·РЅР°С‡РµРЅРёРµ В«РіСЂР°С„С‹ 4В»  СЂР°РІРЅРѕ Р·РЅР°С‡РµРЅРёСЋ В«РіСЂР°С„С‹ 4В» С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё
          *
-         * TODO Гриша сказал что строка там только одна будет и он изменит аналитику
-         * TODO При получении доходов сложных проверить статус нужно?
+         * TODO Р“СЂРёС€Р° СЃРєР°Р·Р°Р» С‡С‚Рѕ СЃС‚СЂРѕРєР° С‚Р°Рј С‚РѕР»СЊРєРѕ РѕРґРЅР° Р±СѓРґРµС‚ Рё РѕРЅ РёР·РјРµРЅРёС‚ Р°РЅР°Р»РёС‚РёРєСѓ
+         * TODO РџСЂРё РїРѕР»СѓС‡РµРЅРёРё РґРѕС…РѕРґРѕРІ СЃР»РѕР¶РЅС‹С… РїСЂРѕРІРµСЂРёС‚СЊ СЃС‚Р°С‚СѓСЃ РЅСѓР¶РЅРѕ?
          */
-        if (isCalcField(row.getCell("opuSumByEnclosure2"))){
-            // получим форму «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
+        if (isCalcField(row.getCell('opuSumByEnclosure2'))){
+            // РїРѕР»СѓС‡РёРј С„РѕСЂРјСѓ В«РЎРІРѕРґРЅР°СЏ С„РѕСЂРјР° РЅР°С‡РёСЃР»РµРЅРЅС‹С… РґРѕС…РѕРґРѕРІ СѓСЂРѕРІРЅСЏ РѕР±РѕСЃРѕР±Р»РµРЅРЅРѕРіРѕ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏВ»(СЃРј. СЂР°Р·РґРµР» 6.1.1)
             def sum6ColumnOfForm302 = 0
-            def formData302 = FormDataService.find(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
+            def formData302 = formDataService.find(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId)
             if (formData302 != null){
-                formData302.dataRows.each{ rowOfForm302 ->
+                formData302dataRowsHelper = formDataService.getDataRowHelper(formData302)
+                formData302dataRowsHelper.getAllCached().each{ rowOfForm302 ->
                     if (rowOfForm302.incomeBuhSumAccountNumber == row.accountNo){
                         sum6ColumnOfForm302 += rowOfForm302.incomeBuhSumAccepted ?:0
                     }
@@ -168,18 +186,18 @@ def logicalCheck(){
 
 
         /**
-         * Графа 12
-         * Номера строк: Все строки. Для ячеек, обозначенных как вычисляемые (см. Табл. 12)
+         * Р“СЂР°С„Р° 12
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє: Р’СЃРµ СЃС‚СЂРѕРєРё. Р”Р»СЏ СЏС‡РµРµРє, РѕР±РѕР·РЅР°С‡РµРЅРЅС‹С… РєР°Рє РІС‹С‡РёСЃР»СЏРµРјС‹Рµ (СЃРј. РўР°Р±Р». 12)
          *
-         * Алгоритм заполннеия:
-         * «графа 12» = сумма значений «графы 8» для тех строк,
-         * для которых значение «графы 4»  равно значению «графы 4» текущей строки.
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         * В«РіСЂР°С„Р° 12В» = СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№ В«РіСЂР°С„С‹ 8В» РґР»СЏ С‚РµС… СЃС‚СЂРѕРє,
+         * РґР»СЏ РєРѕС‚РѕСЂС‹С… Р·РЅР°С‡РµРЅРёРµ В«РіСЂР°С„С‹ 4В»  СЂР°РІРЅРѕ Р·РЅР°С‡РµРЅРёСЋ В«РіСЂР°С„С‹ 4В» С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё.
          *
-         * TODO Гриша сказал что строка там только одна будет и он изменит аналитику
+         * TODO Р“СЂРёС€Р° СЃРєР°Р·Р°Р» С‡С‚Рѕ СЃС‚СЂРѕРєР° С‚Р°Рј С‚РѕР»СЊРєРѕ РѕРґРЅР° Р±СѓРґРµС‚ Рё РѕРЅ РёР·РјРµРЅРёС‚ Р°РЅР°Р»РёС‚РёРєСѓ
          */
         if (isCalcField(row.getCell("opuSumByTableD"))){
             def sum8Column = 0
-            formData.dataRows.each{ irow ->
+            dataRowsHelper.getAllCached().each{ irow ->
                 if (irow.accountNo == row.accountNo){
                     sum8Column += irow.rnu4Field5Accepted?:0
                 }
@@ -189,15 +207,15 @@ def logicalCheck(){
 
 
         /**
-         * Графа 13
-         * Номера строк:
-         * Все строки. Для ячеек, обозначенных как вычисляемые (см. Табл. 12)
-         * за исключением строк  118-119, 141-142
+         * Р“СЂР°С„Р° 13
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє:
+         * Р’СЃРµ СЃС‚СЂРѕРєРё. Р”Р»СЏ СЏС‡РµРµРє, РѕР±РѕР·РЅР°С‡РµРЅРЅС‹С… РєР°Рє РІС‹С‡РёСЃР»СЏРµРјС‹Рµ (СЃРј. РўР°Р±Р». 12)
+         * Р·Р° РёСЃРєР»СЋС‡РµРЅРёРµРј СЃС‚СЂРѕРє  118-119, 141-142
          *
-         * Алгоритм заполннеия:
-         * «графа13» =  сумма значений поля «Сумма, руб» для всех записей «Отчета о прибылях и убытках»  для которых выполняются следующие условия:
-         * Выбираются данные отчета за период, для которого сформирована текущая форма
-         * Значение поля «Кода ОПУ» Отчета о прибылях и убытках совпадает со значением «графы 10» текущей строки текущей формы.
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         * В«РіСЂР°С„Р°13В» =  СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№ РїРѕР»СЏ В«РЎСѓРјРјР°, СЂСѓР±В» РґР»СЏ РІСЃРµС… Р·Р°РїРёСЃРµР№ В«РћС‚С‡РµС‚Р° Рѕ РїСЂРёР±С‹Р»СЏС… Рё СѓР±С‹С‚РєР°С…В»  РґР»СЏ РєРѕС‚РѕСЂС‹С… РІС‹РїРѕР»РЅСЏСЋС‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРµ СѓСЃР»РѕРІРёСЏ:
+         * Р’С‹Р±РёСЂР°СЋС‚СЃСЏ РґР°РЅРЅС‹Рµ РѕС‚С‡РµС‚Р° Р·Р° РїРµСЂРёРѕРґ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° С‚РµРєСѓС‰Р°СЏ С„РѕСЂРјР°
+         * Р—РЅР°С‡РµРЅРёРµ РїРѕР»СЏ В«РљРѕРґР° РћРџРЈВ» РћС‚С‡РµС‚Р° Рѕ РїСЂРёР±С‹Р»СЏС… Рё СѓР±С‹С‚РєР°С… СЃРѕРІРїР°РґР°РµС‚ СЃРѕ Р·РЅР°С‡РµРЅРёРµРј В«РіСЂР°С„С‹ 10В» С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё С‚РµРєСѓС‰РµР№ С„РѕСЂРјС‹.
          */
         if (isCalcField(row.getCell("opuSumTotal")) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])){
             income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords, formData.departmentId).each{ income102 ->
@@ -206,13 +224,13 @@ def logicalCheck(){
         }
 
         /**
-         * Графа 13
-         * Номера строк: 118-119, 141-142
+         * Р“СЂР°С„Р° 13
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє: 118-119, 141-142
          *
-         * Алгоритм заполннеия:
-         *  «графа13» =сумма значений поля «Обороты по дебету, руб» для всех записей «Оборотной Ведомости», для которых выполняются следующие условия:
-         *  Выбираются данные отчета за период, для которого сформирована текущая форма
-         *  Значение поля «Номер счета» совпадает совпадает со значением «графы 10» текущей строки текущей формы.
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         *  В«РіСЂР°С„Р°13В» =СЃСѓРјРјР° Р·РЅР°С‡РµРЅРёР№ РїРѕР»СЏ В«РћР±РѕСЂРѕС‚С‹ РїРѕ РґРµР±РµС‚Сѓ, СЂСѓР±В» РґР»СЏ РІСЃРµС… Р·Р°РїРёСЃРµР№ В«РћР±РѕСЂРѕС‚РЅРѕР№ Р’РµРґРѕРјРѕСЃС‚РёВ», РґР»СЏ РєРѕС‚РѕСЂС‹С… РІС‹РїРѕР»РЅСЏСЋС‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРµ СѓСЃР»РѕРІРёСЏ:
+         *	Р’С‹Р±РёСЂР°СЋС‚СЃСЏ РґР°РЅРЅС‹Рµ РѕС‚С‡РµС‚Р° Р·Р° РїРµСЂРёРѕРґ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° С‚РµРєСѓС‰Р°СЏ С„РѕСЂРјР°
+         *	Р—РЅР°С‡РµРЅРёРµ РїРѕР»СЏ В«РќРѕРјРµСЂ СЃС‡РµС‚Р°В» СЃРѕРІРїР°РґР°РµС‚ СЃРѕРІРїР°РґР°РµС‚ СЃРѕ Р·РЅР°С‡РµРЅРёРµРј В«РіСЂР°С„С‹ 10В» С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё С‚РµРєСѓС‰РµР№ С„РѕСЂРјС‹.
          */
         if (row.getAlias() in ['R118', 'R119', 'R141', 'R142']){
             income101Dao.getIncome101(formData.reportPeriodId, row.accountingRecords, formData.departmentId).each{ income101 ->
@@ -224,13 +242,13 @@ def logicalCheck(){
 
 
         /**
-         * Графа 14
-         * Номера строк:
-         * Все строки. Для ячеек, обозначенных как вычисляемые (см. Табл. 12)
-         * за исключением строк  118-119, 141-142
+         * Р“СЂР°С„Р° 14
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє:
+         * Р’СЃРµ СЃС‚СЂРѕРєРё. Р”Р»СЏ СЏС‡РµРµРє, РѕР±РѕР·РЅР°С‡РµРЅРЅС‹С… РєР°Рє РІС‹С‡РёСЃР»СЏРµРјС‹Рµ (СЃРј. РўР°Р±Р». 12)
+         * Р·Р° РёСЃРєР»СЋС‡РµРЅРёРµРј СЃС‚СЂРѕРє  118-119, 141-142
          *
-         * Алгоритм заполннеия:
-         *  «графа 14» = («графа 11» + «графа 12») – «графа 13»
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         *  В«РіСЂР°С„Р° 14В» = (В«РіСЂР°С„Р° 11В» + В«РіСЂР°С„Р° 12В») вЂ“ В«РіСЂР°С„Р° 13В»
          */
         if (isCalcField(row.getCell("difference")) && !(row.getAlias() in ['R118', 'R119', 'R141', 'R142'])){
             row.difference = (row.opuSumByEnclosure2?:0) + (row.opuSumByTableD ?:0)- (row.opuSumTotal ?:0)
@@ -238,72 +256,76 @@ def logicalCheck(){
 
 
         /**
-         * Графа 14
-         * Номера строк:
+         * Р“СЂР°С„Р° 14
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє:
          * 118-119
          *
-         * Алгоритм заполннеия:
-         *  «графа 14» = «графа 13» - «графа 8»
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         *  В«РіСЂР°С„Р° 14В» = В«РіСЂР°С„Р° 13В» - В«РіСЂР°С„Р° 8В»
          */
         if (row.getAlias() in ['R118', 'R119']){
             row.difference = (row.opuSumTotal?:0) - (row.rnu4Field5Accepted?:0)
         }
 
         /**
-         * Графа 14
-         * Номера строк:
+         * Р“СЂР°С„Р° 14
+         * РќРѕРјРµСЂР° СЃС‚СЂРѕРє:
          * 141-142
          *
-         * Алгоритм заполннеия:
-         *  «графа 14» = «графа 13» - ( А+ Б)
-         *   А – значение «графы 8» для строки 141
-         *   Б – значение «графы 8» для строки 142
+         * РђР»РіРѕСЂРёС‚Рј Р·Р°РїРѕР»РЅРЅРµРёСЏ:
+         *  В«РіСЂР°С„Р° 14В» = В«РіСЂР°С„Р° 13В» - ( Рђ+ Р‘)
+         *   Рђ вЂ“ Р·РЅР°С‡РµРЅРёРµ В«РіСЂР°С„С‹ 8В» РґР»СЏ СЃС‚СЂРѕРєРё 141
+         *   Р‘ вЂ“ Р·РЅР°С‡РµРЅРёРµ В«РіСЂР°С„С‹ 8В» РґР»СЏ СЃС‚СЂРѕРєРё 142
          */
         if (row.getAlias() in ['R141', 'R142']){
-            row.difference = (row.opuSumTotal?:0) - ( (formData.getDataRow("R141").rnu4Field5Accepted?:0) + (formData.getDataRow("R142").rnu4Field5Accepted?:0))
+            dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R141')
+            dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R142')
+            row.difference = (row.opuSumTotal?: 0) -
+                    ( (dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R141').rnu4Field5Accepted?: 0) +
+                            (dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R142').rnu4Field5Accepted?: 0))
         }
     }
     logger.info('<--');
 }
 
 /**
- * Функция возвращает тип ячейки вычисляемая она или нет
+ * Р¤СѓРЅРєС†РёСЏ РІРѕР·РІСЂР°С‰Р°РµС‚ С‚РёРї СЏС‡РµР№РєРё РІС‹С‡РёСЃР»СЏРµРјР°СЏ РѕРЅР° РёР»Рё РЅРµС‚
  * @param cell
  * @return
  */
 def isCalcField(Cell cell){
-    return cell.getStyleAlias() == "Контрольные суммы"
+    return cell.getStyleAlias() == "РљРѕРЅС‚СЂРѕР»СЊРЅС‹Рµ СЃСѓРјРјС‹"
 }
 
 /**
- * Функция проверки является ли ячейка рекадтируемой
+ * Р¤СѓРЅРєС†РёСЏ РїСЂРѕРІРµСЂРєРё СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЏС‡РµР№РєР° СЂРµРєР°РґС‚РёСЂСѓРµРјРѕР№
  * @param cell
  * @return
  */
 def isEditableField(Cell cell){
-    return cell.getStyleAlias() == "Редактируемая"
+    return cell.getStyleAlias() == "Р РµРґР°РєС‚РёСЂСѓРµРјР°СЏ"
 }
 
 /**
- * Консолидация формы
+ * РљРѕРЅСЃРѕР»РёРґР°С†РёСЏ С„РѕСЂРјС‹
  */
 def consolidation(){
     if (!isTerBank()) {
         return
     }
 
-    // очистить форму
-    formData.getDataRows().each{ row ->
+    // РѕС‡РёСЃС‚РёС‚СЊ С„РѕСЂРјСѓ
+    dataRowsHelper.getAllCached().each{ row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted', 'logicalCheck', 'accountingRecords'].each{ alias->
             row.getCell(alias).setValue(null)
         }
     }
-    // получить данные из источников
+    // РїРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ РёР· РёСЃС‚РѕС‡РЅРёРєРѕРІ
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
-        def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             child.getDataRows().eachWithIndex() { row, i ->
-                def rowResult = formData.getDataRows().get(i)
+                def rowResult = dataRowsHelper.getAllCached().get(i)
                 ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted', 'logicalCheck', 'accountingRecords'].each {
                     if (row.getCell(it).getValue() != null) {
                         if (isCalcField(row.getCell(it)) || isEditableField(row.getCell(it)))
@@ -317,24 +339,24 @@ def consolidation(){
 
 
 /**
- * Скрипт для проверки создания.
+ * РЎРєСЂРёРїС‚ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРѕР·РґР°РЅРёСЏ.
  *
  * @author auldanov
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
+        logger.error('РќР°Р»РѕРіРѕРІР°СЏ С„РѕСЂРјР° СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.')
     }
 
     if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
+        logger.error("РќРµР»СЊР·СЏ СЃРѕР·РґР°РІР°С‚СЊ С„РѕСЂРјСѓ СЃ С‚РёРїРѕРј ${formData.kind?.name}")
     }
 }
 
 /**
- * Проверка на террбанк.
+ * РџСЂРѕРІРµСЂРєР° РЅР° С‚РµСЂСЂР±Р°РЅРє.
  */
 def isTerBank() {
     boolean isTerBank = false
@@ -347,13 +369,13 @@ def isTerBank() {
 }
 
 
-// обертка предназначенная для прямых вызовов функции без formData
-BigDecimal summ(ColumnRange cr) {
-    return summ(formData, cr, cr, {return true;})
-}
+//// РѕР±РµСЂС‚РєР° РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅР°СЏ РґР»СЏ РїСЂСЏРјС‹С… РІС‹Р·РѕРІРѕРІ С„СѓРЅРєС†РёРё Р±РµР· formData
+//BigDecimal summ(ColumnRange cr) {
+//    return summ(formData, cr, cr, {return true;})
+//}
 
 /**
- * Проверка на банк.
+ * РџСЂРѕРІРµСЂРєР° РЅР° Р±Р°РЅРє.
  */
 def isBank() {
     boolean isBank = true
@@ -366,7 +388,7 @@ def isBank() {
 }
 
 /**
- * Проверки наличия декларации Банка при отмене принятия нф.
+ * РџСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ РґРµРєР»Р°СЂР°С†РёРё Р‘Р°РЅРєР° РїСЂРё РѕС‚РјРµРЅРµ РїСЂРёРЅСЏС‚РёСЏ РЅС„.
  *
  * @author rtimerbaev
  * @since 21.03.2013 11:00
@@ -378,7 +400,7 @@ void checkDeclarationBankOnCancelAcceptance() {
     departmentFormTypeService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), FormDataKind.SUMMARY).each { department ->
         def bank = declarationService.find(2, department.departmentId, formData.reportPeriodId)
         if (bank != null && bank.accepted) {
-            logger.error('Отмена принятия налоговой формы невозможно, т.к. уже принята декларация Банка.')
+            logger.error('РћС‚РјРµРЅР° РїСЂРёРЅСЏС‚РёСЏ РЅР°Р»РѕРіРѕРІРѕР№ С„РѕСЂРјС‹ РЅРµРІРѕР·РјРѕР¶РЅРѕ, С‚.Рє. СѓР¶Рµ РїСЂРёРЅСЏС‚Р° РґРµРєР»Р°СЂР°С†РёСЏ Р‘Р°РЅРєР°.')
         }
     }
 }
