@@ -5,44 +5,40 @@
  * @author akadyrgulov
  */
 
+
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        logger.info('cosmos create')
-        //checkCreation()
+        checkCreation()
         break
     case FormDataEvent.CHECK :
-        logger.info('cosmos check')
-        //logicalCheck(true)
-        //checkNSI()
+        logicalCheck(true)
+        checkNSI()
         break
     case FormDataEvent.CALCULATE :
         // 6.2.5.7. Пересчитать итоги
-        logger.info('cosmos calculate')
-        //calc()
-//        logicalCheck(false)
-//        checkNSI()
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
     case FormDataEvent.ADD_ROW :
-        logger.info('cosmos add row')
         addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        logger.info('cosmos delete row')
         deleteRow()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-//        logicalCheck(true)
-//        checkNSI()
+        logicalCheck(true)
+        checkNSI()
         // на стороне сервера будет выполнен compose
         break
 // обобщить
     case FormDataEvent.COMPOSE :
-        logger.info('cosmos compose')
-//        consolidation()
-//        calc()
-//        logicalCheck(false)
-//        checkNSI()
+        consolidation()
+        calc()
+        logicalCheck(false)
+        checkNSI()
         break
 }
 
@@ -72,23 +68,29 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+    // TODO (Aydar Kadyrgulov)
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    DataRow<Cell> dataRow = formData.createDataRow()
+    if (currentDataRow == null) currentDataRow = 0
 
-    // графа ..
-    ['', '', ''].each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
+    dataRows = dataRowsHelper.getAllCached()
+    dataRows.add(currentDataRow, dataRow)
+    // графа 3, 5..7 редактируемые
+    ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit'].each {
+        dataRow.getCell(it).editable = true
+        dataRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    dataRowsHelper.save(dataRows)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    if (isTotal(currentDataRow)) {
-        formData.dataRows.remove(currentDataRow)
-    }
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    dataRowsHelper.delete(currentDataRow)
+    dataRows = dataRowsHelper.getAllCached()
+    dataRowsHelper.save(dataRows)
 }
 
 /**
@@ -99,11 +101,14 @@ void calc() {
      * Проверка объязательных полей.
      */
 
-    // список проверяемых столбцов (графа ..)
-    def requiredColumns = ['', '', '']
+    // список проверяемых столбцов (графа 3, 5..7)
 
-    for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+    def requiredColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
+
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+
+    for (def row : dataRowsHelper.getAllCached()) {
+        if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
@@ -112,33 +117,175 @@ void calc() {
      * Расчеты
      */
 
-    // удалить строку "итого"
+    // удалить фиксированные строки
     def delRow = []
-    formData.dataRows.each { row ->
-        if (isTotal(row)) {
+    dataRowsHelper.getAllCached().each { row ->
+        if (isFixedRow(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
+        dataRowsHelper.getAllCached().remove(getIndex(row))
     }
-    if (formData.dataRows.isEmpty()) {
+    if (dataRowsHelper.getAllCached().isEmpty()) {
         return
     }
 
-    formData.dataRows.eachWithIndex { row, i ->
-        // графа
+    // отсортировать/группировать
+    dataRowsHelper.getAllCached().sort { a, b ->
+        if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
+            return a.kpp <=> b.kpp
+        }
+        if (a.regionBank == b.regionBank) {
+            return a.regionBankDivision <=> b.regionBankDivision
+        }
+        return a.regionBank <=> b.regionBank
     }
 
-    // добавить итого (графа ..)
+    // TODO
+    // расчет графы 1..4, 8..21
+    dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+        // графа 1
+        row.number = i + 1
+
+        // графа 2
+        row.regionBank =0
+
+        // графа 4
+        row.kpp =0
+
+        // графа 8
+        row.calcFlag =0
+
+        // графа 9
+        row.obligationPayTax =0
+
+        // графа 10
+        row.baseTaxOf =0
+
+        // графа 11
+        row.baseTaxOfRub =0
+
+        // графа 12
+        row.subjectTaxStavka =0
+
+        // графа 13
+        row.taxSum =0
+
+        // графа 14
+        row.taxSumOutside =0
+
+        // графа 15
+        row.taxSumToPay =0
+
+        // графа 16
+        row.taxSumToReduction =0
+
+        // графа 17
+        row.everyMontherPaymentAfterPeriod =0
+
+        // графа 18
+        row.everyMonthForKvartalNextPeriod =0
+
+        // графа 19
+        row.everyMonthForSecondKvartalNextPeriod =0
+
+        // графа 20
+        row.everyMonthForThirdKvartalNextPeriod =0
+
+        // графа 21
+        row.everyMonthForFourthKvartalNextPeriod =0
+    }
+
+    // добавить строку ЦА (скорректрированный) (графа 1..21)
+    def caRow = formData.createDataRow()
+    dataRowsHelper.getAllCached().add(caRow)
+    caRow.setAlias('ca')
+    caRow.regionBank = 'Итого'  // TODO (Aydar Kadyrgulov)
+    setTotalStyle(caRow)
+    // TODO доделать
+    // расчет графы 1..21
+    dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+        // графа 1
+        row.number = i + 1
+
+        // графа 2
+        row.regionBank =0
+
+        // графа 3
+        row.regionBankDivision =0
+
+        // графа 4
+        row.kpp =0
+
+        // графа 5
+        row.propertyPrice =0
+
+        // графа 6
+        row.workersCount =0
+
+        // графа 7
+        row.subjectTaxCredit =0
+
+        // графа 8
+        row.calcFlag =0
+
+        // графа 9
+        row.obligationPayTax =0
+
+        // графа 10
+        row.baseTaxOf =0
+
+        // графа 11
+        row.baseTaxOfRub =0
+
+        // графа 12
+        row.subjectTaxStavka = 0
+
+        // графа 13
+        row.taxSum =0
+
+        // графа 14
+        row.taxSumOutside =0
+
+        // графа 15
+        row.taxSumToPay =0
+
+        // графа 16
+        row.taxSumToReduction =0
+
+        // графа 17
+        row.everyMontherPaymentAfterPeriod =0
+
+        // графа 18
+        row.everyMonthForKvartalNextPeriod =0
+
+        // графа 19
+        row.everyMonthForSecondKvartalNextPeriod =0
+
+        // графа 20
+        row.everyMonthForThirdKvartalNextPeriod =0
+
+        // графа 21
+        row.everyMonthForFourthKvartalNextPeriod = 0
+    }
+
+
+    // добавить итого (графа 5..7, 10, 11, 13..21)
     def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
+    dataRowsHelper.getAllCached().add(totalRow)
     totalRow.setAlias('total')
-//    totalRow. = 'Итого'
+    totalRow.regionBank = 'Итого' // TODO (Aydar Kadyrgulov)
     setTotalStyle(totalRow)
-    ['', '', ''].each { alias ->
+    ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
+            'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+            'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+            'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+            'everyMonthForThirdKvartalNextPeriod',
+            'everyMonthForFourthKvartalNextPeriod'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
@@ -147,64 +294,31 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
-    if (!formData.dataRows.isEmpty()) {
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    if (!dataRowsHelper.getAllCached().isEmpty()) {
         def i = 1
 
-        // список проверяемых столбцов (графа ..)
-        def requiredColumns = ['', '', '']
+        // список проверяемых столбцов (графа 1..21)
+        def requiredColumns = ['number', 'regionBank', 'regionBankDivision', 'kpp',
+                'propertyPrice', 'workersCount', 'subjectTaxCredit', 'calcFlag',
+                'obligationPayTax', 'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+                'taxSum', 'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+                'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                'everyMonthForFourthKvartalNextPeriod']
 
-        // суммы строки общих итогов
-        def totalSums = [:]
-
-        // графы для которых надо вычислять итого (графа ..)
-        def totalColumns = ['', '', '']
-
-        // признак наличия итоговых строк
-        def hasTotal = false
-
-        def tmp
-
-        for (def row : formData.dataRows) {
+        for (def row : dataRowsHelper.getAllCached()) {
             if (isTotal(row)) {
-                hasTotal = true
                 continue
             }
 
-            // . Обязательность заполнения поля графы ..
+            // 1. Обязательность заполнения поля графы 1..21
             if (!checkRequiredColumns(row, requiredColumns, useLog)) {
                 return
             }
-
-            // . Арифметичесие проверки (начало)
-            // графа ..
-//            tmp = round(row., 2)
-//            if (row.NAME != ) {
-                name = getColumnName(row, 'NAME')
-                logger.warn("Неверно рассчитана графа «$name»!")
-//            }
-            // Арифметичесие проверки (конец)
-
-            // . Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-            totalColumns.each { alias ->
-                if (totalSums[alias] == null) {
-                    totalSums[alias] = 0
-                }
-                totalSums[alias] += (row.getCell(alias).getValue() ?: 0)
-            }
-        }
-
-        if (hasTotal) {
-            def totalRow = formData.getDataRow('total')
-
-            // . Проверка итогового значений по всей форме (графа ..)
-            for (def alias : totalColumns) {
-                if (totalSums[alias] != totalRow.getCell(alias).getValue()) {
-                    logger.error('Итоговые значения рассчитаны неверно!')
-                    return false
-                }
-            }
         }
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return true
 }
 
@@ -212,22 +326,21 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    if (!formData.dataRows.isEmpty()) {
-        for (def row : formData.dataRows) {
-            if (isTotal(row)) {
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    if (!dataRowsHelper.getAllCached().isEmpty()) {
+        for (def row : dataRowsHelper.getAllCached()) {
+            if (isFixedRow(row)) {
                 continue
             }
 
-            // . Проверка (графа )
+            // 1. Проверка совпадения наименования подразделения со справочным
             if (false) {
-                logger.error('')
+                logger.error('Неверное наименование подразделения!')
                 return false
-            }
-            if (false) {
-                logger.warn('')
             }
         }
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return true
 }
 
@@ -235,29 +348,33 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
+    // TODO
+
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    dataRowsHelper.getAllCached().clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 source.getDataRows().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        dataRowsHelper.getAllCached().add(row)
                     }
                 }
             }
         }
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
  * Проверка при создании формы.
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -277,6 +394,13 @@ def isTotal(def row) {
 }
 
 /**
+ * Проверка является ли строка фиксированной.
+ */
+def isFixedRow(def row) {
+    return row != null && row.getAlias() != null
+}
+
+/**
  * Проверка пустое ли значение.
  */
 def isEmpty(def value) {
@@ -287,27 +411,39 @@ def isEmpty(def value) {
  * Устаносить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    ['', '', '', '', ''].each {
+    ['number', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice',
+            'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+            'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
+            'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+            'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+            'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+            'everyMonthForFourthKvartalNextPeriod'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
 }
+
+
 
 /**
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    dataRowsHelper.getAllCached().indexOf(row)
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
     def from = 0
-    def to = formData.dataRows.size() - 2
+    def to = dataRowsHelper.getAllCached().size() - 2 - 1 // добавлен -1 что б исключить скорректированную строку
     if (from > to) {
         return 0
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
