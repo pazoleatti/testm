@@ -40,7 +40,7 @@ public class GetRowsDataHandler extends
 		if (fixedRows) {
 			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(userInfo, action.getFormDataId(), action.isReadOnly()));
 		} else {
-			 dataRowRange = new DataRowRange(action.getRange().getOffset() == 0 ? 1 : action.getRange().getOffset(), action.getRange().getLimit());
+			 dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
 		}
 
 		result.setDataRows(dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, action.isReadOnly()));
