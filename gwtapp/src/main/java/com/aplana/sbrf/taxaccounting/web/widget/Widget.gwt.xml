@@ -15,6 +15,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.history.History" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.PdfViewerWidget" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.RefBookPicker" />
 
 	<source path="cell"/>
     <source path="datepicker"/>

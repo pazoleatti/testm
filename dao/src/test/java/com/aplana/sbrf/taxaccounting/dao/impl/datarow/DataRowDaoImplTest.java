@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
@@ -211,6 +212,28 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRows));
 		checkIndexCorrect(dataRows);
 	}
+	
+	@Test(expected=DaoException.class)
+	public void updateRowsErrorDataRowId() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+		List<DataRow<Cell>> dataRowsForUpdate = new ArrayList<DataRow<Cell>>();
+
+		DataRow<Cell> dr = dataRows.get(0);
+		dr.setId(null);
+		
+		dr.put("stringColumn", "11");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+		dataRowsForUpdate.add(dr);
+		
+
+		dataRowDao.updateRows(fd, dataRowsForUpdate);
+	}
+	
+	
 
 	@Test
 	public void updateRowsRepeatSuccess() {
@@ -252,6 +275,9 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRows));
 		checkIndexCorrect(dataRows);
 	}
+	
+	
+	
 
 	@Test
 	public void updateRowsRepeat2Success() {
@@ -402,6 +428,18 @@ public class DataRowDaoImplTest {
 				new int[] { -2, -1, 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
 	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void insertRowsByIndexError() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dataRows.add(dr);
+
+		dataRowDao.insertRows(fd, 7, dataRows);
+	}
 
 	@Test
 	public void insertRowsAfterFirstSuccess() {
@@ -429,6 +467,23 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(
 				new int[] { 1, 11, 12, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test(expected=DaoException.class)
+	public void insertRowsAfterErrorRowId() {
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "11");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+		dataRows.add(dr);
+
+		DataRow<Cell> drAfter = dataRowDao.getRows(fd, null, new DataRowRange(1, 1)).get(0);
+		drAfter.setId(null);
+		dataRowDao.insertRows(fd, drAfter, dataRows);
 	}
 
 	@Test
@@ -460,7 +515,7 @@ public class DataRowDaoImplTest {
 	}
 
 	@Test
-	public void insertRowsAfterEnptySuccess() {
+	public void insertRowsAfterEmptySuccess() {
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		dataRowDao.insertRows(fd,
@@ -478,6 +533,18 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(
 				new int[] { 1, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void removeRowsByIndexesError1() {
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd, 0, 4);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void removeRowsByIndexes1Error2() {
+		FormData fd = formDataDao.get(1);
+		dataRowDao.removeRows(fd, 1, 6);
 	}
 
 	@Test
@@ -718,6 +785,55 @@ public class DataRowDaoImplTest {
 		dataRows = dataRowDao.getRows(fd, null, null);
 		checkIndexCorrect(dataRows);
 		Assert.assertEquals(5000, dataRows.size());
+	}
+	
+	
+	/**
+	 * Эту проблему нужно исправить, чтобы тут небыло ошибки.
+	 * Задача: http://jira.aplana.com/browse/SBRFACCTAX-3176
+	 */
+	@Test(expected = IllegalStateException.class)
+	public void repackORDSuccessFirst() {
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+			DataRow<Cell> dr = fd.createDataRow();
+			dataRows.add(dr);
+		}
+		dataRowDao.insertRows(fd, 1, dataRows);
+	}
+	
+	/**
+	 * Эту проблему нужно исправить, чтобы тут небыло ошибки.
+	 * Задача: http://jira.aplana.com/browse/SBRFACCTAX-3176
+	 */
+	@Test(expected = IllegalStateException.class)
+	public void repackORDSuccessCenter() {
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+			DataRow<Cell> dr = fd.createDataRow();
+			dataRows.add(dr);
+		}
+		dataRowDao.insertRows(fd, 5, dataRows);
+	}
+	
+	/**
+	 * Эту проблему нужно исправить, чтобы тут небыло ошибки.
+	 * Задача: http://jira.aplana.com/browse/SBRFACCTAX-3176
+	 */
+	@Test
+	public void repackORDSuccessLast() {
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+			DataRow<Cell> dr = fd.createDataRow();
+			dataRows.add(dr);
+		}
+		dataRowDao.insertRows(fd, 6, dataRows);
 	}
 
 }
