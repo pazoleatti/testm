@@ -43,7 +43,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
 	@UiField
-	FlexiblePager pager = new FlexiblePager();
+	FlexiblePager pager;
 	@UiField
 	Button addRowButton;
 	@UiField
@@ -472,6 +472,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
 			final Range range = display.getVisibleRange();
+			System.out.println("Range: " + range.getStart());
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	}
