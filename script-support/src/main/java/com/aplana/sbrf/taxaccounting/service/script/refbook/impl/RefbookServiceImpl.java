@@ -17,7 +17,7 @@ public class RefbookServiceImpl implements RefbookService {
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
-		provider.setRefBookId(refBookId);//TODO: (Marat Fayzullin) временная заглушка
+		//provider.setRefBookId(refBookId);//TODO: (Marat Fayzullin) временная заглушка
         return provider.getRecordData(recordId);
     }
 

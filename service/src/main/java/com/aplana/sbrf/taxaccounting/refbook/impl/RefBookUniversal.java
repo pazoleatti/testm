@@ -23,10 +23,16 @@ import java.util.Map;
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class RefBookDataProviderImpl extends AbstractRefBookDataProvider {
+public class RefBookUniversal implements RefBookDataProvider {
 
 	@Autowired
 	private RefBookDao refBookDao;
+
+	protected Long refBookId;
+
+	public void setRefBookId(Long refBookId) {
+		this.refBookId = refBookId;
+	}
 
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
