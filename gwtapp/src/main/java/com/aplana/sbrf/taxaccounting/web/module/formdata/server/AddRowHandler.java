@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,9 @@ public class AddRowHandler extends
 	@Autowired
 	private SecurityService securityService;
 
+	@Autowired
+	private DataRowService dataRowService;
+
 	public AddRowHandler() {
 		super(AddRowAction.class);
 	}
@@ -41,8 +46,11 @@ public class AddRowHandler extends
 		throws ActionException {
 		FormData formData = action.getFormData();
 		Logger logger = new Logger();
+		if (!action.getModifiedRows().isEmpty()) {
+			TAUserInfo userInfo = securityService.currentUserInfo();
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+		}
 		formDataService.addRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
-
 		FormDataResult result = new FormDataResult();
 		result.setFormData(formData);
 		result.setLogEntries(logger.getEntries());

@@ -265,15 +265,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void saveForm(Set<Long> deleteIds, Long departmentId, int typeId, int formId) {
-        if (deleteIds != null && !deleteIds.isEmpty()) {
-            deleteDepartmentFormType(deleteIds);
-        } else {
-            createDepartmentFormType(departmentId, typeId, formId);
-        }
-    }
-
-    private void deleteDepartmentFormType(final Set<Long> removedLinks) {
+    public void deleteDepartmentFormType(final Set<Long> removedLinks) {
         getJdbcTemplate().batchUpdate(
                 "delete from department_form_type where id = ?",
                 new BatchPreparedStatementSetter() {
@@ -293,7 +285,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private void createDepartmentFormType(Long departmentId, int typeId, int formId) {
+    @Override
+    @Transactional(readOnly = false)
+    public void createDepartmentFormType(Long departmentId, int typeId, int formId) {
         getJdbcTemplate().update(
                 "insert into department_form_type (department_id, form_type_id, id, kind) " +
                         " values (?, ?, seq_department_form_type.nextval, ?)",
@@ -306,16 +300,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void saveDecl(Set<Long> deleteIds, Long departmentId, int formId) {
-        if (deleteIds != null && !deleteIds.isEmpty()) {
-            deleteDepartmentDeclType(deleteIds);
-        } else {
-            createDepartmentDeclType(departmentId, formId);
-        }
-    }
-
-
-    private void deleteDepartmentDeclType(final Set<Long> removedLinks) {
+    public void deleteDepartmentDeclType(final Set<Long> removedLinks) {
         getJdbcTemplate().batchUpdate(
                 "delete from department_declaration_type where id = ?",
                 new BatchPreparedStatementSetter() {
@@ -335,10 +320,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private void createDepartmentDeclType(Long departmentId, int formId) {
+    @Override
+    @Transactional(readOnly = false)
+    public void createDepartmentDeclType(Long departmentId, int formId) {
         getJdbcTemplate().update(
-                "insert into department_declaration_type ( id, department_id, declaration_type_id) " +
-                        " values ( SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
+                "insert into department_declaration_type (id, department_id, declaration_type_id) " +
+                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
                 new Object[]{
                         departmentId,
                         formId

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,9 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, For
 
 	@Autowired
 	private SecurityService securityService;
+
+	@Autowired
+	private DataRowService dataRowService;
 	
 	public DeleteRowHandler() {
 		super(DeleteRowAction.class);
@@ -39,6 +44,10 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, For
 			ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
+		if (!action.getModifiedRows().isEmpty()) {
+			TAUserInfo userInfo = securityService.currentUserInfo();
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+		}
 		formDataService.deleteRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		
 		FormDataResult result = new FormDataResult();
