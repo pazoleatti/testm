@@ -24,7 +24,6 @@
     <source path="pager"/>
     <source path="datarow"/>
     <source path="departmentpicker"/>
-    <source path="newdepartmentpicker"/>
     <source path="reportperiodpicker"/>
     <source path="incrementbutton"/>
 </module>

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup.PopUpWithTree;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.PopUpWithTree;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;

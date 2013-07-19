@@ -3,7 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker">
+             xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker">
 
     <ui:style>
 
@@ -80,7 +80,7 @@
                         <g:cell>
                             <g:VerticalPanel>
                                 <g:Label width="200px" text="Подразделение" />
-                                <n:NewDepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="true"/>
+                                <n:DepartmentPicker ui:field="departmentSelectionTree" header="Выберите подразделение" withCheckBox="true"/>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="250px">
