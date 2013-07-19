@@ -79,29 +79,22 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public List<FormTypeKind> save(Set<Long> ids, Long departmentId, int typeId, int formId, char taxType, boolean isForm) {
-        if (isForm) {
-            if (ids == null) {
-                List<FormTypeKind> list = getFormAssigned(departmentId, taxType);
-                for (FormTypeKind model : list) {
-                    if (model.getFormTypeId().intValue() == formId && model.getKind().getId() == typeId) {
-                        return null;
-                    }
-                }
-            }
-            departmentFormTypeDao.saveForm(ids, departmentId, typeId, formId);
-            return getFormAssigned(departmentId, taxType);
-        } else {
-            if (ids == null) {
-                List<FormTypeKind> list = getDeclarationAssigned(departmentId, taxType);
-                for (FormTypeKind model : list) {
-                    if (model.getFormTypeId().intValue() == formId) {
-                        return null;
-                    }
-                }
-            }
-            departmentFormTypeDao.saveDecl(ids, departmentId, formId);
-            return getDeclarationAssigned(departmentId, taxType);
-        }
+    public void saveForm(Long departmentId, int typeId, int formId) {
+        departmentFormTypeDao.createDepartmentFormType(departmentId,typeId,formId);
+    }
+
+    @Override
+    public void deleteForm(Set<Long> ids) {
+        departmentFormTypeDao.deleteDepartmentFormType(ids);
+    }
+
+    @Override
+    public void saveDeclaration(Long departmentId, int declarationId) {
+        departmentFormTypeDao.createDepartmentDeclType(departmentId, declarationId);
+    }
+
+    @Override
+    public void deleteDeclaration(Set<Long> ids) {
+        departmentFormTypeDao.deleteDepartmentDeclType(ids);
     }
 }
