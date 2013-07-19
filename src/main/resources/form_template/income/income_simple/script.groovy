@@ -123,16 +123,16 @@ def calcForm(){
         def row = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R' + n)
 
         // «графа 5» =сумма значений  «графы 5» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum?:0) + (row.rnu6Field10Sum?:0)
+        row40002.rnu6Field10Sum = (row40002.rnu6Field10Sum?:0) + (row.rnu6Field10Sum?:0)
 
         // «графа 6» =сумма значений  «графы 6» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted?:0) + (row.rnu6Field12Accepted?:0)
+        row40002.rnu6Field12Accepted = (row40002.rnu6Field12Accepted?:0) + (row.rnu6Field12Accepted?:0)
 
         // «графа 7» =сумма значений  «графы 7» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod?:0) + (row.rnu6Field12PrevTaxPeriod?:0)
+        row40002.rnu6Field12PrevTaxPeriod = (row40002.rnu6Field12PrevTaxPeriod?:0) + (row.rnu6Field12PrevTaxPeriod?:0)
 
         // «графа 8» =сумма значений  «графы 8» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted?:0) + (row.rnu4Field5Accepted?:0)
+        row40002.rnu4Field5Accepted = (row40002.rnu4Field5Accepted?:0) + (row.rnu4Field5Accepted?:0)
     }
     dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
