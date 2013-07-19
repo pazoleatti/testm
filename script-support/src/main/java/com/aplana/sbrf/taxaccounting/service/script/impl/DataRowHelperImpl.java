@@ -150,4 +150,19 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         return dataRows;
     }
 
+   @Override
+    public int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias) {
+        if (rowAlias == null) {
+            throw new NullPointerException("Row alias cannot be null");
+        }
+
+        for (int index = 0; index < dataRows.size(); ++index) {
+            DataRow<Cell> row = dataRows.get(index);
+            if (rowAlias.equals(row.getAlias())) {
+                return index;
+            }
+        }
+        throw new IllegalArgumentException("Wrong row alias requested: "
+                + rowAlias);
+    }
 }
