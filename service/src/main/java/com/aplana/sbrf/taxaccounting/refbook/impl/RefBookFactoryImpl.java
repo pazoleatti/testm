@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.RefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -37,8 +36,10 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	@Override
 	public RefBookDataProvider getDataProvider(long refBookId) {
-		RefBookDataProvider refBookDataProvider = (RefBookDataProvider) applicationContext.getBean(RefBookDataProvider.class);
-		refBookDataProvider.setRefBookId(refBookId);
+		RefBookDataProvider refBookDataProvider = applicationContext.getBean(RefBookDataProvider.class);
+		if (refBookDataProvider instanceof RefBookUniversal) {
+			((RefBookUniversal) refBookDataProvider).setRefBookId(refBookId);
+		}
 		//здесь добавлять условия для учета нестандартных справочников
 		return refBookDataProvider;
 	}
