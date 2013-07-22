@@ -507,7 +507,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			c = r.createCell(0);
             c.setCellValue("Исполнитель:");
             c = r.createCell(1);
-			c.setCellValue(data.getPerformer().getName() + "/" + data.getPerformer().getPhone());
+			c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
+                    (data.getPerformer().getPhone()!=null?data.getPerformer().getPhone():""));
 		}
 
 	}
