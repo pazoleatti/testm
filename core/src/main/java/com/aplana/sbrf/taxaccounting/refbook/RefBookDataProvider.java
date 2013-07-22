@@ -19,12 +19,6 @@ import java.util.Map;
 public interface RefBookDataProvider {
 
 	/**
-	 * Устанавливает код справочника
-	 * @param refBookId
-	 */
-	void setRefBookId(Long refBookId);
-
-	/**
 	 * Загружает данные справочника на определенную дату актуальности
 	 * @param version дата актуальности
 	 * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы

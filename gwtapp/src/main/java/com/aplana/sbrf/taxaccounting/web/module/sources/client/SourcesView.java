@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.SelectDepartmentsEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup.SelectDepartmentsEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -20,14 +20,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
-import java.util.List;
 
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		implements SourcesPresenter.MyView, SelectDepartmentsEventHandler {
@@ -71,9 +69,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
 
 	@UiField
-	NewDepartmentPicker departmentReceiverPicker;
+	DepartmentPicker departmentReceiverPicker;
 	@UiField
-	NewDepartmentPicker departmentSourcePicker;
+	DepartmentPicker departmentSourcePicker;
 
 	@UiField
 	Anchor formAnchor;

@@ -6,5 +6,6 @@ target
 .project
 .idea
 *.iml
+.gwt
 bin
 *~

@@ -1,7 +1,7 @@
-package com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup;
+package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.SelectDepartmentsEventHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 import java.util.Collection;

@@ -102,7 +102,6 @@ def formDataComplexConsumption = formDataCollection.find(departmentId, 303, Form
 /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
 def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
 
-// TODO (Ramil Timerbaev) проверить алиасы столбцов после того как будет готова переделанная в сводную выходная (проверить по всей декларации)
 /** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
 def formDataAdvance = formDataCollection.find(departmentId, 500, FormDataKind.SUMMARY)
 
@@ -139,7 +138,7 @@ if (prevReportPeriod != null) {
     formDataSimpleIncomeOld = FormDataService.find(301, FormDataKind.SUMMARY, departmentId, prevReportPeriod.id)
     formDataComplexConsumptionOld = FormDataService.find(303, FormDataKind.SUMMARY, departmentId, prevReportPeriod.id)
     formDataSimpleConsumptionOld = FormDataService.find(304, FormDataKind.SUMMARY, departmentId, prevReportPeriod.id)
-    formDataAdvanceOld = FormDataService.find(305, FormDataKind.ADDITIONAL, departmentId, prevReportPeriod.id)
+    formDataAdvanceOld = FormDataService.find(500, FormDataKind.SUMMARY, departmentId, prevReportPeriod.id)
 }
 def hasPrevPeriodDeclaration = false
 if (formDataComplexIncomeOld != null && formDataSimpleIncomeOld != null &&
@@ -172,7 +171,7 @@ if (prevReportPeriod2 != null) {
     formDataSimpleIncomeOld2 = FormDataService.find(301, FormDataKind.SUMMARY, departmentId, prevReportPeriod2.id)
     formDataComplexConsumptionOld2 = FormDataService.find(303, FormDataKind.SUMMARY, departmentId, prevReportPeriod2.id)
     formDataSimpleConsumptionOld2 = FormDataService.find(304, FormDataKind.SUMMARY, departmentId, prevReportPeriod2.id)
-    formDataAdvanceOld2 = FormDataService.find(305, FormDataKind.ADDITIONAL, departmentId, prevReportPeriod2.id)
+    formDataAdvanceOld2 = FormDataService.find(500, FormDataKind.SUMMARY, departmentId, prevReportPeriod2.id)
 }
 
 def hasPrevPeriodDeclarationOld = false
@@ -293,8 +292,8 @@ def nalBaza = getLong(pribUb - dohIsklPrib - 0 - 0 + 0)
 def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
 def nalIschislFB = getNalIschislFB(nalBazaIsch, departmentParamIncome.taxRate)
-/** НалИсчислСуб. Код строки декларации 200. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-def nalIschislSub = getFormDataSumByColName(formDataAdvance, 'subjectTaxSum')
+/** НалИсчислСуб. Код строки декларации 200. Столбец «Сумма налога». */
+def nalIschislSub = getFormDataSumByColName(formDataAdvance, 'taxSum')
 /** НалИсчисл. Код строки декларации 180. */
 def nalIschisl = getLong(nalIschislFB + nalIschislSub)
 /** НалВыпл311. */
@@ -358,8 +357,8 @@ def nalBazaOld2 = getLong(pribUbOld2 - dohIsklPribOld2 - 0 - 0 + 0)
 def nalBazaIschOld2 = getNalBazaIsch(nalBazaOld2, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
 def nalIschislFBOld2 = getNalIschislFB(nalBazaIschOld2, departmentParamIncome.taxRate)
-/** НалИсчислСуб. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-def nalIschislSubOld2 = getFormDataSumByColName(formDataAdvanceOld2, 'subjectTaxSum')
+/** НалИсчислСуб. Столбец «Сумма налога». */
+def nalIschislSubOld2 = getFormDataSumByColName(formDataAdvanceOld2, 'taxSum')
 
 /*
  * Расчет значении декларации за предыдущий период.
@@ -411,8 +410,8 @@ def nalBazaOld = getLong(pribUbOld - dohIsklPribOld - 0 - 0 + 0)
 def nalBazaIschOld = getNalBazaIsch(nalBazaOld, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
 def nalIschislFBOld = getNalIschislFB(nalBazaIschOld, departmentParamIncome.taxRate)
-/** НалИсчислСуб. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
-def nalIschislSubOld = getFormDataSumByColName(formDataAdvanceOld, 'subjectTaxSum')
+/** НалИсчислСуб. Столбец «Сумма налога». */
+def nalIschislSubOld = getFormDataSumByColName(formDataAdvanceOld, 'taxSum')
 // /** НалИсчисл. */ // TODO (Ramil Timerbaev) если не надо, то убрать
 // def nalIschislOld = getLong(nalIschislFBOld + nalIschislSubOld)
 /** АвПлатМесСуб. Код строки декларации 310. */
@@ -994,7 +993,7 @@ xmlbuilder.Файл(
                     def nalBazaDola = emptyNull
                     /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
                     def stavNalSubRF = emptyNull
-                    /** СумНал. Столбец «Сумма налога в бюджет субъекта РФ». */
+                    /** СумНал. Столбец «Сумма налога». */
                     def sumNal = emptyNull
                     /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
                     def nalNachislSubRF = emptyNull
@@ -1010,19 +1009,19 @@ xmlbuilder.Файл(
                     if (formDataAdvance != null) {
                         formDataAdvance.dataRows.each { row ->
                             if (row.getAlias() != 'total') {
-                                obRasch = row.stringCode
-                                naimOP = row.divisionName
+                                obRasch = row.calcFlag
+                                naimOP = row.regionBankDivision
                                 kppop = row.kpp
-                                obazUplNalOP = row.labalAboutPaymentTax
+                                obazUplNalOP = row.obligationPayTax
                                 dolaNalBaz = row.baseTaxOf
-                                nalBazaDola = getLong(row.baseTaxOfRub)
+                                nalBazaDola = row.baseTaxOfRub
                                 stavNalSubRF = row.subjectTaxStavka
-                                sumNal = getLong(row.subjectTaxSum)
-                                nalNachislSubRF = getLong(row.subjectTaxCredit)
-                                sumNalP = getLong(row.taxSumToPay)
-                                nalViplVneRF = getLong(row.taxSumOutside)
-                                mesAvPlat = getLong(row.everyMontherPaymentAfterPeriod)
-                                mesAvPlat1CvSled = getLong(row.everyMonthForKvartalNextPeriod)
+                                sumNal = row.taxSum
+                                nalNachislSubRF = row.subjectTaxCredit
+                                sumNalP = row.taxSumToPay
+                                nalViplVneRF = row.taxSumOutside
+                                mesAvPlat = row.everyMontherPaymentAfterPeriod
+                                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
 
                                 // 0..n
                                 РаспрНалСубРФ(
@@ -1051,49 +1050,49 @@ xmlbuilder.Файл(
                 // для декларации обособленного подразделения
 
                 // Приложение № 5 к Листу 02
-                /** ОбРасч. Столбец «Код строки 002». */
+                /** ОбРасч. Столбец «Признак расчёта». */
                 def obRasch = emptyNull
-                /** НаимОП. Столбец «Наименование подразделения». */
+                /** НаимОП. Столбец «Подразделение территориального банка». */
                 def naimOP = emptyNull
                 /** КППОП. Столбец «КПП». */
                 def kppop = emptyNull
-                /** ОбязУплНалОП. Столбец «Отметка о возложении обязанности по уплате налога». */
+                /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
                 def obazUplNalOP = emptyNull
-                /** ДоляНалБаз. Столбец «Доля налоговой базы (%) [040]». */
+                /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
                 def dolaNalBaz = emptyNull
-                /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.) [050]». */
+                /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
                 def nalBazaDola = emptyNull
-                /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта РФ [060]». */
+                /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
                 def stavNalSubRF = emptyNull
-                /** СумНал. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
+                /** СумНал. Столбец «Сумма налога». */
                 def sumNal = emptyNull
-                /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта РФ. Расчётный [080]». */
+                /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
                 def nalNachislSubRF = emptyNull
-                /** СумНалП. Столбец «Сумма налога к доплате [100]». */
+                /** СумНалП. Столбец «Сумма налога к доплате». */
                 def sumNalP = emptyNull
-                /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами РФ [090]». */
+                /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
                 def nalViplVneRF = emptyNull
-                /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом [120]». */
+                /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
                 def mesAvPlat = emptyNull
-                /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на 1 квартал следующего налогового периода [121]». */
+                /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
                 def mesAvPlat1CvSled = emptyNull
 
                 // получение из нф авансовых платежей строки соответствующей текущему подразделению
                 def tmpRow = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
                 if (tmpRow != null) {
-                    obRasch = tmpRow.stringCode
-                    naimOP = tmpRow.divisionName
-                    kppop = tmpRow.kpp
-                    obazUplNalOP = tmpRow.labalAboutPaymentTax
-                    dolaNalBaz = tmpRow.baseTaxOf
-                    nalBazaDola = getLong(tmpRow.baseTaxOfRub)
-                    stavNalSubRF = tmpRow.subjectTaxStavka
-                    sumNal = getLong(tmpRow.subjectTaxSum)
-                    nalNachislSubRF = getLong(tmpRow.subjectTaxCredit)
-                    sumNalP = getLong(tmpRow.taxSumToPay)
-                    nalViplVneRF = getLong(tmpRow.taxSumOutside)
-                    mesAvPlat = getLong(tmpRow.everyMontherPaymentAfterPeriod)
-                    mesAvPlat1CvSled = getLong(tmpRow.everyMonthForKvartalNextPeriod)
+                    obRasch = row.calcFlag
+                    naimOP = row.regionBankDivision
+                    kppop = row.kpp
+                    obazUplNalOP = row.obligationPayTax
+                    dolaNalBaz = row.baseTaxOf
+                    nalBazaDola = row.baseTaxOfRub
+                    stavNalSubRF = row.subjectTaxStavka
+                    sumNal = row.taxSum
+                    nalNachislSubRF = row.subjectTaxCredit
+                    sumNalP = row.taxSumToPay
+                    nalViplVneRF = row.taxSumOutside
+                    mesAvPlat = row.everyMontherPaymentAfterPeriod
+                    mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
                 }
 
                 // 0..n - всегда один

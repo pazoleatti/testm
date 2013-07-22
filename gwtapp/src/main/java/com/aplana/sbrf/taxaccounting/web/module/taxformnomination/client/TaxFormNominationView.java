@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.PopUpWithTree;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
@@ -49,6 +49,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         String disabled();
     }
 
+    private Long depoId = null;
+
     @UiField
     LinkStyle css;
     @UiField
@@ -71,14 +73,12 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     Anchor cancelAnchor;
     @UiField
     GenericDataGrid<TableModel> grid;
+    @UiField(provided = true)
+    PopUpWithTree tree;
     @UiField
-    Panel departmentPickerPanel;
+    DockLayoutPanel panelFormDataKind;
     @UiField
-    VerticalPanel panelFormDataKind;
-    @UiField
-    Label labelTaxFormKind;
-    @UiField
-    Label labelDeclKind;
+    Label labelKind;
 
     private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
@@ -89,9 +89,24 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         initBoxes();
 
+        initTree();
+
         initWidget(uiBinder.createAndBindUi(this));
 
         initTable();
+    }
+
+    private void initTree() {
+        tree = new PopUpWithTree("", false);
+        tree.ok.setVisible(false);
+
+    }
+
+    private void setDepiId(Long id) {
+        if ((depoId != null && !depoId.equals(id)) || (depoId == null && id != null)) {
+            depoId = id;
+            onDepoChange();
+        }
     }
 
     @UiHandler("assignAnchor")
@@ -199,7 +214,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     // Изменение выбранного значения "Вид налоговой формы"
     private void onTaxFormKindChange() {
-        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem() && (boxFormDataKind.hasSelectedItem() || !isForm));
+        enableAnchor(assignAnchor, boxTaxFormKind.hasSelectedItem() && (boxFormDataKind.hasSelectedItem() || !isForm) && depoId!=null);
     }
 
     // Перезаполнение комбика "Вид налоговой формы"/"Вид декларации"
@@ -244,6 +259,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
                 return object.getName();
             }
         });
+        boxFormDataKind.addValueChangeHandler(new ValueChangeHandler<FormDataKind>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<FormDataKind> event) {
+                onTaxFormKindChange();
+            }
+        });
+        boxFormDataKind.setAcceptableValues(FORM_DATA_KIND);
 
         boxTaxFormKind = new MyValueListBox<FormType>(new AbstractRenderer<FormType>() {
             @Override
@@ -303,6 +325,31 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         }
     }
 
+    Map<CheckBox, Long> cbMap = new HashMap<CheckBox, Long>();
+
+    ClickHandler handler = new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+            setDepiId(cbMap.get(event.getSource()));
+        }
+    };
+
+    @Override
+    public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
+        tree.setItems(departments, availableDepartment);
+
+        cbMap.clear();
+        Iterator<TreeItem> treeItemIterator = tree.tree.treeItemIterator();
+        TreeItem item;
+
+        while (treeItemIterator.hasNext()) {
+            item = treeItemIterator.next();
+            CheckBox widget = (CheckBox) item.getWidget();
+            cbMap.put( widget,((Integer) ((Pair) item.getUserObject()).getFirst()).longValue());
+            widget.addClickHandler(handler);
+        }
+    }
+
     // Событие "Открытие формы"
     @Override
     public void init(Boolean isForm) {
@@ -314,8 +361,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         declarationLabel.setVisible(!isForm);
         declarationAnchor.setVisible(isForm);
         panelFormDataKind.setVisible(isForm);
-        labelTaxFormKind.setVisible(isForm);
-        labelDeclKind.setVisible(!isForm);
+        labelKind.setText(isForm ? "Вид налоговой формы" : "Вид декларации");
 
         // Таблица "Список назначенных налоговых форм на подразделение": не заполняется
         clearTable();
@@ -328,8 +374,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         enableAnchor(assignAnchor, false);
         enableAnchor(cancelAnchor, false);
 
-        // TODO пока не работает дерево, потом убрать
-        onDepoChange();
+        // TODO отменить выбранное значение в дереве
+
     }
 
     private void initTableHeader() {
@@ -351,9 +397,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     private void clearTable() {
         grid.setRowCount(0);
     }
-
-    // TODO пока не работает дерево, потом убрать
-    private Long depoId = 2L;
 
 
     @Override
@@ -420,11 +463,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @Override
     public Integer getFormId() {
-        return boxTaxFormKind.hasSelectedItem() ? boxTaxFormKind.getValue().getId(): null;
+        return boxTaxFormKind.hasSelectedItem() ? boxTaxFormKind.getValue().getId() : null;
     }
 
     @Override
     public TaxType getTaxType() {
         return boxTaxType.getValue();
     }
+
+
 }
