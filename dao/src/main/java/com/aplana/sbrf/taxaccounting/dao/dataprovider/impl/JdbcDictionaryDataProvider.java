@@ -99,7 +99,7 @@ public abstract class JdbcDictionaryDataProvider<ValueType extends Serializable>
 	 * @param pattern фильтр
 	 * @return количество записей
 	 */
-	protected abstract  long getRowCount(String pattern);
+	protected abstract int getRowCount(String pattern);
 
 	/**
 	 * Подготавливает паттерн поиска. Обрезает со всех сторон. Эскейпит всякие символы. Обрамляет в %.

@@ -3,14 +3,20 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
+    <ui:style>
+        .marginTop{
+            margin-top: 3px;
+        }
+    </ui:style>
+
     <g:DialogBox glassEnabled="true" animationEnabled="true"
                  text="Информация по налоговой форме/декларации">
         <g:FlowPanel>
             <style:GenericDataGrid ui:field="logsTable" height="250px" width="1000px" />
-            <style:Bar>
-                <style:LeftBar>
+            <style:Bar styleName="{style.marginTop}">
+                <style:RightBar>
                     <g:Button text="Закрыть" ui:field="hideButton"/>
-                </style:LeftBar>
+                </style:RightBar>
             </style:Bar>
         </g:FlowPanel>
     </g:DialogBox>

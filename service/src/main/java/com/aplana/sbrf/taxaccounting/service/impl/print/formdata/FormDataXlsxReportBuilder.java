@@ -412,7 +412,12 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 		c = r.getCell(ar.getFirstCell().getCol());
 		sb = new StringBuilder(c.getStringCellValue());
 
-        printDate = (data.getState() == WorkflowState.ACCEPTED && acceptanceDate!=null)?acceptanceDate:creationDate;
+        /*1. Если статус налоговой формы "Утверждена", "Принята" - дата присвоения статуса "Утверждена".
+        2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
+        printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
+                ? acceptanceDate :
+                ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
+                        ? creationDate : null;
 
 		arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
 		if(XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().equals("март") ||
@@ -502,7 +507,8 @@ public class FormDataXlsxReportBuilder extends AbstractXlsxReportBuilder {
 			c = r.createCell(0);
             c.setCellValue("Исполнитель:");
             c = r.createCell(1);
-			c.setCellValue(data.getPerformer().getName() + "/" + data.getPerformer().getPhone());
+			c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
+                    (data.getPerformer().getPhone()!=null?data.getPerformer().getPhone():""));
 		}
 
 	}

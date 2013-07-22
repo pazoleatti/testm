@@ -1,14 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.google.gwt.core.client.*;
-import com.google.gwt.dom.client.*;
-import com.google.gwt.event.dom.client.*;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.*;
-import com.google.gwt.i18n.client.*;
-import com.google.gwt.uibinder.client.*;
-import com.google.gwt.user.client.*;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -39,6 +43,7 @@ public class ReportPeriodPicker extends Composite{
 	private final ScrollPanel panelWithTree = new ScrollPanel();
 	private final HorizontalPanel buttonsPanel = new HorizontalPanel();
 	private final Button applyButton = new Button("Выбрать");
+    private final Button cancelButton = new Button("Отмена");
 
 	private List<TaxPeriod> taxPeriods = new ArrayList<TaxPeriod>();
 	private Map<Integer, ReportPeriodItem> reportPeriodItems = new HashMap<Integer, ReportPeriodItem>();
@@ -72,6 +77,12 @@ public class ReportPeriodPicker extends Composite{
 				popup.hide();
 			}
 		});
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                popup.hide();
+            }
+        });
 		tree.addOpenHandler(new OpenHandler<TreeItem>() {
 			@Override
 			public void onOpen(OpenEvent<TreeItem> event) {
@@ -191,11 +202,13 @@ public class ReportPeriodPicker extends Composite{
 	}
 
 	private int getPopupLeftOffset(){
-		return (Window.getClientWidth() / 2) - 125;
+		/*return (Window.getClientWidth() / 2) - 125;*/
+        return selected.getAbsoluteLeft();
 	}
 
 	private int getPopupTopOffset(){
-		return (Window.getClientHeight() / 2) - 125;
+		/*return (Window.getClientHeight() / 2) - 125;*/
+        return selected.getAbsoluteTop() + selected.getOffsetHeight();
 	}
 
 	private String getFormattedTaxPeriodDate(TaxPeriod taxPeriod){
@@ -225,8 +238,10 @@ public class ReportPeriodPicker extends Composite{
 		popupPanelLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
 
 		buttonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		applyButton.getElement().getStyle().setMarginLeft(200, Style.Unit.PX);
+		applyButton.getElement().getStyle().setMarginLeft(120, Style.Unit.PX);
+        cancelButton.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
 		buttonsPanel.add(applyButton);
+        buttonsPanel.add(cancelButton);
 		rootPanel.add(popupPanelLabel);
 		rootPanel.add(panelWithTree);
 		rootPanel.add(buttonsPanel);

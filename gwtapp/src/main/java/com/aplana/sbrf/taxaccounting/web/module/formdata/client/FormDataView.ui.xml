@@ -116,7 +116,7 @@
                         <g:HorizontalPanel>
                             <g:Label width="100px" text="Состояние:" addStyleNames="{style.headerAttrName}" />
                             <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}" />
-                            <style:ButtonLink ui:field="infoAnchor" text="Информация" />
+                            <style:ButtonLink ui:field="infoAnchor" text="Информация" img="resources/img/exclamation_mark.png"/>
                         </g:HorizontalPanel>
                     </g:FlowPanel>
                     <g:HorizontalPanel height="30px">

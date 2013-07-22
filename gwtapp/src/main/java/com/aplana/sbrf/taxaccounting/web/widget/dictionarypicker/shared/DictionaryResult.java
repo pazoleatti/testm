@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DictionaryResult<ValueType extends Serializable> implements Result {
 	private List<DictionaryItem<ValueType>> dictionaryItems;
-	private Long size;
+	private Integer size;
 
 	public List<DictionaryItem<ValueType>> getDictionaryItems() {
 		return dictionaryItems;
@@ -24,11 +24,11 @@ public class DictionaryResult<ValueType extends Serializable> implements Result 
 		this.dictionaryItems = dictionaryItems;
 	}
 
-	public Long getSize() {
+	public Integer getSize() {
 		return size;
 	}
 
-	public void setSize(Long size) {
+	public void setSize(Integer size) {
 		this.size = size;
 	}
 }

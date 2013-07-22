@@ -246,7 +246,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		//when(formData.getDataRows()).thenReturn(dataRows);
 		when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
 		when(formData.getDepartmentId()).thenReturn(1);
-		when(formData.getState()).thenReturn(WorkflowState.ACCEPTED);
+		when(formData.getState()).thenReturn(WorkflowState.APPROVED);
 		when(formData.getPerformer()).thenReturn(formDataperformer);
 		when(formData.getSigners()).thenReturn(formDataSigners);
 
@@ -255,7 +255,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(new Date());
-        data.setCreationDate(new Date());
+        data.setCreationDate(new Date(324234));
 	}
 
 	@Test

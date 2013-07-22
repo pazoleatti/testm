@@ -27,7 +27,7 @@
         @external .gwt-MenuBar-vertical .gwt-MenuItem;
         .gwt-MenuBar-vertical .gwt-MenuItem {
             margin-left: 15px !important;
-            width: 135px;
+            /*width: 135px;*/
             font-size: 12px;
             padding: 3px 5px 3px 14px;
         }
