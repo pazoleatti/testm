@@ -149,7 +149,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 				},
 				new FormDataSearchResultItemMapper()
 		);
-		long count = getCount(filter);
+		int count = getCount(filter);
 		PagingResult<FormDataSearchResultItem> result = new PagingResult<FormDataSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(count);
@@ -157,9 +157,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	}
 
 	@Override
-	public long getCount(FormDataDaoFilter filter) {
+	public int getCount(FormDataDaoFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*)");
 		appendFromAndWhereClause(sql, filter);
-		return getJdbcTemplate().queryForLong(sql.toString());
+		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 }

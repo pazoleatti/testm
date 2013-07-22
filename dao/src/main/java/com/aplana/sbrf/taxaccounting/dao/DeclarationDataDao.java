@@ -124,5 +124,5 @@ public interface DeclarationDataDao {
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
-	long getCount(DeclarationDataFilter filter);
+	int getCount(DeclarationDataFilter filter);
 }

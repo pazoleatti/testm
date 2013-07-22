@@ -38,5 +38,5 @@ public interface FormDataSearchDao {
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
-	long getCount(FormDataDaoFilter filter);
+	int getCount(FormDataDaoFilter filter);
 }
