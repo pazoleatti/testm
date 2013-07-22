@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -30,7 +30,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
-	private NewDepartmentPicker departmentPicker;
+	private DepartmentPicker departmentPicker;
 
 	@UiField
 	Panel reportPeriodPanel;
@@ -102,7 +102,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@Override
 	public void setDepartments(List<Department> departments) {
 		departmentPickerPanel.clear();
-		departmentPicker = new NewDepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
+		departmentPicker = new DepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
 		departmentPicker.setTreeValues(departments, filterValues.getDepartmentIds());
 		departmentPickerPanel.add(departmentPicker);
 

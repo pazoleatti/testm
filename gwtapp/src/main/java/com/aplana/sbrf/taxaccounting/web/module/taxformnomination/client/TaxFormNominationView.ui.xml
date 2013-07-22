@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:m='urn:import:com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup'>
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup'>
 
 
     <ui:style field="css"

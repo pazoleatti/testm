@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -43,7 +43,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	GenericCellTable periodsTable;
 
 	@UiField
-	NewDepartmentPicker departmentPicker;
+	DepartmentPicker departmentPicker;
 
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
 

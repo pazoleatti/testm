@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker;
+package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 
@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * @author Eugene Stetsenko
  */
-public interface NewDepartmentPickerView {
+public interface DepartmentPickerView {
 
 	Map<String, Integer> getSelectedItems();
 

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ApplicationContextHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -88,8 +88,8 @@ public class MainPagePresenter extends
 		this.messageDialogPresenter = messageDialogPresenter;
 		this.logAreaPresenter = notificationPresenter;
 		this.projectVersionPresenter = projectVersionPresenter;
-		ApplicationContextHolder.setDispatchAsync(dispatcher);
-		ApplicationContextHolder.setEventBus(eventBus);
+		GINContextHolder.setDispatchAsync(dispatcher);
+		GINContextHolder.setEventBus(eventBus);
 	}
 
 	@Override

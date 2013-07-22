@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -36,7 +36,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 //	private NewDepartmentPicker departmentPicker;
 
 	@UiField
-	NewDepartmentPicker departmentPicker;
+	DepartmentPicker departmentPicker;
 
 	@UiField
 	Button continueButton;

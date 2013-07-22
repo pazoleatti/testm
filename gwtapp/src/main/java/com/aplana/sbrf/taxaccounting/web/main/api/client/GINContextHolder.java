@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.main.api.client;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 
-public class ApplicationContextHolder {
+public class GINContextHolder {
 
-	private ApplicationContextHolder(){
+	private GINContextHolder(){
 		super();
 	}
 	
@@ -17,7 +17,7 @@ public class ApplicationContextHolder {
 	}
 
 	public static void setEventBus(EventBus eventBus) {
-		ApplicationContextHolder.eventBus = eventBus;
+		GINContextHolder.eventBus = eventBus;
 	}
 
 	public static DispatchAsync getDispatchAsync() {
@@ -25,6 +25,6 @@ public class ApplicationContextHolder {
 	}
 
 	public static void setDispatchAsync(DispatchAsync dispatchAsync) {
-		ApplicationContextHolder.dispatchAsync = dispatchAsync;
+		GINContextHolder.dispatchAsync = dispatchAsync;
 	}
 }

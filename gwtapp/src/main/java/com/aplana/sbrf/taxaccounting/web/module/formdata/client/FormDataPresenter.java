@@ -83,7 +83,7 @@ public class FormDataPresenter extends
 		if (formData != null) {
 			GetRowsDataAction action = new GetRowsDataAction();
 			action.setFormDataId(formData.getId());
-			action.setRange(new DataRowRange(start, length));
+			action.setRange(new DataRowRange(start+1, length));
 			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 			action.setReadOnly(readOnlyMode);
 			action.setFormDataTemplateId(formData.getFormTemplateId());
@@ -95,7 +95,9 @@ public class FormDataPresenter extends
 								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
 							else {
 								getView().setRowsData(start, (int) result.getDataRows().getTotalRecordCount(), result.getDataRows().getRecords());
-								getView().assignDataProvider(result.getDataRows().getRecords().size());
+								if (result.getDataRows().getRecords().size() > PAGE_SIZE) {
+									getView().assignDataProvider(result.getDataRows().getRecords().size());
+								}
 							}
 
 						modifiedRows.clear();
@@ -231,6 +233,7 @@ public class FormDataPresenter extends
 	private void processFormDataResult(FormDataResult result) {
 		formData = result.getFormData();
 		LogAddEvent.fire(this, result.getLogEntries());
+		getView().updateData();
 		// TODO: Тут было получение строк из FormData
 		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
 //		getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());

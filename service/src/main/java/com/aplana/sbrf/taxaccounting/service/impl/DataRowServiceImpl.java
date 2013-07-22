@@ -46,8 +46,10 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	@Transactional(readOnly = false)
 	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows) {
-		FormData fd = formDataDao.get(formDataId);
-		dataRowDao.updateRows(fd, dataRows);
+		if ((dataRows != null) && (!dataRows.isEmpty())) {
+			FormData fd = formDataDao.get(formDataId);
+			dataRowDao.updateRows(fd, dataRows);
+		}
 	}
 
 }

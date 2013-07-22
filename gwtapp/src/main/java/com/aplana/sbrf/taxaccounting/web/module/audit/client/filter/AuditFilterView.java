@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
-import com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.NewDepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -46,7 +46,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<Integer> userId;
 
     @UiField
-    NewDepartmentPicker departmentSelectionTree;
+    DepartmentPicker departmentSelectionTree;
 
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> formTypeId;

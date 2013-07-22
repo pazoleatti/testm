@@ -1,0 +1,25 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
+		>
+	<g:VerticalPanel>
+		<g:cell width="100%" horizontalAlignment="CENTER">
+			<g:TextBox ui:field="txtFind" text="" width="97%" />
+		</g:cell>
+		<g:cell height="300px" width="200px">
+				<style:GenericCellTable width="100%" ui:field="cellTable" styleName="dictionaryPickerTable"/>
+		</g:cell>
+		<g:cell>
+			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
+				<g:cell>
+					<pager:FlexiblePager ui:field='pager' location='CENTER' showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
+				</g:cell>
+				<g:cell horizontalAlignment='ALIGN_RIGHT'>
+					<g:Button ui:field="btnClear" text="Очистить"/>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:cell>
+	</g:VerticalPanel>
+</ui:UiBinder>
