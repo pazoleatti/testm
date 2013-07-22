@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -164,5 +165,10 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         }
         throw new IllegalArgumentException("Wrong row alias requested: "
                 + rowAlias);
+    }
+
+    @Override
+    public void clear(){
+        save(new ArrayList<DataRow<Cell>>());
     }
 }
