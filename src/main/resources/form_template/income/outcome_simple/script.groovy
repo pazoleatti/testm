@@ -4,6 +4,8 @@
  * @version 46
  */
 
+dataRowsHelper = formDataService.getDataRowHelper(formData)
+
 switch (formDataEvent) {
     // создать
     case FormDataEvent.CREATE :
@@ -20,6 +22,7 @@ switch (formDataEvent) {
     // проверить
     case FormDataEvent.CHECK :
         checkAndCalc()
+        //testFillForm()
         break
     // проверить при переводе в утверждена
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
@@ -44,6 +47,7 @@ switch (formDataEvent) {
         break
 }
 
+
 // графа  1 - consumptionTypeId
 // графа  2 - consumptionGroup
 // графа  3 - consumptionTypeByOperation
@@ -64,6 +68,7 @@ switch (formDataEvent) {
  */
 void checkAndCalc() {
     calculationBasicSum()
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
@@ -71,7 +76,7 @@ void checkAndCalc() {
  */
 void calculationBasicSum() {
 
-//    formData.dataRows.each { row ->
+//    dataRowsHelper.getAllCached().each { row ->
 //        ['rnu7Field10Sum', 'rnu7Field12Accepted',
 //                'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
 //            def cell = row.getCell(it)
@@ -85,7 +90,7 @@ void calculationBasicSum() {
      * Проверка объязательных полей
      */
     def requiredColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
-    for (def row : formData.dataRows) {
+    for (def row : dataRowsHelper.getAllCached()) {
         if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -94,8 +99,8 @@ void calculationBasicSum() {
     /*
      * Расчет сумм
      */
-    def row50001 = formData.getDataRow('R107')
-    def row50002 = formData.getDataRow('R212')
+    def row50001 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R107')
+    def row50002 = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), 'R212')
 
     // суммы для графы 5..8
     ['rnu7Field10Sum', 'rnu7Field12Accepted',
@@ -123,7 +128,7 @@ void calculationControlGraphs() {
     def value
     def formDataComplex = getFormDataComplex()
     def income102NotFound = []
-    for (def row : formData.dataRows) {
+    for (def row : dataRowsHelper.getAllCached()) {
         // исключить итоговые строки
         if (row.getAlias() in ['R107', 'R212']) {
             continue
@@ -179,7 +184,7 @@ void calculationControlGraphs() {
  * @since 21.02.2013 13:40
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
@@ -237,7 +242,7 @@ void consolidation() {
         return
     }
     // очистить форму
-    formData.getDataRows().each { row ->
+    dataRowsHelper.getAllCached().each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias->
             row.getCell(alias).setValue(null)
         }
@@ -247,14 +252,14 @@ void consolidation() {
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), FormDataKind.SUMMARY).each {
-        def child = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == 304) {
             needCalc = true
             for (def row : child.getDataRows()) {
                 if (row.getAlias() == null) {
                     continue
                 }
-                def rowResult = formData.getDataRow(row.getAlias())
+                def rowResult = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), row.getAlias())
                 ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each {
                     if (row.getCell(it).getValue() != null) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
@@ -304,12 +309,12 @@ def isTerBank() {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = formData.getDataRowIndex(rowFromAlias) + 1
-    def to = formData.getDataRowIndex(rowToAlias) - 1
+    def from = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAll(),rowFromAlias) + 1
+    def to = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAll(), rowToAlias) - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRowsHelper.getAll(), new ColumnRange(columnAlias,  from, to))
 }
 
 /**
@@ -360,7 +365,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    dataRowsHelper.getAllCached().indexOf(row)
 }
 
 /**
@@ -381,7 +386,7 @@ def isEmpty(def value) {
 def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
     def sum = 0
     if (data != null && (columnAliasCheck != null || columnAliasCheck != '') && value != null) {
-        for (def row : data.dataRows) {
+        for (def row : dataRowsHelper.getAllCached()) {
             if (row.getCell(columnAliasCheck).getValue() == value) {
                 sum += (row.getCell(columnAliasSum).getValue() ?: 0)
             }
@@ -398,7 +403,7 @@ def getSumFromComplex(data, columnAliasCheck, columnAliasSum, value) {
 def calcColumn6(def aliasRows) {
     def sum = 0
     aliasRows.each { alias ->
-        sum += formData.getDataRow(alias).rnu7Field12Accepted
+        sum += dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(), alias).rnu7Field12Accepted
     }
     return sum
 }
@@ -407,7 +412,7 @@ def calcColumn6(def aliasRows) {
  * Получить данные формы "расходы сложные" (id = 303)
  */
 def getFormDataComplex() {
-    return FormDataService.find(303, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.find(303, formData.kind, formDataDepartment.id, formData.reportPeriodId)
 }
 
 /**
@@ -417,4 +422,20 @@ def getFormDataComplex() {
  */
 def getValue(def value) {
     return value ?: 0
+}
+
+/**
+ * Функция заполнения тестовыми данными
+ */
+def testFillForm(){
+    dataRowsHelper.getAllCached().each{ row ->
+        ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+            cell = row.getCell(alias)
+            if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
+                cell.setValue(1);
+            }
+        }
+    }
+
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
