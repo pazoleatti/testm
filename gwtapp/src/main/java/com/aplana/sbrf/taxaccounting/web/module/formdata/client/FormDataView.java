@@ -472,7 +472,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		@Override
 		protected void onRangeChanged(HasData<DataRow<Cell>> display) {
 			final Range range = display.getVisibleRange();
-			System.out.println("Range: " + range.getStart());
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	}

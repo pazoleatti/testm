@@ -231,8 +231,10 @@ public class FormDataPresenter extends
 	}
 
 	private void processFormDataResult(FormDataResult result) {
-		formData = result.getFormData();
-		LogAddEvent.fire(this, result.getLogEntries());
+		if (result != null) {
+			formData = result.getFormData();
+			LogAddEvent.fire(this, result.getLogEntries());
+		}
 		getView().updateData();
 		// TODO: Тут было получение строк из FormData
 		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
@@ -300,6 +302,11 @@ public class FormDataPresenter extends
 						processFormDataResult(result);
 					}
 
+					@Override
+					public void onFailure(Throwable caught) {
+						getView().updateData();
+					}
+
 				}, this));
 	}
 
@@ -316,6 +323,12 @@ public class FormDataPresenter extends
 						modifiedRows.clear();
 						MessageEvent.fire(FormDataPresenter.this, "Ошибок не обнаружено");
 						LogAddEvent.fire(FormDataPresenter.this, result.getLogEntries());
+						getView().updateData();
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						getView().updateData();
 					}
 				}, this));
 	}
