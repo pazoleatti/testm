@@ -5,7 +5,7 @@
  */
 
 
-dataRowsHelper = formDataService.getDataRowHelper(formData)
+if (formData.id != null) dataRowsHelper = formDataService.getDataRowHelper(formData)
 
 switch (formDataEvent) {
     // создать
@@ -318,8 +318,8 @@ def isTerBank() {
 }
 
 double summ(String columnName, String fromRowA, String toRowA) {
-    def from = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), fromRowA)
-    def to = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), toRowA)
+    def from = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), fromRowA)
+    def to = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), toRowA)
     if (from > to) {
         return 0
     }
@@ -362,8 +362,8 @@ def checkRequiredColumns(def row, def columns, def useLog) {
  * Получить сумму диапазона строк определенного столбца.
  */
 def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowFromAlias) + 1
-    def to = dataRowHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowToAlias) - 1
+    def from = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowFromAlias) + 1
+    def to = dataRowsHelper.getDataRowIndex(dataRowsHelper.getAllCached(), rowToAlias) - 1
     if (from > to) {
         return 0
     }
