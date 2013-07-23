@@ -71,6 +71,13 @@ def addNewRow() {
     def dataRowsHelper = formDataService.getDataRowHelper(formData)
     DataRow<Cell> dataRow = formData.createDataRow()
 
+    logger.info('currentDataRow != null ' + currentDataRow)
+    logger.info('dataRowsHelper.getAllCached().size() ' + dataRowsHelper.getAllCached().size())
+    int index = currentDataRow != null ? currentDataRow.getIndex() : (dataRowsHelper.getAllCached().size() == 0 ? 1 : dataRowsHelper.getAllCached().size())
+    logger.info('getIndex(currentDataRow) : ' + currentDataRow.getIndex())
+    logger.info('index : ' + index)
+
+    dataRowsHelper.insert(dataRow, index);
     dataRows = dataRowsHelper.getAllCached()
     dataRows.add(dataRow)
     // графа 3, 5..7 редактируемые
@@ -142,9 +149,13 @@ void calc() {
 
     // TODO
     // расчет графы 1..4, 8..21
+    def propertyPriceSumm = getSumAll("propertyPrice")
+    def workersCountSumm = getSumAll("workersCount")
+
+    logger.info('propertyPriceSumm = ' + propertyPriceSumm);
+    logger.info('workersCountSumm = ' + workersCountSumm);
     dataRowsHelper.getAllCached().eachWithIndex { row, i ->
 
-        logger.info(row.regionBankDivision)
         // TODO (Aydar Kadyrgulov) после привязки к справочнику брать ID выбранной записи
         def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
 
@@ -173,7 +184,7 @@ void calc() {
         «Графа 8» = значение атрибута «Признак расчёта» формы настроек подразделений.
         */
         // графа 8 TODO (Aydar Kadyrgulov) Признак расчёта
-        row.calcFlag = departmentParam.
+        row.calcFlag = 0
 
         /*
         Заполняется автоматически на основании значения «Графы 3».
@@ -186,7 +197,8 @@ void calc() {
          «Графа 10» =ОКРУГЛ ((((«графа 5»  / «итого по графе 5») * 100) + ((«графа 6» / «итого по графе 6») * 100)) / 2; 8)
         */
         // графа 10
-        row.baseTaxOf =0
+        def tmp = (((( row.propertyPrice  / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
+        row.baseTaxOf = round( tmp, 8)
 
         /*
          «Графа 11» = ОКРУГЛ («распределяемая налоговая база за отчётный период» * «графа 10» / 100; 0)
@@ -546,9 +558,20 @@ def getSum(def columnAlias) {
     if (from > to) {
         return 0
     }
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
-    //summ(formData, new ColumnRange(columnAlias, from, to))
+}
+
+/**
+ * Получить сумму столбца.
+ */
+def getSumAll(def columnAlias) {
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    def from = 0
+    def to = dataRowsHelper.getAllCached().size() - 1
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
