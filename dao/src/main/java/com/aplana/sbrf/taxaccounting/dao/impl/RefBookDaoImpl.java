@@ -115,7 +115,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
 	}
 
-	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy");
+	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
 	private static final String WITH_STATEMENT =
 			"with t as (select\n" +
