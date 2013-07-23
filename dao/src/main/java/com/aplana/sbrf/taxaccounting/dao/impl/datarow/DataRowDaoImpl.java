@@ -45,37 +45,37 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
-	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formDataId=%s";
+	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formData=%s";
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
+	public List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
+		return phisicalGetRows(formData,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData fd, DataRowFilter filter) {
-		return phisicalGetSize(fd,
-				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter);
+	public int getSavedSize(FormData formData, DataRowFilter filter) {
+		return phisicalGetSize(formData,
+				new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, filter);
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
+	public List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
-				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter, range);
+		return phisicalGetRows(formData,
+				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter, range);
 	}
 
 	@Override
-	public int getSize(FormData fd, DataRowFilter filter) {
-		return phisicalGetSize(fd,
-				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter);
+	public int getSize(FormData formData, DataRowFilter filter) {
+		return phisicalGetSize(formData,
+				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter);
 	}
 
 	@Override
-	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
+	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
 		// тем же значением ORD
@@ -84,7 +84,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<Long> forCreateOrder = new ArrayList<Long>();
 		for (DataRow<Cell> dataRow : rows) {
 			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);
+			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(formData.getId(), id);
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
 			} else {
@@ -96,13 +96,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		batchRemoveCells(forUpdate);
 		batchInsertCells(forUpdate);
 
-		phisicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
-		phisicalInsertRows(fd, forCreate, null, null, forCreateOrder);
+		phisicalUpdateRowsType(formData, forCreate, TypeFlag.DEL);
+		phisicalInsertRows(formData, forCreate, null, null, forCreateOrder);
 
 	}
 
 	@Override
-	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
+	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
@@ -150,8 +150,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(final FormData fd, final int idxFrom, final int idxTo) {
-		checkIndexesRange(fd, false, false, idxFrom, idxTo);
+	public void removeRows(final FormData formData, final int idxFrom, final int idxTo) {
+		checkIndexesRange(formData, false, false, idxFrom, idxTo);
 		if (idxTo < idxFrom) {
 			throw new IllegalArgumentException(
 					"Индекс начального элемента меньше индекса конечного");
@@ -164,7 +164,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("types", TypeFlag.rtsToKeys(new TypeFlag[] { TypeFlag.ADD,
 				TypeFlag.SAME }));
-		params.put("formDataId", fd.getId());
+		params.put("formDataId", formData.getId());
 		params.put("from", idxFrom);
 		params.put("to", idxTo);
 		params.put("remType", TypeFlag.ADD.getKey());
@@ -181,65 +181,65 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(FormData fd) {
+	public void removeRows(FormData formData) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
 
 		getJdbcTemplate().update(
 				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { fd.getId(), TypeFlag.ADD.getKey() });
+				new Object[] { formData.getId(), TypeFlag.ADD.getKey() });
 		getJdbcTemplate().update(
 				"update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { TypeFlag.DEL.getKey(), fd.getId(),
+				new Object[] { TypeFlag.DEL.getKey(), formData.getId(),
 						TypeFlag.SAME.getKey() });
 	}
 
 	@Override
-	public void saveRows(final FormData fd, final List<DataRow<Cell>> dataRows) {
+	public void saveRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
 		// Полностью чистим временный срез строк.
-		removeRows(fd);
+		removeRows(formData);
 		// Вставляем строки
-		phisicalInsertRows(fd, dataRows,
+		phisicalInsertRows(formData, dataRows,
 				0l,
 				DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
 	}
 
 	@Override
-	public void insertRows(FormData fd, int index, List<DataRow<Cell>> rows) {
-		checkIndexesRange(fd, false, true, index);
+	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
+		checkIndexesRange(formData, false, true, index);
 		index--;
-		Long ordBegin = getOrd(fd.getId(), index);
+		Long ordBegin = getOrd(formData.getId(), index);
 		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
-		insertRows(fd, index, ordBegin, rows);
+		insertRows(formData, index, ordBegin, rows);
 	}
 
 	@Override
-	public void insertRows(FormData fd, DataRow<Cell> afterRow,
+	public void insertRows(FormData formData, DataRow<Cell> afterRow,
 			List<DataRow<Cell>> rows) {
-		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(fd.getId(),
+		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(formData.getId(),
 				afterRow.getId());
-		insertRows(fd, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
+		insertRows(formData, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
 	}
 
 	@Override
-	public void commit(long fdId) {
-		phisicalRemoveRows(fdId, TypeFlag.DEL);
-		phisicalUpdateRowsType(fdId, TypeFlag.ADD, TypeFlag.SAME);
+	public void commit(long formDataId) {
+		phisicalRemoveRows(formDataId, TypeFlag.DEL);
+		phisicalUpdateRowsType(formDataId, TypeFlag.ADD, TypeFlag.SAME);
 	}
 
 	@Override
-	public void rollback(long fdId) {
-		phisicalRemoveRows(fdId, TypeFlag.ADD);
-		phisicalUpdateRowsType(fdId, TypeFlag.DEL, TypeFlag.SAME);
+	public void rollback(long formDataId) {
+		phisicalRemoveRows(formDataId, TypeFlag.ADD);
+		phisicalUpdateRowsType(formDataId, TypeFlag.DEL, TypeFlag.SAME);
 	}
 
-	private void insertRows(FormData fd, int index, long ordBegin,
+	private void insertRows(FormData formData, int index, long ordBegin,
 			List<DataRow<Cell>> rows) {
 
-		Long ordEnd = getOrd(fd.getId(), index + 1);
+		Long ordEnd = getOrd(formData.getId(), index + 1);
 		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
 				: DataRowDaoImplUtils
 						.calcOrdStep(ordBegin, ordEnd, rows.size());
@@ -251,23 +251,23 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					"Необходима перепаковка поля ORD. (TODO: Задача SBRFACCTAX-3176)");
 		}
 
-		phisicalInsertRows(fd, rows, ordBegin, ordStep, null);
+		phisicalInsertRows(formData, rows, ordBegin, ordStep, null);
 	}
 
-	private void phisicalRemoveRows(long fdId, TypeFlag type) {
+	private void phisicalRemoveRows(long formDataId, TypeFlag type) {
 		getJdbcTemplate().update(
 				"delete from DATA_ROW where FORM_DATA_ID = ? and TYPE = ?",
-				fdId, type.getKey());
+				formDataId, type.getKey());
 	}
 
-	private void phisicalUpdateRowsType(long fdId, TypeFlag fromType,
+	private void phisicalUpdateRowsType(long formDataId, TypeFlag fromType,
 			TypeFlag toType) {
 		getJdbcTemplate()
 				.update("update DATA_ROW set TYPE = ? where FORM_DATA_ID = ? and TYPE = ?",
-						toType.getKey(), fdId, fromType.getKey());
+						toType.getKey(), formDataId, fromType.getKey());
 	}
 
-	private void phisicalUpdateRowsType(FormData fd,
+	private void phisicalUpdateRowsType(FormData formData,
 			final List<DataRow<Cell>> dataRows, final TypeFlag toType) {
 
 		if (!dataRows.isEmpty()) {
@@ -291,9 +291,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-	private List<DataRow<Cell>> phisicalGetRows(FormData fd, TypeFlag[] types,
+	private List<DataRow<Cell>> phisicalGetRows(FormData formData, TypeFlag[] types,
 			DataRowFilter filter, DataRowRange range) {
-		DataRowMapper dataRowMapper = new DataRowMapper(fd, types, filter,
+		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
@@ -303,10 +303,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return dataRows;
 	}
 
-	private int phisicalGetSize(FormData fd, TypeFlag[] types,
+	private int phisicalGetSize(FormData formData, TypeFlag[] types,
 			DataRowFilter filter) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
+		params.put("formDataId", formData.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		return getNamedParameterJdbcTemplate()
 				.queryForInt(
@@ -314,7 +314,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						params);
 	}
 
-	private void phisicalInsertRows(final FormData fd,
+	private void phisicalInsertRows(final FormData formData,
 			final List<DataRow<Cell>> dataRows, final Long ordBegin,
 			final Long ordStep, final List<Long> orders) {
 
@@ -339,7 +339,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					throws SQLException {
 				DataRow<Cell> dr = dataRows.get(index);
 				String rowAlias = dr.getAlias();
-				ps.setLong(1, fd.getId());
+				ps.setLong(1, formData.getId());
 				ps.setString(2, rowAlias);
 				Long order = null;
 				if (orders != null) {
@@ -386,8 +386,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Метод получает значение ORD для строки по индексу. Метод работает со временным срезом формы
 	 * 
-	 * @param fd
-	 * @param types
+	 * @param formDataId
 	 * @param dataRowIndex
 	 * @return
 	 */
@@ -472,9 +471,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-	private void checkIndexesRange(FormData fd, boolean saved, boolean forNew,
+	private void checkIndexesRange(FormData formData, boolean saved, boolean forNew,
 			int... indexes) {
-		int size = saved ? getSavedSize(fd, null) : getSize(fd, null);
+		int size = saved ? getSavedSize(formData, null) : getSize(formData, null);
 		int lastIndex = forNew ? size + 1 : size;
 		for (int index : indexes) {
 			if (index < 1 || index > lastIndex) {

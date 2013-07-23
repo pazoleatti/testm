@@ -14,9 +14,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +26,6 @@ import java.util.Map;
 @ContextConfiguration({ "RefBookDaoTest.xml" })
 @Transactional
 public class RefBookDaoTest {
-
-	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy");
 
 	@Autowired
 	RefBookDao refBookDao;
@@ -47,7 +47,7 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData1() throws Exception {
 		RefBook refBook = refBookDao.get(1L);
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2013"), null, null, refBook.getAttributeByAlias("name"));
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, refBook.getAttributeByAlias("name"));
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.getRecords().size());
@@ -75,7 +75,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData2() throws Exception {
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.02.2013"), null, null, null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 2, 2013), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.getRecords().size());
@@ -89,7 +89,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData3() throws Exception {
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.03.2013"), null, null, null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 3, 2013), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.getRecords().size());
@@ -102,7 +102,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData4() throws Exception {
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2012"), null, null, null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2012), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(0, data.getRecords().size());
@@ -110,7 +110,7 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetData5() throws Exception {
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, sdf.parse("01.01.2014"), null, null, null);
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.getRecords().size());
@@ -148,20 +148,24 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetVersions1() throws Exception {
-		List<Date> versions = refBookDao.getVersions(1L, sdf.parse("01.01.2013"), sdf.parse("01.01.2014"));
+		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2013), getDate(1, 1, 2014));
 		Assert.assertEquals(3, versions.size());
 	}
 
 	@Test
 	public void testGetVersions2() throws Exception {
-		List<Date> versions = refBookDao.getVersions(2L, sdf.parse("01.01.2013"), sdf.parse("01.01.2014"));
+		List<Date> versions = refBookDao.getVersions(2L, getDate(1, 1, 2013), getDate(1, 1, 2014));
 		Assert.assertEquals(2, versions.size());
 	}
 
 	@Test
 	public void testGetVersions3() throws Exception {
-		List<Date> versions = refBookDao.getVersions(1L, sdf.parse("01.01.2013"), sdf.parse("01.02.2013"));
+		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2013), getDate(1, 2, 2013));
 		Assert.assertEquals(2, versions.size());
+	}
+
+	private Date getDate(int day, int month, int year) {
+		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
 	}
 
 }
