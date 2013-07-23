@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.newdepartmentpicker.popup;
+package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 

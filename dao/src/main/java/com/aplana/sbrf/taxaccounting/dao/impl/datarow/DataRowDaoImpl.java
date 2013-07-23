@@ -6,12 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Repository;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -42,34 +45,37 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
+	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formDataId=%s";
+	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
+
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
+	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(formData,
+		return phisicalGetRows(fd,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData formData, DataRowFilter filter) {
-		return phisicalGetSize(formData,
+	public int getSavedSize(FormData fd, DataRowFilter filter) {
+		return phisicalGetSize(fd,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
+	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(formData,
+		return phisicalGetRows(fd,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSize(FormData formData, DataRowFilter filter) {
-		return phisicalGetSize(formData,
+	public int getSize(FormData fd, DataRowFilter filter) {
+		return phisicalGetSize(fd,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
+	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
 		// тем же значением ORD
@@ -78,8 +84,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<Long> forCreateOrder = new ArrayList<Long>();
 		for (DataRow<Cell> dataRow : rows) {
 			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(formData,
-					new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, id);
+			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
 			} else {
@@ -91,13 +96,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		batchRemoveCells(forUpdate);
 		batchInsertCells(forUpdate);
 
-		phisicalUpdateRowsType(formData, forCreate, TypeFlag.DEL);
-		phisicalInsertRows(formData, forCreate, null, null, forCreateOrder);
+		phisicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
+		phisicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
 
 	@Override
-	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
+	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
@@ -145,9 +150,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(final FormData formData, final int indexFrom, final int indexTo) {
-		if ((indexFrom < 1) || (indexTo < indexFrom)) {
-			throw new IllegalArgumentException();
+	public void removeRows(final FormData fd, final int idxFrom, final int idxTo) {
+		checkIndexesRange(fd, false, false, idxFrom, idxTo);
+		if (idxTo < idxFrom) {
+			throw new IllegalArgumentException(
+					"Индекс начального элемента меньше индекса конечного");
 		}
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
@@ -157,9 +164,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("types", TypeFlag.rtsToKeys(new TypeFlag[] { TypeFlag.ADD,
 				TypeFlag.SAME }));
-		params.put("formData", formData.getId());
-		params.put("from", indexFrom);
-		params.put("to", indexTo);
+		params.put("formDataId", fd.getId());
+		params.put("from", idxFrom);
+		params.put("to", idxTo);
 		params.put("remType", TypeFlag.ADD.getKey());
 		params.put("updType", TypeFlag.SAME.getKey());
 		params.put("setType", TypeFlag.DEL.getKey());
@@ -174,47 +181,47 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(FormData formData) {
+	public void removeRows(FormData fd) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
 
 		getJdbcTemplate().update(
 				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { formData.getId(), TypeFlag.ADD.getKey() });
+				new Object[] { fd.getId(), TypeFlag.ADD.getKey() });
 		getJdbcTemplate().update(
 				"update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { TypeFlag.DEL.getKey(), formData.getId(),
+				new Object[] { TypeFlag.DEL.getKey(), fd.getId(),
 						TypeFlag.SAME.getKey() });
 	}
 
 	@Override
-	public void saveRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
+	public void saveRows(final FormData fd, final List<DataRow<Cell>> dataRows) {
 		// Полностью чистим временный срез строк.
-		removeRows(formData);
+		removeRows(fd);
 		// Вставляем строки
-		phisicalInsertRows(formData, dataRows,
-				DataRowDaoImplUtils.DEFAULT_ORDER_STEP,
+		phisicalInsertRows(fd, dataRows,
+				0l,
 				DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
 	}
 
 	@Override
-	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
+	public void insertRows(FormData fd, int index, List<DataRow<Cell>> rows) {
+		checkIndexesRange(fd, false, true, index);
 		index--;
-		Long ordBegin = getOrd(formData,
-				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index);
+		Long ordBegin = getOrd(fd.getId(), index);
 		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
-		insertRows(formData, index, ordBegin, rows);
+		insertRows(fd, index, ordBegin, rows);
 	}
 
 	@Override
-	public void insertRows(FormData formData, DataRow<Cell> afterRow,
+	public void insertRows(FormData fd, DataRow<Cell> afterRow,
 			List<DataRow<Cell>> rows) {
-		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(formData, new TypeFlag[] {
-				TypeFlag.ADD, TypeFlag.SAME }, afterRow.getId());
-		insertRows(formData, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
+		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(fd.getId(),
+				afterRow.getId());
+		insertRows(fd, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
 	}
 
 	@Override
@@ -232,17 +239,16 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private void insertRows(FormData fd, int index, long ordBegin,
 			List<DataRow<Cell>> rows) {
 
-		Long ordEnd = getOrd(fd,
-				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index + 1);
+		Long ordEnd = getOrd(fd.getId(), index + 1);
 		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
 				: DataRowDaoImplUtils
 						.calcOrdStep(ordBegin, ordEnd, rows.size());
-
 		if (ordStep == 0) {
-			// TODO: Реализовать перепаковку п
+			// TODO: Реализовать перепаковку поля ORD
 			// Слишком маленькие значения ORD. В промежуток нельзя вставить
 			// такое количество строк
-			throw new IllegalAccessError("Необходима перепаковка поля ORD");
+			throw new IllegalStateException(
+					"Необходима перепаковка поля ORD. (TODO: Задача SBRFACCTAX-3176)");
 		}
 
 		phisicalInsertRows(fd, rows, ordBegin, ordStep, null);
@@ -293,14 +299,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082
-		//FormDataUtils.setValueOners(dataRows);
+		// FormDataUtils.setValueOners(dataRows);
 		return dataRows;
 	}
 
 	private int phisicalGetSize(FormData fd, TypeFlag[] types,
 			DataRowFilter filter) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formData", fd.getId());
+		params.put("formDataId", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		return getNamedParameterJdbcTemplate()
 				.queryForInt(
@@ -378,18 +384,18 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	/**
-	 * Получаем значение ORD для строки по индексу
+	 * Метод получает значение ORD для строки по индексу. Метод работает со временным срезом формы
 	 * 
 	 * @param fd
 	 * @param types
 	 * @param dataRowIndex
 	 * @return
 	 */
-	private Long getOrd(FormData fd, TypeFlag[] types, int dataRowIndex) {
+	private Long getOrd(long formDataId, int dataRowIndex) {
 		String sql = "select ORD from (select rownum as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX = :dataRowIndex";
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formData", fd.getId());
-		params.put("types", TypeFlag.rtsToKeys(types));
+		params.put("formDataId", formDataId);
+		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowIndex", dataRowIndex);
 		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql,
 				params, Long.class);
@@ -397,46 +403,85 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				.requiredSingleResult(list);
 	}
 
-	private Pair<Long, Integer> getOrdAndIndex(FormData fd, TypeFlag[] types,
-			long dataRowId) {
+	/**
+	 * Метод получает пару: ORD и INDEX. Метод работает со временным срезом формы
+	 * 
+	 * @param formDataId
+	 * @param dataRowId
+	 * @return
+	 */
+	private Pair<Long, Integer> getOrdAndIndex(long formDataId, Long dataRowId) {
 		String sql = "select ORD, IDX from (select rownum as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where ID = :dataRowId";
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formData", fd.getId());
-		params.put("types", TypeFlag.rtsToKeys(types));
+		params.put("formDataId", formDataId);
+		params.put("types",
+				Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowId", dataRowId);
-		return DataAccessUtils
-				.requiredSingleResult(getNamedParameterJdbcTemplate().query(
-						sql, params, new RowMapper<Pair<Long, Integer>>() {
-							@Override
-							public Pair<Long, Integer> mapRow(ResultSet rs,
-									int rowNum) throws SQLException {
-								return new Pair<Long, Integer>(rs
-										.getLong("ORD"), rs.getInt("IDX"));
-							}
-						}));
+		try {
+			return DataAccessUtils
+					.requiredSingleResult(getNamedParameterJdbcTemplate()
+							.query(sql, params,
+									new RowMapper<Pair<Long, Integer>>() {
+										@Override
+										public Pair<Long, Integer> mapRow(
+												ResultSet rs, int rowNum)
+												throws SQLException {
+											return new Pair<Long, Integer>(rs
+													.getLong("ORD"), rs
+													.getInt("IDX"));
+										}
+									}));
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
+		}
 	}
 
-	private Pair<Integer, Long> getTypeAndOrdById(FormData fd,
-			TypeFlag[] types, long dataRowId) {
+	/**
+	 * Метод получает пару: TYPE и ORD. Метод работает со временным срезом формы
+	 * 
+	 * @param formDataId
+	 * @param dataRowId
+	 * @return
+	 */
+	private Pair<Integer, Long> getTypeAndOrdById(long formDataId,
+			Long dataRowId) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formData", fd.getId());
-		params.put("types", TypeFlag.rtsToKeys(types));
+		params.put("formDataId", formDataId);
+		params.put("types",
+				Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowId", dataRowId);
 
-		return DataAccessUtils
-				.requiredSingleResult(getNamedParameterJdbcTemplate()
-						.query("select TYPE, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and ID = :dataRowId",
-								params, new RowMapper<Pair<Integer, Long>>() {
+		try {
+			return DataAccessUtils
+					.requiredSingleResult(getNamedParameterJdbcTemplate()
+							.query("select TYPE, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and ID = :dataRowId",
+									params,
+									new RowMapper<Pair<Integer, Long>>() {
 
-									@Override
-									public Pair<Integer, Long> mapRow(
-											ResultSet rs, int rowNum)
-											throws SQLException {
-										return new Pair<Integer, Long>(rs
-												.getInt("TYPE"), rs
-												.getLong("ORD"));
-									}
-								}));
+										@Override
+										public Pair<Integer, Long> mapRow(
+												ResultSet rs, int rowNum)
+												throws SQLException {
+											return new Pair<Integer, Long>(rs
+													.getInt("TYPE"), rs
+													.getLong("ORD"));
+										}
+									}));
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
+		}
+	}
+
+	private void checkIndexesRange(FormData fd, boolean saved, boolean forNew,
+			int... indexes) {
+		int size = saved ? getSavedSize(fd, null) : getSize(fd, null);
+		int lastIndex = forNew ? size + 1 : size;
+		for (int index : indexes) {
+			if (index < 1 || index > lastIndex) {
+				throw new IllegalArgumentException(String.format(
+						ERROR_MSG_INDEX, index, lastIndex));
+			}
+		}
 	}
 
 	/**

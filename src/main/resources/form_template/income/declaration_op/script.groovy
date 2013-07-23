@@ -44,8 +44,9 @@ def reportPeriodId = declarationData.reportPeriodId
 /** Настройки подразделения. */
 def departmentParam = departmentService.getDepartmentParam(departmentId)
 if (departmentParam == null) {
-    departmentParam = new DepartmentParam()
+    throw new Exception("Ошибка при получении настроек обособленного подразделения")
 }
+
 /** Параметры подразделения по налогу на прибыль. */
 def departmentParamIncome = departmentService.getDepartmentParamIncome(departmentId)
 
@@ -70,18 +71,23 @@ if (formDataCollection == null || formDataCollection.records.isEmpty()) {
 
 /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
 def formDataComplexIncome = formDataCollection.find(departmentId, 302, FormDataKind.SUMMARY)
+def dataRowsHelperComplexIncome = getDataRowHelper(formDataComplexIncome)
 
 /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
 def formDataSimpleIncome = formDataCollection.find(departmentId, 301, FormDataKind.SUMMARY)
+def dataRowsHelperSimpleIncome = getDataRowHelper(formDataSimpleIncome)
 
 /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
 def formDataComplexConsumption = formDataCollection.find(departmentId, 303, FormDataKind.SUMMARY)
+def dataRowsHelperComplexConsumption = getDataRowHelper(formDataComplexConsumption)
 
 /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
 def formDataSimpleConsumption = formDataCollection.find(departmentId, 304, FormDataKind.SUMMARY)
+def dataRowsHelperSimpleConsumption = getDataRowHelper(formDataSimpleConsumption)
 
 /** Выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-def formDataAdvance = formDataCollection.find(departmentId, 309, FormDataKind.ADDITIONAL)
+def formDataAdvance = formDataCollection.find(departmentId, 500, FormDataKind.SUMMARY)
+def dataRowsHelperAdvance = getDataRowHelper(formDataAdvance)
 
 /*
  * Расчет значений для текущей декларации.
@@ -133,46 +139,46 @@ def virRealPred = empty
 /** ПрПодп. */
 def prPodp = departmentParamIncome.signatoryId
 /** ВырРеалТовСоб. */
-def virRealTovSob = getVirRealTovSob(formDataComplexIncome, formDataSimpleIncome)
+def virRealTovSob = getVirRealTovSob(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
-def virRealImPrav = getComplexIncomeSumRows9(formDataComplexIncome, [10855, 10880, 10900])
+def virRealImPrav = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10855, 10880, 10900])
 /** ВырРеалИмПроч. Строка декларации 014. Код вида дохода = 10850. */
-def virRealImProch = getComplexIncomeSumRows9(formDataComplexIncome, [10850])
+def virRealImProch = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [10850])
 /** ВырРеалВс. Код строки декларации 010. */
 def virRealVs = getLong(virRealTovSob + virRealImPrav + virRealImProch)
 /** ВырРеалЦБВс. Код строки декларации 020. Код вида дохода = 11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260. */
-def virRealCBVs = getComplexIncomeSumRows9(formDataComplexIncome, [11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260])
+def virRealCBVs = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260])
 /** ВыручОп302Ит. Код строки декларации 340. */
-def viruchOp302It = getViruchOp302It(formDataComplexIncome, viruchRealTov, dohDolgovDUI, dohDolgovDUI_VnR)
+def viruchOp302It = getViruchOp302It(dataRowsHelperComplexIncome, viruchRealTov, dohDolgovDUI, dohDolgovDUI_VnR)
 /** ДохРеал, ВырРеалИтог. */
 def dohReal = getLong(virRealVs + virRealCBVs + virRealPred + viruchOp302It)
 /** ДохВнереал. Код строки декларации 100. */
-def dohVnereal = getDohVnereal(formDataComplexIncome, formDataSimpleIncome)
+def dohVnereal = getDohVnereal(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** КосвРасхВс. Код строки декларации 040. */
-def cosvRashVs = getCosvRashVs(formDataComplexConsumption, formDataSimpleConsumption)
+def cosvRashVs = getCosvRashVs(dataRowsHelperComplexConsumption, dataRowsHelperSimpleConsumption)
 /** РасхВнереалВС. Строка 200. */
-def rashVnerealVs = getRashVnerealVs(formDataComplexConsumption, formDataSimpleConsumption)
+def rashVnerealVs = getRashVnerealVs(dataRowsHelperComplexConsumption, dataRowsHelperSimpleConsumption)
 /** РасхВнереал. Строка 200 + строка 300. */
 def rashVnereal = rashVnerealVs + ubitPriravnVs
 /** РеалИмущПрав. Код строки декларации 059. Код вида расхода = 21450, 21740, 21750. */
-def realImushPrav = getComplexConsumptionSumRows9(formDataComplexConsumption, [21450, 21740, 21750])
+def realImushPrav = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21450, 21740, 21750])
 /** ПриобрРеалИмущ. Код строки декларации 060. Код вида расхода = 21770. */
-def priobrRealImush = getComplexConsumptionSumRows9(formDataComplexConsumption, [21770])
+def priobrRealImush = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21770])
 /** ПриобРеалЦБ. Код строки декларации 070. Код вида расхода = 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680. */
-def priobrRealCB = getComplexConsumptionSumRows9(formDataComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680])
+def priobrRealCB = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680])
 /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21460. */
-def stoimRealPTDoSr = getComplexConsumptionSumRows9(formDataComplexConsumption, [21460])
+def stoimRealPTDoSr = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21460])
 /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. */
-def stoimRealPTPosSr = getComplexConsumptionSumRows9(formDataComplexConsumption, [21470])
+def stoimRealPTPosSr = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21470])
 /** СумНевозмЗатрЗУ. Код строки декларации 250. Код вида расхода = 21385. */
-def sumNevozmZatrZU = getComplexConsumptionSumRows9(formDataComplexConsumption, [21385])
+def sumNevozmZatrZU = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21385])
 /** ОстСтРеалАИ. Код строки декларации 040. Код вида расхода = 21760. */
-def ostStRealAI = getComplexConsumptionSumRows9(formDataComplexConsumption, [21760])
+def ostStRealAI = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21760])
 /** РасхОпер32, РасхОп302Ит. Код строки декларации = 080 или 350. */
 def rashOper32 = getLong(ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr +
         rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + sumNevozmZatrZU)
 /** УбытРеалАмИм. Код строки декларации 100. Код вида расхода = 21520, 21530. */
-def ubitRealAmIm = getComplexConsumptionSumRows9(formDataComplexConsumption, [21520, 21530])
+def ubitRealAmIm = getComplexConsumptionSumRows9(dataRowsHelperComplexConsumption, [21520, 21530])
 /** УбытРеалЗемУч. Код строки декларации 110. */
 def ubitRealZemUch = empty
 /** РасхУмРеал, РасхПризнИтого. Код строки декларации 130. */
@@ -180,11 +186,11 @@ def rashUmReal = getLong(pramRashReal + pramRashTorgVs + cosvRashVs + realImushP
         priobrRealImush + activRealPred + priobrRealCB + rashOper32 + ubitProshObsl +
         ubitRealAmIm + ubitRealZemUch + nadbPokPred)
 /** Убытки, УбытОп302. Код строки декларации 360. */
-def ubitki = getUbitki(formDataComplexConsumption, ubitObObslNeobl, ubitDogovDUI)
+def ubitki = getUbitki(dataRowsHelperComplexConsumption, ubitObObslNeobl, ubitDogovDUI)
 /** ПрибУб. */
 def pribUb = getLong(dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki)
 /** ДохИсклПриб. */
-def dohIsklPrib = getDohIsklPrib(formDataComplexIncome, formDataSimpleIncome)
+def dohIsklPrib = getDohIsklPrib(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 def nalBaza = getLong(pribUb - dohIsklPrib - 0 - 0 + 0)
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
@@ -261,7 +267,7 @@ xmlbuilder.Файл(
                             НалПУ : empty)
 
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
-                    def rowForNalPu = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
+                    def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
                     tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
                     nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
                     // 0..1
@@ -303,7 +309,7 @@ xmlbuilder.Файл(
                             // (как определять пока не ясно, толи по id, толи по id сбербанка,
                             // толи по КПП = 775001001), при формировании декларации подразделения
                             // надо брать строку appl5List02Row120 относящегося к этому подразделению
-                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
+                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat1 = (long) appl5List02Row120 / 3
                             avPlat2 = avPlat1
@@ -321,49 +327,49 @@ xmlbuilder.Файл(
             }
 
             // Приложение № 5 к Листу 02
-            /** ОбРасч. Столбец «Код строки 002». */
+            /** ОбРасч. Столбец «Признак расчёта». */
             def obRasch = emptyNull
-            /** НаимОП. Столбец «Наименование подразделения». */
+            /** НаимОП. Столбец «Подразделение территориального банка». */
             def naimOP = emptyNull
             /** КППОП. Столбец «КПП». */
             def kppop = emptyNull
-            /** ОбязУплНалОП. Столбец «Отметка о возложении обязанности по уплате налога». */
+            /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
             def obazUplNalOP = emptyNull
-            /** ДоляНалБаз. Столбец «Доля налоговой базы (%) [040]». */
+            /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
             def dolaNalBaz = emptyNull
-            /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.) [050]». */
+            /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
             def nalBazaDola = emptyNull
-            /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта РФ [060]». */
+            /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
             def stavNalSubRF = emptyNull
-            /** СумНал. Столбец «Сумма налога в бюджет субъекта РФ [070]». */
+            /** СумНал. Столбец «Сумма налога». */
             def sumNal = emptyNull
-            /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта РФ. Расчётный [080]». */
+            /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
             def nalNachislSubRF = emptyNull
-            /** СумНалП. Столбец «Сумма налога к доплате [100]». */
+            /** СумНалП. Столбец «Сумма налога к доплате». */
             def sumNalP = emptyNull
-            /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами РФ [090]». */
+            /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
             def nalViplVneRF = emptyNull
-            /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом [120]». */
+            /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
             def mesAvPlat = emptyNull
-            /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на 1 квартал следующего налогового периода [121]». */
+            /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
             def mesAvPlat1CvSled = emptyNull
 
             // получение из нф авансовых платежей строки соответствующей текущему подразделению
-            def tmpRow = getRowAdvanceForCurrentDepartment(formDataAdvance, departmentParam.kpp)
+            def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
             if (tmpRow != null) {
-                obRasch = tmpRow.stringCode
-                naimOP = tmpRow.divisionName
-                kppop = tmpRow.kpp
-                obazUplNalOP = tmpRow.labalAboutPaymentTax
-                dolaNalBaz = tmpRow.baseTaxOf
-                nalBazaDola = getLong(tmpRow.baseTaxOfRub)
-                stavNalSubRF = tmpRow.subjectTaxStavka
-                sumNal = getLong(tmpRow.subjectTaxSum)
-                nalNachislSubRF = getLong(tmpRow.subjectTaxCredit)
-                sumNalP = getLong(tmpRow.taxSumToPay)
-                nalViplVneRF = getLong(tmpRow.taxSumOutside)
-                mesAvPlat = getLong(tmpRow.everyMontherPaymentAfterPeriod)
-                mesAvPlat1CvSled = getLong(tmpRow.everyMonthForKvartalNextPeriod)
+                obRasch = row.calcFlag
+                naimOP = row.regionBankDivision
+                kppop = row.kpp
+                obazUplNalOP = row.obligationPayTax
+                dolaNalBaz = row.baseTaxOf
+                nalBazaDola = row.baseTaxOfRub
+                stavNalSubRF = row.subjectTaxStavka
+                sumNal = row.taxSum
+                nalNachislSubRF = row.subjectTaxCredit
+                sumNalP = row.taxSumToPay
+                nalViplVneRF = row.taxSumOutside
+                mesAvPlat = row.everyMontherPaymentAfterPeriod
+                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
             }
 
             // 0..n - всегда один
@@ -413,18 +419,18 @@ def getValue(def value) {
 /**
  * Получить сумму значении столбца по указанным строкам.
  *
- * @param form нф
+ * @param dataRowsHelper нф
  * @param columnCode псевдоним столбца по которому отбирать данные для суммирования
  * @param columnSum псевдоним столбца значения которого надо суммировать
  * @param codes список значении, которые надо учитывать при суммировании
  */
-def getSumRowsByCol(def form, def columnCode, def columnSum, def codes) {
+def getSumRowsByCol(def dataRowsHelper, def columnCode, def columnSum, def codes) {
     def result = 0
-    if (form == null) {
+    if (dataRowsHelper == null) {
         return result
     }
     def cell
-    form.dataRows.each { row ->
+    dataRowsHelper.getAllCached().each { row ->
         cell = row.getCell(columnSum)
         if (row.getCell(columnCode).getValue() in (String [])codes && !cell.hasValueOwner()) {
             result += getValue(cell.getValue())
@@ -436,52 +442,52 @@ def getSumRowsByCol(def form, def columnCode, def columnSum, def codes) {
 /**
  * Получить сумму графы 9 формы доходы сложные.
  *
- * @param form нф доходы сложные
+ * @param dataRowsHelper нф доходы сложные
  * @param codes коды которые надо учитывать при суммировании
  */
-def getComplexIncomeSumRows9(def form, def codes) {
-    return getSumRowsByCol(form, 'incomeTypeId', 'incomeTaxSumS', codes)
+def getComplexIncomeSumRows9(def dataRowsHelper, def codes) {
+    return getSumRowsByCol(dataRowsHelper, 'incomeTypeId', 'incomeTaxSumS', codes)
 }
 
 /**
  * Получить сумму графы 9 формы расходы сложные.
  *
- * @param form нф расходы сложные
+ * @param dataRowsHelper нф расходы сложные
  * @param codes коды которые надо учитывать при суммировании
  */
-def getComplexConsumptionSumRows9(def form, def codes) {
-    return getSumRowsByCol(form, 'consumptionTypeId', 'consumptionTaxSumS', codes)
+def getComplexConsumptionSumRows9(def dataRowsHelper, def codes) {
+    return getSumRowsByCol(dataRowsHelper, 'consumptionTypeId', 'consumptionTaxSumS', codes)
 }
 
 /**
  * Получить сумму графы 8 формы доходы простые.
  *
- * @param form нф доходы простые
+ * @param dataRowsHelper нф доходы простые
  * @param codes коды которые надо учитывать при суммировании
  */
-def getSimpleIncomeSumRows8(def form, def codes) {
-    getSumRowsByCol(form, 'incomeTypeId', 'rnu4Field5Accepted', codes)
+def getSimpleIncomeSumRows8(def dataRowsHelper, def codes) {
+    getSumRowsByCol(dataRowsHelper, 'incomeTypeId', 'rnu4Field5Accepted', codes)
 }
 
 /**
  * Получить сумму графы 8 формы расходы простые.
  *
- * @param form нф расходы простые
+ * @param dataRowsHelper нф расходы простые
  * @param codes коды которые надо учитывать при суммировании
  */
-def getSimpleConsumptionSumRows8(def form, def codes) {
-    return getSumRowsByCol(form, 'consumptionTypeId', 'rnu5Field5Accepted', codes)
+def getSimpleConsumptionSumRows8(def dataRowsHelper, def codes) {
+    return getSumRowsByCol(dataRowsHelper, 'consumptionTypeId', 'rnu5Field5Accepted', codes)
 }
 
 /**
  * Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6).
  */
-def getCalculatedSimpleConsumption(def formSimple, def codes) {
+def getCalculatedSimpleConsumption(def dataRowsHelperSimple, def codes) {
     def result = 0
-    if (formSimple == null) {
+    if (dataRowsHelperSimple == null) {
         return result
     }
-    formSimple.dataRows.each { row ->
+    dataRowsHelperSimple.getAllCached().each { row ->
         if (row.getCell('consumptionTypeId').getValue() in (String [])codes) {
             result +=
                 getValue(row.rnu5Field5Accepted) +
@@ -495,20 +501,20 @@ def getCalculatedSimpleConsumption(def formSimple, def codes) {
 /**
  * Выручка от реализации товаров (работ, услуг) собственного производства (ВырРеалТовСоб).
  *
- * @param form нф доходы сложные
- * @param formSimple нф доходы простые
+ * @param dataRowsHelper нф доходы сложные
+ * @param dataRowsHelperSimple нф доходы простые
  */
-def getVirRealTovSob(def form, def formSimple) {
+def getVirRealTovSob(def dataRowsHelper, def dataRowsHelperSimple) {
     def result = 0.0
 
     // Код вида дохода = 10633, 10634, 10650, 10670
-    result += getComplexIncomeSumRows9(form, [10633, 10634, 10650, 10670])
+    result += getComplexIncomeSumRows9(dataRowsHelper, [10633, 10634, 10650, 10670])
 
     // Код вида дохода = 10001, 10006, 10041, 10300, 10310, 10320, 10330, 10340, 10350, 10360, 10370,
     // 10380, 10390, 10450, 10460, 10470, 10480, 10490, 10571, 10580, 10590, 10600, 10610, 10630,
     // 10631, 10632, 10640, 10680, 10690, 10740, 10744, 10748, 10752, 10756, 10760, 10770, 10790,
     // 10800, 11140, 11150, 11160, 11170, 11320, 11325, 11330, 11335, 11340, 11350, 11360, 11370, 11375
-    result += getSimpleIncomeSumRows8(formSimple, [10001, 10006, 10041, 10300, 10310, 10320,
+    result += getSimpleIncomeSumRows8(dataRowsHelperSimple, [10001, 10006, 10041, 10300, 10310, 10320,
             10330, 10340, 10350, 10360, 10370, 10380, 10390, 10450, 10460, 10470, 10480, 10490,
             10571, 10580, 10590, 10600, 10610, 10630, 10631, 10632, 10640, 10680, 10690, 10740,
             10744, 10748, 10752, 10756, 10760, 10770, 10790, 10800, 11140, 11150, 11160, 11170,
@@ -520,9 +526,9 @@ def getVirRealTovSob(def form, def formSimple) {
             10490, 10571, 10590, 10610, 10640, 10680, 10690, 11340, 11350, 11370, 11375]
 
     // графа 5
-    result += getSumRowsByCol(formSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
+    result += getSumRowsByCol(dataRowsHelperSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
     // графа 6
-    result -= getSumRowsByCol(formSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
+    result -= getSumRowsByCol(dataRowsHelperSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
 
     return getLong(result)
 }
@@ -530,10 +536,10 @@ def getVirRealTovSob(def form, def formSimple) {
 /**
  * Получить внереализационные доходы (ДохВнереал, ВнеРеалДохВс).
  *
- * @param form нф доходы сложные
- * @param formSimple нф доходы простые
+ * @param dataRowsHelper нф доходы сложные
+ * @param dataRowsHelperSimple нф доходы простые
  */
-def getDohVnereal(def form, def formSimple) {
+def getDohVnereal(def dataRowsHelper, def dataRowsHelperSimple) {
     def result = 0.0
 
     // Код вида дохода = 11405, 11410, 11415, 13040, 13045, 13050, 13055, 13060, 13065,
@@ -541,7 +547,7 @@ def getDohVnereal(def form, def formSimple) {
     // 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
     // 13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180,
     // 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290
-    result += getComplexIncomeSumRows9(form, [11405, 11410, 11415, 13040, 13045, 13050, 13055,
+    result += getComplexIncomeSumRows9(dataRowsHelper, [11405, 11410, 11415, 13040, 13045, 13050, 13055,
             13060, 13065, 13070, 13090, 13100, 13110, 13120, 13250, 13650, 13655, 13660, 13665,
             13670, 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
             13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180, 14190,
@@ -555,7 +561,7 @@ def getDohVnereal(def form, def formSimple) {
     // 13080, 13150, 13160, 13170, 13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330,
     // 13340, 13400, 13410, 13725, 13730, 13920, 13925, 13930, 14000, 14010, 14020, 14030, 14040,
     // 14050, 14060, 14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160
-    result += getSimpleIncomeSumRows8(formSimple, [11380, 11385, 11390, 11395, 11400, 11420,
+    result += getSimpleIncomeSumRows8(dataRowsHelperSimple, [11380, 11385, 11390, 11395, 11400, 11420,
             11430, 11840, 11850, 11855, 11860, 11870, 11880, 11930, 11970, 12000, 12010, 12030,
             12050, 12070, 12090, 12110, 12130, 12150, 12170, 12190, 12210, 12230, 12250, 12270,
             12290, 12320, 12340, 12360, 12390, 12400, 12410, 12420, 12430, 12830, 12840, 12850,
@@ -570,12 +576,12 @@ def getDohVnereal(def form, def formSimple) {
     def codes = [11860, 11870, 11880, 11930, 11970, 12000, 13930, 14020, 14030, 14040, 14050,
             14060, 14070, 14080, 14090, 14100, 14110, 14130, 14150, 14160]
     // графа 5
-    result += getSumRowsByCol(formSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
+    result += getSumRowsByCol(dataRowsHelperSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
     // графа 6
-    result -= getSumRowsByCol(formSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
+    result -= getSumRowsByCol(dataRowsHelperSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
 
     // Код вида дохода = 13130, 13140
-    result -= getSimpleIncomeSumRows8(formSimple, [13130, 13140])
+    result -= getSimpleIncomeSumRows8(dataRowsHelperSimple, [13130, 13140])
 
     return getLong(result)
 }
@@ -583,21 +589,21 @@ def getDohVnereal(def form, def formSimple) {
 /**
  * Получить доходы, исключаемые из прибыли (ДохИсклПриб).
  *
- * @param formSimple нф доходы простые
- * @param formComplex нф доходы сложные
+ * @param dataRowsHelperComplex нф доходы сложные
+ * @param dataRowsHelperSimple нф доходы простые
  */
-def getDohIsklPrib(def formComplex, def formSimple) {
+def getDohIsklPrib(def dataRowsHelperComplex, def dataRowsHelperSimple) {
     def result = 0.0
 
-    if (formComplex != null) {
+    if (dataRowsHelperComplex != null) {
         // Код вида доходов = 13655, 13660, 13665, 13675, 13680, 13685, 13690,
         // 13695, 13705, 13710, 13780, 13785, 13790
-        result += getComplexIncomeSumRows9(formComplex,
+        result += getComplexIncomeSumRows9(dataRowsHelperComplex,
                 [13655, 13660, 13665, 13675, 13680, 13685, 13690, 13695, 13705, 13710, 13780, 13785, 13790])
     }
-    if (formSimple != null) {
+    if (dataRowsHelperSimple != null) {
         // Код вида дохода = 14000
-        result += getSumRowsByCol(formSimple, 'incomeTypeId', 'rnu4Field5Accepted', [14000, 14010])
+        result += getSumRowsByCol(dataRowsHelperSimple, 'incomeTypeId', 'rnu4Field5Accepted', [14000, 14010])
     }
     return getLong(result)
 }
@@ -621,15 +627,15 @@ def getNalBazaIsch(def row100, def row110) {
 /**
  * Косвенные расходы, всего (КосвРасхВс).
  *
- * @param form нф расходы сложные
- * @param formSimple нф расходы простые
+ * @param dataRowsHelper нф расходы сложные
+ * @param dataRowsHelperSimple нф расходы простые
  */
-def getCosvRashVs(def form, def formSimple) {
+def getCosvRashVs(def dataRowsHelper, def dataRowsHelperSimple) {
     def result = 0
 
     // Код вида расхода = 20320, 20321, 20470, 20750, 20755, 20760, 20765, 20770,
     // 20775, 20780, 20785, 21210, 21280, 21345, 21355, 21365, 21370, 21375, 21380
-    result += getComplexConsumptionSumRows9(form, [20320, 20321, 20470, 20750, 20755, 20760, 20765,
+    result += getComplexConsumptionSumRows9(dataRowsHelper, [20320, 20321, 20470, 20750, 20755, 20760, 20765,
             20770, 20775, 20780, 20785, 21210, 21280, 21345, 21355, 21365, 21370, 21375, 21380])
 
     // Код вида расхода = 20291, 20300, 20310, 20330, 20332, 20334, 20336, 20338,
@@ -642,7 +648,7 @@ def getCosvRashVs(def form, def formSimple) {
     // 21154, 21158, 21170, 21270, 21290, 21295, 21300, 21305, 21310, 21315, 21320,
     // 21325, 21340, 21350, 21360, 21400, 21405, 21410, 21580, 21590, 21600, 21610,
     // 21620, 21660, 21700, 21710, 21720, 21730, 21790, 21800, 21810
-    result += getSimpleConsumptionSumRows8(formSimple, [20291, 20300, 20310, 20330, 20332, 20334,
+    result += getSimpleConsumptionSumRows8(dataRowsHelperSimple, [20291, 20300, 20310, 20330, 20332, 20334,
             20336, 20338, 20339, 20340, 20360, 20364, 20368, 20370, 20430, 20434, 20438, 20440,
             20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460, 20464, 20468, 20475,
             20480, 20485, 20490, 20500, 20510, 20520, 20530, 20540, 20550, 20690, 20694, 20698,
@@ -660,7 +666,7 @@ def getCosvRashVs(def form, def formSimple) {
     // 20840, 20850, 20870, 20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055,
     // 21060, 21065, 21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580,
     // 21590, 21620, 21660, 21700, 21710, 21730, 21790, 21800, 21810
-    result += getSumRowsByCol(formSimple, 'consumptionTypeId', 'rnu7Field10Sum', [20300, 20360, 20370, 20430,
+    result += getSumRowsByCol(dataRowsHelperSimple, 'consumptionTypeId', 'rnu7Field10Sum', [20300, 20360, 20370, 20430,
             20434, 20438, 20440, 20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460,
             20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530, 20540, 20550, 20690, 20694,
             20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830, 20840, 20850, 20870,
@@ -675,7 +681,7 @@ def getCosvRashVs(def form, def formSimple) {
     // 20840, 20850, 20870, 20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055,
     // 21060, 21065, 21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580,
     // 21590, 2162021660, 21700, 21710, 21730, 21790, 21800, 21810
-    result -= getSumRowsByCol(formSimple, 'consumptionTypeId', 'rnu7Field12Accepted', [20300, 20360, 20370, 20430,
+    result -= getSumRowsByCol(dataRowsHelperSimple, 'consumptionTypeId', 'rnu7Field12Accepted', [20300, 20360, 20370, 20430,
             20434, 20438, 20440, 20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460,
             20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530, 20540, 20550, 20690, 20694,
             20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830, 20840, 20850, 20870,
@@ -689,14 +695,14 @@ def getCosvRashVs(def form, def formSimple) {
 /**
  * Получить из нф авансовые платежи подраздереления по КПП.
  *
- * @param form выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации».
+ * @param dataRowsHelper выходная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации».
  * @param kpp КПП
  */
-def getRowAdvanceForCurrentDepartment(def form, def kpp) {
-    if (form == null) {
+def getRowAdvanceForCurrentDepartment(def dataRowsHelper, def kpp) {
+    if (dataRowsHelper == null) {
         return null
     }
-    for (row in form.dataRows) {
+    for (row in dataRowsHelper.getAllCached()) {
         if (kpp == row.kpp) {
             return row
         }
@@ -707,11 +713,11 @@ def getRowAdvanceForCurrentDepartment(def form, def kpp) {
 /**
  * Итого выручка от реализации по операциям, отраженным в Приложении 3 к Листу 02 (ВыручОп302Ит).
  *
- * @param form доходы сложные
+ * @param dataRowsHelper доходы сложные
  */
-def getViruchOp302It(def form, def row180, def row210, row211) {
+def getViruchOp302It(def dataRowsHelper, def row180, def row210, row211) {
     // строка 030 + строка 100 + строка 110 + строка 240
-    def result = getComplexIncomeSumRows9(form, [10840, 10860, 10870, 10890])
+    def result = getComplexIncomeSumRows9(dataRowsHelper, [10840, 10860, 10870, 10890])
 
     // строка  180 + (строка 210 - строка 211)
     result += row180 + row210 - row211
@@ -722,15 +728,15 @@ def getViruchOp302It(def form, def row180, def row210, row211) {
 /**
  * Получить внереализационные расходы (РасхВнереалВС).
  *
- * @param form нф расходы сложные
- * @param formSimple нф расходы простые
+ * @param dataRowsHelper нф расходы сложные
+ * @param dataRowsHelperSimple нф расходы простые
  */
-def getRashVnerealVs(def form, def formSimple) {
+def getRashVnerealVs(def dataRowsHelper, def dataRowsHelperSimple) {
     def result = 0.0
 
     // Код вида расхода = 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
     // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
-    result += getComplexConsumptionSumRows9(form, [22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    result += getComplexConsumptionSumRows9(dataRowsHelper, [22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
             22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240])
 
     // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
@@ -750,10 +756,10 @@ def getRashVnerealVs(def form, def formSimple) {
             22580, 22600, 22610, 22640, 22680, 22710, 22715, 22720, 22750, 22760, 22800,
             22810, 22840, 22850, 22860, 22870, 23040, 23050, 23100, 23110, 23200, 23210,
             23220, 23230, 23250, 23260, 23270, 23280 ]
-    result += getCalculatedSimpleConsumption(formSimple, knu)
+    result += getCalculatedSimpleConsumption(dataRowsHelperSimple, knu)
 
     // Код вида расхода = 22492, 23150, 23160, 23170 - графа 9
-    result -= getComplexConsumptionSumRows9(form, [22492, 23150, 23160, 23170])
+    result -= getComplexConsumptionSumRows9(dataRowsHelper, [22492, 23150, 23160, 23170])
 
     return getLong(result)
 }
@@ -761,14 +767,23 @@ def getRashVnerealVs(def form, def formSimple) {
 /**
  * Убытки по операциям, отраженным в Приложении 3 к Листу 02 (УбытОп302).
  *
- * @param form расходы сложные
+ * @param dataRowsHelper расходы сложные
  */
-def getUbitki(form, row201, row230) {
+def getUbitki(dataRowsHelper, row201, row230) {
     // строка 060 + строка 150 + строка 160 + 260
-    def result = getComplexConsumptionSumRows9(form, [21780, 21500, 21510, 21390])
+    def result = getComplexConsumptionSumRows9(dataRowsHelper, [21780, 21500, 21510, 21390])
 
     // строка 201 + строка 230
     result += row201 + row230
 
     return getLong(result)
+}
+
+/**
+ * Получить данные нф.
+ *
+ * @param form нф
+ */
+def getDataRowHelper(def form) {
+    return (form != null ? getDataRowHelper(form) : null)
 }

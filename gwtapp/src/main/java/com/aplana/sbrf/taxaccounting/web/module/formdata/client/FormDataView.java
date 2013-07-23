@@ -43,7 +43,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
 	@UiField
-	FlexiblePager pager = new FlexiblePager();
+	FlexiblePager pager;
 	@UiField
 	Button addRowButton;
 	@UiField

@@ -45,6 +45,8 @@
  * 16  difference                   Расхождение
  */
 
+if (formData.id != null) dataRowsHelper = formDataService.getDataRowHelper(formData)
+
 switch (formDataEvent) {
 // создать
     case FormDataEvent.CREATE :
@@ -87,6 +89,17 @@ switch (formDataEvent) {
         break
 }
 
+//def fill(){
+//    dataRowsHelper.getAllCached().each { row ->
+//        getRequiredColsAliases().each {
+//            def cell = row.getCell(it)
+//            if (cell.isEditable()) {
+//                cell.setValue(1)
+//            }
+//        }
+//    }
+//}
+
 /**
  * В рамках выполнения  логических проверок система должна осуществлять расчет значений вычисляемых ячеек 
  * контрольных столбцов, описанных в Табл. 5 раздела 6.1.1.7 как вычисляемые. (c) ЧТЗ
@@ -113,12 +126,12 @@ def checkRequiredFields() {
 
     def rnd = new Random()
 
-    formData.dataRows.each { dataRow ->
+    dataRowsHelper.getAllCached().each { dataRow ->
         for (def colAlias : requiredColsAliases) {
             cell = dataRow.getCell(colAlias)
             if (cell.editable && isBlankOrNull(cell.getValue())) {
                 isValid = false
-                def rowNumber = formData.dataRows.indexOf(dataRow) + 1
+                def rowNumber = dataRowsHelper.getAllCached().indexOf(dataRow) + 1
                 logger.error("Строка $rowNumber: обязательные поля не заполнены!")
                 break
             }
@@ -134,7 +147,7 @@ def checkRequiredFields() {
  */
 def calc35to40() {
     getRowsAliasesFor35to40().each { rowAlias ->
-        def dataRow = formData.getDataRow(rowAlias)
+        def dataRow = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),rowAlias)
 
         final income101Data = getIncome101Data(dataRow)
 
@@ -220,9 +233,9 @@ def getIncome101Data(def dataRow) {
  */
 def calc4to5() {
     getRowsAliasesFor4to5().each { rowAlias ->
-        def dataRow = formData.getDataRow(rowAlias)
+        def dataRow = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),rowAlias)
 
-        final summaryIncomeSimpleFormData = getSummaryIncomeSimpleFormData()
+        final summaryIncomeSimpleFormHelper = getSummaryIncomeSimpleFormHelper()
         final income102Data = getIncome102Data(dataRow)
 
         dataRow.with {
@@ -231,7 +244,7 @@ def calc4to5() {
 //          графа  13
             opuSumByEnclosure2 = getOpuSumByEnclosure2For4to5(dataRow)
 //          графа  14
-            opuSumByTableD = getOpuSumByTableDFor4to5(dataRow, summaryIncomeSimpleFormData)
+            opuSumByTableD = getOpuSumByTableDFor4to5(dataRow, summaryIncomeSimpleFormHelper)
 //          графа  15
             opuSumTotal = getOpuSumTotalFor4to5(dataRow, income102Data)
 //          графа  16
@@ -287,15 +300,15 @@ def getIncome102Data(def dataRow){
  * № строки 4-5
  * Графа 14
  */
-def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormData) {
-    if (summaryIncomeSimpleFormData != null) {
-        return summaryIncomeSimpleFormData.dataRows.sum { summaryIncomeSimpleDataRow ->
-            if (summaryIncomeSimpleDataRow.accountNo == dataRow.incomeBuhSumAccountNumber) {
-                return summaryIncomeSimpleDataRow.rnu4Field5Accepted
-            } else {
-                return 0
+def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormHelper) {
+    if (summaryIncomeSimpleFormHelper != null && summaryIncomeSimpleFormHelper.getAllCached()!=null && !summaryIncomeSimpleFormHelper.getAllCached().isEmpty()) {
+        def sum = 0;
+        for(def row : summaryIncomeSimpleFormHelper.getAllCached()){
+            if (row.accountNo == dataRow.incomeBuhSumAccountNumber && row.rnu4Field5Accepted!=null) {
+                sum += row.rnu4Field5Accepted
             }
         }
+        return sum;
     }
 }
 
@@ -303,18 +316,20 @@ def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormData) {
  * получаем formData для формы 6.1.2 «Сводная форма " Доходы, учитываемые в простых РНУ" уровня обособленного подразделения»
  * SBRFACCTAX-2749 Доходы сложные - за какой период брать данные по форме "доходы простые"
  */
-def getSummaryIncomeSimpleFormData() {
+def getSummaryIncomeSimpleFormHelper() {
     def formId = 301
     def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId
 
-    def summaryIncomeSimpleFormData = FormDataService.find(formId, formDataKind, departmentId, reportPeriodId)
-    if (summaryIncomeSimpleFormData == null || summaryIncomeSimpleFormData.dataRows.isEmpty()) {
+    def summaryIncomeSimpleFormData = formDataService.find(formId, formDataKind, departmentId, reportPeriodId)
+    def summaryIncomeSimpleDataRowsHelper = null
+    if (summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
+    if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
     }
 
-    return summaryIncomeSimpleFormData
+    return summaryIncomeSimpleDataRowsHelper
 }
 
 /**
@@ -353,18 +368,20 @@ def calcTotal() {
     final colName = getColAliasForTotal()
 
     final firstTotalRowAlias = getFirstTotalRowAlias()
-    formData.getDataRow(firstTotalRowAlias)[colName] = calcTotal(colName, getRowsAliasesForFirstControlSum())
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+    dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),firstTotalRowAlias)[colName] = calcTotal(colName, getRowsAliasesForFirstControlSum())
 
     final secondTotalRowAlias = getSecondTotalRowAlias()
-    formData.getDataRow(secondTotalRowAlias)[colName] = calcTotal(colName, getRowsAliasesForSecondControlSum())
+    dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),secondTotalRowAlias)[colName] = calcTotal(colName, getRowsAliasesForSecondControlSum())
 }
 
 /**
  * подсчитываем сумму для столбца colName в строках rowsAliases
  */
 def calcTotal(def colName, def rowsAliases) {
+    def dataRowsHelper = formDataService.getDataRowHelper(formData)
     return rowsAliases.sum { rowAlias ->
-        def tmp = formData.getDataRow(rowAlias)[colName]
+        def tmp = dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),rowAlias)[colName]
         return (tmp == null) ? 0 : tmp
     }
 }
@@ -419,14 +436,14 @@ def getRowsAliasesForSecondControlSum() {
  * возвращает алиас для первой строки итогов
  */
 def getFirstTotalRowAlias() {
-    return ['R30']
+    return 'R30'
 }
 
 /**
  * возвращает алиас для второй строки итогов
  */
 def getSecondTotalRowAlias() {
-    return ['R85']
+    return 'R85'
 }
 
 /********************************   ОБЩИЕ ФУНКЦИИ   ********************************/
@@ -448,7 +465,7 @@ boolean isBlankOrNull(value) {
  * @since 21.02.2013 12:30
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')

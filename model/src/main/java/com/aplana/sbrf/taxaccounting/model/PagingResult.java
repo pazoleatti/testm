@@ -15,7 +15,7 @@ public class PagingResult<T> implements Serializable{
 	private static final long serialVersionUID = 4359122077734311449L;
 	
 	List<T> records;
-	long totalRecordCount;
+	int totalRecordCount;
 	
 	/**
 	 * @return список записей, попавших в запрошенный диапазон значений
@@ -29,10 +29,10 @@ public class PagingResult<T> implements Serializable{
 	/**
 	 * @return общее количество записей (на всех страницах)
 	 */
-	public long getTotalRecordCount() {
+	public int getTotalRecordCount() {
 		return totalRecordCount;
 	}
-	public void setTotalRecordCount(long totalRecordCount) {
+	public void setTotalRecordCount(int totalRecordCount) {
 		this.totalRecordCount = totalRecordCount;
 	}
 

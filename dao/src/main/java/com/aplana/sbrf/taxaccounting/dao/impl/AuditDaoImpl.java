@@ -155,9 +155,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 	}
 
-	private long getCount(LogSystemFilter filter) {
+	private int getCount(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*) ");
 		appendSelectFromAndWhereClause(sql, filter);
-		return getJdbcTemplate().queryForLong(sql.toString());
+		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 }

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client;
 import java.io.Serializable;
 
 import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ApplicationContextHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.shared.DictionaryAction;
@@ -38,8 +38,8 @@ public abstract class DictionaryDataProvider<A extends DictionaryAction<T>, T ex
 	 * @param dictionaryCode Код справочника.
 	 */
 	public DictionaryDataProvider(String dictionaryCode) {
-		this.eventBus = ApplicationContextHolder.getEventBus();
-		this.dispatcher = ApplicationContextHolder.getDispatchAsync();
+		this.eventBus = GINContextHolder.getEventBus();
+		this.dispatcher = GINContextHolder.getDispatchAsync();
 		this.dictionaryCode = dictionaryCode;
 	}
 

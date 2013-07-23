@@ -235,7 +235,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				},
 				new DeclarationDataSearchResultItemMapper()
 		);
-		long count = getCount(declarationFilter);
+		int count = getCount(declarationFilter);
 		PagingResult<DeclarationDataSearchResultItem> result = new PagingResult<DeclarationDataSearchResultItem>();
 		result.setRecords(records);
 		result.setTotalRecordCount(count);
@@ -286,10 +286,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 	}
 
 	@Override
-	public long getCount(DeclarationDataFilter filter) {
+	public int getCount(DeclarationDataFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*)");
 		appendFromAndWhereClause(sql, filter);
-		return getJdbcTemplate().queryForLong(sql.toString());
+		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 
 	private void appendFromAndWhereClause(StringBuilder sql, DeclarationDataFilter filter) {
