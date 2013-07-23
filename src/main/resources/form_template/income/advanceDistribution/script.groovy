@@ -68,13 +68,11 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    // TODO (Aydar Kadyrgulov)
     def dataRowsHelper = formDataService.getDataRowHelper(formData)
     DataRow<Cell> dataRow = formData.createDataRow()
-    if (currentDataRow == null) currentDataRow = 0
 
     dataRows = dataRowsHelper.getAllCached()
-    dataRows.add(currentDataRow, dataRow)
+    dataRows.add(dataRow)
     // графа 3, 5..7 редактируемые
     ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit'].each {
         dataRow.getCell(it).editable = true
@@ -134,65 +132,168 @@ void calc() {
     // отсортировать/группировать
     dataRowsHelper.getAllCached().sort { a, b ->
         if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
-            return a.kpp <=> b.kpp
+            return b.kpp <=> a.kpp
         }
         if (a.regionBank == b.regionBank) {
-            return a.regionBankDivision <=> b.regionBankDivision
+            return b.regionBankDivision <=> a.regionBankDivision
         }
-        return a.regionBank <=> b.regionBank
+        return b.regionBank <=> a.regionBank
     }
 
     // TODO
     // расчет графы 1..4, 8..21
     dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+
+        logger.info(row.regionBankDivision)
+        // TODO (Aydar Kadyrgulov) после привязки к справочнику брать ID выбранной записи
+        def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
+
         // графа 1
         row.number = i + 1
 
+        /*
+        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
+        «Графа 2» = значение атрибута «Наименование подразделения» справочника «Подразделения»,
+        где «Индекс территориального банка» текущего подразделения («Графа 3»)
+        равен «Индексу территориального банка» среди записей справочника «Подразделения» с типом,
+        соответствующему территориальному банку.
+        */
         // графа 2
-        row.regionBank =0
+        row.regionBank = departmentParam.name
 
+        /*
+        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
+        «Графа 4» = значение атрибута «КПП» формы настроек подразделений.
+        */
         // графа 4
-        row.kpp =0
+        row.kpp = departmentParam.kpp
 
-        // графа 8
-        row.calcFlag =0
+        /*
+        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
+        «Графа 8» = значение атрибута «Признак расчёта» формы настроек подразделений.
+        */
+        // графа 8 TODO (Aydar Kadyrgulov) Признак расчёта
+        row.calcFlag = departmentParam.
 
-        // графа 9
+        /*
+        Заполняется автоматически на основании значения «Графы 3».
+        «Графа 9» = значение атрибута «Обязанность по уплате налога» формы настроек подразделений.
+        */
+        // графа 9 TODO (Aydar Kadyrgulov) Обязанность по уплате налога
         row.obligationPayTax =0
 
+        /*
+         «Графа 10» =ОКРУГЛ ((((«графа 5»  / «итого по графе 5») * 100) + ((«графа 6» / «итого по графе 6») * 100)) / 2; 8)
+        */
         // графа 10
         row.baseTaxOf =0
 
+        /*
+         «Графа 11» = ОКРУГЛ («распределяемая налоговая база за отчётный период» * «графа 10» / 100; 0)
+         */
         // графа 11
         row.baseTaxOfRub =0
 
+        /*
+        Заполняется автоматически на основании значения «Графы 3».
+        «Графа 12» = значение атрибута «Ставка налога (региональная часть)» формы настроек подразделений.
+         */
         // графа 12
         row.subjectTaxStavka =0
 
+        /*
+        ЕСЛИ «графа 11» > 0
+        ТОГДА «графа 13» = ОКРУГЛ («графа 11» * «графа 12» / 100;0)
+        ИНАЧЕ «графа 13» = 0
+         */
         // графа 13
         row.taxSum =0
 
+        /*
+        «Графа 14» = ОКРУГЛ («Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде» * «графа 10» / 100;0)
+         */
         // графа 14
         row.taxSumOutside =0
 
+        /*
+        ЕСЛИ «графа 13» > «графа 7» + «графа 14»
+        ТОГДА «графа 15» = «графа 13» - («графа 7» + «графа 14»)
+        ИНАЧЕ «графа 15» = 0
+         */
         // графа 15
         row.taxSumToPay =0
 
+        /*
+        ЕСЛИ «графа 13» < «графа 7» + «графа 14»
+        ТОГДА «графа 16» = («графа 7» + «графа 14») - «графа 13»
+        ИНАЧЕ «графа 16» = 0
+         */
         // графа 16
         row.taxSumToReduction =0
 
+
+        /*
+        Для первого отчётного периода
+        «графа 17» = «графа 19»
+        Для второго отчётного периода
+        «графа 17» = «графа 20»
+        Для третьего отчётного периода
+        «графа 17» = «графа 21»
+        Для налогового периода
+        «графа 17» = 0
+         */
         // графа 17
         row.everyMontherPaymentAfterPeriod =0
 
+        /*
+        Для первого отчётного периода
+        «графа 18» = 0
+        Для второго отчётного периода
+        «графа 18» = 0
+        Для третьего отчётного периода
+        «графа 18» = «графа 17»
+        Для налогового периода
+        «графа 18» = 0
+         */
         // графа 18
         row.everyMonthForKvartalNextPeriod =0
 
+        /*
+        Для первого отчётного периода
+        «графа 19» = «графа 13»
+        Для второго отчётного периода
+        «графа 19» = 0
+        Для третьего отчётного периода
+        «графа 19» = 0
+        Для налогового периода
+        «графа 19» = 0
+         */
         // графа 19
         row.everyMonthForSecondKvartalNextPeriod =0
 
+        /*
+        Для первого отчётного периода
+        «графа 20» = 0
+        Для второго отчётного периода
+        «графа 20» = «графа 13» - «графа 19»
+        Для третьего отчётного периода
+        «графа 20» = 0
+        Для налогового периода
+        «графа 20» = 0
+         */
         // графа 20
         row.everyMonthForThirdKvartalNextPeriod =0
 
+        /*
+        Для первого отчётного периода
+        «графа 21» = 0
+        Для второго отчётного периода
+        «графа 21» = 0
+        Для третьего отчётного периода
+        «графа 21» = «графа 13» - «графа 20»
+        Для налогового периода
+        «графа 21» = 0
+         */
         // графа 21
         row.everyMonthForFourthKvartalNextPeriod =0
     }
@@ -201,74 +302,77 @@ void calc() {
     def caRow = formData.createDataRow()
     dataRowsHelper.getAllCached().add(caRow)
     caRow.setAlias('ca')
-    caRow.regionBank = 'Итого'  // TODO (Aydar Kadyrgulov)
+    caRow.regionBank = 'Центральный аппарат (скорректированный)'  // TODO (Aydar Kadyrgulov)
     setTotalStyle(caRow)
+    dataRowsHelper.save(dataRowsHelper.getAllCached());
     // TODO доделать
     // расчет графы 1..21
-    dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+    /*dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+        def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
+
         // графа 1
         row.number = i + 1
 
         // графа 2
-        row.regionBank =0
+        row.regionBank = departmentParam.name
 
         // графа 3
-        row.regionBankDivision =0
+        row.regionBankDivision =null
 
         // графа 4
-        row.kpp =0
+        row.kpp = departmentParam.kpp
 
         // графа 5
-        row.propertyPrice =0
+        row.propertyPrice =null
 
         // графа 6
-        row.workersCount =0
+        row.workersCount =null
 
         // графа 7
-        row.subjectTaxCredit =0
+        row.subjectTaxCredit =null
 
         // графа 8
-        row.calcFlag =0
+        row.calcFlag =null
 
         // графа 9
-        row.obligationPayTax =0
+        row.obligationPayTax =null
 
         // графа 10
-        row.baseTaxOf =0
+        row.baseTaxOf =null
 
         // графа 11
-        row.baseTaxOfRub =0
+        row.baseTaxOfRub =null
 
         // графа 12
-        row.subjectTaxStavka = 0
+        row.subjectTaxStavka = null
 
         // графа 13
-        row.taxSum =0
+        row.taxSum =null
 
         // графа 14
-        row.taxSumOutside =0
+        row.taxSumOutside =null
 
         // графа 15
-        row.taxSumToPay =0
+        row.taxSumToPay =null
 
         // графа 16
-        row.taxSumToReduction =0
+        row.taxSumToReduction =null
 
         // графа 17
-        row.everyMontherPaymentAfterPeriod =0
+        row.everyMontherPaymentAfterPeriod =null
 
         // графа 18
-        row.everyMonthForKvartalNextPeriod =0
+        row.everyMonthForKvartalNextPeriod =null
 
         // графа 19
-        row.everyMonthForSecondKvartalNextPeriod =0
+        row.everyMonthForSecondKvartalNextPeriod =null
 
         // графа 20
-        row.everyMonthForThirdKvartalNextPeriod =0
+        row.everyMonthForThirdKvartalNextPeriod =null
 
         // графа 21
-        row.everyMonthForFourthKvartalNextPeriod = 0
-    }
+        row.everyMonthForFourthKvartalNextPeriod = null
+    }*/
 
 
     // добавить итого (графа 5..7, 10, 11, 13..21)
@@ -418,7 +522,7 @@ void setTotalStyle(def row) {
             'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
             'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
             'everyMonthForFourthKvartalNextPeriod'].each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
+        row.getCell(it).setStyleAlias('Итоговая')
     }
 }
 
@@ -430,7 +534,6 @@ void setTotalStyle(def row) {
 def getIndex(def row) {
     def dataRowsHelper = formDataService.getDataRowHelper(formData)
     dataRowsHelper.getAllCached().indexOf(row)
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
@@ -444,7 +547,8 @@ def getSum(def columnAlias) {
         return 0
     }
     dataRowsHelper.save(dataRowsHelper.getAllCached());
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
+    //summ(formData, new ColumnRange(columnAlias, from, to))
 }
 
 /**
