@@ -236,7 +236,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		phisicalUpdateRowsType(fdId, TypeFlag.DEL, TypeFlag.SAME);
 	}
 
-	private void insertRows(FormData fd, int index, long ordBegin,
+	private void insertRows(FormData fd, int index, Long ordBegin,
 			List<DataRow<Cell>> rows) {
 
 		Long ordEnd = getOrd(fd.getId(), index + 1);
@@ -244,11 +244,31 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				: DataRowDaoImplUtils
 						.calcOrdStep(ordBegin, ordEnd, rows.size());
 		if (ordStep == 0) {
-			// TODO: Реализовать перепаковку поля ORD
-			// Слишком маленькие значения ORD. В промежуток нельзя вставить
-			// такое количество строк
-			throw new IllegalStateException(
-					"Необходима перепаковка поля ORD. (TODO: Задача SBRFACCTAX-3176)");
+			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
+			такое количество строк*/
+            long diff = rows.size() - (ordEnd - ordBegin) + 1; //minimal diff between rows
+            int endIndex = getSize(fd, null);
+
+            /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
+             *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
+             *  Прибавляем ровно ту разницу, котрая необходима для вставки строк.
+             */
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("diff", Long.valueOf(diff));
+            map.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+            map.put("formDataId", fd.getId());
+            map.put("dataStartRowIndex", Long.valueOf(index + 1));
+            map.put("dataEndRowIndex", Long.valueOf(endIndex));
+
+            getNamedParameterJdbcTemplate().update(
+                    "update DATA_ROW set ORD = ORD + :diff where ID in" +
+                            "(select RR.ID from " +
+                            "(select rownum as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId order by DR.ORD) " +
+                            "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))", map
+            );
+            ordEnd = getOrd(fd.getId(), index + 1);
+            ordStep = DataRowDaoImplUtils
+                    .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
 
 		phisicalInsertRows(fd, rows, ordBegin, ordStep, null);
@@ -386,8 +406,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Метод получает значение ORD для строки по индексу. Метод работает со временным срезом формы
 	 * 
-	 * @param fd
-	 * @param types
+	 * @param formDataId
 	 * @param dataRowIndex
 	 * @return
 	 */
