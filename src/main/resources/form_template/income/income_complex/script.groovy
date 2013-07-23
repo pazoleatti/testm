@@ -89,6 +89,17 @@ switch (formDataEvent) {
         break
 }
 
+//def fill(){
+//    dataRowsHelper.getAllCached().each { row ->
+//        getRequiredColsAliases().each {
+//            def cell = row.getCell(it)
+//            if (cell.isEditable()) {
+//                cell.setValue(1)
+//            }
+//        }
+//    }
+//}
+
 /**
  * В рамках выполнения  логических проверок система должна осуществлять расчет значений вычисляемых ячеек 
  * контрольных столбцов, описанных в Табл. 5 раздела 6.1.1.7 как вычисляемые. (c) ЧТЗ
@@ -290,14 +301,14 @@ def getIncome102Data(def dataRow){
  * Графа 14
  */
 def getOpuSumByTableDFor4to5(def dataRow, def summaryIncomeSimpleFormHelper) {
-    if (summaryIncomeSimpleFormHelper != null) {
-        return summaryIncomeSimpleFormHelper.getAllCached().sum { summaryIncomeSimpleDataRow ->
-            if (summaryIncomeSimpleDataRow.accountNo == dataRow.incomeBuhSumAccountNumber) {
-                return summaryIncomeSimpleDataRow.rnu4Field5Accepted
-            } else {
-                return 0
+    if (summaryIncomeSimpleFormHelper != null && summaryIncomeSimpleFormHelper.getAllCached()!=null && !summaryIncomeSimpleFormHelper.getAllCached().isEmpty()) {
+        def sum = 0;
+        for(def row : summaryIncomeSimpleFormHelper.getAllCached()){
+            if (row.accountNo == dataRow.incomeBuhSumAccountNumber && row.rnu4Field5Accepted!=null) {
+                sum += row.rnu4Field5Accepted
             }
         }
+        return sum;
     }
 }
 
@@ -312,8 +323,9 @@ def getSummaryIncomeSimpleFormHelper() {
     def reportPeriodId = formData.reportPeriodId
 
     def summaryIncomeSimpleFormData = formDataService.find(formId, formDataKind, departmentId, reportPeriodId)
-    if (summaryIncomeSimpleFormData != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
-    if (summaryIncomeSimpleFormData == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
+    def summaryIncomeSimpleDataRowsHelper = null
+    if (summaryIncomeSimpleFormData.id != null) summaryIncomeSimpleDataRowsHelper = formDataService.getDataRowHelper(summaryIncomeSimpleFormData)
+    if (summaryIncomeSimpleDataRowsHelper == null || summaryIncomeSimpleDataRowsHelper.getAllCached().isEmpty()) {
         logger.error('Нет информации в отчёте Доходы простые')
     }
 
@@ -424,14 +436,14 @@ def getRowsAliasesForSecondControlSum() {
  * возвращает алиас для первой строки итогов
  */
 def getFirstTotalRowAlias() {
-    return ['R30']
+    return 'R30'
 }
 
 /**
  * возвращает алиас для второй строки итогов
  */
 def getSecondTotalRowAlias() {
-    return ['R85']
+    return 'R85'
 }
 
 /********************************   ОБЩИЕ ФУНКЦИИ   ********************************/
