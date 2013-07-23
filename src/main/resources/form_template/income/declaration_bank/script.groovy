@@ -1989,9 +1989,11 @@ def getTotalFromForm(def dataRowsHelper, def columnName) {
  * @return значение или 0, если значение не найдено
  */
 def getOldValue(def data, def kind, def valueName) {
-    data.Документ.Прибыль.НалДохСтав.each {
-        if (it.@ВидДоход == kind) {
-            return it.@"$valueName"
+    if (data != null) {
+        data.Документ.Прибыль.НалДохСтав.each {
+            if (it.@ВидДоход == kind) {
+                return it.@"$valueName"
+            }
         }
     }
     return 0
@@ -2023,5 +2025,5 @@ def getOldXmlData(def prevReportPeriod, def departmentId) {
  * @param form нф
  */
 def getDataRowHelper(def form) {
-    return (form != null ? getDataRowHelper(form) : null)
+    return (form != null ? formDataService.getDataRowHelper(form) : null)
 }
