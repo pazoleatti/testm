@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
+
 /**
  * Класс, содержащий параметры разбивки списка записей на страницы
  */
-public class PagingParams {
+public class PagingParams implements Serializable{
+	private static final long serialVersionUID = 5113425251692266554L;
+	
 	private int startIndex = 0;
 	private int count = 10;
 	
