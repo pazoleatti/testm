@@ -33,17 +33,17 @@ public interface DataRowDao {
 	 * Метод получает строки сохранненого среза строк НФ.
 	 * 
 	 */
-	List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
+	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
 			DataRowRange range);
 	
 	/**
 	 * Метод получает количество строк сохранненого среза.
 	 * 
-	 * @param fd
+	 * @param formData
 	 * @param filter
 	 * @return
 	 */
-	int getSavedSize(FormData fd, DataRowFilter filter);
+	int getSavedSize(FormData formData, DataRowFilter filter);
 
 	/*
 	 * Методы для работы с редактируемым срезом формы
@@ -53,7 +53,7 @@ public interface DataRowDao {
 	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 * 
 	 */
-	List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
+	List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
 			DataRowRange range);
 	
 
@@ -61,48 +61,48 @@ public interface DataRowDao {
 	/**
 	 * Метод получает количество строк редактируемого среза.
 	 * 
-	 * @param fd
+	 * @param formData
 	 * @param filter
 	 * @return
 	 */
-	int getSize(FormData fd, DataRowFilter filter);
+	int getSize(FormData formData, DataRowFilter filter);
 
 	/**
 	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
 	 * При этом поле id у DataRow может быть обновлено.
 	 * 
-	 * @param fd
-	 * @param row
+	 * @param formData
+	 * @param rows
 	 */
-	void updateRows(FormData fd, Collection<DataRow<Cell>> rows);
+	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
 	/**
 	 * Удалет строки. При этом используется иденитфикатор DataRow.id 
 	 * Действие применяется к временному срезу строк
 	 * 
-	 * @param fd
+	 * @param formData
 	 * @param rows
 	 */
-	void removeRows(FormData fd, List<DataRow<Cell>> rows);
+	void removeRows(FormData formData, List<DataRow<Cell>> rows);
 
 	/**
 	 * Удаляет строки в диапазоне индексов. (Индексы от 1)
 	 * Действие применяется к временному срезу строк
 	 * 
-	 * @param fd
-	 * @param idxFrom
-	 * @param idxTo
+	 * @param formData
+	 * @param indexFrom
+	 * @param indexTo
 	 */
-	void removeRows(FormData fd, int idxFrom, int idxTo);
+	void removeRows(FormData formData, int indexFrom, int indexTo);
 	
 	
 	/**
 	 * Удаляем все строки
 	 * Действие применяется к временному срезу строк
 	 * 
-	 * @param fd
+	 * @param formData
 	 */
-	void removeRows(FormData fd);
+	void removeRows(FormData formData);
 	
 	
 	/**
@@ -110,14 +110,14 @@ public interface DataRowDao {
 	 * удаляются все существующие строки. Фактически метод ведет себя как старый способ сохранения формы.
 	 * Поля DataRow.index и DataRow.id не принимаются во внимание. 
 	 * 
-	 * @param fd
+	 * @param formData
 	 * @param rows
 	 */
-	void saveRows(FormData fd, List<DataRow<Cell>> rows);
+	void saveRows(FormData formData, List<DataRow<Cell>> rows);
 
-	void insertRows(FormData fd, int index, List<DataRow<Cell>> rows);
+	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
 
-	void insertRows(FormData fd, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
+	void insertRows(FormData formData, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
 
 	/*
 	 * Сохранение/отмена
@@ -126,14 +126,14 @@ public interface DataRowDao {
 	/**
 	 * Делает временный срез строк формы - постоянным.
 	 * 
-	 * @param fd
+	 * @param formDataId
 	 */
 	void commit(long formDataId);
 
 	/**
 	 * Откатывает временный срез формы к постоянному.
 	 * 
-	 * @param fd
+	 * @param formDataId
 	 */
 	void rollback(long formDataId);
 

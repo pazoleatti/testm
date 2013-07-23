@@ -43,33 +43,33 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
+	public List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
+		return phisicalGetRows(formData,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData fd, DataRowFilter filter) {
-		return phisicalGetSize(fd,
+	public int getSavedSize(FormData formData, DataRowFilter filter) {
+		return phisicalGetSize(formData,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
+	public List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
+		return phisicalGetRows(formData,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSize(FormData fd, DataRowFilter filter) {
-		return phisicalGetSize(fd,
+	public int getSize(FormData formData, DataRowFilter filter) {
+		return phisicalGetSize(formData,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
+	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
 		// тем же значением ORD
@@ -78,7 +78,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<Long> forCreateOrder = new ArrayList<Long>();
 		for (DataRow<Cell> dataRow : rows) {
 			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd,
+			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(formData,
 					new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, id);
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
@@ -91,13 +91,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		batchRemoveCells(forUpdate);
 		batchInsertCells(forUpdate);
 
-		phisicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
-		phisicalInsertRows(fd, forCreate, null, null, forCreateOrder);
+		phisicalUpdateRowsType(formData, forCreate, TypeFlag.DEL);
+		phisicalInsertRows(formData, forCreate, null, null, forCreateOrder);
 
 	}
 
 	@Override
-	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
+	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
@@ -145,8 +145,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(final FormData fd, final int idxFrom, final int idxTo) {
-		if ((idxFrom < 1) || (idxTo < idxFrom)) {
+	public void removeRows(final FormData formData, final int indexFrom, final int indexTo) {
+		if ((indexFrom < 1) || (indexTo < indexFrom)) {
 			throw new IllegalArgumentException();
 		}
 		// Если строка помечена как ADD, то физическое удаление
@@ -157,9 +157,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("types", TypeFlag.rtsToKeys(new TypeFlag[] { TypeFlag.ADD,
 				TypeFlag.SAME }));
-		params.put("formDataId", fd.getId());
-		params.put("from", idxFrom);
-		params.put("to", idxTo);
+		params.put("formData", formData.getId());
+		params.put("from", indexFrom);
+		params.put("to", indexTo);
 		params.put("remType", TypeFlag.ADD.getKey());
 		params.put("updType", TypeFlag.SAME.getKey());
 		params.put("setType", TypeFlag.DEL.getKey());
@@ -174,47 +174,47 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void removeRows(FormData fd) {
+	public void removeRows(FormData formData) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
 
 		getJdbcTemplate().update(
 				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { fd.getId(), TypeFlag.ADD.getKey() });
+				new Object[] { formData.getId(), TypeFlag.ADD.getKey() });
 		getJdbcTemplate().update(
 				"update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { TypeFlag.DEL.getKey(), fd.getId(),
+				new Object[] { TypeFlag.DEL.getKey(), formData.getId(),
 						TypeFlag.SAME.getKey() });
 	}
 
 	@Override
-	public void saveRows(final FormData fd, final List<DataRow<Cell>> dataRows) {
+	public void saveRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
 		// Полностью чистим временный срез строк.
-		removeRows(fd);
+		removeRows(formData);
 		// Вставляем строки
-		phisicalInsertRows(fd, dataRows,
+		phisicalInsertRows(formData, dataRows,
 				DataRowDaoImplUtils.DEFAULT_ORDER_STEP,
 				DataRowDaoImplUtils.DEFAULT_ORDER_STEP, null);
 	}
 
 	@Override
-	public void insertRows(FormData fd, int index, List<DataRow<Cell>> rows) {
+	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
 		index--;
-		Long ordBegin = getOrd(fd,
+		Long ordBegin = getOrd(formData,
 				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, index);
 		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
-		insertRows(fd, index, ordBegin, rows);
+		insertRows(formData, index, ordBegin, rows);
 	}
 
 	@Override
-	public void insertRows(FormData fd, DataRow<Cell> afterRow,
+	public void insertRows(FormData formData, DataRow<Cell> afterRow,
 			List<DataRow<Cell>> rows) {
-		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(fd, new TypeFlag[] {
+		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(formData, new TypeFlag[] {
 				TypeFlag.ADD, TypeFlag.SAME }, afterRow.getId());
-		insertRows(fd, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
+		insertRows(formData, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
 	}
 
 	@Override
@@ -300,7 +300,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private int phisicalGetSize(FormData fd, TypeFlag[] types,
 			DataRowFilter filter) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
+		params.put("formData", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		return getNamedParameterJdbcTemplate()
 				.queryForInt(
@@ -388,7 +388,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private Long getOrd(FormData fd, TypeFlag[] types, int dataRowIndex) {
 		String sql = "select ORD from (select rownum as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX = :dataRowIndex";
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
+		params.put("formData", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		params.put("dataRowIndex", dataRowIndex);
 		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql,
@@ -401,7 +401,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			long dataRowId) {
 		String sql = "select ORD, IDX from (select rownum as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where ID = :dataRowId";
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
+		params.put("formData", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		params.put("dataRowId", dataRowId);
 		return DataAccessUtils
@@ -419,7 +419,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private Pair<Integer, Long> getTypeAndOrdById(FormData fd,
 			TypeFlag[] types, long dataRowId) {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
+		params.put("formData", fd.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
 		params.put("dataRowId", dataRowId);
 
