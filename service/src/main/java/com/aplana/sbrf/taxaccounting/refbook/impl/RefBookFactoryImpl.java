@@ -36,7 +36,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	@Override
 	public RefBook getByAttribute(Long attributeId) {
-		return refBookDao.getByAttributeId(attributeId);
+		return refBookDao.getByAttribute(attributeId);
 	}
 
 	@Override

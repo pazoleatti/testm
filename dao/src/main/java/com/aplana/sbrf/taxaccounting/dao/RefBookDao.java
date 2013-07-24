@@ -40,7 +40,7 @@ public interface RefBookDao {
 	 * @param attributeId код атрибута, входящего в справочник
 	 * @return
 	 */
-	RefBook getByAttributeId(long attributeId);
+	RefBook getByAttribute(long attributeId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности

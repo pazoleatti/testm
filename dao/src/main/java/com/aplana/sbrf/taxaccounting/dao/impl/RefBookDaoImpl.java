@@ -49,7 +49,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 
 	@Override
-	public RefBook getByAttributeId(long attributeId) {
+	public RefBook getByAttribute(long attributeId) {
 		try {
 			return getJdbcTemplate().queryForObject(
 					"select r.id, r.name from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
@@ -166,22 +166,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append(",\n");
 		for (int i = 0; i < attributes.size(); i++) {
 			RefBookAttribute attribute = attributes.get(i);
+			String alias = attribute.getAlias();
 			sql.append("  a");
-			sql.append(i);
+			sql.append(alias);
 			sql.append(".");
 			sql.append(attribute.getAttributeType().toString());
 			sql.append("_value as ");
-			sql.append(attribute.getAlias());
+			sql.append(alias);
 			if (i < attributes.size() - 1) {
 				sql.append(",\n");
 			}
 
 			fromSql.append("  left join ref_book_value a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(" on a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(".record_id = r.id and a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(".attribute_id = ");
 			fromSql.append(attribute.getId());
 			fromSql.append("\n");
@@ -216,22 +217,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		List<RefBookAttribute> attributes = refBook.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			RefBookAttribute attribute = attributes.get(i);
+			String alias = attribute.getAlias();
 			sql.append("  a");
-			sql.append(i);
+			sql.append(alias);
 			sql.append(".");
 			sql.append(attribute.getAttributeType().toString());
 			sql.append("_value as ");
-			sql.append(attribute.getAlias());
+			sql.append(alias);
 			if (i < attributes.size() - 1) {
 				sql.append(",\n");
 			}
 
 			fromSql.append("  left join ref_book_value a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(" on a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(".record_id = r.id and a");
-			fromSql.append(i);
+			fromSql.append(alias);
 			fromSql.append(".attribute_id = ");
 			fromSql.append(attribute.getId());
 			fromSql.append("\n");
