@@ -27,10 +27,17 @@ public interface RefBookFactory {
 	List<RefBook> getAll();
 
 	/**
+	 * Ищет справочник по коду атрибута
+	 * @param attributeId код атрибута, входящего в справочник
+	 * @return
+	 */
+	RefBook getByAttributeId(Long attributeId);
+
+	/**
 	 * Возвращает провайдер данных для конкретного справочника
 	 * @param refBookId код справочника
 	 * @return провайдер данных
 	 */
-	RefBookDataProvider getDataProvider(long refBookId);
+	RefBookDataProvider getDataProvider(Long refBookId);
 
 }

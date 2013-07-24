@@ -35,7 +35,12 @@ public class RefBookFactoryImpl implements RefBookFactory {
 	}
 
 	@Override
-	public RefBookDataProvider getDataProvider(long refBookId) {
+	public RefBook getByAttributeId(Long attributeId) {
+		return refBookDao.getByAttributeId(attributeId);
+	}
+
+	@Override
+	public RefBookDataProvider getDataProvider(Long refBookId) {
 		RefBookDataProvider refBookDataProvider = applicationContext.getBean(RefBookDataProvider.class);
 		if (refBookDataProvider instanceof RefBookUniversal) {
 			((RefBookUniversal) refBookDataProvider).setRefBookId(refBookId);
