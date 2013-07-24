@@ -48,13 +48,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     private final DispatchAsync dispatcher;
-    private final PlaceManager placeManager;
 
     @Inject
     public DepartmentConfigPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 
@@ -117,7 +115,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT));
 
                             }
-                        }, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(this)));
+                        }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
     }
 
     // TODO Unlock. Реализовать механизм блокировок.
