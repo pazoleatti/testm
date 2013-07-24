@@ -786,15 +786,11 @@ public class DataRowDaoImplTest {
 		checkIndexCorrect(dataRows);
 		Assert.assertEquals(5000, dataRows.size());
 	}
-	
-	
-	/**
-	 * Эту проблему нужно исправить, чтобы тут небыло ошибки.
-	 * Задача: http://jira.aplana.com/browse/SBRFACCTAX-3176
-	 */
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void repackORDSuccessFirst() {
 		FormData fd = formDataDao.get(1);
+        int idxBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
@@ -802,13 +798,10 @@ public class DataRowDaoImplTest {
 			dataRows.add(dr);
 		}
 		dataRowDao.insertRows(fd, 1, dataRows);
+        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + idxBefore, dataRowDao.getSize(fd,null));
 	}
-	
-	/**
-	 * Эту проблему нужно исправить, чтобы тут небыло ошибки.
-	 * Задача: http://jira.aplana.com/browse/SBRFACCTAX-3176
-	 */
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void repackORDSuccessCenter() {
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
