@@ -6,7 +6,10 @@
 		>
 	<g:VerticalPanel>
 		<g:cell width="100%" horizontalAlignment="CENTER">
-			<g:TextBox ui:field="txtFind" text="" width="97%" />
+			<g:ValueListBox ui:field="version" width="100%" />
+		</g:cell>
+		<g:cell width="100%" horizontalAlignment="CENTER">
+			<g:TextBox ui:field="txtFind" text="" width="100%" />
 		</g:cell>
 		<g:cell height="300px" width="200px">
 				<style:GenericCellTable width="100%" ui:field="cellTable" styleName="dictionaryPickerTable"/>
