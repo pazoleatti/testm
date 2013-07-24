@@ -81,14 +81,14 @@
                     </g:DockLayoutPanel>
                 </g:west>
                 <g:center>
-                    <g:DockLayoutPanel>
-                        <g:west size="200">
-                            <g:DockLayoutPanel ui:field="panelFormDataKind">
+                    <g:DockLayoutPanel ui:field="panelFormDataKind">
+                        <g:west size="200" >
+                            <g:DockLayoutPanel ui:field="panelFormDataKind2" >
                                 <g:north size="30">
                                     <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
                                 </g:north>
                                 <g:center>
-                                    <m:MyValueListBox ui:field="boxFormDataKind" visibleItemCount="15"/>
+                                    <m:MyValueListBox ui:field="boxFormDataKind" width="100%" visibleItemCount="15"/>
                                 </g:center>
                             </g:DockLayoutPanel>
                         </g:west>
@@ -98,7 +98,7 @@
                                     <g:Label addStyleNames="{style.label}" ui:field="labelKind"/>
                                 </g:north>
                                 <g:center>
-                                    <m:MyValueListBox ui:field="boxTaxFormKind" visibleItemCount="15"/>
+                                    <m:MyValueListBox ui:field="boxTaxFormKind" width="100%" visibleItemCount="15"/>
                                 </g:center>
                             </g:DockLayoutPanel>
                         </g:center>

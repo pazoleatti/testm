@@ -45,38 +45,31 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
-    if (currentDataRow != null) {
-        recalcRowNum()
-        formData.dataRows.remove(currentDataRow)
-    }
-}
-
-void recalcRowNum() {
-    def i = formData.dataRows.indexOf(currentDataRow)
-
-    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
-        row.getCell('rowNumber').value = i++
-    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
+    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
-    row = formData.createDataRow()
-    for (alias in ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def row = formData.createDataRow()
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    dataRowHelper.insert(row, index)
+    dataRows.add(row)
+    ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
-
-    row.getCell('count').value = 1
-
-    row.getCell('rowNumber').value = formData.dataRows.size()
+    dataRowHelper.save(dataRows)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -86,22 +79,26 @@ void checkUniq() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        def rowNum = row.getCell('rowNumber').value
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in  dataRowHelper.getAllCached()) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
-        for (alias in ['fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
-                'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']) {
-            def rowCell = row.getCell(alias)
+        ['fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
+                'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate'].each {
+            def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
         // Проверка количества
-        if (row.getCell('count').value != 1) {
+        if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.error("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
+            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
         }
         //  Корректность даты договора
         def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
@@ -111,17 +108,17 @@ void logicCheck() {
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
             if (dt > dTo) {
-                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
             }
             if (dt < dFrom) {
-                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
             }
         }
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
         // Проверка доходности
         def sumCell = row.getCell('sum')
@@ -130,18 +127,18 @@ void logicCheck() {
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            logger.error("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
         }
         if (totalCell.value != sumCell.value) {
             def msg = totalCell.column.name
-            logger.error("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
+            logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
-            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
     }
     checkNSI()
@@ -151,7 +148,8 @@ void logicCheck() {
  * Проверка соответствия НСИ
  */
 void checkNSI() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // TODO добавить проверки НСИ
     }
 }
@@ -160,13 +158,14 @@ void checkNSI() {
  * Алгоритмы заполнения полей формы.
  */
 void calc() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // Расчет поля " Количество"
-        row.getCell('count').value = 1
+        row.count = 1
         // Расчет поля "Цена"
-        row.getCell('price').value = row.getCell('sum').value
+        row.price = row.sum
         // Расчет поля "Итого"
-        row.getCell('total').value = row.getCell('sum').value
+        row.total = row.sum
         // TODO расчет полей по справочникам
     }
 }
@@ -191,7 +190,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
             formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 source.getDataRows().each { row ->
                     if (row.getAlias() == null) {

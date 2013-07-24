@@ -45,37 +45,37 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
-	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formData=%s";
+	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formDataId=%s";
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
+	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(formData,
+		return phisicalGetRows(fd,
 				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData formData, DataRowFilter filter) {
-		return phisicalGetSize(formData,
-				new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, filter);
+	public int getSavedSize(FormData fd, DataRowFilter filter) {
+		return phisicalGetSize(fd,
+				new TypeFlag[] { TypeFlag.DEL, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
+	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(formData,
-				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter, range);
+		return phisicalGetRows(fd,
+				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter, range);
 	}
 
 	@Override
-	public int getSize(FormData formData, DataRowFilter filter) {
-		return phisicalGetSize(formData,
-				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter);
+	public int getSize(FormData fd, DataRowFilter filter) {
+		return phisicalGetSize(fd,
+				new TypeFlag[] { TypeFlag.ADD, TypeFlag.SAME }, filter);
 	}
 
 	@Override
-	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
+	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
 		// тем же значением ORD
@@ -84,7 +84,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<Long> forCreateOrder = new ArrayList<Long>();
 		for (DataRow<Cell> dataRow : rows) {
 			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(formData.getId(), id);
+			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
 			} else {
@@ -96,13 +96,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		batchRemoveCells(forUpdate);
 		batchInsertCells(forUpdate);
 
-		phisicalUpdateRowsType(formData, forCreate, TypeFlag.DEL);
-		phisicalInsertRows(formData, forCreate, null, null, forCreateOrder);
+		phisicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
+		phisicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
 
 	@Override
-	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
+	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
@@ -244,11 +244,31 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				: DataRowDaoImplUtils
 						.calcOrdStep(ordBegin, ordEnd, rows.size());
 		if (ordStep == 0) {
-			// TODO: Реализовать перепаковку поля ORD
-			// Слишком маленькие значения ORD. В промежуток нельзя вставить
-			// такое количество строк
-			throw new IllegalStateException(
-					"Необходима перепаковка поля ORD. (TODO: Задача SBRFACCTAX-3176)");
+			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
+			такое количество строк*/
+            long diff = rows.size() - (ordEnd - ordBegin) + 1; //minimal diff between rows
+            int endIndex = getSize(formData, null);
+
+            /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
+             *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
+             *  Прибавляем ровно ту разницу, котрая необходима для вставки строк.
+             */
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("diff", Long.valueOf(diff));
+            map.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+            map.put("formDataId", formData.getId());
+            map.put("dataStartRowIndex", Long.valueOf(index + 1));
+            map.put("dataEndRowIndex", Long.valueOf(endIndex));
+
+            getNamedParameterJdbcTemplate().update(
+                    "update DATA_ROW set ORD = ORD + :diff where ID in" +
+                            "(select RR.ID from " +
+                            "(select rownum as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId order by DR.ORD) " +
+                            "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))", map
+            );
+            ordEnd = getOrd(formData.getId(), index + 1);
+            ordStep = DataRowDaoImplUtils
+                    .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
 
 		phisicalInsertRows(formData, rows, ordBegin, ordStep, null);

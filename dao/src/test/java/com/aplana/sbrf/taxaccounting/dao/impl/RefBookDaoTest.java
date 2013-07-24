@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
+import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -13,8 +14,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -47,7 +46,7 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetData1() throws Exception {
 		RefBook refBook = refBookDao.get(1L);
-		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, refBook.getAttributeByAlias("name"));
+		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, refBook.getAttribute("name"));
 		System.out.println(data);
 		// проверяем кол-во строк
 		Assert.assertEquals(2, data.getRecords().size());
@@ -166,6 +165,21 @@ public class RefBookDaoTest {
 
 	private Date getDate(int day, int month, int year) {
 		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
+	}
+
+	@Test
+	public void testGetByAttributeId1() {
+		Assert.assertEquals(2, refBookDao.getByAttributeId(4).getId().longValue());
+	}
+
+	@Test
+	public void testGetByAttributeId2() {
+		Assert.assertEquals(1, refBookDao.getByAttributeId(3).getId().longValue());
+	}
+
+	@Test(expected = DaoException.class)
+	public void testGetByAttributeId3() {
+		refBookDao.getByAttributeId(-123123);
 	}
 
 }
