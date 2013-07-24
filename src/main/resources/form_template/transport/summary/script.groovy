@@ -1,14 +1,17 @@
+package form_template.transport.summary
+
 /**
  * Форма "Расчет суммы налога по каждому транспортному средству".
  */
 
 switch (formDataEvent) {
-// создать
+    // создать
     case FormDataEvent.CREATE :
         checkBeforeCreate()
-        calculationTotal()
+        // save(getData(formData))
+        // calculationTotal()
         break
-// расчитать
+    // расчитать
     case FormDataEvent.CALCULATE :
         deleteTotal()
         fillForm()
@@ -20,11 +23,11 @@ switch (formDataEvent) {
         calculationTotal()
         setRowIndex()
         break
-// обобщить
+    // обобщить
     case FormDataEvent.COMPOSE :
         sort()
         break
-// проверить
+    // проверить
     case FormDataEvent.CHECK :
         checkRequiredField()
         deleteTotal()
@@ -36,22 +39,22 @@ switch (formDataEvent) {
         calculationTotal()
         setRowIndex()
         break
-// утвердить
+    // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
         logicalChecks()
         checkNSI()
         break
-// принять из утверждена
+    // принять из утверждена
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED :
         logicalChecks()
         checkNSI()
         break
-// принять из создана
+    // принять из создана
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
         logicalChecks()
         checkNSI()
         break
-// вернуть из принята в создана
+    // вернуть из принята в создана
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
         checkToCancelAccept()
         break
@@ -66,18 +69,43 @@ switch (formDataEvent) {
         break
 }
 
+// графа 1  - rowNumber
+// графа 2  - okato
+// графа 3  - tsTypeCode
+// графа 4  - tsType
+// графа 5  - vi
+// графа 6  - model
+// графа 7  - regNumber
+// графа 8  - taxBase
+// графа 9  - taxBaseOkeiUnit
+// графа 10 - ecoClass
+// графа 11 - years
+// графа 12 - ownMonths
+// графа 13 - coef362
+// графа 14 - taxRate
+// графа 15 - calculatedTaxSum
+// графа 16 - taxBenefitCode
+// графа 17 - benefitStartDate
+// графа 18 - benefitEndDate
+// графа 19 - coefKl
+// графа 20 - benefitSum
+// графа 21 - taxSumToPay
+
 /**
  * Скрипт для добавления новой строки.
  */
 void addRow() {
+    def data = getData(formData)
+
     def row = formData.createDataRow()
-    formData.dataRows.add(row)
+    data.getAllCached().add(row)
     ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
             'taxBaseOkeiUnit', 'ecoClass', 'years', 'ownMonths',
             'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each { alias ->
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias("Редактируемое поле")
     }
+    save(data)
 }
 
 /**
@@ -86,27 +114,30 @@ void addRow() {
  * @author mfayzullin
  */
 void calculationTotal() {
+    def data = getData(formData)
 
     // подготовка названии колонок по которым будут производиться подсчеты
     def columns = ['calculatedTaxSum', 'benefitSum', 'taxSumToPay']
     def sums = []
 
     // подсчет сумм
-    def rowCount = formData.dataRows.size();
+    def rowCount = data.getAllCached().size()
     if (rowCount > 0) {
         columns.collect(sums) {
-            [it, summ(formData, new ColumnRange(it, 0, rowCount - 1))]
+            [it, summ(formData, data.getAllCached(), new ColumnRange(it, 0, rowCount - 1))]
         }
     }
 
     // добавление строки ИТОГО
-    def totalRow = formData.appendDataRow('total');
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
     totalRow.tsType = 'ИТОГО:'
 
     // вставка подсчитанных сумм в строку ИТОГО
     sums.each {
         totalRow[it[0]] = it[1]
     }
+    save(data)
 }
 
 /**
@@ -115,14 +146,14 @@ void calculationTotal() {
  * @since 15.02.2013 18:20
  */
 void checkBeforeCreate() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.');
+        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 
     if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}");
+        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
     }
 
     if (formDataDepartment.type == DepartmentType.ROOT_BANK) {
@@ -134,7 +165,8 @@ void checkBeforeCreate() {
  * Скрипт для проверки соответствия НСИ.
  */
 void checkNSI() {
-    for (def row : formData.dataRows) {
+    def data = getData(formData)
+    for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
             continue
         }
@@ -142,7 +174,7 @@ void checkNSI() {
         // Проверка совпадения ОКАТО со справочным
         if (row.okato != null) {
             if (!transportTaxDao.validateOkato(row.okato)) {
-                logger.error('Неверный код ОКАТО');
+                logger.error('Неверный код ОКАТО')
             }
         }
 
@@ -151,10 +183,10 @@ void checkNSI() {
             if(transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
                 // Проверка наименования вида ТС коду вида ТС
                 if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
-                    logger.error('Название вида ТС не совпадает с Кодом вида ТС');
+                    logger.error('Название вида ТС не совпадает с Кодом вида ТС')
                 }
             } else {
-                logger.error('Неверный код вида транспортного средства!');
+                logger.error('Неверный код вида транспортного средства!')
             }
         }
 
@@ -163,14 +195,14 @@ void checkNSI() {
         // Проверка совпадения единицы измерения налоговой базы по ОКЕИ со справочной
         if (row.taxBaseOkeiUnit != null) {
             if (!transportTaxDao.validateTaxBaseUnit(row.taxBaseOkeiUnit)) {
-                logger.error('Недопустимый код единицы измерения налоговой базы.');
+                logger.error('Недопустимый код единицы измерения налоговой базы.')
             }
         }
 
         // Проверка совпадения экологического класса со справочным
         if (row.ecoClass!=null) {
             if(!transportTaxDao.validateEcoClass(row.ecoClass)) {
-                logger.error('Недопустимый экологический класс');
+                logger.error('Недопустимый экологический класс')
             }
         }
     }
@@ -183,15 +215,17 @@ void checkNSI() {
  * @since 19.02.2013 13:30
  */
 void checkRequiredField() {
-    for (def row : formData.dataRows) {
+    def data = getData(formData)
+    for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
             continue
         }
 
-        def errorMsg = '';
+        def errorMsg = ''
 
         // 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 20 , 21
-        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ownMonths','coef362', 'calculatedTaxSum', 'taxSumToPay'].each {
+        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
+                'taxBaseOkeiUnit', 'ownMonths','coef362', 'calculatedTaxSum', 'taxSumToPay'].each {
             // Тут у меня непонятки при мерже произошли. Старая строка закомментирована на всякий
             // ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ownMonths','coef362', 'taxRate', 'calculatedTaxSum', 'benefitSum', 'taxSumToPay'].each {
             if (row.getCell(it) != null && (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue()))) {
@@ -204,7 +238,7 @@ void checkRequiredField() {
     }
 }
 
-/*
+/**
  * Проверка при "отменить принятие".
  */
 void checkToCancelAccept() {
@@ -217,16 +251,18 @@ void checkToCancelAccept() {
  * Скрипт для удаления строки.
  */
 void deleteRow() {
+    def data = getData(formData)
     def row = currentDataRow
     if (row != null && row.getAlias() != 'total'){
         // удаление строки
-        formData.deleteDataRow(row)
+        deleteRow(data, row)
 
         // пересчет номеров строк
         def n = 1
-        formData.getDataRows().each{ r ->
+        data.getAllCached().each{ r ->
             r.rowNumber = n++
         }
+        save(data)
     }
 }
 
@@ -236,9 +272,14 @@ void deleteRow() {
  * @author rtimerbaev
  */
 void deleteTotal() {
-    def row = (formData.dataRows.size() > 0 ? formData.getDataRow('total') : null)
+    def data = getData(formData)
+    if (!hasTotal(data)) {
+        return
+    }
+    def row = (data.getAllCached().size() > 0 ? getRow(data, 'total') : null)
     if (row != null) {
-        formData.getDataRows().remove(row)
+        data.getAllCached().delete(row)
+        save(data)
     }
 }
 
@@ -247,11 +288,13 @@ void deleteTotal() {
  * Скрипт для получения названия вида транспортного средства по коду ТС.
  */
 void determinationTransportType() {
-    formData.dataRows.each { row ->
+    def data = getData(formData)
+    data.getAllCached().each { row ->
         if (row.tsTypeCode != null){
             row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
         }
     }
+    save(data)
 }
 
 /**
@@ -270,13 +313,15 @@ void fillForm() {
         monthCountInPeriod = period.getMonths()
     }
 
+    def data = getData(formData)
+
     /** Уменьшающий процент. */
     def reducingPerc = 1 // TODO (Ramil Timerbaev)
     /** Пониженная ставка. */
     def loweringRates = 0 // TODO (Ramil Timerbaev)
 
     def index = 1
-    formData.dataRows.each { row ->
+    data.getAllCached().each { row ->
         // получение региона по ОКАТО
         def region = dictionaryRegionService.getRegionByOkatoOrg(row.okato)
 
@@ -432,6 +477,7 @@ void fillForm() {
             logger.error("\"Исчисленная сумма налога, подлежащая уплате в бюджет\" не может быть вычислена, т.к. поля $errors не были вычислены или заполнены.")
         }
     }
+    save(data)
 }
 
 /**
@@ -440,18 +486,19 @@ void fillForm() {
  * @since 18.02.2013 14:00
  */
 void logicalChecks() {
-    for (def row : formData.dataRows) {
+    def data = getData(formData)
+    for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
             continue
         }
 
         /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
-        int monthCountInPeriod = 0;
-        def period = reportPeriodService.get(formData.reportPeriodId);
+        int monthCountInPeriod = 0
+        def period = reportPeriodService.get(formData.reportPeriodId)
         if (period == null) {
-            info.error('Не найден отчетный период для налоговой формы.');
+            info.error('Не найден отчетный период для налоговой формы.')
         } else {
-            monthCountInPeriod = period.getMonths();
+            monthCountInPeriod = period.getMonths()
         }
 
         // 13 графа - Поверка на соответствие дат использования льготы
@@ -469,9 +516,9 @@ void logicalChecks() {
         //logger.info('kv = ' + row.coef362)
         if (row.coef362 != null) {
             if (row.coef362 < 0.0) {
-                logger.error('Коэффициент Кв меньше нуля.');
+                logger.error('Коэффициент Кв меньше нуля.')
             } else if (row.coef362 > 1.0) {
-                logger.error('Коэффициент Кв больше единицы.');
+                logger.error('Коэффициент Кв больше единицы.')
             }
         }
 
@@ -479,9 +526,9 @@ void logicalChecks() {
         //logger.info('kl = ' + row.coefKl)
         if (row.coefKl != null) {
             if (row.coefKl < 0.0){
-                logger.error('Коэффициент Кл меньше нуля.');
+                logger.error('Коэффициент Кл меньше нуля.')
             } else if (row.coefKl > 1.0) {
-                logger.error('Коэффициент Кл больше единицы.');
+                logger.error('Коэффициент Кл больше единицы.')
             }
         }
 
@@ -490,7 +537,7 @@ void logicalChecks() {
         def allCellsFill = true
         // все ячейки пустые
         def allCellsEmpty = true
-        ['benefitStartDate', 'benefitEndDate', 'coefKl', 'benefitSum', 'taxBenefitCode'].each{
+        ['benefitStartDate', 'benefitEndDate', 'coefKl', 'benefitSum', 'taxBenefitCode'].each {
             if (row[it]){
                 allCellsEmpty = false
             } else {
@@ -498,7 +545,7 @@ void logicalChecks() {
             }
         }
         if (!(allCellsFill || allCellsEmpty)) {
-            logger.error("Данные о налоговой льготе указаны не полностью в строке № "+row.rowNumber);
+            logger.error("Данные о налоговой льготе указаны не полностью в строке № " + row.rowNumber)
         }
 
         // дополнительная проверка для 12 графы
@@ -515,26 +562,87 @@ void logicalChecks() {
  * @since 20.02.2013 13:00
  */
 void setRowIndex() {
+    def data = getData(formData)
     def index = 1
-    for (def row : formData.dataRows) {
+    for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
             continue
         }
         row.rowNumber = index + 1
         index += 1
     }
+    save(data)
 }
 
 /**
  * Скрипт для сортировки.
  */
 void sort() {
+    def data = getData(formData)
+
     // сортировка
-    formData.dataRows.sort { a, b ->
+    data.getAllCached().sort { a, b ->
         int val = (a.okato ?: "").compareTo(b.okato ?: "")
         if (val == 0) {
             val = (a.tsTypeCode?: "").compareTo(b.tsTypeCode ?: "")
         }
-        return val;
+        return val
     }
+    save(data)
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param dataRows данные нф (helper)
+ * @param alias алиас
+ * @return
+ */
+def getRow(def dataRows, def alias) {
+    dataRows.getDataRow(dataRows.getAllCached(), alias)
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param dataRows данные нф (helper)
+ */
+void save(def dataRows) {
+    dataRows.save(dataRows.getAllCached())
+}
+
+/**
+ * Удалить строку из нф
+ *
+ * @param dataRows данные нф (helper)
+ * @param row строка для удаления
+ */
+void deleteRow(def dataRows, def row) {
+    dataRows.delete(row)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Проверить наличие итоговой строки.
+ *
+ * @param data данные нф
+ */
+def hasTotal(def data) {
+    for (def row: data.getAllCached()) {
+        if (row.getAlias() == 'total') {
+            return true
+        }
+    }
+    return false
 }

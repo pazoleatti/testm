@@ -97,7 +97,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
-			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), null, formTemplateId, departmentId, kind, currentPeriod.getId(), false);
+			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(), scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind, currentPeriod.getId(), false);
 			dformData = formDataDao.get(dFormDataId);
 		}
 

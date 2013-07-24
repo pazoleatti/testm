@@ -785,5 +785,5 @@ def getUbitki(dataRowsHelper, row201, row230) {
  * @param form нф
  */
 def getDataRowHelper(def form) {
-    return (form != null ? getDataRowHelper(form) : null)
+    return (form != null ? formDataService.getDataRowHelper(form) : null)
 }

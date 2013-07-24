@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -14,7 +15,7 @@ public class RefBookItem implements Serializable{
 	
 	private Long id;
 	
-	private String name;
+	private List<String> values;
 
 	public Long getId() {
 		return id;
@@ -24,17 +25,12 @@ public class RefBookItem implements Serializable{
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public List<String> getValues() {
+		return values;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String toString() {
-		return "RefBookItem [id=" + id + ", name=" + name + "]";
+	public void setValues(List<String> values) {
+		this.values = values;
 	}
 	
 }

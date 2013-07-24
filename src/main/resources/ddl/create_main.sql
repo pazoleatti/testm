@@ -397,7 +397,7 @@ create table form_column (
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
-  ref_book_id number(9),
+  attribute_id number(9),
   format number(2)
 );
 alter table form_column add constraint form_column_pk primary key (id);
@@ -411,7 +411,7 @@ alter table form_column add constraint form_column_chk_max_length
 check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or (type ='D' and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 
-alter table form_column add constraint form_column_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -425,7 +425,7 @@ comment on column form_column.precision is 'Количество знаков п
 comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
-comment on column form_column.ref_book_id is 'Код справочника для столбцов-ссылок';
+comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
 comment on column form_column.format is 'Формат';
 ---------------------------------------------------------------------------------------------------
 create table department (

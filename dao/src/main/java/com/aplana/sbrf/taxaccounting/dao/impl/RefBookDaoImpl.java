@@ -47,6 +47,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			new RefBookRowMapper());
 	}
 
+
+	@Override
+	public RefBook getByAttributeId(long attributeId) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select r.id, r.name from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
+					new Object[] {attributeId}, new int[] { Types.NUMERIC },
+					new RefBookRowMapper());
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException(String.format("Не найден атрибут справочника с id = %d", attributeId));
+		}
+	}
+
 	/**
 	 * Настройка маппинга для справочника
 	 */
@@ -115,7 +128,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
 	}
 
-	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy");
+	private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
 	private static final String WITH_STATEMENT =
 			"with t as (select\n" +

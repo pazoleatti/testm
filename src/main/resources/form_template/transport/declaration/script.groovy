@@ -103,8 +103,8 @@ def bildXml(){
                 Подписант(ПрПодп: departmentParamTransport.signatoryId){
                     ФИО(
                             "Фамилия": departmentParamTransport.signatorySurname,
-                            "Имя": departmentParamTransport.getSignatoryFirstName,
-                            "Отчество": departmentParamTransport.getSignatoryLastName
+                            "Имя": departmentParamTransport.getSignatoryFirstName(),
+                            "Отчество": departmentParamTransport.getSignatoryLastName()
                     )
                     // СвПред - Сведения о представителе налогоплательщика
                     if (departmentParam.name == 2)
@@ -132,7 +132,8 @@ def bildXml(){
                             rowsData = []
                         }
                         else{
-                            rowsData = formData.getDataRows()
+                            dataRowsHelper = formDataService.getDataRowHelper(formData)
+                            rowsData = dataRowsHelper.getAllCached()
                         }
                         System.out.print("formData == null ->"+(formData == null))
                         // Формирование данных для СумПУ
