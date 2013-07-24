@@ -90,7 +90,10 @@ switch (formDataEvent) {
  */
 void logicalCheck() {
 
-    for (DataRow row in formData.dataRows) {
+    def data = getData(formData)
+    def dataPrev = getData(formPrev)
+
+    for (DataRow row in data.getAllCached()) {
         if (row.getAlias() == null) {
             if (row.currency == 0) {
                 // LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
@@ -135,7 +138,7 @@ void logicalCheck() {
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in formPrev.dataRows) {
+                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
                     if (row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
                         logger.warn("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6»  = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
@@ -143,7 +146,7 @@ void logicalCheck() {
             }
             // LC • Проверка корректности заполнения РНУ
             if (formPrev != null) {
-                for (DataRow rowPrev in formPrev.dataRows) {
+                for (DataRow rowPrev in getData(formPrev).getAllCached()) {
                     if (row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
                         logger.error("РНУ сформирован некорректно! Не выполняется условие: Если  «графа  4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8  = графа 15 формы РНУ-27 за предыдущий отчётный период")
                     }
@@ -198,7 +201,7 @@ void logicalCheck() {
 
         // LC 20
         if (row.getAlias() != null && row.getAlias().indexOf('itogoRegNumber') != -1) {
-            srow = calcItogRegNumber(formData.dataRows.indexOf(row))
+            srow = calcItogRegNumber(data.getAllCached().indexOf(row))
 
             for (column in itogoColumns) {
                 if (row.get(column) != srow.get(column)) {
@@ -210,7 +213,7 @@ void logicalCheck() {
 
         // LC 21
         if (row.getAlias() != null && row.getAlias().indexOf('itogoIssuer') != -1) {
-            srow = calcItogIssuer(formData.dataRows.indexOf(row))
+            srow = calcItogIssuer(data.getAllCached().indexOf(row))
 
             for (column in itogoColumns) {
                 if (row.get(column) != srow.get(column)) {
@@ -236,16 +239,16 @@ void logicalCheck() {
 
     // LC • Проверка корректности заполнения РНУ
     if (formPrev != null) {
-        DataRow itogoPrev = formPrev.getDataRow('itogo')
-        DataRow itogo = formData.getDataRow('itogo')
+        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
+        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
         }
     }
     // LC • Проверка корректности заполнения РНУ
     if (formPrev != null) {
-        DataRow itogoPrev = formPrev.getDataRow('itogo')
-        DataRow itogo = formData.getDataRow('itogo')
+        DataRow itogoPrev = dataPrev.getDataRow(dataPrev.getAllCached(),'itogo')
+        DataRow itogo = data.getDataRow(data.getAllCached(),'itogo')
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
             logger.error("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
         }
@@ -257,10 +260,10 @@ void logicalCheck() {
     if (formPrev != null) {
         List notFound = []
         List foundMany = []
-        for (DataRow rowPrev in formPrev.dataRows) {
+        for (DataRow rowPrev in getData(formPrev).getAllCached()) {
             if (rowPrev.getAlias() != null && rowPrev.reserveCalcValue > 0) {
                 int count = 0
-                for (DataRow row in formData.dataRows) {
+                for (DataRow row in getData(formData).getAllCached()) {
                     if (row.getAlias() != null && row.tradeNumber == rowPrev.tradeNumber) {
                         count++
                     }
@@ -297,7 +300,7 @@ void logicalCheck() {
  * Ищем вверх по форме первую строку без альяса
  */
 DataRow getPrevRowWithoutAlias(DataRow row) {
-    int pos = formData.dataRows.indexOf(row)
+    int pos = getData(formData).getAllCached().indexOf(row)
     for (int i = pos; i >= 0; i++) {
 
         if ( getRow(i).getAlias() == null) {
@@ -325,29 +328,30 @@ List getItogoColumns() {
  * Проставляет статические строки
  */
 void addAllStatic() {
+    def data = getData(formData)
     if (!logger.containsLevel(LogLevel.ERROR)) {
 
-        for (int i = 0; i < formData.dataRows.size(); i++) {
-            DataRow<Cell> row = formData.dataRows.get(i)
+        for (int i = 0; i < data.getAllCached().size(); i++) {
+            DataRow<Cell> row = data.getAllCached().get(i)
             DataRow<Cell> nextRow = getRow(i + 1)
             int j = 0
 
             if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
                 def itogIssuerRow = calcItogIssuer(i)
-                formData.dataRows.add(i + 1, itogIssuerRow)
+                data.insert(itogIssuerRow, i + 2)
                 j++
             }
 
             if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
                 def itogRegNumberRow = calcItogRegNumber(i)
-                formData.dataRows.add(i + 1, itogRegNumberRow)
+                data.insert(itogRegNumberRow, i+2)
                 j++
             }
             i += j  // Обязательно чтобы избежать зацикливания в простановке
         }
 
         def rowItogo = calcItogo()
-        formData.dataRows.add(rowItogo)
+        data.insert(rowItogo,data.getAllCached().size())
     }
 }
 
@@ -444,6 +448,7 @@ def calcItogRegNumber(int i) {
  * @author ivildanov
  */
 def calcItogo() {
+    def data = getData(formData)
     // создаем строку
     def rowItogo = formData.createDataRow()
     rowItogo.setAlias('itogo')
@@ -455,8 +460,8 @@ def calcItogo() {
     }
 
     // ищем снизу вверх итоговую строку по эмитету
-    for (int j = formData.dataRows.size() - 1; j >= 0; j--) {
-        DataRow<Cell> srow = formData.dataRows.get(j)
+    for (int j = data.getAllCached().size() - 1; j >= 0; j--) {
+        DataRow<Cell> srow = data.getAllCached().get(j)
         if ((srow.getAlias() != null) && (srow.getAlias().indexOf('itogoIssuer') != -1)) {
             for (column in itogoColumns) {
                 if (srow.get(column) != null) {
@@ -474,8 +479,9 @@ def calcItogo() {
  * @author ivildanov
  */
 DataRow<Cell> getRow(int i) {
-    if ((i < formData.dataRows.size()) && (i >= 0)) {
-        return formData.dataRows.get(i)
+    def data = getData(formData)
+    if ((i < data.getAllCached().size()) && (i >= 0)) {
+        return data.getAllCached().get(i)
     } else {
         return null
     }
@@ -487,7 +493,8 @@ DataRow<Cell> getRow(int i) {
  */
 
 void calc() {
-    for (row in formData.dataRows) {
+    def data = getData(formData)
+    for (row in data.getAllCached()) {
         // Проверим чтобы человек рукамми ввёл всё что необходимо
         for (alias in ['issuer', 'regNumber', 'tradeNumber']) {
             if (row.getCell(alias).value == null) {
@@ -498,7 +505,7 @@ void calc() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         BigDecimal i = 0
         formPrev
-        for (DataRow row in formData.dataRows) {
+        for (DataRow row in data.getAllCached()) {
             i++
             row.number = i  // @todo http://jira.aplana.com/browse/SBRFACCTAX-2548 блокирует
             row.currency = calc5(row)
@@ -530,7 +537,7 @@ BigDecimal calc8(DataRow row) {
     temp = new BigDecimal(0)
     tempCount = 0
     if (formPrev != null) {
-        for (DataRow rowPrev in formPrev.dataRows) {
+        for (DataRow rowPrev in getData(formPrev).getAllCached()) {
             if (row.tradeNumber == rowPrev.tradeNumber) {
                 temp = rowPrev.reserveCalcValue
                 tempCount++
@@ -652,7 +659,7 @@ BigDecimal calc17(DataRow row) {
  * Сортирует форму в соответвие с требованиями 6.11.2.1	Перечень полей формы
  */
 void sort() {
-    formData.dataRows.sort({ DataRow a, DataRow b ->
+    getData(formData).getAllCached().sort({ DataRow a, DataRow b ->
         if (a.issuer == b.issuer && a.regNumber == b.regNumber) {
             return a.tradeNumber <=> b.tradeNumber
         }
@@ -668,7 +675,7 @@ void sort() {
  */
 void deleteRow() {
     if (currentDataRow != null && currentDataRow.getAlias() == null) {
-        formData.dataRows.remove(currentDataRow)
+        getData(formData).delete(currentDataRow)
     }
 }
 
@@ -676,11 +683,11 @@ void deleteRow() {
  * Удаляет все статические строки(ИТОГО) во всей форме
  */
 void deleteAllStatic() {
-    Iterator<DataRow> iterator = formData.dataRows.iterator() as Iterator<DataRow>
+    Iterator<DataRow> iterator = getData(formData).getAllCached().iterator() as Iterator<DataRow>
     while (iterator.hasNext()) {
         row = (DataRow) iterator.next()
         if (row.getAlias() != null) {
-            iterator.remove()
+            getData(formData).delete(row)
         }
     }
 }
@@ -710,22 +717,22 @@ void setError(Column c) {
  * Вставка строки в случае если форма генирует динамически строки итого (на основе данных введённых пользователем)
  */
 void addNewRowwarnrmData() {
+    def data = getData(formData)
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
 
-    if (formData.dataRows.size() > 0) {
+    if (data.getAllCached().size() > 0) {
         DataRow<Cell> selectRow
         // Форма не пустая
-        if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
+        if (currentDataRow != null && data.getAllCached().indexOf(currentDataRow) != -1) {
             // Значит выбрал строку куда добавлять
             selectRow = currentDataRow
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
-            selectRow = formData.dataRows.get(formData.dataRows.size() - 1) // Вставим в конец
+            selectRow = data.getAllCached().get(data.getAllCached().size() - 1) // Вставим в конец
         }
 
-        int indexSelected = formData.dataRows.indexOf(selectRow)
-
+        int indexSelected = data.getAllCached().indexOf(selectRow)
         // Определим индекс для выбранного места
         if (selectRow.getAlias() == null) {
             // Выбрана строка не итого
@@ -736,7 +743,7 @@ void addNewRowwarnrmData() {
 
             for (index = indexSelected; index >= 0; index--) {
                 log("loop index = " + index.toString())
-                if (formData.dataRows.get(index).getAlias() == null) {
+                if (data.getAllCached().get(index).getAlias() == null) {
                     index++
                     break
                 }
@@ -750,7 +757,6 @@ void addNewRowwarnrmData() {
         // Форма пустая поэтому поставим строку в начало
         index = 0
     }
-    formData.dataRows.add(index, newRow)
     [
             'issuer', 'regNumber', 'tradeNumber', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
             'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'
@@ -758,13 +764,14 @@ void addNewRowwarnrmData() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    data.insert(newRow, index+1)
 }
 
 FormData getFormPrev() {
     reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = FormDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        formPrev = formDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
     }
     return formPrev
 }
@@ -773,20 +780,33 @@ FormData getFormPrev() {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
+                getData(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.insert(row,data.getAllCached().size())
                     }
                 }
             }
         }
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
 }
