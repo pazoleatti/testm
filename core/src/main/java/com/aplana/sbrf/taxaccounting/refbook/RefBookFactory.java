@@ -31,7 +31,7 @@ public interface RefBookFactory {
 	 * @param attributeId код атрибута, входящего в справочник
 	 * @return
 	 */
-	RefBook getByAttributeId(Long attributeId);
+	RefBook getByAttribute(Long attributeId);
 
 	/**
 	 * Возвращает провайдер данных для конкретного справочника
