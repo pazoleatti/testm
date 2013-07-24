@@ -247,7 +247,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
             long diff = rows.size() - (ordEnd - ordBegin) + 1; //minimal diff between rows
-            int endIndex = getSize(fd, null);
+            int endIndex = getSize(formData, null);
 
             /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
@@ -256,7 +256,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("diff", Long.valueOf(diff));
             map.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
-            map.put("formDataId", fd.getId());
+            map.put("formDataId", formData.getId());
             map.put("dataStartRowIndex", Long.valueOf(index + 1));
             map.put("dataEndRowIndex", Long.valueOf(endIndex));
 
@@ -266,7 +266,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                             "(select rownum as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId order by DR.ORD) " +
                             "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))", map
             );
-            ordEnd = getOrd(fd.getId(), index + 1);
+            ordEnd = getOrd(formData.getId(), index + 1);
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
