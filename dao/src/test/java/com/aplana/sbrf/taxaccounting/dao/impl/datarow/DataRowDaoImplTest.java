@@ -400,6 +400,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5, 51, 52 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
 	}
 
 	@Test
@@ -521,9 +522,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.insertRows(fd,
 				dataRowDao.getRows(fd, null, new DataRowRange(5, 1)).get(0),
 				dataRows);
+		dataRows = dataRowDao.getRows(fd, null, null);
+		checkIndexCorrect(dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		
 	}
 
 	@Test
