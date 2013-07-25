@@ -26,11 +26,11 @@ switch (formDataEvent) {
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
@@ -44,7 +44,7 @@ switch (formDataEvent) {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
             formData.reportPeriodId)
 
     if (findForm != null) {
@@ -53,40 +53,31 @@ void checkCreation() {
 }
 
 void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-
-    for (alias in ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    dataRowHelper.insert(row, index)
+    dataRows.add(row)
+    ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-
-    formData.dataRows.add(row)
-
-    row.getCell('rowNum').value = formData.dataRows.size()
+    dataRowHelper.save(dataRows)
 }
 
 void deleteRow() {
-    if (currentDataRow != null) {
-        recalcRowNum()
-        formData.dataRows.remove(currentDataRow)
-    }
-}
-
-/**
- * Пересчет индексов строк перед удалением строки
- */
-void recalcRowNum() {
-    def i = formData.dataRows.indexOf(currentDataRow)
-
-    for (row in formData.dataRows[i..formData.dataRows.size()-1]) {
-        row.getCell('rowNum').value = i++
-    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
+    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 /**
  * Логические проверки
  */
 void logicCheck() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -95,34 +86,50 @@ void logicCheck() {
     def dFrom = taxPeriod.getStartDate()
     def dTo = taxPeriod.getEndDate()
 
-    for (row in formData.dataRows) {
+    for (row in dataRowHelper.getAllCached()) {
+        if (row.getAlias() != null) {
+            continue
+        }
 
-        def rowNum = row.getCell('rowNum').value
+        def rowNum = row.getIndex()
 
         if (row.getAlias() == null) {
-            for (alias in ['name', 'innKio', 'country', 'contractNum', 'contractDate', 'okeiCode', 'count',
-                    'price', 'totalCost', 'transactionDate']) {
-                if (row.getCell(alias).value == null || row.getCell(alias).value.toString().isEmpty()) {
-                    def msg = row.getCell(alias).column.name
+            [
+                    'rowNum', // № п/п
+                    'name', // Полное наименование с указанием ОПФ
+                    'innKio', // ИНН/КИО
+                    'country', // Страна регистрации
+                    'contractNum', // Номер договора
+                    'contractDate', // Дата договора
+                    'okeiCode', // Код единицы измерения по ОКЕИ
+                    'count', // Количество
+                    'price', // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+                    'totalCost', // Итого стоимость без учета НДС, акцизов и пошлин, руб.
+                    'transactionDate' // Дата совершения сделки
+            ].each {
+                if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
+                    def msg = row.getCell(it).column.name
                     logger.error("Графа «$msg» в строке $rowNum не заполнена!")
                 }
             }
 
-            def transactionDate = row.getCell('transactionDate').value
-            def contractDate = row.getCell('contractDate').value
+            def transactionDate = row.transactionDate
+            def contractDate = row.contractDate
+            def totalCost = row.totalCost
+            def price = row.price
 
             // Проверка выбранной единицы измерения
             // TODO поле справочника "код"
             // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
 
             // Проверка количества
-            if (row.getCell('count').value != 1) {
+            if (row.count != 1) {
                 def msg = row.getCell('transactionDate').column.name
                 logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
             }
 
             // Корректность даты договора
-            def dt = row.getCell('contractDate').value
+            def dt = contractDate
             if (dt != null && (dt < dFrom || dt > dTo)) {
                 def msg = row.getCell('contractDate').column.name
 
@@ -141,6 +148,13 @@ void logicCheck() {
                 def msg2 = row.getCell('contractDate').column.name
                 logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
             }
+
+            // Проверка заполнения стоимости сделки
+            if (totalCost != price) {
+                def msg1 = row.getCell('totalCost').column.name
+                def msg2 = row.getCell('price').column.name
+                logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
+            }
         }
     }
 
@@ -151,7 +165,9 @@ void logicCheck() {
  * Проверка соответствия НСИ
  */
 void checkNSI() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    for (row in dataRowHelper.getAllCached()) {
         // TODO добавить проверки НСИ
     }
 }
@@ -160,23 +176,16 @@ void checkNSI() {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    for (row in formData.dataRows) {
+    for (row in dataRowHelper.getAllCached()) {
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
         // Количество
-        row.getCell('count').value = 1
+        row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
-        row.getCell('totalCost').value = row.getCell('price').value
+        row.totalCost = row.price
         // TODO расчет полей по справочникам
-    }
-}
-
-/**
- * Инициация консолидации
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
 
@@ -184,21 +193,21 @@ void acceptance() {
  * Консолидация
  */
 void consolidation() {
-    // Удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
-            formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
-                    if (row.getAlias() == null) {
-                        formData.dataRows.add(row)
-                    }
+    int index = 1;
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                if (row.getAlias() == null) {
+                    dataRowHelper.insert(row, index++)
+                    dataRows.add(row)
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    dataRowHelper.save(dataRows);
 }

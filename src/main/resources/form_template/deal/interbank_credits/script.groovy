@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkUniq()
+        checkCreation()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -30,11 +30,11 @@ switch (formDataEvent) {
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
@@ -68,7 +68,7 @@ void addRow() {
  * Проверяет уникальность в отчётном периоде и вид
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
-void checkUniq() {
+void checkCreation() {
     def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
@@ -171,34 +171,24 @@ void calc() {
 }
 
 /**
- * Инициация консолидации
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
-}
-
-/**
  * Консолидация
  */
 void consolidation() {
-    // Удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
-            formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
-                    if (row.getAlias() == null) {
-                        formData.dataRows.add(row)
-                    }
+    int index = 1;
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                if (row.getAlias() == null) {
+                    dataRowHelper.insert(row, index++)
+                    dataRows.add(row)
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    dataRowHelper.save(dataRows);
 }
