@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -20,10 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -41,13 +39,17 @@ public class UploadXlsController {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private SignService signService;
+
     private static final String JSON_ATTR1 = "formDataId";
     private static final String JSON_ATTR2 = "formTemplateId";
     private static final String JSON_ATTR3 = "departmentId";
     private static final String JSON_ATTR4 = "formDataKindId";
     private static final String JSON_ATTR5 = "formDataRPId";
     @RequestMapping(value = "/xls", method = RequestMethod.POST)
-    public void processUpload(HttpServletRequest request, HttpServletResponse response) throws FileUploadException, IOException, JSONException {
+    public void processUpload(HttpServletRequest request, HttpServletResponse response)
+            throws FileUploadException, IOException, JSONException {
 
         /*BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
         char[] chars = new char[request.getInputStream().available()];
@@ -65,6 +67,8 @@ public class UploadXlsController {
         JSONTokener jt = new JSONTokener(items.get(1).getString());
         JSONObject jo = new JSONObject(jt);
 
+        //checkSign(fileItem);
+
         Logger logger = new Logger();
         formDataService.importFormData(logger, securityService.currentUserInfo(),
                 jo.getInt(JSON_ATTR1), jo.getInt(JSON_ATTR2), jo.getInt(JSON_ATTR3),
@@ -72,5 +76,20 @@ public class UploadXlsController {
         IOUtils.closeQuietly(fileItem.getInputStream());
         /*response.setContentType("text/plain; charset=UTF-8");*/
 
+    }
+
+    // пример использования SignService
+    private boolean checkSign(FileItem signFile) throws IOException {
+        String pathToSignFile = "/" + signFile.getName();
+        File file = new File(pathToSignFile);
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        fileOutputStream.write(signFile.get());
+        IOUtils.closeQuietly(fileOutputStream);
+
+        // означает что подпись удалять не будем
+        int delFlag = 0;
+        boolean result = signService.checkSign(file.getAbsolutePath(), "C:\\Users\\Илья\\Desktop\\sign.dat", delFlag);
+        file.delete();
+        return result;
     }
 }
