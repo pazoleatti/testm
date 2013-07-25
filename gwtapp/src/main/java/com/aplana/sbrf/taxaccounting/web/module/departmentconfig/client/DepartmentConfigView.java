@@ -141,8 +141,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     return;
                 }
 
-                Integer departmentId = event.getItems().values().iterator().next();
-                String departmentName = event.getItems().keySet().iterator().next();
+                Integer selDepartmentId = event.getItems().values().iterator().next();
+                String selDepartmentName = event.getItems().keySet().iterator().next();
 
                 if (driver.isDirty() && isEditMode) {
                     if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?")) {
@@ -158,15 +158,15 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 setEditMode(false);
 
                 // Проверка совпадения выбранного подразделения с текущим
-                if (DepartmentConfigView.this.departmentId != null && DepartmentConfigView.this.departmentId.equals(departmentId)) {
+                if (DepartmentConfigView.this.departmentId != null && DepartmentConfigView.this.departmentId.equals(selDepartmentId)) {
                     return;
                 }
 
-                DepartmentConfigView.this.departmentId = departmentId;
-                DepartmentConfigView.this.departmentName = departmentName;
+                DepartmentConfigView.this.departmentId = selDepartmentId;
+                DepartmentConfigView.this.departmentName = selDepartmentName;
 
                 // Загрузка параметров
-                getUiHandlers().updateDepartment(departmentId);
+                getUiHandlers().updateDepartment(selDepartmentId);
             }
         });
 
@@ -198,8 +198,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void onCancel(ClickEvent event) {
 
         if (driver.isDirty() && isEditMode) {
-            if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?"))
+            if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?")) {
                 return;
+            }
         }
 
         setEditMode(false);
@@ -214,7 +215,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     /**
      * Режим редактирования / чтения
      *
-     * @param isEditMode
+     * @param isEditMode Флаг
      */
     private void setEditMode(boolean isEditMode) {
         this.isEditMode = isEditMode;

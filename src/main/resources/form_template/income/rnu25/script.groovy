@@ -6,6 +6,8 @@
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
+ *      - графа 4 заполняется автоматически при пересчете, но является редактируемой, возможно надо бурать возможность редактировать
+ *      - проверить консолидацию, т.к. после переделки с учетом пейджинга не получилось проверить (ошибка при логировании в ядре)
  *
  * @author rtimerbaev
  */
@@ -75,8 +77,10 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
+    def data = getData(formData)
+
     def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+    data.getAllCached().add(getIndex(data, currentDataRow) + 1, newRow) // TODO (Ramil Timerbaev) проблемы с индексом
 
     // графа 2..5, 7..9
     ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
@@ -84,33 +88,37 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    save(data)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    def data = getData(formData)
+    data.delete(currentDataRow)
+    save(data)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
 
     // список проверяемых столбцов (графа 2, 3, 5, 7, 8)
     def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity']
-    for (def row : formData.dataRows) {
+    for (def row : data.getAllCached()) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
 
     // дополнительная проверка графы 8
-    for (def row : formData.dataRows) {
+    for (def row : data.getAllCached()) {
         // дополнительная проверка графы 8
         if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
             logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
@@ -124,31 +132,35 @@ void calc() {
 
     // удалить строку "итого" и "итого по ГРН: ..."
     def delRow = []
-    formData.dataRows.each { row ->
+    data.getAllCached().each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
+        data.getAllCached().remove(getIndex(data, row))
     }
-    if (formData.dataRows.isEmpty()) {
+    if (data.getAllCached().isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    formData.dataRows.sort { it.regNumber }
+    data.getAllCached().sort { it.regNumber }
 
     def tmp
-    formData.dataRows.eachWithIndex { row, index ->
+
+    def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
+
+    data.getAllCached().eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
 
         // графа 4
-        row.lotSizePrev = getValueForColumn4(row)
+        row.lotSizePrev = getValueForColumn4(dataOld, formDataOld, row)
 
         // графа 6
-        row.reserve = getValueForColumn6(row)
+        row.reserve = getValueForColumn6(dataOld, row)
 
         // графа 10
         row.costOnMarketQuotation = (row.marketQuotation ? round(row.lotSizeCurrent * row.marketQuotation, 2) : 0)
@@ -175,12 +187,12 @@ void calc() {
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
     // добавить строку "итого"
     def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
+    data.getAllCached().add(totalRow)
     totalRow.setAlias('total')
     totalRow.regNumber = 'Общий итог'
     setTotalStyle(totalRow)
     totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
+        totalRow.getCell(alias).setValue(getSum(data, alias))
     }
 
     // посчитать "итого по ГРН:..."
@@ -190,7 +202,7 @@ void calc() {
     totalColumns.each {
         sums[it] = 0
     }
-    formData.dataRows.eachWithIndex { row, i ->
+    data.getAllCached().eachWithIndex { row, i ->
         if (!isTotal(row)) {
             if (tmp == null) {
                 tmp = row.regNumber
@@ -203,7 +215,7 @@ void calc() {
                 }
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по ГРН:..."
-            if (i == formData.dataRows.size() - 2) {
+            if (i == data.getAllCached().size() - 2) {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
                 }
@@ -221,9 +233,10 @@ void calc() {
     // добавить "итого по ГРН:..." в таблицу
     def i = 0
     totalRows.each { index, row ->
-        formData.dataRows.add(index + i, row)
+        data.getAllCached().add(index + i, row)
         i = i + 1
     }
+    save(data)
 }
 
 /**
@@ -233,17 +246,20 @@ void calc() {
  */
 def logicalCheck(def useLog) {
     def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
+    def data = getData(formData)
+
+    if (dataOld != null && !dataOld.getAllCached().isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
         def missContract = []
         def severalContract = []
-        formDataOld.dataRows.each { prevRow ->
+        dataOld.getAllCached().each { prevRow ->
             if (prevRow.reserveCalcValue > 0) {
                 count = 0
-                formDataOld.dataRows.each { row ->
+                data.getAllCached().each { row ->
                     if (row.tradeNumber == prevRow.tradeNumber) {
                         count += 1
                     }
@@ -265,7 +281,7 @@ def logicalCheck(def useLog) {
         }
     }
 
-    if (!formData.dataRows.isEmpty()) {
+    if (!data.getAllCached().isEmpty()) {
         def i = 1
 
         // список проверяемых столбцов (графа ..)
@@ -285,7 +301,7 @@ def logicalCheck(def useLog) {
         def name
         def tmp
 
-        for (def row : formData.dataRows) {
+        for (def row : data.getAllCached()) {
             if (isTotal(row)) {
                 hasTotal = true
                 continue
@@ -355,7 +371,7 @@ def logicalCheck(def useLog) {
             }
 
             // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-            if (checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', formDataOld)) {
+            if (checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', dataOld)) {
                 def curCol = 3
                 def curCol2 = 4
                 def prevCol = 3
@@ -365,7 +381,7 @@ def logicalCheck(def useLog) {
             }
 
             // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-            if (checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', formDataOld)) {
+            if (checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', dataOld)) {
                 def curCol = 3
                 def curCol2 = 3
                 def prevCol = 6
@@ -383,13 +399,13 @@ def logicalCheck(def useLog) {
 
             // 17. Арифметические проверки граф 6, 10, 11, 12, 13 =========================
             // графа 4
-            if (row.lotSizePrev != getValueForColumn4(row)) {
+            if (row.lotSizePrev != getValueForColumn4(dataOld, formDataOld, row)) {
                 name = getColumnName(row, 'lotSizePrev')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 6
-            if (row.reserve != getValueForColumn6(row)) {
+            if (row.reserve != getValueForColumn6(dataOld, row)) {
                 name = getColumnName(row, 'reserve')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
@@ -441,9 +457,9 @@ def logicalCheck(def useLog) {
             }
         }
 
-        if (formDataOld != null && hasTotal) {
-            def totalRow = formData.getDataRow('total')
-            totalRowOld = formDataOld.getDataRow('total')
+        if (dataOld != null && hasTotal) {
+            def totalRow = getRowByAlias(data, 'total')
+            def totalRowOld = getRowByAlias(dataOld, 'total')
 
             // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
@@ -463,13 +479,13 @@ def logicalCheck(def useLog) {
         }
 
         if (hasTotal) {
-            def totalRow = formData.getDataRow('total')
+            def totalRow = getRowByAlias(data, 'total')
 
             // 17. Проверка итоговых значений по ГРН
             for (def codeName : totalGroupsName) {
-                def row = formData.getDataRow('total' + codeName)
+                def row = getRowByAlias(data, 'total' + codeName)
                 for (def alias : totalColumns) {
-                    if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
+                    if (calcSumByCode(data, codeName, alias) != row.getCell(alias).getValue()) {
                         logger.error("Итоговые значения по ГРН $codeName рассчитаны неверно!")
                         return false
                     }
@@ -503,29 +519,33 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
+
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.getAllCached().clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                def sourceData = getData(source)
+                sourceData.getAllCached().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.getAllCached().add(row)
                     }
                 }
             }
         }
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
+    save(data)
 }
 
 /**
  * Проверка при создании формы.
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -547,13 +567,13 @@ def isTotal(def row) {
 /**
  * Получить сумму столбца.
  */
-def getSum(def columnAlias) {
+def getSum(def data, def columnAlias) {
     def from = 0
-    def to = formData.dataRows.size() - 2
+    def to = data.getAllCached().size() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -577,16 +597,19 @@ def getNewRow(def alias, def totalColumns, def sums) {
  * @param likeColumnName псевдоним графы по которому ищутся соответствующиеся строки
  * @param curColumnName псевдоним графы текущей нф для второго условия
  * @param prevColumnName псевдоним графы предыдущей нф для второго условия
- * @param prevForm данные нф предыдущего периода
+ * @param dataOld данные нф предыдущего периода
  */
-def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName, def prevForm) {
-    if (prevForm == null) {
+def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName, def dataOld) {
+    if (dataOld == null) {
         return false
     }
     if (row.getCell(likeColumnName).getValue() == null) {
         return false
     }
-    for (def prevRow : prevForm.dataRows) {
+    for (def prevRow : dataOld.getAllCached()) {
+        if (prevRow.getAlias() != null || prevRow.getAlias() != '') {
+            continue
+        }
         if (row.getCell(likeColumnName).getValue() == prevRow.getCell(likeColumnName).getValue() &&
                 row.getCell(curColumnName).getValue() != prevRow.getCell(prevColumnName).getValue()) {
             return true
@@ -614,7 +637,7 @@ def getFormDataOld() {
     // РНУ-25 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld
@@ -623,12 +646,13 @@ def getFormDataOld() {
 /**
  * Посчитать сумму указанного графа для строк с общим кодом классификации
  *
+ * @param data данные формы
  * @param regNumber код классификации дохода
  * @param alias название графа
  */
-def calcSumByCode(def regNumber, def alias) {
+def calcSumByCode(def data, def regNumber, def alias) {
     def sum = 0
-    formData.dataRows.each { row ->
+    data.getAllCached().each { row ->
         if (!isTotal(row) && row.regNumber == regNumber) {
             sum += (row.getCell(alias).getValue() ?: 0)
         }
@@ -638,9 +662,12 @@ def calcSumByCode(def regNumber, def alias) {
 
 /**
  * Получить номер строки в таблице.
+ *
+ * @param data данные нф
+ * @param row строка
  */
-def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+def getIndex(def data, def row) {
+    data.getAllCached().indexOf(row)
 }
 
 /**
@@ -664,12 +691,13 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.rowNumber
         def errorMsg = colNames.join(', ')
         if (index != null) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            index = getIndex(row) + 1
+            def data = getData(formData)
+            index = getIndex(data, row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return false
@@ -680,15 +708,15 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 /**
  * Получить значение за предыдущий отчетный период для графы 6.
  *
+ * @param dataOld данные за предыдущий период
  * @param row строка текущего периода
  * @return возвращает найденое значение, иначе возвратит 0
  */
-def getValueForColumn6(def row) {
-    def formDataOld = getFormDataOld()
+def getValueForColumn6(def dataOld, def row) {
     def value = 0
     def count = 0
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
-        for (def rowOld : formDataOld.dataRows) {
+    if (dataOld != null && !dataOld.getAllCached().isEmpty()) {
+        for (def rowOld : dataOld.getAllCached()) {
             if (rowOld.tradeNumber == row.tradeNumber) {
                 value = round(rowOld.reserveCalcValue, 2)
                 count += 1
@@ -718,8 +746,9 @@ def getColumnName(def row, def alias) {
  */
 def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+    if (formDataOld != null && formDataOld.state == WorkflowState.ACCEPTED && !dataOld.getAllCached().isEmpty()) {
         return true
     }
     return false
@@ -728,15 +757,16 @@ def checkPrevPeriod() {
 /**
  * Получить значение за предыдущий отчетный период для графы 4
  *
+ * @param dataOld данные за предыдущий период (helper)
+ * @param formDataOld форма за предыдущий период
  * @param row строка текущего периода
  * @return возвращает найденое значение, иначе возвратит 0
  */
-def getValueForColumn4(def row) {
-    def formDataOld = getFormDataOld()
+def getValueForColumn4(def dataOld, def formDataOld, def row) {
     def value = 0
     def count = 0
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
-        for (def rowOld : formDataOld.dataRows) {
+    if (dataOld != null && !dataOld.getAllCached().isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        for (def rowOld : dataOld.getAllCached()) {
             if (rowOld.tradeNumber == row.tradeNumber) {
                 value = (rowOld.signSecurity == '+' && row.signSecurity == '-' ? rowOld.lotSizePrev : 0)
                 count += 1
@@ -746,4 +776,60 @@ def getValueForColumn4(def row) {
     // если count не равно 1, то или нет формы за предыдущий период,
     // или нет соответствующей записи в предыдущем периода или записей несколько
     return (count == 1 ? value : 0)
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ * @param alias алиас
+ * @return
+ */
+def getRowByAlias(def data, def alias) {
+    data.getDataRow(data.getAllCached(), alias)
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(data.getAllCached())
+}
+
+/**
+ * Удалить строку из нф
+ *
+ * @param data данные нф (helper)
+ * @param row строка для удаления
+ */
+void deleteRow(def data, def row) {
+    data.delete(row)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Проверить наличие итоговой строки.
+ *
+ * @param data данные нф (helper)
+ */
+def hasTotal(def data) {
+    for (def row: data.getAllCached()) {
+        if (row.getAlias() == 'total') {
+            return true
+        }
+    }
+    return false
 }

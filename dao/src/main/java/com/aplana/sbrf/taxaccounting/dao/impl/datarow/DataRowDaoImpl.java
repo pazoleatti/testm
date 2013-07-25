@@ -45,7 +45,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
-	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отстутствует во временном срезе формы formDataId=%s";
+	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отсутствует во временном срезе формы formDataId=%s";
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
 	@Override

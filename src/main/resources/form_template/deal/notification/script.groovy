@@ -11,6 +11,7 @@ import groovy.xml.MarkupBuilder
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
+        logicCheck()
         generateXML()
         break
     case FormDataEvent.DELETE:
@@ -31,10 +32,6 @@ void delete() {
  * Запуск генерации XML
  */
 void generateXML() {
-
-}
-
-boolean checkMatrix() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     !declarationData.isAccepted()
@@ -55,18 +52,22 @@ boolean checkMatrix() {
     }
 
     // Получить параметры по транспортному налогу
-    def departmentParamTransport = departmentService.getDepartmentParamTransport(departmentId)
+    // TODO Параметров для УНП пока нет
+    // def departmentParamDeal = departmentService.getDepartmentParamDeal(departmentId)
 
     def builder = new MarkupBuilder(xml)
 
     // Тип декларации - Уведомление
     def notificationType = 6
 
-    builder.Файл(ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId), ВерсПрог: departmentParamTransport.appVersion, ВерсФорм:departmentParamTransport.formatVersion) {
+    builder.Файл(
+            ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId),
+            ВерсПрог: /*departmentParamDeal.appVersion*/'???',      // TODO
+            ВерсФорм: /*departmentParamDeal.formatVersion*/'???') { // TODO
         Документ(
                 // Код формы отчетности по КНД
                 // TODO Константа
-                КНД: "1110025",
+                КНД: '1110025',
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Отчетный год
@@ -74,12 +75,50 @@ boolean checkMatrix() {
                 // Код налогового органа
                 КодНО: departmentParam.taxOrganCode,
                 // Номер корректировки
-                // TODO разобраться
-                НомКорр: "0",
+                НомКорр: '0', // TODO Смотреть признак корректирующего периода
                 // Код места, по которому представляется документ
-                ПоМесту: departmentParamTransport.taxPlaceTypeCode
-        )
+                ПоМесту: /*departmentParamDeal.taxPlaceTypeCode*/'????' // TODO
+        ) {
+            СвНП(
+                    ОКАТО: departmentParam.okato,
+                    ОКВЭД: departmentParam.okvedCode,
+                    Тлф: departmentParam.phone
+            ) {
+                НПЮЛ(
+                        НаимОрг: departmentParam.name,
+                        ИННЮЛ: departmentParam.inn,
+                        КПП: departmentParam.kpp
+                ) {
+                    if (departmentParam.reorgFormCode != null && !departmentParam.reorgFormCode.equals('0')) {
+                        СвРеоргЮЛ(
+                                ФормРеорг: departmentParam.reorgFormCode,
+                                ИННЮЛ: departmentParam.reorgInn,
+                                КПП: departmentParam.reorgKpp)
+                    }
+                }
+            }
+            Подписант(
+                    ПрПодп: /*departmentParamDeal.signatoryId*/1
+            ) {
+                ФИО(
+                        Фамилия: /*departmentParamDeal.signatorySurname*/ 'todo', // TODO
+                        Имя: /*departmentParamDeal.getSignatoryFirstName*/ 'todo', // TODO
+                        Отчество: /*departmentParamDeal.getSignatoryLastName*/ 'todo' // TODO
+                )
+                // TODO СвПред нужен?
+                // СвПред(НаимДок: '', НаимОрг: '')
+            }
+
+            // По строкам матрицы
+            УвКонтрСд(){
+
+            }
+        }
     }
+}
+
+boolean checkMatrix() {
+
 }
 
 void logicCheck() {
