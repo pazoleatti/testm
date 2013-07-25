@@ -244,7 +244,7 @@ void addAllStatic() {
 
                 def itogRow = calcItog(i)
                 dataRows.add(i + 1, itogRow)
-                dataRowHelper.insert(row, i + 1)
+                dataRowHelper.insert(itogRow, i + 1)
 
                 i++
             }
@@ -373,7 +373,9 @@ void consolidation() {
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED) {
+        if (source != null
+                && source.state == WorkflowState.ACCEPTED
+                && source.getFormType().getId() == formData.getFormType().getId()) {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
