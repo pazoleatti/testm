@@ -74,7 +74,8 @@ switch (formDataEvent) {
  */
 
 void logicalCheck() {
-    for (DataRow row in formData.dataRows) {
+    def data = getData(formData).getAllCached()
+    for (DataRow row in data) {
         if (row.getAlias() == null) {
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
             if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax == row.marketPriceInRub) {
@@ -187,7 +188,7 @@ void logicalCheck() {
         List itogoSum = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
                 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'priceInFactRub', 'salePriceTax',
                 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
-        DataRow realItogoKvartal = formData.dataRows.get(formData.dataRows.size() - 2)
+        DataRow realItogoKvartal = data.get(data.size() - 2)
         itogoKvartal
         for (String alias in itogoSum) {
             if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
@@ -202,7 +203,7 @@ void logicalCheck() {
          * 1
          * Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!
          */
-        DataRow realItogo = formData.dataRows.get(formData.dataRows.size() - 1)
+        DataRow realItogo = data.get(data.size() - 1)
         itogo
         for (String alias in itogoSum) {
             if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
@@ -220,18 +221,19 @@ void addNewRowwarnrmData() {
     DataRow<Cell> newRow = formData.createDataRow()
     int index // Здесь будет позиция вставки
 
-    if (formData.dataRows.size() > 0) {
+    def data = getData(formData).getAllCached()
+    if (data.size() > 0) {
         DataRow<Cell> selectRow
         // Форма не пустая
-        if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
+        if (currentDataRow != null && data.indexOf(currentDataRow) != -1) {
             // Значит выбрал строку куда добавлять
             selectRow = currentDataRow
         } else {
             // Строку не выбрал поэтому добавляем в самый конец
-            selectRow = formData.dataRows.get(formData.dataRows.size() - 1) // Вставим в конец
+            selectRow = data.get(data.size() - 1) // Вставим в конец
         }
 
-        int indexSelected = formData.dataRows.indexOf(selectRow)
+        int indexSelected = data.indexOf(selectRow)
 
         // Определим индекс для выбранного места
         if (selectRow.getAlias() == null) {
@@ -242,7 +244,7 @@ void addNewRowwarnrmData() {
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
 
             for (index = indexSelected; index >= 0; index--) {
-                if (formData.dataRows.get(index).getAlias() == null) {
+                if (data.get(index).getAlias() == null) {
                     index++
                     break
                 }
@@ -256,7 +258,6 @@ void addNewRowwarnrmData() {
         // Форма пустая поэтому поставим строку в начало
         index = 0
     }
-    formData.dataRows.add(index, newRow)
     [
             'tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds', 'acquisitionPrice', 'costOfAcquisition',
             'marketPriceInPerc', 'marketPriceInRub', 'redemptionValue', 'priceInFactPerc', 'priceInFactRub', 'expensesOnSale'
@@ -264,6 +265,7 @@ void addNewRowwarnrmData() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    getData(formData).insert(newRow, index+1)
 }
 
 DataRow<Cell> getItogo() {
@@ -301,7 +303,7 @@ DataRow<Cell> getItogo() {
 DataRow<Cell> getPrevItogoKvartal() {
     FormData formPrev = getFormPrev()
     if (formPrev != null && formPrev.state == WorkflowState.ACCEPTED) {
-        return formPrev.getDataRow('itogoKvartal')
+        return getData(formPrev).getDataRow(getData(formPrev).getAllCahced(),'itogoKvartal')
     }
     return null
 }
@@ -310,7 +312,7 @@ FormData getFormPrev() {
     ReportPeriod period = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (period != null) {
-        formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
+        formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
     }
     return formPrev
 }
@@ -323,7 +325,7 @@ DataRow<Cell> getItogoKvartal() {
     itogo.fix = "Итого за текущий квартал"
     sumColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub', 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub',
             'marketPriceInRub1', 'salePriceTax', 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
-    for (DataRow row in formData.dataRows) {
+    for (DataRow row in getData(formData).getAllCached()) {
         if (row.getAlias() == null) {
             for (String alias in sumColumns) {
                 if (itogo.getCell(alias).value == null) {
@@ -425,7 +427,7 @@ BigDecimal calc22(DataRow row) {
 }
 
 void calc() {
-    for (DataRow row in formData.dataRows) {
+    for (DataRow row in getData(formData).getAllCached()) {
         if (row.getAlias() == null) {
             row.rowNumber = calc1(row)
             row.acquisitionPriceTax = calc12(row)
@@ -463,11 +465,11 @@ BigDecimal calc12(DataRow row) {
  * Удаляет все статические строки(ИТОГО) во всей форме
  */
 void deleteAllStatic() {
-    Iterator<DataRow> iterator = formData.dataRows.iterator() as Iterator<DataRow>
+    Iterator<DataRow> iterator = getData(formData).getAllCached().iterator() as Iterator<DataRow>
     while (iterator.hasNext()) {
         row = (DataRow) iterator.next()
         if (row.getAlias() != null) {
-            iterator.remove()
+            getData(formData).delete(row)
         }
     }
 }
@@ -476,7 +478,7 @@ void deleteAllStatic() {
  * Сортирует форму в соответвие с требованиями 6.11.2.1	Перечень полей формы
  */
 void sort() {
-    formData.dataRows.sort({ DataRow a, DataRow b ->
+    getData(formData).getAllCached().sort({ DataRow a, DataRow b ->
         if (a.tradeNumber == b.tradeNumber && a.singSecurirty == b.singSecurirty) {
             return a.issue <=> b.issue
         }
@@ -488,8 +490,8 @@ void sort() {
 }
 
 void addAllStatic() {
-    formData.dataRows.add(itogoKvartal)
-    formData.dataRows.add(itogo)
+    getData(formData).insert(itogoKvartal,getData(formData).getAllCached().size())
+    getData(formData).insert(itogo,getData(formData).getAllCached().size())
 }
 
 void allCheck() {
@@ -517,7 +519,7 @@ BigDecimal round(BigDecimal value, int newScale) {
  * @return
  */
 BigDecimal calc1(DataRow row) {
-    return formData.dataRows.indexOf(row) + 1
+    return getData(formData).getAllCached().indexOf(row) + 1
 }
 
 /**
@@ -525,7 +527,7 @@ BigDecimal calc1(DataRow row) {
  */
 void deleteRow() {
     if (currentDataRow != null && currentDataRow.getAlias() == null) {
-        formData.dataRows.remove(currentDataRow)
+        getData(formData).delete(currentDataRow)
     }
 }
 
@@ -534,19 +536,31 @@ void deleteRow() {
  */
 void consolidation() {
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    getData(formData).clear()
 
     departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { DataRow row ->
+                getData(source).getAllCached().each { DataRow row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        getData(formData).insert(row,getData(formData).getAllCached().size())
                     }
                 }
             }
         }
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
 }
