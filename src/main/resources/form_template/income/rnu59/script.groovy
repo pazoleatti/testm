@@ -21,13 +21,20 @@
 import java.util.GregorianCalendar
 
 // дата начала отчетного периода
-Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
-Calendar periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
+Calendar getPeriodStartDate(){
+    return reportPeriodService.getStartDate(formData.reportPeriodId)
+}
+Calendar getPeriodEndDate(){
+    return reportPeriodService.getEndDate(formData.reportPeriodId)
+}
 // количество дней в году
 def countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
 // отчетная дата
-Calendar reportingDate = periodEndDate
-reportingDate.set(Calendar.DATE, reportingDate.get(Calendar.DATE) + 1)
+Calendar getReportingDate(){
+    def Calendar endDate = periodEndDate
+    endDate.set(Calendar.DATE, endDate.get(Calendar.DATE) + 1)
+    return endDate
+}
 
 /**
  * Выполнение действий по событиям
@@ -80,6 +87,7 @@ switch (formDataEvent){
 
 // событие удалить строку
     case FormDataEvent.DELETE_ROW:
+        deleteRow()
         break
 
     case FormDataEvent.CALCULATE:
@@ -104,29 +112,30 @@ switch (formDataEvent){
  */
 def addNewRow(){
     def newRow = formData.createDataRow()
-    formData.dataRows.add(formData.dataRows.size() > 0 ? formData.dataRows.size() - 1 : 0, newRow )
 
     // Графы 1-10 Заполняется вручную
     ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice', 'income', 'outcome'].each{ column ->
         newRow.getCell(column).setEditable(true)
     }
+    getData(formData).insert(newRow, getData(formData).getAllCached().size() > 0 ? getData(formData).getAllCached().size() : 1)
 }
 
 /**
  * Удаление строки
  */
 def deleteRow(){
-    def row = (DataRow)additionalParameter
+    //def row = (DataRow)additionalParameter
+    def row = currentDataRow
     if (!(row.getAlias() in ['totalByCode', 'total'])){
         // удаление строки
-        formData.deleteDataRow(row)
+        getData(formData).delete(row)
     }
 
-    // пересчет номеров строк таблицы
-    def i = 1;
-    formData.dataRows.each{rowItem->
-        rowItem.rowNumber = i++
-    }
+// пересчет номеров строк таблицы
+//    def i = 1;
+//    getData(formData).getAllCached().each{rowItem->
+//        rowItem.rowNumber = i++
+//    }
 }
 
 /**
@@ -135,12 +144,13 @@ def deleteRow(){
  */
 def fillForm(){
 
+    def data = getData(formData)
     // удаляем строку итого
-    def iterator = formData.dataRows.iterator()
+    def iterator = data.getAllCached().iterator()
     while (iterator.hasNext()){
         def row = iterator.next()
         if (row.getAlias() == "total"){
-            iterator.remove()
+            data.delete(row)
         }
     }
 
@@ -154,14 +164,14 @@ def fillForm(){
         newRow[alias] = 0
     }
 
-    formData.dataRows.each{ row ->
+    data.getAllCached().each{ row ->
         /**
          * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
          */
 
         // графа 9, 10
         // A=«графа8» - «графа7»
-        def a = row.salePrice - row.acquisitionPrice
+        def a = row.salePrice?:0 - row.acquisitionPrice?:0
         // B=ОКРУГЛ(A;2),
         def b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
         // C= ОКРУГЛ(ABS(A);2),
@@ -209,7 +219,7 @@ def fillForm(){
     }
 
     // вставка строки итого
-    formData.dataRows.add(newRow)
+    data.insert(newRow, data.getAllCached().size());
 }
 
 /**
@@ -225,7 +235,8 @@ def logicalCheck(){
     def outcome269st = 0
     def outcomeTax = 0
 
-    formData.dataRows.each{ row ->
+    def data = getData(formData)
+    data.getAllCached().each{ row ->
         // Обязательность заполнения поля графы 12 и 13. Текст ошибки - Поле “Наименование поля” не заполнено!
         ['outcome269st', 'outcomeTax'].each{ alias ->
             if (row[alias] == null){
@@ -256,12 +267,14 @@ def logicalCheck(){
         }
 
         //  «графа 9» = «графа 8» - «графа 7», при условии («графа 8» - «графа 7») > 0. = Неверно определены доходы
-        if (row.salePrice -  row.acquisitionPrice > 0 && !(row.salePrice -  row.acquisitionPrice == row.income)){
+        def price = row.salePrice?:0
+        def acqPrice = row.acquisitionPrice?:0
+        if (price - acqPrice > 0 && !(price - acqPrice == row.income)){
             logger.warn('Неверно определены доходы')
         }
 
         // «графа 10» =|«графа 8» - «графа 7»|, при условии («графа 8» - «графа 7») < 0.  = Неверно определены расходы
-        if ((row.salePrice -  row.acquisitionPrice) < 0 && !(row.outcome == (row.salePrice -  row.acquisitionPrice).abs())){
+        if ((price - acqPrice) < 0 && !(row.outcome == (price - acqPrice).abs())){
             logger.warn('Неверно определены расходы')
         }
 
@@ -285,8 +298,8 @@ def logicalCheck(){
 
         // экономим на итерациях, подсчитаем сумму для граф 4,7-10, 12-13, суммы нужны для проверок
         nominalPrice += row.nominalPrice ?:0
-        acquisitionPrice += row.acquisitionPrice ?:0
-        salePrice += row.salePrice ?:0
+        acquisitionPrice += acqPrice ?:0
+        salePrice += price ?:0
         income += row.income ?:0
         outcome += row.outcome ?:0
         outcome269st += row.outcome269st ?:0
@@ -294,16 +307,20 @@ def logicalCheck(){
     }
 
     // Проверка итоговых значений по всей форме
-    def totalRow = formData.getDataRow("total")
-    if (totalRow != null && totalRow.nominalPrice != nominalPrice ||
-            totalRow.acquisitionPrice != acquisitionPrice ||
-            totalRow.salePrice != salePrice ||
-            totalRow.income != income ||
-            totalRow.outcome != outcome ||
-            totalRow.outcome269st != outcome269st ||
-            totalRow.outcomeTax != outcomeTax){
+    for(def dataRow:data.getAllCached()){
+        if (dataRow.getAlias()=="total"){
+            def totalRow = data.getDataRow(data.getAllCached(),"total")
+            if (totalRow != null && totalRow.nominalPrice != nominalPrice ||
+                    totalRow.acquisitionPrice != acquisitionPrice ||
+                    totalRow.salePrice != salePrice ||
+                    totalRow.income != income ||
+                    totalRow.outcome != outcome ||
+                    totalRow.outcome269st != outcome269st ||
+                    totalRow.outcomeTax != outcomeTax){
 
-        logger.error('Итоговые значения рассчитаны неверно!')
+                logger.error('Итоговые значения рассчитаны неверно!')
+            }
+        }
     }
 
 }
@@ -418,7 +435,7 @@ def calculateColumn13(DataRow row){
  */
 void consolidation() {
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    getData(formData).clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -426,7 +443,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 source.getDataRows().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.insert(row, data.getAllCached().size);
                     }
                 }
             }
@@ -435,4 +452,15 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
 
