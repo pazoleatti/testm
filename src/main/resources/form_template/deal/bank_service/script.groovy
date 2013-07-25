@@ -175,8 +175,9 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRowHelper.getAllCached()) {
+    for (row in dataRows) {
         // Порядковый номер строки
         row.rowNum = row.getIndex()
         // Расчет поля "Цена"
@@ -186,7 +187,7 @@ void calc() {
         // TODO расчет полей по справочникам
     }
 
-    dataRowHelper.save(dataRowHelper.getAllCached());
+    dataRowHelper.save(dataRows);
 }
 
 /**
