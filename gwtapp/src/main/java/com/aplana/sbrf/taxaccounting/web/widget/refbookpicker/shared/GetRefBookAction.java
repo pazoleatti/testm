@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import java.io.Serializable;
+
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 
@@ -8,29 +10,32 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  * @author sgoryachkin
  *
  */
-public class GetRefBookAction extends UnsecuredActionImpl<GetRefBookResult> {
+public class GetRefBookAction extends UnsecuredActionImpl<GetRefBookResult> implements Serializable, ActionName{
+	private static final long serialVersionUID = 3385076853496363265L;
 	
-	private Long refBookId;
-	private String searchPattern;
-	private PagingParams pagingParams;
+	private long refBookId;
+	private Long formDataId;
 	
-	public Long getRefBookId() {
+	
+	public long getRefBookId() {
 		return refBookId;
 	}
-	public void setRefBookId(Long refBookId) {
+	public void setRefBookId(long refBookId) {
 		this.refBookId = refBookId;
 	}
-	public String getSearchPattern() {
-		return searchPattern;
+	public Long getFormDataId() {
+		return formDataId;
 	}
-	public void setSearchPattern(String searchPattern) {
-		this.searchPattern = searchPattern;
+	public void setFormDataId(Long formDataId) {
+		this.formDataId = formDataId;
 	}
-	public PagingParams getPagingParams() {
-		return pagingParams;
+	
+
+	@Override
+	public String getName() {
+		return "Получение справочника";
 	}
-	public void setPagingParams(PagingParams pagingParams) {
-		this.pagingParams = pagingParams;
-	}
+
+
 
 }

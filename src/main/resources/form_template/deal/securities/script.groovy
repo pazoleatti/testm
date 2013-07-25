@@ -1,7 +1,6 @@
 package form_template.deal.securities
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-
 import java.math.RoundingMode
 
 /**
@@ -12,7 +11,7 @@ import java.math.RoundingMode
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkUniq()
+        checkCreation()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -29,11 +28,11 @@ switch (formDataEvent) {
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
+        logicCheck()
         break
 // Консолидация
     case FormDataEvent.COMPOSE:
@@ -44,35 +43,31 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
-    if (currentDataRow != null) {
-        recalcRowNum()
-        formData.dataRows.remove(currentDataRow)
-    }
-}
-
-void recalcRowNum() {
-    def i = formData.dataRows.indexOf(currentDataRow)
-
-    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
-        row.getCell('rowNumber').value = i++
-    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
+    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-    for (alias in ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    dataRowHelper.insert(row, index)
+    dataRows.add(row)
+    ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
-    row.getCell('rowNumber').value = formData.dataRows.size()
+    dataRowHelper.save(dataRows)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
-void checkUniq() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+void checkCreation() {
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -82,15 +77,19 @@ void checkUniq() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        def rowNum = row.getCell('rowNumber').value
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         def okeiCodeCell = row.getCell('okeiCode')
-        for (alias in ['fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDate']) {
-            def rowCell = row.getCell(alias)
+        ['fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDate'].each {
+            def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
         // Проверка доходов и расходов
@@ -99,15 +98,15 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.error("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
+            logger.warn("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            logger.error("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
+            logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
         }
         // Проверка выбранной единицы измерения
         if (okeiCodeCell.value != '796' && okeiCodeCell.value != '744') {
             def msg = okeiCodeCell.column.name
-            logger.error("В графе «$msg» строки $rowNum могут быть указаны только следующие элементы: шт., процент!")
+            logger.warn("В графе «$msg» строки $rowNum могут быть указаны только следующие элементы: шт., процент!")
         }
         //  Корректность даты договора
         def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
@@ -117,14 +116,14 @@ void logicCheck() {
         if (dt != null && (dt < dFrom || dt > dTo)) {
             def msg = docDateCell.column.name
             if (dt > dTo) {
-                logger.error("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
+                logger.warn("«$msg» в строке $rowNum не может быть больше даты окончания отчётного периода!")
             }
             if (dt < dFrom) {
-                logger.error("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
+                logger.warn("«$msg» в строке $rowNum не может быть меньше даты начала отчётного периода!")
             }
         }
         // Проверка цены
-        def sumCell = row.getCell('incomeSum').value != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
+        def sumCell = row.incomeSum != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
         def countCell = row.getCell('count')
         def priceCell = row.getCell('price')
         if (okeiCodeCell.value == '796' && countCell.value != null && countCell.value != 0
@@ -132,18 +131,18 @@ void logicCheck() {
             def msg1 =  priceCell.column.name
             def msg2 =  sumCell.column.name
             def msg3 =  countCell.column.name
-            logger.error("«$msg1» в строке $rowNum не равно отношению «$msg2» и «$msg3»!")
+            logger.warn("«$msg1» в строке $rowNum не равно отношению «$msg2» и «$msg3»!")
         } else if (okeiCodeCell.value == '744' && priceCell.value != sumCell.value) {
             def msg1 =  priceCell.column.name
             def msg2 =  sumCell.column.name
-            logger.error("«$msg1» в строке $rowNum не равно «$msg2»!")
+            logger.warn("«$msg1» в строке $rowNum не равно «$msg2»!")
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
     }
 
@@ -154,7 +153,8 @@ void logicCheck() {
  * Проверка соответствия НСИ
  */
 void checkNSI() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // TODO добавить проверки НСИ
     }
 }
@@ -163,31 +163,22 @@ void checkNSI() {
  * Алгоритмы заполнения полей формы.
  */
 void calc() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // Расчет поля "Цена"
-        priceValue = row.getCell('incomeSum').value != null ? row.getCell('incomeSum').value : row.getCell('outcomeSum').value
-        okeiCode = row.getCell('okeiCode').value
+        priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        okeiCode = row.okeiCode
         if (okeiCode == '744') {
-            row.getCell('price').value = priceValue
-        } else if (okeiCode == '796' && row.getCell('count').value != 0 && row.getCell('count').value != null) {
-            row.getCell('price').value = (priceValue / row.getCell('count').value).setScale(2, RoundingMode.HALF_UP)
+            row.price = priceValue
+        } else if (okeiCode == '796' && row.count != 0 && row.count != null) {
+            row.price = (priceValue / row.count).setScale(2, RoundingMode.HALF_UP)
         } else {
-            row.getCell('price').value = null
+            row.price = null
         }
         // Расчет поля "Стоимость"
-        row.getCell('cost').value = priceValue
+        row.cost = priceValue
 
         // TODO расчет полей по справочникам
-    }
-}
-
-/**
- * Инициация консолидации
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
     }
 }
 
@@ -195,21 +186,21 @@ void acceptance() {
  * Консолидация
  */
 void consolidation() {
-    // Удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
-            formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
-                    if (row.getAlias() == null) {
-                        formData.dataRows.add(row)
-                    }
+    int index = 1;
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                if (row.getAlias() == null) {
+                    dataRowHelper.insert(row, index++)
+                    dataRows.add(row)
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    dataRowHelper.save(dataRows);
 }

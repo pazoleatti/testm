@@ -79,6 +79,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     DockLayoutPanel panelFormDataKind;
     @UiField
     Label labelKind;
+    @UiField
+    DockLayoutPanel panelFormDataKind2;
 
     private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
@@ -354,13 +356,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void init(Boolean isForm) {
         this.isForm = isForm;
+        setDepiId(null);
 
         // видимость частных полей
         formLabel.setVisible(isForm);
         formAnchor.setVisible(!isForm);
         declarationLabel.setVisible(!isForm);
         declarationAnchor.setVisible(isForm);
-        panelFormDataKind.setVisible(isForm);
+        panelFormDataKind.setWidgetSize(panelFormDataKind2,isForm ? 200:0);
+        //panelFormDataKind.getWidget(DeckLayoutPanel.)setWidth("0px");
         labelKind.setText(isForm ? "Вид налоговой формы" : "Вид декларации");
 
         // Таблица "Список назначенных налоговых форм на подразделение": не заполняется
@@ -373,9 +377,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         // Кнопки "Назначить" и "Отменить назначение" — неактивны
         enableAnchor(assignAnchor, false);
         enableAnchor(cancelAnchor, false);
-
-        // TODO отменить выбранное значение в дереве
-
     }
 
     private void initTableHeader() {

@@ -162,7 +162,7 @@ void calc() {
                 tmp = 15
             }
         }
-        row.rateBR = tmp
+        row.rateBR = round(tmp, 2)
 
         // графа 12
         if (row.outcome == 0) {
@@ -260,9 +260,14 @@ def logicalCheck(def useLog) {
             }
 
             // 4. Проверка финансового результата (графа 9, 10, 12, 13)
-            if ((row.income > 0 && row.outcome != 0) ||
-                    (row.outcome > 0 && row.income != 0) ||
-                    (row.outcome == 0 && (row.outcome269st != 0 || row.outcomeTax != 0))) {
+            if (row.income != 0 && row.outcome != 0) {
+                logger.error('Задвоение финансового результата!')
+                return false
+            }
+
+            // 5. Проверка финансого результата
+
+            if (row.outcome != 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
                 logger.error('Задвоение финансового результата!')
                 return false
             }
@@ -291,14 +296,12 @@ def logicalCheck(def useLog) {
             // графа 9
             if (row.income != b) {
                 name = getColumnName(row, 'income')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // графа 10
             if (row.outcome != c) {
                 name = getColumnName(row, 'outcome')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 11
@@ -317,10 +320,9 @@ def logicalCheck(def useLog) {
                     tmp = 15
                 }
             }
-            if (row.rateBR != tmp) {
+            if (row.rateBR != round(tmp, 2)) {
                 name = getColumnName(row, 'rateBR')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
@@ -345,8 +347,7 @@ def logicalCheck(def useLog) {
             }
             if (row.outcome269st != tmp) {
                 name = getColumnName(row, 'outcome269st')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 13
@@ -359,8 +360,7 @@ def logicalCheck(def useLog) {
             }
             if (row.outcomeTax != tmp) {
                 name = getColumnName(row, 'outcomeTax')
-                logger.error("Неверно рассчитана графа «$name»!")
-                return false
+                logger.warn("Неверно рассчитана графа «$name»!")
             }
             // 7. Арифметическая проверка графы 9, 10, 11, 12, 13 ===============================Конец
         }
