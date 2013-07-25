@@ -203,7 +203,8 @@ void checkNSI() {
  * Алгоритмы заполнения полей формы.
  */
 void calc() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -260,34 +261,24 @@ void deleteAllStatic() {
 }
 
 /**
- * Инициация консолидации
- */
-void acceptance() {
-    departmentFormTypeService.getFormDestinations(formDataDepartment.id,
-            formData.getFormType().getId(), formData.getKind()).each() {
-        formDataCompositionService.compose(formData, it.departmentId, it.formTypeId, it.kind, logger)
-    }
-}
-
-/**
  * Консолидация
  */
 void consolidation() {
-    // Удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(),
-            formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
-                    if (row.getAlias() == null) {
-                        formData.dataRows.add(row)
-                    }
+    int index = 1;
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        if (source != null && source.state == WorkflowState.ACCEPTED) {
+            formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                if (row.getAlias() == null) {
+                    dataRowHelper.insert(row, index++)
+                    dataRows.add(row)
                 }
             }
         }
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
+    dataRowHelper.save(dataRows);
 }
