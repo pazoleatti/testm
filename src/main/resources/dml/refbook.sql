@@ -7,6 +7,16 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (6, 'Коды налоговых льго
 INSERT INTO REF_BOOK (ID, NAME) VALUES (7, 'Параметры налоговых льгот');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
 
+INSERT INTO REF_BOOK (ID, NAME) VALUES (22, 'Курсы Валют');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (23, 'Ставки рефинансирования ЦБ РФ');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (24, 'Коды видов платежей');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (25, 'Признак возложения обязанности по уплате налога на обособленное подразделение');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (26, 'Признак составления расчёта');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (27, 'Классификатор расходов Сбербанка России для целей налогового учёта');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (28, 'Классификатор доходов Сбербанка России для целей налогового учёта');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (29, 'Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта');
+
+
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (1,	1,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (2,	1,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
 
@@ -45,4 +55,63 @@ INSERT INTO REF_BOOK_ATTRIBUTE VALUES (28,	8,	'Принадлежность к �
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (29,	8,	'Принадлежность к налогу на имущество',		'P',				2,		4,		null,	null,	1,	0,		10);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (30,	8,	'Принадлежность к налогу НДС',				'V',				2,		5,		null,	null,	1,	0,		10);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (31,	8,	'Принадлежность к ТЦО',						'D',				2,		6,		null,	null,	1,	0,		10);
+
+
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (80,	22,	'Цифровой код валюты',						'CODE_NUMBER',		4,		0,		3,		40,		1,	null,	3); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (81,	22,	'Курс валюты',								'RATE',				2,		1,		null,	null,	1,	4,		24);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (90,	23,	'Ставка рефинансирования,  %',				'RATE',				2,		0,		null,	null,	1,	2,		19); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (91,	23,	'Нормативный документ',						'DOCUMENT',			1,		1,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (100,	24,	'Код вида платежа',							'CODE',				1,		0,		null,	null,	1,	null,	1); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (101,	24,	'Наименование кода вида платежа',			'NAME',				1,		1,		null,	null,	1,	null,	4000);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (110,	25,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (111,	25,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	50);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (120,	26,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (121,	26,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (130,	27,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (131,	27,	'Группа расхода',							'GROUP_EXP',		1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (132,	27,	'Вид расхода по операциям',					'TYPE_EXP',			1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (133,	27,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (134,	27,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (135,	27,	'Нормативный документ(в актуальной редакции)', 
+																							'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (136,	27,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»', 
+																							'UNIT',				1,		6,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (137,	27,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (138,	27,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (139,	27,	'Признак расхода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (140,	28,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (141,	28,	'Группа дохода',							'GROUP_INCOME',		1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (142,	28,	'Вид доходов по операциям',					'TYPE_INCOME',		1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (143,	28,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (144,	28,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (145,	28,	'Нормативный документ(в актуальной редакции)', 
+																							'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (146,	28,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»', 
+																							'UNIT',				1,		6,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (147,	28,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (148,	28,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (149,	28,	'Признак дохода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (150,	29,	'КНУ',										'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (151,	29,	'Наименование операции',					'NAME',				1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (152,	29,	'Балансовый счёт',							'BALANCE_ACCOUNT',	1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (153,	29,	'Символ ОПУ',								'OPU',				1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (154,	29,	'РНУ',										'RNU',				1,		4,		null,	null,	1,	null,	13);
+
+
+update ref_book_attribute
+set width=10
+where width<10 and (ref_book_id>=22 OR ref_book_id<=9);
+
+update ref_book_attribute
+set width=100
+where width>100 and (ref_book_id>=22 OR ref_book_id<=9);
+
 commit;
