@@ -125,7 +125,7 @@ INSERT INTO REF_BOOK_ATTRIBUTE VALUES (211,	34,	'Наименование',					
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (212,	35,	'Код лица, подписавшего документ',	'CODE',			2,		0,		null,	null,	1,	0,			1);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (213,	35,	'Лицо, подписавшее документ',		'NAME',			1,		1,		null,	null,	1,	null,		50);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (170,	31,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',		2,		0,		null,	null,	1,	0,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (170,	31,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,	9);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (171,	31,	'Признак лица подписавшего документ',								'SIGNATORY_ID',			4,		1,		35,		212,	1,	0,		1);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (172,	31,	'Фамилия подписанта',												'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,	120);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (173,	31,	'Имя подписанта',													'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,	120);
@@ -136,7 +136,7 @@ INSERT INTO REF_BOOK_ATTRIBUTE VALUES (177,	31,	'Код места, по кот�
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (178,	31,	'Версия программы, с помощью которой сформирован файл',				'APP_VERSION',			1,		8,		null,	null,	1,	null,	40);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (179,	31,	'Версия формата',													'FORMAT_VERSION',		1,		9,		null,	null,	1,	null,	5);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (180,	32,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',	2,		0,		null,	null,	1,	0,			9);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (180,	32,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',	4,		0,		null,	null,	1,	null,		9);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (181,	32,	'Субъект Российской Федерации (код)',								'DICT_REGION_ID',	4,		1,		4,		9,		1,	null,		2);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (182,	32,	'Код по ОКАТО',														'OKATO',			4,		2,		3,		7,		1,	null,		11);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (183,	32,	'ИНН',																'INN',				1,		3,		null,	null,	1,	null,		10);
@@ -148,6 +148,22 @@ INSERT INTO REF_BOOK_ATTRIBUTE VALUES (188,	32,	'Код формы реорга�
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (189,	32,	'ИНН реорганизованного обособленного подразделения',				'REORG_INN',		1,		9,		null,	null,	1,	null,		10);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (190,	32,	'КПП реорганизованного обособленного подразделения',				'REORG_KPP',		1,		10,		null,	null,	1,	null,		9);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (191,	32,	'Наименование подразделения',										'NAME',				1,		11,		null,	null,	1,	null,		2000);
+
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (192,	33,	'идентификатор (первичный ключ)',																					'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,			9);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (193,	33,	'Признак лица подписавшего документ',																				'SIGNATORY_ID',			4,		1,		35,		212,	1,	null,			1);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (194,	33,	'Фамилия подписанта',																								'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (195,	33,	'Имя подписанта ',																									'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (196,	33,	'Отчество подписанта',																								'SIGNATORY_LASTNAME',	1,		4,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (197,	33,	'Наименование документа, подтверждающего полномочия представителя',													'APPROVE_DOC_NAME',		1,		5,		null,	null,	1,	null,			240);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (198,	33,	'Наименование организации-представителя налогоплательщика',															'APPROVE_ORG_NAME',		1,		6,		null,	null,	1,	null,			2000);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (199,	33,	'Код места, по которому представляется документ',																	'TAX_PLACE_TYPE_CODE',	4,		7,		2,		3,		1,	null,			3);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (200,	33,	'Ставка налога',																									'TAX_RATE',				2,		8,		null,	null,	1,	2,				7);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (201,	33,	'Версия программы, с помощью которой сформирован файл',																'APP_VERSION',			1,		9,		null,	null,	1,	null,			40);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (202,	33,	'Версия формата',																									'FORMAT_VERSION',		1,		10,		null,	null,	1,	null,			5);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (203,	33,	'Обязанность по уплате налога',																						'OBLIGATION',			4,		11,		25,		110,	1,	0,				1);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (204,	33,	'Признак расчёта',																									'TYPE',					4,		12,		26,		120,	1,	0,				1);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (205,	33,	'Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде',						'SUM_TAX',				2,		13,		null,	null,	1,	0,				15);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (206,	33,	'Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода',	'SUM_DIVIDENDS',		2,		14,		null,	null,	1,	0,				15);
 
 update ref_book_attribute
 set width=10
