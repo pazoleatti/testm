@@ -269,7 +269,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	@Override
 	public String toString() {
 		return "DataRow [data=" + data + ", alias=" + alias + ", index="
-				+ index + "]";
+				+ index + ", id " + id + "]";
 	}
 
 

@@ -202,8 +202,9 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRowHelper.getAllCached()) {
+    for (row in dataRows) {
         // Порядковый номер строки
         row.rowNum = row.getIndex()
         // Расчет поля "Цена за 1 шт., руб."
@@ -216,7 +217,7 @@ void calc() {
         // TODO расчет полей по справочникам
     }
 
-    dataRowHelper.save(dataRowHelper.getAllCached());
+    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -230,7 +231,9 @@ void consolidation() {
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED) {
+        if (source != null
+                && source.state == WorkflowState.ACCEPTED
+                && source.getFormType().getId() == formData.getFormType().getId()) {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
