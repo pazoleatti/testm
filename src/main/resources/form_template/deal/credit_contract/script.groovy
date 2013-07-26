@@ -93,68 +93,66 @@ void logicCheck() {
 
         def rowNum = row.getIndex()
 
-        if (row.getAlias() == null) {
-            [
-                    'rowNum', // № п/п
-                    'name', // Полное наименование с указанием ОПФ
-                    'innKio', // ИНН/КИО
-                    'country', // Страна регистрации
-                    'contractNum', // Номер договора
-                    'contractDate', // Дата договора
-                    'okeiCode', // Код единицы измерения по ОКЕИ
-                    'count', // Количество
-                    'price', // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
-                    'totalCost', // Итого стоимость без учета НДС, акцизов и пошлин, руб.
-                    'transactionDate' // Дата совершения сделки
-            ].each {
-                if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
-                    def msg = row.getCell(it).column.name
-                    logger.error("Графа «$msg» в строке $rowNum не заполнена!")
-                }
+        [
+                'rowNum', // № п/п
+                'name', // Полное наименование с указанием ОПФ
+                'innKio', // ИНН/КИО
+                'country', // Страна регистрации
+                'contractNum', // Номер договора
+                'contractDate', // Дата договора
+                'okeiCode', // Код единицы измерения по ОКЕИ
+                'count', // Количество
+                'price', // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+                'totalCost', // Итого стоимость без учета НДС, акцизов и пошлин, руб.
+                'transactionDate' // Дата совершения сделки
+        ].each {
+            if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
+                def msg = row.getCell(it).column.name
+                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+            }
+        }
+
+        def transactionDate = row.transactionDate
+        def contractDate = row.contractDate
+        def totalCost = row.totalCost
+        def price = row.price
+
+        // Проверка выбранной единицы измерения
+        // TODO поле справочника "код"
+        // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+
+        // Проверка количества
+        if (row.count != 1) {
+            def msg = row.getCell('transactionDate').column.name
+            logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
+        }
+
+        // Корректность даты договора
+        def dt = contractDate
+        if (dt != null && (dt < dFrom || dt > dTo)) {
+            def msg = row.getCell('contractDate').column.name
+
+            if (dt > dTo) {
+                logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
             }
 
-            def transactionDate = row.transactionDate
-            def contractDate = row.contractDate
-            def totalCost = row.totalCost
-            def price = row.price
-
-            // Проверка выбранной единицы измерения
-            // TODO поле справочника "код"
-            // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
-
-            // Проверка количества
-            if (row.count != 1) {
-                def msg = row.getCell('transactionDate').column.name
-                logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
+            if (dt < dFrom) {
+                logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
             }
+        }
 
-            // Корректность даты договора
-            def dt = contractDate
-            if (dt != null && (dt < dFrom || dt > dTo)) {
-                def msg = row.getCell('contractDate').column.name
+        // Корректность даты совершения сделки
+        if (transactionDate < contractDate) {
+            def msg1 = row.getCell('transactionDate').column.name
+            def msg2 = row.getCell('contractDate').column.name
+            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+        }
 
-                if (dt > dTo) {
-                    logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
-                }
-
-                if (dt < dFrom) {
-                    logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
-                }
-            }
-
-            // Корректность даты совершения сделки
-            if (transactionDate < contractDate) {
-                def msg1 = row.getCell('transactionDate').column.name
-                def msg2 = row.getCell('contractDate').column.name
-                logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
-            }
-
-            // Проверка заполнения стоимости сделки
-            if (totalCost != price) {
-                def msg1 = row.getCell('totalCost').column.name
-                def msg2 = row.getCell('price').column.name
-                logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
-            }
+        // Проверка заполнения стоимости сделки
+        if (totalCost != price) {
+            def msg1 = row.getCell('totalCost').column.name
+            def msg2 = row.getCell('price').column.name
+            logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
         }
     }
 
@@ -177,8 +175,9 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    for (row in dataRowHelper.getAllCached()) {
+    for (row in dataRows) {
         // Порядковый номер строки
         row.rowNum = row.getIndex()
         // Количество
@@ -187,6 +186,8 @@ void calc() {
         row.totalCost = row.price
         // TODO расчет полей по справочникам
     }
+
+    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -200,7 +201,9 @@ void consolidation() {
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED) {
+        if (source != null
+                && source.state == WorkflowState.ACCEPTED
+                && source.getFormType().getId() == formData.getFormType().getId()) {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)

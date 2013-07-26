@@ -246,7 +246,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (ordStep == 0) {
 			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
-            long diff = rows.size() - (ordEnd - ordBegin) + 1; //minimal diff between rows
+            long diff = 5 * rows.size(); //minimal diff between rows
             int endIndex = getSize(formData, null);
 
             /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
@@ -254,11 +254,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
              *  Прибавляем ровно ту разницу, котрая необходима для вставки строк.
              */
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("diff", Long.valueOf(diff));
+            map.put("diff", diff);
             map.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
             map.put("formDataId", formData.getId());
-            map.put("dataStartRowIndex", Long.valueOf(index + 1));
-            map.put("dataEndRowIndex", Long.valueOf(endIndex));
+            map.put("dataStartRowIndex", (long) (index + 1));
+            map.put("dataEndRowIndex", (long) endIndex);
 
             getNamedParameterJdbcTemplate().update(
                     "update DATA_ROW set ORD = ORD + :diff where ID in" +

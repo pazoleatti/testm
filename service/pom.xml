@@ -76,5 +76,12 @@
 			<artifactId>xmlunit</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <!-- Bicrypt -->
+        <dependency>
+            <groupId>ru.infocrypt.bicrypt</groupId>
+            <artifactId>bicrypt</artifactId>
+            <version>4.0</version>
+        </dependency>
 	</dependencies>
+
 </project>

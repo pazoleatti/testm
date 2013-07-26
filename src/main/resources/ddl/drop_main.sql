@@ -12,6 +12,8 @@ drop table ref_book_value;
 drop table ref_book_record;
 drop table ref_book_attribute;
 drop table ref_book;
+drop sequence seq_ref_book_record;
+drop sequence seq_ref_book_record_row_id;
 
 drop table data_row;
 drop sequence seq_data_row;

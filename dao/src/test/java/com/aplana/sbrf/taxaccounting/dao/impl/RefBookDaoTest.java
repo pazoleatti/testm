@@ -168,18 +168,18 @@ public class RefBookDaoTest {
 	}
 
 	@Test
-	public void testGetByAttributeId1() {
-		Assert.assertEquals(2, refBookDao.getByAttributeId(4).getId().longValue());
+	public void testGetByAttribute1() {
+		Assert.assertEquals(2, refBookDao.getByAttribute(4).getId().longValue());
 	}
 
 	@Test
-	public void testGetByAttributeId2() {
-		Assert.assertEquals(1, refBookDao.getByAttributeId(3).getId().longValue());
+	public void testGetByAttribute2() {
+		Assert.assertEquals(1, refBookDao.getByAttribute(3).getId().longValue());
 	}
 
 	@Test(expected = DaoException.class)
-	public void testGetByAttributeId3() {
-		refBookDao.getByAttributeId(-123123);
+	public void testGetByAttribute3() {
+		refBookDao.getByAttribute(-123123);
 	}
 
 }
