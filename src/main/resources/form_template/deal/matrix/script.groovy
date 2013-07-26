@@ -100,7 +100,6 @@ switch (formDataEvent) {
 // 54.	taxpayerCode
 // 55.	address
 
-
 /**
  * Проверка при создании формы.
  */
@@ -154,7 +153,6 @@ void logicCheck() {
     // 9. Проверка наличия элемента справочника «Коды условий поставки»
     // 10. Проверка наличия элемента «Коды единиц измерения на основании ОКЕИ»справочника «Коды единиц измерения на основании ОКЕИ»
     // 11. Проверка наличия элемента справочника «Коды сведений об организации»
-
 }
 
 /**
@@ -171,6 +169,7 @@ void calc() {
         // Порядковый номер строки
         row.dealNum1 = row.getIndex()
         row.dealNum2 = row.getIndex()
+        row.dealNum3 = row.getIndex()
         // TODO расчет полей по справочникам
     }
 
@@ -188,7 +187,7 @@ void consolidation() {
     int index = 1;
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED  && source.getFormType().getTaxType() == TaxType.DEAL) {
+        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 if (srcRow.getAlias() == null) {
                     def row = buildRow(srcRow, source.getFormType())
@@ -232,6 +231,7 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
     // Графа 12
     // similarTransactionsGroup // справочное
     // Графа 13
+
     switch (type.id) {
         case 376:
             row.dealNameCode = '002'
@@ -274,21 +274,21 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
             row.dealNameCode = '017'
             break
     }
-    // TODO Подменить Id автозаменой
+
     // Графа 14
     switch (type.id) {
-        case 1:
+        case 376:
             row.taxpayerSideCode = '004'
             break
-        case 2:
-        case 3:
-        case 5:
+        case 377:
+        case 375:
+        case 380:
             row.taxpayerSideCode = '012'
             break
-        case 4:
+        case 379:
             row.taxpayerSideCode = '029'
             break
-        case 6:
+        case 381:
             if (srcRow.outcomeSum == null) {
                 row.taxpayerSideCode = '027'
             }
@@ -296,32 +296,32 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
                 row.taxpayerSideCode = '026'
             }
             break
-        case 7:
+        case 382:
             row.taxpayerSideCode = '011'
             break
-        case 8:
-        case 16:
-        case 17:
-        case 18:
+        case 383:
+        case 391:
+        case 392:
+        case 393:
             row.taxpayerSideCode = '052'
             break
-        case 9:
+        case 384:
             // TODO значение справочника (S, B)
             // row.taxpayerSideCode = srcRow.transactionType
             break
-        case 10:
-        case 12:
-        case 14:
+        case 385:
+        case 387:
+        case 389:
             row.taxpayerSideCode = '022'
             break
-        case 11:
-        case 13:
+        case 386:
+        case 388:
             row.taxpayerSideCode = '005'
             break
-        case 15:
+        case 390:
             row.taxpayerSideCode = '030'
             break
-        case 19:
+        case 394:
             if (srcRow.outcomeSum == null) {
                 row.taxpayerSideCode = '027'
             }
@@ -338,49 +338,49 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
     row.dealMemberCount = 2
     // Графа 18
     switch (type.id) {
-        case 1:
+        case 376:
             row.income = srcRow.incomeBankSum
             break
-        case 7:
+        case 382:
             row.income = srcRow.bankIncomeSum
             break
-        case 4:
-        case 12:
+        case 379:
+        case 387:
             row.income = srcRow.sum
             break
-        case 2:
-        case 3:
-        case 5:
+        case 377:
+        case 375:
+        case 380:
             row.income = 0
             break
-        case 6:
+        case 381:
             row.income = srcRow.cost
             break
-        case 8:
+        case 383:
             row.income = srcRow.priceFirstRub
             break
-        case 9:
+        case 384:
             row.income = srcRow.transactionSumRub
             break
-        case 10:
+        case 385:
             row.income = srcRow.totalCost
             break
-        case 11:
-        case 13:
-        case 14:
+        case 386:
+        case 388:
+        case 389:
             row.income = srcRow.total
             break
-        case 15:
-        case 16:
+        case 390:
+        case 391:
             row.income = srcRow.total
             break
-        case 17:
+        case 392:
             row.income = srcRow.cost
             break
-        case 18:
+        case 393:
             row.income = srcRow.totalNds
             break
-        case 19:
+        case 394:
             row.income = srcRow.total
             break
     }
@@ -401,93 +401,450 @@ def buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 24
     switch (type.id) {
-        case 1:
-            row.dealSubjectName = ''
+        case 376:
+            row.dealSubjectName = 'Предоставление в аренду нежилых помещений'
             break
-        case 2:
-            row.dealSubjectName = ''
+        case 377:
+            row.dealSubjectName = 'Оказание услуг по техническому обслуживанию'
             break
-        case 3:
-            row.dealSubjectName = ''
+        case 375:
+            row.dealSubjectName = 'Информационно-технологические услуги'
             break
-        case 4:
-            row.dealSubjectName = ''
+        case 379:
+            row.dealSubjectName = 'Предоставление прав пользования торговым знаком'
             break
-        case 5:
-            row.dealSubjectName = ''
+        case 380:
+            row.dealSubjectName = 'Приобретение услуг по организации и проведению торгов по реализации имущества'
             break
-        case 6:
-            row.dealSubjectName = ''
+        case 381:
+            row.dealSubjectName = 'Купля-продажа ценных бумаг'
             break
-        case 7:
-            row.dealSubjectName = ''
+        case 382:
+        case 384:
+            row.dealSubjectName = 'Оказание банковских услуг'
             break
-        case 8:
-            row.dealSubjectName = ''
+        case 383:
+            row.dealSubjectName = 'РЕПО'
             break
-        case 9:
-            row.dealSubjectName = ''
+        case 385:
+            row.dealSubjectName = 'Уступка прав требования по кредитным договорам'
             break
-        case 10:
-            row.dealSubjectName = ''
+        case 386:
+        case 388:
+            row.dealSubjectName = 'Предоставление банковских гарантий и иных аналогичных инструментов'
             break
-        case 11:
-            row.dealSubjectName = ''
+        case 387:
+        case 389:
+            row.dealSubjectName = 'Предоставление денежных средств на условиях возвратности, платности, срочности'
             break
-        case 12:
-            row.dealSubjectName = ''
+        case 390:
+            row.dealSubjectName = 'Операции с иностранной валютой'
             break
-        case 13:
-            row.dealSubjectName = ''
+        case 391:
+        case 392:
+            row.dealSubjectName = 'Операции с финансовыми инструментами срочных сделок'
             break
-        case 14:
-            row.dealSubjectName = ''
-            break
-        case 15:
-            row.dealSubjectName = ''
-            break
-        case 16:
-            row.dealSubjectName = ''
-            break
-        case 17:
-            row.dealSubjectName = ''
-            break
-        case 18:
-        case 19:
-            row.dealSubjectName = ''
+        case 393:
+        case 394:
+            row.dealSubjectName = 'Купля-продажа драгоценного металла'
             break
     }
-}
 
-// 24.	row.dealSubjectName
-// 25.	row.dealSubjectCode1
-// 26.	row.dealSubjectCode2
-// 27.	row.dealSubjectCode3
-// 28.	row.otherNum
-// 29.	row.contractNum
-// 30.	row.contractDate
-// 31.	row.countryCode
-// 32.	row.countryCode1
-// 33.	region1
-// 34.	row.city1
-// 35.	row.locality1
-// 36.	row.countryCode2
-// 37.	row.region2
-// 38.	row.city2
-// 39.	row.locality2
-// 40.	row.deliveryCode
-// 41.	row.okeiCode
-// 42.	row.count
-// 43.	row.price
-// 44.	row.total
-// 45.	row.dealDoneDate
-// 46.	row.dealNum3
-// 47.	row.dealMemberNum
-// 48.	row.organInfo
-// 49.	row.countryCode3
-// 50.	row.organName
-// 51.	row.organINN
-// 52.	row.organKPP
-// 53.	row.organRegNum
-// 54.	row.taxpayerCode
-// 55.	row.address
+    // Графа 25
+    // TODO В аналитике не описан алгоритм
+    // if (row.dealType == 1) // См. справочник
+
+    // Графа 26
+    switch (type.id) {
+        case 390:
+            // TODO Добавить значение "000000" в справочник и выбрать его
+            // row.dealSubjectCode2 = '000000'
+            break
+        case 393:
+            // TODO Выбрать значение по значению из отчета
+            // row.dealSubjectCode2 = srcRow.okpCode
+            break
+    }
+
+    // Графа 27
+    // TODO Заполнение конкретными значениями из справочника
+    switch (type.id) {
+        case 376:
+            // row.dealSubjectCode3 = '70.20.2'
+            break
+        case 377:
+            // row.dealSubjectCode3 = '70.32.2'
+            break
+        case 375:
+            // row.dealSubjectCode3 = '72.2'
+            break
+        case 379:
+        case 380:
+            // row.dealSubjectCode3 = '74.8'
+            break
+        case 381:
+        case 384:
+        case 386:
+        case 388:
+        case 391:
+        case 392:
+        case 393:
+        case 394:
+            // row.dealSubjectCode3 = '65.23'
+            break
+        case 382:
+            // row.dealSubjectCode3 = '67.12'
+            break
+        case 383:
+        case 385:
+        case 387:
+        case 389:
+            // row.dealSubjectCode3 = '65.22'
+            break
+        case 390:
+            // row.dealSubjectCode3 = '65.12'
+            break
+    }
+
+    // Графа 28
+    row.otherNum = 1
+
+    // Графа 29
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 382:
+        case 383:
+        case 384:
+        case 385:
+        case 392:
+        case 393:
+            row.contractNum = srcRow.contractNum
+            break
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 386:
+        case 387:
+        case 388:
+        case 389:
+        case 391:
+        case 394:
+            row.contractNum = srcRow.docNumber
+            break
+        case 390:
+            row.contractNum = srcRow.docNum
+            break
+    }
+
+    // Графа 30
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 382:
+        case 383:
+        case 384:
+        case 385:
+        case 392:
+        case 393:
+            row.contractDate = srcRow.contractDate
+            break
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 386:
+        case 387:
+        case 388:
+        case 389:
+        case 390:
+        case 391:
+        case 394:
+            row.docDate = srcRow.docDate
+            break
+    }
+
+    // Графа 31
+    switch (type.id) {
+        case 393:
+        case 394:
+            // TODO Разобраться в аналитике. Справочники.
+            break
+    }
+
+    // Графа 32
+    // if (row.dealType == 1) // TODO См. справочник
+    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
+    //     row.countryCode1 =  srcRow.countryCode2
+    // }
+    //
+    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
+    //     row.countryCode1 = srcRow.countryCodeNumeric
+    // }
+
+    // Графа 33
+    // if (row.dealType == 1) // TODO См. справочник
+    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
+    //     row.region1 =  srcRow.region1
+    // }
+    //
+    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
+    //     row.region1 = srcRow.regionCode
+    // }
+
+    // Графа 34
+    // if (row.dealType == 1) // TODO См. справочник
+    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
+    //     row.city1 = srcRow.city1
+    // }
+    //
+    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
+    //     row.city1 = srcRow.city
+    // }
+
+    // Графа 35
+    // if (row.dealType == 1) // TODO См. справочник
+    // if (type.id == 393 && srcRow.signPhis == 'физическая поставка') {
+    //     row.locality1 = srcRow.settlement1
+    // }
+    //
+    // if (type.id == 394 && srcRow.deliverySign == 'физическая поставка') {
+    //     row.locality1 = srcRow.locality
+    // }
+
+    // Графа 36
+    if (type.id == 393) {
+        // row.countryCode2 = srcRow.countryCode3 // Справочник
+    }
+
+    if (type.id == 394) {
+        // row.countryCode2 = srcRow.countryCodeNumeric2 // Справочник
+    }
+
+    // Графа 37
+    if (type.id == 393 || type.id == 394) {
+        // row.region2 = srcRow.region2 // Справочник
+    }
+
+    // Графа 38
+    if (type.id == 393 || type.id == 394) {
+        // row.city2 = srcRow.city2 // Справочник
+    }
+
+    // Графа 39
+    if (type.id == 393) {
+        // row.locality2 = srcRow.settlement2 // Справочник
+    }
+
+    if (type.id == 394) {
+        // row.locality2 = srcRow.locality2 // Справочник
+    }
+
+    // Графа 40
+    if (type.id == 393) {
+        // row.deliveryCode = srcRow.conditionCode // Справочник
+    }
+
+    if (type.id == 394) {
+        // row.deliveryCode = srcRow.deliveryCode // Справочник
+    }
+
+    // Графа 41
+    if (type.id == 381 || type.id == 385) {
+        // row.okeiCode = srcRow.okeiCode // Справочник
+    }
+
+    // Графа 42
+    if ([376, 377, 381, 385, 387, 389, 393, 394].contains(type.id)) {
+        row.count = srcRow.count
+    }
+
+    // Графа 43
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 382:
+        case 387:
+            row.price = srcRow.price
+            break
+        case 383:
+            row.price = srcRow.priceFirstCurrency
+            break
+        case 384:
+            row.price = srcRow.priceOne
+            break
+        case 385:
+        case 386:
+        case 388:
+        case 389:
+        case 394:
+            row.price = srcRow.price
+            break
+    }
+
+    // Графа 44
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 382:
+        case 387:
+            row.total = srcRow.cost
+            break
+        case 385:
+            row.total = srcRow.totalCost
+            break
+        case 386:
+        case 388:
+        case 389:
+        case 394:
+            row.total = srcRow.total
+            break
+        case 390:
+        case 391:
+            row.total = srcRow.total
+            break
+        case 392:
+            row.total = srcRow.cost
+            break
+        case 393:
+            row.total = srcRow.totalNds
+            break
+    }
+
+    // Графа 45
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 382:
+        case 383:
+        case 385:
+        case 392:
+        case 393:
+            row.dealDoneDate = srcRow.transactionDate
+            break
+        case 375:
+        case 379:
+        case 381:
+        case 387:
+            row.dealDoneDate = srcRow.dealDate
+            break
+        case 380:
+            row.dealDoneDate = srcRow.date
+            break
+        case 386:
+        case 388:
+        case 389:
+        case 390:
+        case 391:
+        case 394:
+            row.dealDoneDate = srcRow.dealDoneDate
+            break
+        case 384:
+            row.dealDoneDate = srcRow.transactionDeliveryDate
+            break
+    }
+
+    // Графа 47
+    row.dealMemberNum = row.otherNum
+
+    // Графа 48
+    // row.organInfo = из 50 // Справочное // TODO Перенести поcле 50 и заполнить
+
+    // Графа 49
+    switch (type.id) {
+        case 376:
+        case 377:
+            // row.countryCode3 = srcRow.country // Справочное
+            break
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 382:
+            // row.countryCode3 = srcRow.countryCode // Справочное
+            break
+        case 383:
+        case 389:
+        case 390:
+        case 391:
+        case 392:
+        case 394:
+            // row.countryCode3 = srcRow.countryCode // Справочное
+            break
+        case 393:
+            // row.countryCode3 = srcRow.countryCode1 // Справочное
+            break
+        case 384:
+            // row.countryCode3 = srcRow.contraCountryCode // Справочное
+            break
+        case 385:
+            // row.countryCode3 = srcRow.country // Справочное
+            break
+        case 386:
+            // row.countryCode3 = srcRow.countryCode // Справочное
+            break
+        case 388:
+            // row.countryCode3 = srcRow.countryName // Справочное
+            break
+        case 387:
+            // row.countryCode3 = srcRow.countryName // Справочное
+            break
+    }
+
+    // Графа 50
+    switch (type.id) {
+        case 376:
+        case 377:
+        case 382:
+        case 383:
+            // row.organName = srcRow.jurName // Справочное
+            break
+        case 375:
+        case 379:
+        case 380:
+        case 381:
+        case 387:
+            // row.organName = srcRow.fullNamePerson // Справочное
+            break
+        case 384:
+            // row.organName = srcRow.contraName // Справочное
+            break
+        case 385:
+        case 392:
+        case 393:
+            // row.organName = srcRow.name // Справочное
+            break
+        case 386:
+        case 388:
+        case 389:
+        case 390:
+        case 391:
+        case 394:
+            // row.organName = srcRow.fullName // Справочное
+            break
+    }
+
+    // Графа 51
+    // row.organINN = // Справочное TODO из графы 50
+
+    // Графа 52
+    // row.organKPP = // Справочное TODO из графы 50
+
+    // Графа 53
+    // row.organRegNum = // Справочное TODO из графы 50
+
+    // Графа 54
+    // row.taxpayerCode = // Справочное TODO из графы 50
+
+    // Графа 55
+    // row.address = // Справочное TODO из графы 50
+}
