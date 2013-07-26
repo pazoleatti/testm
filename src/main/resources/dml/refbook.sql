@@ -16,6 +16,8 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (27, 'Классификатор расх
 INSERT INTO REF_BOOK (ID, NAME) VALUES (28, 'Классификатор доходов Сбербанка России для целей налогового учёта');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (29, 'Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта');
 
+INSERT INTO REF_BOOK (ID, NAME) VALUES (30, 'Подразделения');
+
 
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (1,	1,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (2,	1,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
@@ -105,6 +107,13 @@ INSERT INTO REF_BOOK_ATTRIBUTE VALUES (152,	29,	'Балансовый счёт',
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (153,	29,	'Символ ОПУ',								'OPU',				1,		3,		null,	null,	1,	null,	13);
 INSERT INTO REF_BOOK_ATTRIBUTE VALUES (154,	29,	'РНУ',										'RNU',				1,		4,		null,	null,	1,	null,	13);
 
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (160,	30,	'Код подразделения',							'CODE',				2,		0,		null,	null,	1,	0,		15);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (161,	30,	'Наименование подразделения',					'NAME',				1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (162,	30,	'Сокращенное наименование подразделения',		'SHORTNAME',		1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (163,	30,	'Код родительского подразделения',				'DICT_REGION_ID',	4,		3,		4,		9,		1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (164,	30,	'Тип подразделения',							'TYPE',				2,		4,		null,	null,	1,	0,		15);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (165,	30,	'Индекс территориального банка',				'TB_INDEX',			1,		5,		null,	null,	1,	null,	2);
+INSERT INTO REF_BOOK_ATTRIBUTE VALUES (166,	30,	'Код подразделения в нотации Сбербанка',		'SBRF_CODE',		1,		6,		null,	null,	1,	null,	255);
 
 update ref_book_attribute
 set width=10
