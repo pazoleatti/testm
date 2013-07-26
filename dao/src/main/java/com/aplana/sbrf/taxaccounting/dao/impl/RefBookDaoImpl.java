@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -258,26 +260,28 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
 			result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
 			List<RefBookAttribute> attributes = refBook.getAttributes();
-			for (int i = 0; i < attributes.size(); i++) {
-				RefBookAttribute attribute = attributes.get(i);
+			for (int i = 2; i < attributes.size() + 2; i++) {
+				RefBookAttribute attribute = attributes.get(i - 2);
 				Object value = null;
-				switch (attribute.getAttributeType()) {
-					case STRING: {
-						value = rs.getString(i + 2);
+				if (rs.getObject(i) != null) {
+					switch (attribute.getAttributeType()) {
+						case STRING: {
+							value = rs.getString(i);
+						}
+						break;
+						case NUMBER: {
+							value = rs.getDouble(i);
+						}
+						break;
+						case DATE: {
+							value = rs.getDate(i);
+						}
+						break;
+						case REFERENCE: {
+							value = rs.getLong(i);
+						}
+						break;
 					}
-					break;
-					case NUMBER: {
-						value = rs.getDouble(i + 2);
-					}
-					break;
-					case DATE: {
-						value = rs.getDate(i + 2);
-					}
-					break;
-					case REFERENCE: {
-						value = rs.getLong(i + 2);
-					}
-					break;
 				}
 				result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
 			}
@@ -315,18 +319,145 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
 	}
 
+	private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
+			"status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, seq_ref_book_record_row_id.nextval)";
+	private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
+			"string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 	@Override
 	public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
-		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+		// нет данных - нет работы
+		if (records.size() == 0){
+			return;
+		}
+
+		RefBook refBook = get(refBookId);
+		List<Object[]>recordIds = new ArrayList<Object[]>();
+		List<Object[]> listValues = new ArrayList<Object[]>();
+		for (int i=0; i<records.size(); i++) {
+			// создаем строки справочника
+			Long recordId = generateId("seq_ref_book_record", Long.class);
+			recordIds.add(new Object[] {recordId});
+			// записываем значения ячеек
+			Map<String, RefBookValue> record = records.get(i);
+			for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+				String attributeAlias = entry.getKey();
+				if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+						RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+					continue;
+				}
+				RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+				Object[] values = new Object[6];
+				values[0] = recordId;
+				values[1] = attribute.getId();
+				values[2] = null;
+				values[3] = null;
+				values[4] = null;
+				values[5] = null;
+				switch (attribute.getAttributeType()) {
+					case STRING: {
+						values[2] = entry.getValue().getStringValue();
+					}
+					break;
+					case NUMBER: {
+						values[3] = entry.getValue().getNumberValue();
+					}
+					break;
+					case DATE: {
+						values[4] = entry.getValue().getDateValue();
+					}
+					break;
+					case REFERENCE: {
+						values[5] = entry.getValue().getReferenceValue();
+					}
+					break;
+				}
+				listValues.add(values);
+			}
+		}
+		JdbcTemplate jt = getJdbcTemplate();
+		jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), recordIds);
+		jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
 	}
 
+	private Long getRowId(Long recordId) {
+		return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id = ?", new Object[]{recordId});
+	}
+
+	private static final String UPDATE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
+			"status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, ?)";
 	@Override
 	public void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
-		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+		//TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
+		// нет данных - нет работы
+		if (records.size() == 0){
+			return;
+		}
+		RefBook refBook = get(refBookId);
+		List<Object[]>recordIds = new ArrayList<Object[]>();
+		List<Object[]> listValues = new ArrayList<Object[]>();
+		for (int i=0; i<records.size(); i++) {
+			Map<String, RefBookValue> record = records.get(i);
+			// создаем строки справочника
+			Long recordId = generateId("seq_ref_book_record", Long.class);
+			Long rowId = getRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+			recordIds.add(new Object[] {recordId, rowId});
+			// записываем значения ячеек
+			for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+				String attributeAlias = entry.getKey();
+				if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+						RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+					continue;
+				}
+				RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+				Object[] values = new Object[6];
+				values[0] = recordId;
+				values[1] = attribute.getId();
+				values[2] = null;
+				values[3] = null;
+				values[4] = null;
+				values[5] = null;
+				switch (attribute.getAttributeType()) {
+					case STRING: {
+						values[2] = entry.getValue().getStringValue();
+					}
+					break;
+					case NUMBER: {
+						values[3] = entry.getValue().getNumberValue();
+					}
+					break;
+					case DATE: {
+						values[4] = entry.getValue().getDateValue();
+					}
+					break;
+					case REFERENCE: {
+						values[5] = entry.getValue().getReferenceValue();
+					}
+					break;
+				}
+				listValues.add(values);
+			}
+		}
+		JdbcTemplate jt = getJdbcTemplate();
+		jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), recordIds);
+		jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
 	}
 
+	private static final String DELETE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
+			"status, record_id) values (seq_ref_book_record.nextval, %d, to_date('%s', 'DD.MM.YYYY'), -1, ?)";
 	@Override
 	public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
-		//TODO: не реализовано (Marat Fayzullin 2013-07-18)
+		//TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
+		// нет данных - нет работы
+		if (recordIds.size() == 0){
+			return;
+		}
+		List<Object[]> values = new ArrayList<Object[]>();
+		for (int i=0; i<recordIds.size(); i++) {
+			// создаем строки справочника
+			Long rowId = getRowId(recordIds.get(i));
+			values.add(new Object[] {rowId});
+		}
+		JdbcTemplate jt = getJdbcTemplate();
+		jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), values);
 	}
 }

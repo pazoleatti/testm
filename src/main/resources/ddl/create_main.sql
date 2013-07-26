@@ -299,7 +299,7 @@ comment on column ref_book.name is 'Название справочника';
 create table ref_book_attribute (
   id number(9) not null,
   ref_book_id number(9) not null,
-  name varchar2(200) not null,
+  name varchar2(510) not null,
   alias varchar2(30) not null,
   type number(1) not null,
   ord number(9) not null,
@@ -376,7 +376,6 @@ alter table ref_book_value add constraint ref_book_value_pk primary key (record_
 
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
-alter table ref_book_value add constraint ref_book_value_fk_reference foreign key (reference_value) references ref_book_record (id);
 
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -426,7 +425,7 @@ comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';
 comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
-comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
+comment on column form_column.type is 'Тип столбца (S - строка, N – число, D – дата, R - ссылка)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
