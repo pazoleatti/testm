@@ -16,6 +16,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        test() // TODO (Ramil Timerbaev)
+        return
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
@@ -39,20 +41,24 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
+    def data = getData(formData)
     // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
-        formData.dataRows.remove(currentDataRow)
+    if (currentDataRow != null && getRows(data).indexOf(currentDataRow) != -1) {
+        getRows(data).remove(currentDataRow)
+        save(data)
     }
 }
 
 void addRow() {
+    def data = getData(formData)
     row = formData.createDataRow()
     for (alias in ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
             'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
+    getRows(data).add(row)
+    save(data)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -81,7 +87,8 @@ void checkDecl() {
 }
 
 void logicCheck() {
-    for (row in formData.dataRows) {
+    def data = getData(formData)
+    for (row in getRows(data)) {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
@@ -99,4 +106,58 @@ void logicCheck() {
             }
         }
     }
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(getRows(data))
+}
+
+/**
+ * Удалить строку из нф
+ *
+ * @param data данные нф (helper)
+ * @param row строка для удаления
+ */
+void deleteRow(def data, def row) {
+    data.delete(row)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Проверить наличие итоговой строки.
+ *
+ * @param data данные нф (helper)
+ */
+def hasTotal(def data) {
+    for (def row: getRows(data)) {
+        if (row.getAlias() == 'total') {
+            return true
+        }
+    }
+    return false
 }
