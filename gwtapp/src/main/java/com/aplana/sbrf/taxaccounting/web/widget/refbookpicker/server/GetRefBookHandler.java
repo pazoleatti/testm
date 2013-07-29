@@ -39,7 +39,7 @@ public class GetRefBookHandler extends
 		GetRefBookResult result = new GetRefBookResult();
 		List<String> headers = new ArrayList<String>();
 
-		RefBook refBook = refBookFactory.get(action.getRefBookId());
+		RefBook refBook = null;//refBookFactory.get(action.getRefBookId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
 			if (!RefBook.RECORD_ID_ALIAS.equals(refBookAttribute.getAlias())) {
 				headers.add(refBookAttribute.getName());

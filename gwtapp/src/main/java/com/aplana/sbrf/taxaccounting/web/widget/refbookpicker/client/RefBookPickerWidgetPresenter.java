@@ -25,26 +25,26 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	private final DispatchAsync dispatcher;
 	
 	private Long value;
-	private final long refBookId; 
+	private long refBookId; 
 	
 	private String searchPattern;
 	private Date version;
 	
-	public RefBookPickerWidgetPresenter(MyView view, long refBookId, Long formDataId) {
+	public RefBookPickerWidgetPresenter(MyView view, long refBookAttrId, Long formDataId) {
 		super(GINContextHolder.getEventBus(), view);
 		dispatcher = GINContextHolder.getDispatchAsync();
-		this.refBookId = refBookId;
 		getView().setUiHandlers(this);
 		
 		
 		GetRefBookAction getRefBookAction = new GetRefBookAction();
-		getRefBookAction.setRefBookId(refBookId);
+		getRefBookAction.setRefBookAttrId(refBookAttrId);
 		getRefBookAction.setFormDataId(formDataId);
 		
 		dispatcher.execute(getRefBookAction, CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookResult>() {
 
 			@Override
 			public void onSuccess(GetRefBookResult result) {
+				refBookId = result.getRefBookId();
 				getView().initView(result.getHeaders(), result.getVersions());
 			}
 			

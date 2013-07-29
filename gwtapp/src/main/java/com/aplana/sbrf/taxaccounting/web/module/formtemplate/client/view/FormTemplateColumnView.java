@@ -3,11 +3,13 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateColumnPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.ColumnAttributeEditor;
@@ -24,18 +26,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>
@@ -52,11 +49,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private static final String STRING_TYPE = "Строка";
 	private static final String NUMERIC_TYPE = "Число";
 	private static final String DATE_TYPE = "Дата";
+	private static final String REFBOOK_TYPE = "Справочник";
 
 	static {
 		columnTypeNameList.add(STRING_TYPE);
 		columnTypeNameList.add(NUMERIC_TYPE);
 		columnTypeNameList.add(DATE_TYPE);
+		columnTypeNameList.add(REFBOOK_TYPE);
 
 		stringDictionaryCodeMap.put("transportTypeCode", "ТН - Коды видов ТС");
 		stringDictionaryCodeMap.put("transportOkato", "ТН - Коды ОКАТО");
@@ -138,6 +137,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiField(provided = true)
 	ValueListBox<Formats> dateFormat;
+	
+	@UiField
+	Panel refBookAttrIdPanel;
+	
+	@UiField
+	LongBox refBookAttrIdBox;
 
 	@Inject
 	@UiConstructor
@@ -321,6 +326,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	public void onNumericMaxLengthBox(KeyUpEvent event) {
 		((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(numericMaxLengthBox.getValue());
 	}
+	
+	@UiHandler("refBookAttrIdBox")
+	public void onRefBookAttrIdBox(KeyUpEvent event) {
+		((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setRefBookAttributeId(refBookAttrIdBox.getValue());
+	}
 
 	@Override
 	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
@@ -365,12 +375,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 		if (column instanceof StringColumn) {
 			typeColumnDropBox.setValue(STRING_TYPE);
-		}
-        else if (column instanceof NumericColumn) {
+		} else if (column instanceof NumericColumn) {
 			typeColumnDropBox.setValue(NUMERIC_TYPE);
-		}
-		else {
+		} else if (column instanceof DateColumn) {
 			typeColumnDropBox.setValue(DATE_TYPE);
+		} else if (column instanceof RefBookColumn) {
+			typeColumnDropBox.setValue(REFBOOK_TYPE);
+		} else {
+			throw new IllegalStateException();
 		}
 
 		populateUniqueParameters();
@@ -387,6 +399,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
 		dateFormatPanel.setVisible(false);
+		refBookAttrIdPanel.setVisible(false);
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
 			String code = ((StringColumn) column).getDictionaryCode();
 			int maxLength = ((StringColumn) column).getMaxLength();
@@ -430,6 +443,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 					((DateColumn) column).getFormatId() ));
 			dateFormatPanel.setVisible(true);
 
+		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())) {
+			refBookAttrIdPanel.setVisible(true);
+			refBookAttrIdBox.setValue(((RefBookColumn)column).getRefBookAttributeId());
 		}
 	}
 
@@ -471,14 +487,19 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			getUiHandlers().removeColumn(column);
 			getUiHandlers().addColumn(index, numericColumn);
 		}
-		else {
+		else if (typeColumnDropBox.getValue() == DATE_TYPE){
 			DateColumn dateColumn = new DateColumn();
 			copyMainColumnAttributes(column, dateColumn);
 
 			getUiHandlers().removeColumn(column);
 			getUiHandlers().addColumn(index, dateColumn);
+		} else if (typeColumnDropBox.getValue() == REFBOOK_TYPE){
+			RefBookColumn refBookColumn = new RefBookColumn();
+			copyMainColumnAttributes(column, refBookColumn);
+			
+			getUiHandlers().removeColumn(column);
+			getUiHandlers().addColumn(index, refBookColumn);
 		}
-
 		populateUniqueParameters();
 	}
 
