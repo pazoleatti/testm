@@ -129,11 +129,10 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 
 	@Override
 	public void setValue(Long value, boolean fireEvent) {
-		uiHandlers.setValue(value);
-		if (fireEvent) {
-			ValueChangeEvent.fire(RefBookPickerWidget.this, value);
-		}
+		uiHandlers.setValue(value, fireEvent);
 	}
+	
+	
 
 	public void clear() {
 		txtFind.setValue("");
@@ -253,5 +252,10 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 	@Override
 	public void setVersion(Date versionDate) {
 		version.setValue(versionDate);
+	}
+
+	@Override
+	public void fireChangeEvent(Long value) {
+		ValueChangeEvent.fire(RefBookPickerWidget.this, value);
 	}
 }

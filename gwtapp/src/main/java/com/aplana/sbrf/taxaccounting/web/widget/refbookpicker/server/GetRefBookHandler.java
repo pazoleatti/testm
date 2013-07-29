@@ -22,7 +22,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * 
  */
 @Component
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("isAuthenticated()")
 public class GetRefBookHandler extends
 		AbstractActionHandler<GetRefBookAction, GetRefBookResult> {
 
@@ -39,12 +39,14 @@ public class GetRefBookHandler extends
 		GetRefBookResult result = new GetRefBookResult();
 		List<String> headers = new ArrayList<String>();
 
-		RefBook refBook = refBookFactory.get(action.getRefBookId());
+		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
 			if (!RefBook.RECORD_ID_ALIAS.equals(refBookAttribute.getAlias())) {
 				headers.add(refBookAttribute.getName());
 			}
 		}
+		
+		result.setRefBookId(refBook.getId());
 		result.setHeaders(headers);
 		
 		List<Date> versions = new ArrayList<Date>();

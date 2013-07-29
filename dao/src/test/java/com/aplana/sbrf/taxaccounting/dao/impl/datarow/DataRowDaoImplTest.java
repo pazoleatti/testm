@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -112,10 +113,8 @@ public class DataRowDaoImplTest {
 	}
 
 	private void checkIndexCorrect(List<DataRow<Cell>> dataRows) {
-		Integer i = 1;
-		for (DataRow<Cell> dataRow : dataRows) {
-			Assert.assertEquals(i, dataRow.getIndex());
-			i++;
+		for (int i = 0; i < dataRows.size(); i++) {
+			Assert.assertEquals(Integer.valueOf(i + 1), dataRows.get(i).getIndex());	
 		}
 	}
 
@@ -346,6 +345,43 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRows));
 		checkIndexCorrect(dataRows);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void maodifyAndSaveSuccess() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+		checkIndexCorrect(dataRows);
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "21");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+
+		dataRowDao.insertRows(fd, 1, Arrays.asList(dr));
+		dataRows.add(1, dr);
+		dataRowDao.saveRows(fd, dataRows);
+		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void maodifyAndSaveErrorDublicat() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "21");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+
+		dataRows.add(1, dr);
+		dataRows.add(2, dr);
+		dataRowDao.saveRows(fd, dataRows);
+	}
 
 	@Test
 	public void insertRowsRepeatedlySuccess() {
@@ -404,6 +440,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5, 51, 52 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
 	}
 
 	@Test
@@ -525,9 +562,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.insertRows(fd,
 				dataRowDao.getRows(fd, null, new DataRowRange(5, 1)).get(0),
 				dataRows);
+		dataRows = dataRowDao.getRows(fd, null, null);
+		checkIndexCorrect(dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		
 	}
 
 	@Test
