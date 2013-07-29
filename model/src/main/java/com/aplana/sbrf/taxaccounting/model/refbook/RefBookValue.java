@@ -105,17 +105,11 @@ public class RefBookValue implements Serializable {
 
 	@Override
 	public int hashCode() {
-		int result = attributeType.hashCode();
-		result = 31 * result + value.hashCode();
-		return result;
+		return 31 * attributeType.hashCode() + value.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(attributeType.name().charAt(0));
-		sb.append(":");
-		sb.append(value);
-		return sb.toString();
+    	return value.toString();
 	}
 }

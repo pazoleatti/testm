@@ -47,8 +47,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
 
-	private TableRow selectedRow;
-
 	@Inject
 	@UiConstructor
 	public PeriodsView(final Binder uiBinder) {

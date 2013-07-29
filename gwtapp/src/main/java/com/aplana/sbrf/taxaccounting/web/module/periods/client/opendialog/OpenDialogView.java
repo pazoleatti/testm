@@ -20,14 +20,12 @@ import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.*;
 
-
 public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers>
 		implements OpenDialogPresenter.MyView, ReportPeriodDataProvider {
 
 	public interface Binder extends UiBinder<PopupPanel, OpenDialogView> {
 	}
 
-	private static final String DEPARTMENT_PICKER_HEADER = "Выбор подразделения";
 	private DeclarationDataFilter filter;
 	private DeclarationDataFilterAvailableValues filterValues;
 

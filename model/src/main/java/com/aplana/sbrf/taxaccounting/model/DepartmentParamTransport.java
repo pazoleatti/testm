@@ -125,4 +125,10 @@ public class DepartmentParamTransport implements Serializable {
 
         return true;
     }
+
+	@Override
+	public int hashCode() {
+		return departmentId; //TODO: затем добавить сюда отчетный период. 31 * departmentId + reportPeriodId (Marat Fayzullin 2013-07-29)
+	}
+
 }

@@ -35,9 +35,6 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
     @Autowired
     DepartmentFormTypeService departmentFormTypService;
 
-    @Autowired
-    private RefBookDao rbDao;
-
     public GetOpenDataHandler() {
         super(GetOpenDataAction.class);
     }

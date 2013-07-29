@@ -25,9 +25,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao {
 
-	private static final Log logger = LogFactory.getLog(ReportPeriodDaoImpl.class);
-
-
 	private static final class ReportPeriodMapper implements RowMapper<ReportPeriod> {
 		@Override
 		public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
