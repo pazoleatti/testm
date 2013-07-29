@@ -30,8 +30,6 @@ public class NumericColumn extends Column implements Serializable {
 	public static final int MAX_LENGTH = 27;
 
 	private int precision = 0;
-
-	private String dictionaryCode;
 	
 	private int maxLength = MAX_LENGTH;
 
@@ -57,21 +55,6 @@ public class NumericColumn extends Column implements Serializable {
 			throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
 		}
 		this.precision = precision;
-	}
-
-	/**
-	 * @return код справочника, связанного с данным столбцом.
-	 */
-	public String getDictionaryCode() {
-		return dictionaryCode;
-	}
-
-	/**
-	 * @param dictionaryCode код справочника, связанного с данным столбцом, или null, если со столбцом не связан ни
-	 *                       один справочник.
-	 */
-	public void setDictionaryCode(String dictionaryCode) {
-		this.dictionaryCode = dictionaryCode;
 	}
 
 	/**
