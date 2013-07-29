@@ -99,12 +99,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	@UiField(provided = true)
 	ValueListBox<String> typeColumnDropBox;
 
-	@UiField(provided = true)
-	ValueListBox<String> stringDictionaryCodeBox;
-
-	@UiField(provided = true)
-	ValueListBox<String> numericDictionaryCodeBox;
-
 	@UiField
 	IntegerBox stringMaxLengthBox;
 
@@ -122,9 +116,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiField
 	Panel attrPanel;
-
-	@UiField
-	Panel dictionaryCodePanel;
 
 	@UiField
 	Panel stringMaxLengthPanel;
@@ -181,36 +172,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				precisionPanel.setVisible(true);
 				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(precisionBox.getValue());
-			}
-		}, ValueChangeEvent.getType());
-
-		stringDictionaryCodeBox = new ValueListBox<String>(new AbstractRenderer<String>() {
-			@Override
-			public String render(String object) {
-				return stringDictionaryCodeMap.get(object);
-			}
-		});
-		stringDictionaryCodeBox.setAcceptableValues(stringDictionaryCodeMap.keySet());
-
-		stringDictionaryCodeBox.addHandler(new ValueChangeHandler<Integer>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				((StringColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(stringDictionaryCodeBox.getValue());
-			}
-		}, ValueChangeEvent.getType());
-
-		numericDictionaryCodeBox = new ValueListBox<String>(new AbstractRenderer<String>() {
-			@Override
-			public String render(String object) {
-				return numericDictionaryCodeMap.get(object);
-			}
-		});
-		numericDictionaryCodeBox.setAcceptableValues(numericDictionaryCodeMap.keySet());
-
-		numericDictionaryCodeBox.addHandler(new ValueChangeHandler<Integer>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setDictionaryCode(numericDictionaryCodeBox.getValue());
 			}
 		}, ValueChangeEvent.getType());
 
@@ -392,49 +353,25 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	private void populateUniqueParameters() {
 		Column column = columns.get(columnListBox.getSelectedIndex());
 		precisionPanel.setVisible(false);
-		dictionaryCodePanel.setVisible(false);
-		stringDictionaryCodeBox.setVisible(false);
 		stringMaxLengthPanel.setVisible(false);
 		numericMaxLengthPanel.setVisible(false);
-		numericDictionaryCodeBox.setVisible(false);
 		nameBox.setValue(column.getName());
 		dateFormatPanel.setVisible(false);
 		refBookAttrIdPanel.setVisible(false);
 		if (typeColumnDropBox.getValue() == STRING_TYPE) {
-			String code = ((StringColumn) column).getDictionaryCode();
 			int maxLength = ((StringColumn) column).getMaxLength();
-
-			if (stringDictionaryCodeMap.containsKey(code)) {
-				stringDictionaryCodeBox.setValue(code);
-			}
-			else {
-				stringDictionaryCodeBox.setValue(null);
-			}
 
 			stringMaxLengthBox.setValue(maxLength);
 			stringMaxLengthPanel.setVisible(true);
-			stringDictionaryCodeBox.setVisible(true);
-			dictionaryCodePanel.setVisible(true);
-		}
-		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
-			String code = ((NumericColumn) column).getDictionaryCode();
+		} else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
 			int maxLength = ((NumericColumn) column).getMaxLength();
-
-			if (numericDictionaryCodeMap.containsKey(code)) {
-				numericDictionaryCodeBox.setValue(code);
-			}
-			else {
-				numericDictionaryCodeBox.setValue(null);
-			}
 
 			numericMaxLengthPanel.setVisible(true);
 			numericMaxLengthBox.setValue(maxLength);
 			numericMaxLengthBox.setVisible(true);
-			numericDictionaryCodeBox.setVisible(true);
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
 			precisionBox.setAcceptableValues(precisionList);
-			dictionaryCodePanel.setVisible(true);
 		} else if (typeColumnDropBox.getValue() == DATE_TYPE) {
 			dateFormat.setAcceptableValues(dateFormatList);
 			// Если формата нет, то выставляем по умолчанию DD_MM_YYYY

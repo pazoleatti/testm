@@ -45,12 +45,6 @@
                         <g:ValueListBox width="200px" ui:field="typeColumnDropBox"/>
                     </g:HorizontalPanel>
 
-                    <g:HorizontalPanel height="30px" visible="false" ui:field="dictionaryCodePanel">
-                        <g:Label width="150px">Код справочника</g:Label>
-                        <g:ValueListBox width="200px" ui:field="stringDictionaryCodeBox"/>
-                        <g:ValueListBox width="200px" ui:field="numericDictionaryCodeBox"/>
-                    </g:HorizontalPanel>
-
                     <g:HorizontalPanel height="30px" ui:field="stringMaxLengthPanel">
                         <g:Label width="150px">Максимальный размер строки</g:Label>
                         <g:IntegerBox width="100px" ui:field="stringMaxLengthBox"/>
@@ -62,7 +56,7 @@
                     </g:HorizontalPanel>
                     
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrIdPanel">
-                        <g:Label width="150px">Точность</g:Label>
+                        <g:Label width="150px">Атрибут справочника (ID)</g:Label>
                         <g:LongBox width="200px" ui:field="refBookAttrIdBox"/>
                     </g:HorizontalPanel>
 
