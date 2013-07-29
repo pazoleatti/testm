@@ -27,7 +27,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
  * 
  */
 @Component
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
+@PreAuthorize("isAuthenticated()")
 public class GetRefBookValuesHandler extends
 		AbstractActionHandler<GetRefBookValuesAction, GetRefBookValuesResult> {
 

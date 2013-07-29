@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.OrderUtils;
+
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -37,6 +38,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				result = new StringColumn();
 				((StringColumn)result).setDictionaryCode(rs.getString("dictionary_code"));
 				((StringColumn) result).setMaxLength(rs.getInt("max_length"));
+			} else if ("R".equals(type)) {
+				result = new RefBookColumn();
+				((RefBookColumn)result).setRefBookAttributeId(rs.getLong("ATTRIBUTE_ID"));
 			} else {
 				throw new IllegalArgumentException("Unknown column type: " + type);
 			}
@@ -113,8 +117,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 		if (!newColumns.isEmpty()) {
 			jt.batchUpdate(
-				"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking, format) " +
-				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"insert into form_column (id, name, form_template_id, alias, type, width, precision, dictionary_code, ord, group_name, max_length, checking, format, ATTRIBUTE_ID) " +
+				"values (seq_form_column.nextval, ?, " + formId + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -159,6 +163,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						ps.setInt(7, col.getOrder());
 						ps.setString(8, col.getGroupName());
 						ps.setBoolean(10, col.isChecking());
+						
+						if (col instanceof RefBookColumn) {
+							ps.setLong(12, ((RefBookColumn)col).getRefBookAttributeId());
+						} else {
+							ps.setNull(12, Types.NUMERIC);
+						}
+						
 					}
 
 					@Override
@@ -172,7 +183,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
 					"update form_column set name = ?, alias = ?, type = ?, width = ?, " +
-							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?, format = ?" +
+							"precision = ?, dictionary_code = ?, ord = ?, group_name = ?, max_length = ?, checking = ?, format = ?, ATTRIBUTE_ID = ? " +
 							"where id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
@@ -193,24 +204,33 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								ps.setString(6, ((StringColumn)col).getDictionaryCode());
 								ps.setInt(9, ((StringColumn) col).getMaxLength());
 								ps.setNull(11, Types.INTEGER);
+								ps.setNull(12, Types.NUMERIC);
 							} else if(col instanceof NumericColumn){
 								ps.setString(6, ((NumericColumn)col).getDictionaryCode());
 								ps.setInt(9, ((NumericColumn) col).getMaxLength());
 								ps.setNull(11, Types.INTEGER);
+								ps.setNull(12, Types.NUMERIC);
 							} else if (col instanceof DateColumn) {
 								ps.setInt(11, ((DateColumn)col).getFormatId());
+								ps.setNull(6, Types.VARCHAR);
+								ps.setNull(9, Types.INTEGER);
+								ps.setNull(12, Types.NUMERIC);
+							} else if (col instanceof RefBookColumn) {
+								ps.setLong(12, ((RefBookColumn)col).getRefBookAttributeId());
+								ps.setNull(11, Types.INTEGER);
 								ps.setNull(6, Types.VARCHAR);
 								ps.setNull(9, Types.INTEGER);
 							} else {
 								ps.setNull(6, Types.VARCHAR);
 								ps.setNull(9, Types.INTEGER);
 								ps.setNull(11, Types.INTEGER);
+								ps.setNull(12, Types.NUMERIC);
 							}
 
 							ps.setInt(7, col.getOrder());
 							ps.setString(8, col.getGroupName());
 							ps.setBoolean(10, col.isChecking());
-							ps.setInt(12, col.getId());
+							ps.setInt(13, col.getId());
 						}
 
 						@Override
@@ -241,6 +261,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			return "S";
 		} else if (col instanceof DateColumn) {
 			return "D";
+		} else if (col instanceof RefBookColumn) {
+			return "R";
 		} else {
 			throw new IllegalArgumentException("Unknown column type: " + col.getClass().getName());
 		}
