@@ -46,4 +46,9 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	public void openPeriod(int reportPeriodId) {
 		reportPeriodDao.changeActive(reportPeriodId, true);
 	}
+
+	@Override
+	public int add(ReportPeriod reportPeriod) {
+		return reportPeriodDao.add(reportPeriod);
+	}
 }

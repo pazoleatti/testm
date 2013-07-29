@@ -97,4 +97,9 @@ public interface DepartmentService {
 	 * @return список департаментов
 	 */
 	List<Department> listDepartments();
+
+	/**
+	 * Получить подразделение
+	 */
+	Department getDepartmentBySbrfCode(String sbrfCode);
 }

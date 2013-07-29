@@ -35,4 +35,17 @@ public interface TaxPeriodDao {
 	 * @return  список налогововых периодов по данному виду налога за определенный период
 	 */
 	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
+
+	/**
+	 * Добавить новый налоговый период
+	 * @param taxPeriod налоговый период
+	 * @return идентификатор нового налогового периода
+	 */
+	int add(TaxPeriod taxPeriod);
+
+	/**
+	 *  Получить последний налоговый период по виду налога
+	 *  @param taxType вид налога
+	 */
+	TaxPeriod getLast(TaxType taxType);
 }

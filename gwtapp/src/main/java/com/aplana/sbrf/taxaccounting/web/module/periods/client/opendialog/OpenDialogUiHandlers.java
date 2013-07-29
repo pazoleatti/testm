@@ -5,6 +5,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 
 public interface OpenDialogUiHandlers extends UiHandlers {
-	void onContinue();
+	void onContinue(OpenFilterData openFilterData);
 	void onTaxPeriodSelected(TaxPeriod taxPeriod);
 }
