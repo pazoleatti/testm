@@ -1,11 +1,13 @@
 /**
+ * Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации.
  *
- * Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
+ * TODO:
+ *      - алгоритм расчета графа 8: поле "признак расчета" в настройки подразделения еще не добавили
+ *      - алгоритм расчета графа 9: поле "Обязанность по уплате налога" в настройки подразделения еще не добавили
+ *      - алгоритм расчета графа 14: поле "Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде" в настройки подразделения еще не добавили
  *
  * @author akadyrgulov
  */
-
-
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -16,7 +18,6 @@ switch (formDataEvent) {
         checkNSI()
         break
     case FormDataEvent.CALCULATE :
-        // 6.2.5.7. Пересчитать итоги
         calc()
         logicalCheck(false)
         checkNSI()
@@ -27,13 +28,20 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-// после принятия из подготовлена
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED :
+        calc()
+        logicalCheck(false)
+        checkNSI()
+        checkDeclaration()
+        break
+    // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         checkNSI()
         // на стороне сервера будет выполнен compose
         break
-// обобщить
+    // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -68,40 +76,38 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    DataRow<Cell> dataRow = formData.createDataRow()
+    def data = getData(formData)
+    def newRow = formData.createDataRow()
 
-    logger.info('currentDataRow != null ' + currentDataRow)
-    logger.info('dataRowsHelper.getAllCached().size() ' + dataRowsHelper.getAllCached().size())
-    int index = currentDataRow != null ? currentDataRow.getIndex() : (dataRowsHelper.getAllCached().size() == 0 ? 1 : dataRowsHelper.getAllCached().size())
-    logger.info('getIndex(currentDataRow) : ' + currentDataRow.getIndex())
-    logger.info('index : ' + index)
+    // def index = (currentDataRow != null ? getIndex(data, currentDataRow) + 1 : 0)
+    int index = (currentDataRow != null ? currentDataRow.getIndex() :
+        (data.getAllCached().size() == 0 ?
+            1 : data.getAllCached().size()))
 
-    dataRowsHelper.insert(dataRow, index);
-    dataRows = dataRowsHelper.getAllCached()
-    dataRows.add(dataRow)
+    // data.insert(newRow, index)
+    data.getAllCached().add(index, newRow)
     // графа 3, 5..7 редактируемые
     ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit'].each {
-        dataRow.getCell(it).editable = true
-        dataRow.getCell(it).setStyleAlias('Редактируемая')
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowsHelper.save(dataRows)
+    save(data)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    dataRowsHelper.delete(currentDataRow)
-    dataRows = dataRowsHelper.getAllCached()
-    dataRowsHelper.save(dataRows)
+    def data = getData(formData)
+    data.delete(currentDataRow)
+    save(data)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
@@ -110,9 +116,7 @@ void calc() {
 
     def requiredColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
 
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-
-    for (def row : dataRowsHelper.getAllCached()) {
+    for (def row : data.getAllCached()) {
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -124,58 +128,55 @@ void calc() {
 
     // удалить фиксированные строки
     def delRow = []
-    dataRowsHelper.getAllCached().each { row ->
+    data.getAllCached().each { row ->
         if (isFixedRow(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        dataRowsHelper.getAllCached().remove(getIndex(row))
+        data.getAllCached().remove(getIndex(data, row))
     }
-    if (dataRowsHelper.getAllCached().isEmpty()) {
+    if (data.getAllCached().isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    dataRowsHelper.getAllCached().sort { a, b ->
+    data.getAllCached().sort { a, b ->
         if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
             return b.kpp <=> a.kpp
         }
         if (a.regionBank == b.regionBank) {
-            return b.regionBankDivision <=> a.regionBankDivision
+            return -(b.regionBankDivision <=> a.regionBankDivision)
         }
-        return b.regionBank <=> a.regionBank
+        return -(b.regionBank <=> a.regionBank)
     }
 
-    // TODO
-    // расчет графы 1..4, 8..21
-    def propertyPriceSumm = getSumAll("propertyPrice")
-    def workersCountSumm = getSumAll("workersCount")
+    def propertyPriceSumm = getSumAll(data, "propertyPrice")
+    def workersCountSumm = getSumAll(data, "workersCount")
+    def tmp = null
 
-    logger.info('propertyPriceSumm = ' + propertyPriceSumm);
-    logger.info('workersCountSumm = ' + workersCountSumm);
-    dataRowsHelper.getAllCached().eachWithIndex { row, i ->
+    /** Распределяемая налоговая база за отчетный период. */
+    def taxBase = getTaxBase()
+
+    /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
+    def sumNal = 0 // TODO (Ramil Timerbaev) departmentParamIncome...
+
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    // расчет графы 1..4, 8..21
+    data.getAllCached().eachWithIndex { row, i ->
 
         // TODO (Aydar Kadyrgulov) после привязки к справочнику брать ID выбранной записи
         def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
+        def departmentParamIncome = departmentService.getDepartmentParamIncome(Integer.valueOf(row.regionBankDivision))
 
         // графа 1
         row.number = i + 1
 
-        /*
-        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
-        «Графа 2» = значение атрибута «Наименование подразделения» справочника «Подразделения»,
-        где «Индекс территориального банка» текущего подразделения («Графа 3»)
-        равен «Индексу территориального банка» среди записей справочника «Подразделения» с типом,
-        соответствующему территориальному банку.
-        */
         // графа 2
         row.regionBank = departmentParam.name
 
-        /*
-        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
-        «Графа 4» = значение атрибута «КПП» формы настроек подразделений.
-        */
         // графа 4
         row.kpp = departmentParam.kpp
 
@@ -184,214 +185,41 @@ void calc() {
         «Графа 8» = значение атрибута «Признак расчёта» формы настроек подразделений.
         */
         // графа 8 TODO (Aydar Kadyrgulov) Признак расчёта
-        row.calcFlag = 0
+        row.calcFlag = 0 // departmentParam.
 
         /*
         Заполняется автоматически на основании значения «Графы 3».
         «Графа 9» = значение атрибута «Обязанность по уплате налога» формы настроек подразделений.
         */
         // графа 9 TODO (Aydar Kadyrgulov) Обязанность по уплате налога
-        row.obligationPayTax =0
+        row.obligationPayTax = 0 // departmentParam.
 
-        /*
-         «Графа 10» =ОКРУГЛ ((((«графа 5»  / «итого по графе 5») * 100) + ((«графа 6» / «итого по графе 6») * 100)) / 2; 8)
-        */
         // графа 10
-        def tmp = (((( row.propertyPrice  / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
-        row.baseTaxOf = round( tmp, 8)
+        tmp = ((((row.propertyPrice / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
+        row.baseTaxOf = round(tmp, 8)
 
-        /*
-         «Графа 11» = ОКРУГЛ («распределяемая налоговая база за отчётный период» * «графа 10» / 100; 0)
-         */
         // графа 11
-        row.baseTaxOfRub =0
+        row.baseTaxOfRub = round(taxBase * row.baseTaxOf / 100, 0)
 
-        /*
-        Заполняется автоматически на основании значения «Графы 3».
-        «Графа 12» = значение атрибута «Ставка налога (региональная часть)» формы настроек подразделений.
-         */
         // графа 12
-        row.subjectTaxStavka =0
+        row.subjectTaxStavka = departmentParamIncome.taxRate
 
-        /*
-        ЕСЛИ «графа 11» > 0
-        ТОГДА «графа 13» = ОКРУГЛ («графа 11» * «графа 12» / 100;0)
-        ИНАЧЕ «графа 13» = 0
-         */
-        // графа 13
-        row.taxSum =0
-
-        /*
-        «Графа 14» = ОКРУГЛ («Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде» * «графа 10» / 100;0)
-         */
-        // графа 14
-        row.taxSumOutside =0
-
-        /*
-        ЕСЛИ «графа 13» > «графа 7» + «графа 14»
-        ТОГДА «графа 15» = «графа 13» - («графа 7» + «графа 14»)
-        ИНАЧЕ «графа 15» = 0
-         */
-        // графа 15
-        row.taxSumToPay =0
-
-        /*
-        ЕСЛИ «графа 13» < «графа 7» + «графа 14»
-        ТОГДА «графа 16» = («графа 7» + «графа 14») - «графа 13»
-        ИНАЧЕ «графа 16» = 0
-         */
-        // графа 16
-        row.taxSumToReduction =0
-
-
-        /*
-        Для первого отчётного периода
-        «графа 17» = «графа 19»
-        Для второго отчётного периода
-        «графа 17» = «графа 20»
-        Для третьего отчётного периода
-        «графа 17» = «графа 21»
-        Для налогового периода
-        «графа 17» = 0
-         */
-        // графа 17
-        row.everyMontherPaymentAfterPeriod =0
-
-        /*
-        Для первого отчётного периода
-        «графа 18» = 0
-        Для второго отчётного периода
-        «графа 18» = 0
-        Для третьего отчётного периода
-        «графа 18» = «графа 17»
-        Для налогового периода
-        «графа 18» = 0
-         */
-        // графа 18
-        row.everyMonthForKvartalNextPeriod =0
-
-        /*
-        Для первого отчётного периода
-        «графа 19» = «графа 13»
-        Для второго отчётного периода
-        «графа 19» = 0
-        Для третьего отчётного периода
-        «графа 19» = 0
-        Для налогового периода
-        «графа 19» = 0
-         */
-        // графа 19
-        row.everyMonthForSecondKvartalNextPeriod =0
-
-        /*
-        Для первого отчётного периода
-        «графа 20» = 0
-        Для второго отчётного периода
-        «графа 20» = «графа 13» - «графа 19»
-        Для третьего отчётного периода
-        «графа 20» = 0
-        Для налогового периода
-        «графа 20» = 0
-         */
-        // графа 20
-        row.everyMonthForThirdKvartalNextPeriod =0
-
-        /*
-        Для первого отчётного периода
-        «графа 21» = 0
-        Для второго отчётного периода
-        «графа 21» = 0
-        Для третьего отчётного периода
-        «графа 21» = «графа 13» - «графа 20»
-        Для налогового периода
-        «графа 21» = 0
-         */
-        // графа 21
-        row.everyMonthForFourthKvartalNextPeriod =0
+        // графа 13..21
+        calcColumnFrom13To21(row, sumNal, reportPeriod)
     }
 
     // добавить строку ЦА (скорректрированный) (графа 1..21)
-    def caRow = formData.createDataRow()
-    dataRowsHelper.getAllCached().add(caRow)
-    caRow.setAlias('ca')
-    caRow.regionBank = 'Центральный аппарат (скорректированный)'  // TODO (Aydar Kadyrgulov)
-    setTotalStyle(caRow)
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
-    // TODO доделать
-    // расчет графы 1..21
-    /*dataRowsHelper.getAllCached().eachWithIndex { row, i ->
-        def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
-
-        // графа 1
-        row.number = i + 1
-
-        // графа 2
-        row.regionBank = departmentParam.name
-
-        // графа 3
-        row.regionBankDivision =null
-
-        // графа 4
-        row.kpp = departmentParam.kpp
-
-        // графа 5
-        row.propertyPrice =null
-
-        // графа 6
-        row.workersCount =null
-
-        // графа 7
-        row.subjectTaxCredit =null
-
-        // графа 8
-        row.calcFlag =null
-
-        // графа 9
-        row.obligationPayTax =null
-
-        // графа 10
-        row.baseTaxOf =null
-
-        // графа 11
-        row.baseTaxOfRub =null
-
-        // графа 12
-        row.subjectTaxStavka = null
-
-        // графа 13
-        row.taxSum =null
-
-        // графа 14
-        row.taxSumOutside =null
-
-        // графа 15
-        row.taxSumToPay =null
-
-        // графа 16
-        row.taxSumToReduction =null
-
-        // графа 17
-        row.everyMontherPaymentAfterPeriod =null
-
-        // графа 18
-        row.everyMonthForKvartalNextPeriod =null
-
-        // графа 19
-        row.everyMonthForSecondKvartalNextPeriod =null
-
-        // графа 20
-        row.everyMonthForThirdKvartalNextPeriod =null
-
-        // графа 21
-        row.everyMonthForFourthKvartalNextPeriod = null
-    }*/
-
+    def caTotalRow = formData.createDataRow()
+    data.getAllCached().add(caTotalRow)
+    caTotalRow.setAlias('ca')
+    caTotalRow.regionBank = 'Центральный аппарат (скорректированный)'
+    setTotalStyle(caTotalRow)
 
     // добавить итого (графа 5..7, 10, 11, 13..21)
     def totalRow = formData.createDataRow()
-    dataRowsHelper.getAllCached().add(totalRow)
+    data.getAllCached().add(totalRow)
     totalRow.setAlias('total')
-    totalRow.regionBank = 'Итого' // TODO (Aydar Kadyrgulov)
+    totalRow.regionBank = 'Итого'
     setTotalStyle(totalRow)
     ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
             'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
@@ -399,9 +227,28 @@ void calc() {
             'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
             'everyMonthForThirdKvartalNextPeriod',
             'everyMonthForFourthKvartalNextPeriod'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
+        totalRow.getCell(alias).setValue(getSum(data, alias))
     }
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
+
+    // найти строку ЦА
+    def caRow = findCA(data)
+    if (caRow != null) {
+        // расчеты для строки ЦА (скорректированный) графы 1, 3..21
+
+        // графа 1, 3..10, 12
+        ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
+                'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka'].each { alias ->
+            caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue())
+        }
+
+        // графа 11
+        caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
+
+        // графа 13..21
+        calcColumnFrom13To21(caTotalRow, sumNal, reportPeriod)
+    }
+
+    save(data)
 }
 
 /**
@@ -410,10 +257,9 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    if (!dataRowsHelper.getAllCached().isEmpty()) {
-        def i = 1
+    def data = getData(formData)
 
+    if (!data.getAllCached().isEmpty()) {
         // список проверяемых столбцов (графа 1..21)
         def requiredColumns = ['number', 'regionBank', 'regionBankDivision', 'kpp',
                 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'calcFlag',
@@ -423,8 +269,8 @@ def logicalCheck(def useLog) {
                 'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
                 'everyMonthForFourthKvartalNextPeriod']
 
-        for (def row : dataRowsHelper.getAllCached()) {
-            if (isTotal(row)) {
+        for (def row : data.getAllCached()) {
+            if (isFixedRow(row)) {
                 continue
             }
 
@@ -434,7 +280,6 @@ def logicalCheck(def useLog) {
             }
         }
     }
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return true
 }
 
@@ -442,9 +287,9 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    if (!dataRowsHelper.getAllCached().isEmpty()) {
-        for (def row : dataRowsHelper.getAllCached()) {
+    def data = getData(formData)
+    if (!data.getAllCached().isEmpty()) {
+        for (def row : data.getAllCached()) {
             if (isFixedRow(row)) {
                 continue
             }
@@ -456,7 +301,6 @@ def checkNSI() {
             }
         }
     }
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
     return true
 }
 
@@ -464,26 +308,40 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
-    // TODO
+    def data = getData(formData)
 
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
     // удалить все строки и собрать из источников их строки
-    dataRowsHelper.getAllCached().clear()
+    data.getAllCached().clear()
+
+    /** Идентификатор шаблона источников (Приложение 5). */
+    def id = 372
+    def newRow
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
+        if (it.formTypeId == id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                def sourceData = getData(source)
+                sourceData.getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        dataRowsHelper.getAllCached().add(row)
+                        newRow = formData.createDataRow()
+
+                        // TODO (Ramil Timerbaev) уточнить к каким полям присваивать
+                        newRow.regionBank = null // row.code
+                        newRow.regionBankDivision = null // row.depName
+                        newRow.kpp = null // row.kpp
+                        newRow.propertyPrice = null // row.subName
+                        newRow.workersCount = null // row.averageCost
+                        newRow.subjectTaxCredit = null // row.averageNumber
+
+                        data.getAllCached().add(newRow)
                     }
                 }
             }
         }
     }
+    save(data)
     logger.info('Формирование консолидированной формы прошло успешно.')
-    dataRowsHelper.save(dataRowsHelper.getAllCached());
 }
 
 /**
@@ -495,6 +353,17 @@ void checkCreation() {
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
+    }
+}
+
+/**
+ * Проверка наличия декларации для текущего department
+ */
+void checkDeclaration() {
+    declarationType = 2;    // Тип декларации которую проверяем (Налог на прибыль)
+    declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
+    if (declaration != null && declaration.isAccepted()) {
+        logger.error("Декларация банка находиться в статусе принята")
     }
 }
 
@@ -538,40 +407,42 @@ void setTotalStyle(def row) {
     }
 }
 
-
-
 /**
  * Получить номер строки в таблице.
+ *
+ * @param data данные нф (helper)
+ * @param row строка
  */
-def getIndex(def row) {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    dataRowsHelper.getAllCached().indexOf(row)
+def getIndex(def data, def row) {
+    data.getAllCached().indexOf(row)
 }
 
 /**
- * Получить сумму столбца.
+ * Получить сумму столбца (за исключением значении фиксированных строк).
+ *
+ * @param data данные нф (helper)
+ * @param columnAlias алилас столбца по которому считать сумму
+ * @return
  */
-def getSum(def columnAlias) {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+def getSum(def data, def columnAlias) {
     def from = 0
-    def to = dataRowsHelper.getAllCached().size() - 2 - 1 // добавлен -1 что б исключить скорректированную строку
+    def to = data.getAllCached().size() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
- * Получить сумму столбца.
+ * Получить сумму столбца (сумма значении всех строк).
  */
-def getSumAll(def columnAlias) {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
+def getSumAll(def data, def columnAlias) {
     def from = 0
-    def to = dataRowsHelper.getAllCached().size() - 1
+    def to = data.getAllCached().size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRowsHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -595,12 +466,13 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         if (!useLog) {
             return false
         }
-        def index = getIndex(row) + 1
+        def index = row.number
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
             logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
         } else {
-            index = getIndex(row) + 1
+            def data = getData(formData)
+            index = getIndex(data, row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
         }
         return false
@@ -619,4 +491,362 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(data.getAllCached())
+}
+
+/**
+ * Удалить строку из нф
+ *
+ * @param data данные нф (helper)
+ * @param row строка для удаления
+ */
+void deleteRow(def data, def row) {
+    data.delete(row)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Расчитываем распределяемая налоговая база за отчётный период.
+ *
+ * @author ekuvshinov
+ */
+def getTaxBase() {
+    def departmentId = formData.departmentId
+    def reportPeriodId = formData.reportPeriodId
+
+    // доходы сложные
+    def formDataComplexIncome = formDataService.find(302, FormDataKind.SUMMARY, departmentId, reportPeriodId)
+    def dataComplexIncome = getData(formDataComplexIncome)
+
+    // доходы простые
+    def formDataSimpleIncome = formDataService.find(301, FormDataKind.SUMMARY, departmentId, reportPeriodId)
+    def dataSimpleIncome = getData(formDataSimpleIncome)
+
+    // расходы сложные
+    def formDataComplexConsumption = formDataService.find(303, FormDataKind.SUMMARY, departmentId, reportPeriodId)
+    def dataComplexConsumption = getData(formDataComplexConsumption)
+
+    // расходы простые
+    def formDataSimpleConsumption = formDataService.find(304, FormDataKind.SUMMARY, departmentId, reportPeriodId)
+    def dataSimpleConsumption = getData(formDataSimpleConsumption)
+
+    BigDecimal taxBase = 0
+    // доходы сложные
+    if (dataComplexIncome != null) {
+        for (row in dataComplexIncome.getAllCached()) {
+            // Если ячейка не объеденена то она должна быть в списке
+            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
+
+            BigDecimal incomeTaxSumS = (BigDecimal)(row.getCell('incomeTaxSumS').hasValueOwner() ? row.getCell('incomeTaxSumS').getValueOwner().value : row.getCell('incomeTaxSumS').value)
+            incomeTaxSumS = incomeTaxSumS ?: 0
+            //k1
+            if (khy in ['10633', '10634', '10650', '10670']) {
+                taxBase += incomeTaxSumS
+            }
+            //k5
+            if (khy in ['10855', '10880', '10900']) {
+                taxBase += incomeTaxSumS
+            }
+            //k6
+            if (khy in ['10850']) {
+                taxBase += incomeTaxSumS
+            }
+            //k7
+            if (khy in ['11180', '11190', '11200', '11210', '11220', '11230', '11240', '11250', '11260']) {
+                taxBase += incomeTaxSumS
+            }
+            //k8
+            if (khy in ['11405', '11410', '11415', '13040', '13045', '13050', '13055', '13060', '13065', '13070', '13090', '13100', '13110', '13120', '13250', '13650', '13655', '13660', '13665', '13670', '13675', '13680', '13685', '13690', '13695', '13700', '13705', '13710', '13715', '13720', '13780', '13785', '13790', '13940', '13950', '13960', '13970', '13980', '13990', '14140', '14170', '14180', '14190', '14200', '14210', '14220', '14230', '14240', '14250', '14260', '14270', '14280', '14290' ]) {
+                taxBase += incomeTaxSumS
+            }
+            //k13
+            if (khy in ['10840']) {
+                taxBase += incomeTaxSumS
+            }
+            //k15
+            if (khy in ['10860']) {
+                taxBase += incomeTaxSumS
+            }
+            //k16
+            if (khy in ['10870']) {
+                taxBase += incomeTaxSumS
+            }
+            //k19
+            if (khy in ['10890']) {
+                taxBase += incomeTaxSumS
+            }
+            //k21
+            if (khy in ['13655', '13660', '13665', '13675', '13680', '13685', '13690', '13695', '13705', '13710', '13780', '13785', '13790' ]) {
+                taxBase -= incomeTaxSumS
+            }
+        }
+    }
+    // Доходы простые
+    if (dataSimpleIncome != null) {
+        for (row in dataSimpleIncome.getAllCached()) {
+            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
+
+            // графа 8
+            BigDecimal rnu4Field5Accepted = (BigDecimal)(row.getCell('rnu4Field5Accepted').hasValueOwner() ? row.getCell('rnu4Field5Accepted').getValueOwner().value : row.getCell('rnu4Field5Accepted').value)
+            rnu4Field5Accepted = rnu4Field5Accepted ?: 0
+
+            // графа 5
+            BigDecimal rnu6Field10Sum = (BigDecimal)(row.getCell('rnu6Field10Sum').hasValueOwner() ? row.getCell('rnu6Field10Sum').getValueOwner().value : row.getCell('rnu6Field10Sum').value)
+            rnu6Field10Sum = rnu6Field10Sum ?: 0
+
+            // графа 6
+            BigDecimal rnu6Field12Accepted = (BigDecimal)(row.getCell('rnu6Field12Accepted').hasValueOwner() ? row.getCell('rnu6Field12Accepted').getValueOwner().value : row.getCell('rnu6Field12Accepted').value)
+            rnu6Field12Accepted = rnu6Field12Accepted ?: 0
+            //k2
+            if (khy in ['10001', '10006', '10041', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10370', '10380', '10390', '10450', '10460', '10470', '10480', '10490', '10571', '10580', '10590', '10600', '10610', '10630', '10631', '10632', '10640', '10680', '10690', '10740', '10744', '10748', '10752', '10756', '10760', '10770', '10790', '10800', '11140', '11150', '11160', '11170', '11320', '11325', '11330', '11335', '11340', '11350', '11360', '11370', '11375']) {
+                taxBase += rnu4Field5Accepted
+            }
+            //k3
+            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375' ]) {
+                taxBase += rnu6Field10Sum
+            }
+            //k4
+            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375']) {
+                taxBase -= rnu6Field12Accepted
+            }
+            //k9
+            if (khy in ['11380', '11385', '11390', '11395', '11400', '11420', '11430', '11840', '11850', '11855', '11860', '11870', '11880', '11930', '11970', '12000', '12010', '12030', '12050', '12070', '12090', '12110', '12130', '12150', '12170', '12190', '12210', '12230', '12250', '12270', '12290', '12320', '12340', '12360', '12390', '12400', '12410', '12420', '12430', '12830', '12840', '12850', '12860', '12870', '12880', '12890', '12900', '12910', '12920', '12930', '12940', '12950', '12960', '12970', '12980', '12985', '12990', '13000', '13010', '13020', '13030', '13035', '13080', '13150', '13160', '13170', '13180', '13190', '13230', '13240', '13290', '13300', '13310', '13320', '13330', '13340', '13400', '13410', '13725', '13730', '13920', '13925', '13930', '14000', '14010', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14120', '14130', '14150', '14160' ]) {
+                taxBase += rnu4Field5Accepted
+            }
+            //k10
+            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
+                taxBase += rnu6Field10Sum
+            }
+            //k11
+            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
+                taxBase -= rnu6Field12Accepted
+            }
+            //k12
+            if (khy in ['13130', '13140' ]) {
+                taxBase -= rnu4Field5Accepted
+            }
+            //k22
+            if (khy in ['14000', '14010' ]) {
+                taxBase -= rnu4Field5Accepted
+            }
+        }
+    }
+    // Расходы сложные
+    if (dataComplexConsumption != null) {
+        for (row in dataComplexConsumption.getAllCached()) {
+            String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
+
+            // 9
+            BigDecimal consumptionTaxSumS = (BigDecimal)(row.getCell('consumptionTaxSumS').hasValueOwner() ? row.getCell('consumptionTaxSumS').getValueOwner().value : row.getCell('consumptionTaxSumS').value)
+            consumptionTaxSumS = consumptionTaxSumS ?: 0
+
+            //k14
+            if (khy in ['21780']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k17
+            if (khy in ['21500']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k18
+            if (khy in ['21510']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k20
+            if (khy in ['21390']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k23
+            if (khy in ['20320', '20321', '20470', '20750', '20755', '20760', '20765', '20770', '20775', '20780', '20785', '21210', '21280', '21345', '21355', '21365', '21370', '21375', '21380' ]) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k27
+            if (khy in ['21450', '21740', '21750']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k28
+            if (khy in ['21770']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k29
+            if (khy in ['21662', '21664', '21666', '21668', '21670', '21672', '21674', '21676', '21678', '21680']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k30
+            if (khy in ['21520', '21530']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k31
+            if (khy in ['22500', '22505', '22585', '22590', '22595', '22660', '22664', '22668', '22670', '22690', '22695', '22700', '23120', '23130', '23140', '23240']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k35
+            if (khy in ['22492']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k36
+            if (khy in ['23150']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k37
+            if (khy in ['23160']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k38
+            if (khy in ['23170']) {
+                taxBase += consumptionTaxSumS
+            }
+            //k39
+            if (khy in ['21760']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k40
+            if (khy in ['21460']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k41
+            if (khy in ['21470']) {
+                taxBase -= consumptionTaxSumS
+            }
+            //k42
+            if (khy in ['21385']) {
+                taxBase -= consumptionTaxSumS
+            }
+        }
+    }
+    // Расходы простые
+    if (dataSimpleConsumption != null) {
+        for (row in dataSimpleConsumption.getAllCached()) {
+            String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
+
+            // 8
+            BigDecimal rnu5Field5Accepted = (BigDecimal)(row.getCell('rnu5Field5Accepted').hasValueOwner() ? row.getCell('rnu5Field5Accepted').getValueOwner().value : row.getCell('rnu5Field5Accepted').value)
+            rnu5Field5Accepted = rnu5Field5Accepted ?: 0
+
+            // 5
+            BigDecimal rnu7Field10Sum = (BigDecimal)(row.getCell('rnu7Field10Sum').hasValueOwner() ? row.getCell('rnu7Field10Sum').getValueOwner().value : row.getCell('rnu7Field10Sum').value)
+            rnu7Field10Sum = rnu7Field10Sum ?: 0
+
+            // 6
+            BigDecimal rnu7Field12Accepted = (BigDecimal)(row.getCell('rnu7Field10Sum').hasValueOwner() ? row.getCell('rnu7Field10Sum').getValueOwner().value : row.getCell('rnu7Field10Sum').value)
+            rnu7Field12Accepted = rnu7Field12Accepted ?: 0
+
+            //k24
+            if (khy in ['20291', '20300', '20310', '20330', '20332', '20334', '20336', '20338', '20339', '20340', '20360', '20364', '20368', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20510', '20520', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20820', '20825', '20830', '20840', '20850', '20860', '20870', '20880', '20890', '20920', '20940', '20945', '20950', '20960', '20970', '21020','21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21270', '21290', '21295', '21300', '21305', '21310', '21315', '21320', '21325', '21340', '21350', '21360', '21400', '21405', '21410', '21580', '21590', '21600', '21610', '21620', '21660', '21700', '21710', '21720', '21730', '21790', '21800', '21810']) {
+                taxBase -= rnu5Field5Accepted
+            }
+            //k25
+            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500',  '20530',  '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080',  '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
+                taxBase -= rnu7Field10Sum
+            }
+            //k26
+            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500',  '20530',  '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080',  '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
+                taxBase += rnu7Field12Accepted
+            }
+            //k32
+            if (khy in ['22000', '22010', '22020', '22030', '22040', '22050', '22060', '22070', '22080', '22090', '22100', '22110', '22120', '22130', '22140', '22150', '22160', '22170', '22180', '22190', '22200', '22210', '22220', '22230', '22240', '22250', '22260', '22270', '22280', '22290', '22300', '22310', '22320', '22330', '22340', '22350', '22360', '22370', '22380', '22385', '22390', '22395', '22400', '22405', '22410', '22415', '22420', '22425', '22430', '22435', '22440', '22445', '22450', '22455', '22460', '22465', '22470', '22475', '22480', '22485', '22490', '22496', '22498', '22530', '22534', '22538', '22540', '22544', '22548', '22550', '22560', '22565', '22570', '22575', '22580', '22600', '22610', '22640', '22680', '22710', '22715', '22720', '22750', '22760', '22800', '22810', '22840', '22850', '22860', '22870', '23040', '23050', '23100', '23110', '23200', '23210', '23220', '23230', '23250', '23260', '23270', '23280' ]) {
+                taxBase -= rnu5Field5Accepted
+            }
+            //k33
+            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
+                taxBase -= rnu7Field10Sum
+            }
+            //k34
+            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
+                taxBase += rnu7Field12Accepted
+            }
+        }
+    }
+    // taxBase = распределяемая налоговая база за отчётный период
+    return taxBase
+}
+
+/**
+ * Посчитать значение графы 13..21.
+ *
+ * @param row строка
+ * @param sumNal значение из настроек подраздления "Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
+ * @param reportPeriod отчетный период
+ */
+void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
+    def tmp
+
+    // графа 13
+    row.taxSum = (row.baseTaxOfRub > 0 ? round(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0) : 0)
+
+    // графа 14
+    row.taxSumOutside = round(sumNal * row.baseTaxOf / 100, 0)
+
+    // графа 15
+    row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
+        row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+
+    // графа 16
+    row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
+        (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum: 0)
+
+    // графа 19
+    row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : 0)
+
+    // графа 20
+    row.everyMonthForThirdKvartalNextPeriod =
+        (reportPeriod.order == 2 ? row.taxSum - row.everyMonthForSecondKvartalNextPeriod : 0)
+
+    // графа 21
+    row.everyMonthForFourthKvartalNextPeriod =
+        (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+
+    // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
+    // графа 17
+    switch (reportPeriod.order) {
+        case 1:
+            tmp = row.everyMonthForSecondKvartalNextPeriod
+            break
+        case 2:
+            tmp = row.everyMonthForThirdKvartalNextPeriod
+            break
+        case 3:
+            tmp = row.everyMonthForFourthKvartalNextPeriod
+            break
+        default:
+            // налоговый период
+            tmp = 0
+    }
+    row.everyMontherPaymentAfterPeriod = tmp
+
+    // графа 18
+    row.everyMonthForKvartalNextPeriod = (reportPeriod.order == 3 ? row.everyMontherPaymentAfterPeriod : 0)
+}
+
+/**
+ * Найти строку ЦА
+ */
+def findCA(def data) {
+    if (data != null) {
+        for (def row : data.getAllCached()) {
+            if (row.regionBank == 'Центральный аппарат') {
+                return row
+            }
+        }
+    }
+    return null
 }

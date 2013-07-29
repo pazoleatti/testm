@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
@@ -30,7 +31,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
@@ -235,7 +235,7 @@ public class FormDataPresenter extends
 			formData = result.getFormData();
 			LogAddEvent.fire(this, result.getLogEntries());
 		}
-		getView().updateData();
+		/*getView().updateData();*/
 		// TODO: Тут было получение строк из FormData
 		// Сделать пейджинг: Задача: http://jira.aplana.com/browse/SBRFACCTAX-2977
 //		getView().setRowsData(0, 0, new ArrayList<DataRow<Cell>>());

@@ -299,7 +299,7 @@ comment on column ref_book.name is 'Название справочника';
 create table ref_book_attribute (
   id number(9) not null,
   ref_book_id number(9) not null,
-  name varchar2(200) not null,
+  name varchar2(510) not null,
   alias varchar2(30) not null,
   type number(1) not null,
   ord number(9) not null,
@@ -353,6 +353,9 @@ alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreig
 
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
+create sequence seq_ref_book_record start with 100000;
+create sequence seq_ref_book_record_row_id start with 100000;
+
 comment on table ref_book_record is 'Запись справочника';
 comment on column ref_book_record.id is 'Уникальный идентификатор';
 comment on column ref_book_record.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
@@ -373,7 +376,6 @@ alter table ref_book_value add constraint ref_book_value_pk primary key (record_
 
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id);
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
-alter table ref_book_value add constraint ref_book_value_fk_reference foreign key (reference_value) references ref_book_record (id);
 
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -405,11 +407,12 @@ create sequence seq_form_column start with 10000;
 
 alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
-alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D'));
+alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D', 'R'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
 alter table form_column add constraint form_column_chk_max_length
-check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or (type ='D' and max_length is null));
+check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 1000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or ((type ='D' or type ='R') and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
+alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null and precision >=0 and precision < 9) or (type <> 'R' and attribute_id is null));
 
 alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
@@ -422,7 +425,7 @@ comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';
 comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
-comment on column form_column.type is 'Тип столбца (S- строка, N – число, D – дата)';
+comment on column form_column.type is 'Тип столбца (S - строка, N – число, D – дата, R - ссылка)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';

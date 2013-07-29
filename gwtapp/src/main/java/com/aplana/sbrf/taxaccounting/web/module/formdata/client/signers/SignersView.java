@@ -202,16 +202,34 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	}
 
 	private void onSave() {
-		if (performer == null && !name.getText().isEmpty()) {
-			performer = new FormDataPerformer();
-		}
-		if (performer != null && !name.getText().isEmpty()) {
-			performer.setName(name.getText());
-			performer.setPhone(phone.getText());
-		} else {
-			Window.alert("Необходимо ввести ФИО исполнителя");
-			return;
-		}
+        if(performer == null){
+            if(!name.getText().isEmpty()){
+                performer = new FormDataPerformer();
+            }else{
+                Window.alert("Необходимо ввести ФИО исполнителя");
+                return;
+            }
+            if(!phone.getText().isEmpty()){
+                performer.setPhone(phone.getText());
+            } else{
+                Window.alert("Необходимо ввести телефон исполнителя");
+                return;
+            }
+
+        }else{
+            if(name.getText().isEmpty() && performer.getName().isEmpty()){
+                Window.alert("Необходимо ввести ФИО исполнителя");
+                return;
+            }else if(!name.getText().isEmpty()){
+                performer.setName(name.getText());
+            }
+            if(phone.getText().isEmpty() && performer.getPhone().isEmpty()){
+                Window.alert("Необходимо ввести телефон исполнителя");
+                return;
+            }else if(!phone.getText().isEmpty()){
+                performer.setPhone(phone.getText());
+            }
+        }
 
 		if (validateSigners()) {
 			if (signers == null) {
@@ -331,7 +349,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 					return false;
 				}
 			}
-		} else if (clonedSigners.size() != 0) {
+		} else if ((clonedSigners != null ? clonedSigners.size() : 0) != 0) {
 			return false;
 		}
 		return true;

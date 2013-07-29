@@ -81,7 +81,7 @@ public class RefBook implements Serializable {
 	 * @param alias
 	 * @return
 	 */
-	public RefBookAttribute getAttributeByAlias(String alias) {
+	public RefBookAttribute getAttribute(String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Attribute alias must be defined");
 		}
@@ -91,7 +91,21 @@ public class RefBook implements Serializable {
 				return attribute;
 			}
 		}
-		return null;
+		throw new IllegalArgumentException(String.format("Attribute \"%s\" not found in refbook (id=%d, \"%s\"))", alias, id, name));
+	}
+
+	/**
+	 * Возвращает атрибут по его коду
+	 * @param attributeId
+	 * @return
+	 */
+	public RefBookAttribute getAttribute(Long attributeId) {
+		for(RefBookAttribute attribute : attributes) {
+			if (attributeId.equals(attribute.getId())) {
+				return attribute;
+			}
+		}
+		throw new IllegalArgumentException(String.format("Attribute id=%d not found in refbook (id=%d, \"%s\"))", attributeId, id, name));
 	}
 
 	/**

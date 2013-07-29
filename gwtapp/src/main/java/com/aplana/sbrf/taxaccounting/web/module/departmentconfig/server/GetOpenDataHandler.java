@@ -80,7 +80,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
             avSet.add(currUser.getDepartmentId());
 
             // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList(departmentService.getRequiredForTreeDepartments(avSet).values()));
+            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
 
         } else {
             // Все подразделения
