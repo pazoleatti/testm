@@ -23,7 +23,6 @@
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
   		<property name="basePackage" value="com.aplana.sbrf.taxaccounting.dao.mapper" />
 	</bean>
-	
 
 	 
 	<!-- JDBC-based DAOs -->
