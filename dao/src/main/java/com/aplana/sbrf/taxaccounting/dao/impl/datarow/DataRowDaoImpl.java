@@ -316,6 +316,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
+
+        if(!isSupportOver()){
+            sql.first = sql.getFirst().replaceFirst("over \\(order by R.ORD\\)", "over ()");
+        }
+
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082

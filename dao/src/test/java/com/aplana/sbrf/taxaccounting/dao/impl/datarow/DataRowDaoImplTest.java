@@ -105,7 +105,6 @@ public class DataRowDaoImplTest {
 			Object v = dataRow.get("stringColumn");
 			;
 			result[i] = Integer.valueOf(v != null ? String.valueOf(v) : "0");
-            System.out.println("Id: " + dataRow.getId() + " index: " + dataRow.getIndex());
 			i++;
 		}
 		return result;
