@@ -1,15 +1,81 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
-	int reportPeriodId;
+import java.util.Date;
 
-	public int getReportPeriodId() {
-		return reportPeriodId;
+public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
+	TaxType taxType;
+	int year;
+	boolean balancePeriod;
+	boolean active;
+	long departmentId;
+	int months;
+	int dictionaryTaxPeriodId;
+	Date endDate;
+
+	public TaxType getTaxType() {
+		return taxType;
 	}
 
-	public void setReportPeriodId(int reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public boolean isBalancePeriod() {
+		return balancePeriod;
+	}
+
+	public void setBalancePeriod(boolean balancePeriod) {
+		this.balancePeriod = balancePeriod;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public long getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(long departmentId) {
+		this.departmentId = departmentId;
+	}
+
+	public int getMonths() {
+		return months;
+	}
+
+	public void setMonths(int months) {
+		this.months = months;
+	}
+
+	public int getDictionaryTaxPeriodId() {
+		return dictionaryTaxPeriodId;
+	}
+
+	public void setDictionaryTaxPeriodId(int dictionaryTaxPeriodId) {
+		this.dictionaryTaxPeriodId = dictionaryTaxPeriodId;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 }

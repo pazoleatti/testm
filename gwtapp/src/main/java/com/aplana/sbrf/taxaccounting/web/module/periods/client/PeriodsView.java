@@ -18,6 +18,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -95,15 +96,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public void setTableData(List<TableRow> data) {
 
 		periodsTable.setRowData(data);
-//		for (int i=0; i<data.size(); i++) {
-//			if (data.get(i).isSubHeader()) {
-//				for(int j=0; j<periodsTable.getRowElement(i).getCells().getLength(); j++) {
-//					periodsTable.getRowElement(i).getCells().getItem(j).setPropertyString("background-color","#888"); //TODO
-//				}
-//
-//			}
-//		}
-//		Window.alert("Форма еще не готова!");
 	}
 
 	@Override
@@ -112,12 +104,16 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments) {
+	public void setFilterData(List<Department> departments, Map<String, Integer> selectedDepartments, int yearFrom, int yearTo) {
 		Set<Integer> available = new HashSet<Integer>();
 		for (Department dep : departments) {
 			available.add(dep.getId());
 		}
 		departmentPicker.setTreeValues(departments, available);
+		departmentPicker.setSelectedItems(selectedDepartments);
+		fromBox.setValue(yearFrom);
+		toBox.setValue(yearTo);
+
 	}
 
 	@UiHandler("find")
@@ -126,7 +122,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			getUiHandlers().applyFilter(
 					Integer.valueOf(fromBox.getValue()),
 					Integer.valueOf(toBox.getValue()),
-					departmentPicker.getSelectedItems().values().iterator().next()
+					departmentPicker.getSelectedItems().values().isEmpty() ?
+							0 : departmentPicker.getSelectedItems().values().iterator().next()
 			);
 		}
 	}
@@ -144,10 +141,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@UiHandler("openPeriod")
 	void onOpenPeriodClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-//			TableRow selectedRow = selectionModel.getSelectedObject();
-//			if (!selectedRow.isSubHeader()) {
-				getUiHandlers().openPeriod();
-//			}
+			getUiHandlers().openPeriod();
 		}
 	}
 }

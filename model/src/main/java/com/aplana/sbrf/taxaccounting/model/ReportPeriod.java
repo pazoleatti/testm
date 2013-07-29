@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class ReportPeriod implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private int id;
+	private Integer id;
 	private String name;
 	private boolean active;
 	private int months;
@@ -20,17 +20,18 @@ public class ReportPeriod implements Serializable {
 	private int taxPeriodId;
 	private boolean balancePeriod;
 	private long departmentId;
+	private int dictTaxPeriodId;
 
 	/**
 	 * Получить идентификатор отчётного периода
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	/**
 	 * Задать идентфикатор отчётного периода
 	 */
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	/**
@@ -124,5 +125,13 @@ public class ReportPeriod implements Serializable {
 
 	public void setDepartmentId(long departmentId) {
 		this.departmentId = departmentId;
+	}
+
+	public int getDictTaxPeriodId() {
+		return dictTaxPeriodId;
+	}
+
+	public void setDictTaxPeriodId(int dictTaxPeriodId) {
+		this.dictTaxPeriodId = dictTaxPeriodId;
 	}
 }

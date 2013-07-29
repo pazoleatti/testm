@@ -33,13 +33,18 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	@Override
 	public GetPeriodDataResult execute(GetPeriodDataAction action, ExecutionContext executionContext) throws ActionException {
 		GetPeriodDataResult res = new GetPeriodDataResult();
-		GregorianCalendar from = new GregorianCalendar(action.getFrom(), 1, 1);
-		GregorianCalendar to = new GregorianCalendar(action.getTo(), 1, 1);
+		GregorianCalendar from = new GregorianCalendar(action.getFrom(), Calendar.JANUARY, 1);
+		GregorianCalendar to = new GregorianCalendar(action.getTo(), Calendar.DECEMBER, 31);
 		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndDate(action.getTaxType(), from.getTime(), to.getTime());
 		Map<TaxPeriod, List<ReportPeriod>> periods = new LinkedHashMap<TaxPeriod, List<ReportPeriod>>();
 		for (TaxPeriod taxPeriod : taxPeriods) {
-			periods.put(taxPeriod,
-					reportPeriodService.listByTaxPeriodAndDepartment(taxPeriod.getId(), action.getDepartmentId()));
+			if (action.getDepartmentId() == 0) {
+				periods.put(taxPeriod,
+						reportPeriodService.listByTaxPeriod(taxPeriod.getId()));
+			} else {
+				periods.put(taxPeriod,
+						reportPeriodService.listByTaxPeriodAndDepartment(taxPeriod.getId(), action.getDepartmentId()));
+			}
 		}
 		List<TableRow> rows = new ArrayList<TableRow>();
 		for(TaxPeriod taxPeriod : periods.keySet()) {

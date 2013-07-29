@@ -94,4 +94,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 		return departmentDao.listDepartments();
 	}
 
+	@Override
+	public Department getDepartmentBySbrfCode(String sbrfCode) {
+		return departmentDao.getDepartmentBySbrfCode(sbrfCode);
+	}
+
 }

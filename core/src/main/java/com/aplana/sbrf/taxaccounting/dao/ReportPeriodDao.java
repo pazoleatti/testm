@@ -50,4 +50,11 @@ public interface ReportPeriodDao {
 	 * @param active
 	 */
 	void changeActive(int reportPeriodId, boolean active);
+
+	/**
+	 *
+	 * @param reportPeriod отчётный период
+	 * @return идентификатор нового отчетного периода
+	 */
+	int add(ReportPeriod reportPeriod);
 }

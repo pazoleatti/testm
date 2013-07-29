@@ -38,7 +38,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
 	private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
-	private static final int FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE = 30;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
@@ -186,18 +185,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 				logger.error("значение для имени группы столбца \"" + column.getGroupName() +
 						"\" слишком велико (фактическое: " + column.getGroupName().getBytes().length +
 						", максимальное: " + FORM_COLUMN_GROUP_NAME_MAX_VALUE + ")");
-			}
-			if (column instanceof StringColumn && ((StringColumn)column).getDictionaryCode() != null &&
-					((StringColumn)column).getDictionaryCode().getBytes().length > FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE) {
-				logger.error("значение для кода справочника \"" + ((StringColumn)column).getDictionaryCode() +
-						"\" слишком велико (фактическое: " + ((StringColumn)column).getDictionaryCode().getBytes().length +
-						", максимальное: " + FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE + ")");
-			}
-			if (column instanceof NumericColumn && ((NumericColumn)column).getDictionaryCode() != null &&
-					((NumericColumn)column).getDictionaryCode().getBytes().length > FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE) {
-				logger.error("значение для кода справочника \"" + ((NumericColumn)column).getDictionaryCode() +
-						"\" солишком велико (фактическое: " + ((NumericColumn)column).getDictionaryCode().getBytes().length +
-						", максимальное: " + FORM_COLUMN_DICTIONARY_CODE_MAX_VALUE + ")");
 			}
 		}
 	}

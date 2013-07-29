@@ -58,7 +58,7 @@ switch (formDataEvent) {
         break
 // проверить
     case FormDataEvent.CHECK :
-        checkAndCalc()
+        checkRequiredFields()
         break
 // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
@@ -165,6 +165,7 @@ def calc35to40() {
         }
 
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**
@@ -252,6 +253,7 @@ def calc4to5() {
         }
 
     }
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**
@@ -373,6 +375,7 @@ def calcTotal() {
 
     final secondTotalRowAlias = getSecondTotalRowAlias()
     dataRowsHelper.getDataRow(dataRowsHelper.getAllCached(),secondTotalRowAlias)[colName] = calcTotal(colName, getRowsAliasesForSecondControlSum())
+    dataRowsHelper.save(dataRowsHelper.getAllCached())
 }
 
 /**

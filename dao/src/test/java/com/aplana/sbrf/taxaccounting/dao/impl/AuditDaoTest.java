@@ -42,7 +42,7 @@ public class AuditDaoTest {
 		assertEquals(1, logSystem.getUser().getId());
 		assertEquals("operator", logSystem.getRoles());
 		assertEquals(1, logSystem.getDepartment().getId());
-		assertEquals(1, logSystem.getReportPeriod().getId());
+		assertEquals(1, logSystem.getReportPeriod().getId().intValue());
 		assertEquals(1, logSystem.getDeclarationType().getId());
 		assertEquals(1, logSystem.getFormType().getId());
 		assertEquals(1, logSystem.getFormKind().getId());
@@ -87,7 +87,7 @@ public class AuditDaoTest {
 		assertEquals(1, logSystemSearchResultItem.getUser().getId());
 		assertEquals("operator", logSystemSearchResultItem.getRoles());
 		assertEquals(1, logSystemSearchResultItem.getDepartment().getId());
-		assertEquals(1, logSystemSearchResultItem.getReportPeriod().getId());
+		assertEquals(1, logSystemSearchResultItem.getReportPeriod().getId().intValue());
 		assertEquals(1, logSystemSearchResultItem.getDeclarationType().getId());
 		assertEquals(1, logSystemSearchResultItem.getFormType().getId());
 		assertEquals(2, logSystemSearchResultItem.getFormKind().getId());

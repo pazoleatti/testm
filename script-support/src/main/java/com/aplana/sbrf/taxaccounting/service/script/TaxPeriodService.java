@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -27,4 +28,15 @@ public interface TaxPeriodService {
 	 * @return список налоговых периодов по данному виду налога, отсортированный по убыванию даты начала периодоа
 	 */
 	List<TaxPeriod> listByTaxType(TaxType taxType);
+
+	/**
+	 *
+	 */
+	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
+
+	/**
+	 *
+	 * @param taxPeriod
+	 */
+	int add(TaxPeriod taxPeriod);
 }

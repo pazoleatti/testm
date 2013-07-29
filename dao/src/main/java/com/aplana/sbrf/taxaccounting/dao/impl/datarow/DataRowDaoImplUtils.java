@@ -2,10 +2,13 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ListIterator;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 
 public class DataRowDaoImplUtils {
@@ -50,6 +53,8 @@ public class DataRowDaoImplUtils {
 			return objects[0];
 		} else if (c instanceof DateColumn) {
 			return objects[2];
+		} else if (c instanceof RefBookColumn) {
+			return objects[0];
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -65,6 +70,18 @@ public class DataRowDaoImplUtils {
 
 	static long calcOrdStep(Long ordBegin, Long ordEnd, int number) {
 		return (ordEnd - ordBegin) / (number + 1);
+	}
+	
+	static boolean hasDublicats(List<?> c){
+			for (ListIterator<?> li1 = c.listIterator(); li1.hasNext();) {
+				Object object = li1.next();
+				for (ListIterator<?> li2 = c.listIterator(li1.nextIndex()); li2.hasNext();) {
+					if (object == li2.next()){
+						return true;
+					}
+				}
+			}
+			return false;
 	}
 
 	static interface CellValueExtractor {

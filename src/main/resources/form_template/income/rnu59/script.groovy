@@ -439,9 +439,9 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                getData(source).getAllCached().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         data.insert(row, data.getAllCached().size);
                     }

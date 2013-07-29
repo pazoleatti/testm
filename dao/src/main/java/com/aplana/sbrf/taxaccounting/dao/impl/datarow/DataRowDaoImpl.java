@@ -346,6 +346,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (dataRows.isEmpty()) {
 			return;
 		}
+		
+		if (DataRowDaoImplUtils.hasDublicats(dataRows)){
+			throw new IllegalArgumentException("Дубликаты строк не допустимы в списке. Дубликаты - ссылки на один и тот же объект DataRow");
+		}
 
 		// SBRFACCTAX-2201, SBRFACCTAX-2082
 		FormDataUtils.cleanValueOners(dataRows);
@@ -405,7 +409,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 
 		batchInsertCells(dataRows);
-
+		
 	}
 
 	/**

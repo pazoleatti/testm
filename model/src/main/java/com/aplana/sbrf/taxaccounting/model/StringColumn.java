@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 
-import com.aplana.sbrf.taxaccounting.model.dictionary.DictionaryItem;
-
 /**
  * Реализация {@link Column}, предназначенная для представления столбцов со строковыми данными
  * 
@@ -18,35 +16,8 @@ public class StringColumn extends Column  implements Serializable {
 	 * (Ограничение накладывается параметрами таблицы STRING_VALUE в БД)
 	 */
 	public static final int MAX_LENGTH = 1000;
-	private String dictionaryCode;
+
 	private int maxLength = MAX_LENGTH;
-
-	/**
-	 * Получить код справочника, связанного с данным столбцов.
-	 * 
-	 * Обращаю внимание, что поскольку значение любой ячейки в налоговой может быть изменено из скриптов,
-	 * то использование справочника не гарантирует того, что в столбце могут оказаться только значения, перечисленные в справочнике,
-	 * автоматических проверок такой целосостности не производится.
-	 * 
-	 * В качестве значения, записываемого в столбец используется {@link DictionaryItem#getValue() значение} элемента справочника, 
-	 * а не его {@link DictionaryItem#getName() описание}. 
-	 * 
-	 * @see {@link DictionaryManager}
-	 * 
-	 * @return код справочника, или null, если с данным столбцов не связан справочник
-	 */
-	public String getDictionaryCode() {
-		return dictionaryCode;
-	}
-
-	/**
-	 * Задать справочник, связанный с данным столбцом
-	 * 
-	 * @param dictionaryCode код справочника
-	 */
-	public void setDictionaryCode(String dictionaryCode) {
-		this.dictionaryCode = dictionaryCode;
-	}
 
 	/**
 	 * Получить максимально допустимую длину строки в этом столбце

@@ -57,4 +57,25 @@ public interface RefBookDataProvider {
 	 * @return
 	 */
 	List<Date> getVersions(Date startDate, Date endDate);
+
+	/**
+	 * Создает новые записи в справочнике
+	 * @param version дата актуальности новых записей
+	 * @param records список новых записей
+	 */
+	void insertRecords(Date version, List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Обновляет значения в справочнике
+	 * @param version задает дату актуальности
+	 * @param records список обновленных записей
+	 */
+	void updateRecords(Date version, List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Удаляет записи из справочника
+	 * @param version задает дату удаления данных
+	 * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+	 */
+	void deleteRecords(Date version, List<Long> recordIds);
 }

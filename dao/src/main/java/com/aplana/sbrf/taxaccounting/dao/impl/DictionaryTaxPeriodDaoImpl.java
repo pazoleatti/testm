@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 
@@ -32,5 +33,15 @@ public class DictionaryTaxPeriodDaoImpl  extends AbstractDao implements Dictiona
 				new DictionaryTaxPeriodMapper()
 		);
 
+	}
+
+	@Override
+	public DictionaryTaxPeriod get(int code) {
+		return getJdbcTemplate().queryForObject(
+				"select * from dict_tax_period where code = ?",
+				new Object[]{code},
+				new int[]{Types.NUMERIC},
+				new DictionaryTaxPeriodMapper()
+		);
 	}
 }

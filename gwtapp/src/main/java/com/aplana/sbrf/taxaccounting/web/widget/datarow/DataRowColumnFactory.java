@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DateColumn;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -22,31 +23,27 @@ public class DataRowColumnFactory {
 		} else {
 			columnContext.setMode(ColumnContext.Mode.DEFAULT_MODE);
 		}
-		Column<DataRow<Cell>, ?> tableCol = null;
+		Column<DataRow<Cell>, ?> uiColumn = null;
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
 			columnContext.setColumn(stringColumn);
-			if (stringColumn.getDictionaryCode() != null) {
-				tableCol = new EditStringDictionaryColumn(stringColumn, columnContext);
-			} else {
-				tableCol = new EditTextColumn((StringColumn)col, columnContext);
-			}
+			uiColumn = new EditTextColumn((StringColumn)col, columnContext);
 		} else if (col instanceof NumericColumn) {
 			NumericColumn numericColumn = (NumericColumn) col;
 			columnContext.setColumn(numericColumn);
-			String dictionaryCode = numericColumn.getDictionaryCode();
-			if(dictionaryCode !=null && !dictionaryCode.trim().isEmpty()) {
-				tableCol = new EditNumericDictionaryColumn(numericColumn, columnContext);
-			}else{
-				tableCol = new EditNumericColumn(numericColumn, columnContext);
-			}
+			uiColumn = new EditNumericColumn(numericColumn, columnContext);
 		} else if (col instanceof DateColumn) {
 			DateColumn dateColumn = (DateColumn) col;
 			columnContext.setColumn(dateColumn);
-	        tableCol = new EditDateColumn(dateColumn, columnContext);
-
+	        uiColumn = new EditDateColumn(dateColumn, columnContext);
+		} else if (col instanceof RefBookColumn){
+			RefBookColumn refBookColumn = (RefBookColumn) col;
+			columnContext.setColumn(refBookColumn);
+			uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
+		} else {
+			throw new IllegalArgumentException();
 		}
-		return tableCol;
+		return uiColumn;
 	}
 
 	public Boolean isReadOnly() {

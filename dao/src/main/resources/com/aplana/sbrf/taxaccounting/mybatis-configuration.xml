@@ -3,11 +3,8 @@
 <configuration>
 	<typeHandlers>
 		<typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.DepartmentTypeHandler"/>
-        <typeHandler handler="com.aplana.sbrf.taxaccounting.dao.mapper.typehandler.TaxTypeHandler"/>
 	</typeHandlers>
 	<mappers>
 		<mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/DepartmentMapper.xml"/>
-        <mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/ReportPeriodMapper.xml"/>
-		<mapper resource="com/aplana/sbrf/taxaccounting/dao/mapper/TAUserMapper.xml"/>
 	</mappers>	
 </configuration>
