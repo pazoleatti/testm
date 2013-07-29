@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.home.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomePagePresenter.MyView;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -15,9 +16,13 @@ public class HomePageView extends ViewImpl implements MyView {
 
 	@UiField
 	FlowPanel test;
+	
+	@UiField(provided=true) 
+	RefBookPickerWidget picker;
 
 	@Inject
 	public HomePageView(final Binder binder) {
+		picker = new RefBookPickerWidget(2l);
 		initWidget(binder.createAndBindUi(this));
 	}
 

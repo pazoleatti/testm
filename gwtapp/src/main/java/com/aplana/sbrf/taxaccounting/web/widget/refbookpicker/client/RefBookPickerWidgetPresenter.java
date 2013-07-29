@@ -59,6 +59,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		String getSearchPattern();
 		void updateRowData(int start, List<RefBookItem> values, int size);
 		void goToFirstPage();
+		void fireChangeEvent(Long value);
 	}
 
 
@@ -106,9 +107,9 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	@Override
 	public void setValue(Long value, boolean fireEvents) {
 		setValue(value);
-		//if (fireEvents){
-		//	getView().fireEvent(new );
-		//}
+		if (fireEvents){
+			getView().fireChangeEvent(value);
+		}
 	}
 
 	@Override

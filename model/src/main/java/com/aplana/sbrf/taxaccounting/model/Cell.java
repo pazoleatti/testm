@@ -69,6 +69,7 @@ public class Cell extends AbstractCell {
 		if (getColumn() instanceof RefBookColumn){
 			if (value instanceof Long){
 				numericValue = BigDecimal.valueOf((Long)value);
+				return numericValue.longValueExact();
 			} else {
 				throw new IllegalArgumentException("Несовместимые типы колонки и значения. Ссылка на справочник должна быть типа Long");
 			}
