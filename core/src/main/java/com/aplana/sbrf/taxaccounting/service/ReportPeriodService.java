@@ -21,4 +21,6 @@ public interface ReportPeriodService {
 	void closePeriod(int reportPeriodId);
 
 	void openPeriod(int reportPeriodId);
+
+	int add(ReportPeriod reportPeriod);
 }

@@ -121,7 +121,7 @@ public class ReportPeriodServiceTest {
 	 */
 	@Test
 	public void getPrevReportPeriodOutSide(){
-		assertEquals(service.getPrevReportPeriod(5).getId(), 1);
+		assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 1);
 	}
 
 

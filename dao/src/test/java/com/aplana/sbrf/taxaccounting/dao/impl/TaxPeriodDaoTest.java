@@ -39,6 +39,19 @@ public class TaxPeriodDaoTest {
 	}
 
 	@Test
+	public void saveTest() {
+		TaxPeriod taxPeriod = new TaxPeriod();
+		taxPeriod.setTaxType(TaxType.INCOME);
+		Date date = getDate(2013, 11, 12);
+		taxPeriod.setStartDate(date);
+		taxPeriod.setEndDate(date);
+		int id = taxPeriodDao.add(taxPeriod);
+		assertEquals(TaxType.INCOME, taxPeriodDao.get(id).getTaxType());
+		assertEquals(date, taxPeriodDao.get(id).getStartDate());
+		assertEquals(date, taxPeriodDao.get(id).getEndDate());
+	}
+
+	@Test
 	public void listAllPeriodsByTaxTypeSuccessfulTest() {
 		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxType(TaxType.TRANSPORT);
 		assertEquals(2, taxPeriodList.size());
@@ -51,6 +64,12 @@ public class TaxPeriodDaoTest {
 
 		taxPeriodList = taxPeriodDao.listByTaxType(TaxType.INCOME);
 		assertEquals(0, taxPeriodList.size());
+	}
+
+	@Test
+	public void getLastTest() {
+		TaxPeriod lastTaxPeriod = taxPeriodDao.get(1);
+		assertEquals(lastTaxPeriod.getStartDate(), taxPeriodDao.getLast(TaxType.TRANSPORT).getStartDate());
 	}
 
 	private Date getDate(int year, int month, int day) {

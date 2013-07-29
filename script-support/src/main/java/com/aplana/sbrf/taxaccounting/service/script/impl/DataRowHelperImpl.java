@@ -80,7 +80,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 		@SuppressWarnings("unchecked")
 		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
 		dataRowDao.insertRows(fd, index, asList);
-		
+
 	}
 
 	@Override
@@ -104,12 +104,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void delete(DataRow<Cell> dataRow) {
 		@SuppressWarnings("unchecked")
 		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
-		dataRowDao.removeRows(fd, asList);
-	}
+        dataRowDao.removeRows(fd, asList);
+        getAllCached().remove(dataRow);
+    }
 
 	@Override
 	public void delete(List<DataRow<Cell>> dataRows) {
 		dataRowDao.removeRows(fd, dataRows);
+        getAllCached().remove(dataRows);
 	}
 
 	@Override

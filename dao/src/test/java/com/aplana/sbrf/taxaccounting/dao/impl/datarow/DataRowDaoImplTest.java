@@ -806,7 +806,7 @@ public class DataRowDaoImplTest {
 	}
 	
 	@Test
-	public void perfomance() {
+	public void performance() {
 
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();

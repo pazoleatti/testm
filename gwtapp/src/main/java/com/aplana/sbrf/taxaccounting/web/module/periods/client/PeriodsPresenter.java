@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
@@ -20,7 +19,9 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers {
@@ -38,7 +39,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
 		void setDepartmentPickerEnable(boolean enable);
-		void setFilterData(List<Department> departments);
+		void setFilterData(List<Department> departments, Map<String, Integer> selectedDepartments, int yearFrom, int yearTo);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -81,12 +82,13 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Window.alert("Период уже закрыт.");
 			return;
 		}
-		ClosePeriodAction requestData = new ClosePeriodAction();
+		ChangeActivePeriodAction requestData = new ChangeActivePeriodAction();
 		requestData.setReportPeriodId(reportPeriod.getId());
+		requestData.setActive(false);
 		dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
-				.defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+				.defaultCallback(new AbstractCallback<ChangeActivePeriodResult>() {
 					@Override
-					public void onSuccess(ClosePeriodResult result) {
+					public void onSuccess(ChangeActivePeriodResult result) {
 					}
 				}, PeriodsPresenter.this)
 		);
@@ -95,38 +97,15 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void openPeriod() {
-//		if (reportPeriod.isOpen()) {
-//			Window.alert("Период уже открыт.");
-//			return;
-//		}
 		addToPopupSlot(openDialogPresenter);
-		openDialogPresenter.setDepartments(departments);
-		openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
-
-//		OpenPeriodAction requestData = new OpenPeriodAction();
-//		requestData.setReportPeriodId(reportPeriod.getId());
-//		dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
-//				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {
-//					@Override
-//					public void onSuccess(OpenPeriodResult result) {
-//						System.out.println("Open: " + result);
-//						getProxy().manualReveal(PeriodsPresenter.this);
-//					}
-//				}, PeriodsPresenter.this)
-//		);
 	}
 
-	/**
-	 * Здесь происходит подготовка декларации.
-	 *
-	 * @param request
-	 *            запрос
-	 */
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
 		taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		getView().setTitle(taxType.getName() + " / Ведение периодов");
+		this.openDialogPresenter.setTaxType(taxType);
 		if ((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) {
 			getView().setDepartmentPickerEnable(false);
 		} else {
@@ -134,7 +113,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		}
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));
-//		applyFilter(1900, 2100);
+
 		PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
 		getFilterData.setTaxType(taxType);
 		dispatcher.execute(getFilterData, CallbackUtils
@@ -143,7 +122,14 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					public void onSuccess(PeriodsGetFilterDataResult result) {
 						departments = result.getDepartments();
 						dictionaryTaxPeriods = result.getDictionaryTaxPeriods();
-						getView().setFilterData(departments);
+						Map<String, Integer> selectedDepartments = new HashMap<String, Integer>();
+						selectedDepartments.put(result.getSelectedDepartment().getName(),
+								result.getSelectedDepartment().getId());
+						getView().setFilterData(departments, selectedDepartments, result.getYearFrom(), result.getYearTo());
+						openDialogPresenter.setDepartments(departments, selectedDepartments);
+						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);
+						openDialogPresenter.setYear(result.getCurrentYear());
+						applyFilter(result.getYearFrom(), result.getYearTo(), result.getSelectedDepartment().getId());
 					}
 				}, PeriodsPresenter.this)
 		);
