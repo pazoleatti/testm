@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -118,6 +119,10 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@UiHandler("find")
 	void onFindClicked(ClickEvent event) {
+		if ( (fromBox.getValue() > toBox.getValue())) {
+			Window.alert("Интервал поиска периодов указан неверно!");
+			return;
+		}
 		if (getUiHandlers() != null) {
 			getUiHandlers().applyFilter(
 					Integer.valueOf(fromBox.getValue()),

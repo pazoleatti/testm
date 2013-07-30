@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service.script;
+package com.aplana.sbrf.taxaccounting.service.shared;
 
 import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED;
 import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED;
