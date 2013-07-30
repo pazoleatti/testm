@@ -95,7 +95,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@Override
 	public void setTableData(List<TableRow> data) {
-
 		periodsTable.setRowData(data);
 	}
 

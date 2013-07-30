@@ -67,7 +67,10 @@ public class Cell extends AbstractCell {
 		
 		// Проверяем на предмет столбца - справочник
 		if (getColumn() instanceof RefBookColumn) {
-			if((value != null) && (value instanceof Long)){
+			if((value != null) && (value instanceof BigDecimal) && ((BigDecimal)value).scale() == 0){
+				numericValue = (BigDecimal)value;
+				return numericValue.longValueExact();
+			} else if((value != null) && (value instanceof Long)){
 				numericValue = BigDecimal.valueOf((Long)value);
 				return numericValue.longValueExact();
 			} else if (value == null) {
@@ -76,7 +79,8 @@ public class Cell extends AbstractCell {
 				numericValue = null;
 				return null;
 			} else {
-				throw new IllegalArgumentException("Несовместимые типы колонки и значения. Ссылка на справочник должна быть типа Long");
+				throw new IllegalArgumentException("Несовместимые типы колонки и значения. Ссылка на справочник должна быть типа Long "
+						+ "или BigDecimal со scale == 0");
 			}
 		}
 		

@@ -22,6 +22,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRowwarnrmData()
