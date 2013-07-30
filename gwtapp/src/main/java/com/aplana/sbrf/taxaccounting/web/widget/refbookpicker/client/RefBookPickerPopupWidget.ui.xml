@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        .inp {
+            margin: 0;
+            padding: 0;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel>
+        <g:cell width="100%">
+            <g:TextBox enabled="false" ui:field="text" height="22px" width="100%" styleName="{style.inp}"/>
+        </g:cell>
+        <g:Button text="..." ui:field="selectButton"/>
+    </g:HorizontalPanel>
+</ui:UiBinder>
