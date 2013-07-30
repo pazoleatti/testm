@@ -339,19 +339,22 @@ void addAllStatic() {
             if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
                 def itogIssuerRow = calcItogIssuer(i)
                 data.insert(itogIssuerRow, i + 2)
+                data.getAllCached().add(i+1, itogIssuerRow)
                 j++
             }
 
             if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
                 def itogRegNumberRow = calcItogRegNumber(i)
-                data.insert(itogRegNumberRow, i+2)
+                data.insert(itogRegNumberRow, i + 2)
+                data.getAllCached().add(i+1, itogRegNumberRow)
                 j++
             }
             i += j  // Обязательно чтобы избежать зацикливания в простановке
         }
 
         def rowItogo = calcItogo()
-        data.insert(rowItogo,data.getAllCached().size())
+        data.insert(rowItogo,data.getAllCached().size()+1)
+        data.getAllCached().add(data.getAllCached().size(), rowItogo)
     }
 }
 
@@ -518,6 +521,7 @@ void calc() {
             row.reserveCreation = calc16(row)
             row.recovery = calc17(row)
         }
+        data.save(data.getAllCached());
     }
 }
 
@@ -555,7 +559,7 @@ BigDecimal calc8(DataRow row) {
  * Расчет графы 11
  * @author ivildanov
  */
-def calc11(DataRow row) {
+BigDecimal calc11(DataRow row) {
     if (row.currency == 'RUR') {
         return null
     }
@@ -566,7 +570,7 @@ def calc11(DataRow row) {
  * Расчет графы 12
  * @author ivildanov
  */
-def calc12(DataRow row) {
+BigDecimal calc12(DataRow row) {
     if (row.currency == 'RUR') {
         return null
     }
@@ -577,7 +581,7 @@ def calc12(DataRow row) {
  * Расчет графы 13
  * @author ivildanov
  */
-def calc13(DataRow row) {
+BigDecimal calc13(DataRow row) {
     // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2995
     if (row.marketQuotation != null && row.rubCourse != null) {
         return round((BigDecimal) (row.marketQuotation * row.rubCourse), 2)
@@ -628,10 +632,14 @@ BigDecimal calc15(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc16(DataRow row) {
-    if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-        return round((BigDecimal) (row.marketQuotation - row.prev), 2)
+    if (row.reserveCalcValue!=null && row.reserveCalcValuePrev!=null) {
+        if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
+            return round((BigDecimal) (row.marketQuotation - row.prev), 2)
+        } else {
+            return (BigDecimal) 0
+        }
     } else {
-        return (BigDecimal) 0
+        return null;
     }
 }
 
@@ -641,18 +649,22 @@ BigDecimal calc16(DataRow row) {
  */
 BigDecimal calc17(DataRow row) {
 
-    BigDecimal a
-    if (row.reserveCalcValue - row.reserveCalcValuePrev < 0) {
-        a = row.reserveCalcValue - row.reserveCalcValuePrev
-    } else {
-        a = 0
-    }
-    // abs
-    if (a < 0) {
-        a = -a
-    }
+    if (row.reserveCalcValue!=null && row.reserveCalcValuePrev!=null) {
+        BigDecimal a
+        if (row.reserveCalcValue - row.reserveCalcValuePrev < 0) {
+            a = row.reserveCalcValue - row.reserveCalcValuePrev
+        } else {
+            a = 0
+        }
+        // abs
+        if (a < 0) {
+            a = -a
+        }
 
-    return round((BigDecimal) (a), 2)
+        return round((BigDecimal) (a), 2)
+    } else {
+        return null;
+    }
 }
 
 /**
@@ -683,13 +695,21 @@ void deleteRow() {
  * Удаляет все статические строки(ИТОГО) во всей форме
  */
 void deleteAllStatic() {
+    def data = getData(formData)
+    while(getStaticRow()!=null){
+        data.delete(getStaticRow())
+    }
+}
+
+def getStaticRow(){
     Iterator<DataRow> iterator = getData(formData).getAllCached().iterator() as Iterator<DataRow>
     while (iterator.hasNext()) {
         row = (DataRow) iterator.next()
         if (row.getAlias() != null) {
-            getData(formData).delete(row)
+            return row;
         }
     }
+    return null
 }
 
 /**
@@ -742,7 +762,7 @@ void addNewRowwarnrmData() {
             // Для динимаческих строк итого идём вверх пока не встретим конец формы или строку не итого
 
             for (index = indexSelected; index >= 0; index--) {
-                log("loop index = " + index.toString())
+                logger.info("loop index = " + index.toString())
                 if (data.getAllCached().get(index).getAlias() == null) {
                     index++
                     break
@@ -791,6 +811,7 @@ void consolidation() {
                 getData(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         data.insert(row,data.getAllCached().size())
+                        data.getAllCached().add(data.getAllCached().size(), row)
                     }
                 }
             }

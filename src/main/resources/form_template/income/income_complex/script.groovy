@@ -58,7 +58,7 @@ switch (formDataEvent) {
         break
 // проверить
     case FormDataEvent.CHECK :
-        checkRequiredFields()
+        checkAndCalc()
         break
 // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :

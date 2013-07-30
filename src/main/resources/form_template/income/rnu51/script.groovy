@@ -20,7 +20,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        allCheck()
+        //allCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRowwarnrmData()
@@ -84,7 +84,7 @@ void logicalCheck() {
 
             // 2.Проверка рыночной цены в процентах при погашении (графа 16)
             if (row.redemptionValue != null && row.redemptionValue > 0 && !(row.marketPriceInPerc1 == 100)) {
-                logger.error("Неверно указана рыночная цена в % при погашении!")
+                logger.error("Неверно указана рыночная цена в процентах при погашении!")
             }
 
             // 3.Проверка рыночной цены в рублях при погашении (графа 17)
@@ -188,12 +188,14 @@ void logicalCheck() {
         List itogoSum = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInRub',
                 'acquisitionPriceTax', 'redemptionValue', 'priceInFactRub', 'priceInFactRub', 'salePriceTax',
                 'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax']
-        DataRow realItogoKvartal = data.get(data.size() - 2)
-        itogoKvartal
-        for (String alias in itogoSum) {
-            if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
-                logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
-                break
+        if (data.size()>=2) {
+            DataRow realItogoKvartal = getRealItogoKvartal()
+            itogoKvartal
+            for (String alias in itogoSum) {
+                if (realItogoKvartal.getCell(alias).value != itogoKvartal.getCell(alias).value) {
+                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                    break
+                }
             }
         }
 
@@ -203,12 +205,14 @@ void logicalCheck() {
          * 1
          * Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!
          */
-        DataRow realItogo = data.get(data.size() - 1)
-        itogo
-        for (String alias in itogoSum) {
-            if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
-                logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
-                break
+        if (data.size()>=1) {
+            DataRow realItogo = getRealItogo()
+            itogo
+            for (String alias in itogoSum) {
+                if (realItogo.getCell(alias).value != itogo.getCell(alias).value) {
+                    logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+                    break
+                }
             }
         }
     }
@@ -349,7 +353,7 @@ BigDecimal calc16(DataRow row) {
     if (row.redemptionValue > 0) {
         result = 100
     }
-    if (result != null) result = round(result, 3)
+    if (result != null) result = roundTo2(result, 3)
     return result
 }
 
@@ -363,7 +367,7 @@ BigDecimal calc17(DataRow row) {
     if (row.redemptionValue > 0) {
         result = row.redemptionValue
     }
-    if (result != null) result = round(result, 3)
+    if (result != null) result = roundTo2(result, 3)
     return result
 }
 /**
@@ -384,7 +388,7 @@ BigDecimal calc18(DataRow row) {
     if ((row.tradeNumber == 2 || row.tradeNumber == 5) && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         result = row.marketPriceInRub1
     }
-    if (result != null) result = round(result, 3)
+    if (result != null) result = roundTo2(result, 3)
     return result
 }
 
@@ -395,7 +399,7 @@ BigDecimal calc18(DataRow row) {
  */
 BigDecimal calc20(DataRow row) {
     BigDecimal result = (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)
-    return round(result, 3)
+    return roundTo2(result, 3)
 }
 
 /**
@@ -405,7 +409,7 @@ BigDecimal calc20(DataRow row) {
  */
 BigDecimal calc21(DataRow row) {
     BigDecimal result = (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)
-    return round(result, 3)
+    return roundTo2(result, 3)
 }
 
 /**
@@ -423,10 +427,11 @@ BigDecimal calc22(DataRow row) {
     } else {
         result = (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0)
     }
-    return round(result, 3)
+    return roundTo2(result, 3)
 }
 
 void calc() {
+    def data = getData(formData)
     for (DataRow row in getData(formData).getAllCached()) {
         if (row.getAlias() == null) {
             row.rowNumber = calc1(row)
@@ -439,6 +444,7 @@ void calc() {
             row.excessSalePriceTax = calc22(row)
         }
     }
+    data.save(data.getAllCached());
 }
 
 /**
@@ -457,7 +463,7 @@ BigDecimal calc12(DataRow row) {
     } else {
         result = row.acquisitionPrice
     }
-    if (result != null) result = round(result, 2)
+    if (result != null) result = roundTo2(result, 2)
     return result
 }
 
@@ -465,13 +471,9 @@ BigDecimal calc12(DataRow row) {
  * Удаляет все статические строки(ИТОГО) во всей форме
  */
 void deleteAllStatic() {
-    Iterator<DataRow> iterator = getData(formData).getAllCached().iterator() as Iterator<DataRow>
-    while (iterator.hasNext()) {
-        row = (DataRow) iterator.next()
-        if (row.getAlias() != null) {
-            getData(formData).delete(row)
-        }
-    }
+    def data = getData(formData)
+    data.delete(getRealItogo())
+    data.delete(getRealItogoKvartal())
 }
 
 /**
@@ -490,8 +492,8 @@ void sort() {
 }
 
 void addAllStatic() {
-    getData(formData).insert(itogoKvartal,getData(formData).getAllCached().size())
-    getData(formData).insert(itogo,getData(formData).getAllCached().size())
+    getData(formData).insert(itogoKvartal,getData(formData).getAllCached().size()+1)
+    getData(formData).insert(itogo,getData(formData).getAllCached().size()+2)
 }
 
 void allCheck() {
@@ -504,8 +506,7 @@ void allCheck() {
  * @param newScale
  * @return
  */
-BigDecimal round(BigDecimal value, int newScale) {
-    logger.info(value.toString())
+BigDecimal roundTo2(BigDecimal value, int newScale) {
     if (value != null) {
         return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
     } else {
@@ -564,3 +565,28 @@ def getData(def formData) {
     }
     return null
 }
+
+DataRow getRealItogo(){
+    def data = getData(formData)
+    for(def i=0;i<getRows(data).size();i++){
+        def row = getRows(data).get(i)
+        if (row.getAlias() == "itogo") {
+            return row;
+        }
+    }
+}
+
+DataRow getRealItogoKvartal(){
+    def data = getData(formData)
+    for(def i=0;i<getRows(data).size();i++){
+        def row = getRows(data).get(i)
+        if (row.getAlias() == "itogoKvartal") {
+            return row;
+        }
+    }
+}
+
+def getRows(def data){
+    return data.getAllCached()
+}
+
