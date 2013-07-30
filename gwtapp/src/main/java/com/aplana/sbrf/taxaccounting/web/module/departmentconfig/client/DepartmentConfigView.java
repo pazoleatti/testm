@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ButtonLink;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -84,6 +85,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @UiField
     LongBox incomeExternalTaxSum,
             incomeSumDifference;
+
+    @UiField
+    @Path("incomeExternalTaxSum")            //TODO Нужен свой атрибут
+    RefBookPickerPopupWidget rbRfCode;
 
     @UiField
     @Ignore
