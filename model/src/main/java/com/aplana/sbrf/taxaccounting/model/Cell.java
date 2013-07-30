@@ -69,6 +69,7 @@ public class Cell extends AbstractCell {
 		if (getColumn() instanceof RefBookColumn) {
 			if((value != null) && (value instanceof BigDecimal) && ((BigDecimal)value).scale() == 0){
 				numericValue = (BigDecimal)value;
+				return numericValue.longValueExact();
 			} else if((value != null) && (value instanceof Long)){
 				numericValue = BigDecimal.valueOf((Long)value);
 				return numericValue.longValueExact();
