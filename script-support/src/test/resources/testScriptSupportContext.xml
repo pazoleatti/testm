@@ -9,54 +9,36 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
 
-	<!--<bean class="org.mockito.Mockito" factory-method="mock">-->
-		<!--<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>-->
-	<!--</bean>-->
-	<!---->
-	<!--<bean class="org.mockito.Mockito" factory-method="mock">-->
-		<!--<constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataScriptingService"/>-->
-	<!--</bean>-->
 
 
-    <!-- Sevices -->
-    <!--<import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>-->
-
-    <!-- NamedJdbcTemplate, используемый в jdbc-Dao (в частности - в наследниках AbstractDao) -->
-    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg index="0" ref="dataSource"/>
-    </bean>
-
-    <tx:annotation-driven/>
-
-    <!--  MyBatis configuration and DAOs-->
-    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
-    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.aplana.sbrf.taxaccounting.dao.mapper" />
-    </bean>
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>    
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/script-support.xml"/>
+    
 
     <!-- Для декларативного управления транзакциями с помощью @Transactional -->
-    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  		<property name="dataSource" ref="dataSource"/>
+	</bean>
 
     <!-- Встроенная тестовая база данных HSQLDB -->
-    <jdbc:embedded-database id="dataSource" type="HSQL"/>
+    <jdbc:embedded-database id="dataSource" type="HSQL">
+        <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
+    </jdbc:embedded-database>
+
+	<!--Uncomment for Oracle testing-->
+	<!--<bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">
+        <property name="URL" value="jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL" /> 
+        <property name="user" value="TAX_TEST"/> 
+        <property name="password" value="TAX"/> 
+        <property name="connectionCachingEnabled" value="true"/> 
+    </bean>-->
 
     <jdbc:initialize-database ignore-failures="DROPS">
-        <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
-        <!--<jdbc:script location="file:../src/main/resources/ddl/drop_income.sql" encoding="UTF-8"/>
-         <jdbc:script location="file:../src/main/resources/ddl/drop_transport.sql" encoding="UTF-8"/>-->
-        <jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
-        <jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
-        <!--<jdbc:script location="file:../src/main/resources/ddl/create_transport.sql" encoding="UTF-8"/>
-        <jdbc:script location="file:../src/main/resources/ddl/create_income.sql" encoding="UTF-8"/>-->
+		<jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
+		<jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
     
-    <!-- JDBC-based DAOs -->
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>
-    <!--<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.cell.impl"/>-->
+
 
 
 </beans>

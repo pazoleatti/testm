@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;

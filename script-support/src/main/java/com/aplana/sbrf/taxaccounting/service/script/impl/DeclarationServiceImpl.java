@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
@@ -30,8 +28,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 
 /*
  * author auldanov

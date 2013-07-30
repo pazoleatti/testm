@@ -3,13 +3,17 @@ package com.aplana.sbrf.taxaccounting.service.script.refbook.impl;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefbookService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Map;
 
 @Service("refbookService")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefbookServiceImpl implements RefbookService {
 
     @Autowired

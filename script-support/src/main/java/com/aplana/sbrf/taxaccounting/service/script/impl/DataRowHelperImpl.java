@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
