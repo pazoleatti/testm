@@ -91,8 +91,19 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
-        ['fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber',
-                'dealDate', 'sum', 'price', 'total', 'dealDoneDate'].each {
+        [
+                'fullName',      // Полное наименование юридического лица с указанием ОПФ
+                'inn',           // ИНН/КИО
+                'countryName',   // Страна регистрации
+                'docNumber',     // Номер договора
+                'docDate',       // Дата договора
+                'dealNumber',    // Номер сделки
+                'dealDate',      // Дата сделки
+                'sum',           // Сумма доходов Банка по данным бухгалтерского учета, руб.
+                'price',         // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+                'total',         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
+                'dealDoneDate'   // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -168,48 +179,6 @@ void calc() {
 }
 
 /**
- * Проставляет статические строки
- */
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-
-        def newRow = formData.createDataRow()
-
-        newRow.fullName = 'Подитог:'
-        newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 7
-
-        // Расчеты подитоговых значений
-        BigDecimal sumItg = 0, totalItg = 0
-        for (row in formData.dataRows) {
-
-            sum = row.sum
-            total = row.total
-
-            sumItg += sum != null ? sum : 0
-            totalItg += total != null ? total : 0
-        }
-
-        newRow.sum = sumItg
-        newRow.total = totalItg
-
-        formData.dataRows.add(newRow)
-    }
-}
-
-/**
- * Удаление всех статическиех строк "Подитог" из списка строк
- */
-void deleteAllStatic() {
-    for (Iterator<DataRow> iter = formData.dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
-        }
-    }
-}
-
-/**
  * Консолидация
  */
 void consolidation() {
@@ -230,4 +199,55 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows);
+}
+
+/**
+ * Удаление всех статическиех строк "Подитог" из списка строк
+ */
+void deleteAllStatic() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            dataRowHelper.delete(row)
+            iter.remove()
+        }
+    }
+    dataRowHelper.save(dataRows);
+}
+
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+        def newRow = formData.createDataRow()
+
+        newRow.fullName = 'Подитог:'
+        newRow.setAlias('itg')
+        newRow.getCell('fullName').colSpan = 7
+
+        // Расчеты подитоговых значений
+        def BigDecimal sumItg = 0, totalItg = 0
+        for (row in dataRows) {
+
+            def sum = row.sum
+            def total = row.total
+
+            sumItg += sum != null ? sum : 0
+            totalItg += total != null ? total : 0
+        }
+
+        newRow.sum = sumItg
+        newRow.total = totalItg
+
+        dataRows.add(dataRows.size(), newRow)
+        dataRowHelper.insert(newRow, dataRows.size())
+        dataRowHelper.save(dataRows);
+    }
 }

@@ -157,9 +157,9 @@ public class TaxFormNominationPresenter
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getErrorOnSave() != null) {
                             MessageEvent.fire(TaxFormNominationPresenter.this, result.getErrorOnSave());
-                        } else {
-                            getView().setTableData(result.getTableData());
                         }
+                        if (result.getTableData() != null)
+                            getView().setTableData(result.getTableData());
                     }
                 }, this));
     }

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -80,12 +79,12 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
 
     @Override
     public void saveForm(Long departmentId, int typeId, int formId) {
-        departmentFormTypeDao.createDepartmentFormType(departmentId,typeId,formId);
+        departmentFormTypeDao.createDepartmentFormType(departmentId, typeId, formId);
     }
 
     @Override
-    public void deleteForm(Set<Long> ids) {
-        departmentFormTypeDao.deleteDepartmentFormType(ids);
+    public void deleteForm(Long id) {
+        departmentFormTypeDao.deleteDepartmentFormType(id);
     }
 
     @Override
@@ -94,7 +93,7 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     }
 
     @Override
-    public void deleteDeclaration(Set<Long> ids) {
-        departmentFormTypeDao.deleteDepartmentDeclType(ids);
+    public void deleteDeclaration(Long id) {
+        departmentFormTypeDao.deleteDepartmentDeclType(id);
     }
 }

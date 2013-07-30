@@ -1,6 +1,5 @@
 package form_template.deal.forward_contracts
 
-import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
@@ -91,8 +90,22 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
-        ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate', 'dealNumber', 'dealDate'
-                , 'dealType', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate'].each {
+        [
+                'fullName',         // Полное наименование с указанием ОПФ
+                'inn',              // ИНН/КИО
+                'countryName',      // Наименование страны регистрации
+                'countryCode',      // Код страны по классификатору ОКСМ
+                'docNumber',        // Номер договора
+                'docDate',          // Дата договора
+                'dealNumber',       // Номер сделки
+                'dealDate',         // Дата заключения сделки
+                'dealType',         // Вид срочной сделки
+                'currencyCode',     // Код валюты расчетов по сделке
+                'countryDealCode',  // Код страны происхождения предмета сделки по классификатору ОКСМ
+                'price',            // Цена (тариф) за единицу измерения, руб.
+                'total',            // Итого стоимость, руб.
+                'dealDoneDate'      // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -165,36 +178,13 @@ void calc() {
 }
 
 /**
- * Проставляет статические строки
- */
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-
-        for (int i = 0; i < formData.dataRows.size(); i++) {
-            DataRow<Cell> row = formData.dataRows.get(i)
-            DataRow<Cell> nextRow = null
-
-            if (i < formData.dataRows.size() - 1) {
-                nextRow = formData.dataRows.get(i + 1)
-            }
-
-            // TODO сравнение по полям  'inn', docNumber', 'docDate', 'dealType'
-            if (row.getAlias() == null && nextRow == null || row.fullName != nextRow.fullName) {
-                def itogRow = calcItog(i)
-                formData.dataRows.add(i + 1, itogRow)
-                i++
-            }
-        }
-        recalcRowNum()
-    }
-}
-
-/**
  * Расчет подитогового значения
  * @param i
  * @return
  */
 def calcItog(int i) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def newRow = formData.createDataRow()
 
     newRow.fullName = 'Подитог:'
@@ -203,13 +193,13 @@ def calcItog(int i) {
     newRow.getCell('fullName').colSpan = 11
 
     // Расчеты подитоговых значений
-    BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
+    def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
     for (int j = i; j >= 0 && formData.dataRows.get(j).getAlias() == null; j--) {
-        row = formData.dataRows.get(j)
+        def row = formData.dataRows.get(j)
 
-        incomeSum = row.incomeSum
-        outcomeSum = row.outcomeSum
-        total = row.total
+        def incomeSum = row.incomeSum
+        def outcomeSum = row.outcomeSum
+        def total = row.total
 
         incomeSumItg += incomeSum != null ? incomeSum : 0
         outcomeSumItg += outcomeSum != null ? outcomeSum : 0
@@ -227,36 +217,28 @@ def calcItog(int i) {
  * Сортировка строк
  */
 void sort() {
-    formData.dataRows.sort({ DataRow a, DataRow b ->
-        // name - innKio - contractNum - contractDate - transactionType
-        if (a.fullName == b.fullName) {
-            if (a.inn == b.inn) {
-                if (a.docNumber == b.docNumber) {
-                    if (a.docDate == b.docDate) {
-                        return a.dealType <=> b.dealType
-                    }
-                    return a.docDate <=> b.docDate
-                }
-                return a.docNumber <=> b.docNumber
-            }
-            return a.inn <=> b.inn
-        }
-        return a.fullName <=> b.fullName;
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    dataRows.sort({ DataRow a, DataRow b ->
+        sortRow(['fullName', 'inn', 'docNumber', 'docDate', 'dealType'], a, b)
     })
-    recalcRowNum()
+
+    dataRowHelper.save(dataRows);
 }
 
-/**
- * Удаление всех статическиех строк "Подитог" из списка строк
- */
-void deleteAllStatic() {
-    for (Iterator<DataRow> iter = formData.dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        def aD = a.getCell(param).value
+        def bD = b.getCell(param).value
+
+        if (aD == bD) {
+            continue
+        } else {
+            return aD <=> bD
         }
     }
-    recalcRowNum()
+    return 0
 }
 
 /**
@@ -280,4 +262,55 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows);
+}
+
+/**
+ * Удаление всех статическиех строк "Подитог" из списка строк
+ */
+void deleteAllStatic() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            dataRowHelper.delete(row)
+            iter.remove()
+        }
+    }
+    dataRowHelper.save(dataRows);
+}
+
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows.get(i)
+            def nextRow = null
+
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1)
+            }
+
+            if (row.getAlias() == null && nextRow == null
+                    || row.fullName != nextRow.fullName
+                    || row.inn != nextRow.inn
+                    || row.docNumber != nextRow.docNumber
+                    || row.docDate != nextRow.docDate
+                    || row.dealType != nextRow.dealType) {
+                def itogRow = calcItog(i)
+                dataRows.add(i + 1, itogRow)
+                dataRowHelper.insert(itogRow, i + 1)
+
+                i++
+            }
+        }
+        dataRowHelper.save(dataRows);
+    }
 }

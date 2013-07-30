@@ -152,9 +152,9 @@ public interface DepartmentFormTypeService {
     /**
      * Удаляет налоговые формы, назначенные подразделению
      *
-     * @param ids список id на удаление
+     * @param id id на удаление
      */
-    void deleteForm(Set<Long> ids);
+    void deleteForm(Long id);
 
     /**
      * Добавляет декларации, назначенные подразделению
@@ -167,7 +167,7 @@ public interface DepartmentFormTypeService {
     /**
      * Удаляет декларации, назначенные подразделению
      *
-     * @param ids список id на удаление
+     * @param id id на удаление
      */
-    void deleteDeclaration(Set<Long> ids);
+    void deleteDeclaration(Long id);
 }
