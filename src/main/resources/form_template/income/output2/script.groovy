@@ -1,3 +1,7 @@
+package form_template.income.output2
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -16,8 +20,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        test() // TODO (Ramil Timerbaev)
-        return
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
@@ -42,8 +44,7 @@ switch (formDataEvent) {
 
 void deleteRow() {
     def data = getData(formData)
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && getRows(data).indexOf(currentDataRow) != -1) {
+    if (currentDataRow != null) {
         getRows(data).remove(currentDataRow)
         save(data)
     }
@@ -65,7 +66,7 @@ void addRow() {
  */
 void checkUniq() {
 
-    FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
@@ -101,6 +102,7 @@ void logicCheck() {
             logger.error('Неправильно указан почтовый индекс!')
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
+            // @todo Вызывать работу со справочником по новому
             if (!dictionaryRegionService.isValidCode((String) row.subdivisionRF)) {
                 logger.error('Неверное наименование субъекта РФ!')
             }
@@ -113,7 +115,7 @@ void logicCheck() {
  *
  * @param data данные нф (helper)
  */
-def getRows(def data) {
+DataRow<Cell> getRows(def data) {
     return data.getAllCached();
 }
 
@@ -154,7 +156,7 @@ def getData(def formData) {
  * @param data данные нф (helper)
  */
 def hasTotal(def data) {
-    for (def row: getRows(data)) {
+    for (DataRow row: getRows(data)) {
         if (row.getAlias() == 'total') {
             return true
         }
