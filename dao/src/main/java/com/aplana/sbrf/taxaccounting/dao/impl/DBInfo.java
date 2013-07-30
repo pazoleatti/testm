@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
+package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
