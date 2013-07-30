@@ -9,9 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE:
-        checkUniq()
-        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -25,46 +22,35 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         deleteRow()
         break
-// После принятия из Утверждено
-    case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
-        acceptance()
-        break
-// После принятия из Подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        acceptance()
-        break
 }
 
 void deleteRow() {
-    if (currentDataRow != null) {
-        recalcRowNum()
-        formData.dataRows.remove(currentDataRow)
-    }
-}
-
-void recalcRowNum() {
-    def i = formData.dataRows.indexOf(currentDataRow)
-
-    for (row in formData.dataRows[i..formData.dataRows.size() - 1]) {
-        row.getCell('rowNum').value = i++
-    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
+    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-    for (alias in ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    dataRowHelper.insert(row, index)
+    dataRows.add(row)
+    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
-    row.getCell('rowNum').value = formData.dataRows.size()
+    dataRowHelper.save(dataRows)
 }
+
 /**
  * Проверяет уникальность в отчётном периоде и вид
  * (не был ли ранее сформирован отчет, параметры которого совпадают с параметрами, указанными пользователем )
  */
 void checkUniq() {
-    def findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
         logger.error('Формирование нового отчета невозможно, т.к. отчет с указанными параметрами уже сформирован.')
     }
@@ -74,19 +60,23 @@ void checkUniq() {
  * Логические проверки
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
-        def rowNum = row.getCell('rowNum').value
-        for (alias in ['name', 'country', 'regNum', 'code']) {
-            def rowCell = row.getCell(alias)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+        ['name', 'country', 'regNum', 'code'].each {
+            def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
-                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
 // Проверка уникальности Регистрационного номера организации в стране ее регистрации (инкорпорации)
+        def list = []
         // TODO графа 3 (regNum) должна быть уникальна в рамках справочника «Организации – участники контролируемых сделок»
         def regNumCell = row.getCell('regNum')
-        def list = []
         if (false) {
             list.add(regNumCell.column.name)
         }
@@ -110,18 +100,18 @@ void logicCheck() {
         }
 // результат проверок
         for (msg in list) {
-            logger.error("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+            logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
         }
 
         // TODO второй варинат проверки, если прокатит - оставить его, первый - убрать
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-        for (alias in ['regNum', 'taxpayerCode', 'inn', 'kpp']) {
-            def rowCell = row.getCell(alias)
+       ['regNum', 'taxpayerCode', 'inn', 'kpp'].each {
+            def rowCell = row.getCell(it)
             if (rowCell.value != null && !rowCell.value.toString().isEmpty()) {
                 // TODO Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
                 if (false) {
                     def msg = rowCell.column.name
-                    logger.error("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
                 }
             }
         }
@@ -132,14 +122,8 @@ void logicCheck() {
  * Алгоритмы заполнения полей формы.
  */
 void calc() {
-    for (row in formData.dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    for (row in dataRowHelper.getAllCached()) {
         // TODO расчет полей по справочникам
     }
-}
-
-/**
- * Инициация консолидации
- */
-void acceptance() {
-    // TODO  Данные отчета попадают в справочник «Организации – участники контролируемых сделок»
 }

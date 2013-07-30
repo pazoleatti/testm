@@ -86,7 +86,18 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
-        ['fullNamePerson', 'inn', 'countryName', 'sum', 'docNumber', 'docDate', 'count', 'price', 'cost', 'dealDate'].each {
+        [
+                'fullNamePerson',// Полное наименование юридического лица с указанием ОПФ
+                'inn',           // ИНН/КИО
+                'countryName',   // Страна регистрации
+                'sum',           // Сумма доходов Банка, руб.
+                'docNumber',     // Номер договора
+                'docDate',       // Дата договора
+                'count',         // Количество
+                'price',         // Цена
+                'cost',          // Стоимость
+                'dealDate'       // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -125,7 +136,7 @@ void logicCheck() {
             def msg = costCell.column.name
             logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
         }
-        // Корректность даты совершения сделки                                   FormTemplateService
+        // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name

@@ -11,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 @Transactional(readOnly = true)
@@ -265,22 +263,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void deleteDepartmentFormType(final Set<Long> removedLinks) {
-        getJdbcTemplate().batchUpdate(
+    public void deleteDepartmentFormType(Long id) {
+        getJdbcTemplate().update(
                 "delete from department_form_type where id = ?",
-                new BatchPreparedStatementSetter() {
-
-                    private Iterator<Long> iterator = removedLinks.iterator();
-
-                    @Override
-                    public void setValues(PreparedStatement ps, int index) throws SQLException {
-                        ps.setLong(1, iterator.next());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return removedLinks.size();
-                    }
+                new Object[]{
+                        id
                 }
         );
     }
@@ -300,22 +287,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void deleteDepartmentDeclType(final Set<Long> removedLinks) {
-        getJdbcTemplate().batchUpdate(
+    public void deleteDepartmentDeclType(Long id) {
+        getJdbcTemplate().update(
                 "delete from department_declaration_type where id = ?",
-                new BatchPreparedStatementSetter() {
-
-                    private Iterator<Long> iterator = removedLinks.iterator();
-
-                    @Override
-                    public void setValues(PreparedStatement ps, int index) throws SQLException {
-                        ps.setLong(1, iterator.next());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return removedLinks.size();
-                    }
+                new Object[]{
+                        id
                 }
         );
     }

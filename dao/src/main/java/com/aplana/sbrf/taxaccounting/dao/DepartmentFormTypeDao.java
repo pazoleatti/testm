@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Интерфейс Dao для работы с источникам НФ
@@ -143,7 +142,7 @@ public interface DepartmentFormTypeDao {
     /**
      * Удаляет налоговые формы, назначенные подразделению
      */
-    void deleteDepartmentFormType(final Set<Long> removedLinks);
+    void deleteDepartmentFormType(Long id);
 
     /**
      * Добавляет декларации, назначенные подразделению
@@ -153,5 +152,5 @@ public interface DepartmentFormTypeDao {
     /**
      * Удаляет декларации, назначенные подразделению
      */
-    void deleteDepartmentDeclType(final Set<Long> removedLinks);
+    void deleteDepartmentDeclType(Long id);
 }

@@ -50,12 +50,13 @@ public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataR
                 departmentFormTypeService.saveForm(departmentId, typeId, formId);
             } else {
                 // Удаление
-                try {
-                    departmentFormTypeService.deleteForm(ids);
-                } catch (DataIntegrityViolationException exception) {
-                    // есть зависимые связи
-                    result.setErrorOnSave("Невозможно снять назначение налоговой формы, т.к. определены источники или приёмники данных");
-                    return result;
+                for (Long id : ids) {
+                    try {
+                        departmentFormTypeService.deleteForm(id);
+                    } catch (DataIntegrityViolationException exception) {
+                        // есть зависимые связи
+                        result.setErrorOnSave("Невозможно снять назначение налоговой формы, т. к. определены источники данных / назначение является источником данных");
+                    }
                 }
             }
             // актуальный список
@@ -75,12 +76,13 @@ public class SaveHandler extends AbstractActionHandler<SaveAction, GetTableDataR
                 departmentFormTypeService.saveDeclaration(departmentId, formId);
             } else {
                 // Удаление
-                try {
-                    departmentFormTypeService.deleteDeclaration(ids);
-                } catch (DataIntegrityViolationException exception) {
-                    // есть зависимые связи
-                    result.setErrorOnSave("Невозможно снять назначение декларации, т.к. определены источники или приёмники данных");
-                    return result;
+                for (Long id : ids){
+                    try {
+                        departmentFormTypeService.deleteDeclaration(id);
+                    } catch (DataIntegrityViolationException exception) {
+                        // есть зависимые связи
+                        result.setErrorOnSave("Невозможно снять назначение декларации, т. к. определены источники данных / назначение является источником данных");
+                    }
                 }
             }
             // актуальный список
