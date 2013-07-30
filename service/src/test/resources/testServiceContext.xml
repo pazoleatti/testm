@@ -68,6 +68,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.RefBookDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService"/>
     </bean>
 </beans>
