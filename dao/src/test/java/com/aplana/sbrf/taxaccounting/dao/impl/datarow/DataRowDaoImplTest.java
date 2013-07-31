@@ -892,4 +892,39 @@ public class DataRowDaoImplTest {
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
 	}
 
+    @Test
+    public void repackORDWithRemoveRows(){
+        //Prepare
+        FormData fd = formDataDao.get(1);
+        List<DataRow<Cell>> rowsBefore = dataRowDao.getRows(fd,null,null);
+        List<Long> rowIdsBefore = new ArrayList<Long>();
+        for (DataRow<Cell> row : rowsBefore){
+            rowIdsBefore.add(row.getId());
+        }
+        int sizeBefore = rowsBefore.size();
+        dataRowDao.removeRows(fd,3,3);
+        Assert.assertEquals(sizeBefore - 1, dataRowDao.getSize(fd,null));
+
+        //Execute
+        int sizeAfterRem = dataRowDao.getSize(fd,null);
+        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+        for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+            DataRow<Cell> dr = fd.createDataRow();
+            dataRows.add(dr);
+        }
+        dataRowDao.insertRows(fd, 1, dataRows);
+        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeAfterRem, dataRowDao.getRows(fd, null, null).size());
+
+        //We check after rollback that second element become first(it could be second)
+        dataRowDao.rollback(fd.getId());
+        Assert.assertEquals(sizeBefore, dataRowDao.getSize(fd,null));
+        List<Long> rowIdsAfterRollback = new ArrayList<Long>();
+        for (DataRow<Cell> row : dataRowDao.getRows(fd,null,null)) {
+            rowIdsAfterRollback.add(row.getId());
+        }
+        //Must following with same order
+        Assert.assertArrayEquals(rowIdsBefore.toArray(), rowIdsAfterRollback.toArray());
+    }
+
 }

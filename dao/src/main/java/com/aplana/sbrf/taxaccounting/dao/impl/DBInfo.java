@@ -10,11 +10,18 @@ import java.sql.SQLException;
 
 /**
  * User: avanteev
+ * Класс необходимый исключительно для совместимости sql-функции между базами данных.
+ * При составлении запроса используется встроенная функция row_number() over (order ...), гарантирующая нам порядок
+ * строк в отсортированной таблице. Эта фукция не поддерживается в БД hsqldb.
+ * Класс работает как синглтон, единожды при инициализаци определяет тип БД и выставляет признак supportOver.
  */
 @Repository
 public class DBInfo {
     private static final String HSQLDB_NAME_ENGINE = "HSQL Database Engine";
 
+    /**
+     * Признак поддержки функции row_number() over (...)
+     */
     private static boolean supportOver;
 
     private DBInfo() {
