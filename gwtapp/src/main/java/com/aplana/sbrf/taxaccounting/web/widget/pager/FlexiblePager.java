@@ -201,13 +201,13 @@ public class FlexiblePager extends AbstractPager {
 	}
 
 	private static final int DEFAULT_FAST_FORWARD_ROWS = 1000;
-	private static Resources DEFAULT_RESOURCES;
+	private static Resources defaultResources;
 
 	private static Resources getDefaultResources() {
-		if (DEFAULT_RESOURCES == null) {
-			DEFAULT_RESOURCES = GWT.create(Resources.class);
+		if (defaultResources == null) {
+			defaultResources = GWT.create(Resources.class);
 		}
-		return DEFAULT_RESOURCES;
+		return defaultResources;
 	}
 
 	private final ImageButton fastForward;

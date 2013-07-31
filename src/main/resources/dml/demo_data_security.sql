@@ -1,17 +1,17 @@
-insert into sec_user (id, name, login, department_id) values (3, 'Контролёр Банка', 'controlBank', 1);
-insert into sec_user (id, name, login, department_id) values (1, 'Контролёр ТБ1', 'controlTB1', 2);
-insert into sec_user (id, name, login, department_id) values (2, 'Контролёр ТБ2', 'controlTB2', 3);
-insert into sec_user (id, name, login, department_id) values (100, 'Контролёр УНП', 'controlUnp', 1);
-insert into sec_user (id, name, login, department_id) values (101, 'Оператор ТБ1', 'operTB1', 2);
-insert into sec_user (id, name, login, department_id) values (102, 'Оператор ТБ2', 'operTB2', 3);
-insert into sec_user (id, name, login, department_id) values (103, 'Настройщик', 'conf', 1);
-insert into sec_user (id, name, login, department_id) values (104, 'Администратор', 'admin', 1);
+insert into sec_user (id, name, login, department_id) values (3, 'РљРѕРЅС‚СЂРѕР»С‘СЂ Р‘Р°РЅРєР°', 'controlBank', 1);
+insert into sec_user (id, name, login, department_id) values (1, 'РљРѕРЅС‚СЂРѕР»С‘СЂ РўР‘1', 'controlTB1', 2);
+insert into sec_user (id, name, login, department_id) values (2, 'РљРѕРЅС‚СЂРѕР»С‘СЂ РўР‘2', 'controlTB2', 3);
+insert into sec_user (id, name, login, department_id) values (100, 'РљРѕРЅС‚СЂРѕР»С‘СЂ РЈРќРџ', 'controlUnp', 1);
+insert into sec_user (id, name, login, department_id) values (101, 'РћРїРµСЂР°С‚РѕСЂ РўР‘1', 'operTB1', 2);
+insert into sec_user (id, name, login, department_id) values (102, 'РћРїРµСЂР°С‚РѕСЂ РўР‘2', 'operTB2', 3);
+insert into sec_user (id, name, login, department_id) values (103, 'РќР°СЃС‚СЂРѕР№С‰РёРє', 'conf', 1);
+insert into sec_user (id, name, login, department_id) values (104, 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ', 'admin', 1);
 
-insert into sec_role (id, alias, name) values (1, 'ROLE_CONTROL', 'Контролёр');
-insert into sec_role (id, alias, name) values (2, 'ROLE_OPER', 'Оператор');
-insert into sec_role (id, alias, name) values (3, 'ROLE_CONTROL_UNP', 'Контролёр УНП');
-insert into sec_role (id, alias, name) values (4, 'ROLE_CONF', 'Настройщик');
-insert into sec_role (id, alias, name) values (5, 'ROLE_ADMIN', 'Администратор');
+insert into sec_role (id, alias, name) values (1, 'ROLE_CONTROL', 'РљРѕРЅС‚СЂРѕР»С‘СЂ');
+insert into sec_role (id, alias, name) values (2, 'ROLE_OPER', 'РћРїРµСЂР°С‚РѕСЂ');
+insert into sec_role (id, alias, name) values (3, 'ROLE_CONTROL_UNP', 'РљРѕРЅС‚СЂРѕР»С‘СЂ РЈРќРџ');
+insert into sec_role (id, alias, name) values (4, 'ROLE_CONF', 'РќР°СЃС‚СЂРѕР№С‰РёРє');
+insert into sec_role (id, alias, name) values (5, 'ROLE_ADMIN', 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ');
 
 insert into sec_user_role (user_id, role_id) values (1, 1);
 insert into sec_user_role (user_id, role_id) values (2, 1);

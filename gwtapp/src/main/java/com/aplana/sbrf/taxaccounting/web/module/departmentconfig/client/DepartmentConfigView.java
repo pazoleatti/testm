@@ -14,6 +14,8 @@ import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,10 +25,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * View для формы настроек подразделений
@@ -54,7 +53,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private Integer departmentId;
     private String departmentName;
 
+    @UiField(provided = true)
+    @Ignore
+    ValueListBox period = new ValueListBox<Date>(new DateTimeFormatRenderer(DateTimeFormat.getFormat("dd.MM.yyyy")));
+
     @UiField
+    @Ignore
     TextArea commonName,
             incomeApproveDocName,
             incomeApproveOrgName,
@@ -62,6 +66,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             transportApproveOrgName;
 
     @UiField
+    @Ignore
     TextBox commonPhone,
             commonInn,
             commonKpp,
@@ -80,15 +85,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             transportFormatVersion;
 
     @UiField
+    @Ignore
     DoubleBox incomeTaxRate;
 
     @UiField
+    @Ignore
     LongBox incomeExternalTaxSum,
             incomeSumDifference;
 
     @UiField
-    @Path("incomeExternalTaxSum")            //TODO Нужен свой атрибут
-    RefBookPickerPopupWidget rbRfCode;
+    @Ignore
+    RefBookPickerPopupWidget rbRfCode,
+            rbReorgCode,
+            rbIncomeSignPerson,
+            rbTransportSignPerson,
+            rbIncomePlace,
+            rbTransportPlace,
+            rbIncomeTax,
+            commonOkato,
+            commonOkved;
 
     @UiField
     @Ignore
@@ -267,6 +282,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         }
         this.departmentId = department != null ? department.getId() : null;
         this.departmentName = department != null ? department.getName() : null;
+    }
+
+    @Override
+    public void setPeriods(List<String> dates) {
+        period.setAcceptableValues(dates);
     }
 
     @Override

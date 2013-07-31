@@ -15,7 +15,7 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-	public final static String RECORD_ID_ALIAS = "id";
+	public final static String RECORD_ID_ALIAS = "record_id";
 
 	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
 
