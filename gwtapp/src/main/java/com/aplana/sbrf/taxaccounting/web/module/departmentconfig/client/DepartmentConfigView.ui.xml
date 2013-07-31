@@ -34,12 +34,20 @@
                 <g:HorizontalPanel spacing="5">
                     <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
                     <d:DepartmentPicker ui:field="departmentPicker" withCheckBox="false"
-                                           header="Выберите подразделение"/>
+                                        header="Выберите подразделение"/>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel spacing="5" height="35px">
-                    <style:ButtonLink ui:field="editButton" text="Редактировать"/>
-                    <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
-                    <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>
+                <g:HorizontalPanel>
+                    <g:HorizontalPanel spacing="5" width="413px" height="35px">
+                        <style:ButtonLink ui:field="editButton" text="Редактировать"/>
+                        <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
+                        <g:cell width="100%">
+                            <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel spacing="5" height="35px">
+                        <g:Label styleName="{style.boldLabel}" text="Период:"/>
+                        <g:ValueListBox ui:field="period" width="150px"/>
+                    </g:HorizontalPanel>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
             <g:FormPanel ui:field="formPanel">
@@ -66,7 +74,7 @@
                                 <g:Label text="ИНН" width="40px"/>
                                 <g:TextBox width="100px" ui:field="commonInn"/>
                                 <g:Label text="ОКАТО" styleName="{style.sps}" width="60px"/>
-                                <g:ListBox width="115px"/>
+                                <r:RefBookPickerPopupWidget ui:field="commonOkato" width="115px" refBookId="3"/>
                                 <g:Label text="Код налогового органа" width="160px" styleName="{style.sps}"/>
                                 <g:TextBox width="100px" ui:field="commonTaxOrganCode"/>
                             </g:HorizontalPanel>
@@ -74,13 +82,13 @@
                                 <g:Label text="КПП" width="40px"/>
                                 <g:TextBox width="100px" ui:field="commonKpp"/>
                                 <g:Label text="ОКВЭД" styleName="{style.sps}" width="60px"/>
-                                <g:ListBox width="115px"/>
+                                <r:RefBookPickerPopupWidget ui:field="commonOkved" width="115px" refBookId="34"/>
                             </g:HorizontalPanel>
                             <!-- Сведения о реорганизации -->
                             <g:Label styleName="{style.boldLabel}" text="Сведения о реорганизации"/>
                             <g:HorizontalPanel>
                                 <g:Label text="Код формы реорганизации и ликвидации" width="250px"/>
-                                <g:ListBox width="105px"/>
+                                <r:RefBookPickerPopupWidget ui:field="rbReorgCode" width="105px" refBookId="5"/>
                             </g:HorizontalPanel>
                             <g:HorizontalPanel>
                                 <g:Label text="ИНН реорганизованной организации" width="250px"/>
@@ -104,7 +112,7 @@
                                 <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Признак лица подписавшего документ" width="250px"/>
-                                    <g:ListBox width="355px"/>
+                                    <r:RefBookPickerPopupWidget ui:field="rbIncomeSignPerson" width="355px" refBookId="5"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Фамилия подписанта" width="250px"/>
@@ -121,20 +129,22 @@
                                 <g:HorizontalPanel>
                                     <g:Label text="Наименование документа, подтверждающего полномочия представителя"
                                              width="250px"/>
-                                    <g:TextArea ui:field="incomeApproveDocName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                    <g:TextArea ui:field="incomeApproveDocName" width="350px" height="70px"
+                                                styleName="{style.noresize}"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Наименование организации-представителя налогоплательщика"
                                              width="250px"/>
-                                    <g:TextArea ui:field="incomeApproveOrgName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                    <g:TextArea ui:field="incomeApproveOrgName" width="350px" height="70px"
+                                                styleName="{style.noresize}"/>
                                 </g:HorizontalPanel>
                                 <!-- Прочие сведения -->
                                 <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Код места, по которому представляется документ" width="250px"/>
-                                    <g:ListBox width="145px"/>
+                                    <r:RefBookPickerPopupWidget ui:field="rbIncomePlace" width="145px" refBookId="2"/>
                                     <g:Label text="Ставка налога" width="110px" styleName="{style.sps}"/>
-                                    <g:DoubleBox ui:field="incomeTaxRate" width="75px"  styleName="{style.sps}"/>
+                                    <g:DoubleBox ui:field="incomeTaxRate" width="75px" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Версия программы, с помощью которой сформирован файл" width="250px"/>
@@ -144,7 +154,7 @@
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel ui:field="incomePayPanel">
                                     <g:Label text="Обязанность по уплате налога" width="250px"/>
-                                    <g:ListBox width="145px"/>
+                                    <r:RefBookPickerPopupWidget ui:field="rbIncomeTax" width="145px" refBookId="25"/>
                                     <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
                                     <g:ListBox width="80px" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
@@ -166,7 +176,7 @@
                                 <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Признак лица подписавшего документ" width="250px"/>
-                                    <g:ListBox width="355px"/>
+                                    <r:RefBookPickerPopupWidget ui:field="rbTransportSignPerson" width="355px" refBookId="35"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Фамилия подписанта" width="250px"/>
@@ -183,18 +193,20 @@
                                 <g:HorizontalPanel>
                                     <g:Label text="Наименование документа, подтверждающего полномочия представителя"
                                              width="250px"/>
-                                    <g:TextArea ui:field="transportApproveDocName"  width="350px" height="70px" styleName="{style.noresize}"/>
+                                    <g:TextArea ui:field="transportApproveDocName" width="350px" height="70px"
+                                                styleName="{style.noresize}"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Наименование организации-представителя налогоплательщика"
                                              width="250px"/>
-                                    <g:TextArea ui:field="transportApproveOrgName" width="350px" height="70px" styleName="{style.noresize}"/>
+                                    <g:TextArea ui:field="transportApproveOrgName" width="350px" height="70px"
+                                                styleName="{style.noresize}"/>
                                 </g:HorizontalPanel>
                                 <!-- Прочие сведения -->
                                 <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Код места, по которому представляется документ" width="250px"/>
-                                    <g:ListBox width="145px"/>
+                                    <r:RefBookPickerPopupWidget ui:field="rbTransportPlace" width="145px" refBookId="2"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Версия программы, с помощью которой сформирован файл" width="250px"/>

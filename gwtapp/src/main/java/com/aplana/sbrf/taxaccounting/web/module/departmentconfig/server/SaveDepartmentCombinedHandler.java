@@ -29,10 +29,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     public SaveDepartmentCombinedResult execute(SaveDepartmentCombinedAction action, ExecutionContext executionContext) throws ActionException {
 
         DepartmentCombined departmentCombined = action.getDepartmentCombined();
-        departmentParamDao.updateDepartmentParam(departmentCombined.getCommonParams());
-        departmentParamDao.updateDepartmentParamIncome(departmentCombined.getIncomeParams());
-        departmentParamDao.updateDepartmentParamTransport(departmentCombined.getTransportParams());
-
+        // TODO Заменить на рефбуки
         return new SaveDepartmentCombinedResult();
     }
 
