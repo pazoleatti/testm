@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.service.script.refbook.RefbookService;
+import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,9 +14,9 @@ import java.util.Map;
 
 @Service("refbookService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class RefbookServiceImpl implements RefbookService {
+public class RefBookServiceImpl implements RefBookService {
 
-    @Autowired
+    @Autowired  // Получать через фабрику com.aplana.sbrf.taxaccounting.refbook.RefBookFactory потому что будет много RefBookDataProvider а не один универсальный
     private RefBookDataProvider provider;
 
     @Override
