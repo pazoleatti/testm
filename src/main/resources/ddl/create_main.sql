@@ -314,7 +314,7 @@ alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
-alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (alias <> 'id' and alias <> 'parent_id');
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (alias <> 'record_id');
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
