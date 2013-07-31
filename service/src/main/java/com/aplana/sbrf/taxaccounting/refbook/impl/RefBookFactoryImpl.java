@@ -41,7 +41,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	@Override
 	public RefBookDataProvider getDataProvider(Long refBookId) {
-		RefBookDataProvider refBookDataProvider = applicationContext.getBean(RefBookDataProvider.class);
+		RefBookDataProvider refBookDataProvider = applicationContext.getBean("universal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
 		if (refBookDataProvider instanceof RefBookUniversal) {
 			((RefBookUniversal) refBookDataProvider).setRefBookId(refBookId);
 		}

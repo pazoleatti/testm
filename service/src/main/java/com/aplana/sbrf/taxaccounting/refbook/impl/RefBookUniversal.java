@@ -21,7 +21,7 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 11.07.13 11:32
  */
-@Service
+@Service("universal")   // Магия spring написал марат пока под вопросом как это лучше
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookUniversal implements RefBookDataProvider {
 
