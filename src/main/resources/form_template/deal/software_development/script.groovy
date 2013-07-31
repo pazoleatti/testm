@@ -119,9 +119,9 @@ void logicCheck() {
             }
         }
         // Проверка расходов
-        def sumCell = row.expensesSum
-        def priceCell = row.price
-        def costCell = row.cost
+        def sumCell = row.getCell('expensesSum')
+        def priceCell = row.getCell('price')
+        def costCell = row.getCell('cost')
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
@@ -132,7 +132,7 @@ void logicCheck() {
             logger.warn("«$msg» в строке $rowNum не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
-        def dealDateCell = row.dealDate
+        def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
@@ -148,7 +148,22 @@ void logicCheck() {
 void checkNSI() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+        // TODO проверить проверки НСИ, проверить без первого условия
+        /*
+        if (row.fullNamePerson != null && refBookService.getRecordData(9, row.fullNamePerson) == null) {
+            logger.warn("В справочнике «Организации-участники контролируемых сделок» не найден элемент, указанный в строке $rowNum!")
+        }
+        if (row.countryCode != null && refBookService.getRecordData(10, row.countryCode) == null) {
+            logger.warn("В справочнике ОКСМ не найден элемент «Код страны по классификатору ОКСМ», указанный в строке $rowNum!")
+        }
+        if (row.countryCode != null && refBookService.getRecordData(11, row.serviceType) == null) {
+            logger.warn("В справочнике «Услуги в части программного обеспечения» не найден элемент «Вид услуг», указанный в строке $rowNum!")
+        }
+        */
     }
 }
 
@@ -157,13 +172,24 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
         // Расчет поля "Цена"
         row.price = row.expensesSum
         // Расчет поля "Стоимость"
         row.cost = row.expensesSum
-        // TODO расчет полей по справочникам
+        // Расчет полей зависимых от справочников
+        if (row.fullNamePerson != null) {
+            def map = refBookService.getRecordData(9, row.fullNamePerson)
+            row.inn = map.INN_KIO.numberValue
+            //TODO после разыменование ббрать просто map.COUNTRY.referenceValue (а тип row.countryCode станет справочником)
+            row.countryCode = refBookService.getNumberValue(10, map.COUNTRY.referenceValue, 'CODE')
+        } else {
+            row.inn = null
+            row.countryCode = null
+        }
     }
+    dataRowHelper.save(dataRows);
 }
 
 /**

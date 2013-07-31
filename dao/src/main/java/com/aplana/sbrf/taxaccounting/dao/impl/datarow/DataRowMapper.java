@@ -41,7 +41,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	public Pair<String, Map<String, Object>> createSql() {
 
 		StringBuilder select = new StringBuilder(
-				"select rownum as IDX, R.ID as ID, R.ALIAS as A");
+				"select row_number() over (order by R.ORD) as IDX, R.ID as ID, R.ALIAS as A");
 		StringBuilder from = new StringBuilder(" from DATA_ROW R");
 
 		Map<String, Object> params = new HashMap<String, Object>();

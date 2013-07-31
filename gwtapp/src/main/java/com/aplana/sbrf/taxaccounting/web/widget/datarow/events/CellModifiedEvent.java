@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class CellModifiedEvent extends GwtEvent<CellModifiedEventHandler> {
 
-	public static Type<CellModifiedEventHandler> TYPE = new Type<CellModifiedEventHandler>();
+	public static final Type<CellModifiedEventHandler> TYPE = new Type<CellModifiedEventHandler>();
 
 	private final DataRow<Cell> dataRow;
 

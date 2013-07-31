@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -48,10 +51,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	private ValueUpdater<Long> valueUpdater;
 	private RefBookPickerWidget selectWidget;
 	private Long refBookAttrId;
+	private String columnAlias;
 
-	public RefBookCell(Long refBookAttrId, ColumnContext columnContext) {
+	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
-		this.refBookAttrId = refBookAttrId;
+		this.refBookAttrId = ((RefBookColumn) columnContext.getColumn()).getRefBookAttributeId();
+		this.columnAlias = columnContext.getColumn().getAlias();
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
 
 		// Create popup panel
@@ -177,23 +182,13 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	@Override
 	public void render(Context context, Long value, SafeHtmlBuilder sb) {
-		// Get the view data.
-		Object key = context.getKey();
-		String viewData = getViewData(key);
-		String stringValue = String.valueOf(value);
-
-		if (viewData != null && viewData.equals(stringValue)) {
-			clearViewData(key);
-			viewData = null;
+		@SuppressWarnings("unchecked")
+		DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
+		Cell cell = dataRow.getCell(columnAlias);
+		String rendValue = cell.getRefBookDereference();
+		if (rendValue == null){
+			rendValue = String.valueOf(value);
 		}
-
-		String s;
-		if (viewData != null) {
-			s = viewData;
-		} else {
-			s = stringValue;
-		}
-
-		sb.append(renderer.render(s));
+		sb.append(renderer.render(rendValue));
 	}
 }

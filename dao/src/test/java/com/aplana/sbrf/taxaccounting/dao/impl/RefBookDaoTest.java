@@ -55,20 +55,20 @@ public class RefBookDaoTest {
 		// проверяем типы значений
 		for (int i = 0; i < 2; i++) {
 			Map<String, RefBookValue> record = data.getRecords().get(0);
-			Assert.assertEquals(RefBookAttributeType.NUMBER, record.get("id").getAttributeType());
+			Assert.assertEquals(RefBookAttributeType.NUMBER, record.get(RefBook.RECORD_ID_ALIAS).getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.STRING, record.get("name").getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.NUMBER, record.get("pagecount").getAttributeType());
 			Assert.assertEquals(RefBookAttributeType.REFERENCE, record.get("author").getAttributeType());
 		}
 		sort(data.getRecords());
 		Map<String, RefBookValue> record = data.getRecords().get(0);
-		Assert.assertEquals(1, record.get("id").getNumberValue().intValue());
+		Assert.assertEquals(1, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
 		Assert.assertEquals("Алиса в стране чудес", record.get("name").getStringValue());
 		Assert.assertEquals(1113, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(5, record.get("author").getReferenceValue().intValue());
 
 		Map<String, RefBookValue> record2 = data.getRecords().get(1);
-		Assert.assertEquals(4, record2.get("id").getNumberValue().intValue());
+		Assert.assertEquals(4, record2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
 		Assert.assertEquals("Вий", record2.get("name").getStringValue());
 		Assert.assertEquals(425, record2.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(6, record2.get("author").getReferenceValue().intValue());
@@ -82,7 +82,7 @@ public class RefBookDaoTest {
 		Assert.assertEquals(2, data.getRecords().size());
 		sort(data.getRecords());
 		Map<String, RefBookValue> record = data.getRecords().get(0);
-		Assert.assertEquals(2, record.get("id").getNumberValue().intValue());
+		Assert.assertEquals(2, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
 		Assert.assertEquals("Алиса в стране", record.get("name").getStringValue());
 		Assert.assertEquals(1213, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(7, record.get("author").getReferenceValue().intValue());
@@ -95,7 +95,7 @@ public class RefBookDaoTest {
 		// проверяем кол-во строк
 		Assert.assertEquals(1, data.getRecords().size());
 		Map<String, RefBookValue> record2 = data.getRecords().get(0);
-		Assert.assertEquals(4, record2.get("id").getNumberValue().intValue());
+		Assert.assertEquals(4, record2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
 		Assert.assertEquals("Вий", record2.get("name").getStringValue());
 		Assert.assertEquals(425, record2.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(6L, record2.get("author").getReferenceValue().intValue());
@@ -125,8 +125,8 @@ public class RefBookDaoTest {
 		Collections.sort(data, new Comparator<Map<String, RefBookValue>>() {
 			@Override
 			public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-				Long l1 = o1.get("id").getNumberValue().longValue();
-				Long l2 = o2.get("id").getNumberValue().longValue();
+				Long l1 = o1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+				Long l2 = o2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
 				return l1.compareTo(l2);
 			}
 		});
@@ -141,7 +141,7 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetRecordData(){
 		Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
-		Assert.assertEquals(4, record.get("id").getNumberValue().intValue());
+		Assert.assertEquals(4, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
 		Assert.assertEquals("Вий", record.get("name").getStringValue());
 		Assert.assertEquals(425, record.get("pagecount").getNumberValue().doubleValue(), 1e-5);
 		Assert.assertEquals(6, record.get("author").getReferenceValue().intValue());

@@ -36,7 +36,7 @@ public class FormDataPresenter extends
 		FormDataPresenterBase<FormDataPresenter.MyProxy> implements
 		FormDataUiHandlers {
 
-	public static int PAGE_SIZE = 15;
+	public static final int PAGE_SIZE = 15;
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -308,6 +308,7 @@ public class FormDataPresenter extends
 					@Override
 					public void onSuccess(FormDataResult result) {
 						modifiedRows.clear();
+						getView().updateData();
 						processFormDataResult(result);
 					}
 

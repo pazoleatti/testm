@@ -159,7 +159,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
-		String idsSQL = "select ID from (select rownum as IDX, ID, TYPE from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX between :from and :to";
+		String idsSQL = "select ID from (select row_number() over (order by ORD) as IDX, ID, TYPE from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where IDX between :from and :to";
+        if (!isSupportOver()){
+            idsSQL = idsSQL.replaceFirst("over \\(order by ORD\\)", "over ()");
+        }
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("types", TypeFlag.rtsToKeys(new TypeFlag[] { TypeFlag.ADD,
@@ -247,7 +250,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
             long diff = 5 * rows.size(); //minimal diff between rows
-            int endIndex = getSize(formData, null);
+            int endIndex = phisicalGetSize(formData,
+                    new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME}, null);
 
             /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
@@ -255,16 +259,20 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
              */
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("diff", diff);
-            map.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+            map.put("types", Arrays.asList(TypeFlag.DEL.getKey(), TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
             map.put("formDataId", formData.getId());
             map.put("dataStartRowIndex", (long) (index + 1));
             map.put("dataEndRowIndex", (long) endIndex);
 
+            String sql = "update DATA_ROW set ORD = ORD + :diff where ID in" +
+                    "(select RR.ID from " +
+                    "(select row_number() over (order by DR.ORD) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
+                    "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))";
+            if (!isSupportOver()){
+                sql = sql.replaceFirst("over \\(order by DR.ORD\\)", "over ()");
+            }
             getNamedParameterJdbcTemplate().update(
-                    "update DATA_ROW set ORD = ORD + :diff where ID in" +
-                            "(select RR.ID from " +
-                            "(select rownum as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId order by DR.ORD) " +
-                            "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))", map
+                    sql, map
             );
             ordEnd = getOrd(formData.getId(), index + 1);
             ordStep = DataRowDaoImplUtils
@@ -316,6 +324,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
+
+        if(!isSupportOver()){
+            sql.first = sql.getFirst().replaceFirst("over \\(order by R.ORD\\)", "over ()");
+        }
+
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082
@@ -415,7 +428,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return
 	 */
 	private Long getOrd(long formDataId, int dataRowIndex) {
-		String sql = "select ORD from (select rownum as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where IDX = :dataRowIndex";
+		String sql = "select ORD from (select row_number() over (order by ORD) as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where IDX = :dataRowIndex";
+        if (!isSupportOver()){
+            sql = sql.replaceFirst("over \\(order by ORD\\)", "over ()");
+        }
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
 		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
@@ -434,7 +450,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return
 	 */
 	private Pair<Long, Integer> getOrdAndIndex(long formDataId, Long dataRowId) {
-		String sql = "select ORD, IDX from (select rownum as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId order by ORD) RR where ID = :dataRowId";
+		String sql = "select ORD, IDX from (select row_number() over (order by ORD) as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where ID = :dataRowId";
+        if (!isSupportOver()){
+            sql = sql.replaceFirst("over \\(order by ORD\\)", "over ()");
+        }
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
 		params.put("types",
