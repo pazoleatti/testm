@@ -31,7 +31,7 @@
 				<Set name="uniqueName">TaxAccDS</Set>
 				<Set name="allowLocalTransactions">true</Set>
 				<Set name="minPoolSize">0</Set>
-				<Set name="maxPoolSize">5</Set>
+				<Set name="maxPoolSize">10</Set>
 				<Get name="driverProperties">
 					<Put name="driverClassName">oracle.jdbc.OracleDriver</Put>
 					<Put name="url">
