@@ -104,9 +104,7 @@ public class DataRowDaoImplTest {
 		int i = 0;
 		for (DataRow<Cell> dataRow : dataRows) {
 			Object v = dataRow.get("stringColumn");
-			;
 			result[i] = Integer.valueOf(v != null ? String.valueOf(v) : "0");
-            System.out.println("Id: " + dataRow.getId() + " index: " + dataRow.getIndex());
 			i++;
 		}
 		return result;
@@ -406,9 +404,7 @@ public class DataRowDaoImplTest {
 
 		dataRowDao.insertRows(fd, 3, dataRows);
 		dataRowDao.insertRows(fd, 3, dataRows);
-        for (DataRow dataRow : dataRows){
-            System.out.println("Test: " + dataRow);
-        }
+
         dataRows = dataRowDao.getRows(fd, null, null);
 		Assert.assertArrayEquals(new int[] { 1, 2, 21, 22, 21, 22, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRows));
