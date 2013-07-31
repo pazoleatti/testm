@@ -842,8 +842,11 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-        Assert.assertEquals(addedDataRowsBefore.get(0).getId(), addedDataRowsAfter.get(100000).getId());//проверка сдвига, id записи должны быть равны
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
+
+        //проверка сдвига, id записи должны быть равны,все сдвинулись
+        for (int i  =0; i< sizeBefore; i++){
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + i)).getId());
+        }
 	}
 
 	@Test
@@ -862,9 +865,7 @@ public class DataRowDaoImplTest {
         Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
         //проверка сдвига, id записи должны быть равны(т.е. со сдвигом в данном случае на 100000)
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get(100004).getId());
-
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
+        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + 4)).getId());
 	}
 
 	@Test
@@ -882,11 +883,10 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
 
         //проверка сдвига, id записи должны быть равны(т.е. без сдвига в данном случае)
-        Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get(4).getId());
-
+        for (int i  =0; i< sizeBefore; i++){
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get(i).getId());
+        }
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
 	}
 
 }

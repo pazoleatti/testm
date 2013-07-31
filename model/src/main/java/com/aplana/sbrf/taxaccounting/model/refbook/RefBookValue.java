@@ -97,25 +97,19 @@ public class RefBookValue implements Serializable {
 
 		RefBookValue that = (RefBookValue) o;
 
-		if (attributeType != that.attributeType) return false;
-		if (!value.equals(that.value)) return false;
-
-		return true;
-	}
+        return attributeType == that.attributeType
+                && (value == null || that.value != null)
+                && (value != null || that.value == null)
+                && (value == null || that.value == null || value.equals(that.value));
+    }
 
 	@Override
 	public int hashCode() {
-		int result = attributeType.hashCode();
-		result = 31 * result + value.hashCode();
-		return result;
+		return 31 * attributeType.hashCode() + (value == null ? 0 : value.hashCode());
 	}
 
-	@Override
+    @Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(attributeType.name().charAt(0));
-		sb.append(":");
-		sb.append(value);
-		return sb.toString();
+        return value == null ? "" : value.toString();
 	}
 }

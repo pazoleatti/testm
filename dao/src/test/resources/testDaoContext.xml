@@ -17,6 +17,9 @@
         <jdbc:script location="hsql_init.sql" encoding="UTF-8"/>
     </jdbc:embedded-database>
 
+    <!-- Встроенная тестовая база данных H2 -->
+    <!--<jdbc:embedded-database id="dataSource" type="H2" />-->
+
 	<!--Uncomment for Oracle testing-->
 	<!--<bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">
         <property name="URL" value="jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL" /> 
@@ -29,5 +32,4 @@
 		<jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
 		<jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
-    
 </beans>
