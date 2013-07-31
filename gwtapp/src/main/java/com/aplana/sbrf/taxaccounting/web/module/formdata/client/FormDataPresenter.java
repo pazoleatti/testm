@@ -308,6 +308,7 @@ public class FormDataPresenter extends
 					@Override
 					public void onSuccess(FormDataResult result) {
 						modifiedRows.clear();
+						getView().updateData();
 						processFormDataResult(result);
 					}
 

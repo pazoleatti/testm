@@ -14,7 +14,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 public class RefBookUiColumn extends DataRowColumn<Long> {
 	
 	public RefBookUiColumn(RefBookColumn column, ColumnContext columnContext) {
-		super(new RefBookCell(column.getRefBookAttributeId(), columnContext), column);
+		super(new RefBookCell(columnContext), column);
 		this.setHorizontalAlignment(ALIGN_RIGHT);
 		this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, Long>() {
 			@Override

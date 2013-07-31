@@ -20,6 +20,8 @@ public class Cell extends AbstractCell {
 	private Date dateValue;
 	private BigDecimal numericValue;
 	private boolean editable;
+	
+	private String refBookDereference;
 
 	private FormStyle style;
 	
@@ -237,6 +239,28 @@ public class Cell extends AbstractCell {
 
 	public String getStyleAlias() {
 		return style != null ? style.getAlias() : null;
+	}
+
+	/**
+	 * Возвращает разименованное значение справочника 
+	 * !!! Используется только в GUI
+	 * SBRFACCTAX-3219
+	 * 
+	 * @return
+	 */
+	public String getRefBookDereference() {
+		return refBookDereference;
+	}
+
+	/**
+	 * Возвращает разименованное значение справочника
+	 * !!! Используется только в GUI
+	 * SBRFACCTAX-3219
+	 * 
+	 * @param refBookDereference
+	 */
+	public void setRefBookDereference(String refBookDereference) {
+		this.refBookDereference = refBookDereference;
 	}
 
 

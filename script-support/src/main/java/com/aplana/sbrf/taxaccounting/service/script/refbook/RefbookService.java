@@ -9,7 +9,7 @@ import java.util.Map;
 
 
 @ScriptExposed
-public interface RefbookService {
+public interface RefBookService {
 
     Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
