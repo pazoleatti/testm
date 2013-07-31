@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,5 +100,28 @@ public class ReportPeriodDaoTest {
 		reportPeriodDao.changeActive(reportPeriod.getId(), true);
 		reportPeriod = reportPeriodDao.get(2);
 		assertEquals(true, reportPeriod.isActive());
+	}
+
+	@Test
+	public void addTest() {
+		ReportPeriod newReportPeriod = new ReportPeriod();
+		newReportPeriod.setBalancePeriod(true);
+		newReportPeriod.setName("MyTestName");
+		newReportPeriod.setOrder(reportPeriodDao.listByTaxPeriod(1).size() + 1);
+		newReportPeriod.setActive(true);
+		newReportPeriod.setMonths(3);
+		newReportPeriod.setDepartmentId(2);
+		newReportPeriod.setTaxPeriodId(1);
+
+		int newReportPeriodId = reportPeriodDao.add(newReportPeriod);
+
+		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
+
+		assertEquals(true, reportPeriod.isBalancePeriod());
+		assertEquals("MyTestName", reportPeriod.getName());
+		assertEquals(true, reportPeriod.isActive());
+		assertEquals(3, reportPeriod.getMonths());
+		assertEquals(2, reportPeriod.getDepartmentId());
+		assertEquals(1, reportPeriod.getTaxPeriodId());
 	}
 }

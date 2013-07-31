@@ -9,7 +9,6 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.signin.SignIn" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.listeditor.ListEditor" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.DictionaryPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.logarea.LogArea" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.version.ProjectVersion" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.history.History" />

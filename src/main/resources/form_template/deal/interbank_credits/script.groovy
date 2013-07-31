@@ -87,8 +87,21 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
-        ['fullName', 'inn', 'countryName', 'countryCode', 'docNumber', 'docDate',
-                'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate'].each {
+        [
+                'fullName',      // Полное наименование юридического лица с указанием ОПФ
+                'inn',           // ИНН/КИО
+                'countryName',   // Наименование страны регистрации
+                'countryCode',   // Код страны регистрации по классификатору ОКСМ
+                'docNumber',     // Номер договора
+                'docDate',       // Дата договора
+                'dealNumber',    // Номер сделки
+                'dealDate',      // Дата сделки
+                'count',         // Количество
+                'sum',           // Сумма доходов Банка по данным бухгалтерского учета, руб.
+                'price',         // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+                'total',         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
+                'dealDoneDate'   // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name

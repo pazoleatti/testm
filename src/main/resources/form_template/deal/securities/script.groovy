@@ -85,7 +85,18 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         def okeiCodeCell = row.getCell('okeiCode')
-        ['fullNamePerson', 'inn', 'countryCode', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDate'].each {
+        [
+                'fullNamePerson',// Полное наименование юридического лица с указанием ОПФ
+                'inn',           // ИНН/КИО
+                'countryCode',   // Код страны регистрации по классификатору ОКСМ
+                'docNumber',     // Номер договора
+                'docDate',       // Дата договора
+                'okeiCode',      // Код единицы измерения по ОКЕИ
+                'count',         // Количество
+                'price',         // Цена
+                'cost',          // Стоимость
+                'dealDate'       // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name

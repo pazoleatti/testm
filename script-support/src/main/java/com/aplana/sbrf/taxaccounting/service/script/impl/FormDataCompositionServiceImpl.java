@@ -22,9 +22,9 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.script.FormDataCompositionService;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 
 /**
  * Сервис, отвечающий за интеграцию/дезинтеграцию форм. Поставляется в скрипты и позволяет формам посылать события

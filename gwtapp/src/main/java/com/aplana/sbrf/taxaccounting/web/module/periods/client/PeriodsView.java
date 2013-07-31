@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -18,6 +19,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -91,17 +93,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
 	@Override
 	public void setTableData(List<TableRow> data) {
-
 		periodsTable.setRowData(data);
-//		for (int i=0; i<data.size(); i++) {
-//			if (data.get(i).isSubHeader()) {
-//				for(int j=0; j<periodsTable.getRowElement(i).getCells().getLength(); j++) {
-//					periodsTable.getRowElement(i).getCells().getItem(j).setPropertyString("background-color","#888"); //TODO
-//				}
-//
-//			}
-//		}
-//		Window.alert("Форма еще не готова!");
 	}
 
 	@Override
@@ -110,21 +102,30 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments) {
+	public void setFilterData(List<Department> departments, Map<String, Integer> selectedDepartments, int yearFrom, int yearTo) {
 		Set<Integer> available = new HashSet<Integer>();
 		for (Department dep : departments) {
 			available.add(dep.getId());
 		}
 		departmentPicker.setTreeValues(departments, available);
+		departmentPicker.setSelectedItems(selectedDepartments);
+		fromBox.setValue(yearFrom);
+		toBox.setValue(yearTo);
+
 	}
 
 	@UiHandler("find")
 	void onFindClicked(ClickEvent event) {
+		if ( (fromBox.getValue() > toBox.getValue())) {
+			Window.alert("Интервал поиска периодов указан неверно!");
+			return;
+		}
 		if (getUiHandlers() != null) {
 			getUiHandlers().applyFilter(
 					Integer.valueOf(fromBox.getValue()),
 					Integer.valueOf(toBox.getValue()),
-					departmentPicker.getSelectedItems().values().iterator().next()
+					departmentPicker.getSelectedItems().values().isEmpty() ?
+							0 : departmentPicker.getSelectedItems().values().iterator().next()
 			);
 		}
 	}
@@ -142,10 +143,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@UiHandler("openPeriod")
 	void onOpenPeriodClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-//			TableRow selectedRow = selectionModel.getSelectedObject();
-//			if (!selectedRow.isSubHeader()) {
-				getUiHandlers().openPeriod();
-//			}
+			getUiHandlers().openPeriod();
 		}
 	}
 }

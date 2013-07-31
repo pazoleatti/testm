@@ -316,6 +316,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
+
+        if(!isSupportOver()){
+            sql.first = sql.getFirst().replaceFirst("over \\(order by R.ORD\\)", "over ()");
+        }
+
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
 		// SBRFACCTAX-2082
@@ -340,6 +345,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		if (dataRows.isEmpty()) {
 			return;
+		}
+		
+		if (DataRowDaoImplUtils.hasDublicats(dataRows)){
+			throw new IllegalArgumentException("Дубликаты строк не допустимы в списке. Дубликаты - ссылки на один и тот же объект DataRow");
 		}
 
 		// SBRFACCTAX-2201, SBRFACCTAX-2082
@@ -400,7 +409,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 
 		batchInsertCells(dataRows);
-
+		
 	}
 
 	/**

@@ -1,7 +1,8 @@
-package com.aplana.sbrf.taxaccounting.service.script;
+package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 
 
 /**

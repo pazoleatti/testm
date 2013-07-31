@@ -90,8 +90,21 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
-        ['fullName', 'inn', 'countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber', 'dealDate'
-                , 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate'].each {
+        [
+                'fullName',         // Полное наименование с указанием ОПФ
+                'inn',              // ИНН/КИО
+                'countryName',      // Наименование страны регистрации
+                'countryCode',      // Код страны по классификатору ОКСМ
+                'docNum',           // Номер договора
+                'docDate',          // Дата договора
+                'dealNumber',       // Номер сделки
+                'dealDate',         // Дата заключения сделки
+                'currencyCode',     // Код валюты расчетов по сделке
+                'countryDealCode',  // Код страны происхождения предмета сделки по классификатору ОКСМ
+                'price',            // Цена (тариф) за единицу измерения, руб.
+                'total',            // Итого стоимость, руб.
+                'dealDoneDate'      // Дата совершения сделки
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -136,8 +149,14 @@ void logicCheck() {
             def msg2 = row.getCell('total').column.name
             logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
         }
+        // Корректность дат сделки  dealDate - 9гр, dealDoneDate - 16гр
+        def dealDoneDate = row.getCell('dealDoneDate')
+        if (dealDateCell.value > dealDoneDate.value) {
+            def msg1 = dealDoneDate.column.name
+            def msg2 = dealDateCell.column.name
+            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+        }
     }
-
     checkNSI()
 }
 
@@ -166,51 +185,6 @@ void calc() {
 }
 
 /**
- * Проставляет статические строки
- */
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-
-        def newRow = formData.createDataRow()
-
-        newRow.fullName = 'Подитог:'
-        newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 10
-
-        // Расчеты подитоговых значений
-        BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
-        for (row in formData.dataRows) {
-
-            incomeSum = row.incomeSum
-            outcomeSum = row.outcomeSum
-            total = row.total
-
-            incomeSumItg += incomeSum != null ? incomeSum : 0
-            outcomeSumItg += outcomeSum != null ? outcomeSum : 0
-            totalItg += total != null ? total : 0
-        }
-
-        newRow.incomeSum = incomeSumItg
-        newRow.outcomeSum = outcomeSumItg
-        newRow.total = totalItg
-
-        formData.dataRows.add(newRow)
-    }
-}
-
-/**
- * Удаление всех статическиех строк "Подитог" из списка строк
- */
-void deleteAllStatic() {
-    for (Iterator<DataRow> iter = formData.dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
-        }
-    }
-}
-
-/**
  * Консолидация
  */
 void consolidation() {
@@ -231,4 +205,58 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows);
+}
+
+/**
+ * Удаление всех статическиех строк "Подитог" из списка строк
+ */
+void deleteAllStatic() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            dataRowHelper.delete(row)
+            iter.remove()
+        }
+    }
+    dataRowHelper.save(dataRows);
+}
+
+/**
+ * Проставляет статические строки
+ */
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+        def newRow = formData.createDataRow()
+
+        newRow.fullName = 'Подитог:'
+        newRow.setAlias('itg')
+        newRow.getCell('fullName').colSpan = 10
+
+        // Расчеты подитоговых значений
+        def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
+        for (row in dataRows) {
+
+            def incomeSum = row.incomeSum
+            def outcomeSum = row.outcomeSum
+            def total = row.total
+
+            incomeSumItg += incomeSum != null ? incomeSum : 0
+            outcomeSumItg += outcomeSum != null ? outcomeSum : 0
+            totalItg += total != null ? total : 0
+        }
+
+        newRow.incomeSum = incomeSumItg
+        newRow.outcomeSum = outcomeSumItg
+        newRow.total = totalItg
+
+        dataRows.add(dataRows.size(), newRow)
+        dataRowHelper.insert(newRow, dataRows.size())
+        dataRowHelper.save(dataRows);
+    }
 }

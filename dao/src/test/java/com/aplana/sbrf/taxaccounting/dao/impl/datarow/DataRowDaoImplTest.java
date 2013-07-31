@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -105,17 +106,14 @@ public class DataRowDaoImplTest {
 			Object v = dataRow.get("stringColumn");
 			;
 			result[i] = Integer.valueOf(v != null ? String.valueOf(v) : "0");
-            System.out.println("Id: " + dataRow.getId() + " index: " + dataRow.getIndex());
 			i++;
 		}
 		return result;
 	}
 
 	private void checkIndexCorrect(List<DataRow<Cell>> dataRows) {
-		Integer i = 1;
-		for (DataRow<Cell> dataRow : dataRows) {
-			Assert.assertEquals(i, dataRow.getIndex());
-			i++;
+		for (int i = 0; i < dataRows.size(); i++) {
+			Assert.assertEquals(Integer.valueOf(i + 1), dataRows.get(i).getIndex());	
 		}
 	}
 
@@ -346,6 +344,43 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRows));
 		checkIndexCorrect(dataRows);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void maodifyAndSaveSuccess() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+		checkIndexCorrect(dataRows);
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "21");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+
+		dataRowDao.insertRows(fd, 1, Arrays.asList(dr));
+		dataRows.add(1, dr);
+		dataRowDao.saveRows(fd, dataRows);
+		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void maodifyAndSaveErrorDublicat() {
+
+		FormData fd = formDataDao.get(1);
+		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
+
+		DataRow<Cell> dr = fd.createDataRow();
+		dr.put("stringColumn", "21");
+		dr.put("numericColumn", 1.01);
+		Date date = getDate(2012, 11, 31);
+		dr.put("dateColumn", date);
+
+		dataRows.add(1, dr);
+		dataRows.add(2, dr);
+		dataRowDao.saveRows(fd, dataRows);
+	}
 
 	@Test
 	public void insertRowsRepeatedlySuccess() {
@@ -404,6 +439,7 @@ public class DataRowDaoImplTest {
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5, 51, 52 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
 	}
 
 	@Test
@@ -525,9 +561,12 @@ public class DataRowDaoImplTest {
 		dataRowDao.insertRows(fd,
 				dataRowDao.getRows(fd, null, new DataRowRange(5, 1)).get(0),
 				dataRows);
+		dataRows = dataRowDao.getRows(fd, null, null);
+		checkIndexCorrect(dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+		
 	}
 
 	@Test
@@ -766,7 +805,7 @@ public class DataRowDaoImplTest {
 	}
 	
 	@Test
-	public void perfomance() {
+	public void performance() {
 
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
@@ -806,8 +845,11 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-        Assert.assertEquals(addedDataRowsBefore.get(0).getId(), addedDataRowsAfter.get(100000).getId());//проверка сдвига, id записи должны быть равны
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
+
+        //проверка сдвига, id записи должны быть равны,все сдвинулись
+        for (int i  =0; i< sizeBefore; i++){
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + i)).getId());
+        }
 	}
 
 	@Test
@@ -826,9 +868,7 @@ public class DataRowDaoImplTest {
         Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
         //проверка сдвига, id записи должны быть равны(т.е. со сдвигом в данном случае на 100000)
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get(100004).getId());
-
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
+        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + 4)).getId());
 	}
 
 	@Test
@@ -846,11 +886,10 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
 
         //проверка сдвига, id записи должны быть равны(т.е. без сдвига в данном случае)
-        Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get(4).getId());
-
+        for (int i  =0; i< sizeBefore; i++){
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get(i).getId());
+        }
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeBefore, dataRowDao.getSize(fd,null));
 	}
 
 }

@@ -208,6 +208,15 @@ public class FormDataPresenter extends
 			if(formData.getId() == null){
 				goToFormDataList();
 			} else {
+				RollbackDataAction action = new RollbackDataAction();
+				action.setFormDataId(formData.getId());
+				dispatcher.execute(action, CallbackUtils
+						.defaultCallback(new AbstractCallback<RollbackDataResult>() {
+							@Override
+							public void onSuccess(RollbackDataResult result) {
+							}
+
+						}, this));
 				revealForm(true);
 				modifiedRows.clear();
 			}

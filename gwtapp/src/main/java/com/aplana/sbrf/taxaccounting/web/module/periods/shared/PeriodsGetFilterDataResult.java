@@ -11,6 +11,10 @@ public class PeriodsGetFilterDataResult implements Result {
     private List<Department> departments;
 	private FormDataFilterAvailableValues filterValues;
 	private List<DictionaryTaxPeriod> dictionaryTaxPeriods;
+	private int yearFrom;
+	private int yearTo;
+	private int currentYear;
+	private Department selectedDepartment;
 //	private List<>
 
     public PeriodsGetFilterDataResult(){
@@ -47,5 +51,37 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	public void setDictionaryTaxPeriods(List<DictionaryTaxPeriod> dictionaryTaxPeriods) {
 		this.dictionaryTaxPeriods = dictionaryTaxPeriods;
+	}
+
+	public int getYearFrom() {
+		return yearFrom;
+	}
+
+	public void setYearFrom(int yearFrom) {
+		this.yearFrom = yearFrom;
+	}
+
+	public int getYearTo() {
+		return yearTo;
+	}
+
+	public void setYearTo(int yearTo) {
+		this.yearTo = yearTo;
+	}
+
+	public int getCurrentYear() {
+		return currentYear;
+	}
+
+	public void setCurrentYear(int currentYear) {
+		this.currentYear = currentYear;
+	}
+
+	public Department getSelectedDepartment() {
+		return selectedDepartment;
+	}
+
+	public void setSelectedDepartment(Department selectedDepartment) {
+		this.selectedDepartment = selectedDepartment;
 	}
 }

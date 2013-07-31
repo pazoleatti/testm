@@ -1,3 +1,7 @@
+package form_template.income.output2
+
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -39,27 +43,30 @@ switch (formDataEvent) {
 }
 
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
-        formData.dataRows.remove(currentDataRow)
+    def data = getData(formData)
+    if (currentDataRow != null) {
+        getRows(data).remove(currentDataRow)
+        save(data)
     }
 }
 
 void addRow() {
+    def data = getData(formData)
     row = formData.createDataRow()
     for (alias in ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
             'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']) {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
+    getRows(data).add(row)
+    save(data)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
  */
 void checkUniq() {
 
-    FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
@@ -81,7 +88,8 @@ void checkDecl() {
 }
 
 void logicCheck() {
-    for (row in formData.dataRows) {
+    def data = getData(formData)
+    for (row in getRows(data)) {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
             if (row.getCell(alias).value == null) {
@@ -94,9 +102,64 @@ void logicCheck() {
             logger.error('Неправильно указан почтовый индекс!')
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
+            // @todo Вызывать работу со справочником по новому
             if (!dictionaryRegionService.isValidCode((String) row.subdivisionRF)) {
                 logger.error('Неверное наименование субъекта РФ!')
             }
         }
     }
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ */
+DataRow<Cell> getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Сохранить измененные значения нф.
+ *
+ * @param data данные нф (helper)
+ */
+void save(def data) {
+    data.save(getRows(data))
+}
+
+/**
+ * Удалить строку из нф
+ *
+ * @param data данные нф (helper)
+ * @param row строка для удаления
+ */
+void deleteRow(def data, def row) {
+    data.delete(row)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Проверить наличие итоговой строки.
+ *
+ * @param data данные нф (helper)
+ */
+def hasTotal(def data) {
+    for (DataRow row: getRows(data)) {
+        if (row.getAlias() == 'total') {
+            return true
+        }
+    }
+    return false
 }

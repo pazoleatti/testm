@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -10,15 +12,13 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.*;
+
 
 public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers>
 		implements OpenDialogPresenter.MyView, ReportPeriodDataProvider {
@@ -26,8 +26,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	public interface Binder extends UiBinder<PopupPanel, OpenDialogView> {
 	}
 
-	private DeclarationDataFilter filter;
-	private DeclarationDataFilterAvailableValues filterValues;
+	private static final String DEPARTMENT_PICKER_HEADER = "Выбор подразделения";
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
@@ -42,25 +41,22 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	@UiField
 	Button cancelButton;
 
-	@UiField(provided = true)
-	ListBoxWithTooltip period;
+	@UiField
+	IncrementButton yearBox;
 
-//	@UiField(provided = true)
-//	ListBoxWithTooltip<DeclarationType> declarationType;
+	@UiField
+	CheckBox balancePeriod;
+
+	@UiField
+	CustomDateBox term;
+
+	@UiField(provided = true)
+	ListBoxWithTooltip<DictionaryTaxPeriod> period;
 
 	@Inject
 	public OpenDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 
-//		declarationType = new ListBoxWithTooltip<DeclarationType>(new AbstractRenderer<DeclarationType>() {
-//			@Override
-//			public String render(DeclarationType object) {
-//				if (object == null) {
-//					return "";
-//				}
-//				return object.getName();
-//			}
-//		});
 		period = new ListBoxWithTooltip<DictionaryTaxPeriod>(new AbstractRenderer<DictionaryTaxPeriod>() {
 			@Override
 			public String render(DictionaryTaxPeriod object) {
@@ -76,56 +72,15 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public void setDeclarationFilter(DeclarationDataFilter filter) {
-		this.filter = filter;
-	}
-
-	@Override
-	public void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues) {
-		this.filterValues = filterValues;
-
-		setDeclarationType();
-	}
-
-	private void setDeclarationType() {
-//		declarationType.setValue(null);
-//		declarationType.setAcceptableValues(filterValues.getDeclarationTypes());
-
-		if (filter.getDeclarationTypeId() != null) {
-			for (DeclarationType availableType : filterValues.getDeclarationTypes()) {
-				if (availableType.getId() == filter.getDeclarationTypeId()) {
-//					declarationType.setValue(availableType);
-					return;
-				}
-			}
-		}
-	}
-
-	@Override
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
 		periodPicker = new ReportPeriodPicker(this, false);
 		periodPicker.setTaxPeriods(taxPeriods);
 	}
 
 	@Override
-	public void setDepartments(List<Department> departments) {
-
-//		departmentPickerPanel.clear();
-//		departmentPicker = new NewDepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
+	public void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments) {
 		departmentPicker.setTreeValues(departments, new HashSet<Integer>());
-//		departmentPickerPanel.add(departmentPicker);
-
-//		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-//			Integer departmentId = filter.getDepartmentIds().iterator().next();
-//			for (Department department : departments) {
-//				if (department.getId() == departmentId) {
-//					Map<String, Integer> value = new HashMap<String, Integer>(1);
-//					value.put(department.getName(), departmentId);
-//					departmentPicker.setSelectedItems(value);
-//					return;
-//				}
-//			}
-//		}
+		departmentPicker.setSelectedItems(selectedDepartments);
 	}
 
 	@Override
@@ -144,21 +99,8 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public DeclarationDataFilter updateAndGetDeclarationFilter() {
-		if (periodPicker.getSelectedReportPeriods().entrySet().iterator().hasNext()) {
-			filter.setReportPeriodIds(Arrays.asList(periodPicker.
-					getSelectedReportPeriods().entrySet().iterator().next().getKey()));
-		}
-		if (departmentPicker.getSelectedItems().entrySet().iterator().hasNext() ) {
-			filter.setDepartmentIds(departmentPicker.getSelectedItems().isEmpty() ? new ArrayList<Integer>() :
-					Arrays.asList(departmentPicker.
-							getSelectedItems().entrySet().iterator().next().getValue()));
-		}
-//		if(declarationType.getValue() != null) {
-//			filter.setDeclarationTypeId(declarationType.getValue().getId());
-//		}
-
-		return filter;
+	public void setYear(int year) {
+		yearBox.setValue(year);
 	}
 
 	@Override
@@ -173,7 +115,14 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
-		getUiHandlers().onContinue();
+		OpenFilterData openFilterData = new OpenFilterData();
+		openFilterData.setYear(yearBox.getValue());
+		openFilterData.setBalancePeriod(balancePeriod.getValue());
+		openFilterData.setDepartmentId(departmentPicker.getSelectedItems().entrySet().iterator().next().getValue());
+		openFilterData.setDictionaryTaxPeriod(period.getValue());
+		openFilterData.setEndDate(term.getValue());
+
+		getUiHandlers().onContinue(openFilterData);
 	}
 
 	@UiHandler("cancelButton")

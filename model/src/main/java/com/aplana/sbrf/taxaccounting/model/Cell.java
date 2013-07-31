@@ -48,8 +48,13 @@ public class Cell extends AbstractCell {
 		} else if (dateValue != null) {
 			return dateValue;
 		} else if (numericValue != null) {
-			return numericValue;
-		}
+			if (getColumn() instanceof RefBookColumn){
+				// Возвращаем Long если это ссылка на значение справочника
+				return numericValue.longValueExact();
+			} else {
+				return numericValue;
+			}
+		} 
 		return null;
 	}
 
@@ -59,6 +64,26 @@ public class Cell extends AbstractCell {
 			getValueOwner().setValue(value);
 			return getValueOwner().getValue();
 		}
+		
+		// Проверяем на предмет столбца - справочник
+		if (getColumn() instanceof RefBookColumn) {
+			if((value != null) && (value instanceof BigDecimal) && ((BigDecimal)value).scale() == 0){
+				numericValue = (BigDecimal)value;
+				return numericValue.longValueExact();
+			} else if((value != null) && (value instanceof Long)){
+				numericValue = BigDecimal.valueOf((Long)value);
+				return numericValue.longValueExact();
+			} else if (value == null) {
+				stringValue = null;
+				dateValue = null;
+				numericValue = null;
+				return null;
+			} else {
+				throw new IllegalArgumentException("Несовместимые типы колонки и значения. Ссылка на справочник должна быть типа Long "
+						+ "или BigDecimal со scale == 0");
+			}
+		}
+		
 		
 		if ( (value != null) && !(value instanceof Number && getColumn() instanceof NumericColumn
 				|| value instanceof String && getColumn() instanceof StringColumn

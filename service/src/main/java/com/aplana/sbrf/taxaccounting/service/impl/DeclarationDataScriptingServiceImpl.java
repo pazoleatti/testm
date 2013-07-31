@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
@@ -14,11 +13,15 @@ import org.springframework.stereotype.Component;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextImpl;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 /**

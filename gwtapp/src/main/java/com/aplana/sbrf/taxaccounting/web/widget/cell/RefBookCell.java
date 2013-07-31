@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import com.aplana.sbrf.taxaccounting.web.widget.dictionarypicker.client.DictionaryPickerWidget;
+import static com.google.gwt.dom.client.BrowserEvents.CLICK;
+import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
+
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -19,11 +22,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
-import java.io.Serializable;
-
-import static com.google.gwt.dom.client.BrowserEvents.CLICK;
-import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
-
 
 /**
  * Ячейка для редактирования значений из справочника.
@@ -34,26 +32,26 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
  *
  * @param <ValueType> тип значения справочника
  */
-public abstract class DictionaryCell<ValueType extends Serializable> extends AbstractEditableCell<ValueType, String> {
+public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	private int offsetX = 10;
 	private int offsetY = 10;
 
 	private Object lastKey;
 	private Element lastParent;
-	private ValueType lastValue;
+	private Long lastValue;
 
 	private int lastIndex;
 	private int lastColumn;
 	private PopupPanel panel;
 	protected final SafeHtmlRenderer<String> renderer;
-	private ValueUpdater<ValueType> valueUpdater;
-	private DictionaryPickerWidget<ValueType> selectWidget;
-	private String dictionaryCode;
+	private ValueUpdater<Long> valueUpdater;
+	private RefBookPickerWidget selectWidget;
+	private Long refBookAttrId;
 
-	public DictionaryCell(String dictionaryCode) {
+	public RefBookCell(Long refBookAttrId, ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
-		this.dictionaryCode = dictionaryCode;
+		this.refBookAttrId = refBookAttrId;
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
 
 		// Create popup panel
@@ -87,40 +85,39 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 		});
 	}
 
-	protected abstract DictionaryPickerWidget<ValueType> createWidget(String dictionaryCode);
-
-	protected abstract String valueToString(ValueType value);
 
 	@Override
-	public boolean isEditing(Context context, Element parent, ValueType value) {
+	public boolean isEditing(Context context, Element parent, Long value) {
 		return lastKey != null && lastKey.equals(context.getKey());
 	}
 
 	@Override
-	public void onBrowserEvent(Context context, Element parent, ValueType value,
-							   NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
+	public void onBrowserEvent(Context context, Element parent, Long value,
+							   NativeEvent event, ValueUpdater<Long> valueUpdater) {
 		super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		if (CLICK.equals(event.getType())) {
 			createSelectWidget();
 			onEnterKeyDown(context, parent, value, event, valueUpdater);
 		}
 	}
+	
+	
 
 	private void createSelectWidget() {
 		if (selectWidget != null) {
 			return;
 		}
 
-		selectWidget = createWidget(dictionaryCode);
+		selectWidget = new RefBookPickerWidget(refBookAttrId);
 		// Put selectWidget on panel
 		panel.add(selectWidget);
 		selectWidget.addValueChangeHandler(
-				new ValueChangeHandler<ValueType>() {
+				new ValueChangeHandler<Long>() {
 					@Override
-					public void onValueChange(ValueChangeEvent<ValueType> event) {
+					public void onValueChange(ValueChangeEvent<Long> event) {
 						// Remember the values before hiding the popup.
 						Element cellParent = lastParent;
-						ValueType oldValue = lastValue;
+						Long oldValue = lastValue;
 						Object key = lastKey;
 						int index = lastIndex;
 						int column = lastColumn;
@@ -128,8 +125,8 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 						selectWidget.clear();
 
 						// Update the cell and value updater.
-						ValueType value = event.getValue();
-						setViewData(key, valueToString(value));
+						Long value = event.getValue();
+						setViewData(key, String.valueOf(value));
 						setValue(new Context(index, column, key), cellParent, oldValue);
 						if (valueUpdater != null) {
 							valueUpdater.update(value);
@@ -140,8 +137,8 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 	}
 
 	@Override
-	protected void onEnterKeyDown(Context context, Element parent, ValueType value,
-								  NativeEvent event, ValueUpdater<ValueType> valueUpdater) {
+	protected void onEnterKeyDown(Context context, Element parent, Long value,
+								  NativeEvent event, ValueUpdater<Long> valueUpdater) {
 		this.lastKey = context.getKey();
 		this.lastParent = parent;
 		this.lastValue = value;
@@ -179,11 +176,11 @@ public abstract class DictionaryCell<ValueType extends Serializable> extends Abs
 	}
 
 	@Override
-	public void render(Context context, ValueType value, SafeHtmlBuilder sb) {
+	public void render(Context context, Long value, SafeHtmlBuilder sb) {
 		// Get the view data.
 		Object key = context.getKey();
 		String viewData = getViewData(key);
-		String stringValue = valueToString(value);
+		String stringValue = String.valueOf(value);
 
 		if (viewData != null && viewData.equals(stringValue)) {
 			clearViewData(key);

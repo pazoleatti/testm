@@ -1,11 +1,22 @@
+package form_template.income.output1
+
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
 
 /**
  * 6.3.1    Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях, созданных на территории Российской Федерации)
  */
+
+DataRowHelper getDataRowsHelper() {
+    DataRowHelper dataRowsHelper = null
+    if (formData.id != null) {
+        dataRowsHelper = formDataService.getDataRowHelper(formData)
+    }
+    return dataRowsHelper
+}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -16,6 +27,7 @@ switch (formDataEvent) {
         logicalCheck()
         logicCheck()
         calc()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.CHECK:
         logicalCheck()
@@ -26,6 +38,7 @@ switch (formDataEvent) {
         logicalCheck()
         logicCheck()
         calc()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_PREPARED_TO_CREATED:
         break
@@ -34,20 +47,23 @@ switch (formDataEvent) {
         logicalCheck()
         logicCheck()
         calc()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
         break
     case FormDataEvent.ADD_ROW:
         addRow()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
 }
+
 void deleteRow() {
-    // @todo убрать indexOf после http://jira.aplana.com/browse/SBRFACCTAX-2702
-    if (currentDataRow != null && formData.dataRows.indexOf(currentDataRow) != -1) {
-        formData.dataRows.remove(currentDataRow)
+    if (currentDataRow != null) {
+        dataRowsHelper.getAllCached().remove(currentDataRow)
     }
 }
 
@@ -62,7 +78,7 @@ void addRow() {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
-    formData.dataRows.add(row)
+    dataRowsHelper.getAllCached().add(row)
 
 }
 
@@ -71,7 +87,7 @@ void addRow() {
  */
 void checkUniq() {
 
-    FormData findForm = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    FormData findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
@@ -97,7 +113,7 @@ void logicalCheck() {
 
     formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = FormDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
+        formPrev = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriodPrev.id)
     }
     if (formPrev == null) {
         logger.warn('Форма за предыдущий отчётный период не создавалась!')
@@ -108,7 +124,7 @@ void logicalCheck() {
  * Проверка полей которые обязательно надо заполнить пользователю
  */
 void logicCheck() {
-    for (row in formData.dataRows) {
+    for (row in dataRowsHelper.getAllCached()) {
         for (alias in ['financialYear', 'dividendSumRaspredPeriod', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
                 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10',
                 'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia',
@@ -123,7 +139,7 @@ void logicCheck() {
 
 void calc() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        for (row in formData.dataRows) {
+        for (row in dataRowsHelper.getAllCached()) {
             row.dividendType = '2'
             row.taxPeriod = '34'
             row.dividendRussianMembersAll = row.dividendSumRaspredPeriod - row.dividendForgeinOrgAll - row.dividendForgeinPersonalAll

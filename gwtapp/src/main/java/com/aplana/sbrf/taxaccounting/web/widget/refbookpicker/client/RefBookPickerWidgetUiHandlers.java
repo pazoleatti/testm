@@ -5,8 +5,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface RefBookPickerWidgetUiHandlers extends UiHandlers, HasValue<Long>{
 	
-	
-	
 	void rangeChanged(int startIndex, int max);
 	
 	void onSearchPatternChange();

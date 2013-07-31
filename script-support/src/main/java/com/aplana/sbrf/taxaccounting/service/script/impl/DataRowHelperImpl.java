@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.script.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -80,7 +81,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 		@SuppressWarnings("unchecked")
 		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
 		dataRowDao.insertRows(fd, index, asList);
-		
+
 	}
 
 	@Override
@@ -104,12 +105,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void delete(DataRow<Cell> dataRow) {
 		@SuppressWarnings("unchecked")
 		List<DataRow<Cell>> asList = Arrays.asList(dataRow);
-		dataRowDao.removeRows(fd, asList);
-	}
+        dataRowDao.removeRows(fd, asList);
+        getAllCached().remove(dataRow);
+    }
 
 	@Override
 	public void delete(List<DataRow<Cell>> dataRows) {
 		dataRowDao.removeRows(fd, dataRows);
+        getAllCached().remove(dataRows);
 	}
 
 	@Override

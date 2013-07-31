@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 			reportPeriod.setTaxPeriodId(rs.getInt("tax_period_id"));
 			reportPeriod.setOrder(rs.getInt("ord"));
 			reportPeriod.setBalancePeriod(rs.getBoolean("is_balance_period"));
-
+			reportPeriod.setDepartmentId(rs.getLong("department_id"));
+			reportPeriod.setDictTaxPeriodId(rs.getInt("dict_tax_period_id"));
 			return reportPeriod;
 		}
 	}
@@ -85,9 +87,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public List<ReportPeriod> listByTaxPeriodAndDepartmentId(int taxPeriodId, long departmentId) {
 		return getJdbcTemplate().query(
-				"select * from report_period where tax_period_id = ? and department_id = ? order by ord",
-				new Object[]{taxPeriodId, departmentId},
-				new int[]{Types.NUMERIC, Types.NUMERIC},
+				"select * from report_period where tax_period_id = ? order by ord",
+				new Object[]{taxPeriodId},
+				new int[]{Types.NUMERIC},
 				new ReportPeriodMapper()
 		);
 	}
@@ -99,5 +101,40 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				new Object[]{active, reportPeriodId},
 				new int[]{Types.NUMERIC, Types.NUMERIC}
 		);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public int add(ReportPeriod reportPeriod) {
+		JdbcTemplate jt = getJdbcTemplate();
+
+		Integer id = reportPeriod.getId();
+		if (id == null) {
+			id = generateId("seq_report_period", Integer.class);
+		}
+
+		Integer order = reportPeriod.getOrder();
+		if (order == 0) {
+			order = jt.queryForInt(
+					"select max(ord) from report_period where tax_period_id = ?",
+					new Object[]{reportPeriod.getTaxPeriodId()},
+					new int[]{Types.NUMERIC}
+			);
+		}
+		jt.update(
+				"insert into report_period (id, name, is_active, months, tax_period_id, ord, " +
+						"is_balance_period, department_id, dict_tax_period_id)" +
+						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				id,
+				reportPeriod.getName(),
+				reportPeriod.isActive(),
+				reportPeriod.getMonths(),
+				reportPeriod.getTaxPeriodId(),
+				order,
+				reportPeriod.isBalancePeriod(),
+				reportPeriod.getDepartmentId(),
+				reportPeriod.getDictTaxPeriodId()
+		);
+		return id;
 	}
 }

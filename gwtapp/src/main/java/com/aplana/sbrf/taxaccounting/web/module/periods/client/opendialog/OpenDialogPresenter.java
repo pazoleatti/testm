@@ -3,8 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -14,6 +15,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -23,18 +25,17 @@ import java.util.List;
 public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyView> implements OpenDialogUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenDialogUiHandlers> {
-		void setDeclarationFilter(DeclarationDataFilter filter);
-		void setDeclarationFilterValues(DeclarationDataFilterAvailableValues filterValues);
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
-		void setDepartments(List<Department> departments);
+		void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments);
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
 		void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod);
-		DeclarationDataFilter updateAndGetDeclarationFilter();
+		void setYear(int year);
 	}
 
 	private DispatchAsync dispatcher;
 	private PlaceManager placeManager;
+	private TaxType taxType;
 
 	@Inject
 	public OpenDialogPresenter(final EventBus eventBus, final MyView view,
@@ -50,20 +51,12 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().hide();
 	}
 
-	public void setDeclarationFilter(DeclarationDataFilter filter) {
-		getView().setDeclarationFilter(filter);
-	}
-
-	public void setFilterValues(DeclarationDataFilterAvailableValues filterValues) {
-		getView().setDeclarationFilterValues(filterValues);
-	}
-
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods) {
 		getView().setTaxPeriods(taxPeriods);
 	}
 
-	public void setDepartments(List<Department> departments) {
-		getView().setDepartments(departments);
+	public void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments) {
+		getView().setDepartments(departments, selectedDepartments);
 	}
 
 	public void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod) {
@@ -74,8 +67,60 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().setCurrentReportPeriod(currentReportPeriod);
 	}
 
+	public void setYear(int year) {
+		getView().setYear(year);
+	}
+
 	@Override
-	public void onContinue() {
+	public void onContinue(OpenFilterData openFilterData) {
+		OpenPeriodAction action = new OpenPeriodAction();
+		action.setYear(openFilterData.getYear());
+
+		action.setEndDate(openFilterData.getEndDate());
+		action.setTaxType(this.taxType);
+		action.setDepartmentId(openFilterData.getDepartmentId());
+		action.setBalancePeriod(openFilterData.isBalancePeriod());
+		action.setActive(true);
+		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod().getCode());
+		action.setMonths(openFilterData.getDictionaryTaxPeriod().getMonths());
+		dispatcher.execute(action, CallbackUtils
+				.simpleCallback(new AbstractCallback<OpenPeriodResult>() {
+					@Override
+					public void onSuccess(OpenPeriodResult result) {
+						getView().hide();
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						if (caught instanceof OpenException) {
+							OpenException openException = (OpenException) caught;
+							switch (openException.getErrorCode()) {
+								case EXIST_OPEN:
+								case PREVIOUS_ACTIVE:
+									Window.alert(openException.getErrorMsg());
+									break;
+								case EXIST_CLOSED:
+									if (Window.confirm(openException.getErrorMsg())) {
+										ChangeActivePeriodAction requestData = new ChangeActivePeriodAction();
+										requestData.setReportPeriodId(openException.getReportPeriodId());
+										requestData.setActive(true);
+										dispatcher.execute(requestData, CallbackUtils //TODO добавить апдейт таблицы
+												.defaultCallback(new AbstractCallback<ChangeActivePeriodResult>() {
+													@Override
+													public void onSuccess(ChangeActivePeriodResult result) {
+														getView().hide();
+													}
+												}, OpenDialogPresenter.this)
+										);
+									}
+									break;
+							}
+						} else {
+							Window.alert(caught.getMessage());
+						}
+					}
+				})
+		);
 	}
 
 	@Override
@@ -89,5 +134,9 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 						getView().setReportPeriods(result.getReportPeriods());
 					}
 				}, OpenDialogPresenter.this));
+	}
+
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
 	}
 }
