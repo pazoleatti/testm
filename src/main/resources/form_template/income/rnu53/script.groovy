@@ -379,7 +379,6 @@ def logicalCheck(def useLog) {
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
                 if (totalRow.getCell(alias).getValue() != getSum(alias)) {
-                    logger.info(totalRow.getCell(alias).getValue() + ' ' + getSum(alias))
                     logger.error('Итоговые значения формы рассчитаны неверно!')
                     return false
                 }
@@ -454,7 +453,6 @@ void consolidation() {
                 getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         data.insert(row,getRows(data).size()+1)
-                        getRows(data).add(row)
                     }
                 }
             }

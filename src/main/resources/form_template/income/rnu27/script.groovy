@@ -339,14 +339,12 @@ void addAllStatic() {
             if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
                 def itogIssuerRow = calcItogIssuer(i)
                 data.insert(itogIssuerRow, i + 2)
-                data.getAllCached().add(i+1, itogIssuerRow)
                 j++
             }
 
             if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
                 def itogRegNumberRow = calcItogRegNumber(i)
                 data.insert(itogRegNumberRow, i + 2)
-                data.getAllCached().add(i+1, itogRegNumberRow)
                 j++
             }
             i += j  // Обязательно чтобы избежать зацикливания в простановке
@@ -354,7 +352,6 @@ void addAllStatic() {
 
         def rowItogo = calcItogo()
         data.insert(rowItogo,data.getAllCached().size()+1)
-        data.getAllCached().add(data.getAllCached().size(), rowItogo)
     }
 }
 
@@ -810,8 +807,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.insert(row,data.getAllCached().size())
-                        data.getAllCached().add(data.getAllCached().size(), row)
+                        data.insert(row,data.getAllCached().size()+1)
                     }
                 }
             }
