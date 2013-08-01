@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentParamDaoTest.xml"})
+@Deprecated
 public class DepartmentParamDaoTest {
 	@Autowired
 	DepartmentParamDao departmentParamDao;

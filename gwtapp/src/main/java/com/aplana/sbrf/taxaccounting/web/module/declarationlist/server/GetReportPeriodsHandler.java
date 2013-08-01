@@ -25,7 +25,12 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
 	@Override
 	public GetReportPeriodsResult execute(GetReportPeriods action, ExecutionContext executionContext) throws ActionException {
 		GetReportPeriodsResult result = new GetReportPeriodsResult();
-		result.setReportPeriods(reportPeriodDao.listByTaxPeriod(action.getTaxPeriod().getId()));
+        if (action.getDepartamentId() == null) {
+		    result.setReportPeriods(reportPeriodDao.listByTaxPeriod(action.getTaxPeriod().getId()));
+        } else {
+            result.setReportPeriods(reportPeriodDao.listByTaxPeriodAndDepartmentId(action.getTaxPeriod().getId(), action.getDepartamentId()));
+        }
+
 		return result;
 	}
 

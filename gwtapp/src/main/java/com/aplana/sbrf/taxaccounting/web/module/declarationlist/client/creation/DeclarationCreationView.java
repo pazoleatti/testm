@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,7 +19,7 @@ import java.util.*;
 
 
 public class DeclarationCreationView extends PopupViewWithUiHandlers<DeclarationCreationUiHandlers>
-		implements DeclarationCreationPresenter.MyView, ReportPeriodDataProvider {
+		implements DeclarationCreationPresenter.MyView, ReportPeriodSelectHandler {
 
 	public interface Binder extends UiBinder<PopupPanel, DeclarationCreationView> {
 	}
@@ -157,7 +157,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 		getUiHandlers().onTaxPeriodSelected(taxPeriod);
 	}
 
-	@UiHandler("continueButton")
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    }
+
+    @UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
 		getUiHandlers().onContinue();
 	}

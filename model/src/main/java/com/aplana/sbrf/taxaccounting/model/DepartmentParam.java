@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * общие сведения подразделения
  */
+@Deprecated
 public class DepartmentParam implements Serializable {
 	private static final long serialVersionUID = 1L;
 

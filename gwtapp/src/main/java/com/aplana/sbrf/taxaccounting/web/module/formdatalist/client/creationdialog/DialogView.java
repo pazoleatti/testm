@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implements DialogPresenter.MyView,
-		ReportPeriodDataProvider{
+        ReportPeriodSelectHandler {
 
 	public interface Binder extends UiBinder<PopupPanel, DialogView> {
 	}
@@ -171,7 +171,11 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		}
 	}
 
-	@Override
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    }
+
+    @Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		reportPeriodPicker.setReportPeriods(reportPeriods);
 	}
