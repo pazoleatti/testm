@@ -1033,7 +1033,7 @@ create table log_system (
   user_id             number(9,0),
   roles               varchar2(200),
   department_id       number(9,0) not null,
-  report_period_id    number(9,0) not null,
+  report_period_id    number(9,0),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
@@ -1044,7 +1044,9 @@ alter table log_system add constraint log_system_chk_form_kind_id check (form_ki
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 101, 102,
   103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 501, 502));
 
-alter table log_system add constraint log_system_chk_dcl_form check (declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502) or
+  declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502) or report_period_id is not null);
 
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user (id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
