@@ -158,7 +158,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	}
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @UiHandler("continueButton")

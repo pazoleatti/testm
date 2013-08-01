@@ -47,10 +47,9 @@ public class ReportPeriodPicker extends Composite{
 
 	private List<TaxPeriod> taxPeriods = new ArrayList<TaxPeriod>();
 	private Map<Integer, ReportPeriodItem> reportPeriodItems = new HashMap<Integer, ReportPeriodItem>();
-	private final Map<String, Integer> allReportPeriodsNameToId = new HashMap<String, Integer>();
-	private final Map<Integer, String> allReportPeriodsIdToName = new HashMap<Integer, String>();
 	private final Map<TaxPeriod, TreeItem> taxPeriodNodes = new HashMap<TaxPeriod, TreeItem>();
-	private final Map<Integer, String> selectedReportPeriods = new HashMap<Integer, String>();
+	private final Map<Integer, ReportPeriod> selectedReportPeriods = new HashMap<Integer, ReportPeriod>();
+    private final Map<CheckBox, ReportPeriod> cbToReportPeriod = new HashMap<CheckBox, ReportPeriod>();
 	private TaxPeriod lastTimeSelectedTaxPeriod = new TaxPeriod();
 
 	@UiConstructor
@@ -96,7 +95,7 @@ public class ReportPeriodPicker extends Composite{
 		setupUI();
 	}
 
-	public Map<Integer, String> getSelectedReportPeriods(){
+	public Map<Integer, ReportPeriod> getSelectedReportPeriods(){
 		return selectedReportPeriods;
 	}
 
@@ -110,10 +109,10 @@ public class ReportPeriodPicker extends Composite{
 			entry.getValue().getCheckBox().setValue(false);
 		}
 
-		Map<Integer, String> periods = new HashMap<Integer, String>();
+		Map<Integer, ReportPeriod> periods = new HashMap<Integer, ReportPeriod>();
 		for(ReportPeriod item : reportPeriodList){
 			if (item != null) {
-				periods.put(item.getId(), item.getName());
+				periods.put(item.getId(), item);
 				if (reportPeriodItems != null && reportPeriodItems.get(item.getId()) != null) {
 					reportPeriodItems.get(item.getId()).getCheckBox().setValue(true);
 				}
@@ -125,23 +124,23 @@ public class ReportPeriodPicker extends Composite{
 	private void setSelectedReportPeriods(){
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
-		for(Map.Entry<Integer, String> item : selectedReportPeriods.entrySet()){
-			result.append(item.getValue()).append(';');
-			tooltipTitle.append(item.getValue()).append('\n');
+		for(Map.Entry<Integer, ReportPeriod> item : selectedReportPeriods.entrySet()){
+			result.append(item.getValue().getName()).append(';');
+			tooltipTitle.append(item.getValue().getName()).append('\n');
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());
         dataProvider.onReportPeriodsSelected(selectedReportPeriods);
 	}
 
-	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){
+	private void setSelectedReportPeriods(Map<Integer, ReportPeriod> selectedReportPeriods){
 		StringBuilder result = new StringBuilder();
 		StringBuilder tooltipTitle = new StringBuilder();
 		this.selectedReportPeriods.clear();
 		this.selectedReportPeriods.putAll(selectedReportPeriods);
-		for(Map.Entry<Integer, String> item : this.selectedReportPeriods.entrySet()){
-			result.append(item.getValue()).append(';');
-			tooltipTitle.append(item.getValue()).append('\n');
+		for(Map.Entry<Integer, ReportPeriod> item : this.selectedReportPeriods.entrySet()){
+			result.append(item.getValue().getName()).append(';');
+			tooltipTitle.append(item.getValue().getName()).append('\n');
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());
@@ -177,9 +176,8 @@ public class ReportPeriodPicker extends Composite{
 			ReportPeriodItem treeItem = new ReportPeriodItem(checkBox);
 			treeItem.setReportPeriod(reportPeriod);
 			reportPeriodItems.put(reportPeriod.getId(), treeItem);
+            cbToReportPeriod.put(checkBox, reportPeriod);
 			taxPeriodNodes.get(lastTimeSelectedTaxPeriod).addItem(treeItem);
-			allReportPeriodsNameToId.put(reportPeriod.getName(), reportPeriod.getId());
-			allReportPeriodsIdToName.put(reportPeriod.getId(), reportPeriod.getName());
 		}
 	}
 
@@ -286,15 +284,16 @@ public class ReportPeriodPicker extends Composite{
 		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				CheckBox selectedItem = (CheckBox)event.getSource();
-				Integer selectedItemId = allReportPeriodsNameToId.get(selectedItem.getText());
+
+                ReportPeriod checkedPeriod = cbToReportPeriod.get(event.getSource());
+
 				if(checkBox.getValue()){
 					if(checkBox instanceof RadioButton){
 						selectedReportPeriods.clear();
 					}
-					selectedReportPeriods.put(selectedItemId, allReportPeriodsIdToName.get(selectedItemId));
+					selectedReportPeriods.put(checkedPeriod.getId(), checkedPeriod);
 				} else if (!checkBox.getValue()) {
-					selectedReportPeriods.remove(selectedItemId);
+					selectedReportPeriods.remove(checkedPeriod.getId());
 				}
 			}
 		});

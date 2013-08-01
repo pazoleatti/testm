@@ -110,7 +110,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	}
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @Override
@@ -146,7 +146,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public List<Integer> getSelectedReportPeriods(){
 		List<Integer> selectedReportPeriodIds = new ArrayList<Integer>();
 		if(getUiHandlers() != null){
-			for(Map.Entry<Integer, String> reportPeriod : taxTypeReportPeriodPickerMap
+			for(Map.Entry<Integer, ReportPeriod> reportPeriod : taxTypeReportPeriodPickerMap
 					.get(getUiHandlers().getCurrentTaxType()).getSelectedReportPeriods().entrySet()){
 				selectedReportPeriodIds.add(reportPeriod.getKey());
 			}

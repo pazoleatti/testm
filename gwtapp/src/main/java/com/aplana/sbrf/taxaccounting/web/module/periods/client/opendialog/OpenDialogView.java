@@ -114,7 +114,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @UiHandler("continueButton")

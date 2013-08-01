@@ -128,7 +128,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
         //Antil we choose tax type
         if(currentReportPeriod !=null){
-            for (Map.Entry<Integer, String> reportPeriod : currentReportPeriod.getSelectedReportPeriods().entrySet()){
+            for (Map.Entry<Integer, ReportPeriod> reportPeriod : currentReportPeriod.getSelectedReportPeriods().entrySet()){
                 reportPeriods.add(reportPeriod.getKey());
             }
             lsf.setReportPeriodIds(reportPeriods);
@@ -203,7 +203,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @Inject

@@ -165,7 +165,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	public List<Integer> getSelectedReportPeriods(){
 		List<Integer> selectedReportPeriodIds = new ArrayList<Integer>();
 		if(getUiHandlers() != null){
-			for(Map.Entry<Integer, String> reportPeriod : taxTypeReportPeriodPickerMap
+			for(Map.Entry<Integer, ReportPeriod> reportPeriod : taxTypeReportPeriodPickerMap
 					.get(getUiHandlers().getCurrentTaxType()).getSelectedReportPeriods().entrySet()){
 				selectedReportPeriodIds.add(reportPeriod.getKey());
 			}
@@ -219,7 +219,7 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	}
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @UiHandler("create")

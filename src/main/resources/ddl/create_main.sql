@@ -625,7 +625,8 @@ create table form_data (
   kind number(9) not null,
   report_period_id number(9) not null,
   acceptance_date date,
-  creation_date date default sysdate not null
+  creation_date date default sysdate not null,
+  return_sign number(1) not null
 );
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
@@ -633,15 +634,17 @@ alter table form_data add constraint form_data_fk_dep_id foreign key (department
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
+alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
 comment on column form_data.state is 'Код состояния';
-comment on column form_data.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
+comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.creation_date is 'Дата создания';
+comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -1033,7 +1036,7 @@ create table log_system (
   user_id             number(9,0),
   roles               varchar2(200),
   department_id       number(9,0) not null,
-  report_period_id    number(9,0) not null,
+  report_period_id    number(9,0),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
@@ -1044,7 +1047,9 @@ alter table log_system add constraint log_system_chk_form_kind_id check (form_ki
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 101, 102,
   103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 501, 502));
 
-alter table log_system add constraint log_system_chk_dcl_form check (declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (501, 502) or
+  declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (501, 502) or report_period_id is not null);
 
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user (id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
