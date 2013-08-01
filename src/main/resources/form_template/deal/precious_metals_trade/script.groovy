@@ -1,5 +1,6 @@
 package form_template.deal.precious_metals_trade
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -60,7 +61,7 @@ void addRow() {
     dataRowHelper.insert(row, index)
     dataRows.add(row)
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
+            'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -137,13 +138,13 @@ void logicCheck() {
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
         // Зависимости от признака физической поставки
-        // TODO (проверка связана со справочниками) if (row.getCell('deliverySign').value == 1 ){
-        if (false) {
+        if (row.deliverySign == 1) {
+            def msg1 = row.getCell('deliverySign').column.name
             ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2'].each {
-                cell = row.getCell(it)
+                def cell = row.getCell(it)
                 if (cell.value != null && !cell.value.toString().isEmpty()) {
-                    logger.warn('«' + row.getCell('deliverySign').column.name + '» указан «ОМС», ' +
-                            'графа «' + cell.column.name + '» строки ' + rowNum + ' заполняться не должна!')
+                    def msg2 = cell.column.name
+                    logger.warn("«$msg1» указан «ОМС», графа «$msg2» строки $rowNum заполняться не должна!")
                 }
             }
         }
@@ -172,10 +173,24 @@ void logicCheck() {
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
+            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только значение «1»!")
         }
         // Проверка внешнеторговой сделки
-        // TODO (проверки связаны со справочниками)
+        def msg14 = row.getCell('foreignDeal').column.name
+        // TODO нет в спр да/нет кода 2
+        if (row.countryCodeNumeric == row.countryCodeNumeric2 && row.foreignDeal != 2) {
+            def msg2 = refBookService.getStringValue(38, 2, 'VALUE')
+            logger.warn("«$msg14» в строке $rowNum должен быть «$msg2»!")
+        } else {
+            if (row.deliverySign == 2 && row.foreignDeal != 0) {
+                def msg1 = refBookService.getStringValue(38, 0, 'VALUE')
+                logger.warn("«$msg14» в строке $rowNum должен быть «$msg1»!")
+            }
+            if (row.deliverySign != 1 && row.foreignDeal != 1) {
+                def msg1 = refBookService.getStringValue(38, 1, 'VALUE')
+                logger.warn("«$msg14» в строке $rowNum должен быть «$msg1»!")
+            }
+        }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
@@ -191,17 +206,45 @@ void logicCheck() {
             def msg2 = price.column.name
             logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
         }
+        checkNSI(row)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row) {
+    def rowNum = row.getIndex()
+    def String msg = "В справочнике %s не найден элемент %s, указанный в строке $rowNum!"
+    if (row.fullName != null && refBookService.getRecordData(9, row.fullName) == null) {
+        logger.warn(String.format(msg, "«Организации-участники контролируемых сделок»", ""))
+    }
+    if (row.countryCode != null && refBookService.getRecordData(10, row.countryCode) == null) {
+        logger.warn(String.format(msg, "ОКСМ", row.getCell('countryCode').column.name))
+    }
+    if (row.countryCodeNumeric != null && refBookService.getRecordData(10, row.countryCodeNumeric) == null) {
+        logger.warn(String.format(msg, "«ОКСМ»", row.getCell('countryCodeNumeric').column.name))
+    }
+    if (row.countryCodeNumeric2 != null && refBookService.getRecordData(10, row.countryCodeNumeric2) == null) {
+        logger.warn(String.format(msg, "«ОКСМ»", row.getCell('countryCodeNumeric2').column.name))
+    }
+    if (row.region != null && refBookService.getRecordData(9, row.region) == null) {
+        logger.warn(String.format(msg, "«Коды субъектов Российской Федерации»", row.getCell('countryCodeNumeric').column.name))
+    }
+    if (row.region2 != null && refBookService.getRecordData(9, row.region2) == null) {
+        logger.warn(String.format(msg, "«Коды субъектов Российской Федерации»", row.getCell('countryCodeNumeric2').column.name))
+    }
+    if (row.metalName != null && refBookService.getRecordData(40, row.metalName) == null) {
+        logger.warn(String.format(msg, "«Коды драгоценных металлов»", row.getCell('metalName').column.name))
+    }
+    if (row.deliverySign != null && refBookService.getRecordData(44, row.deliverySign) == null) {
+        logger.warn(String.format(msg, "«Признаки физической поставки»", row.getCell('deliverySign').column.name))
+    }
+    if (row.deliveryCode != null && refBookService.getRecordData(47, row.deliveryCode) == null) {
+        logger.warn(String.format(msg, "«Коды условий поставки»", row.getCell('deliveryCode').column.name))
+    }
+    if (row.dealFocus != null && refBookService.getRecordData(46, row.dealFocus) == null) {
+        logger.warn(String.format(msg, "«Направленности сделок»", row.getCell('dealFocus').column.name))
     }
 }
 
@@ -217,7 +260,41 @@ void calc() {
         row.total = row.price
         // Расчет поля "Количество"
         row.count = 1
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+            row.countryName = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+            row.countryName = null
+        }
+        if (row.deliverySign == 1) {
+            row.countryCodeNumeric = null
+            row.regionCode = null
+            row.city = null
+            row.locality = null
+            row.countryCodeNumeric2 = null
+            row.regionCode2 = null
+            row.city2 = null
+            row.locality2 = null
+        }
+        if (row.countryCodeNumeric == row.countryCodeNumeric2 ) {
+            // TODO нет в спр да/нет кода 2
+            row.foreignDeal = 2
+        } else {
+            // TODO путианица какая-то с кодами
+            if (row.deliverySign == 1) {
+                row.foreignDeal = 1
+            }
+            else {
+                row.foreignDeal = 0
+            }
+        }
+
     }
 }
 
