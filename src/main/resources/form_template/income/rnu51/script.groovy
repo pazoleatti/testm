@@ -493,7 +493,7 @@ void sort() {
 
 void addAllStatic() {
     getData(formData).insert(itogoKvartal,getData(formData).getAllCached().size()+1)
-    getData(formData).insert(itogo,getData(formData).getAllCached().size()+2)
+    getData(formData).insert(itogo,getData(formData).getAllCached().size()+1)
 }
 
 void allCheck() {
