@@ -172,7 +172,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
     }
 
     @Override

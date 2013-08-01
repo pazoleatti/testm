@@ -197,7 +197,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      * @param periodsMap
      * @return
      */
-    private Integer getReportPeriod(Map<Integer, String> periodsMap) {
+    private Integer getReportPeriod(Map<Integer, ReportPeriod> periodsMap) {
         if (periodsMap != null && periodsMap.size() != 0) {
             return periodsMap.keySet().iterator().next();
         }
@@ -273,7 +273,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
     @Override
-    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
         Integer reportPeriodId = getReportPeriod(selectedReportPeriods);
 
         // Проверка совпадения выбранного подразделения с текущим
