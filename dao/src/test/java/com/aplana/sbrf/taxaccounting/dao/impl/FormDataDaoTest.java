@@ -32,6 +32,7 @@ public class FormDataDaoTest {
 
 	@Test
 	public void testGet() {
+		@SuppressWarnings("unused")
 		FormData formData = formDataDao.get(1);
 
 	}
@@ -181,9 +182,26 @@ public class FormDataDaoTest {
 	
 	
 	@Test
-	public void testChangeState() {
+	public void updateStateSuccess() {
 		formDataDao.updateState(1, WorkflowState.APPROVED);
-		FormData fd = formDataDao.get(1);
-		Assert.assertEquals(WorkflowState.APPROVED, fd.getState());
+		Assert.assertEquals(WorkflowState.APPROVED, formDataDao.get(1).getState());
+	}
+	
+	@Test(expected=DaoException.class)
+	public void updateStateError() {
+		formDataDao.updateState(1000, WorkflowState.APPROVED);
+	}
+	
+	@Test
+	public void updateReturnSignSuccess() {
+		formDataDao.updateReturnSign(1, true);
+		Assert.assertTrue(formDataDao.get(1).isReturnSign());
+		formDataDao.updateReturnSign(1, false);
+		Assert.assertFalse(formDataDao.get(1).isReturnSign());
+	}
+	
+	@Test(expected=DaoException.class)
+	public void updateReturnSignError() {
+		formDataDao.updateReturnSign(1000, true);
 	}
 }

@@ -19,6 +19,11 @@ public class FormData extends IdentityObject<Long> {
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
+	
+	/**
+	 * Признак возврата
+	 */
+	private boolean returnSign;
 
 	private int formTemplateId;
 	private List<Column> formColumns;
@@ -207,8 +212,17 @@ public class FormData extends IdentityObject<Long> {
         List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
         return new DataRow<Cell>(cells);
     }
+    
+   
+	public boolean isReturnSign() {
+		return returnSign;
+	}
 
-    @Override
+	public void setReturnSign(boolean returnSign) {
+		this.returnSign = returnSign;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("FormData [state=");
@@ -219,12 +233,16 @@ public class FormData extends IdentityObject<Long> {
 		builder.append(departmentId);
 		builder.append(", reportPeriodId=");
 		builder.append(reportPeriodId);
+		builder.append(", returnSign=");
+		builder.append(returnSign);
 		builder.append(", formTemplateId=");
 		builder.append(formTemplateId);
 		builder.append(", formColumns=");
 		builder.append(formColumns);
 		builder.append(", formStyles=");
 		builder.append(formStyles);
+		builder.append(", headers=");
+		builder.append(headers);
 		builder.append(", formType=");
 		builder.append(formType);
 		builder.append(", performer=");
@@ -234,4 +252,7 @@ public class FormData extends IdentityObject<Long> {
 		builder.append("]");
 		return builder.toString();
 	}
+
+
+
 }
