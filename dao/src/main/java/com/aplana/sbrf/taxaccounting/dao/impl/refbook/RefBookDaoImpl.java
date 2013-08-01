@@ -1,6 +1,9 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -17,11 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -114,7 +113,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
 															  String filter, RefBookAttribute sortAttribute) {
-		String sql = getRefBookSql(refBookId, version, sortAttribute);
+		String sql = getRefBookSql(refBookId, version, sortAttribute, filter);
 		RefBook refBook = get(refBookId);
 		List<Map<String, RefBookValue>> records = getJdbcTemplate().query(sql, new RefBookValueMapper(refBook));
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
@@ -149,11 +148,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute) {
-		RefBook refBook = get(refBookId);
+	private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute, String filter) {
+
+        RefBook refBook = get(refBookId);
 		List<RefBookAttribute> attributes = refBook.getAttributes();
 
-		if (sortAttribute != null && !attributes.contains(sortAttribute)) {
+        StringBuffer stringBuffer = new StringBuffer();
+        Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, stringBuffer));
+        System.out.println("SqlPart: " + stringBuffer.toString());
+
+        if (sortAttribute != null && !attributes.contains(sortAttribute)) {
 			throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
 					refBookId, sortAttribute.getAlias()));
 		}
@@ -193,6 +197,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append("where\n  r.ref_book_id = ");
 		sql.append(refBookId);
 		sql.append(" and\n  status <> -1\n");
+
+        if (stringBuffer.length() > 0){
+            sql.append(" and\n ");
+            sql.append(stringBuffer.toString());
+            sql.append("\n");
+        }
+
+
 		if (sortAttribute != null) {
 			sql.append("order by\n");
 			sql.append(sortAttribute.getAlias());

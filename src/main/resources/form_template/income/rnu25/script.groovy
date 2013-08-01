@@ -1,13 +1,15 @@
+package form_template.income.rnu25
+
 /**
- * Скрипт для РНУ-25 (rnu25.groovy).
  * Форма "(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения".
  *
  * @version 65
  *
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
- *      - графа 4 заполняется автоматически при пересчете, но является редактируемой, возможно надо бурать возможность редактировать
- *      - проверить консолидацию, т.к. после переделки с учетом пейджинга не получилось проверить (ошибка при логировании в ядре)
+ *      - графа 4 заполняется автоматически при пересчете, но является редактируемой, возможно надо брать возможность редактировать
+ *      - проблемы с индексами
+ *      - импорт данных сделан без чтз
  *
  * @author rtimerbaev
  */
@@ -56,6 +58,11 @@ switch (formDataEvent) {
         calc()
         logicalCheck(false)
         checkNSI()
+        // для сохранения изменении приемников
+        getData(formData).commit()
+        break
+    case FormDataEvent.IMPORT :
+        importData()
         break
 }
 
@@ -79,8 +86,18 @@ switch (formDataEvent) {
 def addNewRow() {
     def data = getData(formData)
 
+    def newRow = getNewRow()
+    getRows(data).add(getIndex(data, currentDataRow) + 1, newRow) // TODO (Ramil Timerbaev) проблемы с индексом
+
+    save(data)
+    return newRow
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
     def newRow = formData.createDataRow()
-    data.getAllCached().add(getIndex(data, currentDataRow) + 1, newRow) // TODO (Ramil Timerbaev) проблемы с индексом
 
     // графа 2..5, 7..9
     ['regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
@@ -88,7 +105,7 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    save(data)
+    return newRow
 }
 
 /**
@@ -111,14 +128,14 @@ void calc() {
 
     // список проверяемых столбцов (графа 2, 3, 5, 7, 8)
     def requiredColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'cost', 'signSecurity']
-    for (def row : data.getAllCached()) {
+    for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
 
     // дополнительная проверка графы 8
-    for (def row : data.getAllCached()) {
+    for (def row : getRows(data)) {
         // дополнительная проверка графы 8
         if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
             logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
@@ -132,27 +149,27 @@ void calc() {
 
     // удалить строку "итого" и "итого по ГРН: ..."
     def delRow = []
-    data.getAllCached().each { row ->
+    getRows(data).each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        data.getAllCached().remove(getIndex(data, row))
+        getRows(data).remove(getIndex(data, row))
     }
-    if (data.getAllCached().isEmpty()) {
+    if (getRows(data).isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    data.getAllCached().sort { it.regNumber }
+    getRows(data).sort { it.regNumber }
 
     def tmp
 
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
-    data.getAllCached().eachWithIndex { row, index ->
+    getRows(data).eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
 
@@ -187,7 +204,7 @@ void calc() {
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
     // добавить строку "итого"
     def totalRow = formData.createDataRow()
-    data.getAllCached().add(totalRow)
+    getRows(data).add(totalRow)
     totalRow.setAlias('total')
     totalRow.regNumber = 'Общий итог'
     setTotalStyle(totalRow)
@@ -202,7 +219,7 @@ void calc() {
     totalColumns.each {
         sums[it] = 0
     }
-    data.getAllCached().eachWithIndex { row, i ->
+    getRows(data).eachWithIndex { row, i ->
         if (!isTotal(row)) {
             if (tmp == null) {
                 tmp = row.regNumber
@@ -215,7 +232,7 @@ void calc() {
                 }
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по ГРН:..."
-            if (i == data.getAllCached().size() - 2) {
+            if (i == getRows(data).size() - 2) {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
                 }
@@ -233,7 +250,7 @@ void calc() {
     // добавить "итого по ГРН:..." в таблицу
     def i = 0
     totalRows.each { index, row ->
-        data.getAllCached().add(index + i, row)
+        getRows(data).add(index + i, row)
         i = i + 1
     }
     save(data)
@@ -250,16 +267,16 @@ def logicalCheck(def useLog) {
 
     def data = getData(formData)
 
-    if (dataOld != null && !dataOld.getAllCached().isEmpty()) {
+    if (dataOld != null && !getRows(dataOld).isEmpty()) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
         def missContract = []
         def severalContract = []
-        dataOld.getAllCached().each { prevRow ->
+        getRows(dataOld).each { prevRow ->
             if (prevRow.reserveCalcValue > 0) {
                 count = 0
-                data.getAllCached().each { row ->
+                getRows(data).each { row ->
                     if (row.tradeNumber == prevRow.tradeNumber) {
                         count += 1
                     }
@@ -281,7 +298,7 @@ def logicalCheck(def useLog) {
         }
     }
 
-    if (!data.getAllCached().isEmpty()) {
+    if (!getRows(data).isEmpty()) {
         def i = 1
 
         // список проверяемых столбцов (графа ..)
@@ -301,7 +318,7 @@ def logicalCheck(def useLog) {
         def name
         def tmp
 
-        for (def row : data.getAllCached()) {
+        for (def row : getRows(data)) {
             if (isTotal(row)) {
                 hasTotal = true
                 continue
@@ -483,6 +500,12 @@ def logicalCheck(def useLog) {
 
             // 17. Проверка итоговых значений по ГРН
             for (def codeName : totalGroupsName) {
+                def totalRowAlias = 'total' + codeName
+
+                if (!checkAlias(getRows(data), totalRowAlias)) {
+                    logger.warn("Итоговые значения по ГРН $codeName не рассчитаны! Необходимо расчитать данные формы.")
+                    continue
+                }
                 def row = getRowByAlias(data, 'total' + codeName)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(data, codeName, alias) != row.getCell(alias).getValue()) {
@@ -522,16 +545,16 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    data.getAllCached().clear()
+    getRows(data).clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceData = getData(source)
-                sourceData.getAllCached().each { row->
+                getRows(sourceData).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        data.getAllCached().add(row)
+                        getRows(data).add(row)
                     }
                 }
             }
@@ -569,11 +592,11 @@ def isTotal(def row) {
  */
 def getSum(def data, def columnAlias) {
     def from = 0
-    def to = data.getAllCached().size() - 2
+    def to = getRows(data).size() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -606,7 +629,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
     if (row.getCell(likeColumnName).getValue() == null) {
         return false
     }
-    for (def prevRow : dataOld.getAllCached()) {
+    for (def prevRow : getRows(dataOld)) {
         if (prevRow.getAlias() != null || prevRow.getAlias() != '') {
             continue
         }
@@ -652,7 +675,7 @@ def getFormDataOld() {
  */
 def calcSumByCode(def data, def regNumber, def alias) {
     def sum = 0
-    data.getAllCached().each { row ->
+    getRows(data).each { row ->
         if (!isTotal(row) && row.regNumber == regNumber) {
             sum += (row.getCell(alias).getValue() ?: 0)
         }
@@ -667,7 +690,7 @@ def calcSumByCode(def data, def regNumber, def alias) {
  * @param row строка
  */
 def getIndex(def data, def row) {
-    data.getAllCached().indexOf(row)
+    getRows(data).indexOf(row)
 }
 
 /**
@@ -715,8 +738,8 @@ def checkRequiredColumns(def row, def columns, def useLog) {
 def getValueForColumn6(def dataOld, def row) {
     def value = 0
     def count = 0
-    if (dataOld != null && !dataOld.getAllCached().isEmpty()) {
-        for (def rowOld : dataOld.getAllCached()) {
+    if (dataOld != null && !getRows(dataOld).isEmpty()) {
+        for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
                 value = round(rowOld.reserveCalcValue, 2)
                 count += 1
@@ -748,7 +771,7 @@ def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
     def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && formDataOld.state == WorkflowState.ACCEPTED && !dataOld.getAllCached().isEmpty()) {
+    if (formDataOld != null && formDataOld.state == WorkflowState.ACCEPTED && !getRows(dataOld).isEmpty()) {
         return true
     }
     return false
@@ -765,8 +788,8 @@ def checkPrevPeriod() {
 def getValueForColumn4(def dataOld, def formDataOld, def row) {
     def value = 0
     def count = 0
-    if (dataOld != null && !dataOld.getAllCached().isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
-        for (def rowOld : dataOld.getAllCached()) {
+    if (dataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
                 value = (rowOld.signSecurity == '+' && row.signSecurity == '-' ? rowOld.lotSizePrev : 0)
                 count += 1
@@ -782,11 +805,20 @@ def getValueForColumn4(def dataOld, def formDataOld, def row) {
  * Получить строку по алиасу.
  *
  * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
  * @param alias алиас
  * @return
  */
 def getRowByAlias(def data, def alias) {
-    data.getDataRow(data.getAllCached(), alias)
+    data.getDataRow(getRows(data), alias)
 }
 
 /**
@@ -795,7 +827,7 @@ def getRowByAlias(def data, def alias) {
  * @param data данные нф (helper)
  */
 void save(def data) {
-    data.save(data.getAllCached())
+    data.save(getRows(data))
 }
 
 /**
@@ -826,8 +858,170 @@ def getData(def formData) {
  * @param data данные нф (helper)
  */
 def hasTotal(def data) {
-    for (def row: data.getAllCached()) {
+    for (def row: getRows(data)) {
         if (row.getAlias() == 'total') {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    def format = 'xls'
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, format, 'windows-1251', 'Государственный регистрационный номер', 'Общий итог', 3);
+    if (xmlString == null) {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // добавить данные в форму
+    addData(xml)
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ */
+void addData(def xml) {
+    if (xml == null) {
+        return
+    }
+    def data = getData(formData)
+
+    // количество графов в таблице
+    def columnCount = 12
+
+    def tmp
+    for (def row : xml.row) {
+        // проверить по грн итоговая ли это строка
+        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
+        if (tmp != null && tmp.contains('Итог')) {
+            continue
+        }
+        if (row.cell.size() == columnCount) {
+            // проверить по номеру договора повторяющиеся записи
+            tmp = (row.cell[1] != null ? row.cell[1].text() : null)
+            def newRow = getRowByTradeNumber(data, tmp)
+            if (newRow == null) {
+                newRow = getNewRow()
+                getRows(data).add(newRow)
+            }
+            def index = 0
+
+            // графа 2
+            newRow.regNumber = row.cell[index].text()
+            index++
+
+            // графа 3
+            newRow.tradeNumber = row.cell[index].text()
+            index++
+
+            // графа 4
+            newRow.lotSizePrev = getNumber(row.cell[index].text())
+            index++
+
+            // графа 5
+            newRow.lotSizeCurrent = getNumber(row.cell[index].text())
+            index++
+
+            // графа 6
+            newRow.reserve = getNumber(row.cell[index].text())
+            index++
+
+            // графа 7
+            newRow.cost = getNumber(row.cell[index].text())
+            index++
+
+            // графа 8
+            newRow.signSecurity = row.cell[index].text()
+            index++
+
+            // графа 9
+            newRow.marketQuotation = getNumber(row.cell[index].text())
+            index++
+
+            // графа 10
+            newRow.costOnMarketQuotation = getNumber(row.cell[index].text())
+            index++
+
+            // графа 11
+            newRow.reserveCalcValue = getNumber(row.cell[index].text())
+            index++
+
+            // графа 12
+            newRow.reserveCreation = getNumber(row.cell[index].text())
+            index++
+
+            // графа 13
+            newRow.reserveRecovery = getNumber(row.cell[index].text())
+        }
+    }
+    save(data)
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить строку по номеру договора
+ * @param data
+ * @param tradeNumber
+ * @return
+ */
+def getRowByTradeNumber(def data, def tradeNumber) {
+    if (tradeNumber == null) {
+        return null
+    }
+    for (def row : getRows(data)) {
+        if (row.tradeNumber == tradeNumber) {
+            return row
+        }
+    }
+    return null
+}
+
+/**
+ * Проверить существования строки по алиасу.
+ *
+ * @param list строки нф
+ * @param rowAlias алиас
+ * @return <b>true</b> - строка с указанным алиасом есть, иначе <b>false</b>
+ */
+def checkAlias(def list, def rowAlias) {
+    if (rowAlias == null || rowAlias == "" || list == null || list.isEmpty()) {
+        return false
+    }
+    for (def row : list) {
+        if (row.getAlias() == rowAlias) {
             return true
         }
     }
