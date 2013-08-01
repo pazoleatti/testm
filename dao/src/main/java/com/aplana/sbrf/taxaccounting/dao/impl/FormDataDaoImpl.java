@@ -27,6 +27,9 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 @Repository("formDataDao")
 @Transactional(readOnly = true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
+	
+	public static final String MSG_FORM_NOT_FOUND = "Форма id=%s не найдена";
+	
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -219,6 +222,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	@Override
 	public void updateReturnSign(long id, boolean returnSign) {
-		// TODO [sgoryachkin] SBRFACCTAX-3261
+		if (getJdbcTemplate().update("update form_data set return_sign=? where id=?", returnSign ? 1 : 0, id) == 0) {
+			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+		}
+	}
+
+	@Override
+	public void updateState(long id, WorkflowState workflowState) {
+		if (getJdbcTemplate().update("update form_data set state=? where id=?", workflowState.getId(), id) == 0) {
+			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+		}
 	}
 }

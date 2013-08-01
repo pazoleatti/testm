@@ -178,4 +178,12 @@ public class FormDataDaoTest {
 		FormData fd = formDataDao.find(1, FormDataKind.SUMMARY, 1, 13);
 		Assert.assertNull(fd);
 	}
+	
+	
+	@Test
+	public void testChangeState() {
+		formDataDao.updateState(1, WorkflowState.APPROVED);
+		FormData fd = formDataDao.get(1);
+		Assert.assertEquals(WorkflowState.APPROVED, fd.getState());
+	}
 }

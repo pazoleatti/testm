@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.eventhandler;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
@@ -10,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.service.eventhendler.FormDataEventHandler;
 
 /**
  * Нужно выставить флаг возврата при событиях указанных в аналитике. Во всех
@@ -24,10 +24,16 @@ import com.aplana.sbrf.taxaccounting.service.eventhendler.FormDataEventHandler;
  * 
  * @author sgoryachkin
  */
-public class ReturnSignHandler implements FormDataEventHandler {
+@Component
+public class FormDataUpdateReturnSignHandler implements EventHandler {
 
 	@Autowired
 	FormDataDao formDataDao;
+	
+	@Override
+	public int priority() {
+		return 0;
+	}
 
 	@Override
 	public void handle(TAUserInfo userInfo, FormData formData,
@@ -47,5 +53,6 @@ public class ReturnSignHandler implements FormDataEventHandler {
 			}
 		}
 	}
+
 
 }
