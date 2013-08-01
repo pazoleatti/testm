@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,7 +21,7 @@ import java.util.*;
 
 
 public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers>
-		implements OpenDialogPresenter.MyView, ReportPeriodDataProvider {
+		implements OpenDialogPresenter.MyView, ReportPeriodSelectHandler {
 
 	public interface Binder extends UiBinder<PopupPanel, OpenDialogView> {
 	}
@@ -30,7 +30,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
-//	private NewDepartmentPicker departmentPicker;
+    //private NewDepartmentPicker departmentPicker;
 
 	@UiField
 	DepartmentPicker departmentPicker;
@@ -113,7 +113,11 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		getUiHandlers().onTaxPeriodSelected(taxPeriod);
 	}
 
-	@UiHandler("continueButton")
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
+    }
+
+    @UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
 		OpenFilterData openFilterData = new OpenFilterData();
 		openFilterData.setYear(yearBox.getValue());

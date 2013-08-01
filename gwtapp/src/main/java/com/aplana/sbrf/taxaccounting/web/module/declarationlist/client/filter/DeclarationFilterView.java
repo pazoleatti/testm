@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -17,7 +17,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.*;
 
 public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterUIHandlers> implements DeclarationFilterPresenter.MyView,
-		ReportPeriodDataProvider{
+        ReportPeriodSelectHandler {
 
 	interface MyBinder extends UiBinder<Widget, DeclarationFilterView> {
     }
@@ -109,7 +109,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 		}
 	}
 
-	@Override
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, ReportPeriod> selectedReportPeriods) {
+    }
+
+    @Override
 	public void setDepartmentsList(List<Department> list, Set<Integer> availableDepartments){
 		if(getUiHandlers() != null){
 			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list, availableDepartments);
@@ -142,7 +146,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public List<Integer> getSelectedReportPeriods(){
 		List<Integer> selectedReportPeriodIds = new ArrayList<Integer>();
 		if(getUiHandlers() != null){
-			for(Map.Entry<Integer, String> reportPeriod : taxTypeReportPeriodPickerMap
+			for(Map.Entry<Integer, ReportPeriod> reportPeriod : taxTypeReportPeriodPickerMap
 					.get(getUiHandlers().getCurrentTaxType()).getSelectedReportPeriods().entrySet()){
 				selectedReportPeriodIds.add(reportPeriod.getKey());
 			}

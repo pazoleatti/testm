@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * Параметры подразделения по налогу на прибыль
  */
+@Deprecated
 public class DepartmentParamIncome implements Serializable {
 	private static final long serialVersionUID = 1L;
 

@@ -5,6 +5,6 @@
 	<g:HTMLPanel>
 		<p>Домашняя страница</p>
 		<g:FlowPanel ui:field="test" />
-		<refbookpiker:RefBookPickerWidget ui:field="picker" />
+		<!-- <refbookpiker:RefBookPickerWidget ui:field="picker" />  -->
 	</g:HTMLPanel>
 </ui:UiBinder> 
