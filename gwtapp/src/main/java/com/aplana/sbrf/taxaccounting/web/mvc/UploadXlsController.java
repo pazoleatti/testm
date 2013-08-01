@@ -72,7 +72,7 @@ public class UploadXlsController {
         Logger logger = new Logger();
         formDataService.importFormData(logger, securityService.currentUserInfo(),
                 jo.getInt(JSON_ATTR1), jo.getInt(JSON_ATTR2), jo.getInt(JSON_ATTR3),
-                FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream());
+                FormDataKind.fromId(jo.getInt(JSON_ATTR4)), jo.getInt(JSON_ATTR5), fileItem.getInputStream(), fileItem.getName());
         IOUtils.closeQuietly(fileItem.getInputStream());
         /*response.setContentType("text/plain; charset=UTF-8");*/
 
