@@ -72,4 +72,7 @@ public interface FormDataDao {
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
+	
+	
+	void updateReturnSign(long id, boolean returnSign);
 }

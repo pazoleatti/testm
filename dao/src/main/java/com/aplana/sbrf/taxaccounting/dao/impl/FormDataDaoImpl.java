@@ -216,4 +216,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					+ formDataId + " не найдено");
 		}
 	}
+
+	@Override
+	public void updateReturnSign(long id, boolean returnSign) {
+		// TODO [sgoryachkin] SBRFACCTAX-3261
+	}
 }

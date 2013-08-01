@@ -40,6 +40,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventHandlerSimpleLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 
@@ -76,6 +77,8 @@ public class FormDataServiceImpl implements FormDataService {
     private FormDataCompositionService formDataCompositionService;
     @Autowired
     private ReportPeriodService reportPeriodService;
+    @Autowired
+    private EventHandlerSimpleLauncher eventHandlerLauncher;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -430,6 +433,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
+				
 
         if (!checkDestinations(formData)) {
             String message = "Переход \"" + workflowMove.getName() + "\" из текущего состояния невозможен," +
@@ -441,6 +445,7 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo,
 				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
+			eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
 			formDataWorkflowDao
 					.changeFormDataState(
 							formDataId,
