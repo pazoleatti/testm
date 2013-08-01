@@ -1,5 +1,6 @@
 package form_template.deal.foreign_currency
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -156,17 +157,33 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
+        checkNSI(row)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row) {
+    def rowNum = row.getIndex()
+    def String msg = "В справочнике %s не найден элемент%s, указанный в строке $rowNum!"
+    if (row.fullName != null && refBookService.getRecordData(9, row.fullName) == null) {
+        logger.warn(String.format(msg, "«Организации-участники контролируемых сделок»", ""))
+    }
+    if (row.countryName != null && refBookService.getRecordData(10, row.countryName) == null) {
+        logger.warn(String.format(msg, "ОКСМ", " «Наименование страны регистрации»"))
+    }
+    if (row.countryCode != null && refBookService.getRecordData(10, row.countryCode) == null) {
+        logger.warn(String.format(msg, "ОКСМ", " «Код страны по классификатору ОКСМ»"))
+    }
+    if (row.countryDealCode != null && refBookService.getRecordData(10, row.countryDealCode) == null) {
+        logger.warn(String.format(msg, "ОКСМ", " «Код страны по классификатору ОКСМ»"))
+    }
+    if (row.countryDealCode != null && refBookService.getRecordData(10, row.countryDealCode) == null) {
+        logger.warn(String.format(msg, "ОКСМ", " «Код страны происхождения предмета сделки по классификатору ОКСМ»"))
+    }
+    if (row.currencyCode != null && refBookService.getRecordData(15, row.currencyCode) == null) {
+        logger.warn(String.format(msg, "Единый справочник валют", " «Код валюты расчетов по сделке»"))
     }
 }
 
@@ -180,7 +197,18 @@ void calc() {
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
         row.total = row.price
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+            row.countryName = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+            row.countryName = null
+        }
     }
 }
 

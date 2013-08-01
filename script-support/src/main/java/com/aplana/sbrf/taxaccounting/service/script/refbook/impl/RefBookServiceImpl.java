@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,7 +22,11 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
-        return factory.getDataProvider(refBookId).getRecordData(recordId);
+        try{
+            return factory.getDataProvider(refBookId).getRecordData(recordId);
+        } catch (EmptyResultDataAccessException e){
+            return null;
+        }
     }
 
     @Override
