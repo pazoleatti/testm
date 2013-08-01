@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @since 10.07.13 11:49
  */
 
+@ScriptExposed
 public interface RefBookFactory {
 
 	/**

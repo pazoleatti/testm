@@ -1,14 +1,14 @@
-package com.aplana.sbrf.taxaccounting.dao;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Дао для версионных справочников.

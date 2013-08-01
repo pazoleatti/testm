@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-
-import java.util.List;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 /**
  * DAO для работы с данными по налоговым формам
@@ -72,4 +73,21 @@ public interface FormDataDao {
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
+	
+	
+	/**
+	 * Обновление признака возврата
+	 * 
+	 * @param id
+	 * @param returnSign
+	 */
+	void updateReturnSign(long id, boolean returnSign);
+	
+	/**
+	 * Обновление статуса
+	 * 
+	 * @param id
+	 * @param workflowState
+	 */
+	void updateState(long id, WorkflowState workflowState);
 }

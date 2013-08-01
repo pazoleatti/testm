@@ -27,6 +27,9 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 @Repository("formDataDao")
 @Transactional(readOnly = true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
+	
+	public static final String MSG_FORM_NOT_FOUND = "Форма id=%s не найдена";
+	
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 	@Autowired
@@ -57,6 +60,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
+			fd.setReturnSign(rs.getBoolean("return_sign"));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			fd.setReportPeriodId(rs.getInt("report_period_id"));
 			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
@@ -75,6 +79,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			result.setId(rs.getLong("id"));
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
+			result.setReturnSign(rs.getBoolean("return_sign"));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
 			result.setReportPeriodId(rs.getInt("report_period_id"));
 			result.setFormType(formTypeDao.getType(rs.getInt("type_id")));
@@ -125,11 +130,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id)" +
-							" values (?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign)" +
+							" values (?, ?, ?, ?, ?, ?, ?)", 
 					formDataId, formData.getFormTemplateId(),
 					formData.getDepartmentId(), formData.getKind().getId(),
-					formData.getState().getId(), formData.getReportPeriodId());
+					formData.getState().getId(), formData.getReportPeriodId(), 0);
 			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();
@@ -202,18 +207,31 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
 	@Override
-	public FormData getWithoutRows(long formDataId){
+	public FormData getWithoutRows(long id){
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, " +
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
-					new Object[] { formDataId }, new int[] { Types.NUMERIC },
+					new Object[] { id }, new int[] { Types.NUMERIC },
 					new FormDataWithoutRowMapper());
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Записи в таблице FORM_DATA с id = "
-					+ formDataId + " не найдено");
+			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+		}
+	}
+
+	@Override
+	public void updateReturnSign(long id, boolean returnSign) {
+		if (getJdbcTemplate().update("update form_data set return_sign=? where id=?", returnSign ? 1 : 0, id) == 0) {
+			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+		}
+	}
+
+	@Override
+	public void updateState(long id, WorkflowState workflowState) {
+		if (getJdbcTemplate().update("update form_data set state=? where id=?", workflowState.getId(), id) == 0) {
+			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
 		}
 	}
 }

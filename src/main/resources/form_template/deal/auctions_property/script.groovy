@@ -1,5 +1,7 @@
 package form_template.deal.auctions_property
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
@@ -135,17 +137,21 @@ void logicCheck() {
             def msg2 = docDateCell.column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
+        checkNSI(row)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row) {
+    def rowNum = row.getIndex()
+    def String msg = "В справочнике %s не найден элемент%s, указанный в строке $rowNum!"
+    if (row.fullNamePerson != null && refBookService.getRecordData(9, row.fullNamePerson) == null) {
+        logger.warn(String.format(msg, "«Организации-участники контролируемых сделок»", ""))
+    }
+    if (row.countryCode != null && refBookService.getRecordData(10, row.countryCode) == null) {
+        logger.warn(String.format(msg, "ОКСМ", " «Код страны по классификатору ОКСМ»"))
     }
 }
 
@@ -159,7 +165,16 @@ void calc() {
         row.price = row.sum
         // Расчет поля "Стоимость"
         row.cost = row.sum
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.fullNamePerson != null) {
+            def map = refBookService.getRecordData(9, row.fullNamePerson)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+        }
     }
 }
 

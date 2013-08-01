@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -40,6 +39,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 
@@ -56,8 +56,6 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataDao formDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
-	@Autowired
-	private FormDataWorkflowDao formDataWorkflowDao;
 	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
@@ -76,6 +74,8 @@ public class FormDataServiceImpl implements FormDataService {
     private FormDataCompositionService formDataCompositionService;
     @Autowired
     private ReportPeriodService reportPeriodService;
+    @Autowired
+    private EventLauncher eventHandlerLauncher;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -430,6 +430,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		FormData formData = formDataDao.get(formDataId);
+				
 
         if (!checkDestinations(formData)) {
             String message = "Переход \"" + workflowMove.getName() + "\" из текущего состояния невозможен," +
@@ -441,12 +442,8 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo,
 				formData, workflowMove.getEvent(), logger, null);
 		if (!logger.containsLevel(LogLevel.ERROR)) {
-			formDataWorkflowDao
-					.changeFormDataState(
-							formDataId,
-							workflowMove.getToState(),
-							workflowMove.getToState().equals(
-									WorkflowState.ACCEPTED) ? new Date() : null);
+			
+			eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
 
 			if (workflowMove.getAfterEvent() != null) {
 				formDataScriptingService.executeScript(
