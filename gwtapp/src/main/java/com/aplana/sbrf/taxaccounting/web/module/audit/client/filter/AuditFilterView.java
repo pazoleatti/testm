@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.core.client.GWT;
@@ -26,7 +26,7 @@ import java.util.*;
  * Date: 2013
  */
 public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
-        implements AuditFilterPresenter.MyView, ReportPeriodDataProvider {
+        implements AuditFilterPresenter.MyView, ReportPeriodSelectHandler {
 
 
     private ReportPeriodPicker currentReportPeriod;
@@ -200,6 +200,10 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         if(getUiHandlers()!=null) {
             getUiHandlers().onTaxPeriodSelected(taxPeriod);
         }
+    }
+
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
     }
 
     @Inject

@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodDataProvider;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements FilterPresenter.MyView,
-		Editor<FormDataFilter>, ReportPeriodDataProvider {
+		Editor<FormDataFilter>, ReportPeriodSelectHandler {
 
     interface MyBinder extends UiBinder<Widget, FilterView> {
     }
@@ -218,7 +218,11 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 		}
 	}
 
-	@UiHandler("create")
+    @Override
+    public void onReportPeriodsSelected(Map<Integer, String> selectedReportPeriods) {
+    }
+
+    @UiHandler("create")
 	void onCreateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCreateClicked();

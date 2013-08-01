@@ -1,12 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetTaxPeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -18,6 +25,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +44,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     private final DispatchAsync dispatcher;
 
-    public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers>, ReportPeriodSelectHandler {
         /**
          * Расчет видимости поле в зависимости от роли (Контролер/Контролер УНП)
          * @param isUnp
@@ -57,10 +65,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartment(Department department);
 
         /**
-         * Установка периода
-         * @param dates
+         * Установка доступных налоговых периодов
+         * @param taxPeriods
          */
-        void setPeriods(List<String> dates);
+        void setTaxPeriods(List<TaxPeriod> taxPeriods);
+
+        /**
+         * Установка доступных налоговых периодов
+         * @param reportPeriods
+         */
+        void setReportPeriods(List<ReportPeriod> reportPeriods);
 
         /**
          * Установка параметров подразделения
@@ -73,6 +87,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param types
          */
         void setTaxTypes(List<TaxType> types);
+
+        /**
+         * Перезагрузка параметров подразделения
+         */
+        void reloadDepartmentParams();
     }
 
     @Inject
@@ -101,14 +120,57 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void updateDepartment(Integer departmentId) {
+    public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId) {
+        if (departmentId == null || taxType == null || reportPeriodId == null) {
+            return;
+        }
+
         GetDepartmentCombinedAction action = new GetDepartmentCombinedAction();
         action.setDepartmentId(departmentId);
+        action.setTaxType(taxType);
+        action.setReportPeriodId(reportPeriodId);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentCombinedResult>() {
                     @Override
                     public void onSuccess(GetDepartmentCombinedResult result) {
                         getView().setDepartmentCombined(result.getDepartmentCombined());
+                    }
+                }, this));
+    }
+
+    @Override
+    public void reloadTaxPeriods(TaxType taxType) {
+        if (taxType == null) {
+            return;
+        }
+
+        GetTaxPeriodAction action = new GetTaxPeriodAction();
+        action.setTaxType(taxType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTaxPeriodResult>() {
+                    @Override
+                    public void onSuccess(GetTaxPeriodResult result) {
+                        getView().setTaxPeriods(result.getTaxPeriods());
+                        getView().reloadDepartmentParams();
+                    }
+                }, this));
+
+    }
+
+    @Override
+    public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
+        if (taxPeriod == null || departmentId == null) {
+            return;
+        }
+
+        GetReportPeriods action = new GetReportPeriods();
+        action.setTaxPeriod(taxPeriod);
+        action.setDepartamentId(departmentId);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
+                    @Override
+                    public void onSuccess(GetReportPeriodsResult result) {
+                        getView().setReportPeriods(result.getReportPeriods());
                     }
                 }, this));
     }
@@ -139,7 +201,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 // Текущее подразделение пользователя
                                 getView().setDepartment(result.getDepartment());
                                 // Доступные типы налогов
-                                getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT));
+                                getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL));
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));

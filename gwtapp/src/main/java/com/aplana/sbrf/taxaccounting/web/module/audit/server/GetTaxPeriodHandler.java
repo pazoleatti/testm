@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetTaxPeriodHandler extends AbstractActionHandler<GetTaxPeriodAction, GetTaxPeriodResult> {
 
     @Autowired

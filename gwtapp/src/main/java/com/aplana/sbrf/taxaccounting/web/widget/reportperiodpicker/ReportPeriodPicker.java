@@ -34,7 +34,7 @@ public class ReportPeriodPicker extends Composite{
 	private final boolean multiselectTree;
 
 	private static SelectionUiBinder uiBinder = GWT.create(SelectionUiBinder.class);
-	private final ReportPeriodDataProvider dataProvider;
+	private final ReportPeriodSelectHandler dataProvider;
 
 	private final Label popupPanelLabel = new Label();
 	private final Tree tree = new Tree();
@@ -54,32 +54,32 @@ public class ReportPeriodPicker extends Composite{
 	private TaxPeriod lastTimeSelectedTaxPeriod = new TaxPeriod();
 
 	@UiConstructor
-	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider){
+	public ReportPeriodPicker(ReportPeriodSelectHandler reportPeriodDataProvider){
 		this(reportPeriodDataProvider, true);
 	}
 
 	@UiConstructor
-	public ReportPeriodPicker(ReportPeriodDataProvider reportPeriodDataProvider, boolean isMultiselect){
+	public ReportPeriodPicker(ReportPeriodSelectHandler reportPeriodDataProvider, boolean isMultiselect){
 		initWidget(uiBinder.createAndBindUi(this));
 		this.dataProvider = reportPeriodDataProvider;
 		multiselectTree = isMultiselect;
 
 		popup.addCloseHandler(new CloseHandler<PopupPanel>() {
-			@Override
-			public void onClose(CloseEvent<PopupPanel> event) {
-				setSelectedReportPeriods();
-			}
-		});
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                setSelectedReportPeriods();
+            }
+        });
 		applyButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				setSelectedReportPeriods();
 				popup.hide();
 			}
 		});
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                // TODO Баг SBRFACCTAX-3258
                 popup.hide();
             }
         });
@@ -131,6 +131,7 @@ public class ReportPeriodPicker extends Composite{
 		}
 		selected.setText(result.toString());
 		selected.setTitle(tooltipTitle.toString());
+        dataProvider.onReportPeriodsSelected(selectedReportPeriods);
 	}
 
 	private void setSelectedReportPeriods(Map<Integer, String> selectedReportPeriods){

@@ -1,9 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedResult;
@@ -14,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Map;
+
 /**
  * Получение параметров подразделения и списка доступных налоговых периодов
  *
@@ -21,42 +30,106 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
-public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction, GetDepartmentCombinedResult> {
+public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
+        GetDepartmentCombinedResult> {
 
-    //@Autowired
-    //private DepartmentService departmentService;
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
 
-    //@Autowired
-    //private RefBookDao rbDao;
+    @Autowired
+    private ReportPeriodService reportService;
 
-    //@Autowired
-    //private ReportPeriodDao periodDao;
+    @Autowired
+    private RefBookFactory rbFactory;
 
     public GetDepartmentCombinedHandler() {
         super(GetDepartmentCombinedAction.class);
     }
 
     @Override
-    public GetDepartmentCombinedResult execute(GetDepartmentCombinedAction action, ExecutionContext executionContext) throws ActionException {
+    public GetDepartmentCombinedResult execute(GetDepartmentCombinedAction action, ExecutionContext executionContext)
+            throws ActionException {
 
         DepartmentCombined depCombined = new DepartmentCombined();
 
-        // PagingParams pp = new PagingParams();
-        // getRecords(Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
-        // rbDao.getRecords(32L, null, null, null, null);
+        // Параметры пагинации
+        PagingParams pp = new PagingParams();
+        pp.setCount(1);
+        pp.setStartIndex(0);
 
-        // TODO Заменить на рефбуки
+        RefBookDataProvider provider = null;
 
+        switch (action.getTaxType()) {
+            case INCOME:
+                provider = rbFactory.getDataProvider(33L);
+                break;
+            case TRANSPORT:
+                provider = rbFactory.getDataProvider(31L);
+                break;
+            case DEAL:
+                provider = rbFactory.getDataProvider(37L);
+                break;
+        }
+
+        Calendar calendar = reportService.getEndDate(action.getReportPeriodId());
+
+        // TODO Фильтр пока не работает, проверить потом
+        PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
+                calendar.getTime(), pp, "departament_id = " + action.getDepartmentId(), null);
+        // TODO Добавить проверку на наличие результата. Результат должен быть - одна строка
+        Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
+
+        if (paramsMap != null) {
+            // Общая часть
+            depCombined.setDepartmentId(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue());
+            depCombined.setDictRegionId(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue());
+            depCombined.setOkato(paramsMap.get(DepartmentParamAliases.OKATO.name()).getReferenceValue());
+            depCombined.setInn(paramsMap.get(DepartmentParamAliases.INN.name()).getStringValue());
+            depCombined.setKpp(paramsMap.get(DepartmentParamAliases.KPP.name()).getStringValue());
+            depCombined.setTaxOrganCode(paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE.name()).getStringValue());
+            depCombined.setOkvedCode(paramsMap.get(DepartmentParamAliases.OKVED_CODE.name()).getReferenceValue());
+            depCombined.setPhone(paramsMap.get(DepartmentParamAliases.PHONE.name()).getStringValue());
+            depCombined.setReorgFormCode(paramsMap.get(DepartmentParamAliases.REORG_FORM_CODE.name()).getReferenceValue());
+            depCombined.setReorgInn(paramsMap.get(DepartmentParamAliases.REORG_INN.name()).getStringValue());
+            depCombined.setReorgKpp(paramsMap.get(DepartmentParamAliases.REORG_KPP.name()).getStringValue());
+            depCombined.setName(paramsMap.get(DepartmentParamAliases.NAME.name()).getStringValue());
+
+            // Общая частная часть
+            depCombined.setSignatoryId(paramsMap.get(DepartmentParamAliases.SIGNATORY_ID.name()).getReferenceValue());
+            depCombined.setSignatorySurname(paramsMap.get(DepartmentParamAliases.SIGNATORY_SURNAME.name()).getStringValue());
+            depCombined.setSignatoryFirstname(paramsMap.get(DepartmentParamAliases.SIGNATORY_FIRSTNAME.name()).getStringValue());
+            depCombined.setSignatoryLastname(paramsMap.get(DepartmentParamAliases.SIGNATORY_LASTNAME.name()).getStringValue());
+            depCombined.setApproveDocName(paramsMap.get(DepartmentParamAliases.APPROVE_DOC_NAME.name()).getStringValue());
+            depCombined.setApproveOrgName(paramsMap.get(DepartmentParamAliases.APPROVE_ORG_NAME.name()).getStringValue());
+            depCombined.setTaxPlaceTypeCode(paramsMap.get(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name()).getReferenceValue());
+            depCombined.setAppVersion(paramsMap.get(DepartmentParamAliases.APP_VERSION.name()).getStringValue());
+            depCombined.setFormatVersion(paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getStringValue());
+
+            // УКС и налог на прибыль
+            if (action.getTaxType() == TaxType.INCOME || action.getTaxType() == TaxType.DEAL) {
+                Number sumTax = paramsMap.get(DepartmentParamAliases.SUM_TAX.name()).getNumberValue();
+                depCombined.setSumTax(sumTax == null ? null : sumTax.longValue());
+                Number sumDividends = paramsMap.get(DepartmentParamAliases.SUM_DIVIDENDS.name()).getNumberValue();
+                depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue() );
+
+                // Налог на прибыль
+                if (action.getTaxType() == TaxType.INCOME) {
+                    depCombined.setObligation(paramsMap.get(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name()).getReferenceValue());
+                    depCombined.setTaxRate((Double) paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getNumberValue());
+                    depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
+                }
+            }
+        }
 
         GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
         result.setDepartmentCombined(depCombined);
-        //result.setPeriods(periodDao.listByTaxPeriodAndDepartmentId());
 
         return result;
     }
 
     @Override
-    public void undo(GetDepartmentCombinedAction action, GetDepartmentCombinedResult result, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetDepartmentCombinedAction action, GetDepartmentCombinedResult result,
+                     ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
 }

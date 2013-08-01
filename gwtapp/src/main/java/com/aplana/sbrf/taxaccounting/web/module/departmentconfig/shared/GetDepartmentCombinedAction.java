@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
+import java.util.Date;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -9,8 +11,14 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetDepartmentCombinedAction extends UnsecuredActionImpl<GetDepartmentCombinedResult> implements ActionName {
 
-    // Код подразделения
+    // Код выбранного подразделения
     private Integer departmentId;
+
+    // Тип выбранного налогa
+    private TaxType taxType;
+
+    // Дата окончания выбранного отчетного периода
+    private Integer reportPeriodId;
 
     public Integer getDepartmentId() {
         return departmentId;
@@ -18,6 +26,22 @@ public class GetDepartmentCombinedAction extends UnsecuredActionImpl<GetDepartme
 
     public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
+
+    public Integer getReportPeriodId() {
+        return reportPeriodId;
+    }
+
+    public void setReportPeriodId(Integer reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
     }
 
     @Override
