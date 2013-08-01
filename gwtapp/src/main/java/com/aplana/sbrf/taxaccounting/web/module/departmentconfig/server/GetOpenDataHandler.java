@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
