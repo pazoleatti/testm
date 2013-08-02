@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
@@ -17,9 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction, SaveDepartmentCombinedResult> {
-
-    @Autowired
-    private DepartmentParamDao departmentParamDao;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);

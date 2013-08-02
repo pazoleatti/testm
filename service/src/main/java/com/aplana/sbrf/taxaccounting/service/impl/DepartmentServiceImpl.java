@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +15,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 		
 	@Autowired
 	DepartmentDao departmentDao;
-
-	@Autowired
-	DepartmentParamDao departmentParamDao;
 
 	@Override
 	public Department getDepartment(int departmentId) {
@@ -44,25 +37,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public DepartmentParam getDepartmentParam(int departmentId) {
-		return departmentParamDao.getDepartmentParam(departmentId);
-	}
-
-	@Override
 	public List<Department> getIsolatedDepartments() {
 		return departmentDao.getIsolatedDepartments();
 	}
-
-	@Override
-	public DepartmentParamIncome getDepartmentParamIncome(int departmentId) {
-		return departmentParamDao.getDepartmentParamIncome(departmentId);
-	}
-
-	@Override
-	public DepartmentParamTransport getDepartmentParamTransport(int departmentId) {
-		return departmentParamDao.getDepartmentParamTransport(departmentId);
-	}
-
 
 	@Override
  	public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){

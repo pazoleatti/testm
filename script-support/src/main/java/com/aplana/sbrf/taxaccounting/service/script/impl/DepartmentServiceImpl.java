@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
 
 import java.util.List;
@@ -14,25 +13,7 @@ import java.util.List;
 public class DepartmentServiceImpl implements DepartmentService {
 
 	@Autowired
-	DepartmentParamDao departmentParamDao;
-	
-	@Autowired
 	DepartmentDao departmentDao;
-	
-	@Override
-	public DepartmentParam getDepartmentParam(int departmentId) {
-		return departmentParamDao.getDepartmentParam(departmentId);
-	}
-
-	@Override
-	public DepartmentParamIncome getDepartmentParamIncome(int departmentId) {
-		return departmentParamDao.getDepartmentParamIncome(departmentId);
-	}
-
-	@Override
-	public DepartmentParamTransport getDepartmentParamTransport(int departmentId) {
-		return departmentParamDao.getDepartmentParamTransport(departmentId);
-	}
 
 	@Override
 	public Boolean issetSbrfCode(String sbrfCode) {

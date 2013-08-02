@@ -168,6 +168,7 @@ void calc() {
     data.getAllCached().eachWithIndex { row, i ->
 
         // TODO (Aydar Kadyrgulov) после привязки к справочнику брать ID выбранной записи
+        // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
         def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
         def departmentParamIncome = departmentService.getDepartmentParamIncome(Integer.valueOf(row.regionBankDivision))
 

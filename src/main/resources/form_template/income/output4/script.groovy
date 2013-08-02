@@ -423,10 +423,12 @@ void calc() {
                         row.bankCode = departmentParent.sbrfCode
                     }
                     row.divisionCode = department.sbrfCode
+                    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
                     departmentParam = departmentService.getDepartmentParam((int) department.id)
                     row.kpp = departmentParam.kpp
                     row.subjectCode = department.dictRegionId
                     row.subjectName = dictionaryRegionService.getRegionByCode(department.getDictRegionId()).getName()
+                    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
                     departmentParamIncome = departmentService.getDepartmentParamIncome(department.id)
                     row.subjectTaxStavka = departmentParamIncome.taxRate
                 }
@@ -468,6 +470,7 @@ void calc() {
             for (row in formData.dataRows) {
                 if (!rowTotal.getAlias().equals(row.getAlias())) {   // Пропустим строку итого
                     //noinspection GroovyVariableNotAssigned
+                    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
                     row.taxSumOutside = (BigDecimal) (departmentService.getDepartmentParamIncome(formData.departmentId).externalTaxSum * 18 / (18 + 2)).setScale(0, BigDecimal.ROUND_HALF_UP) *
                             (BigDecimal) (row.baseTaxOf / 100).setScale(0, BigDecimal.ROUND_HALF_UP) - row.delta28
                     // externalTaxSum у каждого периода будет своя версия (Версионирование формы настроек)
