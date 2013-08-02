@@ -119,7 +119,6 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
     dataRowHelper.insert(row, index)
-    dataRows.add(row)
     // TODO пересмотреть редактируемость (пока все редактируемо)
     for (column in formData.getFormColumns()) {
         if (column.alias.equals('dealNum1')) {
@@ -128,7 +127,6 @@ void addRow() {
         row.getCell(column.alias).editable = true
         row.getCell(column.alias).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
 }
 
 void deleteRow() {
@@ -173,7 +171,7 @@ void calc() {
         // TODO расчет полей по справочникам
     }
 
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -192,12 +190,10 @@ void consolidation() {
                 if (srcRow.getAlias() == null) {
                     def row = buildRow(srcRow, source.getFormType())
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
