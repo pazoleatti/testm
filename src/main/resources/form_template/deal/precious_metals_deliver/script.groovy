@@ -1,5 +1,6 @@
 package form_template.deal.precious_metals_deliver
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
@@ -62,21 +63,18 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 /**
@@ -143,13 +141,12 @@ void logicCheck() {
 
         // Проверка зависимости от признака физической поставки
         def signPhis = row.signPhis
-        // TODO Если графа 13 = элемент с кодом «1», заменить условие когда будет справочник!
-        if (signPhis == 1) {
-            for (alias in ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2',
-                    'settlement2', 'conditionCode']) {
-                if (row.getCell(alias).value != null && !row.getCell(alias).value.toString().isEmpty()) {
+        if (signPhis != null && refBookService.getNumberValue(18, signPhis, 'CODE') == 1) {
+            ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2',
+                    'settlement2', 'conditionCode'].each {
+                if (row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()) {
                     def msg1 = row.getCell('signPhis').column.name
-                    def msg2 = row.getCell(alias).column.name
+                    def msg2 = row.getCell(it).column.name
                     logger.warn("«$msg1» указан «ОМС», графа «$msg2» строки $rowNum заполняться не должна!")
                 }
             }
@@ -177,9 +174,13 @@ void logicCheck() {
         }
 
         // Корректность заполнения признака внешнеторговой сделки
-        def signTransaction = row.signTransaction
-        // TODO Проверка по справочникам
-        // Если графа 15 = графе 19, то графа 14 должна иметь значение «Нет», иначе – «Да»
+        def msg14 = row.getCell('signTransaction').column.name
+        def sign = refBookService.getNumberValue(38, row.signTransaction, 'CODE')
+        if (row.countryCode2 == row.countryCode3 && sign != 0) {
+            logger.warn("«$msg14» в строке $rowNum должен быть «Нет»!")
+        } else if (row.countryCode2 != row.countryCode3 && sign != 1) {
+            logger.warn("«$msg14» в строке $rowNum должен быть «Да»!")
+        }
 
         // Проверка населенного пункта 1
         if (settlement1 != null && !settlement1.toString().isEmpty() && city1 != null && !city1.toString().isEmpty()) {
@@ -233,7 +234,7 @@ void logicCheck() {
         // Проверка количества
         if (count != null && count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn('В графе «$msg» может быть указано только значение «1» в строке $rowNum!')
+            logger.warn("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
         }
 
         // Корректность дат сделки
@@ -249,19 +250,26 @@ void logicCheck() {
             def msg2 = row.getCell('totalNds').column.name
             logger.warn("«$msg1» не может отличаться от «$msg2» сделки в строке $rowNum!")
         }
-    }
 
-    checkNSI()
+        //Проверки соответствия НСИ
+        checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "countryCode1", "ОКСМ", 10)
+        checkNSI(row, "okpCode", "Коды драгоценных металлов", 17)
+        checkNSI(row, "signPhis", "Признаки физической поставки", 18)
+        checkNSI(row, "conditionCode", "Коды условий поставки", 21)
+    }
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -292,9 +300,35 @@ void calc() {
             row.priceOne = consumptionSum
             row.totalNds = consumptionSum
         }
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.name != null) {
+            def map = refBookService.getRecordData(9, row.name)
+            row.innKio = map.INN_KIO.numberValue
+            row.country = map.COUNTRY.referenceValue
+            row.countryCode1 = map.COUNTRY.referenceValue
+        } else {
+            row.innKio = null
+            row.country = null
+            row.countryCode1 = null
+        }
+        if (row.signPhis == 1) {
+            row.countryCode2 = null
+            row.region1 = null
+            row.city1 = null
+            row.settlement1 = null
+            row.countryCode3 = null
+            row.region2 = null
+            row.city2 = null
+            row.settlement2 = null
+        }
+        if (row.countryCode2 == row.countryCode3) {
+            row.signTransaction = 0
+        } else {
+            row.signTransaction = 1
+        }
     }
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -311,7 +345,6 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -335,9 +368,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
         aD = a.getCell(param).value
         bD = b.getCell(param).value
 
-        if (aD == bD) {
-            continue
-        } else {
+        if (aD != bD) {
             return aD <=> bD
         }
     }
@@ -388,7 +419,6 @@ void addAllStatic() {
                 i++
             }
         }
-        dataRowHelper.save(dataRows);
     }
 }
 
@@ -442,10 +472,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }

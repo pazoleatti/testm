@@ -25,7 +25,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -46,10 +45,10 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers>, ReportPeriodSelectHandler {
         /**
-         * Расчет видимости поле в зависимости от роли (Контролер/Контролер УНП)
+         * Флаг роли (Контролер/Контролер УНП)
          * @param isUnp
          */
-        void updateVisibility(boolean isUnp);
+        void setUnpFlag(boolean isUnp);
 
         /**
          * Данные справочника "Подразделения"
@@ -92,6 +91,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Перезагрузка параметров подразделения
          */
         void reloadDepartmentParams();
+
+        /**
+         * Очистка формы
+         */
+        void clear();
+
+        /**
+         * Обновление списка налоговых периодов
+         */
+        void reloadTaxPeriods();
     }
 
     @Inject
@@ -117,6 +126,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
                     }
                 }, this));
+    }
+
+    @Override
+    public void clear() {
+        getView().clear();
     }
 
     @Override
@@ -154,8 +168,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().reloadDepartmentParams();
                     }
                 }, this));
-
     }
+
+
 
     @Override
     public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {
@@ -194,7 +209,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     return;
                                 }
 
-                                getView().updateVisibility(result.getControlUNP());
+                                getView().setUnpFlag(result.getControlUNP());
 
                                 // Список подразделений для справочника
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());

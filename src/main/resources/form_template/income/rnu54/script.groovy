@@ -64,8 +64,14 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
+    def data = getData(formData)
     def newRow = formData.createDataRow()
-    formData.dataRows.add(newRow)
+    def index = 0
+    if(currentDataRow!=null){
+        if(currentDataRow.getAlias()==null){
+            index = getIndex(currentDataRow)+1
+        }
+    }
 
     // графа 1..10
     ['tadeNumber', 'securityName', 'currencyCode', 'nominalPriceSecurities',
@@ -73,19 +79,21 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    data.insert(newRow,index+1)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    getData(formData).delete(currentDataRow)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
@@ -95,7 +103,7 @@ void calc() {
             'nominalPriceSecurities', 'salePrice', 'acquisitionPrice',
             'part1REPODate', 'part2REPODate']
 
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -107,13 +115,13 @@ void calc() {
 
     // удалить строку "итого"
     def delRow = []
-    formData.dataRows.each { row ->
+    getRows(data).each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
+        data.delete(row)
     }
 
     /** Отчетная дата. */
@@ -131,16 +139,16 @@ void calc() {
     def tmp
     def a, b ,c
 
-    formData.dataRows.eachWithIndex { row, i ->
+    getRows(data).eachWithIndex { row, i ->
 
         // графа 9, 10
         a = calcAForColumn9or10(row, reportDate, course)
         b = 0
         c = 0
         if (a < 0) {
-            c = round(Math.abs(a), 2)
+            c = roundTo2(Math.abs(a), 2)
         } else if (a > 0) {
-            b = round(a, 2)
+            b = roundTo2(a, 2)
         }
         row.income = b
         row.outcome = c
@@ -161,7 +169,7 @@ void calc() {
                 tmp = 15
             }
         }
-        row.rateBR = round(tmp, 2)
+        row.rateBR = roundTo2(tmp, 2)
 
         // графа 12
         if (row.outcome == 0) {
@@ -196,9 +204,10 @@ void calc() {
         row.outcomeTax = tmp
     }
 
+    data.save(getRows(data))
+
     // строка итого
     def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.tadeNumber = 'Итого'
     totalRow.getCell('tadeNumber').colSpan = 2
@@ -206,6 +215,7 @@ void calc() {
     ['salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
+    data.insert(totalRow,getRows(data).size()+1)
 }
 
 /**
@@ -214,7 +224,8 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
-    if (!formData.dataRows.isEmpty()) {
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
 
         // список проверяемых столбцов (графа 12, 13)
         def requiredColumns = ['outcome269st', 'outcomeTax']
@@ -236,7 +247,7 @@ def logicalCheck(def useLog) {
         def tmp
         def a, b, c
 
-        for (def row : formData.dataRows) {
+        for (def row : getRows(data)) {
             if (isTotal(row)) {
                 hasTotalRow = true
                 continue
@@ -272,12 +283,12 @@ def logicalCheck(def useLog) {
 
             // 6. Проверка финансового результата
             tmp = ((row.acquisitionPrice - row.salePrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp < 0 && row.income != round(Math.abs(tmp), 2)) {
+            if (tmp < 0 && row.income != roundTo2(Math.abs(tmp), 2)) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 7. Проверка финансового результата
-            if (tmp > 0 && row.outcome != round(Math.abs(tmp), 2)) {
+            if (tmp > 0 && row.outcome != roundTo2(Math.abs(tmp), 2)) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -287,9 +298,9 @@ def logicalCheck(def useLog) {
             b = 0
             c = 0
             if (a < 0) {
-                c = round(Math.abs(a), 2)
+                c = roundTo2(Math.abs(a), 2)
             } else if (a > 0) {
-                b = round(a, 2)
+                b = roundTo2(a, 2)
             }
             // графа 9
             if (row.income != b) {
@@ -318,7 +329,7 @@ def logicalCheck(def useLog) {
                     tmp = 15
                 }
             }
-            if (row.rateBR != round(tmp, 2)) {
+            if (row.rateBR != roundTo2(tmp, 2)) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
@@ -365,7 +376,7 @@ def logicalCheck(def useLog) {
 
         // 9. Проверка итоговых значений формы  Заполняется автоматически (графа 5, 6, 9, 10, 12, 13).
         if (hasTotalRow) {
-            def totalRow = formData.getDataRow('total')
+            def totalRow = data.getDataRow(getRows(data),'total')
             def totalSumColumns = ['salePrice', 'acquisitionPrice', 'income',
                     'outcome', 'outcome269st', 'outcomeTax']
             for (def alias : totalSumColumns) {
@@ -383,12 +394,13 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    if (!formData.dataRows.isEmpty()) {
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
         /** Отчетная дата. */
         def reportDate = getReportDate()
 
         def hasError
-        for (def row : formData.dataRows) {
+        for (def row : getRows(data)) {
             if (isTotal(row)) {
                 continue
             }
@@ -432,16 +444,17 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row ->
+                getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.insert(row,getRows(data).size()+1)
                     }
                 }
             }
@@ -463,7 +476,7 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -523,19 +536,21 @@ def getDate(def value) {
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
     def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return round(tmp, 2)
+    return roundTo2(tmp, 2)
 }
 
 /**
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
+    def data = getData(formData)
     def from = 0
-    def to = formData.dataRows.size() - 2
+    def rows = getRows(data)
+    def to = (rows.get(rows.size()-1)!=null && rows.get(rows.size()-1).getAlias()!=null)?rows.size() - 2:rows.size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -553,7 +568,7 @@ void setTotalStyle(def row) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    getRows(getData(formData)).indexOf(row)
 }
 
 /**
@@ -637,4 +652,40 @@ def calcAForColumn9or10(def row, def reportDate, def course) {
     def tmp = ((row.acquisitionPrice - row.salePrice) *
             (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
     return tmp
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
+}
+
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @param newScale
+ * @return
+ */
+BigDecimal roundTo2(BigDecimal value, int newScale) {
+    if (value != null) {
+        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
 }

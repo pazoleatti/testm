@@ -1,5 +1,6 @@
 package form_template.deal.nondeliverable
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
@@ -62,20 +63,17 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
             'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 /**
@@ -203,19 +201,23 @@ void logicCheck() {
             def msg2 = row.getCell('transactionDeliveryDate').column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
-    }
 
-    checkNSI()
+        //Проверки соответствия НСИ
+        checkNSI(row, "jurName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+    }
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -249,7 +251,6 @@ void addAllStatic() {
                 i++
             }
         }
-        dataRowHelper.save(dataRows);
     }
 }
 
@@ -312,9 +313,20 @@ void calc() {
             row.price = consumptionSum
             row.cost = consumptionSum
         }
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.name != null) {
+            def map = refBookService.getRecordData(9, row.name)
+            row.innKio = map.INN_KIO.numberValue
+            row.country = map.COUNTRY.referenceValue
+            row.countryCode = map.COUNTRY.referenceValue
+        } else {
+            row.innKio = null
+            row.country = null
+            row.countryCode = null
+        }
     }
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -336,9 +348,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
         aD = a.getCell(param).value
         bD = b.getCell(param).value
 
-        if (aD == bD) {
-            continue
-        } else {
+        if (aD != bD) {
             return aD <=> bD
         }
     }
@@ -359,7 +369,6 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -379,10 +388,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
