@@ -75,11 +75,9 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
 
-        // TODO Фильтр пока не работает, проверить потом
+        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendarFrom.getTime(), pp, "departament_id = " + action.getDepartmentId(), null);
-
-        // TODO Добавить проверку на наличие результата. Результат должен быть - одна строка
+                calendarFrom.getTime(), pp, filter, null);
 
         if (params.getRecords().size() != 0) {
             Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
