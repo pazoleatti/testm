@@ -1,5 +1,6 @@
 package form_template.deal.forward_contracts
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
@@ -57,14 +58,12 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealType',
             'currencyCode', 'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 
 /**
@@ -91,6 +90,7 @@ void logicCheck() {
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
         [
+                'rowNumber',        // № п/п
                 'fullName',         // Полное наименование с указанием ОПФ
                 'inn',              // ИНН/КИО
                 'countryName',      // Наименование страны регистрации
@@ -118,7 +118,7 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.error("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
+            logger.warn("«$msgIn» и «$msgOut» в строке $rowNum не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
@@ -150,17 +150,24 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
+        //Проверки соответствия НСИ
+        checkNSI(row, "fullName", "Организации-участники контролируемых сделок",9)
+        checkNSI(row, "countryName", "ОКСМ",10)
+        checkNSI(row, "countryCode", "ОКСМ",10)
+        checkNSI(row, "countryDealCode", "ОКСМ",10)
+        checkNSI(row, "currencyCode", "Единый справочник валют",15)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -169,12 +176,26 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
         row.total = row.price
+
+        // Расчет полей зависимых от справочников
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
+            row.inn = map.INN_KIO.numberValue
+            row.countryName = map.COUNTRY.referenceValue
+            row.countryCode = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryName = null
+            row.countryCode = null
+        }
     }
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -183,8 +204,6 @@ void calc() {
  * @return
  */
 def calcItog(int i) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
     def newRow = formData.createDataRow()
 
     newRow.fullName = 'Подитог:'
@@ -232,9 +251,7 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
         def aD = a.getCell(param).value
         def bD = b.getCell(param).value
 
-        if (aD == bD) {
-            continue
-        } else {
+        if (aD != bD) {
             return aD <=> bD
         }
     }
@@ -256,12 +273,10 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -278,7 +293,6 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -311,6 +325,5 @@ void addAllStatic() {
                 i++
             }
         }
-        dataRowHelper.save(dataRows);
     }
 }

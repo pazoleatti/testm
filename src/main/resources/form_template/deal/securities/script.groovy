@@ -1,6 +1,9 @@
 package form_template.deal.securities
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+
 import java.math.RoundingMode
 
 /**
@@ -54,13 +57,11 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['fullNamePerson', 'dealSign', 'incomeSum', 'outcomeSum', 'docNumber', 'docDate', 'okeiCode', 'count', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -86,6 +87,7 @@ void logicCheck() {
         def docDateCell = row.getCell('docDate')
         def okeiCodeCell = row.getCell('okeiCode')
         [
+                'rowNumber',        // № п/п
                 'fullNamePerson',// Полное наименование юридического лица с указанием ОПФ
                 'inn',           // ИНН/КИО
                 'countryCode',   // Код страны регистрации по классификатору ОКСМ
@@ -139,13 +141,13 @@ void logicCheck() {
         def priceCell = row.getCell('price')
         if (okeiCodeCell.value == '796' && countCell.value != null && countCell.value != 0
                 && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
-            def msg1 =  priceCell.column.name
-            def msg2 =  sumCell.column.name
-            def msg3 =  countCell.column.name
+            def msg1 = priceCell.column.name
+            def msg2 = sumCell.column.name
+            def msg3 = countCell.column.name
             logger.warn("«$msg1» в строке $rowNum не равно отношению «$msg2» и «$msg3»!")
         } else if (okeiCodeCell.value == '744' && priceCell.value != sumCell.value) {
-            def msg1 =  priceCell.column.name
-            def msg2 =  sumCell.column.name
+            def msg1 = priceCell.column.name
+            def msg2 = sumCell.column.name
             logger.warn("«$msg1» в строке $rowNum не равно «$msg2»!")
         }
         // Корректность даты совершения сделки
@@ -155,18 +157,23 @@ void logicCheck() {
             def msg2 = docDateCell.column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
+        //Проверки соответствия НСИ
+        checkNSI(row, "fullNamePerson", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+        checkNSI(row, "dealSign", "Признак сделки, совершенной в РПС", 36)
+        checkNSI(row, "okeiCode", "Коды единиц измерения на основании ОКЕИ", 12)
     }
-
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -175,7 +182,8 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
         // Расчет поля "Цена"
         priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         okeiCode = row.okeiCode
@@ -189,8 +197,17 @@ void calc() {
         // Расчет поля "Стоимость"
         row.cost = priceValue
 
-        // TODO расчет полей по справочникам
+        // Расчет полей зависимых от справочников
+        if (row.fullNamePerson != null) {
+            def map = refBookService.getRecordData(9, row.fullNamePerson)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+        }
     }
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -208,10 +225,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }

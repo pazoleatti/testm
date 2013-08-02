@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class RefBookDaoTest {
 
 	@Autowired
-	RefBookDao refBookDao;
+    RefBookDao refBookDao;
 
 	@Test
 	public void testGet1() {

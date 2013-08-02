@@ -23,9 +23,6 @@
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormTemplateDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormDataWorkflowDao"/>
-	</bean>
-	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ColumnDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
@@ -62,7 +59,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.BlobDataDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.RefBookDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService"/>

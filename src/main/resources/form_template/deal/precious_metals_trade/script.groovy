@@ -1,5 +1,6 @@
 package form_template.deal.precious_metals_trade
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -57,15 +58,13 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName',
-            'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
+            'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2',
             'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -91,6 +90,7 @@ void logicCheck() {
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
         [
+                'rowNum',         // № п/п
                 'fullName',       // Полное наименование с указанием ОПФ
                 'interdependence',// Признак взаимозависимости
                 'inn',            // ИНН/КИО
@@ -137,13 +137,13 @@ void logicCheck() {
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
         // Зависимости от признака физической поставки
-        // TODO (проверка связана со справочниками) if (row.getCell('deliverySign').value == 1 ){
-        if (false) {
+        if (row.deliverySign == 1) {
+            def msg1 = row.getCell('deliverySign').column.name
             ['countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2', 'region2', 'city2', 'locality2'].each {
-                cell = row.getCell(it)
+                def cell = row.getCell(it)
                 if (cell.value != null && !cell.value.toString().isEmpty()) {
-                    logger.warn('«' + row.getCell('deliverySign').column.name + '» указан «ОМС», ' +
-                            'графа «' + cell.column.name + '» строки ' + rowNum + ' заполняться не должна!')
+                    def msg2 = cell.column.name
+                    logger.warn("«$msg1» указан «ОМС», графа «$msg2» строки $rowNum заполняться не должна!")
                 }
             }
         }
@@ -172,10 +172,16 @@ void logicCheck() {
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только  значение «1»!")
+            logger.warn("В графе «$msg» в строке $rowNum может  быть указано только значение «1»!")
         }
         // Проверка внешнеторговой сделки
-        // TODO (проверки связаны со справочниками)
+        def msg14 = row.getCell('foreignDeal').column.name
+        def sign = refBookService.getNumberValue(38, row.foreignDeal, 'CODE')
+        if (row.countryCodeNumeric == row.countryCodeNumeric2 && sign != 0) {
+            logger.warn("«$msg14» в строке $rowNum должен быть «Нет»!")
+        } else if (row.countryCodeNumeric != row.countryCodeNumeric2 && sign != 1) {
+            logger.warn("«$msg14» в строке $rowNum должен быть «Да»!")
+        }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
@@ -191,17 +197,29 @@ void logicCheck() {
             def msg2 = price.column.name
             logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
         }
+        //Проверки соответствия НСИ
+        checkNSI(row, "fullName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+        checkNSI(row, "countryCodeNumeric", "ОКСМ", 10)
+        checkNSI(row, "countryCodeNumeric2", "ОКСМ", 10)
+        checkNSI(row, "region", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "metalName", "Коды драгоценных металлов", 40)
+        checkNSI(row, "deliverySign", "Признаки физической поставки", 44)
+        checkNSI(row, "deliveryCode", "Коды условий поставки", 47)
+        checkNSI(row, "dealFocus", "Направленности сделок", 46)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -210,15 +228,43 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
         row.total = row.price
         // Расчет поля "Количество"
         row.count = 1
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+            row.countryName = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+            row.countryName = null
+        }
+        if (row.deliverySign == 1) {
+            row.countryCodeNumeric = null
+            row.regionCode = null
+            row.city = null
+            row.locality = null
+            row.countryCodeNumeric2 = null
+            row.regionCode2 = null
+            row.city2 = null
+            row.locality2 = null
+        }
+        if (row.countryCodeNumeric == row.countryCodeNumeric2) {
+            row.foreignDeal = 0
+        } else {
+            row.foreignDeal = 1
+        }
     }
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -236,12 +282,10 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -258,7 +302,6 @@ void deleteAllStatic() {
             iter.remove()
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -294,6 +337,5 @@ void addAllStatic() {
 
         dataRows.add(dataRows.size(), newRow)
         dataRowHelper.insert(newRow, dataRows.size())
-        dataRowHelper.save(dataRows);
     }
 }

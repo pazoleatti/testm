@@ -1,5 +1,6 @@
 package form_template.deal.foreign_currency
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -58,14 +59,12 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['fullName', 'docNum', 'docDate', 'dealNumber', 'dealDate', 'currencyCode',
             'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 
 /**
@@ -91,6 +90,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         [
+                'rowNumber',        // № п/п
                 'fullName',         // Полное наименование с указанием ОПФ
                 'inn',              // ИНН/КИО
                 'countryName',      // Наименование страны регистрации
@@ -156,17 +156,24 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
+        //Проверки соответствия НСИ
+        checkNSI(row, "fullName", "Организации-участники контролируемых сделок",9)
+        checkNSI(row, "countryName", "ОКСМ",10)
+        checkNSI(row, "countryCode", "ОКСМ",10)
+        checkNSI(row, "countryDealCode", "ОКСМ",10)
+        checkNSI(row, "currencyCode", "Единый справочник валют",15)
     }
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -175,13 +182,26 @@ void checkNSI() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
         row.total = row.price
-        // TODO расчет полей по справочникам
+
+        // Расчет полей зависимых от справочников
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
+            row.inn = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+            row.countryName = map.COUNTRY.referenceValue
+        } else {
+            row.inn = null
+            row.countryCode = null
+            row.countryName = null
+        }
     }
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -199,12 +219,10 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -218,10 +236,8 @@ void deleteAllStatic() {
         row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            iter.remove()
         }
     }
-    dataRowHelper.save(dataRows);
 }
 
 /**
@@ -257,6 +273,5 @@ void addAllStatic() {
 
         dataRows.add(dataRows.size(), newRow)
         dataRowHelper.insert(newRow, dataRows.size())
-        dataRowHelper.save(dataRows);
     }
 }

@@ -1,5 +1,7 @@
 package form_template.deal.tech_service
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 import java.math.RoundingMode
@@ -54,23 +56,21 @@ void checkCreation() {
 }
 
 void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def row = formData.createDataRow()
-
-    for (alias in ['jurName', 'bankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
+    def dataRows = dataRowHelper.getAllCached()
+    def size = dataRows.size()
+    def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
+    ['jurName', 'bankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate'].each {
+        row.getCell(it).editable = true
+        row.getCell(it).setStyleAlias('Редактируемая')
     }
-
-    formData.dataRows.add(row)
-
-    row.getCell('rowNum').value = formData.dataRows.size()
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
-    if (currentDataRow != null) {
-        recalcRowNum()
-        formData.dataRows.remove(currentDataRow)
-    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.delete(currentDataRow)
 }
 
 /**
@@ -180,27 +180,40 @@ void logicCheck() {
 
         // Проверка заполнения региона
         def country = row.country
-
         if (country != null) {
-            // TODO проверки для страны по коду справочника
-        } else {
-            // TODO проверки для страны по коду справочника
+            def msg1 = row.getCell('region').column.name
+            def msg2 = row.getCell('country').column.name
+            if (country == 643 && row.region == null) {
+                logger.warn("«$msg1» в строке $rowNum должен быть заполнен, т.к. в «$msg2» указан код 643!")
+            } else if (country != 643 && row.region != null) {
+                logger.warn("«$msg1» в строке $rowNum не должен быть заполнен, т.к. в «$msg2» указан код, отличный от 643!")
+            }
+        }
+        // Проверка населенного пункта
+        if (row.city != null && row.city.toString().isEmpty() && row.settlement != null && row.city.settlement().isEmpty()) {
+            def msg1 = row.getCell('city').column.name
+            def msg2 = row.getCell('settlement').column.name
+            logger.warn("Если указан «$msg1» в строке $rowNum, не должен быть указан «$msg2» в строке $rowNum!")
         }
 
-        // TODO Проверка населенного пункта
+        //Проверки соответствия НСИ
+        checkNSI(row, "jurName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "countryCode", "ОКСМ", 10)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "region", "Коды субъектов Российской Федерации", 4)
     }
 
-    checkNSI()
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -213,7 +226,11 @@ void calc() {
 
     for (row in dataRows) {
 
-        // TODO Расчет поля "Населенный пункт"
+        // Расчет поля "Населенный пункт"
+        if (row.city != null && !row.city.toString().isEmpty()) {
+            row.settlement = row.city
+        }
+
         count = row.count
         bankSum = row.bankSum
         // Расчет поля "Цена"
@@ -221,9 +238,17 @@ void calc() {
         // Расчет поля "Стоимость"
         row.coste = bankSum
 
-        // TODO расчет полей по справочникам
+        // Расчет полей зависимых от справочников
+        if (row.jurName != null) {
+            def map = refBookService.getRecordData(9, row.jurName)
+            row.innKio = map.INN_KIO.numberValue
+            row.countryCode = map.COUNTRY.referenceValue
+        } else {
+            row.innKio = null
+            row.countryCode = null
+        }
     }
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -243,10 +268,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }

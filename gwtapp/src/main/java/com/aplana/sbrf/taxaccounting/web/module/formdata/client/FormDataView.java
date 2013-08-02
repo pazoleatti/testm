@@ -24,6 +24,7 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.Date;
 import java.util.List;
 
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
@@ -340,7 +341,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
 			String formKind, String departmentId, String reportPeriod,
-			String state) {
+			String state, Date startDate, Date endDate) {
 		String taxFormType = taxType.getName() + " / " + formType;
 		title.setText(taxFormType);
 		title.setTitle(taxFormType);
@@ -348,6 +349,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		departmentIdLabel.setText(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
 		stateLabel.setText(state);
+		factory.setDateRange(startDate, endDate);
 	}
 
 	/**
