@@ -6,6 +6,7 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -48,10 +49,11 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	private int lastColumn;
 	private PopupPanel panel;
 	protected final SafeHtmlRenderer<String> renderer;
-	private ValueUpdater<Long> valueUpdater;
-	private RefBookPickerWidget selectWidget;
+	//private ValueUpdater<Long> valueUpdater;
+	private RefBookPicker refBookPiker = new RefBookPickerWidget();
 	private Long refBookAttrId;
 	private String columnAlias;
+	private boolean refBookPikerAlredyInit;
 
 	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
@@ -67,7 +69,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
 						// Dismiss when escape is pressed
 						panel.hide();
-						selectWidget.clear();
+						//selectWidget.clear();
 					}
 				}
 			}
@@ -85,9 +87,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					lastParent.focus();
 				}
 				lastParent = null;
-				selectWidget.clear();
+				//selectWidget.clear();
 			}
 		});
+		
+		
+		panel.add(refBookPiker);
 	}
 
 
@@ -98,48 +103,40 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	@Override
 	public void onBrowserEvent(Context context, Element parent, Long value,
-							   NativeEvent event, ValueUpdater<Long> valueUpdater) {
+							   NativeEvent event, final ValueUpdater<Long> valueUpdater) {
 		super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		if (CLICK.equals(event.getType())) {
-			createSelectWidget();
+			refBookPiker.addValueChangeHandler(
+					new ValueChangeHandler<Long>() {
+						@Override
+						public void onValueChange(ValueChangeEvent<Long> event) {
+							// Remember the values before hiding the popup.
+							Element cellParent = lastParent;
+							Long oldValue = lastValue;
+							Object key = lastKey;
+							int index = lastIndex;
+							int column = lastColumn;
+							panel.hide();
+
+							// Update the cell and value updater.
+							Long value = event.getValue();
+							//setViewData(key, String.valueOf(value));
+							
+							DataRow<Cell> dataRow = (DataRow<Cell>) key;
+							Cell cell = dataRow.getCell(columnAlias);
+							cell.setRefBookDereference(refBookPiker.getDereferenceValue());
+							
+							setValue(new Context(index, column, key), cellParent, oldValue);
+							if (valueUpdater != null) {
+								valueUpdater.update(value);
+							}
+						}
+					}
+			);
 			onEnterKeyDown(context, parent, value, event, valueUpdater);
 		}
 	}
-	
-	
 
-	private void createSelectWidget() {
-		if (selectWidget != null) {
-			return;
-		}
-
-		selectWidget = new RefBookPickerWidget(refBookAttrId);
-		// Put selectWidget on panel
-		panel.add(selectWidget);
-		selectWidget.addValueChangeHandler(
-				new ValueChangeHandler<Long>() {
-					@Override
-					public void onValueChange(ValueChangeEvent<Long> event) {
-						// Remember the values before hiding the popup.
-						Element cellParent = lastParent;
-						Long oldValue = lastValue;
-						Object key = lastKey;
-						int index = lastIndex;
-						int column = lastColumn;
-						panel.hide();
-						selectWidget.clear();
-
-						// Update the cell and value updater.
-						Long value = event.getValue();
-						setViewData(key, String.valueOf(value));
-						setValue(new Context(index, column, key), cellParent, oldValue);
-						if (valueUpdater != null) {
-							valueUpdater.update(value);
-						}
-					}
-				}
-		);
-	}
 
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, Long value,
@@ -149,9 +146,14 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		this.lastValue = value;
 		this.lastIndex = context.getIndex();
 		this.lastColumn = context.getColumn();
-		this.valueUpdater = valueUpdater;
+		//this.valueUpdater = valueUpdater;
 
-		selectWidget.setValue(lastValue);
+		if (!refBookPikerAlredyInit){
+			refBookPiker.setAcceptableValues(refBookAttrId);
+			refBookPikerAlredyInit = true;
+		}
+		
+		refBookPiker.setValue(lastValue);
 
 		panel.setPopupPositionAndShow(new PositionCallback() {
 			public void setPosition(int offsetWidth, int offsetHeight) {
@@ -177,7 +179,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			}
 		});
 
-		selectWidget.focus();
+		//selectWidget.asWidget().focus();
 	}
 
 	@Override

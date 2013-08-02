@@ -41,12 +41,12 @@ public class GetRefBookValuesHandler extends
 	@Override
 	public GetRefBookValuesResult execute(GetRefBookValuesAction action,
 			ExecutionContext context) throws ActionException {
-		RefBook refBook = refBookFactory.get(action.getRefBookId());
+		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		
 		RefBookAttribute sortAttribute = refBook.getAttributes().iterator().next();
 		
 		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefBookId());
+				.getDataProvider(refBook.getId());
 
 		PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 				.getRecords(action.getVersion(), action.getPagingParams(),
@@ -82,7 +82,11 @@ public class GetRefBookValuesHandler extends
 						// TODO: Необходимо разименовать значение ссылки
 						values.add("Не разименовано: " + record.get(refBookAttribute.getAlias()));
 					} else {
-						values.add(String.valueOf(record.get(refBookAttribute.getAlias())));
+						String derefValue = String.valueOf(record.get(refBookAttribute.getAlias()));
+						values.add(derefValue);
+						if (refBookAttribute.getId().equals(action.getRefBookAttrId())){
+							item.setDereferenceValue(derefValue);
+						}
 					}
 					
 				}

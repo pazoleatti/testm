@@ -15,17 +15,16 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValuesResult> implements Serializable, ActionName{
 	private static final long serialVersionUID = -5419717754708198048L;
 	
-	private long refBookId;
+	private long refBookAttrId;
 	private String searchPattern;
 	private PagingParams pagingParams;
 	private Date version;
 	
-	
-	public Long getRefBookId() {
-		return refBookId;
+	public long getRefBookAttrId() {
+		return refBookAttrId;
 	}
-	public void setRefBookId(Long refBookId) {
-		this.refBookId = refBookId;
+	public void setRefBookAttrId(long refBookAttrId) {
+		this.refBookAttrId = refBookAttrId;
 	}
 	public String getSearchPattern() {
 		return searchPattern;

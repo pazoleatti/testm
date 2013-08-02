@@ -7,10 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookAction;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookValuesResult;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookAction;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -25,47 +25,67 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	private final DispatchAsync dispatcher;
 	
 	private Long value;
-	private long refBookId; 
+	private String dereferenceValue;
+	
+	private Long refBookAttrId;
 	
 	private String searchPattern;
 	private Date version;
 	
-	public RefBookPickerWidgetPresenter(MyView view, long refBookAttrId, Long formDataId) {
-		super(GINContextHolder.getEventBus(), view);
-		dispatcher = GINContextHolder.getDispatchAsync();
-		getView().setUiHandlers(this);
+
+	@Override
+	public void init(final long refBookAttrId, Date date1, Date date2) {
 		
 		
-		GetRefBookAction getRefBookAction = new GetRefBookAction();
-		getRefBookAction.setRefBookAttrId(refBookAttrId);
-		getRefBookAction.setFormDataId(formDataId);
+		InitRefBookAction initRefBookAction = new InitRefBookAction();
+		initRefBookAction.setRefBookAttrId(refBookAttrId);
+		initRefBookAction.setDate1(date1);
+		initRefBookAction.setDate2(date2);
 		
-		dispatcher.execute(getRefBookAction, CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookResult>() {
+		dispatcher.execute(initRefBookAction, CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookResult>() {
 
 			@Override
-			public void onSuccess(GetRefBookResult result) {
-				refBookId = result.getRefBookId();
-				getView().initView(result.getHeaders(), result.getVersions());
+			public void onSuccess(InitRefBookResult result) {
+				RefBookPickerWidgetPresenter.this.refBookAttrId = refBookAttrId;
+				getView().setHeaders(result.getHeaders());
+				getView().setVersions(result.getVersions());
+				getView().refreshData();
 			}
 			
 		}, this));
+		
+	}
+
 	
+	public RefBookPickerWidgetPresenter(MyView view) {
+		super(GINContextHolder.getEventBus(), view);
+		dispatcher = GINContextHolder.getDispatchAsync();
+		getView().setUiHandlers(this);
 	}
 
 	interface MyView extends View, HasValue<Long>, HasUiHandlers<RefBookPickerWidgetUiHandlers>{
-		void initView(List<String> headers, List<Date> versions);
+		void setVersions(List<Date> versions);
+		void setHeaders(List<String> headers);
+		
 		void setVersion(Date version);
 		Date getVersion();
+		
 		String getSearchPattern();
-		void updateRowData(int start, List<RefBookItem> values, int size);
-		void goToFirstPage();
-		void fireChangeEvent(Long value);
+		
+		void setRowData(int start, List<RefBookItem> values, int size);
+		RefBookItem getSelectionValue();
+		void refreshData();
+		void widgetFireChangeEvent(Long value);
+		HandlerRegistration widgetAddValueHandler(ValueChangeHandler<Long> handler);
 	}
 
 
 
 	@Override
 	public void rangeChanged(int startIndex, int maxRows) {
+		if (refBookAttrId == null){
+			return;
+		}
 		final int offset = startIndex;
 		int max = maxRows;
 
@@ -74,24 +94,17 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 			action.setSearchPattern(searchPattern);
 		}
 		action.setPagingParams(new PagingParams(offset, max));
-		action.setRefBookId(refBookId);
+		action.setRefBookAttrId(refBookAttrId);
 		action.setVersion(getView().getVersion());
 
 		dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
 				new AbstractCallback<GetRefBookValuesResult>() {
 					@Override
 					public void onSuccess(GetRefBookValuesResult result) {
-						getView().updateRowData(offset, result.getPage().getRecords(), result.getPage().getTotalRecordCount());
+						getView().setRowData(offset, result.getPage().getRecords(), result.getPage().getTotalRecordCount());
 					}
 				}, this));
 		
-	}
-
-	@Override
-	public HandlerRegistration addValueChangeHandler(
-			ValueChangeHandler<Long> handler) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -108,8 +121,14 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	public void setValue(Long value, boolean fireEvents) {
 		setValue(value);
 		if (fireEvents){
-			getView().fireChangeEvent(value);
+			getView().widgetFireChangeEvent(value);
 		}
+	}
+	
+	@Override
+	public HandlerRegistration addValueChangeHandler(
+			ValueChangeHandler<Long> handler) {
+		return getView().widgetAddValueHandler(handler);
 	}
 
 	@Override
@@ -118,7 +137,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		String newValue = getView().getSearchPattern();
 		if (oldValue != null ? !oldValue.equals(newValue) : newValue != null) {
 			searchPattern = newValue;
-			getView().goToFirstPage();
+			getView().refreshData();
 		}	
 	}
 	
@@ -129,8 +148,22 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		Date newValue = getView().getVersion();
 		if (oldValue != null ? !oldValue.equals(newValue) : newValue != null) {
 			version = newValue;
-			getView().goToFirstPage();
+			getView().refreshData();
 		}
 	}
+	
+	@Override
+	public void onSelectionChange() {
+		RefBookItem item = getView().getSelectionValue();
+		dereferenceValue = item.getDereferenceValue();
+		setValue(item.getId(), true);
+	}
+
+
+	@Override
+	public String getDereferenceValue() {
+		return dereferenceValue;
+	}
+
 
 }

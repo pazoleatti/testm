@@ -15,6 +15,8 @@ public class RefBookItem implements Serializable{
 	
 	private Long id;
 	
+	private String dereferenceValue;
+	
 	private List<String> values;
 
 	public Long getId() {
@@ -31,6 +33,14 @@ public class RefBookItem implements Serializable{
 
 	public void setValues(List<String> values) {
 		this.values = values;
+	}
+
+	public String getDereferenceValue() {
+		return dereferenceValue;
+	}
+
+	public void setDereferenceValue(String dereferenceValue) {
+		this.dereferenceValue = dereferenceValue;
 	}
 	
 }
