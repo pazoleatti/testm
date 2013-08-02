@@ -60,9 +60,16 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
+    def data = getData(formData)
     def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
-
+    def index = 0
+    if(currentDataRow!=null){
+        if(currentDataRow.getAlias()==null){
+            index = getIndex(currentDataRow)
+        }else{
+            index = getIndex(currentDataRow)-1
+        }
+    }
     // графа 3..12
     ['ofz', 'municipalBonds', 'governmentBonds  ', 'mortgageBonds',
             'municipalBondsBefore', 'rtgageBondsBefore', 'ovgvz',
@@ -70,19 +77,21 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    data.insert(newRow, index + 1)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    getData(formData).delete(currentDataRow)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
@@ -92,7 +101,7 @@ void calc() {
             'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore',
             'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -107,12 +116,14 @@ void calc() {
 def logicalCheck(def useLog) {
     // данные предыдущего отчета
     def formDataOld = getFormDataOld()
+    def data = getData(formData)
+    def dataOld = getData(formDataOld)
 
     /** Строка из предыдущего отчета. */
-    def rowOld = (formDataOld != null && !formDataOld.dataRows.isEmpty() ? formDataOld.getDataRow('total') : null)
+    def rowOld = (formDataOld != null && !getRows(dataOld).isEmpty() ? dataOld.getDataRow(getRows(dataOld),'total') : null)
 
     /** Строка из текущего отчета. */
-    def row = (formData != null && !formData.dataRows.isEmpty() ? formData.getDataRow('total') : null)
+    def row = (formData != null && !getRows(data).isEmpty() ? data.getDataRow(getRows(data),'total') : null)
     if (row == null) {
         return true
     }
@@ -173,9 +184,10 @@ def logicalCheck(def useLog) {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
     // занулить данные и просуммировать из источников
 
-    def row = formData.getDataRow('total')
+    def row = data.getDataRow(getRows(data),'total')
 
     // графа 3..12
     def columns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds',
@@ -187,16 +199,17 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             def sourceRow
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceRow = source.getDataRow('total')
+                sourceRow = getData(source).getDataRow(getRows(getData(source)),'total')
                 columns.each { alias ->
                     row.getCell(alias).setValue(sourceRow.getCell(alias).getValue())
                 }
             }
         }
     }
+    data.save(getRows(data))
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -213,7 +226,7 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -249,7 +262,7 @@ def getFormDataOld() {
     // РНУ-31 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld
@@ -272,7 +285,8 @@ def isFirstMonth() {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    def data = getData(formData)
+    getRows(data).indexOf(row)
 }
 
 /**
@@ -320,4 +334,26 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
 }

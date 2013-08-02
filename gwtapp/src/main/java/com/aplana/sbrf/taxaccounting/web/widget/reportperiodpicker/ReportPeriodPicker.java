@@ -17,7 +17,10 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
-
+/**
+ * Компонент для выбора отчетного периода.
+ * Период может быть выбран один или несколько.
+ */
 public class ReportPeriodPicker extends Composite{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, ReportPeriodPicker> {

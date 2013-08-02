@@ -37,12 +37,10 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
     dataRowHelper.insert(row, index)
-    dataRows.add(row)
-    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code'].each {
+    ['name', 'country', 'regNum', 'taxpayerCode', 'address', 'inn', 'kpp', 'code', 'editSign', 'refBookRecord'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
 }
 
 /**
@@ -66,54 +64,34 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        ['name', 'country', 'regNum', 'code'].each {
+        ['name', 'country', 'regNum', 'address', 'inn', 'code'].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
                 logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
-// Проверка уникальности Регистрационного номера организации в стране ее регистрации (инкорпорации)
-        def list = []
-        // TODO графа 3 (regNum) должна быть уникальна в рамках справочника «Организации – участники контролируемых сделок»
-        def regNumCell = row.getCell('regNum')
-        if (false) {
-            list.add(regNumCell.column.name)
+        if (row.editSign == 1 && row.refBookRecord == null) {
+            def msg = row.getCell('refBookRecord').column.name
+            logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
         }
-// Проверка уникальности Кода налогоплательщика в стране регистрации (инкорпорации) или его аналог
-        // TODO  Графа 4 (taxpayerCode) должна быть уникальна в рамках справочника «Организации – участники контролируемых сделок»
-        def taxpayerCode = row.getCell('taxpayerCode')
-        if (false) {
-            list.add(taxpayerCode.column.name)
-        }
-// Проверка уникальности ИНН / КИО
-        // TODO  Графа 6 (inn) должна быть уникальна в рамках справочника «Организации – участники контролируемых сделок»
-        def inn = row.getCell('inn')
-        if (false) {
-            list.add(inn.column.name)
-        }
-// Проверка уникальности КПП
-        // TODO  Графа 7 (kpp) должна быть уникальна в рамках справочника «Организации – участники контролируемых сделок»
-        def kpp = row.getCell('kpp')
-        if (false) {
-            list.add(kpp.column.name)
-        }
-// результат проверок
-        for (msg in list) {
-            logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
-        }
-
-        // TODO второй варинат проверки, если прокатит - оставить его, первый - убрать
         // Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-       ['regNum', 'taxpayerCode', 'inn', 'kpp'].each {
-            def rowCell = row.getCell(it)
-            if (rowCell.value != null && !rowCell.value.toString().isEmpty()) {
-                // TODO Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
-                if (false) {
-                    def msg = rowCell.column.name
-                    logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+        if (row.editSign == null) {
+            ['regNum', 'taxpayerCode', 'inn', 'kpp'].each {
+                def rowCell = row.getCell(it)
+                if (rowCell.value != null && !rowCell.value.toString().isEmpty()) {
+                    // TODO Проверка уникальности полей в рамках справочника «Организации – участники контролируемых сделок»
+                    if (false) {
+                        def msg = rowCell.column.name
+                        logger.warn("«$msg» в строке $rowNum уже существует в справочнике «Организации – участники контролируемых сделок»!")
+                    }
                 }
             }
+        }
+        // Проверка существования записи
+        if (row.refBookRecord != null && refBookService.getRecordData(9, row.refBookRecord) == null) {
+            def msg = row.getCell('refBookRecord').column.name
+            logger.warn("В справочнике «Организации – участники контролируемых сделок» не найден элемент $msg, указанный в строке $rowNum!")
         }
     }
 }
@@ -123,7 +101,9 @@ void logicCheck() {
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO расчет полей по справочникам
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
+        // TODO тут вроде ниче не надо
     }
+    dataRowHelper.update(dataRows);
 }

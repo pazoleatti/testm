@@ -82,11 +82,12 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
 
     @Override
     public boolean isEnabled() {
-        return selectButton.isEnabled();
+        return selectButton.isVisible();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectButton.setEnabled(enabled);
+        // При недоступности кнопка прячется
+        selectButton.setVisible(enabled);
     }
 }

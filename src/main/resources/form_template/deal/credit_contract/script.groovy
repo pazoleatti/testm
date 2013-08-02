@@ -1,5 +1,7 @@
 package form_template.deal.credit_contract
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
@@ -59,18 +61,15 @@ void addRow() {
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
     dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
 }
 
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 /**
@@ -108,7 +107,7 @@ void logicCheck() {
         ].each {
             if (row.getCell(it).value == null || row.getCell(it).value.toString().isEmpty()) {
                 def msg = row.getCell(it).column.name
-                logger.error("Графа «$msg» в строке $rowNum не заполнена!")
+                logger.warn("Графа «$msg» в строке $rowNum не заполнена!")
             }
         }
 
@@ -118,13 +117,14 @@ void logicCheck() {
         def price = row.price
 
         // Проверка выбранной единицы измерения
-        // TODO поле справочника "код"
-        // logger.error('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+        if (refBookService.getNumberValue(12, row.okeiCode, 'CODE')!= 796){
+            logger.warn('В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!')
+        }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('transactionDate').column.name
-            logger.error("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
+            logger.warn("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
         }
 
         // Корректность даты договора
@@ -133,11 +133,11 @@ void logicCheck() {
             def msg = row.getCell('contractDate').column.name
 
             if (dt > dTo) {
-                logger.error("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
+                logger.warn("«$msg» не может быть больше даты окончания отчётного периода в строке $rowNum!")
             }
 
             if (dt < dFrom) {
-                logger.error("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
+                logger.warn("«$msg» не может быть меньше даты начала отчётного периода в строке $rowNum!")
             }
         }
 
@@ -145,7 +145,7 @@ void logicCheck() {
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.error("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
+            logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
 
         // Проверка заполнения стоимости сделки
@@ -154,19 +154,23 @@ void logicCheck() {
             def msg2 = row.getCell('price').column.name
             logger.warn("«$msg1» не может отличаться от «$msg2» в строке $rowNum!")
         }
-    }
 
-    checkNSI()
+        //Проверки соответствия НСИ
+        checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "country", "ОКСМ", 10)
+        checkNSI(row, "okeiCode", "Коды единиц измерения на основании ОКЕИ", 12)
+    }
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    for (row in dataRowHelper.getAllCached()) {
-        // TODO добавить проверки НСИ
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -184,10 +188,21 @@ void calc() {
         row.count = 1
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
-        // TODO расчет полей по справочникам
+
+        // TODO Элемент с кодом «796» подставляется по умолчанию.  (графа Код единицы измерения по ОКЕИ)
+
+        // Расчет полей зависимых от справочников
+        if (row.name != null) {
+            def map = refBookService.getRecordData(9, row.name)
+            row.innKio = map.INN_KIO.numberValue
+            row.country = map.COUNTRY.referenceValue
+        } else {
+            row.innKio = null
+            row.country = null
+        }
     }
 
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -207,10 +222,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }
