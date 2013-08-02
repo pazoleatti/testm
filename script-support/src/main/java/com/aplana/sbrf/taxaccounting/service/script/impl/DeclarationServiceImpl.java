@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,14 +13,12 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.model.FormType;
@@ -44,9 +40,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	@Autowired
 	DeclarationDataDao declarationDataDao;
-
-	@Autowired
-	DepartmentParamDao departmentParamDao;
 
 	@Autowired
 	DeclarationTypeDao declarationTypeDao;
@@ -75,15 +68,16 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	public String generateXmlFileId(int declarationTypeId, int departmentId) {
 		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 		String declarationPrefix = declarationTypeDao.get(declarationTypeId).getTaxType().getDeclarationPrefix();
-		DepartmentParam departmentParam = departmentParamDao.getDepartmentParam(departmentId);
-		Calendar calendar = Calendar.getInstance();
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
+		//TODO: Удалил старые справочники. Необходимо переделать на новые (Marat Fayzullin 2013-08-02)
+		/*DepartmentParam departmentParam = departmentParamDao.getDepartmentParam(departmentId);
+		Calendar calendar = Calendar.getInstance();
 		stringBuilder.append('_' +
 				departmentParam.getTaxOrganCode() + '_' +
 				departmentParam.getTaxOrganCode() + '_' +
 				departmentParam.getInn() + departmentParam.getKpp() + '_' +
 				dateFormat.format(calendar.getTime()) + '_' +
-				UUID.randomUUID().toString().toUpperCase());
+				UUID.randomUUID().toString().toUpperCase());*/
 		return stringBuilder.toString();
 	}
 	
@@ -91,7 +85,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
 	 * "Создана"
 	 *
-	 * @param logger журнал сообщений
 	 * @param declarationData декларация
 	 * @return список НФ-источников в статусе "Принята"
 	 */

@@ -42,12 +42,14 @@ def departmentId = declarationData.departmentId
 def reportPeriodId = declarationData.reportPeriodId
 
 /** Настройки подразделения. */
+// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
 def departmentParam = departmentService.getDepartmentParam(departmentId)
 if (departmentParam == null) {
     throw new Exception("Ошибка при получении настроек обособленного подразделения")
 }
 
 /** Параметры подразделения по налогу на прибыль. */
+// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
 def departmentParamIncome = departmentService.getDepartmentParamIncome(departmentId)
 
 /** Отчётный период. */
