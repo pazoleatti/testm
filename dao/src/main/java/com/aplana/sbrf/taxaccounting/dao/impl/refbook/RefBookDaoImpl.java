@@ -151,11 +151,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private String getRefBookSql(Long refBookId, Date version, RefBookAttribute sortAttribute, String filter) {
 
         RefBook refBook = get(refBookId);
-		List<RefBookAttribute> attributes = refBook.getAttributes();
 
+        /**
+         * создаем StringBuffer для передачи в FilterTreeListener, псле обхода дерева
+         * stringBuffer будет содержать строку с xml
+         */
         StringBuffer stringBuffer = new StringBuffer();
         Filter.getFilterQuery(filter, new UniversalFilterTreeListener(refBook, stringBuffer));
-        System.out.println("SqlPart: " + stringBuffer.toString());
+
+        List<RefBookAttribute> attributes = refBook.getAttributes();
 
         if (sortAttribute != null && !attributes.contains(sortAttribute)) {
 			throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
