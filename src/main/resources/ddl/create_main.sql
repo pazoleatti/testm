@@ -475,6 +475,7 @@ alter table report_period add constraint report_period_fk_taxperiod foreign key 
 alter table report_period add constraint report_period_chk_active check (is_active in (0, 1));
 alter table report_period add constraint report_period_chk_balance check (is_balance_period in (0, 1));
 alter table report_period add constraint report_period_fk_department_id foreign key (department_id) references department(id);
+alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
