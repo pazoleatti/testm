@@ -17,7 +17,10 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
-
+/**
+ * Компонент для выбора отчетного периода.
+ * Период может быть выбран один или несколько.
+ */
 public class ReportPeriodPicker extends Composite{
 
 	interface SelectionUiBinder extends UiBinder<HTMLPanel, ReportPeriodPicker> {
@@ -52,7 +55,6 @@ public class ReportPeriodPicker extends Composite{
     private final Map<CheckBox, ReportPeriod> cbToReportPeriod = new HashMap<CheckBox, ReportPeriod>();
 	private TaxPeriod lastTimeSelectedTaxPeriod = new TaxPeriod();
 
-	@UiConstructor
 	public ReportPeriodPicker(ReportPeriodSelectHandler reportPeriodDataProvider){
 		this(reportPeriodDataProvider, true);
 	}
@@ -154,6 +156,8 @@ public class ReportPeriodPicker extends Composite{
 
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
 		this.taxPeriods = taxPeriods;
+		taxPeriodNodes.clear();
+		tree.clear();
 	}
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){

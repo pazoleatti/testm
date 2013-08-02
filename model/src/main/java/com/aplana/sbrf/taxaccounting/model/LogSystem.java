@@ -18,7 +18,7 @@ public class LogSystem implements Serializable {
 	private int userId;
 	private String roles;
 	private int departmentId;
-	private int reportPeriodId;
+	private Integer reportPeriodId;
 	private Integer declarationTypeId;
 	private Integer formTypeId;
 	private Integer formKindId;
@@ -81,11 +81,11 @@ public class LogSystem implements Serializable {
 		this.departmentId = departmentId;
 	}
 
-	public int getReportPeriodId() {
+	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
 
-	public void setReportPeriodId(int reportPeriodId) {
+	public void setReportPeriodId(Integer reportPeriodId) {
 		this.reportPeriodId = reportPeriodId;
 	}
 

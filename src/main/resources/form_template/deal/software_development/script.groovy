@@ -57,13 +57,11 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
-    dataRows.add(row)
     ['fullNamePerson', 'expensesSum', 'docNumber', 'docDate', 'serviceType', 'dealDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.insert(row, index)
 }
 
 /**
@@ -89,6 +87,7 @@ void logicCheck() {
         def rowNum = row.getIndex()
         def docDateCell = row.getCell('docDate')
         [
+                'rowNumber',        // № п/п
                 'fullNamePerson',// Полное наименование юридического лица с указанием ОПФ
                 'inn',           // ИНН/КИО
                 'countryCode',   // Код страны регистрации по классификатору ОКСМ
@@ -141,24 +140,22 @@ void logicCheck() {
             logger.warn("«$msg1» не может быть меньше «$msg2» в строке $rowNum!")
         }
 
-        checkNSI(row)
+        //Проверки соответствия НСИ
+        checkNSI(row, "fullNamePerson", "Организации-участники контролируемых сделок",9)
+        checkNSI(row, "countryCode", "ОКСМ",10)
+        checkNSI(row, "serviceType", "Услуги в части программного обеспечени",11)
     }
 }
 
 /**
  * Проверка соответствия НСИ
  */
-void checkNSI(DataRow<Cell> row) {
-    def rowNum = row.getIndex()
-    def String msg = "В справочнике %s не найден элемент%s, указанный в строке $rowNum!"
-    if (row.fullNamePerson != null && refBookService.getRecordData(9, row.fullNamePerson) == null) {
-        logger.warn(String.format(msg, "«Организации-участники контролируемых сделок»", ""))
-    }
-    if (row.countryCode != null && refBookService.getRecordData(10, row.countryCode) == null) {
-        logger.warn(String.format(msg, "ОКСМ", " «Код страны по классификатору ОКСМ»"))
-    }
-    if (row.serviceType != null && refBookService.getRecordData(11, row.serviceType) == null) {
-        logger.warn(String.format(msg, "«Услуги в части программного обеспечения»"," «Вид услуг»"))
+void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
+    def cell = row.getCell(alias)
+    if (cell.value != null && refBookService.getRecordData(id, cell.value) == null) {
+        def msg2 = cell.column.name
+        def rowNum = row.getIndex()
+        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -184,7 +181,7 @@ void calc() {
             row.countryCode = null
         }
     }
-    dataRowHelper.save(dataRows);
+    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -202,10 +199,8 @@ void consolidation() {
             formDataService.getDataRowHelper(source).getAllCached().each { row ->
                 if (row.getAlias() == null) {
                     dataRowHelper.insert(row, index++)
-                    dataRows.add(row)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows);
 }

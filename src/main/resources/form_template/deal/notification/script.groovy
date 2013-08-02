@@ -45,6 +45,7 @@ void generateXML() {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
+    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
     def departmentParam = departmentService.getDepartmentParam(departmentId)
 
     if (departmentParam == null){

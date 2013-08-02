@@ -25,7 +25,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -46,10 +45,10 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers>, ReportPeriodSelectHandler {
         /**
-         * Расчет видимости поле в зависимости от роли (Контролер/Контролер УНП)
+         * Флаг роли (Контролер/Контролер УНП)
          * @param isUnp
          */
-        void updateVisibility(boolean isUnp);
+        void setUnpFlag(boolean isUnp);
 
         /**
          * Данные справочника "Подразделения"
@@ -92,6 +91,22 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Перезагрузка параметров подразделения
          */
         void reloadDepartmentParams();
+
+        /**
+         * Очистка формы
+         */
+        void clear();
+
+        /**
+         * Обновление списка налоговых периодов
+         */
+        void reloadTaxPeriods();
+
+        /**
+         * Установка выбранного отчетного периода
+         * @param reportPeriod
+         */
+        void setReportPeriod(ReportPeriod reportPeriod);
     }
 
     @Inject
@@ -120,6 +135,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
+    public void clear() {
+        getView().clear();
+    }
+
+    @Override
     public void reloadDepartmentParams(Integer departmentId, TaxType taxType, Integer reportPeriodId) {
         if (departmentId == null || taxType == null || reportPeriodId == null) {
             return;
@@ -139,22 +159,23 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void reloadTaxPeriods(TaxType taxType) {
-        if (taxType == null) {
+    public void reloadTaxPeriods(TaxType taxType, Integer departmentId) {
+        if (taxType == null || departmentId == null) {
             return;
         }
 
-        GetTaxPeriodAction action = new GetTaxPeriodAction();
+        GetTaxPeriodWDAction action = new GetTaxPeriodWDAction();
+        action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTaxPeriodResult>() {
+                .defaultCallback(new AbstractCallback<GetTaxPeriodWDResult>() {
                     @Override
-                    public void onSuccess(GetTaxPeriodResult result) {
+                    public void onSuccess(GetTaxPeriodWDResult result) {
                         getView().setTaxPeriods(result.getTaxPeriods());
+                        getView().setReportPeriod(result.getLastReportPeriod());
                         getView().reloadDepartmentParams();
                     }
                 }, this));
-
     }
 
     @Override
@@ -194,7 +215,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     return;
                                 }
 
-                                getView().updateVisibility(result.getControlUNP());
+                                getView().setUnpFlag(result.getControlUNP());
 
                                 // Список подразделений для справочника
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());

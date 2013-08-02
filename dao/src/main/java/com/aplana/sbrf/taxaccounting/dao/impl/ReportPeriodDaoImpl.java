@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,7 +44,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public ReportPeriod get(int periodId) {
 		try {
-			return getJdbcTemplate().queryForObject(
+			return 0 == periodId? null :
+                    getJdbcTemplate().queryForObject(
 					"select * from report_period where id = ?",
 					new Object[]{periodId},
 					new int[]{Types.NUMERIC},
@@ -137,4 +136,25 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		);
 		return id;
 	}
+
+    @Override
+    public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select * from ( " +
+                            "select rp.* " +
+                            "from TAX_PERIOD tp, REPORT_PERIOD rp " +
+                            "where TP.id = RP.TAX_PERIOD_ID " +
+                            "and TP.TAX_TYPE = ? " +
+                            "and RP.DEPARTMENT_ID = ? " +
+                            "order by tp.end_date desc, rp.ord desc) " +
+                            "where rownum = 1",
+                    new Object[]{taxType.getCode(), departmentId},
+                    new int[]{Types.VARCHAR, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

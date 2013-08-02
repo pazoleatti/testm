@@ -20,12 +20,18 @@
         </g:north>
 
         <g:center>
-                <g:VerticalPanel width="100%" height="100%">
-                    <style:GenericDataGrid ui:field="auditTable" width="100%" height="600px" />
+            <g:VerticalPanel width="100%" height="100%">
+                <g:cell height="90%">
+                    <style:GenericDataGrid ui:field="auditTable" width="100%" height="100%"/>
+                </g:cell>
+                <g:cell height="10%">
                     <pager:FlexiblePager ui:field="pager" location="CENTER"
                                          showFastForwardButton="false" fastForwardRows="0"
                                          showLastPageButton="true" rangeLimited="true" styleName="{style.pager}" />
-                </g:VerticalPanel>
+                </g:cell>
+
+            </g:VerticalPanel>
+
         </g:center>
 
     </g:DockLayoutPanel>

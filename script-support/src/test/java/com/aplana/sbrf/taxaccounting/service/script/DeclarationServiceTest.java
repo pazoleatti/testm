@@ -29,7 +29,6 @@ public class DeclarationServiceTest {
     public static void tearUp() {
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
-        DepartmentParamDao departmentParamDao = mock(DepartmentParamDao.class);
         DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
         DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 
@@ -58,13 +57,11 @@ public class DeclarationServiceTest {
         when(declarationDataDao.find(2, 1, 101)).thenReturn(new DeclarationData());
         when(declarationDataDao.getXmlData(1)).thenReturn("result");
         when(declarationTypeDao.get(2)).thenReturn(declarationType);
-        when(departmentParamDao.getDepartmentParam(1)).thenReturn(new DepartmentParam());
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
         when(departmentFormTypeDao.getDeclarationSources(1, 1)).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
-        ReflectionTestUtils.setField(service, "departmentParamDao", departmentParamDao);
         ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
     }

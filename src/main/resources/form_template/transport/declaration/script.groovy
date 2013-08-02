@@ -52,12 +52,14 @@ def bildXml(){
 
     def departmentId = declarationData.departmentId
     // получить настройки обособленного подразделения
+    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
     def departmentParam = departmentService.getDepartmentParam(departmentId)
     if (departmentParam == null){
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
 
     // Получить параметры по транспортному налогу
+    // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
     def departmentParamTransport = departmentService.getDepartmentParamTransport(departmentId)
     // получения региона по кода ОКАТО по справочнику Регионов
     def region = dictionaryRegionService.getRegionByOkatoOrg(departmentParam.okato.toString());

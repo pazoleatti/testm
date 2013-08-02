@@ -21,6 +21,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,15 +73,14 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 break;
         }
 
-        Calendar calendar = reportService.getEndDate(action.getReportPeriodId());
+        Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
 
-        // TODO Фильтр пока не работает, проверить потом
+        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendar.getTime(), pp, "departament_id = " + action.getDepartmentId(), null);
-        // TODO Добавить проверку на наличие результата. Результат должен быть - одна строка
-        Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
+                calendarFrom.getTime(), pp, filter, null);
 
-        if (paramsMap != null) {
+        if (params.getRecords().size() != 0) {
+            Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
             // Общая часть
             depCombined.setDepartmentId(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue());
             depCombined.setDictRegionId(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue());

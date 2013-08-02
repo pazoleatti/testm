@@ -8,11 +8,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentParamDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParam;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamIncome;
-import com.aplana.sbrf.taxaccounting.model.DepartmentParamTransport;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 
 import static org.mockito.Matchers.anyInt;
@@ -50,21 +46,6 @@ public class DepartmentServiceImplTest {
 		Assert.assertEquals(3, departmentService.getIsolatedDepartments().size());
 	}
 	
-	@Test
-	public void testDepParamDao(){
-		DepartmentParam departmentParam = new DepartmentParam();
-		DepartmentParamIncome departmentParamIncome = new DepartmentParamIncome();
-		DepartmentParamTransport departmentParamTransport = new DepartmentParamTransport();
-		DepartmentParamDao departmentParamDao = mock(DepartmentParamDao.class);
-		ReflectionTestUtils.setField(departmentService, "departmentParamDao", departmentParamDao);
-		when(departmentParamDao.getDepartmentParam(DEPARTMENT_TB1_ID)).thenReturn(departmentParam);
-		when(departmentParamDao.getDepartmentParamIncome(DEPARTMENT_TB1_ID)).thenReturn(departmentParamIncome);
-		when(departmentParamDao.getDepartmentParamTransport(DEPARTMENT_TB1_ID)).thenReturn(departmentParamTransport);
-		Assert.assertEquals(departmentParam, departmentService.getDepartmentParam(DEPARTMENT_TB1_ID));
-		Assert.assertEquals(departmentParamIncome, departmentService.getDepartmentParamIncome(DEPARTMENT_TB1_ID));
-		Assert.assertEquals(departmentParamTransport, departmentService.getDepartmentParamTransport(DEPARTMENT_TB1_ID));
-	}
-
 	@Test
 	public void listAllTest(){
 		DepartmentDao departmentDao = mock(DepartmentDao.class);

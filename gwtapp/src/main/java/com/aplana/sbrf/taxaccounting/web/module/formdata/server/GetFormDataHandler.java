@@ -4,22 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
@@ -43,7 +36,10 @@ public class GetFormDataHandler extends
 	private FormDataService formDataService;
 
 	@Autowired
-	private ReportPeriodDao reportPeriodDao;
+	private ReportPeriodService reportPeriodService;
+
+	@Autowired
+	private TaxPeriodService taxPeriodService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -102,8 +98,8 @@ public class GetFormDataHandler extends
 		FormTemplate formTemplate = formTemplateService.get(formData
 				.getFormTemplateId());
 
-		result.setReportPeriod(reportPeriodDao
-				.get(formData.getReportPeriodId()));
+		ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
+		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
 		result.setNumberedHeader(formTemplate.isNumberedColumns());
@@ -111,6 +107,10 @@ public class GetFormDataHandler extends
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
+
+		TaxPeriod taxPeriod = taxPeriodService.get(reportPeriod.getTaxPeriodId());
+		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
+		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
 	}
 
 	/**

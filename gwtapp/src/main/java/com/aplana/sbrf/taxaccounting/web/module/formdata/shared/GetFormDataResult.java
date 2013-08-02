@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 
+import java.util.Date;
 import java.util.List;
 /**
  * 
@@ -49,6 +50,10 @@ public class GetFormDataResult implements Result {
 	private FormMode formMode;
 	
 	private boolean fixedRows;
+
+	private Date TaxPeriodStartDate;
+
+	private Date TaxPeriodEndDate;
 
 	public FormData getFormData() {
 		return formData;
@@ -146,9 +151,25 @@ public class GetFormDataResult implements Result {
 		this.fixedRows = fixedRows;
 	}
 
+	public Date getTaxPeriodStartDate() {
+		return TaxPeriodStartDate;
+	}
+
+	public void setTaxPeriodStartDate(Date taxPeriodStartDate) {
+		TaxPeriodStartDate = taxPeriodStartDate;
+	}
+
+	public Date getTaxPeriodEndDate() {
+		return TaxPeriodEndDate;
+	}
+
+	public void setTaxPeriodEndDate(Date taxPeriodEndDate) {
+		TaxPeriodEndDate = taxPeriodEndDate;
+	}
+
 	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+		 * @see java.lang.Object#toString()
+		 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

@@ -82,7 +82,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSystemSearchResultItem> reportPeriodColumn = new TextColumn<LogSystemSearchResultItem>() {
             @Override
             public String getValue(LogSystemSearchResultItem object) {
-                return object.getReportPeriod().getName();
+                return object.getReportPeriod()!=null?object.getReportPeriod().getName() : "";
             }
         };
 
@@ -110,7 +110,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
                 if(object.getFormType() != null)
                     return object.getFormType().getName();
                 else
-                    return object.getDeclarationType().getName();
+                    return object.getDeclarationType()!= null?object.getDeclarationType().getName():"";
             }
         };
 
