@@ -10,9 +10,13 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 
+import java.util.Date;
+
 public class DataRowColumnFactory {
 	private Boolean isReadOnly = false;
 	private Boolean isEditOnly = false;
+	private Date startDate;
+	private Date endDate;
 
 	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
@@ -23,6 +27,7 @@ public class DataRowColumnFactory {
 		} else {
 			columnContext.setMode(ColumnContext.Mode.DEFAULT_MODE);
 		}
+		columnContext.setDateRange(startDate, endDate);
 		Column<DataRow<Cell>, ?> uiColumn = null;
 		if (col instanceof StringColumn) {
 			StringColumn stringColumn = (StringColumn)col;
@@ -56,5 +61,10 @@ public class DataRowColumnFactory {
 
 	public void setEditOnly(Boolean editOnly) {
 		this.isEditOnly = editOnly;
+	}
+
+	public void setDateRange(Date startDate, Date endDate) {
+		this.startDate = startDate;
+		this.endDate = endDate;
 	}
 }

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
 
+import java.util.Date;
+
 /**
  * Контекст колонки
  *@author Eugene Stetsenko
@@ -15,6 +17,8 @@ public class ColumnContext {
 
 	Mode mode = Mode.DEFAULT_MODE;
 	Column column;
+	Date startDate;
+	Date endDate;
 
 	public ColumnContext() {
 	}
@@ -35,4 +39,16 @@ public class ColumnContext {
 		return this.column;
 	}
 
+	public void setDateRange(Date startDate, Date endDate) {
+		this.startDate = startDate;
+		this.endDate = endDate;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
 }
