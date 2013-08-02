@@ -156,6 +156,8 @@ public class ReportPeriodPicker extends Composite{
 
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
 		this.taxPeriods = taxPeriods;
+		taxPeriodNodes.clear();
+		tree.clear();
 	}
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){
