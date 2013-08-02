@@ -1,3 +1,4 @@
+// Generated from FilterTree.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
@@ -22,10 +23,10 @@ public class FilterTreeParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		T__1=1, T__0=2, LINK_TYPE_OR=3, LINK_TYPE_AND=4, EQUAL=5, NOTEQUAL=6, 
-		MORE=7, LESS=8, LIKE=9, INT=10, ALIAS=11, STR=12, STRING=13, SPACE=14;
+		MORE=7, LESS=8, LIKE=9, NUMBER=10, ALIAS=11, FLOAT=12, STRING=13, SPACE=14;
 	public static final String[] tokenNames = {
 		"<INVALID>", "')'", "'('", "LINK_TYPE_OR", "LINK_TYPE_AND", "'='", "'!='", 
-		"'>'", "'<'", "LIKE", "INT", "ALIAS", "STR", "STRING", "' '"
+		"'>'", "'<'", "LIKE", "NUMBER", "ALIAS", "FLOAT", "STRING", "' '"
 	};
 	public static final int
 		RULE_query = 0, RULE_condition = 1, RULE_link_type = 2, RULE_expr = 3, 
@@ -35,7 +36,7 @@ public class FilterTreeParser extends Parser {
 	};
 
 	@Override
-	public String getGrammarFileName() { return "SqlCondition.g4"; }
+	public String getGrammarFileName() { return "FilterTree.g4"; }
 
 	@Override
 	public String[] getTokenNames() { return tokenNames; }
@@ -67,7 +68,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitQuery(this);
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitQuery(this);
 		}
 	}
 
@@ -90,7 +91,7 @@ public class FilterTreeParser extends Parser {
 				setState(15); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << INT) | (1L << ALIAS) | (1L << STR))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
 			}
 		}
 		catch (RecognitionException re) {
@@ -201,7 +202,7 @@ public class FilterTreeParser extends Parser {
 					setState(28); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << INT) | (1L << ALIAS) | (1L << STR))) != 0) );
+				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 2) | (1L << LINK_TYPE_OR) | (1L << LINK_TYPE_AND) | (1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0) );
 				setState(30); match(1);
 				}
 				break;
@@ -231,7 +232,7 @@ public class FilterTreeParser extends Parser {
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitLink_type(this);
+			if ( listener instanceof FilterTreeListener) ((FilterTreeListener)listener).exitLink_type(this);
 		}
 	}
 
@@ -308,9 +309,9 @@ public class FilterTreeParser extends Parser {
 	}
 
 	public static class OperandContext extends ParserRuleContext {
-		public TerminalNode INT() { return getToken(FilterTreeParser.INT, 0); }
-		public TerminalNode STR() { return getToken(FilterTreeParser.STR, 0); }
+		public TerminalNode NUMBER() { return getToken(FilterTreeParser.NUMBER, 0); }
 		public TerminalNode ALIAS() { return getToken(FilterTreeParser.ALIAS, 0); }
+		public TerminalNode STRING() { return getToken(FilterTreeParser.STRING, 0); }
 		public OperandContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -334,7 +335,7 @@ public class FilterTreeParser extends Parser {
 			{
 			setState(40);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INT) | (1L << ALIAS) | (1L << STR))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -402,15 +403,15 @@ public class FilterTreeParser extends Parser {
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\6\2\20\n\2\r\2\16\2\21\3\3\5\3"+
 		"\25\n\3\3\3\3\3\5\3\31\n\3\3\3\3\3\6\3\35\n\3\r\3\16\3\36\3\3\3\3\5\3"+
 		"#\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\6\3\6\3\7\3\7\3\7\2\b\2\4\6\b\n\f\2\5"+
-		"\3\2\5\6\3\2\f\16\3\2\7\13-\2\17\3\2\2\2\4\"\3\2\2\2\6$\3\2\2\2\b&\3\2"+
-		"\2\2\n*\3\2\2\2\f,\3\2\2\2\16\20\5\4\3\2\17\16\3\2\2\2\20\21\3\2\2\2\21"+
-		"\17\3\2\2\2\21\22\3\2\2\2\22\3\3\2\2\2\23\25\5\6\4\2\24\23\3\2\2\2\24"+
-		"\25\3\2\2\2\25\26\3\2\2\2\26#\5\b\5\2\27\31\5\6\4\2\30\27\3\2\2\2\30\31"+
-		"\3\2\2\2\31\32\3\2\2\2\32\34\7\4\2\2\33\35\5\4\3\2\34\33\3\2\2\2\35\36"+
-		"\3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2\37 \3\2\2\2 !\7\3\2\2!#\3\2\2\2\""+
-		"\24\3\2\2\2\"\30\3\2\2\2#\5\3\2\2\2$%\t\2\2\2%\7\3\2\2\2&\'\5\n\6\2\'"+
-		"(\5\f\7\2()\5\n\6\2)\t\3\2\2\2*+\t\3\2\2+\13\3\2\2\2,-\t\4\2\2-\r\3\2"+
-		"\2\2\7\21\24\30\36\"";
+		"\3\2\5\6\4\2\f\r\17\17\3\2\7\13-\2\17\3\2\2\2\4\"\3\2\2\2\6$\3\2\2\2\b"+
+		"&\3\2\2\2\n*\3\2\2\2\f,\3\2\2\2\16\20\5\4\3\2\17\16\3\2\2\2\20\21\3\2"+
+		"\2\2\21\17\3\2\2\2\21\22\3\2\2\2\22\3\3\2\2\2\23\25\5\6\4\2\24\23\3\2"+
+		"\2\2\24\25\3\2\2\2\25\26\3\2\2\2\26#\5\b\5\2\27\31\5\6\4\2\30\27\3\2\2"+
+		"\2\30\31\3\2\2\2\31\32\3\2\2\2\32\34\7\4\2\2\33\35\5\4\3\2\34\33\3\2\2"+
+		"\2\35\36\3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2\37 \3\2\2\2 !\7\3\2\2!#\3"+
+		"\2\2\2\"\24\3\2\2\2\"\30\3\2\2\2#\5\3\2\2\2$%\t\2\2\2%\7\3\2\2\2&\'\5"+
+		"\n\6\2\'(\5\f\7\2()\5\n\6\2)\t\3\2\2\2*+\t\3\2\2+\13\3\2\2\2,-\t\4\2\2"+
+		"-\r\3\2\2\2\7\21\24\30\36\"";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {
