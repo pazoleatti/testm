@@ -250,7 +250,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void reloadTaxPeriods() {
-        getUiHandlers().reloadTaxPeriods(currentTaxType);
+        getUiHandlers().reloadTaxPeriods(currentTaxType, currentDepartmentId);
+    }
+
+    @Override
+    public void setReportPeriod(ReportPeriod reportPeriod) {
+        currentReportPeriod = reportPeriod;
+        period.setSelectedReportPeriods(Arrays.asList(currentReportPeriod));
     }
 
     @Override

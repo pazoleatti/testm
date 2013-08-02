@@ -23,4 +23,12 @@ public interface ReportPeriodService {
 	void openPeriod(int reportPeriodId);
 
 	int add(ReportPeriod reportPeriod);
+
+    /**
+     * Последний отчетный период для указанного вида налога и подразделения
+     * @param taxType Тип налога
+     * @param departmentId Подразделение
+     * @return
+     */
+    ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
 }
