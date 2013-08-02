@@ -4,9 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,7 +44,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public ReportPeriod get(int periodId) {
 		try {
-			return getJdbcTemplate().queryForObject(
+			return 0 == periodId? null :
+                    getJdbcTemplate().queryForObject(
 					"select * from report_period where id = ?",
 					new Object[]{periodId},
 					new int[]{Types.NUMERIC},
