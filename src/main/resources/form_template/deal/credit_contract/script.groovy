@@ -60,11 +60,11 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
     ['name', 'contractNum', 'contractDate', 'okeiCode', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
@@ -189,13 +189,16 @@ void calc() {
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
 
-        // TODO Элемент с кодом «796» подставляется по умолчанию.  (графа Код единицы измерения по ОКЕИ)
+        // Элемент с кодом «796» подставляется по умолчанию
+        def refDataProvider =  refBookFactory.getDataProvider(12);
+        def res = refDataProvider.getRecords(new Date(), null, "CODE = 796", null);
+        row.okeiCode = res.getRecords().get(0).record_id.numberValue
 
         // Расчет полей зависимых от справочников
         if (row.name != null) {
-            def map = refBookService.getRecordData(9, row.name)
-            row.innKio = map.INN_KIO.numberValue
-            row.country = map.COUNTRY.referenceValue
+            def map2 = refBookService.getRecordData(9, row.name)
+            row.innKio = map2.INN_KIO.numberValue
+            row.country = map2.COUNTRY.referenceValue
         } else {
             row.innKio = null
             row.country = null

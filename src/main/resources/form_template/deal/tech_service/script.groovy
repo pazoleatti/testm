@@ -61,11 +61,11 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
     ['jurName', 'bankSum', 'contractNum', 'contractDate', 'country', 'region', 'city', 'settlement', 'count', 'price', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
@@ -226,7 +226,11 @@ void calc() {
 
     for (row in dataRows) {
 
-        // TODO Расчет поля "Населенный пункт"
+        // Расчет поля "Населенный пункт"
+        if (row.city != null && !row.city.toString().isEmpty()) {
+            row.settlement = row.city
+        }
+
         count = row.count
         bankSum = row.bankSum
         // Расчет поля "Цена"

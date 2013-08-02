@@ -63,12 +63,12 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
             'transactionType', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {

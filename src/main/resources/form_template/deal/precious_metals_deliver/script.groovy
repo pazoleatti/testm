@@ -63,13 +63,13 @@ void addRow() {
     def dataRows = dataRowHelper.getAllCached()
     def size = dataRows.size()
     def index = currentDataRow != null ? currentDataRow.getIndex() : (size == 0 ? 1 : size)
-    dataRowHelper.insert(row, index)
     ['name', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
             'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
             'city2', 'settlement2', 'conditionCode', 'count', 'incomeSum', 'consumptionSum', 'transactionDate'].each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
+    dataRowHelper.insert(row, index)
 }
 
 void deleteRow() {
@@ -234,7 +234,7 @@ void logicCheck() {
         // Проверка количества
         if (count != null && count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn('В графе «$msg» может быть указано только значение «1» в строке $rowNum!')
+            logger.warn("В графе «$msg» может быть указано только значение «1» в строке $rowNum!")
         }
 
         // Корректность дат сделки
