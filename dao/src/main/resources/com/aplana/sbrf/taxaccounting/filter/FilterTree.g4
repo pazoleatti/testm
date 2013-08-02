@@ -13,9 +13,9 @@ LINK_TYPE_AND : ('a'|'A')('n'|'N')('d'|'D') ;
 
 expr : operand operand_type operand;
 
-operand :INT
+operand :NUMBER
 	| ALIAS
-	| STR;
+	| STRING;
 
 operand_type :	EQUAL
 	| NOTEQUAL
@@ -32,13 +32,14 @@ LIKE	: ('L'|'l') ('I'|'i') ('K'|'k') ('E'|'e');
 
 fragment DIGIT : '0'..'9' ;
 
-INT :	DIGIT+ ;
-ALIAS :	('a'..'z'|'A'..'Z')+  ('a'..'z'|'A'..'Z'|DIGIT)* ;
-STR :	'\''  (SPACE|'a'..'z'|'0'..'9'|'A'..'Z')* '\'';
+NUMBER : DIGIT+ | FLOAT ;
+ALIAS :	('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')* ;
 
+
+FLOAT	: DIGIT+ '.' DIGIT+;
 
 STRING
-    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
+    :  '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
     ;
 
 fragment
