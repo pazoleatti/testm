@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setAdditionalFormInfo(String formType, TaxType taxType,
 				String formKind, String departmentId, String reportPeriod,
-				String state);
+				String state, Date startDate, Date endDate);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
 
