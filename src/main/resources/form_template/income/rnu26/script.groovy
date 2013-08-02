@@ -81,8 +81,14 @@ switch (formDataEvent) {
  * Добавить новую строку.
  */
 def addNewRow() {
+    def data = getData(formData)
     def newRow = formData.createDataRow()
-    formData.dataRows.add(getIndex(currentDataRow) + 1, newRow)
+    def index = 0
+    if(currentDataRow!=null){
+        if(currentDataRow.getAlias()==null){
+            index = getIndex(currentDataRow)+1
+        }
+    }
 
     // графа 2..7, 9..13
     ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
@@ -90,23 +96,25 @@ def addNewRow() {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    data.insert(newRow,index+1)
 }
 
 /**
  * Удалить строку.
  */
 def deleteRow() {
-    formData.dataRows.remove(currentDataRow)
+    getData(formData).delete(currentDataRow)
 }
 
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         if (!isTotal(row)) {
             // список проверяемых столбцов (графа 2..7, 9, 10, 11)
             def requiredColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev',
@@ -119,7 +127,7 @@ void calc() {
     }
 
     // дополнительная проверка графы 10
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         // дополнительная проверка графы 10
         if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
             logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
@@ -133,23 +141,23 @@ void calc() {
 
     // удалить строку "итого" и "итого по Эмитенту: ..."
     def delRow = []
-    formData.dataRows.each { row ->
+    getRows(data).each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        formData.dataRows.remove(getIndex(row))
+        data.delete(row)
     }
-    if (formData.dataRows.isEmpty()) {
+    if (getRows(data).isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    formData.dataRows.sort { it.issuer }
+    getRows(data).sort { it.issuer }
 
     def tmp
-    formData.dataRows.eachWithIndex { row, index ->
+    getRows(data).eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
 
@@ -190,19 +198,21 @@ void calc() {
         row.reserveRecovery = (tmp < 0 ? Math.abs(tmp) : 0)
     }
 
+    data.save(getRows(data))
+
     // графы для которых надо вычислять итого и итого по эмитенту (графа 6..9, 14..17)
     def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev',
             'cost', 'costOnMarketQuotation', 'reserveCalcValue',
             'reserveCreation', 'reserveRecovery']
     // добавить строку "итого"
     def totalRow = formData.createDataRow()
-    formData.dataRows.add(totalRow)
     totalRow.setAlias('total')
     totalRow.issuer = 'Общий итог'
     setTotalStyle(totalRow)
     totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(getSum(alias))
     }
+    data.insert(totalRow,getRows(data).size()+1)
 
     // посчитать "итого по Эмитенту:..."
     def totalRows = [:]
@@ -211,7 +221,7 @@ void calc() {
     totalColumns.each {
         sums[it] = 0
     }
-    formData.dataRows.eachWithIndex { row, i ->
+    getRows(data).eachWithIndex { row, i ->
         if (!isTotal(row)) {
             if (tmp == null) {
                 tmp = row.issuer
@@ -224,7 +234,7 @@ void calc() {
                 }
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по Эмитента:..."
-            if (i == formData.dataRows.size() - 2) {
+            if (i == getRows(data).size() - 2) {
                 totalColumns.each {
                     sums[it] += (row.getCell(it).getValue() ?: 0)
                 }
@@ -242,7 +252,7 @@ void calc() {
     // добавить "итого по Эмитенту:..." в таблицу
     def i = 0
     totalRows.each { index, row ->
-        formData.dataRows.add(index + i, row)
+        data.insert(row, index + i + 1)
         i = i + 1
     }
 }
@@ -255,8 +265,10 @@ void calc() {
 def logicalCheck(def useLog) {
     // данные предыдущего отчетного периода
     def formDataOld = getFormDataOld()
+    def data = getData(formData)
+    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
+    if (formDataOld != null && !getRows(dataOld).isEmpty()) {
         def i = 1
 
         // список проверяемых столбцов (графа 1..3, 5..10, 13, 14)
@@ -278,7 +290,7 @@ def logicalCheck(def useLog) {
         def totalGroupsName = []
 
         def tmp
-        for (def row : formData.dataRows) {
+        for (def row : getRows(data)) {
             if (isTotal(row)) {
                 hasTotal = true
                 continue
@@ -453,8 +465,8 @@ def logicalCheck(def useLog) {
         }
 
         if (formDataOld != null && hasTotal) {
-            totalRow = formData.getDataRow('total')
-            totalRowOld = formDataOld.getDataRow('total')
+            totalRow = data.getDataRow(getRows(data),'total')
+            totalRowOld = data.getDataRow(getRows(data),'total')
 
             // 13. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
             if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
@@ -474,11 +486,11 @@ def logicalCheck(def useLog) {
         }
 
         if (hasTotal) {
-            def totalRow = formData.getDataRow('total')
+            def totalRow = data.getDataRow(getRows(data),'total')
 
             // 18. Проверка итоговых значений по эмитенту
             for (def codeName : totalGroupsName) {
-                def row = formData.getDataRow('total' + codeName)
+                def row = data.getDataRow(getRows(data),'total' + codeName)
                 for (def alias : totalColumns) {
                     if (calcSumByCode(codeName, alias) != row.getCell(alias).getValue()) {
                         logger.error("Итоговые значения по эмитенту $codeName рассчитаны неверно!")
@@ -529,16 +541,17 @@ def checkNSI() {
  * Консолидация.
  */
 void consolidation() {
+    def data = getData(formData)
     // удалить все строки и собрать из источников их строки
-    formData.dataRows.clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = FormDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                source.getDataRows().each { row->
+                getRows(getData(source)).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        formData.dataRows.add(row)
+                        data.insert(row,getRows(data).size()+1)
                     }
                 }
             }
@@ -551,7 +564,7 @@ void consolidation() {
  * Проверка при создании формы.
  */
 void checkCreation() {
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -574,12 +587,14 @@ def isTotal(def row) {
  * Получить сумму столбца.
  */
 def getSum(def columnAlias) {
+    def data = getData(formData)
     def from = 0
-    def to = formData.dataRows.size() - 2
+    def rows = getRows(data)
+    def to = (rows.get(rows.size()-1)!=null && rows.get(rows.size()-1).getAlias()!=null)?rows.size() - 2:rows.size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, new ColumnRange(columnAlias, from, to))
+    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -612,7 +627,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
     if (row.getCell(likeColumnName).getValue() == null) {
         return false
     }
-    for (def prevRow : prevForm.dataRows) {
+    for (def prevRow : getRows(getData(prevForm))) {
         if (row.getCell(likeColumnName).getValue() == prevRow.getCell(likeColumnName).getValue() &&
                 row.getCell(curColumnName).getValue() != prevRow.getCell(prevColumnName).getValue()) {
             return true
@@ -630,7 +645,7 @@ def getFormDataOld() {
     // РНУ-26 за предыдущий отчетный период
     def formDataOld = null
     if (reportPeriodOld != null) {
-        formDataOld = FormDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
+        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodOld.id)
     }
 
     return formDataOld
@@ -643,8 +658,9 @@ def getFormDataOld() {
  * @param alias название графа
  */
 def calcSumByCode(def value, def alias) {
+    def data = getData(formData)
     def sum = 0
-    formData.dataRows.each { row ->
+    getRows(data).each { row ->
         if (!isTotal(row) && row.issuer == value) {
             sum += (row.getCell(alias).getValue() ?: 0)
         }
@@ -668,7 +684,7 @@ void setTotalStyle(def row) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    getRows(getData(formData)).indexOf(row)
 }
 
 /**
@@ -720,10 +736,11 @@ def checkRequiredColumns(def row, def columns, def useLog) {
  */
 def getPrevPeriodValue(def needColumnName, def searchColumnName, def searchValue) {
     def formDataOld = getFormDataOld()
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty()) {
-        for (def row : formDataOld.dataRows) {
+    def dataOld = getData(formDataOld)
+    if (formDataOld != null && !getRows(dataOld).isEmpty()) {
+        for (def row : getRows(dataOld)) {
             if (row.getCell(searchColumnName).getValue() == searchValue) {
-                return round(row.getCell(needColumnName), 2)
+                return round(row.getCell(needColumnName).getValue(), 2)
             }
         }
     }
@@ -748,8 +765,9 @@ def getColumnName(def row, def alias) {
  */
 def checkPrevPeriod() {
     def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
 
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+    if (formDataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
         return true
     }
     return false
@@ -763,10 +781,11 @@ def checkPrevPeriod() {
  */
 def getValueForColumn6(def row) {
     def formDataOld = getFormDataOld()
+    def dataOld = getData(formDataOld)
     def value = 0
     def count = 0
-    if (formDataOld != null && !formDataOld.dataRows.isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
-        for (def rowOld : formDataOld.dataRows) {
+    if (formDataOld != null && !getRows(dataOld).isEmpty() && formDataOld.state == WorkflowState.ACCEPTED) {
+        for (def rowOld : getRows(dataOld)) {
             if (rowOld.tradeNumber == row.tradeNumber) {
                 value = (rowOld.signSecurity == '+' && row.reserveCalcValuePrev == '-' ? rowOld.lotSizePrev : 0)
                 count += 1
@@ -777,3 +796,26 @@ def getValueForColumn6(def row) {
     // или нет соответствующей записи в предыдущем периода или записей несколько
     return (count == 1 ? value : 0)
 }
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
+}
+

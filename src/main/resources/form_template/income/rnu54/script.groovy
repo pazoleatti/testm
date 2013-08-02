@@ -550,7 +550,7 @@ def getSum(def columnAlias) {
     if (from > to) {
         return 0
     }
-    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
+    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
 }
 
 /**
