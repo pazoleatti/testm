@@ -108,14 +108,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
-        /*if(currentReportPeriod != null){
-            reportPeriodPanel.remove(currentReportPeriod);
-        }
-        currentReportPeriod = new ReportPeriodPicker(this);
-        currentReportPeriod.setHeight("25px");*/
-        Window.confirm("TaxType: " + taxPeriods);
         currentReportPeriod.setTaxPeriods(taxPeriods == null?new ArrayList<TaxPeriod>():taxPeriods);
-        /*reportPeriodPanel.add(currentReportPeriod);*/
     }
 
     @Override

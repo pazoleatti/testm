@@ -10,7 +10,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,6 +17,7 @@ import java.util.List;
 
 /**
  * User: avanteev
+ * Класс для построения отчета по "Журналу аудита"
  */
 public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
@@ -61,10 +61,10 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         logger.info("Initialize table headers " + getClass());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
-        cs.setBorderBottom(CellStyle.BORDER_THICK);
-        cs.setBorderTop(CellStyle.BORDER_THICK);
-        cs.setBorderRight(CellStyle.BORDER_THICK);
-        cs.setBorderLeft(CellStyle.BORDER_THICK);
+        cs.setBorderBottom(CellStyle.BORDER_THIN);
+        cs.setBorderTop(CellStyle.BORDER_THIN);
+        cs.setBorderRight(CellStyle.BORDER_THIN);
+        cs.setBorderLeft(CellStyle.BORDER_THIN);
         cs.setFillForegroundColor(HSSFColor.BRIGHT_GREEN.index);
         cs.setFillBackgroundColor(HSSFColor.BRIGHT_GREEN.index);
         cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
@@ -146,6 +146,14 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_DOUBLE);
         cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
 
+        //Стиль для "Вида налоговой формы/декларации"
+        CellStyle csFormType = workBook.createCellStyle();
+        csFormType.setAlignment(CellStyle.ALIGN_LEFT);
+        csFormType.setBorderBottom(CellStyle.BORDER_DOUBLE);
+        csFormType.setBorderTop(CellStyle.BORDER_DOUBLE);
+        csFormType.setBorderRight(CellStyle.BORDER_DOUBLE);
+        csFormType.setBorderLeft(CellStyle.BORDER_DOUBLE);
+
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_DATA_FORMAT);
 
         for(LogSystemSearchResultItem item : items){
@@ -171,7 +179,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getReportPeriod().getName());
+            cell.setCellValue(item.getReportPeriod() != null ? item.getReportPeriod().getName() : "");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
@@ -188,7 +196,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
             cellNumber++;
 
             cell = row.createCell(cellNumber);
-            cell.setCellStyle(cs);
+            cell.setCellStyle(csFormType);
             cell.setCellValue(item.getFormType() != null?item.getFormType().getName():"");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
