@@ -22,7 +22,7 @@ public interface RefBookDepartmentDao {
      * @param sortAttribute может быть не задан (null)
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, RefBookAttribute sortAttribute);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * По коду возвращает строку справочника

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.DepartmentFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
@@ -25,8 +27,10 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     private RefBookDao refBookDao;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         RefBook refBook = refBookDao.get(refBookId);
+        StringBuffer sb = new StringBuffer();
+        Filter.getFilterQuery(filter, new DepartmentFilterTreeListener(refBook, sb));
         StringBuilder sql = new StringBuilder("SELECT ");
         sql.append("id ").append(RefBook.RECORD_ID_ALIAS);
         for(RefBookAttribute attribute: refBook.getAttributes()){
@@ -34,6 +38,11 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             sql.append(attribute.getAlias());
         }
         sql.append(" FROM (SELECT rownum rnum, d.* FROM DEPARTMENT d");
+        if (sb.length() > 0){
+            sql.append(" WHERE\n ");
+            sql.append(sb.toString());
+            sql.append("\n");
+        }
         if (sortAttribute != null && sortAttribute.getAlias() != null) {
             sql.append(" ORDER BY ").append(sortAttribute.getAlias());
         }
