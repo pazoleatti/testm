@@ -101,6 +101,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Обновление списка налоговых периодов
          */
         void reloadTaxPeriods();
+
+        /**
+         * Установка выбранного отчетного периода
+         * @param reportPeriod
+         */
+        void setReportPeriod(ReportPeriod reportPeriod);
     }
 
     @Inject
@@ -153,24 +159,24 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void reloadTaxPeriods(TaxType taxType) {
-        if (taxType == null) {
+    public void reloadTaxPeriods(TaxType taxType, Integer departmentId) {
+        if (taxType == null || departmentId == null) {
             return;
         }
 
-        GetTaxPeriodAction action = new GetTaxPeriodAction();
+        GetTaxPeriodWDAction action = new GetTaxPeriodWDAction();
+        action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTaxPeriodResult>() {
+                .defaultCallback(new AbstractCallback<GetTaxPeriodWDResult>() {
                     @Override
-                    public void onSuccess(GetTaxPeriodResult result) {
+                    public void onSuccess(GetTaxPeriodWDResult result) {
                         getView().setTaxPeriods(result.getTaxPeriods());
+                        getView().setReportPeriod(result.getLastReportPeriod());
                         getView().reloadDepartmentParams();
                     }
                 }, this));
     }
-
-
 
     @Override
     public void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId) {

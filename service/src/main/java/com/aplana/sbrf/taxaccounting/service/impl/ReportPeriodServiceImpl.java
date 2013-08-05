@@ -51,4 +51,9 @@ public class ReportPeriodServiceImpl implements ReportPeriodService{
 	public int add(ReportPeriod reportPeriod) {
 		return reportPeriodDao.add(reportPeriod);
 	}
+
+    @Override
+    public ReportPeriod getLastReportPeriod(TaxType taxType, long departmentId) {
+        return reportPeriodDao.getLastReportPeriod(taxType, departmentId);
+    }
 }

@@ -28,8 +28,8 @@ import java.util.*;
 public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         implements AuditFilterPresenter.MyView, ReportPeriodSelectHandler {
 
-
-    private ReportPeriodPicker currentReportPeriod;
+    @UiField
+    ReportPeriodPicker currentReportPeriod;
 
     interface Binder extends UiBinder<Widget, AuditFilterView> { }
 
@@ -108,12 +108,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void updateTaxPeriodPicker(List<TaxPeriod> taxPeriods) {
-        if(currentReportPeriod != null){
-            reportPeriodPanel.remove(currentReportPeriod);
-        }
-        currentReportPeriod = new ReportPeriodPicker(this);
         currentReportPeriod.setTaxPeriods(taxPeriods == null?new ArrayList<TaxPeriod>():taxPeriods);
-        reportPeriodPanel.add(currentReportPeriod);
     }
 
     @Override
@@ -274,8 +269,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
-        currentReportPeriod = new ReportPeriodPicker(this);
-        reportPeriodPanel.add(currentReportPeriod);
     }
 
     @UiHandler("search")
@@ -287,6 +280,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
         getUiHandlers().onPrintButtonClicked();
+    }
+
+    @UiFactory
+    AuditFilterView getView(){
+        return this;
     }
 
 }

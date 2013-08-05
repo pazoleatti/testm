@@ -141,7 +141,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, int formDataId, int formTemplateId,
-                               int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream) {
+                               int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName) {
         if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriodId)) {
             FormData fd = formDataDao.getWithoutRows(formDataId);
@@ -151,9 +151,9 @@ public class FormDataServiceImpl implements FormDataService {
             formDataScriptingService.executeScript(userInfo, fd, FormDataEvent.IMPORT, logger, additionalParameters);
             formDataDao.save(fd); //TODO: Когда переделаем пейджинг,переделать на сохранение во временную таблицу (спросить у Марата)
 
-            logBusinessService.add(Long.valueOf(formDataId), null, userInfo, FormDataEvent.IMPORT, null);
+            logBusinessService.add((long) formDataId, null, userInfo, FormDataEvent.IMPORT, null);
             auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, reportPeriodId,
-                    null, fd.getFormType().getId(), kind.getId(), null);
+                    null, fd.getFormType().getId(), kind.getId(), fileName);
         }else {
             throw new AccessDeniedException(
                     "Недостаточно прав для создания налоговой формы с указанными параметрами");

@@ -23,7 +23,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -41,7 +40,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  * @author sgoryachkin
  *
  */
-public class RefBookPickerWidget extends Composite implements HasValue<Long>, MyView {
+public class RefBookPickerWidget extends Composite implements RefBookPicker, MyView {
 	
 	private final NoSelectionModel<RefBookItem> selectionModel = new NoSelectionModel<RefBookItem>();
 
@@ -68,23 +67,77 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 		}
 	};
 	
-	AsyncDataProvider<RefBookItem> dataProvider = new AsyncDataProvider<RefBookItem>() {
+	private MyDataProvider dataProvider = new MyDataProvider();
+
+	
+	private class MyDataProvider extends AsyncDataProvider<RefBookItem> {
+
+		public void update() {
+			for (HasData<RefBookItem> display: getDataDisplays()) {
+				onRangeChanged(display);
+			}
+		}
+
 		@Override
-		protected void onRangeChanged(HasData<RefBookItem> display) {
+		public void onRangeChanged(HasData<RefBookItem> display) {
 			Range range = display.getVisibleRange();
 			uiHandlers.rangeChanged(range.getStart(), range.getLength());
 		}
-	};
-	
-	
-	public RefBookPickerWidget(long refBookId) {
-		this(refBookId, null);
 	}
 	
-	public RefBookPickerWidget(long refBookId, Long formDataId) {
+	
+	public RefBookPickerWidget() {
 		version = new ValueListBox<Date>(new DateTimeFormatRenderer());
 		initWidget(binder.createAndBindUi(this));
-		new RefBookPickerWidgetPresenter(this, refBookId, formDataId);
+		new RefBookPickerWidgetPresenter(this);
+		
+		cellTable.setSelectionModel(selectionModel);
+		
+		cellTable
+				.addCellPreviewHandler(new CellPreviewEvent.Handler<RefBookItem>() {
+					@Override
+					public void onCellPreview(
+							CellPreviewEvent<RefBookItem> event) {
+						if (BrowserEvents.MOUSEOVER.equals(event
+								.getNativeEvent().getType())) {
+							Element cellElement = event.getNativeEvent()
+									.getEventTarget().cast();
+							cellElement.setTitle(cellElement.getInnerText());
+						}
+					}
+				});
+
+		selectionModel
+				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+					@Override
+					public void onSelectionChange(SelectionChangeEvent event) {
+						uiHandlers.onSelectionChange();
+						focus();
+					}
+				});
+
+		cellTable
+				.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
+					@Override
+					public void onLoadingStateChanged(
+							LoadingStateChangeEvent event) {
+						if (event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED) {
+							focus();
+						}
+					}
+				});
+
+		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
+			public void onRangeChange(RangeChangeEvent event) {
+				focus();
+			}
+		});
+
+
+		pager.setDisplay(cellTable);
+		pager.setPageSize(15);
+
+		dataProvider.addDataDisplay(cellTable);
 	}
 
 	public void focus() {
@@ -114,7 +167,7 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 	@Override
 	public HandlerRegistration addValueChangeHandler(
 			ValueChangeHandler<Long> handler) {
-		return addHandler(handler, ValueChangeEvent.getType());
+		return uiHandlers.addValueChangeHandler(handler);
 	}
 
 	@Override
@@ -132,28 +185,23 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 		uiHandlers.setValue(value, fireEvent);
 	}
 	
-	
-
 	public void clear() {
 		txtFind.setValue("");
 	}
 
 	@Override
 	public void addToSlot(Object slot, IsWidget content) {
-		// TODO
-		
+		// 
 	}
 
 	@Override
 	public void removeFromSlot(Object slot, IsWidget content) {
-		// TODO Auto-generated method stub
-		
+		// 
 	}
 
 	@Override
 	public void setInSlot(Object slot, IsWidget content) {
-		// TODO Auto-generated method stub
-		
+		// 
 	}
 
 	@Override
@@ -162,7 +210,7 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 	}
 
 	@Override
-	public void updateRowData(int start, List<RefBookItem> values, int size) {
+	public void setRowData(int start, List<RefBookItem> values, int size) {
 		dataProvider.updateRowData(start, values);
 		dataProvider.updateRowCount(size, true);
 	}
@@ -175,78 +223,8 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 	}
 
 	@Override
-	public void initView(List<String> headers, List<Date> versions) {
-
-		for (int i = 0; i < headers.size(); i++) {
-			cellTable.addColumn(new RefBookItemTextColumn(i), headers.get(i));
-		}
-		
-		version.setValue(versions.iterator().next());
-		version.setAcceptableValues(versions);	
-
-
-		cellTable.setSelectionModel(selectionModel);
-		
-		cellTable
-				.addCellPreviewHandler(new CellPreviewEvent.Handler<RefBookItem>() {
-					@Override
-					public void onCellPreview(
-							CellPreviewEvent<RefBookItem> event) {
-						if (BrowserEvents.MOUSEOVER.equals(event
-								.getNativeEvent().getType())) {
-							Element cellElement = event.getNativeEvent()
-									.getEventTarget().cast();
-							cellElement.setTitle(cellElement.getInnerText());
-						}
-					}
-				});
-
-		selectionModel
-				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-					@Override
-					public void onSelectionChange(SelectionChangeEvent event) {
-						RefBookItem selected = selectionModel
-								.getLastSelectedObject();
-						if (selected != null) {
-							setValue(selected.getId(), true);
-						}
-						focus();
-					}
-				});
-
-		cellTable
-				.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
-					@Override
-					public void onLoadingStateChanged(
-							LoadingStateChangeEvent event) {
-						if (event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED) {
-							focus();
-						}
-					}
-				});
-
-		cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
-			public void onRangeChange(RangeChangeEvent event) {
-				focus();
-			}
-		});
-
-
-		pager.setDisplay(cellTable);
-		pager.setPageSize(15);
-
-		dataProvider.addDataDisplay(cellTable);
-		
-	}
-
-	@Override
 	public String getSearchPattern() {
 		return txtFind.getValue();
-	}
-
-	@Override
-	public void goToFirstPage() {
-		pager.firstPage();
 	}
 
 	@Override
@@ -254,8 +232,56 @@ public class RefBookPickerWidget extends Composite implements HasValue<Long>, My
 		version.setValue(versionDate);
 	}
 
+
+
 	@Override
-	public void fireChangeEvent(Long value) {
+	public void setAcceptableValues(long refBookAttrId) {
+		uiHandlers.init(refBookAttrId, null, null);
+	}
+
+	@Override
+	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
+		uiHandlers.init(refBookAttrId, date1, date2);
+	}
+
+	@Override
+	public void setVersions(List<Date> versions) {
+		version.setValue(versions.iterator().next());
+		version.setAcceptableValues(versions);	
+	}
+
+	@Override
+	public void setHeaders(List<String> headers) {
+		for (int i = 0; i < headers.size(); i++) {
+			cellTable.addColumn(new RefBookItemTextColumn(i), headers.get(i));
+		}
+	}
+
+	@Override
+	public void refreshData() {
+		dataProvider.update();
+	}
+
+	@Override
+	public void widgetFireChangeEvent(Long value) {
 		ValueChangeEvent.fire(RefBookPickerWidget.this, value);
 	}
+	
+	@Override
+	public HandlerRegistration widgetAddValueHandler(ValueChangeHandler<Long> handler) {
+		return addHandler(handler, ValueChangeEvent.getType());
+	}
+
+
+
+	@Override
+	public RefBookItem getSelectionValue() {
+		return selectionModel.getLastSelectedObject();
+	}
+
+	@Override
+	public String getDereferenceValue() {
+		return uiHandlers.getDereferenceValue();
+	}
+
 }

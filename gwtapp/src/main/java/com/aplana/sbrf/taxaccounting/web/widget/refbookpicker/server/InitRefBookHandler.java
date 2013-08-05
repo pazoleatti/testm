@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookAction;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.GetRefBookResult;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookAction;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.InitRefBookResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -23,20 +23,20 @@ import com.gwtplatform.dispatch.shared.ActionException;
  */
 @Component
 @PreAuthorize("isAuthenticated()")
-public class GetRefBookHandler extends
-		AbstractActionHandler<GetRefBookAction, GetRefBookResult> {
+public class InitRefBookHandler extends
+		AbstractActionHandler<InitRefBookAction, InitRefBookResult> {
 
 	@Autowired
 	RefBookFactory refBookFactory;
 
-	public GetRefBookHandler() {
-		super(GetRefBookAction.class);
+	public InitRefBookHandler() {
+		super(InitRefBookAction.class);
 	}
 
 	@Override
-	public GetRefBookResult execute(GetRefBookAction action,
+	public InitRefBookResult execute(InitRefBookAction action,
 			ExecutionContext context) throws ActionException {
-		GetRefBookResult result = new GetRefBookResult();
+		InitRefBookResult result = new InitRefBookResult();
 		List<String> headers = new ArrayList<String>();
 
 		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
@@ -50,8 +50,8 @@ public class GetRefBookHandler extends
 		result.setHeaders(headers);
 		
 		List<Date> versions = new ArrayList<Date>();
-		if (action.getFormDataId()!=null){
-			// TODO: Получить список версий для периода formData
+		if (action.getDate1()!=null && action.getDate2()!=null){
+			versions.addAll(refBookFactory.getDataProvider(refBook.getId()).getVersions(action.getDate1(), action.getDate2()));
 		} else {
 			versions.add(new Date());
 		}
@@ -61,7 +61,7 @@ public class GetRefBookHandler extends
 	}
 
 	@Override
-	public void undo(GetRefBookAction action, GetRefBookResult result,
+	public void undo(InitRefBookAction action, InitRefBookResult result,
 			ExecutionContext context) throws ActionException {
 		//
 	}

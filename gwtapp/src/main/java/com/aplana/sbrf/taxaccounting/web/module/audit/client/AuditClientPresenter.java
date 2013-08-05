@@ -72,7 +72,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
 
     protected final DispatchAsync dispatcher;
 
-    private static final int PAGE_SIZE = 30;
+    private static final int PAGE_SIZE = 20;
 
     @Inject
     public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {

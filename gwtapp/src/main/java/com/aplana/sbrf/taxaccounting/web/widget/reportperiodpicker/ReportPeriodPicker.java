@@ -55,7 +55,6 @@ public class ReportPeriodPicker extends Composite{
     private final Map<CheckBox, ReportPeriod> cbToReportPeriod = new HashMap<CheckBox, ReportPeriod>();
 	private TaxPeriod lastTimeSelectedTaxPeriod = new TaxPeriod();
 
-	@UiConstructor
 	public ReportPeriodPicker(ReportPeriodSelectHandler reportPeriodDataProvider){
 		this(reportPeriodDataProvider, true);
 	}
@@ -157,6 +156,8 @@ public class ReportPeriodPicker extends Composite{
 
 	public void setTaxPeriods(List<TaxPeriod> taxPeriods){
 		this.taxPeriods = taxPeriods;
+		taxPeriodNodes.clear();
+		tree.clear();
 	}
 
 	public void setReportPeriods(List<ReportPeriod> reportPeriods){

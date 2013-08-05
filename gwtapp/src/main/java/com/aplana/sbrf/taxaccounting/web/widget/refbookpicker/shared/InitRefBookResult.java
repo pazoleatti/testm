@@ -6,7 +6,7 @@ import java.util.List;
 import com.gwtplatform.dispatch.shared.Result;
 
 
-public class GetRefBookResult implements Result {
+public class InitRefBookResult implements Result {
 	private static final long serialVersionUID = 1099858218534060155L;
 	
 	private long refBookId;

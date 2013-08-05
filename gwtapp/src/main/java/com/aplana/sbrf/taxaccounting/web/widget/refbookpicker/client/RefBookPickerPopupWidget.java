@@ -19,12 +19,14 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
 
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {
     }
+    
+    private Long attrId;
 
     private static Binder binder = GWT.create(Binder.class);
 
     private PopupPanel popupPanel;
 
-    private RefBookPickerWidget popupWidget;
+    private RefBookPicker refBookPiker;
 
     @UiField
     TextBox text;
@@ -35,18 +37,19 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
     public RefBookPickerPopupWidget() {
         initWidget(binder.createAndBindUi(this));
         popupPanel = new PopupPanel(true, true);
+        refBookPiker = new RefBookPickerWidget();
+        popupPanel.add(refBookPiker);
     }
 
     public void setRefBookId(int id) {
-        popupPanel.clear();
-        popupWidget = new RefBookPickerWidget(id);
-        popupPanel.add(popupWidget);
+        
+        attrId = Long.valueOf(id);
 
-        popupWidget.addValueChangeHandler(new ValueChangeHandler<Long>() {
+        refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
             @Override
             public void onValueChange(ValueChangeEvent<Long> event) {
-                // TODO Переделать на текстовое представление
-                text.setText(String.valueOf(event.getValue()));
+                text.setText(refBookPiker.getDereferenceValue());
+                setValue(event.getValue(), true);
                 popupPanel.hide();
             }
         });
@@ -54,30 +57,35 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
+        refBookPiker.setAcceptableValues(attrId);
         popupPanel.setPopupPosition(text.getAbsoluteLeft(), text.getAbsoluteTop() + text.getOffsetHeight());
         popupPanel.show();
     }
 
     @Override
     public Long getValue() {
-        return popupWidget.getValue();
+        return refBookPiker.getValue();
     }
 
     @Override
     public void setValue(Long value) {
         // TODO Переделать на текстовое представление
-        text.setText(String.valueOf(value));
+        //text.setText(String.valueOf(value));
+        refBookPiker.setValue(value);
     }
 
     @Override
     public void setValue(Long value, boolean fireEvents) {
         // TODO Переделать на текстовое представление
         setValue(value);
+        if (fireEvents){
+        	ValueChangeEvent.fire(this, value);
+        }
     }
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Long> handler) {
-        return popupWidget.addValueChangeHandler(handler);
+        return refBookPiker.addValueChangeHandler(handler);
     }
 
     @Override

@@ -40,7 +40,7 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, int reportPeriodId,
+	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, Integer reportPeriodId,
 					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
 		LogSystem log = new LogSystem();
 		log.setLogDate(new Date());

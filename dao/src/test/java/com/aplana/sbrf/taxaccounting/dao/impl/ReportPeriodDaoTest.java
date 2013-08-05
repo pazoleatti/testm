@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
@@ -19,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ReportPeriodDaoTest.xml"})
@@ -124,4 +122,10 @@ public class ReportPeriodDaoTest {
 		assertEquals(2, reportPeriod.getDepartmentId());
 		assertEquals(1, reportPeriod.getTaxPeriodId());
 	}
+
+    @Test
+    public void getLastReportPeriodTest() {
+        ReportPeriod period = reportPeriodDao.getLastReportPeriod(TaxType.TRANSPORT, 1L);
+        assertNotNull(period);
+    }
 }
