@@ -14,6 +14,7 @@ public interface RefBookPickerWidgetUiHandlers extends UiHandlers, HasValue<Long
 	void onSearchPatternChange();
 	void onVersionChange();
 	void onSelectionChange();
+	void onBtnClearClick();
 	
 	String getDereferenceValue();
 
