@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -9,13 +10,17 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Версионный справочник с выбором значения из выпадающего списка с пагинацией
  * @author Dmitriy Levykin
  */
-public class RefBookPickerPopupWidget extends Composite implements HasValue<Long>, HasEnabled, LeafValueEditor<Long> {
+public class RefBookPickerPopupWidget extends Composite implements RefBookPickerPopup {
 
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {
     }
@@ -41,18 +46,18 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
         popupPanel.add(refBookPiker);
     }
 
+    /**
+     * 
+     * @param id
+     * 
+     * @deprecated
+     * 
+     * Нужно использовать метод setAcceptableValues
+     * 
+     */
+    @Deprecated
     public void setRefBookId(int id) {
-        
-        attrId = Long.valueOf(id);
-
-        refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Long> event) {
-                text.setText(refBookPiker.getDereferenceValue());
-                setValue(event.getValue(), true);
-                popupPanel.hide();
-            }
-        });
+        setAcceptableValues(Long.valueOf(id));
     }
 
     @UiHandler("selectButton")
@@ -98,4 +103,33 @@ public class RefBookPickerPopupWidget extends Composite implements HasValue<Long
         // При недоступности кнопка прячется
         selectButton.setVisible(enabled);
     }
+
+	@Override
+	public void setAcceptableValues(long refBookAttrId) {
+		setAcceptableValues(refBookAttrId, null, null);
+	}
+
+	@Override
+	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
+        attrId = refBookAttrId;
+
+        refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Long> event) {
+                text.setText(refBookPiker.getDereferenceValue());
+                setValue(event.getValue(), true);
+                popupPanel.hide();
+            }
+        });
+	}
+
+	@Override
+	public String getDereferenceValue() {
+		return text.getValue();
+	}
+
+	@Override
+	public void setDereferenceValue(String value) {
+		text.setValue(value);
+	}
 }
