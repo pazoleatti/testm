@@ -46,11 +46,17 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         if (sortAttribute != null && sortAttribute.getAlias() != null) {
             sql.append(" ORDER BY ").append(sortAttribute.getAlias());
         }
-        sql.append(") WHERE rnum BETWEEN :offset AND :count");
-        Map<String, Integer> params = new HashMap<String, Integer>();
-        params.put("count", pagingParams.getCount());
-        params.put("offset", pagingParams.getStartIndex());
-        List<Map<String, RefBookValue>> records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
+        sql.append(")");
+        List<Map<String, RefBookValue>> records;
+        if (pagingParams != null) {
+            sql.append(" WHERE rnum BETWEEN :offset AND :count");
+            Map<String, Integer> params = new HashMap<String, Integer>();
+            params.put("count", pagingParams.getCount());
+            params.put("offset", pagingParams.getStartIndex());
+            records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
+        } else {
+            records = getNamedParameterJdbcTemplate().query(sql.toString(), new HashMap<String, Object>(), new RefBookValueMapper(refBook));
+        }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
         result.setRecords(records);
         result.setTotalRecordCount(getJdbcTemplate().queryForInt("SELECT count(*) FROM DEPARTMENT"));

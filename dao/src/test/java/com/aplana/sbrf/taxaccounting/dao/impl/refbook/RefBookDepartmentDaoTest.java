@@ -57,6 +57,11 @@ public class RefBookDepartmentDaoTest {
         data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), "sbrf_code like '%003%'", null);
         assertTrue(data.getRecords().size() == 1);
         assertTrue(data.getRecords().get(0).get("name").equals(departmentTB1Name));
+
+        // Получение данных без пагинации
+        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, null, "sbrf_code like '%003%'", null);
+        assertTrue(data.getRecords().size() == 1);
+        assertTrue(data.getRecords().get(0).get("name").equals(departmentTB1Name));
     }
 
     @Test
