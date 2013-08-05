@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -263,46 +264,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		sql.append("  r.ref_book_id =");
 		sql.append(refBookId);
 		return sql.toString();
-	}
-
-	private class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> {
-
-		private final RefBook refBook;
-
-		public RefBookValueMapper(RefBook refBook) {
-			this.refBook = refBook;
-		}
-		public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
-			Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-			result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(1)));
-			List<RefBookAttribute> attributes = refBook.getAttributes();
-			for (int i = 2; i < attributes.size() + 2; i++) {
-				RefBookAttribute attribute = attributes.get(i - 2);
-				Object value = null;
-				if (rs.getObject(i) != null) {
-					switch (attribute.getAttributeType()) {
-						case STRING: {
-							value = rs.getString(i);
-						}
-						break;
-						case NUMBER: {
-							value = rs.getDouble(i);
-						}
-						break;
-						case DATE: {
-							value = rs.getDate(i);
-						}
-						break;
-						case REFERENCE: {
-							value = rs.getLong(i);
-						}
-						break;
-					}
-				}
-				result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
-			}
-			return result;
-		}
 	}
 
 	private static final String RECORD_VERSION =
