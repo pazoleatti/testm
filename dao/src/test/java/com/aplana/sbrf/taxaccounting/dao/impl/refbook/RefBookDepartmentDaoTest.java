@@ -33,14 +33,14 @@ public class RefBookDepartmentDaoTest {
         // Получим записи из бд
         RefBookValue departmentBankid = new RefBookValue(RefBookAttributeType.NUMBER, 1L);
         RefBookValue departmentTB1Name = new RefBookValue(RefBookAttributeType.STRING, "Териториальный Банк №1");
-        PagingResult<Map<String, RefBookValue>> data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), null);
+        PagingResult<Map<String, RefBookValue>> data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), null, null);
         assertTrue(data.getTotalRecordCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.getRecords().size() == DEPARTMENTS_COUNT);
         assertTrue(data.getRecords().get(0).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
         assertTrue(data.getRecords().get(1).get("name").equals(departmentTB1Name));
 
         // Получим пустой результат (уйдем за пределы пагинации)
-        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(999999, 10), null);
+        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(999999, 10), null, null);
         assertTrue(data.getTotalRecordCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.getRecords().size() == 0);
 
@@ -52,6 +52,16 @@ public class RefBookDepartmentDaoTest {
 //        assertTrue(data.getRecords().size() == DEPARTMENTS_COUNT);
 //        assertTrue(data.getRecords().get(1).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
 //        assertTrue(data.getRecords().get(0).get("name").equals(departmentTB1Name));
+
+        // Проверка фильтрации
+        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), "sbrf_code like '%003%'", null);
+        assertTrue(data.getRecords().size() == 1);
+        assertTrue(data.getRecords().get(0).get("name").equals(departmentTB1Name));
+
+        // Получение данных без пагинации
+        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, null, "sbrf_code like '%003%'", null);
+        assertTrue(data.getRecords().size() == 1);
+        assertTrue(data.getRecords().get(0).get("name").equals(departmentTB1Name));
     }
 
     @Test
