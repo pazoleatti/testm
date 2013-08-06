@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkUniq()
-        checkDecl()
         break
     case FormDataEvent.CALCULATE:
         logicCheck()
@@ -33,12 +32,15 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
+        checkDecl()
         break
     case FormDataEvent.ADD_ROW:
         addRow()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
+        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
 }
 
