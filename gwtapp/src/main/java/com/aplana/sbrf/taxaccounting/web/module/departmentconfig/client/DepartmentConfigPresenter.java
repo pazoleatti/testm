@@ -26,6 +26,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -107,6 +108,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param reportPeriod
          */
         void setReportPeriod(ReportPeriod reportPeriod);
+
+        /**
+         * Установка разыменованных значений для справочников
+         */
+        void setDereferenceValue(Map<Long, String> rbTextValues);
     }
 
     @Inject
@@ -118,13 +124,14 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void save(DepartmentCombined combinedDepartmentParam) {
-        if (combinedDepartmentParam == null) {
+    public void save(DepartmentCombined combinedDepartmentParam, ReportPeriod period) {
+        if (combinedDepartmentParam == null || period == null) {
             return;
         }
 
         SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
         action.setDepartmentCombined(combinedDepartmentParam);
+        action.setPeriod(period);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
@@ -154,6 +161,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                     @Override
                     public void onSuccess(GetDepartmentCombinedResult result) {
                         getView().setDepartmentCombined(result.getDepartmentCombined());
+                        getView().setDereferenceValue(result.getRbTextValues());
+                        result.getRbTextValues();
                     }
                 }, this));
     }
