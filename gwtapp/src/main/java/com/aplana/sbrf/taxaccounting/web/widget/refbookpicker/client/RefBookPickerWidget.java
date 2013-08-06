@@ -161,7 +161,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@UiHandler("btnClear")
 	void onBtnClearClick(ClickEvent event) {
-		setValue(null, true);
+		uiHandlers.onBtnClearClick();
 	}
 
 	@Override
@@ -252,6 +252,9 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@Override
 	public void setHeaders(List<String> headers) {
+        for (int i = cellTable.getColumnCount()-1; i >= 0; i--) {
+            cellTable.removeColumn(i);
+        }
 		for (int i = 0; i < headers.size(); i++) {
 			cellTable.addColumn(new RefBookItemTextColumn(i), headers.get(i));
 		}

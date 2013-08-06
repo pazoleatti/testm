@@ -14,7 +14,6 @@ public interface RefBookDepartmentDao {
     /**
      * Загружает данные справочника
      * в данном случае даты актуальности нет смотри SBRFACCTAX-3245
-     * TODO Добавить фильтрацию blocked by SBRFACCTAX-3187
      * TODO Добавить сортировку по атрибуту (пока не понятно как должно работать)
      *
      * @param refBookId
