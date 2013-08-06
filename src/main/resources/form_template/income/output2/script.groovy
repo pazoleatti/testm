@@ -36,32 +36,44 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
+        break
+    case FormDataEvent.IMPORT :
+        // importData()
         break
 }
+
+// графа 1  - title
+// графа 2  - zipCode
+// графа 3  - subdivisionRF
+// графа 4  - area
+// графа 5  - city
+// графа 6  - region
+// графа 7  - street
+// графа 8  - homeNumber
+// графа 9  - corpNumber
+// графа 10 - apartment
+// графа 11 - surname
+// графа 12 - name
+// графа 13 - patronymic
+// графа 14 - phone
+// графа 15 - dividendDate
+// графа 16 - sumDividend
+// графа 17 - sumTax
 
 void deleteRow() {
     def data = getData(formData)
     if (currentDataRow != null) {
         getRows(data).remove(currentDataRow)
-        save(data)
     }
 }
 
 void addRow() {
     def data = getData(formData)
-    row = formData.createDataRow()
-    for (alias in ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
-            'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']) {
-        row.getCell(alias).editable = true
-        row.getCell(alias).setStyleAlias('Редактируемая')
-    }
-    getRows(data).add(row)
-    save(data)
+    row = getNewRow()
+    insert(data, row)
 }
 /**
  * Проверяет уникальность в отчётном периоде и вид
@@ -131,6 +143,16 @@ void save(def data) {
 }
 
 /**
+ * Вставить новую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
  * Удалить строку из нф
  *
  * @param data данные нф (helper)
@@ -164,4 +186,202 @@ def hasTotal(def data) {
         }
     }
     return false
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
+    def fileName = 'fileName.xls'
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null);
+    if (xmlString == null) {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // количество строк в шапке
+    def headRowCount = 4
+
+    // проверка заголовка таблицы
+    if (!checkTableHead(xml, headRowCount)) {
+        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+        return
+    }
+    // TODO (Ramil Timerbaev) Проверка корректности данных (типы данных)
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    // добавить данные в форму
+    addData(xml, headRowCount)
+}
+
+/**
+ * Заполнить форму данными.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+void addData(def xml, headRowCount) {
+    if (xml == null) {
+        return
+    }
+    def data = getData(formData)
+
+    // количество графов в таблице
+    def columnCount = 12
+
+    def tmp
+    for (def row : xml.row) {
+        // пропустить шапку таблицы
+        if (indexRow < headRowCount) {
+            continue
+        }
+
+        // проверить по грн итоговая ли это строка
+        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
+        if (tmp != null && tmp.contains('Итог')) {
+            continue
+        }
+        if (row.cell.size() == columnCount) {
+            // проверить по номеру договора повторяющиеся записи
+            tmp = (row.cell[1] != null ? row.cell[1].text() : null)
+            def newRow = getRowByTradeNumber(data, tmp)
+            if (newRow == null) {
+                newRow = getNewRow()
+                insert(data, newRow)
+            }
+
+            // графа 1
+            newRow.title = row.cell[2].text()
+
+            // графа 2
+            newRow.zipCode = row.cell[7].text()
+
+            // графа 3
+            newRow.subdivisionRF = row.cell[8].text()
+
+            // графа 4
+            newRow.area = row.cell[10].text()
+
+            // графа 5
+            newRow.city = row.cell[11].text()
+
+            // графа 6
+            newRow.region = row.cell[12].text()
+
+            // графа 7
+            newRow.street = row.cell[13].text()
+
+            // графа 8
+            newRow.homeNumber = row.cell[14].text()
+
+            // графа 9
+            newRow.corpNumber = row.cell[15].text()
+
+            // графа 10
+            newRow.apartment = row.cell[16].text()
+
+            // TODO (Ramil Timerbaev) разбиение ФИО
+
+            'данные не представлены'
+            // графа 11 - newRow.surname = row.cell[index].text()
+            index++
+            // графа 12 - newRow.name = row.cell[index].text()
+            index++
+            // графа 13 - newRow.patronymic = row.cell[index].text()
+
+            // графа 14
+            newRow.phone = row.cell[18].text()
+
+            // графа 15
+            newRow.dividendDate = row.cell[19].text()
+
+            // графа 16
+            newRow.sumDividend = getNumber(row.cell[20].text())
+
+            // графа 17
+            newRow.sumTax = getNumber(row.cell[22].text())
+        }
+    }
+    save(data)
+}
+
+/**
+ * Получить числовое значение.
+ *
+ * @param value строка
+ */
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+
+    ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment',
+            'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax'].each { alias ->
+        row.getCell(alias).editable = true
+        row.getCell(alias).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
+
+/**
+ * Проверить шапку таблицы.
+ *
+ * @param xml данные
+ * @param headRowCount количество строк в шапке
+ */
+def checkTableHead(def xml, def headRowCount) {
+    def colCount = 21
+    // проверить количество строк и голонок в шапке
+    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
+        return false
+    }
+    def result = (xml.row[0].cell[0] == '№ стр.' &&
+            xml.row[0].cell[1] == 'Код территориального банка' &&
+            xml.row[0].cell[2] == 'Наименование территориального банка' &&
+            xml.row[0].cell[3] == 'Наименование получателя' &&
+            xml.row[0].cell[4] == 'ИНН' &&
+            xml.row[0].cell[5] == 'КПП' &&
+            xml.row[0].cell[6] == 'Юридический адрес ( место жительства )' &&
+            xml.row[0].cell[7] == 'Юридический адрес ( место нахождения )' &&
+            xml.row[1].cell[7] == 'Почтовый индекс' &&
+            xml.row[1].cell[8] == 'Субъект Российской Федерации' &&
+            xml.row[2].cell[8] == 'Код' &&
+            xml.row[2].cell[9] == 'Наименование субъекта РФ' &&
+            xml.row[1].cell[10] == 'Район' &&
+            xml.row[1].cell[11] == 'Город' &&
+            xml.row[1].cell[12] == 'Населенный пункт (село, поселок и т.п.)' &&
+            xml.row[1].cell[13] == 'Улица (проспект, переулок и т.д.)' &&
+            xml.row[1].cell[14] == 'Номер дома (владения)' &&
+            xml.row[1].cell[15] == 'Номер корпуса (строения)' &&
+            xml.row[1].cell[16] == 'Номер офиса (квартиры)' &&
+            xml.row[0].cell[17] == 'Руководитель организации (Ф.И.О.)' &&
+            xml.row[0].cell[18] == 'Контактный телефон' &&
+            xml.row[0].cell[19] == 'Дата перечисления дивидентов' &&
+            xml.row[0].cell[20] == 'Сумма дивидентов' &&
+            xml.row[0].cell[21] == 'Сумма налога')
+    return result
 }

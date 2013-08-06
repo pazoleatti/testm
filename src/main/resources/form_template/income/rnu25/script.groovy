@@ -1,5 +1,8 @@
 package form_template.income.rnu25
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Форма "(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения".
  *
@@ -9,6 +12,7 @@ package form_template.income.rnu25
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - графа 4 заполняется автоматически при пересчете, но является редактируемой, возможно надо брать возможность редактировать
  *      - проблемы с индексами
+ *      - получение имени файла при импорте
  *      - импорт данных сделан без чтз
  *
  * @author rtimerbaev
@@ -47,12 +51,12 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW :
         deleteRow()
         break
-    // после принятия из подготовлена
+// после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         checkNSI()
         break
-    // обобщить
+// обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
@@ -87,9 +91,9 @@ def addNewRow() {
     def data = getData(formData)
 
     def newRow = getNewRow()
-    getRows(data).add(getIndex(data, currentDataRow) + 1, newRow) // TODO (Ramil Timerbaev) проблемы с индексом
+    insert(data, newRow)
+    // data.insert(newRow, getIndex(data, currentDataRow) + 1) // TODO (Ramil Timerbaev) проблемы с индексом
 
-    save(data)
     return newRow
 }
 
@@ -114,7 +118,6 @@ def getNewRow() {
 def deleteRow() {
     def data = getData(formData)
     data.delete(currentDataRow)
-    save(data)
 }
 
 /**
@@ -204,7 +207,7 @@ void calc() {
             'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
     // добавить строку "итого"
     def totalRow = formData.createDataRow()
-    getRows(data).add(totalRow)
+    insert(data, totalRow)
     totalRow.setAlias('total')
     totalRow.regNumber = 'Общий итог'
     setTotalStyle(totalRow)
@@ -250,8 +253,8 @@ void calc() {
     // добавить "итого по ГРН:..." в таблицу
     def i = 0
     totalRows.each { index, row ->
-        getRows(data).add(index + i, row)
         i = i + 1
+        data.insert(row, index + i)
     }
     save(data)
 }
@@ -545,7 +548,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    getRows(data).clear()
+    data.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
@@ -554,14 +557,13 @@ void consolidation() {
                 def sourceData = getData(source)
                 getRows(sourceData).each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        getRows(data).add(row)
+                        insert(data, row)
                     }
                 }
             }
         }
     }
     logger.info('Формирование консолидированной формы прошло успешно.')
-    save(data)
 }
 
 /**
@@ -574,6 +576,32 @@ void checkCreation() {
     if (findForm != null) {
         logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
+}
+
+/**
+ * Получение импортируемых данных.
+ */
+void importData() {
+    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
+    def fileName = 'fileName.xls'
+
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
+
+    def xmlString = importService.getData(is, fileName, 'windows-1251', 'Государственный регистрационный номер', 'Общий итог');
+    if (xmlString == null) {
+        return
+    }
+
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
+
+    // добавить данные в форму
+    addData(xml)
 }
 
 /*
@@ -645,7 +673,8 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
  */
 void setTotalStyle(def row) {
     ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
-            'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
+            'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
+            'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
 }
@@ -831,6 +860,16 @@ void save(def data) {
 }
 
 /**
+ * Вставить новую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
+
+/**
  * Удалить строку из нф
  *
  * @param data данные нф (helper)
@@ -867,31 +906,6 @@ def hasTotal(def data) {
 }
 
 /**
- * Получение импортируемых данных.
- */
-void importData() {
-    def format = 'xls'
-
-    def is = ImportInputStream
-    if (is == null) {
-        return
-    }
-
-    def xmlString = importService.getData(is, format, 'windows-1251', 'Государственный регистрационный номер', 'Общий итог', 3);
-    if (xmlString == null) {
-        return
-    }
-
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        return
-    }
-
-    // добавить данные в форму
-    addData(xml)
-}
-
-/**
  * Заполнить форму данными.
  *
  * @param xml данные
@@ -904,9 +918,19 @@ void addData(def xml) {
 
     // количество графов в таблице
     def columnCount = 12
+    // количество строк в шапке
+    def headRowCount = 3
 
     def tmp
+    def indexRow = -1;
     for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow < headRowCount) {
+            continue
+        }
+
         // проверить по грн итоговая ли это строка
         tmp = (row.cell[0] != null ? row.cell[0].text() : null)
         if (tmp != null && tmp.contains('Итог')) {
@@ -918,56 +942,56 @@ void addData(def xml) {
             def newRow = getRowByTradeNumber(data, tmp)
             if (newRow == null) {
                 newRow = getNewRow()
-                getRows(data).add(newRow)
+                insert(data, newRow)
             }
-            def index = 0
+            def indexCell = 0
 
             // графа 2
-            newRow.regNumber = row.cell[index].text()
-            index++
+            newRow.regNumber = row.cell[indexCell].text()
+            indexCell++
 
             // графа 3
-            newRow.tradeNumber = row.cell[index].text()
-            index++
+            newRow.tradeNumber = row.cell[indexCell].text()
+            indexCell++
 
             // графа 4
-            newRow.lotSizePrev = getNumber(row.cell[index].text())
-            index++
+            newRow.lotSizePrev = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 5
-            newRow.lotSizeCurrent = getNumber(row.cell[index].text())
-            index++
+            newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 6
-            newRow.reserve = getNumber(row.cell[index].text())
-            index++
+            newRow.reserve = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 7
-            newRow.cost = getNumber(row.cell[index].text())
-            index++
+            newRow.cost = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 8
-            newRow.signSecurity = row.cell[index].text()
-            index++
+            newRow.signSecurity = row.cell[indexCell].text()
+            indexCell++
 
             // графа 9
-            newRow.marketQuotation = getNumber(row.cell[index].text())
-            index++
+            newRow.marketQuotation = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 10
-            newRow.costOnMarketQuotation = getNumber(row.cell[index].text())
-            index++
+            newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 11
-            newRow.reserveCalcValue = getNumber(row.cell[index].text())
-            index++
+            newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 12
-            newRow.reserveCreation = getNumber(row.cell[index].text())
-            index++
+            newRow.reserveCreation = getNumber(row.cell[indexCell].text())
+            indexCell++
 
             // графа 13
-            newRow.reserveRecovery = getNumber(row.cell[index].text())
+            newRow.reserveRecovery = getNumber(row.cell[indexCell].text())
         }
     }
     save(data)
