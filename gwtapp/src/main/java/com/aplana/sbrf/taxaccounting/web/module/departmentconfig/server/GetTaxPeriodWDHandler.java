@@ -38,7 +38,6 @@ public class GetTaxPeriodWDHandler extends AbstractActionHandler<GetTaxPeriodWDA
     public GetTaxPeriodWDResult execute(GetTaxPeriodWDAction action, ExecutionContext executionContext)
             throws ActionException {
         GetTaxPeriodWDResult result = new GetTaxPeriodWDResult();
-        // TODO Учитывать подразделение
         result.setTaxPeriods(taxPeriodSDao.listByTaxType(action.getTaxType()));
         result.setLastReportPeriod(reportPeriodService.getLastReportPeriod(action.getTaxType(), action.getDepartmentId()));
         return result;
