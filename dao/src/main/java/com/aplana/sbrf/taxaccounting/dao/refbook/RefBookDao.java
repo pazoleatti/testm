@@ -107,4 +107,21 @@ public interface RefBookDao {
 	 * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
 	 */
 	void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
+
+    /**
+     * Проверка и поиск Id записи по:
+     * @param refBookId Id справочника
+     * @param version Версия
+     * @param rowId Id строки справочника
+     * @return Id первой найденной записи
+     */
+    Long checkRecordUnique(Long refBookId, Date version, Long rowId);
+
+    /**
+     * Значение справочника по Id записи и Id атрибута
+     * @param recordId
+     * @param attributeId
+     * @return
+     */
+    RefBookValue getValue(Long recordId, Long attributeId);
 }

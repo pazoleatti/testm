@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -13,9 +14,11 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface DepartmentConfigUiHandlers extends UiHandlers {
     /**
      * Сохранение
+     *
      * @param combinedDepartmentParam
+     * @param period
      */
-    void save(DepartmentCombined combinedDepartmentParam);
+    void save(DepartmentCombined combinedDepartmentParam, ReportPeriod period);
 
     /**
      * Очистка формы
@@ -24,6 +27,7 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
 
     /**
      * Перезагрузка параметров подразделений на форме
+     *
      * @param departmentId
      * @param taxType
      * @param reportPeriodId
@@ -32,6 +36,7 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
 
     /**
      * Перезагрузка налоговых периодов
+     *
      * @param taxType
      * @param departmentId
      */
@@ -39,6 +44,7 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
 
     /**
      * Обработка выбора налогового периода
+     *
      * @param taxPeriod
      * @param departmentId
      */

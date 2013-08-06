@@ -95,7 +95,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             taxPlaceTypeCode,
             obligation,
             okato,
-            okvedCode;
+            okvedCode,
+            type;
 
     @UiField
     TextArea name;
@@ -149,7 +150,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         departmentPicker.addDepartmentsReceivedEventHandler(new SelectDepartmentsEventHandler() {
             @Override
             public void onDepartmentsReceived(SelectDepartmentsEvent event) {
-
 
                 if (event == null || event.getItems().isEmpty()) {
                     return;
@@ -319,7 +319,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
-        getUiHandlers().save(driver.flush());
+        getUiHandlers().save(driver.flush(), currentReportPeriod);
         driver.edit(data);
     }
 
@@ -437,6 +437,19 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void setDepartmentCombined(DepartmentCombined combinedDepartmentParam) {
         data = combinedDepartmentParam;
         driver.edit(data);
+    }
+
+    @Override
+    public void setDereferenceValue(Map<Long, String> rbTextValues) {
+        // Заполнение текстовых значений справочников
+        dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
+        reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
+        signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
+        taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
+        obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
+        okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
+        okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
+        type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
     }
 
     @Override
