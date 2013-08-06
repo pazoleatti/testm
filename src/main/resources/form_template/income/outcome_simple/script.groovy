@@ -136,7 +136,6 @@ void calculationControlGraphs() {
             def formDataRNU14 = getFormDataRNU14()
             for (def rowRNU14 : getData(formDataRNU14).getAllCached()){
                 if(row.consumptionTypeId == rowRNU14.knu){
-                    logger.info('rowRNU14.overApprovedNprms = '+rowRNU14.overApprovedNprms)
                     row.rnu5Field5Accepted = rowRNU14.overApprovedNprms
                 }
             }
