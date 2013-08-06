@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;

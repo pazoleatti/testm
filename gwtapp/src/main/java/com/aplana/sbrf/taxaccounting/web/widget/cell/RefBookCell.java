@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+import java.util.Date;
+
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
@@ -54,12 +56,16 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	private Long refBookAttrId;
 	private String columnAlias;
 	private boolean refBookPikerAlredyInit;
+	private Date startDate;
+	private Date endDate;
 
 	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
 		this.refBookAttrId = ((RefBookColumn) columnContext.getColumn()).getRefBookAttributeId();
 		this.columnAlias = columnContext.getColumn().getAlias();
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
+		this.startDate = columnContext.getStartDate();
+		this.endDate = columnContext.getEndDate();
 
 		// Create popup panel
 		this.panel = new PopupPanel(true, true) {
@@ -112,7 +118,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 						public void onValueChange(ValueChangeEvent<Long> event) {
 							// Remember the values before hiding the popup.
 							Element cellParent = lastParent;
-							Long oldValue = lastValue;
+							// Не очень понял зачем запоминать старые значения.
+							//Long oldValue = lastValue;
 							Object key = lastKey;
 							int index = lastIndex;
 							int column = lastColumn;
@@ -126,7 +133,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 							Cell cell = dataRow.getCell(columnAlias);
 							cell.setRefBookDereference(refBookPiker.getDereferenceValue());
 							
-							setValue(new Context(index, column, key), cellParent, oldValue);
+							setValue(new Context(index, column, key), cellParent, value);
 							if (valueUpdater != null) {
 								valueUpdater.update(value);
 							}
@@ -149,7 +156,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		//this.valueUpdater = valueUpdater;
 
 		if (!refBookPikerAlredyInit){
-			refBookPiker.setAcceptableValues(refBookAttrId);
+			refBookPiker.setAcceptableValues(refBookAttrId, startDate, endDate);
 			refBookPikerAlredyInit = true;
 		}
 		
@@ -189,7 +196,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		Cell cell = dataRow.getCell(columnAlias);
 		String rendValue = cell.getRefBookDereference();
 		if (rendValue == null){
-			rendValue = String.valueOf(value);
+			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
 	}

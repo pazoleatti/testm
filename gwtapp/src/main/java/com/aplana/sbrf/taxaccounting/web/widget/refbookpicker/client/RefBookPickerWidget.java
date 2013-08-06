@@ -161,7 +161,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@UiHandler("btnClear")
 	void onBtnClearClick(ClickEvent event) {
-		setValue(null, true);
+		uiHandlers.onBtnClearClick();
 	}
 
 	@Override
