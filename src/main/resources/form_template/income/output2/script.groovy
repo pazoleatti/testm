@@ -36,11 +36,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
 }
 
