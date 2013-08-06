@@ -21,7 +21,6 @@ DataRowHelper getDataRowsHelper() {
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkUniq()
-        checkDecl()
         break
     case FormDataEvent.CALCULATE:
         logicalCheck()
@@ -37,7 +36,6 @@ switch (formDataEvent) {
         checkDecl()
         logicalCheck()
         logicCheck()
-        calc()
         dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_PREPARED_TO_CREATED:
@@ -46,10 +44,10 @@ switch (formDataEvent) {
         checkDecl()
         logicalCheck()
         logicCheck()
-        calc()
         dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
+        checkDecl()
         break
     case FormDataEvent.ADD_ROW:
         addRow()
