@@ -160,6 +160,12 @@ public class RefBookDaoTest {
 		Assert.assertEquals(2, versions.size());
 	}
 
+	@Test
+	public void testGetVersions4() throws Exception {
+		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2020), getDate(1, 1, 2030));
+		Assert.assertEquals(1, versions.size());
+	}
+
 	private Date getDate(int day, int month, int year) {
 		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
 	}

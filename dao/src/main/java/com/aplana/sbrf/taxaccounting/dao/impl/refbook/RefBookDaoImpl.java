@@ -267,6 +267,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
 	private static final String RECORD_VERSION =
+		"select\n" +
+		"  max(version) as version\n" +
+		"from\n" +
+		"  ref_book_record\n" +
+		"where\n" +
+		"  ref_book_id = %d and\n" +
+		"version <= to_date('%s', 'DD.MM.YYYY')\n" +
+		"union\n" +
 		"select\n"+
 		"  version\n"+
 		"from\n"+
@@ -281,7 +289,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		"  version";
 	@Override
 	public List<Date> getVersions(Long refBookId, Date startDate, Date endDate) {
-		String sql = String.format(RECORD_VERSION, refBookId, sdf.format(startDate), sdf.format(endDate));
+		String sql = String.format(RECORD_VERSION, refBookId, sdf.format(startDate), refBookId, sdf.format(startDate), sdf.format(endDate));
 		return getJdbcTemplate().query(sql, new RowMapper<Date>() {
 
 			@Override
@@ -480,6 +488,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (rb == null) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
+		//TODO: лучше одним запросом получать значение и тип атрибута (Marat Fayzullin 2013-08-06)
         RefBookAttribute attribute = rb.getAttribute(attributeId);
         if (attribute == null) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
