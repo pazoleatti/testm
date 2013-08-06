@@ -23,7 +23,7 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (33, 'Параметры подразде
 INSERT INTO REF_BOOK (ID, NAME) VALUES (34, 'Общероссийский классификатор видов экономической деятельности');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (35, 'Признак лица, подписавшего документ');
 
-INSERT INTO REF_BOOK (ID, NAME) VALUES (40, 'Экономические классы транспортных средств');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (40, 'Экологические классы транспортных средств');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (41, 'Ставки транспортного налога');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (42, 'Код вида транспортного средства');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (43, 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)');
