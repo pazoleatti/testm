@@ -6,6 +6,7 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (5, 'Коды форм реорганиз
 INSERT INTO REF_BOOK (ID, NAME) VALUES (6, 'Коды налоговых льгот');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (7, 'Параметры налоговых льгот');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (9, 'Единый справочник валют');
 
 INSERT INTO REF_BOOK (ID, NAME) VALUES (22, 'Курсы Валют');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (23, 'Ставки рефинансирования ЦБ РФ');
@@ -18,152 +19,212 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (29, 'Классификатор соот
 
 INSERT INTO REF_BOOK (ID, NAME) VALUES (30, 'Подразделения');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (31, 'Параметры подразделения по транспортному налогу');
-INSERT INTO REF_BOOK (ID, NAME) VALUES (32, 'Общие сведения');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (33, 'Параметры подразделения по налогу на прибыль');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (34, 'Общероссийский классификатор видов экономической деятельности');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (35, 'Признак лица, подписавшего документ');
 
+INSERT INTO REF_BOOK (ID, NAME) VALUES (40, 'Экологические классы транспортных средств');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (41, 'Ставки транспортного налога');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (42, 'Код вида транспортного средства');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (43, 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)');
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (1,	1,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (2,	1,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (3,	2,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	3);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (4,	2,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (5,	3,	'Идентификатор записи',						'ID',				2,		0,		null,	null,	1,	0,		9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (6,	3,	'Идентификатор родительской записи',		'PARENT_ID',		4,		1,		3,		8,		1,	null,	510);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (7,	3,	'Код ОКАТО',								'OKATO',			1,		2,		null,	null,	1,	null,	11);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (8,	3,	'Наименование муниципального образования',	'NAME',				1,		3,		null,	null,	1,	null,	510);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (9,	4,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (10,	4,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (11,	4,	'код ОКАТО',								'OKATO',			1,		2,		null,	null,	1,	null,	11);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (12,	4,	'определяющая часть кода ОКАТО',			'OKATO_DEFINITION',	1,		3,		null,	null,	1,	null,	11);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (13,	5,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (14,	5,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (15,	6,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (16,	6,	'Наименование льготы',						'NAME',				1,		1,		null,	null,	1,	null,	4000);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (17,	7,	'код',										'CODE',				2,		0,		null,	null,	1,	0,		9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (18,	7,	'Код региона',								'DICT_REGION_ID',	4,		1,		5,		14,		1,	null,	510);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (19,	7,	'Код налоговой  льготы',					'TAX_BENEFIT_ID',	4,		2,		6,		16,		1,	null,	4000);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (20,	7,	'Основание - статья',						'SECTION',			1,		3,		null,	null,	1,	null,	4);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (21,	7,	'Основание - пункт',						'ITEM',				1,		4,		null,	null,	1,	null,	4);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (22,	7,	'Основание - подпункт',						'SUBITEM',			1,		5,		null,	null,	1,	null,	4);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (23,	7,	'Уменьшающий процент, %',					'PERCENT',			2,		6,		null,	null,	1,	2,		6);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (24,	7,	'Пониженная ставка',						'RATE',				2,		7,		null,	null,	1,	2,		20);
-
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (25,	8,	'код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (26,	8,	'наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (27,	8,	'Принадлежность к налогу на прибыль',		'I',				2,		2,		null,	null,	1,	0,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (28,	8,	'Принадлежность к налогу на транспорт',		'T',				2,		3,		null,	null,	1,	0,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (29,	8,	'Принадлежность к налогу на имущество',		'P',				2,		4,		null,	null,	1,	0,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (30,	8,	'Принадлежность к налогу НДС',				'V',				2,		5,		null,	null,	1,	0,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (31,	8,	'Принадлежность к ТЦО',						'D',				2,		6,		null,	null,	1,	0,		10);
+INSERT INTO REF_BOOK (ID, NAME) VALUES (50, 'Оборотная ведомость (Форма 0409101-СБ)');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (52, 'Отчет о прибылях и убытках (Форма 0409102-СБ)');
 
 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (1,	1,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (2,	1,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (80,	22,	'Цифровой код валюты',						'CODE_NUMBER',		4,		0,		3,		40,		1,	null,	3); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (81,	22,	'Курс валюты',								'RATE',				2,		1,		null,	null,	1,	4,		24);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (3,	2,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	3);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (4,	2,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (90,	23,	'Ставка рефинансирования,  %',				'RATE',				2,		0,		null,	null,	1,	2,		19); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (91,	23,	'Нормативный документ',						'DOCUMENT',			1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (5,	3,	'Идентификатор записи',						'ID',				2,		0,		null,	null,	1,	0,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (8,	3,	'Наименование муниципального образования',	'NAME',				1,		3,		null,	null,	1,	null,	510);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (6,	3,	'Идентификатор родительской записи',		'PARENT_ID',		4,		1,		3,		8,		1,	null,	510);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (7,	3,	'Код ОКАТО',								'OKATO',			1,		2,		null,	null,	1,	null,	11);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (100,	24,	'Код вида платежа',							'CODE',				1,		0,		null,	null,	1,	null,	1); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (101,	24,	'Наименование кода вида платежа',			'NAME',				1,		1,		null,	null,	1,	null,	4000);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (110,	25,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (111,	25,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	50);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (9,	4,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (10,	4,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (11,	4,	'Код ОКАТО',								'OKATO',			1,		2,		null,	null,	1,	null,	11);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (12,	4,	'Определяющая часть кода ОКАТО',			'OKATO_DEFINITION',	1,		3,		null,	null,	1,	null,	11);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (120,	26,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (121,	26,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (13,	5,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (14,	5,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (130,	27,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (131,	27,	'Группа расхода',							'GROUP_EXP',		1,		1,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (132,	27,	'Вид расхода по операциям',					'TYPE_EXP',			1,		2,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (133,	27,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (134,	27,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (135,	27,	'Нормативный документ(в актуальной редакции)', 
-																							'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (136,	27,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»', 
-																							'UNIT',				1,		6,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (137,	27,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (138,	27,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (139,	27,	'Признак расхода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (15,	6,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (16,	6,	'Наименование льготы',						'NAME',				1,		1,		null,	null,	1,	null,	4000);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (140,	28,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (141,	28,	'Группа дохода',							'GROUP_INCOME',		1,		1,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (142,	28,	'Вид доходов по операциям',					'TYPE_INCOME',		1,		2,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (143,	28,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (144,	28,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (145,	28,	'Нормативный документ(в актуальной редакции)', 
-																							'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (146,	28,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»', 
-																							'UNIT',				1,		6,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (147,	28,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (148,	28,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (149,	28,	'Признак дохода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (17,	7,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (18,	7,	'Код региона',								'DICT_REGION_ID',	4,		1,		5,		14,		1,	null,	510);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (19,	7,	'Код налоговой  льготы',					'TAX_BENEFIT_ID',	4,		2,		6,		16,		1,	null,	4000);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (20,	7,	'Основание - статья',						'SECTION',			1,		3,		null,	null,	1,	null,	4);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (21,	7,	'Основание - пункт',						'ITEM',				1,		4,		null,	null,	1,	null,	4);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (22,	7,	'Основание - подпункт',						'SUBITEM',			1,		5,		null,	null,	1,	null,	4);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (23,	7,	'Уменьшающий процент, %',					'PERCENT',			2,		6,		null,	null,	1,	2,		6);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (24,	7,	'Пониженная ставка',						'RATE',				2,		7,		null,	null,	1,	2,		20);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (150,	29,	'КНУ',										'CODE',				1,		0,		null,	null,	1,	null,	5); 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (151,	29,	'Наименование операции',					'NAME',				1,		1,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (152,	29,	'Балансовый счёт',							'BALANCE_ACCOUNT',	1,		2,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (153,	29,	'Символ ОПУ',								'OPU',				1,		3,		null,	null,	1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (154,	29,	'РНУ',										'RNU',				1,		4,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (25,	8,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (26,	8,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (27,	8,	'Принадлежность к налогу на прибыль',		'I',				2,		2,		null,	null,	1,	0,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (28,	8,	'Принадлежность к налогу на транспорт',		'T',				2,		3,		null,	null,	1,	0,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (29,	8,	'Принадлежность к налогу на имущество',		'P',				2,		4,		null,	null,	1,	0,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (30,	8,	'Принадлежность к налогу НДС',				'V',				2,		5,		null,	null,	1,	0,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (31,	8,	'Принадлежность к ТЦО',						'D',				2,		6,		null,	null,	1,	0,		10);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (160,	30,	'Код подразделения',							'CODE',				2,		0,		null,	null,	1,	0,		15);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (161,	30,	'Наименование подразделения',					'NAME',				1,		1,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (162,	30,	'Сокращенное наименование подразделения',		'SHORTNAME',		1,		2,		null,	null,	1,	null,	255);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (163,	30,	'Код родительского подразделения',				'DICT_REGION_ID',	4,		3,		4,		9,		1,	null,	13);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (164,	30,	'Тип подразделения',							'TYPE',				2,		4,		null,	null,	1,	0,		15);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (165,	30,	'Индекс территориального банка',				'TB_INDEX',			1,		5,		null,	null,	1,	null,	2);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (166,	30,	'Код подразделения в нотации Сбербанка',		'SBRF_CODE',		1,		6,		null,	null,	1,	null,	255);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 70, 9,'Код валюты (цифровой)','CODE_NUM', 1, 0,null,null,1,null, 3);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 71, 9,'Код валюты (строковый)','CODE_CHAR', 1, 1,null,null,1,null, 3);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 72, 9,'Наименование','NAME', 1, 2,null,null,1,null, 55);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 73, 9,'Краткое наименование стран и территорий','TERR_NAME', 1, 3,null,null,1,null, 55);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (210,	34,	'Код ОКВЭД',						'CODE',			2,		0,		null,	null,	1,	0,			6);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (211,	34,	'Наименование',						'NAME',			1,		1,		null,	null,	1,	null,		250);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (80,	22,	'Цифровой код валюты',						'CODE_NUMBER',		4,		0,		9,		72,		1,	null,	3); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (81,	22,	'Курс валюты',								'RATE',				2,		1,		null,	null,	1,	4,		24);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (212,	35,	'Код лица, подписавшего документ',	'CODE',			2,		0,		null,	null,	1,	0,			1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (213,	35,	'Лицо, подписавшее документ',		'NAME',			1,		1,		null,	null,	1,	null,		50);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (90,	23,	'Ставка рефинансирования,  %',				'RATE',				2,		0,		null,	null,	1,	2,		19); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (91,	23,	'Нормативный документ',						'DOCUMENT',			1,		1,		null,	null,	1,	null,	255);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (170,	31,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,	9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (171,	31,	'Признак лица подписавшего документ',								'SIGNATORY_ID',			4,		1,		35,		212,	1,	0,		1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (172,	31,	'Фамилия подписанта',												'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,	120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (173,	31,	'Имя подписанта',													'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,	120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (174,	31,	'Отчество подписанта',												'SIGNATORY_LASTNAME',	1,		4,		null,	null,	1,	null,	120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (175,	31,	'Наименование документа, подтверждающего полномочия представителя',	'APPROVE_DOC_NAME',		1,		5,		null,	null,	1,	null,	240);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (176,	31,	'Наименование организации-представителя налогоплательщика',			'APPROVE_ORG_NAME',		1,		6,		null,	null,	1,	null,	2000);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (177,	31,	'Код места, по которому представляется документ',					'TAX_PLACE_TYPE_CODE',	4,		7,		2,		3,		1,	null,	3);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (178,	31,	'Версия программы, с помощью которой сформирован файл',				'APP_VERSION',			1,		8,		null,	null,	1,	null,	40);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (179,	31,	'Версия формата',													'FORMAT_VERSION',		1,		9,		null,	null,	1,	null,	5);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (100,	24,	'Код вида платежа',							'CODE',				1,		0,		null,	null,	1,	null,	1); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (101,	24,	'Наименование кода вида платежа',			'NAME',				1,		1,		null,	null,	1,	null,	4000);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (180,	32,	'идентификатор (первичный ключ)',									'DEPARTMENT_ID',	4,		0,		null,	null,	1,	null,		9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (181,	32,	'Субъект Российской Федерации (код)',								'DICT_REGION_ID',	4,		1,		4,		9,		1,	null,		2);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (182,	32,	'Код по ОКАТО',														'OKATO',			4,		2,		3,		7,		1,	null,		11);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (183,	32,	'ИНН',																'INN',				1,		3,		null,	null,	1,	null,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (184,	32,	'КПП',																'KPP',				1,		4,		null,	null,	1,	null,		9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (185,	32,	'Код налогового органа',											'TAX_ORGAN_CODE',	1,		5,		null,	null,	1,	null,		4);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (186,	32,	'Код вида экономической деятельности и по классификатору ОКВЭД',	'OKVED_CODE',		4,		6,		34,		210,	1,	null,		8);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (187,	32,	'Номер контактного телефона',										'PHONE',			1,		7,		null,	null,	1,	null,		20);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (188,	32,	'Код формы реорганизации и ликвидации',								'REORG_FORM_CODE',	4,		8,		5,		13,		1,	null,		1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (189,	32,	'ИНН реорганизованного обособленного подразделения',				'REORG_INN',		1,		9,		null,	null,	1,	null,		10);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (190,	32,	'КПП реорганизованного обособленного подразделения',				'REORG_KPP',		1,		10,		null,	null,	1,	null,		9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (191,	32,	'Наименование подразделения',										'NAME',				1,		11,		null,	null,	1,	null,		2000);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (110,	25,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (111,	25,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	50);
 
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (192,	33,	'идентификатор (первичный ключ)',																					'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,			9);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (193,	33,	'Признак лица подписавшего документ',																				'SIGNATORY_ID',			4,		1,		35,		212,	1,	null,			1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (194,	33,	'Фамилия подписанта',																								'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,			120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (195,	33,	'Имя подписанта ',																									'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,			120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (196,	33,	'Отчество подписанта',																								'SIGNATORY_LASTNAME',	1,		4,		null,	null,	1,	null,			120);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (197,	33,	'Наименование документа, подтверждающего полномочия представителя',													'APPROVE_DOC_NAME',		1,		5,		null,	null,	1,	null,			240);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (198,	33,	'Наименование организации-представителя налогоплательщика',															'APPROVE_ORG_NAME',		1,		6,		null,	null,	1,	null,			2000);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (199,	33,	'Код места, по которому представляется документ',																	'TAX_PLACE_TYPE_CODE',	4,		7,		2,		3,		1,	null,			3);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (200,	33,	'Ставка налога',																									'TAX_RATE',				2,		8,		null,	null,	1,	2,				7);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (201,	33,	'Версия программы, с помощью которой сформирован файл',																'APP_VERSION',			1,		9,		null,	null,	1,	null,			40);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (202,	33,	'Версия формата',																									'FORMAT_VERSION',		1,		10,		null,	null,	1,	null,			5);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (203,	33,	'Обязанность по уплате налога',																						'OBLIGATION',			4,		11,		25,		110,	1,	0,				1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (204,	33,	'Признак расчёта',																									'TYPE',					4,		12,		26,		120,	1,	0,				1);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (205,	33,	'Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде',						'SUM_TAX',				2,		13,		null,	null,	1,	0,				15);
-INSERT INTO REF_BOOK_ATTRIBUTE VALUES (206,	33,	'Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода',	'SUM_DIVIDENDS',		2,		14,		null,	null,	1,	0,				15);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (120,	26,	'Код',										'CODE',				2,		0,		null,	null,	1,	0,		1); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (121,	26,	'Значение',									'NAME',				1,		1,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (130,	27,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (131,	27,	'Группа расхода',							'GROUP_EXP',		1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (132,	27,	'Вид расхода по операциям',					'TYPE_EXP',			1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (133,	27,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (134,	27,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (135,	27,	'Нормативный документ(в актуальной редакции)', 'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (136,	27,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»', 'UNIT',				1,		6,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (137,	27,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (138,	27,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (139,	27,	'Признак расхода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (140,	28,	'Код налогового учёта ',					'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (141,	28,	'Группа дохода',							'GROUP_INCOME',		1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (142,	28,	'Вид доходов по операциям',					'TYPE_INCOME',		1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (143,	28,	'Балансовый счёт по учёту расхода',			'BALANCE_ACCOUNT',	1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (144,	28,	'Символ ОПУ',								'OPU',				1,		4,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (145,	28,	'Нормативный документ(в актуальной редакции)', 'NORMATIVE_DOCUMENT',1,		5,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (146,	28,	'Учётное подразделение Центрального аппарата ОАО «Сбербанк России»',  'UNIT',				1,		6,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (147,	28,	'Первичный документ для налогового учёта', 	'BASIC_DOCUMENT',	1,		7,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (148,	28,	'Форма регистра налогового учёта', 			'FORM',				1,		8,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (149,	28,	'Признак дохода', 							'TYPE',				1,		9,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (150,	29,	'КНУ',										'CODE',				1,		0,		null,	null,	1,	null,	5); 
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (151,	29,	'Наименование операции',					'NAME',				1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (152,	29,	'Балансовый счёт',							'BALANCE_ACCOUNT',	1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (153,	29,	'Символ ОПУ',								'OPU',				1,		3,		null,	null,	1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (154,	29,	'РНУ',										'RNU',				1,		4,		null,	null,	1,	null,	13);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (160,	30,	'Код подразделения',							'CODE',				2,		0,		null,	null,	1,	0,		15);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (161,	30,	'Наименование подразделения',					'NAME',				1,		1,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (162,	30,	'Сокращенное наименование подразделения',		'SHORTNAME',		1,		2,		null,	null,	1,	null,	255);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (163,	30,	'Код родительского подразделения',				'DICT_REGION_ID',	4,		3,		4,		9,		1,	null,	13);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (164,	30,	'Тип подразделения',							'TYPE',				2,		4,		null,	null,	1,	0,		15);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (165,	30,	'Индекс территориального банка',				'TB_INDEX',			1,		5,		null,	null,	1,	null,	2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (166,	30,	'Код подразделения в нотации Сбербанка',		'SBRF_CODE',		1,		6,		null,	null,	1,	null,	255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (210,	34,	'Код ОКВЭД',						'CODE',			2,		0,		null,	null,	1,	0,			6);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (211,	34,	'Наименование',						'NAME',			1,		1,		null,	null,	1,	null,		250);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (212,	35,	'Код лица, подписавшего документ',	'CODE',			2,		0,		null,	null,	1,	0,			1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (213,	35,	'Лицо, подписавшее документ',		'NAME',			1,		1,		null,	null,	1,	null,		50);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (170,	31,	'Идентификатор (первичный ключ)',									'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,	9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (171,	31,	'Признак лица подписавшего документ',								'SIGNATORY_ID',			4,		1,		35,		212,	1,	null,	1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (172,	31,	'Фамилия подписанта',												'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,	120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (173,	31,	'Имя подписанта',													'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,	120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (174,	31,	'Отчество подписанта',												'SIGNATORY_LASTNAME',	1,		4,		null,	null,	1,	null,	120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (175,	31,	'Наименование документа, подтверждающего полномочия представителя',	'APPROVE_DOC_NAME',		1,		5,		null,	null,	1,	null,	240);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (176,	31,	'Наименование организации-представителя налогоплательщика',			'APPROVE_ORG_NAME',		1,		6,		null,	null,	1,	null,	2000);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (177,	31,	'Код места, по которому представляется документ',					'TAX_PLACE_TYPE_CODE',	4,		7,		2,		3,		1,	null,	3);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (178,	31,	'Версия программы, с помощью которой сформирован файл',				'APP_VERSION',			1,		8,		null,	null,	1,	null,	40);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (179,	31,	'Версия формата',													'FORMAT_VERSION',		1,		9,		null,	null,	1,	null,	5);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (181,	31,	'Субъект Российской Федерации (код)',								'DICT_REGION_ID',	4,		10,		4,		9,		1,	null,		2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (182,	31,	'Код по ОКАТО',														'OKATO',			4,		11,		3,		7,		1,	null,		11);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (183,	31,	'ИНН',																'INN',				1,		12,		null,	null,	1,	null,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (184,	31,	'КПП',																'KPP',				1,		13,		null,	null,	1,	null,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (185,	31,	'Код налогового органа',											'TAX_ORGAN_CODE',	1,		14,		null,	null,	1,	null,		4);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (186,	31,	'Код вида экономической деятельности и по классификатору ОКВЭД',	'OKVED_CODE',		4,		15,		34,		210,	1,	null,		8);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (187,	31,	'Номер контактного телефона',										'PHONE',			1,		16,		null,	null,	1,	null,		20);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (188,	31,	'Код формы реорганизации и ликвидации',								'REORG_FORM_CODE',	4,		17,		5,		13,		1,	null,		1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (189,	31,	'ИНН реорганизованного обособленного подразделения',				'REORG_INN',		1,		18,		null,	null,	1,	null,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (190,	31,	'КПП реорганизованного обособленного подразделения',				'REORG_KPP',		1,		19,		null,	null,	1,	null,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (191,	31,	'Наименование подразделения',										'NAME',				1,		20,		null,	null,	1,	null,		2000);
+
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (192,	33,	'Идентификатор (первичный ключ)',																					'DEPARTMENT_ID',		4,		0,		null,	null,	1,	null,			9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (193,	33,	'Признак лица подписавшего документ',																				'SIGNATORY_ID',			4,		1,		35,		212,	1,	null,			1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (194,	33,	'Фамилия подписанта',																								'SIGNATORY_SURNAME',	1,		2,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (195,	33,	'Имя подписанта ',																									'SIGNATORY_FIRSTNAME',	1,		3,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (196,	33,	'Отчество подписанта',																								'SIGNATORY_LASTNAME',	1,		4,		null,	null,	1,	null,			120);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (197,	33,	'Наименование документа, подтверждающего полномочия представителя',													'APPROVE_DOC_NAME',		1,		5,		null,	null,	1,	null,			240);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (198,	33,	'Наименование организации-представителя налогоплательщика',															'APPROVE_ORG_NAME',		1,		6,		null,	null,	1,	null,			2000);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (199,	33,	'Код места, по которому представляется документ',																	'TAX_PLACE_TYPE_CODE',	4,		7,		2,		3,		1,	null,			3);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (200,	33,	'Ставка налога',																									'TAX_RATE',				2,		8,		null,	null,	1,	2,				7);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (201,	33,	'Версия программы, с помощью которой сформирован файл',																'APP_VERSION',			1,		9,		null,	null,	1,	null,			40);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (202,	33,	'Версия формата',																									'FORMAT_VERSION',		1,		10,		null,	null,	1,	null,			5);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (203,	33,	'Обязанность по уплате налога',																						'OBLIGATION',			4,		11,		25,		110,	1,	null,			1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (204,	33,	'Признак расчёта',																									'TYPE',					4,		12,		26,		120,	1,	null,			1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (205,	33,	'Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде',						'SUM_TAX',				2,		13,		null,	null,	1,	0,				15);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (206,	33,	'Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода',	'SUM_DIVIDENDS',		2,		14,		null,	null,	1,	0,				15);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (220,	33,	'Субъект Российской Федерации (код)',								'DICT_REGION_ID',	4,		15,		4,		9,		1,	null,		2);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (221,	33,	'Код по ОКАТО',														'OKATO',			4,		16,		3,		7,		1,	null,		11);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (222,	33,	'ИНН',																'INN',				1,		17,		null,	null,	1,	null,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (223,	33,	'КПП',																'KPP',				1,		18,		null,	null,	1,	null,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (224,	33,	'Код налогового органа',											'TAX_ORGAN_CODE',	1,		19,		null,	null,	1,	null,		4);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (225,	33,	'Код вида экономической деятельности и по классификатору ОКВЭД',	'OKVED_CODE',		4,		20,		34,		210,	1,	null,		8);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (226,	33,	'Номер контактного телефона',										'PHONE',			1,		21,		null,	null,	1,	null,		20);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (227,	33,	'Код формы реорганизации и ликвидации',								'REORG_FORM_CODE',	4,		22,		5,		13,		1,	null,		1);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (228,	33,	'ИНН реорганизованного обособленного подразделения',				'REORG_INN',		1,		23,		null,	null,	1,	null,		10);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (229,	33,	'КПП реорганизованного обособленного подразделения',				'REORG_KPP',		1,		24,		null,	null,	1,	null,		9);
+INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (230,	33,	'Наименование подразделения',										'NAME',				1,		25,		null,	null,	1,	null,		2000);
+
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 400, 40,'Код','CODE', 2, 0,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 401, 40,'Наименование','NAME', 1, 1,null,null,1,null, 100);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 430, 43,'Код единиц измерения','CODE', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 431, 43,'Наименование единицы измерения','NAME', 1, 2,null,null,1,null, 100);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 432, 43,'Условное обозначение','CONVENTION', 1, 3,null,null,1,null, 10);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 410, 41,'Первичный ключ (номер п.п.)','ID', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 411, 41,'Код транспортного средства','CODE', 1, 2,null,null,1,null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 412, 41,'Срок использования "От", лет','MIN_AGE', 2, 3,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 413, 41,'Срок использования "До", лет','MAX_AGE', 2, 4,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 414, 41,'Мощность "От"','MIN_POWER', 2, 5,null,null,1, 2, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 415, 41,'Мощность "До"','MAX_POWER', 2, 6,null,null,1, 2, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 416, 41,'Ставка, руб.','VALUE', 2, 7,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 417, 41,'Код региона','DICT_REGION_ID', 4, 8, 4, 10 ,1,null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 418, 41,'Ед. измерения мощности','UNIT_OF_POWER', 4, 9, 43, 431, 1, 0, 10);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 420, 42,'Идентификатор записи','ID', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 423, 42,'Наименование','NAME', 1, 4,null,null,1,null, 100);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 421, 42,'Идентификатор родительской записи','PARENT_ID', 4, 2, 42, 423, 1, null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 422, 42,'Код типа','CODE', 1, 3,null,null,1,null, 10);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 501, 50,'Идентификатор отчетного периода','REPORT_PERIOD_ID', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 502, 50,'Номер счета','ACCOUNT', 1, 2,null,null,1,null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 503, 50,'Входящие остатки по дебету','INCOME_DEBET_REMAINS', 2, 3,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 504, 50,'Входящие остатки по кредиту','INCOME_CREDIT_REMAINS', 2, 4,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 505, 50,'Обороты по дебету','DEBET_RATE', 2, 5,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 506, 50,'Обороты по кредиту','CREDIT_RATE', 2, 6,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 507, 50,'Исходящие остатки по дебету','OUTCOME_DEBET_REMAINS', 2, 7,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 508, 50,'Исходящие остатки по кредиту','OUTCOME_CREDIT_REMAINS', 2, 8,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 509, 50,'Подразделение','DEPARTMENT_ID', 4, 9, 30, 161, 1, null, 10);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 520, 52,'Идентификатор отчетного периода','REPORT_PERIOD_ID', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 521, 52,'Код ОПУ','OPU_CODE', 1, 2,null,null,1,null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 522, 52,'Сумма','TOTAL_SUM', 2, 3,null,null,1, 4, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 523, 52,'Подразделение','DEPARTMENT_ID', 4, 4, 30, 161, 1, null, 10);
+
+
+
+
+
 
 update ref_book_attribute
 set width=10

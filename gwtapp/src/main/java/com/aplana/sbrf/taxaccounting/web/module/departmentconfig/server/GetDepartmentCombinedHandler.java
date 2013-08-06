@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.dao.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -20,9 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,9 +32,6 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
 public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
         GetDepartmentCombinedResult> {
-
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
 
     @Autowired
     private ReportPeriodService reportService;
@@ -53,6 +48,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             throws ActionException {
 
         DepartmentCombined depCombined = new DepartmentCombined();
+        depCombined.setTaxType(action.getTaxType());
 
         // Параметры пагинации
         PagingParams pp = new PagingParams();
@@ -81,6 +77,14 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         if (params.getRecords().size() != 0) {
             Map<String, RefBookValue> paramsMap = params.getRecords().get(0);
+             if (params.getRecords().size() != 1) {
+                 throw new ActionException("Miltiple RefBook records (version = "+
+                         new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
+             }
+
+            // Id записи
+            depCombined.setRecordId(paramsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+
             // Общая часть
             depCombined.setDepartmentId(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue());
             depCombined.setDictRegionId(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue());
@@ -111,11 +115,11 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 Number sumTax = paramsMap.get(DepartmentParamAliases.SUM_TAX.name()).getNumberValue();
                 depCombined.setSumTax(sumTax == null ? null : sumTax.longValue());
                 Number sumDividends = paramsMap.get(DepartmentParamAliases.SUM_DIVIDENDS.name()).getNumberValue();
-                depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue() );
+                depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue());
 
                 // Налог на прибыль
                 if (action.getTaxType() == TaxType.INCOME) {
-                    depCombined.setObligation(paramsMap.get(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name()).getReferenceValue());
+                    depCombined.setObligation(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue());
                     depCombined.setTaxRate((Double) paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getNumberValue());
                     depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
                 }
@@ -125,7 +129,54 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
         result.setDepartmentCombined(depCombined);
 
+        // Получение текстовых значений справочника
+        Map<Long, String> rbTextValues = new HashMap<Long, String>();
+
+        if (depCombined.getDictRegionId() != null) {
+            rbTextValues.put(9L, getStringValue(provider.getValue(depCombined.getDictRegionId(), 9L)));
+        }
+        if (depCombined.getOkato() != null) {
+            rbTextValues.put(7L, getStringValue(provider.getValue(depCombined.getOkato(), 7L)));
+        }
+        if (depCombined.getOkvedCode() != null) {
+            rbTextValues.put(210L, getNumberValue(provider.getValue(depCombined.getOkvedCode(), 210L)));
+        }
+        if (depCombined.getReorgFormCode() != null) {
+            rbTextValues.put(13L, getStringValue(provider.getValue(depCombined.getReorgFormCode(), 13L)));
+        }
+        if (depCombined.getSignatoryId() != null) {
+            rbTextValues.put(213L, getStringValue(provider.getValue(depCombined.getSignatoryId(), 213L)));
+        }
+        if (depCombined.getTaxPlaceTypeCode() != null) {
+            rbTextValues.put(3L, getStringValue(provider.getValue(depCombined.getTaxPlaceTypeCode(), 3L)));
+        }
+        if (depCombined.getObligation() != null) {
+            rbTextValues.put(110L, getStringValue(provider.getValue(depCombined.getObligation(), 110L)));
+        }
+        if (depCombined.getType() != null) {
+            rbTextValues.put(120L, getNumberValue(provider.getValue(depCombined.getType(), 120L)));
+        }
+
+        result.setRbTextValues(rbTextValues);
+
         return result;
+    }
+
+    private String getStringValue(RefBookValue value) {
+        if (value == null) {
+            return null;
+        }
+        return value.getStringValue();
+    }
+
+    private String getNumberValue(RefBookValue value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.getNumberValue() == null) {
+            return null;
+        }
+        return value.getNumberValue().toString();
     }
 
     @Override
