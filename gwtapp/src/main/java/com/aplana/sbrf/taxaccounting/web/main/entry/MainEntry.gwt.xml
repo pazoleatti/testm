@@ -22,6 +22,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.sources.Sources"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
 
     <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>
