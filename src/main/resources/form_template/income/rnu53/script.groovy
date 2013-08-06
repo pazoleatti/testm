@@ -127,7 +127,7 @@ void calc() {
     def someDate = getDate('01.11.2009')
 
     /** Количество дней в году. */
-    def daysInYear = getCountDaysInYaer(new Date())
+    def daysInYear = getCountDaysInYear(new Date())
 
     /** Курс ЦБ РФ на отчётную дату. */
     def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
@@ -149,18 +149,18 @@ void calc() {
         row.income = b
         row.outcome = c
 
+        def currency = getCurrency(row.currencyCode)
         // графа 11
         if (row.outcome == 0 || isEmpty(row.currencyCode)) {
             tmp = null
-        } else if (row.currencyCode == '810') {
-            // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-            tmp = 0
+        }
+        if (currency == '810') {
+            tmp = getRate(reportDate)
         } else {
             if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                 tmp = 22
             } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                tmp = 0
+                tmp = getRate(reportDate)
             } else {
                 tmp = 15
             }
@@ -234,14 +234,13 @@ def logicalCheck(def useLog) {
         def someDate = getDate('01.11.2009')
 
         /** Количество дней в году. */
-        def daysInYear = getCountDaysInYaer(new Date())
+        def daysInYear = getCountDaysInYear(new Date())
 
         /** Курс ЦБ РФ на отчётную дату. */
         def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
 
         def hasTotalRow = false
-        def hasError
-        def tmp
+        def BigDecimal tmp
         def a, b, c
 
         for (def row : getRows(data)) {
@@ -257,12 +256,12 @@ def logicalCheck(def useLog) {
 
             // 2. Проверка даты первой части РЕПО (графа 7)
             if (row.part1REPODate > reportDate) {
-                logger.error('Неверно указана дата первой части сделки!')
+                logger.error('Неверно указана дата первой части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
             if (row.part2REPODate <= reportDate) {
-                logger.error('Неверно указана дата второй части сделки!')
+                logger.error('Неверно указана дата второй части сделки в строке '+ (getRows(data).indexOf(row)+1)+'!')
                 return false
             }
 
@@ -312,17 +311,18 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
+            def currency = getCurrency(row.currencyCode)
+            def rate = getRate(reportDate)
             if (row.outcome == 0 || isEmpty(row.currencyCode)) {
                 tmp = null
-            } else if (row.currencyCode == '810') {
-                // TODO (Ramil Timerbaev) «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-                tmp = 0
+            }
+            if (currency == '810') {
+                tmp = rate
             } else {
                 if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                     tmp = 22
                 } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                    // TODO (Ramil Timerbaev) ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                    tmp = 0
+                    tmp = rate
                 } else {
                     tmp = 15
                 }
@@ -397,7 +397,6 @@ def checkNSI() {
         /** Отчетная дата. */
         def reportDate = getReportDate()
 
-        def hasError
         for (def row : getRows(data)) {
             if (isTotal(row)) {
                 continue
@@ -409,27 +408,24 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            hasError = false
-            if (((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR == null)) {
-                hasError = false
-            } else if ((row.outcome == 0 || isEmpty(row.currencyCode)) && row.rateBR != null) {
-                hasError = true
-            } else if (row.currencyCode == '810' && true) {
-                // TODO (Ramil Timerbaev) условие: «графа 11» != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на «отчетную дату»
-                // row.rateBR != значнеие из справочника
-                hasError = true
-            } else if (row.currencyCode != '810') {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009') && row.rateBR != 22) {
-                    hasError = true
-                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012') && true) {
-                    // TODO (Ramil Timerbaev) условие: графа 11 != ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на «отчетную дату»
-                    // row.rateBR != значнеие из справочника
-                    hasError = true
-                } else if (row.rateBR != 15) {
-                    hasError = true
+            def BigDecimal tmp
+            def currency = getCurrency(row.currencyCode)
+            def rate = getRate(reportDate)
+            if (row.outcome == 0 || isEmpty(row.currencyCode)) {
+                tmp = null
+            }
+            if (currency == '810') {
+                tmp = rate
+            } else {
+                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+                    tmp = 22
+                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
+                    tmp = rate
+                } else {
+                    tmp = 15
                 }
             }
-            if (hasError) {
+            if(row.rateBR!=roundTo2(tmp, 2)){
                 logger.error('Неверно указана ставка Банка России!')
                 return false
             }
@@ -586,7 +582,7 @@ def getLastInsertIndex(){
 /**
  * Получить количество дней в году по указанной дате.
  */
-def getCountDaysInYaer(def date) {
+def getCountDaysInYear(def date) {
     if (date == null) {
         return 0
     }
@@ -700,4 +696,18 @@ BigDecimal roundTo2(BigDecimal value, int newScale) {
     } else {
         return value
     }
+}
+
+def getRate(def date) {
+    def refDataProvider = refBookFactory.getDataProvider(23)
+    def res = refDataProvider.getRecords(date, null, null, null);
+    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+
+}
+
+def getCurrency(def currencyCode) {
+    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
+    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
+    return  resCurrency.get('CODE').getStringValue()
+
 }

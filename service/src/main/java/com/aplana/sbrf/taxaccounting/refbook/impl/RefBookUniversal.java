@@ -58,16 +58,21 @@ public class RefBookUniversal implements RefBookDataProvider {
 
 	@Override
 	public void deleteRecords(Date version, List<Long> recordIds) {
-		//To change body of implemented methods use File | Settings | File Templates.
+        refBookDao.deleteRecords(refBookId, version, recordIds);
 	}
 
-	@Override
+    @Override
+    public RefBookValue getValue(Long recordId, Long attributeId) {
+        return refBookDao.getValue(recordId, attributeId);
+    }
+
+    @Override
 	public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
-		//To change body of implemented methods use File | Settings | File Templates.
+        refBookDao.createRecords(refBookId, version, records);
 	}
 
 	@Override
 	public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
-		//To change body of implemented methods use File | Settings | File Templates.
+        refBookDao.updateRecords(refBookId, version, records);
 	}
 }

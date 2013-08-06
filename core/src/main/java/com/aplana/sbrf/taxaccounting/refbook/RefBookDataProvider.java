@@ -78,4 +78,12 @@ public interface RefBookDataProvider {
 	 * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
 	 */
 	void deleteRecords(Date version, List<Long> recordIds);
+
+    /**
+     * Значение справочника по Id записи и Id атрибута
+     * @param recordId
+     * @param attributeId
+     * @return
+     */
+    RefBookValue getValue(Long recordId, Long attributeId);
 }

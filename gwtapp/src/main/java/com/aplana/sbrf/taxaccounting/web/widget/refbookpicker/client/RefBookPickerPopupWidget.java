@@ -24,7 +24,7 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {
     }
-    
+
     private Long attrId;
 
     private static Binder binder = GWT.create(Binder.class);
@@ -46,20 +46,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         popupPanel.add(refBookPiker);
     }
 
-    /**
-     * 
-     * @param id
-     * 
-     * @deprecated
-     * 
-     * Нужно использовать метод setAcceptableValues
-     * 
-     */
-    @Deprecated
-    public void setRefBookId(int id) {
-        setAcceptableValues(Long.valueOf(id));
-    }
-
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
         refBookPiker.setAcceptableValues(attrId);
@@ -74,17 +60,14 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     @Override
     public void setValue(Long value) {
-        // TODO Переделать на текстовое представление
-        //text.setText(String.valueOf(value));
         refBookPiker.setValue(value);
     }
 
     @Override
     public void setValue(Long value, boolean fireEvents) {
-        // TODO Переделать на текстовое представление
-        setValue(value);
+        refBookPiker.setValue(value);
         if (fireEvents){
-        	ValueChangeEvent.fire(this, value);
+            ValueChangeEvent.fire(this, value);
         }
     }
 
@@ -109,6 +92,15 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 		setAcceptableValues(refBookAttrId, null, null);
 	}
 
+    // Для совместимости с uibinder'ом
+    /**
+     * @see com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget#setAcceptableValues
+     * @param refBookAttrId
+     */
+    public void setAcceptableIntValues(int refBookAttrId) {
+        setAcceptableValues((long)refBookAttrId);
+    }
+
 	@Override
 	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
         attrId = refBookAttrId;
@@ -132,4 +124,12 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 	public void setDereferenceValue(String value) {
 		text.setValue(value);
 	}
+
+    /**
+     * Id отображаемого атрибута
+     * @return
+     */
+    public Long getAttributeId() {
+        return attrId;
+    }
 }

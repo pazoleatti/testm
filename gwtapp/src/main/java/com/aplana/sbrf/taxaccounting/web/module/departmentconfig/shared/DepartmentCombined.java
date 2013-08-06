@@ -15,6 +15,8 @@ import java.io.Serializable;
  */
 public class DepartmentCombined implements Serializable {
 
+    private Long recordId;
+
     // Общие параметры
     private Long departmentId;
     private Long dictRegionId;
@@ -51,6 +53,14 @@ public class DepartmentCombined implements Serializable {
 
     // Тип налога
     private TaxType taxType;
+
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
 
     public DepartmentCombined() {
         super();

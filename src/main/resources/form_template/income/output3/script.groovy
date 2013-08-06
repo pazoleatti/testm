@@ -19,7 +19,6 @@ DataRowHelper getDataRowsHelper() {
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkUniq()
-        checkDecl()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -31,19 +30,16 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:
         checkDecl()
-        calc()
         logicCheck()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_PREPARED_TO_CREATED:
         break
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED:
         checkDecl()
-        calc()
         logicCheck()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED:
+        checkDecl()
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -54,6 +50,13 @@ switch (formDataEvent) {
         dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
 }
+/**
+ 1 paymentType	Вид платежа (код)	Строка /1/	—	Должно содержать значение поля «Код вида платежа» справочника «Коды видов платежей» Принимает значения: 1, 3, 4
+ 2 okatoCode	Код по ОКАТО	Строка /11/	—	Принимает значение: 45293554000
+ 3 budgetClassificationCode	Код бюджетной классификации	Строка /20/	Принимает значения:•	18210101040011000110•	18210101060 011000110•	18210101070 011000110
+ 4 dateOfPayment	Срок уплаты	Дата	DD.MM.YYYY	—	—	—	Да	—
+ 5 sumTax	Сумма налога, подлежащая уплате	Число /15/	0	—	—	—	Да	—
+ */
 void calc() {
     for(DataRow row in dataRowsHelper.getAllCached()) {
         row.okatoCode = "45293554000"

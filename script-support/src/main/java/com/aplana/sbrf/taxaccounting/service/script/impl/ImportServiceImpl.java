@@ -21,68 +21,65 @@ public class ImportServiceImpl implements ImportService {
     private static HSSFDataFormatter formatter = new HSSFDataFormatter();
 
     @Override
-    public String getData(InputStream inputStream, String format, String charset) {
+    public String getData(InputStream inputStream, String fileName, String charset) {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
-        if (format == null) {
-            throw new NullPointerException("format cannot be null");
+        if (fileName == null) {
+            throw new NullPointerException("file name cannot be null");
         }
-        String tmp = format.trim().toLowerCase();
-        if ("".equals(tmp)) {
-            throw new IllegalArgumentException("format cannot be empty");
+        if ("".equals(fileName.trim())) {
+            throw new IllegalArgumentException("file name cannot be empty");
         }
         if (charset == null || "".equals(charset.trim())) {
             charset = DEFAULT_CHARSET;
         }
 
-        if (XLS.equals(tmp)) {
-            // обработка эксельки
+        // Получение расширения файла
+        String format = getFileExtension(fileName.trim());
+
+        if (XLS.equals(format)) {
             return getXMLStringFromXLS(inputStream);
-        } else if (CSV.equals(tmp)) {
-            // обработка csv
+        } else if (CSV.equals(format)) {
             return getXMLStringFromCSV(inputStream, charset);
         }
-        throw new IllegalArgumentException("format cannot be " + tmp + ". Only xls or csv");
+        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or csv");
     }
 
     @Override
-    public String getData(InputStream inputStream, String format) {
-        return getData(inputStream, format, DEFAULT_CHARSET);
+    public String getData(InputStream inputStream, String fileName) {
+        return getData(inputStream, fileName, DEFAULT_CHARSET);
     }
 
     @Override
-    public String getData(InputStream inputStream, String format, String charset, String startStr, String endStr, Integer headRow) {
+    public String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr) {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
-        if (format == null) {
+        if (fileName == null) {
             throw new NullPointerException("format cannot be null");
         }
-        String tmp = format.trim().toLowerCase();
-        if ("".equals(tmp)) {
-            throw new IllegalArgumentException("format cannot be empty");
+        if ("".equals(fileName.trim())) {
+            throw new IllegalArgumentException("file name cannot be empty");
         }
         if (charset == null || "".equals(charset.trim())) {
             charset = DEFAULT_CHARSET;
         }
         if ((startStr == null || "".equals(startStr.trim()))
                 && (endStr == null || "".equals(endStr.trim()))) {
-            getData(inputStream, format, charset);
-        }
-        if (headRow == null || headRow < 1) {
-            headRow = 1;
+            getData(inputStream, fileName, charset);
         }
 
-        if (XLS.equals(tmp)) {
-            // обработка эксельки
-            return getXMLStringFromXLS(inputStream, startStr, endStr, headRow);
-        } else if (CSV.equals(tmp)) {
+        // Получение расширения файла
+        String format = getFileExtension(fileName.trim());
+
+        if (XLS.equals(format)) {
+            return getXMLStringFromXLS(inputStream, startStr, endStr);
+        } else if (CSV.equals(format)) {
             // TODO (Ramil Timerbaev) обработка csv с позициями
-            // обработка csv
             return getXMLStringFromCSV(inputStream, charset);
         }
-        throw new IllegalArgumentException("format cannot be " + tmp + ". Only xls or csv");
+        throw new IllegalArgumentException("format cannot be " + format + ". Only xls or csv");
     }
 
     /**
@@ -121,10 +118,9 @@ public class ImportServiceImpl implements ImportService {
      *
      * @param startStr начало таблицы (шапка первой колонки)
      * @param endStr конец табцицы (надпись "итого" или значения после таблицы)
-     * @param headRow количество строк в шапке таблицы
      * @param inputStream данные из файла
      */
-    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer headRow) {
+    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr) {
         HSSFWorkbook workbook;
         try {
             workbook = new HSSFWorkbook(inputStream);
@@ -134,12 +130,12 @@ public class ImportServiceImpl implements ImportService {
         }
         HSSFSheet sheet = workbook.getSheetAt(0);
 
+        // позиция начала таблицы
         Point firstP = findCellCoordinateByValue(sheet, startStr);
         if (firstP == null) {
             return "<data></data>";
         }
-        // смещаем на размер шапки
-        firstP.setY(firstP.getY() + headRow);
+        // позиция конца таблицы
         Point endP = findCellCoordinateByValue(sheet, endStr);
 
         // обработка эксельки
@@ -154,9 +150,11 @@ public class ImportServiceImpl implements ImportService {
             indexRow += 1;
             HSSFRow row = (HSSFRow) rows.next();
 
+            // брать колонки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
                 continue;
             }
+            // брать строки
             if (endP != null && indexRow >= endP.getY()) {
                 break;
             }
@@ -313,5 +311,16 @@ public class ImportServiceImpl implements ImportService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Получить расширение файла.
+     *
+     * @param fileName имя файла
+     * @return расширение (null - если нет расширения)
+     */
+    private String getFileExtension(String fileName) {
+        int index = fileName.lastIndexOf(".");
+        return (index != -1 ? fileName.substring(index + 1).trim().toLowerCase() : null);
     }
 }

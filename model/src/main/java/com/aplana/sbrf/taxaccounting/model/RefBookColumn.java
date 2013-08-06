@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.io.Serializable;
 
 /**
  * Реализация {@link Column}, предназначенная для хранения значений
@@ -8,13 +7,27 @@ import java.io.Serializable;
  * 
  * @author sgoryachkin
  */
-public class RefBookColumn extends Column implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class RefBookColumn extends Column {
+	private static final long serialVersionUID = -6969365681036598158L;
 
 	private long refBookAttributeId;
 
-	private static Formatter formatter;
-	
+	private String filter;
+
+	private static Formatter formatter = new Formatter() {
+		@Override
+		public String format(String valueToFormat) {
+			return String.valueOf(valueToFormat);
+		}
+	};
+
+	private static ValidationStrategy validationStrategy = new ValidationStrategy() {
+		@Override
+		public boolean matches(String valueToCheck) {
+			return true;
+		}
+	};
+
 	public long getRefBookAttributeId() {
 		return refBookAttributeId;
 	}
@@ -23,25 +36,22 @@ public class RefBookColumn extends Column implements Serializable {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 
+	public String getFilter() {
+		return filter;
+	}
+
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
+
 	@Override
 	public Formatter getFormatter() {
-		return formatter != null ? formatter : new Formatter() {
-			@Override
-			public String format(String valueToFormat) {
-				return String.valueOf(valueToFormat);
-			}
-		};
+		return formatter;
 	}
 
 	@Override
 	public ValidationStrategy getValidationStrategy() {
-		return new ValidationStrategy() {
-			@Override
-			public boolean matches(String valueToCheck) {
-				return true;
-			}
-		};
+		return validationStrategy;
 	}
-
 
 }
