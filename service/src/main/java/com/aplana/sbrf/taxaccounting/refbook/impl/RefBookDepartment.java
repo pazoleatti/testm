@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,7 +21,8 @@ import java.util.Map;
  * Смотри http://jira.aplana.com/browse/SBRFACCTAX-3245
  * User: ekuvshinov
  */
-@Service("department")
+@Service("refBookDepartment")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RefBookDepartment implements RefBookDataProvider {
     public final static long REF_BOOK_ID = 30;
     @Autowired
@@ -28,7 +31,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         // TODO сделать фильтр и sortAttribute
-        return refBookDepartmentDao.getRecords(REF_BOOK_ID, pagingParams, sortAttribute);
+        return refBookDepartmentDao.getRecords(REF_BOOK_ID, pagingParams, filter, sortAttribute);
     }
 
     @Override

@@ -48,7 +48,9 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 			public void onSuccess(InitRefBookResult result) {
 				RefBookPickerWidgetPresenter.this.refBookAttrId = refBookAttrId;
 				getView().setHeaders(result.getHeaders());
-				getView().setVersions(result.getVersions());
+				if (!result.getVersions().isEmpty()){
+					getView().setVersions(result.getVersions());
+				}
 				getView().refreshData();
 			}
 			
@@ -86,6 +88,10 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		if (refBookAttrId == null){
 			return;
 		}
+		Date version = getView().getVersion();
+		if (version == null){
+			return;
+		}
 		final int offset = startIndex;
 		int max = maxRows;
 
@@ -95,7 +101,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		}
 		action.setPagingParams(new PagingParams(offset, max));
 		action.setRefBookAttrId(refBookAttrId);
-		action.setVersion(getView().getVersion());
+		action.setVersion(version);
 
 		dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
 				new AbstractCallback<GetRefBookValuesResult>() {
@@ -163,6 +169,13 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	@Override
 	public String getDereferenceValue() {
 		return dereferenceValue;
+	}
+
+
+	@Override
+	public void onBtnClearClick() {
+		dereferenceValue = null;
+		setValue(null, true);
 	}
 
 

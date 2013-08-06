@@ -5,8 +5,6 @@ package form_template.income.rnu14
  *
  * @version 1
  *
- * TODO:
- *      -
  *
  * @author lhaziev
  */
@@ -52,7 +50,7 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1  - rowNumber
+// графа 1  - knu
 // графа 2  - mode
 // графа 3  - sum
 // графа 4  - normBase
@@ -66,6 +64,7 @@ switch (formDataEvent) {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
+    def data = getData(formData)
     /*
      * Проверка объязательных полей.
      */
@@ -73,39 +72,82 @@ void calc() {
     // список проверяемых столбцов (графа 3..4)
     def requiredColumns = ['normBase']
 
-    for (def row : formData.dataRows) {
-        if (!isTotal(row) && !checkRequiredColumns(row, requiredColumns, true)) {
+    for (def row : getRows(data)) {
+        if (!checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
     }
 
-    def col = ['21270', '21410', '20698', '20700', '20690']
+    def col = getCol()
     def koeffNormBase = [4/100, 1/100, 6/100, 12/100, 15000]
 
-    for (def row : formData.dataRows) {
+    def formDataComplex = getFormDataComplex()
+    def formDataSimple = getFormDataSimple()
+    def knuComplex = getKnuComplex()
+    def knuSimpleRNU4 = getKnuSimpleRNU4()
+    def knuSimpleRNU6 = getKnuSimpleRNU6()
+    for (def row : getRows(data)) {
         def rowA = getTotalRowFromRNU(col[getIndex(row)])
         if (rowA!=null) {
             // 3 - графа 8 строки А + (графа 5 строки А – графа 6 строки А)
             row.sum = rowA.rnu5Field5Accepted?:0 + rowA.rnu7Field10Sum?:0  - rowA.rnu7Field12Accepted?:0
-            // 6
-            row.limitSum = koeffNormBase[getIndex(row)] * row.normBase
-            def diff6_3 = row.limitSum - row.sum
-            // 7 - 1. ЕСЛИ («графа 6» – «графа 3») ≥ 0, то «графа 3»;
-            //     2. ЕСЛИ («графа 6» – «графа 3») < 0, то «графа 6»;
-            if (diff6_3>=0) {
-                row.inApprovedNprms = row.sum
-            } else {
-                row.inApprovedNprms = row.limitSum
+            // 4 - сумма по всем (графа 8 строки B + (графа 5 строки B – графа 6 строки B)),
+            // КНУ которых совпадает со значениями в colBase (или colTax если налоговый период)
+            if (getRows(data).indexOf(row)!=4 && getRows(data).indexOf(row)!=1) {//не 5-я и 2-я строка
+                def normBase = 0
+                def rowB = getRowPeriodAddNormBase()
+                if (rowB!=null){
+                    normBase += rowB.rnu5Field5Accepted?:0 + rowB.rnu7Field10Sum?:0  - rowB.rnu7Field12Accepted?:0
+                }
+                row.normBase = normBase
+            } else if (getRows(data).indexOf(row)==1){//2-я строка(сложнее)
+                def normBase = 0
+                //Сумма значений по графе 9 (столбец «Доход по данным налогового учёта. Сумма») в сложных доходах где КНУ = ...
+                //объединил
+                for(def rowComplex:getRows(getData(formDataComplex))){
+                    if (rowComplex.incomeTypeId in knuComplex) {
+                        normBase += rowComplex.incomeTaxSumS
+                    }
+                }
+                //простые доходы
+                for(def rowSimple:getRows(getData(formDataSimple))){
+                    //+ Сумма значений по графе 8 (столбец «РНУ-4 (графа 5) сумма») в простых доходах
+                    if (rowSimple.incomeTypeId in knuSimpleRNU4) {
+                        normBase += rowSimple.rnu4Field5Accepted
+                    }
+                    //+ Сумма значений по графе 5 (столбец «РНУ-6 (графа 10) сумма»)
+                    //- Сумма значений по графе 6 (столбец «РНУ-6 (графа 12). Сумма»)
+                    // КНУ одни, поэтому объединил
+                    if (rowSimple.incomeTypeId in knuSimpleRNU6) {
+                        normBase += (rowSimple.rnu6Field10Sum - rowSimple.rnu6Field12Accepted)
+                    }
+                }
+                row.normBase = normBase
             }
-            // 8 - 1. ЕСЛИ («графа 6» – «графа 3») ≥ 0, то 0;
-            //     2. ЕСЛИ («графа 6» – «графа 3») < 0, то «графа 3» - «графа 6».
-            if (diff6_3>=0) {
-                row.overApprovedNprms = 0
-            } else {
-                row.overApprovedNprms = -diff6_3
+            // 6
+            if (row.normBase!=null) {
+                row.limitSum = koeffNormBase[getIndex(row)] * row.normBase
+            }
+            def diff6_3 = row.limitSum - row.sum
+            if (diff6_3 != null) {
+                // 7 - 1. ЕСЛИ («графа 6» – «графа 3») ≥ 0, то «графа 3»;
+                //     2. ЕСЛИ («графа 6» – «графа 3») < 0, то «графа 6»;
+                if (diff6_3>=0) {
+                    row.inApprovedNprms = row.sum
+                } else {
+                    row.inApprovedNprms = row.limitSum
+                }
+                // 8 - 1. ЕСЛИ («графа 6» – «графа 3») ≥ 0, то 0;
+                //     2. ЕСЛИ («графа 6» – «графа 3») < 0, то «графа 3» - «графа 6».
+                if (diff6_3>=0) {
+                    row.overApprovedNprms = 0
+                } else {
+                    row.overApprovedNprms = -diff6_3
+                }
             }
         }
     }
+    data.save(getRows(data));
 }
 
 /**
@@ -114,10 +156,10 @@ void calc() {
  * @param useLog нужно ли записывать в лог сообщения о незаполненности обязательных полей
  */
 def logicalCheck(def useLog) {
-
+    def data = getData(formData)
     // список проверяемых столбцов (графа 4)
     def requiredColumns = ['normBase']
-    for (def row : formData.dataRows) {
+    for (def row : getRows(data)) {
         // 1. Обязательность заполнения полей графы 4
         if (!checkRequiredColumns(row, requiredColumns, useLog)) {
             return false
@@ -133,7 +175,7 @@ void checkOnPrepareOrAcceptance(def value) {
     departmentFormTypeService.getFormDestinations(formDataDepartment.id,
             formData.getFormType().getId(), formData.getKind()).each() { department ->
         if (department.formTypeId == formData.getFormType().getId()) {
-            def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+            def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
             // если форма существует и статус "принята"
             if (form != null && form.getState() == WorkflowState.ACCEPTED) {
                 logger.error("$value первичной налоговой формы невозможно, т.к. уже подготовлена консолидированная налоговая форма.")
@@ -157,7 +199,7 @@ void checkOnCancelAcceptance() {
             formData.getFormType().getId(), formData.getKind());
     def department = departments.getAt(0);
     if (department != null) {
-        def form = FormDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
+        def form = formDataService.find(department.formTypeId, department.kind, department.departmentId, formData.reportPeriodId)
 
         if (form != null && (form.getState() == WorkflowState.PREPARED || form.getState() == WorkflowState.ACCEPTED)) {
             logger.error("Нельзя отменить принятие налоговой формы, так как уже принята вышестоящая налоговая форма")
@@ -191,7 +233,7 @@ void checkCreation() {
         return
     }
 
-    def findForm = FormDataService.find(formData.formType.id,
+    def findForm = formDataService.find(formData.formType.id,
             formData.kind, formData.departmentId, formData.reportPeriodId)
 
     if (findForm != null) {
@@ -215,7 +257,7 @@ def isEmpty(def value) {
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
-    formData.dataRows.indexOf(row)
+    getRows(getData(formData)).indexOf(row)
 }
 
 /**
@@ -230,7 +272,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
     def colNames = []
 
     columns.each {
-        if (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue())) {
+        if (row.getCell(it).editable && (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue()))) {
             def name = getColumnName(row, it)
             colNames.add('"' + name + '"')
         }
@@ -242,7 +284,7 @@ def checkRequiredColumns(def row, def columns, def useLog) {
         def index = getIndex(row) + 1
         def errorMsg = colNames.join(', ')
         if (!isEmpty(index)) {
-            logger.error("В строке \"№ пп\" равной $index не заполнены колонки : $errorMsg.")
+            logger.error("В строке под номером $index не заполнены колонки : $errorMsg.")
         } else {
             index = getIndex(row) + 1
             logger.error("В строке $index не заполнены колонки : $errorMsg.")
@@ -270,13 +312,97 @@ def getColumnName(def row, def alias) {
  * @params knu КНУ
  */
 def getTotalRowFromRNU(def knu) {
-    def formDataRNU = FormDataService.find(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+    def formDataRNU = formDataService.find(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
     if (formDataRNU != null) {
-        for (def row : formDataRNU.dataRows) {
+        def dataRNU = getData(formDataRNU)
+        for (def row : getRows(dataRNU)) {
             if (row.consumptionTypeId == knu) {
                 return row
             }
         }
     }
     return null
+}
+
+/**
+ * Получить данные формы "доходы сложные" (id = 302)
+ */
+def getFormDataComplex() {
+    return formDataService.find(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+}
+
+/**
+ * Получить данные формы "доходы простые" (id = 301)
+ */
+def getFormDataSimple() {
+    return formDataService.find(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+}
+
+/**
+ * Получить данные формы.
+ *
+ * @param formData форма
+ */
+def getData(def formData) {
+    if (formData != null && formData.id != null) {
+        return formDataService.getDataRowHelper(formData)
+    }
+    return null
+}
+
+/**
+ * Получить строки формы.
+ *
+ * @param formData форма
+ */
+def getRows(def data) {
+    def cached = data.getAllCached()
+    return cached
+}
+
+def getCol() {
+    return ['21270', '21410', '20698', '20700', '20690']
+}
+
+def getKnuBase() {
+    return ['20480', '20485', '20490', '20500', '20505', '20530']
+}
+
+def getKnuTax() {
+    return ['20480', '20485', '20490', '20500', '20505', '20530', '20510', '20520']
+}
+
+def getKnuComplex(){
+    return ['10633', '10634', '10650', '10670', '10855', '10880', '10900', '10850',
+            '11180', '11190', '11200', '11210', '11220', '11230', '11240', '11250',
+            '11260', '10840', '10860', '10870', '10890']
+}
+
+def getKnuSimpleRNU4(){
+    return ['10001', '10006', '10041', '10300', '10310', '10320', '10330', '10340',
+            '10350', '10360', '10370', '10380', '10390', '10450', '10460', '10470',
+            '10480', '10490', '10571', '10580', '10590', '10600', '10610', '10630',
+            '10631', '10632', '10640', '10680', '10690', '10740', '10744', '10748',
+            '10752', '10756', '10760', '10770', '10790', '10800', '11140', '11150',
+            '11160', '11170', '11320', '11325', '11330', '11335', '11340', '11350',
+            '11360', '11370', '11375']
+}
+
+def getKnuSimpleRNU6(){
+    return ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350',
+            '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640',
+            '10680', '10690', '11340', '11350', '11370', '11375']
+}
+
+def getRowPeriodAddNormBase() {
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    /** Признак налоговый ли это период. */
+    def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
+    for(def knu:(isTaxPeriod?knuTax:knuBase)){
+        def rowB = getTotalRowFromRNU(knu)
+        return rowB
+    }
+    return null;
+
 }
