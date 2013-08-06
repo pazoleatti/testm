@@ -8,6 +8,7 @@
 	<import resource="classpath:testScriptSupportContext.xml"/>
 
     <jdbc:initialize-database>
+        <jdbc:script location="classpath:data/DictTaxPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/FormTemplate.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>

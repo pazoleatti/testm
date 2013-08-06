@@ -110,6 +110,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setMonths(3);
 		newReportPeriod.setDepartmentId(2);
 		newReportPeriod.setTaxPeriodId(1);
+		newReportPeriod.setDictTaxPeriodId(21);
 
 		int newReportPeriodId = reportPeriodDao.add(newReportPeriod);
 
