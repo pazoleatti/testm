@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogPresenter
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditClientUIModule;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookStatementsModule;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;

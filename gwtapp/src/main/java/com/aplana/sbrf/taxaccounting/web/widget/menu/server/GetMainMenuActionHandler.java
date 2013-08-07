@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookStatementsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
@@ -80,7 +80,7 @@ public class GetMainMenuActionHandler extends
                 MenuItem nsiMenuItem = new MenuItem("НСИ");
                 settingMenuItem.getSubMenu().add(nsiMenuItem);
 
-                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookerStatementsTokens.bookerStatements));
+                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN + BookStatementsTokens.bookerStatements));
             }
 			/*settingMenuItem.getSubMenu().add(new MenuItem("Тест РНУ 26",
 					new StringBuilder(NUMBER_SIGN)
