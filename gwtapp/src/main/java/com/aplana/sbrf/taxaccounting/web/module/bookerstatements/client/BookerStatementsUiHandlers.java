@@ -7,5 +7,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  *
  * @author Dmitriy Levykin
  */
-public interface BookStatementsUiHandlers extends UiHandlers {
+public interface BookerStatementsUiHandlers extends UiHandlers {
 }
