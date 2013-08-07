@@ -60,6 +60,11 @@
                         <g:LongBox width="200px" ui:field="refBookAttrIdBox"/>
                     </g:HorizontalPanel>
 
+                    <g:HorizontalPanel height="30px" ui:field="refBookAttrFilterPanel">
+                        <g:Label width="150px">Атрибут фильтр справочника</g:Label>
+                        <g:TextBox width="200px" ui:field="refBookAttrFilterBox"/>
+                    </g:HorizontalPanel>
+
                     <g:HorizontalPanel height="30px" ui:field="numericMaxLengthPanel">
                         <g:Label width="150px">Максимальное количество цифр</g:Label>
                         <g:IntegerBox width="100px" ui:field="numericMaxLengthBox"/>

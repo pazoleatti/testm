@@ -23,6 +23,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
@@ -131,9 +132,16 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	
 	@UiField
 	Panel refBookAttrIdPanel;
+
+    @UiField
+    Panel refBookAttrFilterPanel;
 	
 	@UiField
 	LongBox refBookAttrIdBox;
+
+    @UiField
+    TextBox refBookAttrFilterBox;
+
 
 	@Inject
 	@UiConstructor
@@ -293,6 +301,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setRefBookAttributeId(refBookAttrIdBox.getValue());
 	}
 
+    @UiHandler("refBookAttrFilterBox")
+    public void onRefBookAttrFilterBox(KeyUpEvent event) {
+        ((RefBookColumn) columns.get(columnListBox.getSelectedIndex())).setFilter(refBookAttrFilterBox.getValue());
+    }
+
 	@Override
 	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
 		columns = columnList;
@@ -358,12 +371,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		nameBox.setValue(column.getName());
 		dateFormatPanel.setVisible(false);
 		refBookAttrIdPanel.setVisible(false);
-		if (typeColumnDropBox.getValue() == STRING_TYPE) {
+        refBookAttrFilterPanel.setVisible(false);
+		if (STRING_TYPE.equals(typeColumnDropBox.getValue())) {
 			int maxLength = ((StringColumn) column).getMaxLength();
 
 			stringMaxLengthBox.setValue(maxLength);
 			stringMaxLengthPanel.setVisible(true);
-		} else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
+		} else if (typeColumnDropBox.getValue().equals(NUMERIC_TYPE)) {
 			int maxLength = ((NumericColumn) column).getMaxLength();
 
 			numericMaxLengthPanel.setVisible(true);
@@ -372,7 +386,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
 			precisionBox.setAcceptableValues(precisionList);
-		} else if (typeColumnDropBox.getValue() == DATE_TYPE) {
+		} else if (typeColumnDropBox.getValue().equals(DATE_TYPE)) {
 			dateFormat.setAcceptableValues(dateFormatList);
 			// Если формата нет, то выставляем по умолчанию DD_MM_YYYY
 			dateFormat.setValue(Formats.getById(((DateColumn) column).getFormatId() == Formats.NONE.getId() ?
@@ -383,6 +397,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())) {
 			refBookAttrIdPanel.setVisible(true);
 			refBookAttrIdBox.setValue(((RefBookColumn)column).getRefBookAttributeId());
+            refBookAttrFilterPanel.setVisible(true);
+            refBookAttrFilterBox.setValue(((RefBookColumn)column).getFilter());
 		}
 	}
 
@@ -410,27 +426,27 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		Column column = columns.get(index);
 		flush();
 
-		if (typeColumnDropBox.getValue() == STRING_TYPE) {
+		if (typeColumnDropBox.getValue().equals(STRING_TYPE)) {
 			StringColumn stringColumn = new StringColumn();
 			copyMainColumnAttributes(column, stringColumn);
 
 			getUiHandlers().removeColumn(column);
 			getUiHandlers().addColumn(index, stringColumn);
 		}
-		else if (typeColumnDropBox.getValue() == NUMERIC_TYPE) {
+		else if (NUMERIC_TYPE.equals(typeColumnDropBox.getValue())) {
 			NumericColumn numericColumn = new NumericColumn();
 			copyMainColumnAttributes(column, numericColumn);
 
 			getUiHandlers().removeColumn(column);
 			getUiHandlers().addColumn(index, numericColumn);
 		}
-		else if (typeColumnDropBox.getValue() == DATE_TYPE){
+		else if (DATE_TYPE.equals(typeColumnDropBox.getValue())){
 			DateColumn dateColumn = new DateColumn();
 			copyMainColumnAttributes(column, dateColumn);
 
 			getUiHandlers().removeColumn(column);
 			getUiHandlers().addColumn(index, dateColumn);
-		} else if (typeColumnDropBox.getValue() == REFBOOK_TYPE){
+		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())){
 			RefBookColumn refBookColumn = new RefBookColumn();
 			copyMainColumnAttributes(column, refBookColumn);
 			
