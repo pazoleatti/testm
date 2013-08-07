@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 /**
@@ -8,4 +9,18 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Dmitriy Levykin
  */
 public interface BookerStatementsUiHandlers extends UiHandlers {
+    /**
+     * Перезагрузка налоговых периодов
+     *
+     * @param departmentId
+     */
+    void reloadTaxPeriods(Integer departmentId);
+
+    /**
+     * Обработка выбора налогового периода
+     *
+     * @param taxPeriod
+     * @param departmentId
+     */
+    void onTaxPeriodSelected(TaxPeriod taxPeriod, Integer departmentId);
 }
