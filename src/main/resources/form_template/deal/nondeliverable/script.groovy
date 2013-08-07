@@ -18,6 +18,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
+        calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -203,7 +204,7 @@ void logicCheck() {
         }
 
         //Проверки соответствия НСИ
-        checkNSI(row, "jurName", "Организации-участники контролируемых сделок", 9)
+        checkNSI(row, "name", "Организации-участники контролируемых сделок", 9)
         checkNSI(row, "country", "ОКСМ", 10)
         checkNSI(row, "countryCode", "ОКСМ", 10)
     }
@@ -245,10 +246,7 @@ void addAllStatic() {
                     || row.transactionType != nextRow.transactionType) {
 
                 def itogRow = calcItog(i)
-                dataRows.add(i + 1, itogRow)
-                dataRowHelper.insert(itogRow, i + 1)
-
-                i++
+                dataRowHelper.insert(itogRow, ++i+1)
             }
         }
     }
@@ -264,10 +262,11 @@ def calcItog(int i) {
     def dataRows = dataRowHelper.getAllCached()
     def newRow = formData.createDataRow()
 
-    newRow.name = 'Подитог:'
-
+    newRow.getCell('itog').colSpan = 12
+    newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('name').colSpan = 11
+    newRow.getCell('fix').colSpan = 2
+    newRow.rowNum = i+2
 
     // Расчеты подитоговых значений
     BigDecimal priceItg = 0, costItg = 0
@@ -293,13 +292,12 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def index = 1;
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         // Порядковый номер строки
-        row.rowNum = index++
+        row.rowNum = row.getIndex()
         // Графы 13 и 14 из 11 и 12
         incomeSum = row.incomeSum
         consumptionSum = row.consumptionSum
@@ -365,8 +363,8 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         row = (DataRow) iter.next()
         if (row.getAlias() != null) {
-            dataRowHelper.delete(row)
             iter.remove()
+            dataRowHelper.delete(row)
         }
     }
 }

@@ -18,6 +18,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
+        //calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -323,9 +324,9 @@ void calc() {
             row.settlement2 = null
         }
         if (row.countryCode2 == row.countryCode3) {
-            row.signTransaction = 0
+            row.signTransaction = Long.valueOf(182632)
         } else {
-            row.signTransaction = 1
+            row.signTransaction = Long.valueOf(182633)
         }
     }
     dataRowHelper.update(dataRows);
@@ -341,8 +342,8 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         row = (DataRow) iter.next()
         if (row.getAlias() != null) {
-            dataRowHelper.delete(row)
             iter.remove()
+            dataRowHelper.delete(row)
         }
     }
 }
@@ -390,34 +391,32 @@ void addAllStatic() {
             if (i < dataRows.size() - 1) {
                 nextRow = dataRows.get(i + 1)
             }
+            if (row.getAlias() == null)
+                if (nextRow == null
+                        || row.name != nextRow.name
+                        || row.innKio != nextRow.innKio
+                        || row.contractNum != nextRow.contractNum
+                        || row.contractDate != nextRow.contractDate
+                        || row.innerCode != nextRow.innerCode
+                        || row.okpCode != nextRow.okpCode
+                        || row.unitCountryCode != nextRow.unitCountryCode
+                        || row.signPhis != nextRow.signPhis
+                        || row.signTransaction != nextRow.signTransaction
+                        || row.countryCode2 != nextRow.countryCode2
+                        || row.region1 != nextRow.region1
+                        || row.city1 != nextRow.city1
+                        || row.settlement1 != nextRow.settlement1
+                        || row.countryCode3 != nextRow.countryCode3
+                        || row.region2 != nextRow.region2
+                        || row.city2 != nextRow.city2
+                        || row.settlement2 != nextRow.settlement2
+                        || row.conditionCode != nextRow.conditionCode
+                        || row.count != nextRow.count) {
 
-            if (row.getAlias() == null && nextRow == null
-                    || row.name != nextRow.name
-                    || row.innKio != nextRow.innKio
-                    || row.contractNum != nextRow.contractNum
-                    || row.contractDate != nextRow.contractDate
-                    || row.innerCode != nextRow.innerCode
-                    || row.okpCode != nextRow.okpCode
-                    || row.unitCountryCode != nextRow.unitCountryCode
-                    || row.signPhis != nextRow.signPhis
-                    || row.signTransaction != nextRow.signTransaction
-                    || row.countryCode2 != nextRow.countryCode2
-                    || row.region1 != nextRow.region1
-                    || row.city1 != nextRow.city1
-                    || row.settlement1 != nextRow.settlement1
-                    || row.countryCode3 != nextRow.countryCode3
-                    || row.region2 != nextRow.region2
-                    || row.city2 != nextRow.city2
-                    || row.settlement2 != nextRow.settlement2
-                    || row.conditionCode != nextRow.conditionCode
-                    || row.count != nextRow.count) {
-
-                def itogRow = calcItog(i)
-                dataRows.add(i + 1, itogRow)
-                dataRowHelper.insert(itogRow, i + 1)
-
-                i++
-            }
+                    def itogRow = calcItog(i)
+                    dataRows.add(i + 1, itogRow)
+                    dataRowHelper.insert(itogRow, ++i + 1)
+                }
         }
     }
 }
@@ -432,10 +431,11 @@ def calcItog(int i) {
     def dataRows = dataRowHelper.getAllCached()
     def newRow = formData.createDataRow()
 
-    newRow.name = 'Подитог:'
-
+    newRow.getCell('itog').colSpan = 26
+    newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('name').colSpan = 25
+    newRow.getCell('fix').colSpan = 2
+    //newRow.rowNum = i + 2
 
     // Расчеты подитоговых значений
     BigDecimal totalNdsItg = 0, priceOneItg = 0
