@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,9 +16,11 @@ import org.springframework.security.core.userdetails.AuthenticationUserDetailsSe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class AuthenticationUserDetailsServiceImpl implements
 		AuthenticationUserDetailsService<Authentication> {
@@ -24,6 +28,9 @@ public class AuthenticationUserDetailsServiceImpl implements
 
 	@Autowired
 	TAUserService userService;
+
+    @Autowired
+    private AuditService auditService;
 
 	@Override
 	public UserDetails loadUserDetails(Authentication token)
@@ -43,7 +50,11 @@ public class AuthenticationUserDetailsServiceImpl implements
 		for (TARole role : user.getRoles()) {
 			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
 		}
-
+        TAUserInfo info = new TAUserInfo();
+        info.setUser(user);
+        info.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest().getRemoteAddr());
+        auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
 		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
 		// возможно в будущем задействуем и их
 		return new User(userName, "notused", grantedAuthorities);
