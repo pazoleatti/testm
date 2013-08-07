@@ -8,4 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Stanislav Yasinskiy
  */
 public interface RefBookListUiHandlers extends UiHandlers {
+    void init(Boolean external, String filter);
 }
