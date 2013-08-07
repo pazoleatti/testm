@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
     <ui:style>
@@ -31,10 +30,10 @@
                 </g:HorizontalPanel>
                 <g:HorizontalPanel verticalAlignment="MIDDLE">
                     <g:cell width="220px">
-                        <d:DepartmentPicker width="200px" ui:field="departmentPicker" withCheckBox="true" header="Выберите подразделение"/>
+                        <d:DepartmentPicker width="200px" ui:field="departmentPicker" withCheckBox="false" header="Выберите подразделение"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <r:ReportPeriodPicker width="200px" ui:field="period"/>
+                        <g:SimplePanel ui:field="reportPeriodPanel" width="200px"/>
                     </g:cell>
                     <g:cell width="220px">
                         <g:ListBox ui:field="bookerReportType" width="200px"/>
