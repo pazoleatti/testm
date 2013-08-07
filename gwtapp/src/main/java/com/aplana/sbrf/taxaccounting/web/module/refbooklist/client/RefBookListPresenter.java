@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -54,9 +55,9 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     }
 
     @Override
-    public void init(Boolean external, String filter) {
+    public void init(Type type, String filter) {
         GetTableDataAction action = new GetTableDataAction();
-        action.setExternal(external);
+        action.setType(type);
         action.setFilter(filter);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(

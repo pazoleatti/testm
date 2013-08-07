@@ -21,7 +21,7 @@
                         <g:Label styleName="{style.titleLabel}" text="Список справочников"/>
                     </g:cell>
                     <g:cell width="220px" >
-                        <g:RadioButton name="r2" text="Внешние справочники"/>
+                        <g:RadioButton ui:field="rbExternal" name="group1" text="Внешние справочники"/>
                     </g:cell>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel>
@@ -32,7 +32,7 @@
                         <g:Label text="Наименование справочника"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <g:RadioButton name="r2" text="Внутренние справочники"/>
+                        <g:RadioButton ui:field="rbInternal" name="group1" text="Внутренние справочники"/>
                     </g:cell>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel verticalAlignment="TOP">
@@ -46,7 +46,7 @@
                         <g:Button ui:field="findButton" text="Поиск"/>
                     </g:cell>
                     <g:cell width="220px">
-                        <g:RadioButton name="r1" text="Все справочники"  value="true"/>
+                        <g:RadioButton ui:field="rbAll" name="group1" text="Все справочники"  value="true"/>
                     </g:cell>
                     <g:cell horizontalAlignment="RIGHT">
                         <g:Button ui:field="loadButton" text="Загрузить справочники"/>

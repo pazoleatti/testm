@@ -4,18 +4,19 @@ import java.io.Serializable;
 
 /**
  * Модель для таблицы
+ *
  * @author Stanislav Yasinskiy
  */
 public class TableModel implements Serializable {
 
     private Long id;
     private String name;
-    private String type;
+    private Type type;
 
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, String type) {
+    public TableModel(Long id, String name, Type type) {
         setId(id);
         setName(name);
         setType(type);
@@ -29,11 +30,11 @@ public class TableModel implements Serializable {
         this.name = name;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Type type) {
         this.type = type;
     }
 

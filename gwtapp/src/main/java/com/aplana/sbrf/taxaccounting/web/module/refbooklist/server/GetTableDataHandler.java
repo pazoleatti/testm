@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.GetTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -44,23 +45,22 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
         GetTableDataResult result = new GetTableDataResult();
         List<RefBook> list = new ArrayList<RefBook>();
 
-        if (action.getExternal() == null)
-            list = refBookFactory.getAll();
-        else if (action.getExternal()) {
+        if (Type.EXTERNAL.equals(action.getType())) {
             // TODO внешние
-        } else {
+        } else if (Type.INTERNAL.equals(action.getType())) {
             // TODO  внутренние
+        } else {
+            list = refBookFactory.getAll();
         }
 
         List<TableModel> returnList = new ArrayList<TableModel>();
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();
         for (RefBook model : list) {
-            // TODO внеш/внутр
-            if (!isFiltered || model.getName().toLowerCase().contains(action.getFilter().toLowerCase()))
-                returnList.add(new TableModel(model.getId(), model.getName(), "todo type"));
+            if (!isFiltered || model.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
+                // TODO внеш/внутр
+                returnList.add(new TableModel(model.getId(), model.getName(), Type.EXTERNAL));
+            }
         }
-
-        System.out.println(returnList.size());
 
         result.setTableData(returnList);
         return result;

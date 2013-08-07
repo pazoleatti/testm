@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
@@ -14,11 +15,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +42,12 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
     FlexiblePager pager;
     @UiField
     TextBox filterText;
+    @UiField
+    RadioButton rbExternal;
+    @UiField
+    RadioButton rbInternal;
+    @UiField
+    RadioButton rbAll;
 
     interface Binder extends UiBinder<Widget, RefBookListView> {
     }
@@ -52,7 +61,13 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
 
     @UiHandler("findButton")
     void onFindClicked(ClickEvent event) {
-        getUiHandlers().init(null, filterText.getText());
+        Type type = null;
+        if (rbExternal.getValue()) {
+            type = Type.EXTERNAL;
+        } else if (rbInternal.getValue()) {
+            type = Type.INTERNAL;
+        }
+        getUiHandlers().init(type, filterText.getText());
     }
 
     @UiHandler("loadButton")
@@ -86,7 +101,7 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         TextColumn<TableModel> typeColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel object) {
-                return object.getType();
+                return object.getType().getName();
             }
         };
 

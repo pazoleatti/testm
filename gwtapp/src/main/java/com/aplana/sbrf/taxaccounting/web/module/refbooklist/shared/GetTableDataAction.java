@@ -8,22 +8,15 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> implements ActionName {
 
-    private Boolean external;
+    private Type type;
     private String filter;
 
-    /**
-     * @return true - внешние, false - внутренние, null - все
-     */
-    public Boolean getExternal() {
-        return external;
+    public Type getType() {
+        return type;
     }
 
-
-    /**
-     * @param external true - внешние, false - внутренние, null - все
-     */
-    public void setExternal(Boolean external) {
-        this.external = external;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     @Override
