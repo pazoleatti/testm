@@ -175,6 +175,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // Порядковый номер строки
+        row.rowNumber = row.getIndex()
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Итого"
@@ -224,8 +229,8 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         row = (DataRow) iter.next()
         if (row.getAlias() != null) {
-            dataRowHelper.delete(row)
             iter.remove()
+            dataRowHelper.delete(row)
         }
     }
 }
@@ -240,9 +245,11 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.fullName = 'Подитог:'
+        newRow.getCell('itog').colSpan = 8
+        newRow.getCell('fix').colSpan = 2
+        newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 7
+        newRow.rowNumber = dataRows.size()+1
 
         // Расчеты подитоговых значений
         def BigDecimal sumItg = 0, totalItg = 0
@@ -258,7 +265,6 @@ void addAllStatic() {
         newRow.sum = sumItg
         newRow.total = totalItg
 
-        dataRows.add(dataRows.size(), newRow)
-        dataRowHelper.insert(newRow, dataRows.size())
+        dataRowHelper.insert(newRow, dataRows.size()+1)
     }
 }

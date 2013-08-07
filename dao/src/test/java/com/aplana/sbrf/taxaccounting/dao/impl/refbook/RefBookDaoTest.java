@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "RefBookDaoTest.xml" })
@@ -165,6 +160,12 @@ public class RefBookDaoTest {
 		Assert.assertEquals(2, versions.size());
 	}
 
+	@Test
+	public void testGetVersions4() throws Exception {
+		List<Date> versions = refBookDao.getVersions(1L, getDate(1, 1, 2020), getDate(1, 1, 2030));
+		Assert.assertEquals(1, versions.size());
+	}
+
 	private Date getDate(int day, int month, int year) {
 		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
 	}
@@ -250,6 +251,33 @@ public class RefBookDaoTest {
 		Assert.assertEquals(6, record.get("author").getReferenceValue().intValue());
 	}
 
+    @Test
+    public void testUpdateRecords2() {
+        // Проверка обновления при совпадении версий
+        Long refBookId = 1L;
+        // Существующая дата
+        Date version = getDate(1, 1, 2013);
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
+        Map<String, RefBookValue> record = data.getRecords().get(1);
+
+        record.get("name").setValue("Вий. Туда и обратно");
+        record.get("pagecount").setValue(123);
+        record.get("author").setValue(7L);
+        refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
+
+        data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
+        record = data.getRecords().get(1);
+        Assert.assertEquals(record.get("name").getStringValue(), "Вий. Туда и обратно");
+        Assert.assertEquals(record.get("pagecount").getNumberValue().longValue(), 123L);
+        Assert.assertEquals(record.get("author").getReferenceValue(), Long.valueOf(7L));
+    }
+
+    @Test
+    public void checkRecordUnique() {
+       Assert.assertEquals(refBookDao.checkRecordUnique(1L, getDate(1, 1, 2013), 1L), Long.valueOf(1L));
+       Assert.assertNull(refBookDao.checkRecordUnique(1L, getDate(2, 1, 2013), 1L));
+    }
+
 	@Test
 	public void testDeleteRecords1() {
 		RefBook refBook = refBookDao.get(1L);
@@ -267,4 +295,16 @@ public class RefBookDaoTest {
 		Assert.assertEquals(1, data.getRecords().size());
 	}
 
+    @Test
+    public void testGetValue1() {
+        // Cуществующие значения
+        Assert.assertEquals(refBookDao.getValue(1L, 1L).getStringValue(), "Алиса в стране чудес");
+        Assert.assertEquals(refBookDao.getValue(1L, 2L).getNumberValue().intValue(), 1113);
+    }
+
+    @Test(expected = DaoException.class)
+    public void testGetValue2() {
+        // Не существующее значение
+        refBookDao.getValue(-1L, 2L);
+    }
 }

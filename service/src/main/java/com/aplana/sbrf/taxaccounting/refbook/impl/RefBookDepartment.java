@@ -64,4 +64,9 @@ public class RefBookDepartment implements RefBookDataProvider {
     public void deleteRecords(Date version, List<Long> recordIds) {
         // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
     }
+
+    @Override
+    public RefBookValue getValue(Long recordId, Long attributeId) {
+        return null;
+    }
 }

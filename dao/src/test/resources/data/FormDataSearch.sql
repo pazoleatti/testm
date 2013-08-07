@@ -13,7 +13,8 @@ insert into form_template (id, type_id, data_rows, version, is_active, edition, 
 insert into form_template (id, type_id, data_rows, version, is_active, edition, numbered_columns, fixed_rows, name, fullname, code) values (4, 4, null, '0.1', 1, 1, 1, 1,'name', 'fullname', 'code');
 
 insert into tax_period(id, tax_type, start_date, end_date) values (1, 'T', date '2013-01-01', date '2013-12-31');
-insert into dict_tax_period (code, name, I, T, P, V, D) values ('21', 'первый квартал', 1, 1, 1, 1, 0);
+insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
+insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
 
 insert into report_period (id, name, is_active, months, tax_period_id, ord, department_id, dict_tax_period_id) values (1, '1 - период', 1, 3, 1, 1, 1, 21);
 insert into report_period (id, name, is_active, months, tax_period_id, ord, department_id, dict_tax_period_id) values (2, '2 - период', 1, 3, 1, 2, 1, 21);

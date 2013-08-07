@@ -42,7 +42,7 @@
 
                 <g:HorizontalPanel height="45px">
                     <g:HorizontalPanel width="210px">
-                        <g:Label addStyleNames="{style.label}" text="Назанчение:"/>
+                        <g:Label addStyleNames="{style.label}" text="Назначение:"/>
                         <g:VerticalPanel>
                             <g:Anchor ui:field="formAnchor" href="#!destination;isForm=true">Налоговые формы</g:Anchor>
                             <g:Label ui:field="formLabel">Налоговые формы</g:Label>
@@ -58,7 +58,7 @@
                     </g:FlowPanel>
 
                     <g:cell width="100px" verticalAlignment="bottom">
-                        <style:ButtonLink ui:field="assignAnchor" text="Назанчить"/>
+                        <style:ButtonLink ui:field="assignAnchor" text="Назначить"/>
                     </g:cell>
 
                     <g:cell verticalAlignment="bottom">

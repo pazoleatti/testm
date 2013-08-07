@@ -35,12 +35,12 @@ public class ImportServiceTest {
 
     @Test
     public void getAllData() {
-        assertTrue(service.getData(getInputStream(), "xls") != null);
+        assertTrue(service.getData(getInputStream(), "fileName.xls") != null);
     }
 
     @Test
     public void getTableData() {
-        assertTrue(service.getData(getInputStream(), "xls", "windows-1251",
-                "Государственный регистрационный номер", "Общий итог", 3) != null);
+        assertTrue(service.getData(getInputStream(), "fileName.xls", "windows-1251",
+                "Государственный регистрационный номер", "Общий итог") != null);
     }
 }

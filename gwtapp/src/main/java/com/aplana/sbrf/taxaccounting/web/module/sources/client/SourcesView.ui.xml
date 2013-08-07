@@ -51,7 +51,7 @@
 
         <g:HorizontalPanel height="45px">
             <g:HorizontalPanel width="210px">
-                <g:Label addStyleNames="{style.searchLabel}">Назанчение:</g:Label>
+                <g:Label addStyleNames="{style.searchLabel}">Назначение:</g:Label>
                 <g:VerticalPanel>
                     <g:Anchor ui:field="formAnchor" href="#!sources;isForm=true">Налоговые формы</g:Anchor>
                     <g:Label ui:field="formLabel">Налоговые формы</g:Label>
@@ -66,7 +66,7 @@
             </g:FlowPanel>
 
             <g:cell width="100px" verticalAlignment="bottom">
-                <style:ButtonLink ui:field="assignButton" text="Назанчить" />
+                <style:ButtonLink ui:field="assignButton" text="Назначить" />
             </g:cell>
 
             <g:cell verticalAlignment="bottom">
@@ -89,7 +89,7 @@
             </g:FlowPanel>
             <g:FlowPanel width="15px" />
             <g:FlowPanel addStyleNames="{style.sourcesTable}">
-                <g:Label text="Источники" addStyleNames="{style.destinationLabel}" />
+                <g:Label text="Источник" addStyleNames="{style.destinationLabel}" />
                 <g:HorizontalPanel height="30px">
                     <g:cell verticalAlignment="middle">
                         <g:Label text="Подразделение: " styleName="{style.searchLabel}" />

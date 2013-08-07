@@ -48,7 +48,6 @@ switch (formDataEvent) {
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -117,10 +116,12 @@ void logicCheck() {
             logger.warn("Одна из граф «$msgIn» и «$msgOut» в строке $rowNum должна быть заполнена!")
         }
         // Проверка выбранной единицы измерения
-        if (okeiCodeCell.value != '796' && okeiCodeCell.value != '744') {
+        def okei = refBookService.getNumberValue(12, okeiCodeCell.value, 'CODE')
+        if (okei != 796 && okei != 744) {
             def msg = okeiCodeCell.column.name
             logger.warn("В графе «$msg» строки $rowNum могут быть указаны только следующие элементы: шт., процент!")
         }
+
         //  Корректность даты договора
         def taxPeriod = taxPeriodService.get(reportPeriodService.get(formData.reportPeriodId).taxPeriodId)
         def dFrom = taxPeriod.getStartDate()
@@ -139,13 +140,13 @@ void logicCheck() {
         def sumCell = row.incomeSum != null ? row.getCell('incomeSum') : row.getCell('outcomeSum')
         def countCell = row.getCell('count')
         def priceCell = row.getCell('price')
-        if (okeiCodeCell.value == '796' && countCell.value != null && countCell.value != 0
+        if (okei == 796 && countCell.value != null && countCell.value != 0
                 && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
             def msg1 = priceCell.column.name
             def msg2 = sumCell.column.name
             def msg3 = countCell.column.name
             logger.warn("«$msg1» в строке $rowNum не равно отношению «$msg2» и «$msg3»!")
-        } else if (okeiCodeCell.value == '744' && priceCell.value != sumCell.value) {
+        } else if (okei == 744 && priceCell.value != sumCell.value) {
             def msg1 = priceCell.column.name
             def msg2 = sumCell.column.name
             logger.warn("«$msg1» в строке $rowNum не равно «$msg2»!")
@@ -184,13 +185,16 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        // Порядковый номер строки
+        row.rowNumber = row.getIndex()
         // Расчет поля "Цена"
-        priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
-        okeiCode = row.okeiCode
-        if (okeiCode == '744') {
+        def priceValue = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        def okei = refBookService.getNumberValue(12, row.okeiCode, 'CODE')
+        println("okei = " + okei)
+        if (okei == 744) {
             row.price = priceValue
-        } else if (okeiCode == '796' && row.count != 0 && row.count != null) {
-            row.price = (priceValue / row.count).setScale(2, RoundingMode.HALF_UP)
+        } else if (okei == 796 && row.count != 0 && row.count != null) {
+            row.price = priceValue / row.count
         } else {
             row.price = null
         }

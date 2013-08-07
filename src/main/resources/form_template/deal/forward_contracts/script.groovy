@@ -19,6 +19,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
+        calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -178,6 +179,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // Порядковый номер строки
+        row.rowNumber = row.getIndex()
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -205,16 +211,18 @@ void calc() {
  */
 def calcItog(int i) {
     def newRow = formData.createDataRow()
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
 
-    newRow.fullName = 'Подитог:'
-
+    newRow.getCell('itog').colSpan = 12
+    newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fullName').colSpan = 11
+    newRow.rowNumber = i+2
 
     // Расчеты подитоговых значений
     def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
-    for (int j = i; j >= 0 && formData.dataRows.get(j).getAlias() == null; j--) {
-        def row = formData.dataRows.get(j)
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        def row = dataRows.get(j)
 
         def incomeSum = row.incomeSum
         def outcomeSum = row.outcomeSum
@@ -289,8 +297,8 @@ void deleteAllStatic() {
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
         row = (DataRow) iter.next()
         if (row.getAlias() != null) {
-            dataRowHelper.delete(row)
             iter.remove()
+            dataRowHelper.delete(row)
         }
     }
 }
@@ -311,18 +319,15 @@ void addAllStatic() {
             if (i < dataRows.size() - 1) {
                 nextRow = dataRows.get(i + 1)
             }
-
-            if (row.getAlias() == null && nextRow == null
-                    || row.fullName != nextRow.fullName
-                    || row.inn != nextRow.inn
-                    || row.docNumber != nextRow.docNumber
-                    || row.docDate != nextRow.docDate
-                    || row.dealType != nextRow.dealType) {
-                def itogRow = calcItog(i)
-                dataRows.add(i + 1, itogRow)
-                dataRowHelper.insert(itogRow, i + 1)
-
-                i++
+            if (row.getAlias() == null)
+                if (nextRow == null
+                        || row.fullName != nextRow.fullName
+                        || row.inn != nextRow.inn
+                        || row.docNumber != nextRow.docNumber
+                        || row.docDate != nextRow.docDate
+                        || row.dealType != nextRow.dealType) {
+                    def itogRow = calcItog(i)
+                    dataRowHelper.insert(itogRow, ++i+1)
             }
         }
     }

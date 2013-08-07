@@ -1,12 +1,17 @@
+package form_template.income.advanceDistribution
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 /**
  * Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации.
  *
  * TODO:
- *      - алгоритм расчета графа 8: поле "признак расчета" в настройки подразделения еще не добавили
- *      - алгоритм расчета графа 9: поле "Обязанность по уплате налога" в настройки подразделения еще не добавили
- *      - алгоритм расчета графа 14: поле "Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде" в настройки подразделения еще не добавили
+ *      - консолидация не доделана потому что не готова нф "(Приложение 5) Сведения для расчета налога на прибыль".
  *
  * @author akadyrgulov
+ * @author <a href="mailto:Ramil.Timerbaev@aplana.com">Тимербаев Рамиль</a>
  */
 
 switch (formDataEvent) {
@@ -35,18 +40,20 @@ switch (formDataEvent) {
         checkNSI()
         checkDeclaration()
         break
-    // после принятия из подготовлена
+// после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
         logicalCheck(true)
         checkNSI()
         // на стороне сервера будет выполнен compose
         break
-    // обобщить
+// обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         calc()
         logicalCheck(false)
         checkNSI()
+        // для сохранения изменении приемников
+        getData(formData).commit()
         break
 }
 
@@ -77,21 +84,27 @@ switch (formDataEvent) {
  */
 def addNewRow() {
     def data = getData(formData)
-    def newRow = formData.createDataRow()
+    def newRow = getNewRow()
 
     // def index = (currentDataRow != null ? getIndex(data, currentDataRow) + 1 : 0)
     int index = (currentDataRow != null ? currentDataRow.getIndex() :
-        (data.getAllCached().size() == 0 ?
-            1 : data.getAllCached().size()))
+        (getRows(data).size() == 0 ? 1 : getRows(data).size()))
 
-    // data.insert(newRow, index)
-    data.getAllCached().add(index, newRow)
+    data.insert(newRow, index)
+}
+
+/**
+ * Получить новую стролу с заданными стилями.
+ */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+
     // графа 3, 5..7 редактируемые
     ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit'].each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    save(data)
+    return newRow
 }
 
 /**
@@ -100,7 +113,6 @@ def addNewRow() {
 def deleteRow() {
     def data = getData(formData)
     data.delete(currentDataRow)
-    save(data)
 }
 
 /**
@@ -113,10 +125,9 @@ void calc() {
      */
 
     // список проверяемых столбцов (графа 3, 5..7)
-
     def requiredColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
 
-    for (def row : data.getAllCached()) {
+    for (def row : getRows(data)) {
         if (!isFixedRow(row) && !checkRequiredColumns(row, requiredColumns, true)) {
             return
         }
@@ -128,20 +139,20 @@ void calc() {
 
     // удалить фиксированные строки
     def delRow = []
-    data.getAllCached().each { row ->
+    getRows(data).each { row ->
         if (isFixedRow(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        data.getAllCached().remove(getIndex(data, row))
+        getRows(data).remove(getIndex(data, row))
     }
-    if (data.getAllCached().isEmpty()) {
+    if (getRows(data).isEmpty()) {
         return
     }
 
     // отсортировать/группировать
-    data.getAllCached().sort { a, b ->
+    getRows(data).sort { a, b ->
         if (a.regionBank == b.regionBank && a.regionBankDivision == b.regionBankDivision) {
             return b.kpp <=> a.kpp
         }
@@ -158,42 +169,46 @@ void calc() {
     /** Распределяемая налоговая база за отчетный период. */
     def taxBase = getTaxBase()
 
-    /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
-    def sumNal = 0 // TODO (Ramil Timerbaev) departmentParamIncome...
-
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
-    // расчет графы 1..4, 8..21
-    data.getAllCached().eachWithIndex { row, i ->
+    // справочник "Подразделения"
+    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
 
-        // TODO (Aydar Kadyrgulov) после привязки к справочнику брать ID выбранной записи
-        // TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-        def departmentParam = departmentService.getDepartmentParam(Integer.valueOf(row.regionBankDivision))
-        def departmentParamIncome = departmentService.getDepartmentParamIncome(Integer.valueOf(row.regionBankDivision))
+    // справочник "Параметры подразделения по налогу на прибыль"
+    def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
+
+    /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
+    def sumNal = 0
+    def sumTaxRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '1'", null);
+    if (sumTaxRecords != null && !sumTaxRecords.getRecords().isEmpty()) {
+        sumNal = new BigDecimal(getValue(sumTaxRecords.getRecords().getAt(0), 'SUM_TAX').doubleValue())
+    }
+
+    // расчет графы 1..4, 8..21
+    getRows(data).eachWithIndex { row, i ->
+        def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
+        def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null, "DEPARTMENT_ID = '" + row.regionBankDivision + "'", null);
+        if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
+            logger.error('Не найдены настройки подразделения для строки ' + (row.number ?: getIndex(data, row)))
+            return
+        }
+        def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
 
         // графа 1
         row.number = i + 1
 
-        // графа 2
-        row.regionBank = departmentParam.name
+        // графа 2 - название подразделения
+        row.regionBank = getValue(departmentRecord, 'NAME')
 
-        // графа 4
-        row.kpp = departmentParam.kpp
+        // графа 4 - кпп
+        row.kpp = getValue(incomeParams, 'KPP')
 
-        /*
-        Заполняется автоматически на основании значения «Графы 3». regionBankDivision
-        «Графа 8» = значение атрибута «Признак расчёта» формы настроек подразделений.
-        */
-        // графа 8 TODO (Aydar Kadyrgulov) Признак расчёта
-        row.calcFlag = 0 // departmentParam.
+        // графа 8 - Признак расчёта
+        row.calcFlag = getValue(incomeParams, 'TYPE')
 
-        /*
-        Заполняется автоматически на основании значения «Графы 3».
-        «Графа 9» = значение атрибута «Обязанность по уплате налога» формы настроек подразделений.
-        */
-        // графа 9 TODO (Aydar Kadyrgulov) Обязанность по уплате налога
-        row.obligationPayTax = 0 // departmentParam.
+        // графа 9 - Обязанность по уплате налога
+        row.obligationPayTax = getValue(incomeParams, 'OBLIGATION')
 
         // графа 10
         tmp = ((((row.propertyPrice / propertyPriceSumm) * 100) + ((row.workersCount / workersCountSumm) * 100)) / 2)
@@ -203,7 +218,7 @@ void calc() {
         row.baseTaxOfRub = round(taxBase * row.baseTaxOf / 100, 0)
 
         // графа 12
-        row.subjectTaxStavka = departmentParamIncome.taxRate
+        row.subjectTaxStavka = getValue(incomeParams, 'TAX_RATE')
 
         // графа 13..21
         calcColumnFrom13To21(row, sumNal, reportPeriod)
@@ -211,14 +226,14 @@ void calc() {
 
     // добавить строку ЦА (скорректрированный) (графа 1..21)
     def caTotalRow = formData.createDataRow()
-    data.getAllCached().add(caTotalRow)
+    insert(data, caTotalRow)
     caTotalRow.setAlias('ca')
     caTotalRow.regionBank = 'Центральный аппарат (скорректированный)'
     setTotalStyle(caTotalRow)
 
     // добавить итого (графа 5..7, 10, 11, 13..21)
     def totalRow = formData.createDataRow()
-    data.getAllCached().add(totalRow)
+    insert(data, totalRow)
     totalRow.setAlias('total')
     totalRow.regionBank = 'Итого'
     setTotalStyle(totalRow)
@@ -260,7 +275,7 @@ void calc() {
 def logicalCheck(def useLog) {
     def data = getData(formData)
 
-    if (!data.getAllCached().isEmpty()) {
+    if (!getRows(data).isEmpty()) {
         // список проверяемых столбцов (графа 1..21)
         def requiredColumns = ['number', 'regionBank', 'regionBankDivision', 'kpp',
                 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'calcFlag',
@@ -270,7 +285,7 @@ def logicalCheck(def useLog) {
                 'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
                 'everyMonthForFourthKvartalNextPeriod']
 
-        for (def row : data.getAllCached()) {
+        for (def row : getRows(data)) {
             if (isFixedRow(row)) {
                 continue
             }
@@ -289,14 +304,20 @@ def logicalCheck(def useLog) {
  */
 def checkNSI() {
     def data = getData(formData)
-    if (!data.getAllCached().isEmpty()) {
-        for (def row : data.getAllCached()) {
+    if (!getRows(data).isEmpty()) {
+
+        // справочник "Подразделения"
+        def departmentRefDataProvider = refBookFactory.getDataProvider(30)
+
+        for (def row : getRows(data)) {
             if (isFixedRow(row)) {
                 continue
             }
 
+            def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
+
             // 1. Проверка совпадения наименования подразделения со справочным
-            if (false) {
+            if (departmentRecord.isEmpty()) {
                 logger.error('Неверное наименование подразделения!')
                 return false
             }
@@ -312,7 +333,7 @@ void consolidation() {
     def data = getData(formData)
 
     // удалить все строки и собрать из источников их строки
-    data.getAllCached().clear()
+    data.clear()
 
     /** Идентификатор шаблона источников (Приложение 5). */
     def id = 372
@@ -323,7 +344,7 @@ void consolidation() {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceData = getData(source)
-                sourceData.getAllCached().each { row ->
+                getRows(sourceData).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
                         newRow = formData.createDataRow()
 
@@ -335,13 +356,12 @@ void consolidation() {
                         newRow.workersCount = null // row.averageCost
                         newRow.subjectTaxCredit = null // row.averageNumber
 
-                        data.getAllCached().add(newRow)
+                        insert(data, newRow)
                     }
                 }
             }
         }
     }
-    save(data)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -415,7 +435,7 @@ void setTotalStyle(def row) {
  * @param row строка
  */
 def getIndex(def data, def row) {
-    data.getAllCached().indexOf(row)
+    getRows(data).indexOf(row)
 }
 
 /**
@@ -427,11 +447,11 @@ def getIndex(def data, def row) {
  */
 def getSum(def data, def columnAlias) {
     def from = 0
-    def to = data.getAllCached().size() - 2
+    def to = getRows(data).size() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -439,11 +459,11 @@ def getSum(def data, def columnAlias) {
  */
 def getSumAll(def data, def columnAlias) {
     def from = 0
-    def to = data.getAllCached().size() - 1
+    def to = getRows(data).size() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, data.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return summ(formData, getRows(data), new ColumnRange(columnAlias, from, to))
 }
 
 /**
@@ -500,7 +520,7 @@ def getColumnName(def row, def alias) {
  * @param data данные нф (helper)
  */
 void save(def data) {
-    data.save(data.getAllCached())
+    data.save(getRows(data))
 }
 
 /**
@@ -523,6 +543,25 @@ def getData(def formData) {
         return formDataService.getDataRowHelper(formData)
     }
     return null
+}
+
+/**
+ * Получить строку по алиасу.
+ *
+ * @param data данные нф (helper)
+ */
+def getRows(def data) {
+    return data.getAllCached();
+}
+
+/**
+ * Вставить новыую строку в конец нф.
+ *
+ * @param data данные нф
+ * @param row строка
+ */
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
 }
 
 /**
@@ -843,11 +882,32 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
  */
 def findCA(def data) {
     if (data != null) {
-        for (def row : data.getAllCached()) {
+        for (def row : getRows(data)) {
             if (row.regionBank == 'Центральный аппарат') {
                 return row
             }
         }
+    }
+    return null
+}
+
+/**
+ * Получить значение атрибута строки справочника.
+
+ * @param record строка справочника
+ * @param alias алиас
+ */
+def getValue(def record, def alias) {
+    def value = record.get(alias)
+    switch (value.getAttributeType()) {
+        case RefBookAttributeType.DATE :
+            return value.getDateValue()
+        case RefBookAttributeType.NUMBER :
+            return value.getNumberValue()
+        case RefBookAttributeType.STRING :
+            return value.getStringValue()
+        case RefBookAttributeType.REFERENCE :
+            return value.getReferenceValue()
     }
     return null
 }

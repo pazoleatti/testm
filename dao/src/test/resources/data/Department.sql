@@ -1,5 +1,3 @@
-
-
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (1, 'Банк', null, 1, null, null, null, '12');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)

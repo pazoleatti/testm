@@ -192,6 +192,9 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (row in dataRows) {
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
+
         incomeBankSum = row.incomeBankSum
         count = row.count
         // Расчет поля "Цена"
