@@ -1,6 +1,6 @@
 INSERT INTO REF_BOOK (ID, NAME) VALUES (1, 'Коды, определяющие способ представления налоговой декларации в налоговый орган');
-INSERT INTO REF_BOOK (ID, NAME) VALUES (2, 'Коды представления налоговой по месту нахождения (учёта)');
-INSERT INTO REF_BOOK (ID, NAME) VALUES (3, 'Коды ОКАТО и Муниципальных образований');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (2, 'Коды представления налоговой декларации по месту нахождения (учёта)');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (3, 'Коды ОКАТО');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (4, 'Коды субъектов Российской Федерации');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (5, 'Коды форм реорганизации и ликвидации организации');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (6, 'Коды налоговых льгот');
@@ -39,9 +39,9 @@ INSERT INTO ref_book(ID, NAME) VALUES (36,'Признак сделки, сове
 INSERT INTO ref_book(ID, NAME) VALUES (37,'Параметры подразделения по УКС');
 INSERT INTO ref_book(ID, NAME) VALUES (38,'Да/Нет');
 
-INSERT INTO REF_BOOK (ID, NAME) VALUES (40, 'Экологические классы транспортных средств');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (40, 'Экологические классы');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (41, 'Ставки транспортного налога');
-INSERT INTO REF_BOOK (ID, NAME) VALUES (42, 'Код вида транспортного средства');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (42, 'Коды видов транспортных средств');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (43, 'Коды единиц измерения налоговой базы на основании ОКЕИ (Выписка)');
 
 INSERT INTO REF_BOOK (ID, NAME) VALUES (50, 'Оборотная ведомость (Форма 0409101-СБ)');
