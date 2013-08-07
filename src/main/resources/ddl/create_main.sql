@@ -400,7 +400,8 @@ create table form_column (
   max_length number(4),
   checking  number(1) default 0 not null,
   attribute_id number(9),
-  format number(2)
+  format number(2),
+  filter varchar2(1000)
 );
 alter table form_column add constraint form_column_pk primary key (id);
 create sequence seq_form_column start with 10000;
@@ -430,6 +431,7 @@ comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
 comment on column form_column.format is 'Формат';
+comment on column form_column.filter is 'Условие фильтрации элементов справочника';
 ---------------------------------------------------------------------------------------------------
 create table department (
   id number(9) not null,
