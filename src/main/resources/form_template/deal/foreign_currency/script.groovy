@@ -50,7 +50,6 @@ switch (formDataEvent) {
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -184,6 +183,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // Порядковый номер строки
+        row.rowNumber = row.getIndex()
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -233,9 +237,10 @@ void deleteAllStatic() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
+        def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
+            break
         }
     }
 }
@@ -250,9 +255,10 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.fullName = 'Подитог:'
         newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 10
+        newRow.itog = 'Подитог:'
+        newRow.getCell('itog').colSpan = 11
+        newRow.rowNumber = dataRows.size()+1
 
         // Расчеты подитоговых значений
         def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
@@ -271,7 +277,7 @@ void addAllStatic() {
         newRow.outcomeSum = outcomeSumItg
         newRow.total = totalItg
 
-        dataRows.add(dataRows.size(), newRow)
-        dataRowHelper.insert(newRow, dataRows.size())
+       // dataRows.add(dataRows.size(), newRow)
+        dataRowHelper.insert(newRow, dataRows.size()+1)
     }
 }

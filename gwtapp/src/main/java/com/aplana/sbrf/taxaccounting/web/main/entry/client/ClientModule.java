@@ -6,12 +6,13 @@ import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogPresenter
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MessageDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.about.client.AboutModule;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditClientUIModule;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookStatementsModule;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdataimport.client.FormDataImportModule;
@@ -83,7 +84,8 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new PeriodsModule());
 		install(new SourcesModule());
         install(new DepartmentConfigModule());
-        install(new BookStatementsModule());
+        install(new BookerStatementsModule());
+        install(new RefBookListModule());
         install(new TaxFormNominationModule());
 	}
 }

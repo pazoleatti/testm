@@ -49,7 +49,6 @@ switch (formDataEvent) {
 void deleteRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
 }
 
 void addRow() {
@@ -202,7 +201,7 @@ void logicCheck() {
         checkNSI(row, "countryCode", "ОКСМ", 10)
         checkNSI(row, "countryCodeNumeric", "ОКСМ", 10)
         checkNSI(row, "countryCodeNumeric2", "ОКСМ", 10)
-        checkNSI(row, "region", "Коды субъектов Российской Федерации", 4)
+        checkNSI(row, "regionCode", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
         checkNSI(row, "metalName", "Коды драгоценных металлов", 40)
         checkNSI(row, "deliverySign", "Признаки физической поставки", 44)
@@ -230,6 +229,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
         // Расчет поля "Цена"
         row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
         // Расчет поля "Итого"
@@ -254,14 +258,14 @@ void calc() {
             row.city = null
             row.locality = null
             row.countryCodeNumeric2 = null
-            row.regionCode2 = null
+            row.region2 = null
             row.city2 = null
             row.locality2 = null
         }
         if (row.countryCodeNumeric == row.countryCodeNumeric2) {
-            row.foreignDeal = 0
+            row.foreignDeal = Long.valueOf(182632)
         } else {
-            row.foreignDeal = 1
+            row.foreignDeal = Long.valueOf(182633)
         }
     }
     dataRowHelper.update(dataRows);
@@ -296,10 +300,10 @@ void deleteAllStatic() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
+        def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            iter.remove()
+            break
         }
     }
 }
@@ -314,9 +318,11 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.fullName = 'Подитог:'
+        newRow.getCell('itog').colSpan = 23
+        newRow.itog = 'Подитог:'
         newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 22
+        newRow.getCell('fix').colSpan = 2
+        newRow.rowNum = dataRows.size()+1
 
         // Расчеты подитоговых значений
         def BigDecimal incomeSumItg = 0, outcomeSumItg = 0, totalItg = 0
@@ -335,7 +341,6 @@ void addAllStatic() {
         newRow.outcomeSum = outcomeSumItg
         newRow.total = totalItg
 
-        dataRows.add(dataRows.size(), newRow)
         dataRowHelper.insert(newRow, dataRows.size())
     }
 }

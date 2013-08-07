@@ -82,28 +82,28 @@ void checkUniq() {
  */
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (row in  dataRowHelper.getAllCached()) {
+    for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
         def rowNum = row.getIndex()
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
-         [
-                 'rowNumber',        // № п/п
-                 'fullName',    // Полное наименование юридического лица с указанием ОПФ
-                 'inn',         // ИНН/КИО
-                 'countryCode', // Страна регистрации
-                 'docNumber',   // Номер договора
-                 'docDate',     // Дата договора
-                 'dealNumber',  // Номер сделки
-                 'dealDate',    // Дата сделки
-                 'sum',         // Сумма доходов Банка по данным бухгалтерского учета, руб.
-                 'price',       // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
-                 'total',       // Итого стоимость без учета НДС, акцизов и пошлин, руб.
-                 'dealDoneDate' // Дата совершения сделки
+        [
+                'rowNumber',        // № п/п
+                'fullName',    // Полное наименование юридического лица с указанием ОПФ
+                'inn',         // ИНН/КИО
+                'countryCode', // Страна регистрации
+                'docNumber',   // Номер договора
+                'docDate',     // Дата договора
+                'dealNumber',  // Номер сделки
+                'dealDate',    // Дата сделки
+                'sum',         // Сумма доходов Банка по данным бухгалтерского учета, руб.
+                'price',       // Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+                'total',       // Итого стоимость без учета НДС, акцизов и пошлин, руб.
+                'dealDoneDate' // Дата совершения сделки
 
-         ].each {
+        ].each {
             def rowCell = row.getCell(it)
             if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
                 def msg = rowCell.column.name
@@ -175,14 +175,20 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
     for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+
+        // Порядковый номер строки
+        row.rowNumber = row.getIndex()
         // Расчет поля "Цена"
-        row.price= row.sum
+        row.price = row.sum
         // Расчет поля "Итог"
         row.total = row.sum
 
         // Расчет полей зависимых от справочников
-        if (row.fullNamePerson != null) {
-            def map = refBookService.getRecordData(9, row.fullNamePerson)
+        if (row.fullName != null) {
+            def map = refBookService.getRecordData(9, row.fullName)
             row.inn = map.INN_KIO.numberValue
             row.countryCode = map.COUNTRY.referenceValue
         } else {
@@ -222,13 +228,12 @@ void deleteAllStatic() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
+        def row = (DataRow) iter.next()
         if (row.getAlias() != null) {
             dataRowHelper.delete(row)
-            iter.remove()
+            break
         }
     }
-    dataRowHelper.update(dataRows);
 }
 
 /**
@@ -241,9 +246,11 @@ void addAllStatic() {
         def dataRows = dataRowHelper.getAllCached()
         def newRow = formData.createDataRow()
 
-        newRow.fullName = 'Подитог:'
+        newRow.getCell('itog').colSpan = 8
         newRow.setAlias('itg')
-        newRow.getCell('fullName').colSpan = 7
+        newRow.itog = 'Подитог:'
+        newRow.rowNumber = dataRows.size()+1
+        newRow.getCell('fix').colSpan = 2
 
         // Расчеты подитоговых значений
         def BigDecimal sumItg = 0, totalItg = 0
@@ -259,7 +266,6 @@ void addAllStatic() {
         newRow.sum = sumItg
         newRow.total = totalItg
 
-        dataRows.add(dataRows.size(), newRow)
-        dataRowHelper.insert(newRow, dataRows.size())
+        dataRowHelper.insert(newRow, dataRows.size()+1)
     }
 }

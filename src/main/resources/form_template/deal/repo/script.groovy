@@ -78,6 +78,7 @@ void deleteRow() {
  * Логические проверки
  */
 void logicCheck() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
     // Отчётный период
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     // Налоговый период
@@ -208,6 +209,8 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (row in dataRows) {
+        // Порядковый номер строки
+        row.rowNum = row.getIndex()
         // Расчет полей зависимых от справочников
         if (row.jurName != null) {
             def map = refBookService.getRecordData(9, row.jurName)

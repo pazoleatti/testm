@@ -1,0 +1,73 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
+    <ui:style>
+        .titleLabel {
+            font-size: 26px;
+            margin: 10px;
+        }
+
+        .pager {
+            margin-right: auto;
+            margin-left: auto;
+        }
+    </ui:style>
+    <g:DockLayoutPanel>
+        <g:north size="100">
+            <g:VerticalPanel width="100%">
+                <g:HorizontalPanel verticalAlignment="BOTTOM">
+                    <g:cell width="620px">
+                        <g:Label styleName="{style.titleLabel}" text="Список справочников"/>
+                    </g:cell>
+                    <g:cell width="220px" >
+                        <g:RadioButton ui:field="rbExternal" name="group1" text="Внешние справочники"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+                <g:HorizontalPanel>
+                    <g:cell width="300px">
+                        <g:Label/>
+                    </g:cell>
+                    <g:cell width="320px">
+                        <g:Label text="Наименование справочника"/>
+                    </g:cell>
+                    <g:cell width="220px">
+                        <g:RadioButton ui:field="rbInternal" name="group1" text="Внутренние справочники"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+                <g:HorizontalPanel verticalAlignment="TOP">
+                    <g:cell width="300px">
+                        <g:Label/>
+                    </g:cell>
+                    <g:cell width="220px">
+                        <g:TextBox width="210px" ui:field="filterText"/>
+                    </g:cell>
+                    <g:cell width="100px">
+                        <g:Button ui:field="findButton" text="Поиск"/>
+                    </g:cell>
+                    <g:cell width="220px">
+                        <g:RadioButton ui:field="rbAll" name="group1" text="Все справочники"  value="true"/>
+                    </g:cell>
+                    <g:cell horizontalAlignment="RIGHT">
+                        <g:Button ui:field="loadButton" text="Загрузить справочники"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+            </g:VerticalPanel>
+        </g:north>
+        <g:center>
+            <g:DockLayoutPanel>
+                <g:center>
+                    <g:ResizeLayoutPanel>
+                        <style:GenericDataGrid height="100%" ui:field="formDataTable"/>
+                    </g:ResizeLayoutPanel>
+                </g:center>
+                <g:south size="30">
+                    <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                         showFastForwardButton="false" fastForwardRows="0"
+                                         showLastPageButton="true" rangeLimited="true" styleName="{style.pager}"/>
+                </g:south>
+            </g:DockLayoutPanel>
+        </g:center>
+
+    </g:DockLayoutPanel>
+</ui:UiBinder>
