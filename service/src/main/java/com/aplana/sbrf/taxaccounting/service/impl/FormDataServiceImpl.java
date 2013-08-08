@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,12 +36,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -51,6 +48,10 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
+
+	public static final String TMP_FILE_NAME = "fileToCheck";
+	public static final String SIGN_FILE_NAME = "sign";
+	public static final String IGNORE_URL = "http://ignore/";
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -76,6 +77,10 @@ public class FormDataServiceImpl implements FormDataService {
     private ReportPeriodService reportPeriodService;
     @Autowired
     private EventLauncher eventHandlerLauncher;
+	@Autowired
+	private SignService signService;
+	@Autowired(required = false)
+	private URL signDataPath;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -144,6 +149,23 @@ public class FormDataServiceImpl implements FormDataService {
                                int departmentId, FormDataKind kind, int reportPeriodId, InputStream inputStream, String fileName) {
         if (formDataAccessService.canCreate(userInfo, formTemplateId, kind,
                 departmentId, reportPeriodId)) {
+	        boolean checkSuccess = true;
+	        if ((signDataPath != null) && !signDataPath.toString().equals(IGNORE_URL)) { //TODO временное решение с IGNORE_URL
+		        try {
+			        OutputStream outputStream =
+					        new FileOutputStream(new File(TMP_FILE_NAME));
+			        IOUtils.copy(inputStream, outputStream);
+			        OutputStream outputSignStream =
+					        new FileOutputStream(new File(SIGN_FILE_NAME));
+			        IOUtils.copy(signDataPath.openStream(), outputSignStream);
+			        checkSuccess = signService.checkSign(TMP_FILE_NAME, SIGN_FILE_NAME, 0);
+		        } catch (Exception e) {
+			        throw new ServiceException("Произошла ошибка при проверке подписи.", e);
+		        }
+	        }
+	        if (!checkSuccess) {
+		        throw new ServiceException("Файл не подписан.");
+	        }
             FormData fd = formDataDao.getWithoutRows(formDataId);
             fd.initFormTemplateParams(formTemplateDao.get(formTemplateId));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();

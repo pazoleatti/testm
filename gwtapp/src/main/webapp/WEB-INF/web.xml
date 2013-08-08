@@ -21,6 +21,9 @@
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
+    <listener>
+        <listener-class>com.aplana.sbrf.taxaccounting.web.listner.SessionDestroyAttributeListener</listener-class>
+    </listener>
 
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
@@ -52,14 +55,14 @@
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
+	<!--<servlet>
 		<servlet-name>logout</servlet-name>
 		<servlet-class>com.aplana.sbrf.taxaccounting.web.servlet.LogoutServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>logout</servlet-name>
 		<url-pattern>/logout</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 
 	<servlet>
 		<servlet-name>login</servlet-name>
@@ -136,7 +139,15 @@
 		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
 		<res-auth>Container</res-auth>
 		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>	
+	</resource-ref>
+
+    <resource-ref>
+        <description>Адрес публичных ключей для проверки подписи</description>
+        <res-ref-name>services/aplana/taxaccounting/Sign</res-ref-name>
+        <res-type>java.net.URL</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	

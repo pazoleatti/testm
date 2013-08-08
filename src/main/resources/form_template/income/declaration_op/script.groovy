@@ -1,3 +1,8 @@
+package form_template.income.declaration_op
+
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+
 /**
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
@@ -41,16 +46,40 @@ def typeNP = '1'
 def departmentId = declarationData.departmentId
 def reportPeriodId = declarationData.reportPeriodId
 
-/** Настройки подразделения. */
-// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-def departmentParam = departmentService.getDepartmentParam(departmentId)
-if (departmentParam == null) {
-    throw new Exception("Ошибка при получении настроек обособленного подразделения")
+// справочник "Параметры подразделения по налогу на прибыль" - начало
+def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
+def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null,
+        "DEPARTMENT_ID = '" + departmentId + "'", null);
+if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
+    throw new Exception("Не удалось получить настройки обособленного подразделения.")
 }
-
-/** Параметры подразделения по налогу на прибыль. */
-// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-def departmentParamIncome = departmentService.getDepartmentParamIncome(departmentId)
+def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
+if (incomeParams == null) {
+    throw new Exception("Ошибка при получении настроек обособленного подразделения.")
+}
+def reorgFormCode = getValue(incomeParams, 'REORG_FORM_CODE')
+def taxOrganCode = getValue(incomeParams, 'TAX_ORGAN_CODE')
+def okvedCode =  getValue(incomeParams, 'OKVED_CODE')
+def phone = getValue(incomeParams, 'PHONE')
+def name = getValue(incomeParams, 'NAME')
+def inn = getValue(incomeParams, 'INN')
+def kpp = getValue(incomeParams, 'KPP')
+def reorgInn = getValue(incomeParams, 'REORG_INN')
+def reorgKpp = getValue(incomeParams, 'REORG_KPP')
+def okato = getValue(incomeParams, 'OKATO')
+def signatoryId = getValue(incomeParams, 'SIGNATORY_ID')
+def taxRate = getValue(incomeParams, 'TAX_RATE')
+def sumTax = getValue(incomeParams, 'SUM_TAX') // вместо departmentParamIncome.externalTaxSum
+def appVersion = getValue(incomeParams, 'APP_VERSION')
+def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
+def taxPlaceTypeCode = getValue(incomeParams, 'TAX_PLACE_TYPE_CODE')
+def signatorySurname = getValue(incomeParams, 'SIGNATORY_SURNAME')
+def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
+def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
+def approveDocName = getValue(incomeParams, 'APPROVE_DOC_NAME')
+def approveOrgName = getValue(incomeParams, 'APPROVE_ORG_NAME')
+def sumDividends = getValue(incomeParams, 'SUM_DIVIDENDS')
+// справочник "Параметры подразделения по налогу на прибыль" - конец
 
 /** Отчётный период. */
 def reportPeriod = reportPeriodService.get(reportPeriodId)
@@ -96,7 +125,7 @@ def dataRowsHelperAdvance = getDataRowHelper(formDataAdvance)
  */
 
 def period = 0
-if (departmentParam.reorgFormCode == 50) {
+if (reorgFormCode == 50) {
     period = 50
 } else if (reportPeriod.order != null) {
     def values = [21, 31, 33, 34]
@@ -139,7 +168,7 @@ def ubitDogovDUI = empty;
 def virRealPred = empty
 
 /** ПрПодп. */
-def prPodp = departmentParamIncome.signatoryId
+def prPodp = signatoryId
 /** ВырРеалТовСоб. */
 def virRealTovSob = getVirRealTovSob(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
@@ -210,8 +239,8 @@ def xmlbuilder = new MarkupBuilder(xml)
 
 xmlbuilder.Файл(
         ИдФайл : declarationService.generateXmlFileId(5, departmentId),
-        ВерсПрог : departmentParamIncome.appVersion,
-        ВерсФорм : departmentParamIncome.formatVersion) {
+        ВерсПрог : appVersion,
+        ВерсФорм : formatVersion) {
 
     // Титульный лист
     Документ(
@@ -219,37 +248,37 @@ xmlbuilder.Файл(
             ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
             Период : period,
             ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
-            КодНО : departmentParam.taxOrganCode,
+            КодНО : taxOrganCode,
             НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
-            ПоМесту : departmentParamIncome.taxPlaceTypeCode) {
+            ПоМесту : taxPlaceTypeCode) {
 
         СвНП(
-                ОКВЭД : departmentParam.okvedCode,
-                Тлф : departmentParam.phone) {
+                ОКВЭД : okvedCode,
+                Тлф : phone) {
 
             НПЮЛ(
-                    НаимОрг : departmentParam.name,
-                    ИННЮЛ : departmentParam.inn,
-                    КПП : departmentParam.kpp) {
+                    НаимОрг : name,
+                    ИННЮЛ : inn,
+                    КПП : kpp) {
 
-                if (departmentParam.reorgFormCode != null) {
+                if (reorgFormCode != null) {
                     СвРеоргЮЛ(
-                            ФормРеорг : departmentParam.reorgFormCode,
-                            ИННЮЛ : departmentParam.reorgInn,
-                            КПП : departmentParam.reorgKpp)
+                            ФормРеорг : reorgFormCode,
+                            ИННЮЛ : reorgInn,
+                            КПП : reorgKpp)
                 }
             }
         }
 
         Подписант(ПрПодп : prPodp) {
             ФИО(
-                    Фамилия : departmentParamIncome.signatorySurname,
-                    Имя : departmentParamIncome.signatoryFirstName,
-                    Отчество : departmentParamIncome.signatoryLastName)
+                    Фамилия : signatorySurname,
+                    Имя : signatoryFirstName,
+                    Отчество : signatoryLastName)
             if (prPodp != 1) {
                 СвПред(
-                        [НаимДок : departmentParamIncome.approveDocName] +
-                                (departmentParamIncome.approveOrgName != null ? [НаимОрг : departmentParamIncome.approveOrgName] : [:] )
+                        [НаимДок : approveDocName] +
+                                (approveOrgName != null ? [НаимОрг : approveOrgName] : [:] )
                 )
             }
         }
@@ -261,7 +290,7 @@ xmlbuilder.Файл(
                 // 0..n // всегда один
                 НалПУАв(
                         ТипНП : typeNP,
-                        ОКАТО : departmentParam.okato) {
+                        ОКАТО : okato) {
 
                     // 0..1
                     ФедБдж(
@@ -269,7 +298,7 @@ xmlbuilder.Файл(
                             НалПУ : empty)
 
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
-                    def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+                    def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                     tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
                     nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
                     // 0..1
@@ -293,7 +322,7 @@ xmlbuilder.Файл(
                     НалПУМес(
                             [ТипНП : typeNP] +
                                     (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                    [ОКАТО : departmentParam.okato]) {
+                                    [ОКАТО : okato]) {
 
                         def avPlat1 = empty
                         def avPlat2 = empty
@@ -311,7 +340,7 @@ xmlbuilder.Файл(
                             // (как определять пока не ясно, толи по id, толи по id сбербанка,
                             // толи по КПП = 775001001), при формировании декларации подразделения
                             // надо брать строку appl5List02Row120 относящегося к этому подразделению
-                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat1 = (long) appl5List02Row120 / 3
                             avPlat2 = avPlat1
@@ -357,7 +386,7 @@ xmlbuilder.Файл(
             def mesAvPlat1CvSled = emptyNull
 
             // получение из нф авансовых платежей строки соответствующей текущему подразделению
-            def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+            def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
             if (tmpRow != null) {
                 obRasch = row.calcFlag
                 naimOP = row.regionBankDivision
@@ -788,4 +817,25 @@ def getUbitki(dataRowsHelper, row201, row230) {
  */
 def getDataRowHelper(def form) {
     return (form != null ? formDataService.getDataRowHelper(form) : null)
+}
+
+/**
+ * Получить значение атрибута строки справочника.
+
+ * @param record строка справочника
+ * @param alias алиас
+ */
+def getValue(def record, def alias) {
+    def value = record.get(alias)
+    switch (value.getAttributeType()) {
+        case RefBookAttributeType.DATE :
+            return value.getDateValue()
+        case RefBookAttributeType.NUMBER :
+            return value.getNumberValue()
+        case RefBookAttributeType.STRING :
+            return value.getStringValue()
+        case RefBookAttributeType.REFERENCE :
+            return value.getReferenceValue()
+    }
+    return null
 }
