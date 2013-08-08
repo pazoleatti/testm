@@ -1,3 +1,5 @@
+package refbook.okato
+
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
@@ -5,10 +7,16 @@ import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
 import java.text.SimpleDateFormat
 
-def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
-def reader
+/**
+ * загрузка справочника ОКАТО
+ *
+ * @author Stanislav Yasinskiy
+ */
 
-def Date version  //дата актуальности
+def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
+def reader = null
+
+def Date version = null  //дата актуальности
 def Map<String, RefBookAttributeType> attributeTypeMap = new HashMap<String, RefBookAttributeType>()  // аттрибуты и их типы
 def boolean recordChange = false // флаг перехода к новой записи справочника
 def Map<String, RefBookValue> recordsMap = new HashMap<String, RefBookValue>() // аттрибут и его значение
@@ -27,7 +35,7 @@ try {
             // Список аттрибутов с типом
             if (reader.getName().equals(QName.valueOf("fielddesc"))) {
                 def String type = reader.getAttributeValue(null, "type")
-                def RefBookAttributeType refBookAttributeType
+                def RefBookAttributeType refBookAttributeType = null
                 if (type.equals("string"))
                     refBookAttributeType = RefBookAttributeType.STRING
                 else if (type.equals("numeric"))
@@ -55,15 +63,15 @@ try {
                 def name = reader.getAttributeValue(null, "name")
                 def value = reader.getAttributeValue(null, "value")
                 def RefBookAttributeType type = attributeTypeMap.get(name)
-                def RefBookValue refBookValue
+                def RefBookValue refBookValue = null
                 if (reader.getAttributeValue(null, "null").toBoolean()) {
                     refBookValue = new RefBookValue(type, null)
                 } else if (type.equals(RefBookAttributeType.STRING)) {
-                    refBookValue = new RefBookValue(type, value.toString())
+                    refBookValue = new RefBookValue(type, value)
                 } else if (type.equals(RefBookAttributeType.NUMBER)) {
                     refBookValue = new RefBookValue(type, value.toLong())
                 } else if (type.equals(RefBookAttributeType.DATE)) {
-                    refBookValue = new RefBookValue(type, sdf.parse(value.toString()))
+                    refBookValue = new RefBookValue(type, sdf.parse(value))
                 }
                 recordsMap.put(name, refBookValue)
             }
@@ -77,15 +85,12 @@ try {
 // TODO аккуратно проверить запись в бд
 //refBookDataProvider.updateRecords(version, recordsList)
 
-// дебаг
-if (false) {
-    println("version = " + version)
-    println("attribute count = " + attributeTypeMap.size())
-    println("record count = " + recordsList.size())
-    recordsList.each { map ->
-        println("==========================")
-        map.each {
-            println("attr = " + it.key + "; value = [s:" + it.value.getStringValue() + "; n:" + it.value.getNumberValue() + "; d:" + it.value.getDateValue())
-        }
-    }
-}
+//дебаг
+println("version = " + version)
+println("attribute count = " + attributeTypeMap.size())
+println("record count = " + recordsList.size())
+//recordsList.each { map ->
+//println("==========================")
+//map.each {
+//println("attr = " + it.key + "; value = [s:" + it.value.getStringValue() + "; n:" + it.value.getNumberValue() + "; d:" + it.value.getDateValue())
+//}}}
