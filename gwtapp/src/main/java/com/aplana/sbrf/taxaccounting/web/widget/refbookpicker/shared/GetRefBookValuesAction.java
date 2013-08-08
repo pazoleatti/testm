@@ -13,10 +13,11 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  *
  */
 public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValuesResult> implements Serializable, ActionName{
-	private static final long serialVersionUID = -5419717754708198048L;
+	private static final long serialVersionUID = -5419717754608198048L;
 	
 	private long refBookAttrId;
 	private String searchPattern;
+	private String filter;
 	private PagingParams pagingParams;
 	private Date version;
 	
@@ -44,11 +45,18 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
 	public void setVersion(Date version) {
 		this.version = version;
 	}
+	public String getFilter() {
+		return filter;
+	}
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
 	
 	@Override
 	public String getName() {
 		return "Получение значений справочника";
 	}
+
 
 
 }
