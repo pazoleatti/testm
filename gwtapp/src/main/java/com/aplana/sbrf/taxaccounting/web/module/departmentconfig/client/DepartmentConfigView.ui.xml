@@ -57,7 +57,7 @@
                             </g:HorizontalPanel>
                             <g:HorizontalPanel>
                                 <g:Label text="Субъект Российской Федерации (код)" width="250px"/>
-                                <r:RefBookPickerPopupWidget ui:field="dictRegionId" width="100px" acceptableIntValues="9"/>
+                                <r:RefBookPickerPopupWidget ui:field="dictRegionId" width="100px" attributeIdInt="9"/>
                             </g:HorizontalPanel>
                             <g:HorizontalPanel>
                                 <g:Label text="Номер контактного телефона" width="250px"/>
@@ -67,7 +67,7 @@
                                 <g:Label text="ИНН" width="40px"/>
                                 <g:TextBox width="100px" ui:field="inn"/>
                                 <g:Label text="ОКАТО" styleName="{style.sps}" width="60px"/>
-                                <r:RefBookPickerPopupWidget ui:field="okato" width="115px" acceptableIntValues="7"/>
+                                <r:RefBookPickerPopupWidget ui:field="okato" width="115px" />
                                 <g:Label text="Код налогового органа" width="160px" styleName="{style.sps}"/>
                                 <g:TextBox width="100px" ui:field="taxOrganCode"/>
                             </g:HorizontalPanel>
@@ -75,13 +75,13 @@
                                 <g:Label text="КПП" width="40px"/>
                                 <g:TextBox width="100px" ui:field="kpp"/>
                                 <g:Label text="ОКВЭД" styleName="{style.sps}" width="60px"/>
-                                <r:RefBookPickerPopupWidget ui:field="okvedCode" width="115px" acceptableIntValues="210"/>
+                                <r:RefBookPickerPopupWidget ui:field="okvedCode" width="115px" attributeIdInt="210"/>
                             </g:HorizontalPanel>
                             <!-- Сведения о реорганизации -->
                             <g:Label styleName="{style.boldLabel}" text="Сведения о реорганизации"/>
                             <g:HorizontalPanel>
                                 <g:Label text="Код формы реорганизации и ликвидации" width="250px"/>
-                                <r:RefBookPickerPopupWidget ui:field="reorgFormCode" width="105px" acceptableIntValues="13"/>
+                                <r:RefBookPickerPopupWidget ui:field="reorgFormCode" width="105px" attributeIdInt="13"/>
                             </g:HorizontalPanel>
                             <g:HorizontalPanel>
                                 <g:Label text="ИНН реорганизованной организации" width="250px"/>
@@ -101,7 +101,7 @@
                                 <g:Label styleName="{style.boldLabel}" text="Ответственный за декларацию"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Признак лица подписавшего документ" width="250px"/>
-                                    <r:RefBookPickerPopupWidget ui:field="signatoryId" width="355px" acceptableIntValues="213"/>
+                                    <r:RefBookPickerPopupWidget ui:field="signatoryId" width="355px" attributeIdInt="213"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel>
                                     <g:Label text="Фамилия подписанта" width="250px"/>
@@ -131,7 +131,7 @@
                                 <g:Label styleName="{style.boldLabel}" text="Прочие сведения"/>
                                 <g:HorizontalPanel>
                                     <g:Label text="Код места, по которому представляется документ" width="250px"/>
-                                    <r:RefBookPickerPopupWidget ui:field="taxPlaceTypeCode" width="145px" acceptableIntValues="3"/>
+                                    <r:RefBookPickerPopupWidget ui:field="taxPlaceTypeCode" width="145px" attributeIdInt="3"/>
                                     <g:HorizontalPanel ui:field="taxRatePanel">
                                         <g:Label text="Ставка налога" width="110px" styleName="{style.sps}"/>
                                         <g:DoubleBox ui:field="taxRate" width="75px" styleName="{style.sps}"/>
@@ -145,9 +145,9 @@
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel ui:field="payPanel">
                                     <g:Label text="Обязанность по уплате налога" width="250px"/>
-                                    <r:RefBookPickerPopupWidget ui:field="obligation" width="145px" acceptableIntValues="110"/>
+                                    <r:RefBookPickerPopupWidget ui:field="obligation" width="145px" attributeIdInt="110"/>
                                     <g:Label text="Признак расчёта" width="110px" styleName="{style.sps}"/>
-                                    <r:RefBookPickerPopupWidget ui:field="type" width="80px" acceptableIntValues="120" styleName="{style.sps}"/>
+                                    <r:RefBookPickerPopupWidget ui:field="type" width="80px" attributeIdInt="120" styleName="{style.sps}"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel ui:field="sumTaxPanel">
                                     <g:Label
