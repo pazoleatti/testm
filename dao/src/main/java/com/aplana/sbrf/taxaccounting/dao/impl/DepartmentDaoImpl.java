@@ -67,12 +67,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Department> listDepartments(){
         return departmentMapper.getAll();
     }
-
-	@Override
-	public List<Department> getIsolatedDepartments() {
-		return departmentMapper.getIsolatedDepartments();
-	}
-	
 	
 
 	protected class DepartmentJdbcMapper implements RowMapper<Department> {

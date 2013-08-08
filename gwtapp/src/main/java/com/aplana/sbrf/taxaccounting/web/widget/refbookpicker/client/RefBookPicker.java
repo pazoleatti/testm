@@ -33,6 +33,30 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	
 	
 	/**
+	 * Устанавливает параметры и инициализирует компонент.
+	 * В компоненте доступны версии справочника c учетом фильтра.
+	 * В компоненте доступны версии справочника из диапазона дат.
+	 * 
+	 * @param refBookAttrId
+	 * @param filter
+	 */
+	public void setAcceptableValues(long refBookAttrId, String filter);
+	
+	
+	/**
+	 * Устанавливает параметры и инициализирует компонент.
+	 * В компоненте доступны версии справочника c учетом фильтра.
+	 * 
+	 * 
+	 * @param refBookAttrId
+	 * @param filter
+	 * @param date1
+	 * @param date2
+	 */
+	public void setAcceptableValues(long refBookAttrId, String filter, Date date1, Date date2);
+	
+	
+	/**
 	 * @return
 	 */
 	public String getDereferenceValue();

@@ -1,26 +1,38 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
-			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
-		>
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+	xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
 	<g:VerticalPanel>
 		<g:cell width="100%" horizontalAlignment="CENTER">
 			<g:ValueListBox ui:field="version" width="100%" />
 		</g:cell>
 		<g:cell width="100%" horizontalAlignment="CENTER">
-			<g:TextBox ui:field="txtFind" text="" width="100%" />
+			<g:HorizontalPanel width="100%">
+				<g:cell horizontalAlignment="LEFT">
+					<g:TextBox width="100%" ui:field="txtFind" text="" />
+				</g:cell>
+				<g:cell horizontalAlignment="RIGHT" width="12px">
+					<g:FlowPanel />
+				</g:cell>
+				<g:cell horizontalAlignment="RIGHT" width="60px">
+					<g:Button text="Найти" ui:field="searchButton" width="100%"/>
+				</g:cell>
+			</g:HorizontalPanel>
 		</g:cell>
-		<g:cell height="300px" width="200px">
-				<style:GenericCellTable width="100%" ui:field="cellTable" styleName="dictionaryPickerTable"/>
+		<g:cell width="200px">
+			<style:GenericCellTable width="100%" ui:field="cellTable"
+				styleName="dictionaryPickerTable" />
 		</g:cell>
 		<g:cell>
-			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM' width="100%">
+			<g:HorizontalPanel verticalAlignment='ALIGN_BOTTOM'
+				width="100%">
 				<g:cell>
-					<pager:FlexiblePager ui:field='pager' location='CENTER' showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" />
+					<pager:FlexiblePager ui:field='pager' location='CENTER'
+						showFastForwardButton="false" fastForwardRows="0"
+						showLastPageButton="true" />
 				</g:cell>
 				<g:cell horizontalAlignment='ALIGN_RIGHT'>
-					<g:Button ui:field="btnClear" text="Очистить"/>
+					<g:Button ui:field="clearButton" text="Очистить" />
 				</g:cell>
 			</g:HorizontalPanel>
 		</g:cell>
