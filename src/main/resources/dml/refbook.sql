@@ -46,6 +46,10 @@ INSERT INTO REF_BOOK (ID, NAME) VALUES (42, 'Коды видов транспо�
 INSERT INTO REF_BOOK (ID, NAME) VALUES (50, 'Оборотная ведомость (Форма 0409101-СБ)');
 INSERT INTO REF_BOOK (ID, NAME) VALUES (52, 'Отчет о прибылях и убытках (Форма 0409102-СБ)');
 
+INSERT INTO REF_BOOK (ID, NAME) VALUES (60, 'Части сделок');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (61, 'Коды сделок');
+INSERT INTO REF_BOOK (ID, NAME) VALUES (62, 'Признаки ценных бумаг');
+
 
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (1,	1,	'Код',										'CODE',				1,		0,		null,	null,	1,	null,	2);
 INSERT INTO REF_BOOK_ATTRIBUTE  (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH) VALUES (2,	1,	'Наименование',								'NAME',				1,		1,		null,	null,	1,	null,	510);
@@ -310,10 +314,6 @@ INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 523, 52,'Подразделение','DEPARTMENT_ID', 4, 4, 30, 161, 1, null, 10);
 
 
-
-
-
-
 update ref_book_attribute
 set width=10
 where width<10 and (ref_book_id>=22 OR ref_book_id<=9);
@@ -321,5 +321,15 @@ where width<10 and (ref_book_id>=22 OR ref_book_id<=9);
 update ref_book_attribute
 set width=100
 where width>100 and (ref_book_id>=22 OR ref_book_id<=9);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 601, 60,'Код части сделки','CODE', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 602, 60,'Часть сделки','NAME', 1, 2,null,null,1,null, 100);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 611, 61,'Код сделки','CODE', 2, 1,null,null,1, 0, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 612, 61,'Тип сделки','TYPE', 1, 2,null,null,1,null, 100);
+
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 621, 62,'Код признака','CODE', 1, 1,null,null,1,null, 10);
+INSERT INTO ref_book_attribute(ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH) VALUES ( 622, 62,'Признак ценной бумаги','NAME', 1, 2,null,null,1,null, 100);
+
 
 commit;
