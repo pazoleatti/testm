@@ -40,10 +40,8 @@ public class DepartmentServiceImplTest {
 		ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
 		when(departmentDao.getChildren(DEPARTMENT_TB1_ID)).thenReturn(listDep);
 		when(departmentDao.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(department);
-		when(departmentDao.getIsolatedDepartments()).thenReturn(listDep);
 		Assert.assertEquals(3, departmentService.getChildren(DEPARTMENT_TB1_ID).size());
 		Assert.assertEquals(department, departmentService.getDepartment(DEPARTMENT_TB1_ID));
-		Assert.assertEquals(3, departmentService.getIsolatedDepartments().size());
 	}
 	
 	@Test

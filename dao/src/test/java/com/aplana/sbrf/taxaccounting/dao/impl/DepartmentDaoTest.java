@@ -57,12 +57,7 @@ public class DepartmentDaoTest {
 	public void testGetIncorrectId() {
 		departmentDao.getDepartment(-1);
 	}
-	
-	@Test
-	public void testGetAll() {
-		departmentDao.listDepartments();
-		Assert.assertEquals(0, departmentDao.getIsolatedDepartments().size()); //TODO: было 3 - исправить обратно на 0 после переделки на верс. справочники (Marat Fayzullin 2013-08-02)
-	}
+
 
 	@Test
 	public void getParentTest(){

@@ -58,6 +58,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	private boolean refBookPikerAlredyInit;
 	private Date startDate;
 	private Date endDate;
+	private String filter;
 
 	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
@@ -66,6 +67,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
 		this.startDate = columnContext.getStartDate();
 		this.endDate = columnContext.getEndDate();
+		this.filter = ((RefBookColumn) columnContext.getColumn()).getFilter();
+		
 
 		// Create popup panel
 		this.panel = new PopupPanel(true, true) {
@@ -129,6 +132,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 							Long value = event.getValue();
 							//setViewData(key, String.valueOf(value));
 							
+							@SuppressWarnings("unchecked")
 							DataRow<Cell> dataRow = (DataRow<Cell>) key;
 							Cell cell = dataRow.getCell(columnAlias);
 							cell.setRefBookDereference(refBookPiker.getDereferenceValue());
@@ -156,7 +160,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		//this.valueUpdater = valueUpdater;
 
 		if (!refBookPikerAlredyInit){
-			refBookPiker.setAcceptableValues(refBookAttrId, startDate, endDate);
+			refBookPiker.setAcceptableValues(refBookAttrId, filter, startDate, endDate);
 			refBookPikerAlredyInit = true;
 		}
 		

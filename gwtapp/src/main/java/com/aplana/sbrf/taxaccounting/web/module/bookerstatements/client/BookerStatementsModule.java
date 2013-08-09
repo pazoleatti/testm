@@ -8,11 +8,11 @@ import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
  * @author Dmitriy Levykin
  *
  */
-public class BookStatementsModule extends AbstractPresenterModule {
+public class BookerStatementsModule extends AbstractPresenterModule {
 
 	@Override
 	protected void configure() {
-		bindPresenter(BookStatementsPresenter.class, BookStatementsPresenter.MyView.class,
-                BookStatementsView.class, BookStatementsPresenter.MyProxy.class);
+		bindPresenter(BookerStatementsPresenter.class, BookerStatementsPresenter.MyView.class,
+                BookerStatementsView.class, BookerStatementsPresenter.MyProxy.class);
 	}
 }

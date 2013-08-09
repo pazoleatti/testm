@@ -37,11 +37,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public List<Department> getIsolatedDepartments() {
-		return departmentDao.getIsolatedDepartments();
-	}
-
-	@Override
  	public Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments){
 		Map<Integer, Department> departmentSet = new HashMap<Integer, Department>();
 		for(Integer departmentId : availableDepartments){

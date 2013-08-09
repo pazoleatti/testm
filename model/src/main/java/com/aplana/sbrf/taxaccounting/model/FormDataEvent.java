@@ -48,7 +48,10 @@ public enum FormDataEvent implements Serializable {
 
 	ADD_ROW(301, "Добавить строку"),
 	DELETE_ROW(303, "Удалить строку"),
-	AFTER_LOAD(302, "Загрузка");	/* Вызывается после того как форма была получена из БД. */
+	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД. */
+
+    LOGIN(501, "Вход пользователя в Систему"),
+    LOGOUT(502, "Выход пользователя из Системы");
 
 	private String title;
 	private int code;
