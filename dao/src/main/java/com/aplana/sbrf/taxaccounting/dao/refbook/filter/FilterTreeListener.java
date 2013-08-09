@@ -1,3 +1,4 @@
+// Generated from FilterTree.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
@@ -43,15 +44,15 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitQuery(@NotNull FilterTreeParser.QueryContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#expr}.
+	 * Enter a parse tree produced by {@link FilterTreeParser#standartExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(@NotNull FilterTreeParser.ExprContext ctx);
+	void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#expr}.
+	 * Exit a parse tree produced by {@link FilterTreeParser#standartExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(@NotNull FilterTreeParser.ExprContext ctx);
+	void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#withbrakets}.
@@ -74,6 +75,17 @@ public interface FilterTreeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitOperand(@NotNull FilterTreeParser.OperandContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link FilterTreeParser#isNullExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FilterTreeParser#isNullExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#link_type}.
