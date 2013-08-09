@@ -263,16 +263,16 @@ public class RefBookDaoTest {
         PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
         Map<String, RefBookValue> record = data.getRecords().get(1);
 
-        record.get("name").setValue("Вий. Туда и обратно");
-        record.get("pagecount").setValue(123);
-        record.get("author").setValue(7L);
+        record.get(RefBookDaoTest.ATTRIBUTE_NAME).setValue("Вий. Туда и обратно");
+        record.get(ATTRIBUTE_PAGECOUNT).setValue(123);
+        record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).setValue(7L);
         refBookDao.updateRecords(refBookId, version, Arrays.asList(record));
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
         record = data.getRecords().get(1);
-        Assert.assertEquals(record.get("name").getStringValue(), "Вий. Туда и обратно");
-        Assert.assertEquals(record.get("pagecount").getNumberValue().longValue(), 123L);
-        Assert.assertEquals(record.get("author").getReferenceValue(), Long.valueOf(7L));
+        Assert.assertEquals(record.get(RefBookDaoTest.ATTRIBUTE_NAME).getStringValue(), "Вий. Туда и обратно");
+        Assert.assertEquals(record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().longValue(), 123L);
+        Assert.assertEquals(record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).getReferenceValue(), Long.valueOf(7L));
     }
 
     @Test
