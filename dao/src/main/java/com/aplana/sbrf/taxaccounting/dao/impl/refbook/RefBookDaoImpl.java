@@ -181,19 +181,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append("  r.id as \"");
         sql.append(RefBook.RECORD_ID_ALIAS);
         sql.append("\",\n");
-        if (isSupportOver()) {
-            // Значит база данных Oracle а не HSQL и она поддеживает row_number()
+        if (isSupportOver() && sortAttribute != null) {
+            // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
             sql.append("row_number()");
-            if (sortAttribute != null) {
-                // Надо делать сортировку
-                sql.append(" over (order by \'");
-                sql.append("a");
-                sql.append(sortAttribute.getAlias());
-                sql.append(".");
-                sql.append(sortAttribute.getAttributeType().toString());
-                sql.append("_value");
-				sql.append("\')");
-            }
+            // Надо делать сортировку
+            sql.append(" over (order by \'");
+            sql.append("a");
+            sql.append(sortAttribute.getAlias());
+            sql.append(".");
+            sql.append(sortAttribute.getAttributeType().toString());
+            sql.append("_value");
+            sql.append("\')");
             sql.append(" as row_number_over,\n");
         } else {
             // База тестовая и не поддерживает row_number() значит сортировка работать не будет
@@ -208,7 +206,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql.append(attribute.getAttributeType().toString());
             sql.append("_value as \"");
             sql.append(alias);
-			sql.append("\"");
+            sql.append("\"");
             if (i < attributes.size() - 1) {
                 sql.append(",\n");
             }
@@ -269,7 +267,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql.append(attribute.getAttributeType().toString());
             sql.append("_value as \"");
             sql.append(alias);
-			sql.append("\"");
+            sql.append("\"");
             if (i < attributes.size() - 1) {
                 sql.append(",\n");
             }
