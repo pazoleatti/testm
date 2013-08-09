@@ -28,13 +28,11 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	private String dereferenceValue;
 	
 	private Long refBookAttrId;
-	
-	private String searchPattern;
-	private Date version;
+	private String filter;
 	
 
 	@Override
-	public void init(final long refBookAttrId, Date date1, Date date2) {
+	public void init(final long refBookAttrId, final String filter, Date date1, Date date2) {
 		
 		
 		InitRefBookAction initRefBookAction = new InitRefBookAction();
@@ -51,7 +49,8 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 				if (!result.getVersions().isEmpty()){
 					getView().setVersions(result.getVersions());
 				}
-				getView().refreshData();
+				RefBookPickerWidgetPresenter.this.filter = filter;
+				getView().refreshDataAndGoToFirstPage();
 			}
 			
 		}, this));
@@ -76,7 +75,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		
 		void setRowData(int start, List<RefBookItem> values, int size);
 		RefBookItem getSelectionValue();
-		void refreshData();
+		void refreshDataAndGoToFirstPage();
 		void widgetFireChangeEvent(Long value);
 		HandlerRegistration widgetAddValueHandler(ValueChangeHandler<Long> handler);
 	}
@@ -96,9 +95,8 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		int max = maxRows;
 
 		GetRefBookValuesAction action = new GetRefBookValuesAction();
-		if (searchPattern != null && !searchPattern.trim().isEmpty()) {
-			action.setSearchPattern(searchPattern);
-		}
+		action.setSearchPattern(getView().getSearchPattern());
+		action.setFilter(filter);
 		action.setPagingParams(new PagingParams(offset, max));
 		action.setRefBookAttrId(refBookAttrId);
 		action.setVersion(version);
@@ -138,24 +136,14 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	}
 
 	@Override
-	public void onSearchPatternChange() {
-		String oldValue = searchPattern;
-		String newValue = getView().getSearchPattern();
-		if (oldValue != null ? !oldValue.equals(newValue) : newValue != null) {
-			searchPattern = newValue;
-			getView().refreshData();
-		}	
+	public void searche() {
+		getView().refreshDataAndGoToFirstPage();
 	}
 	
 
 	@Override
-	public void onVersionChange() {
-		Date oldValue = version;
-		Date newValue = getView().getVersion();
-		if (oldValue != null ? !oldValue.equals(newValue) : newValue != null) {
-			version = newValue;
-			getView().refreshData();
-		}
+	public void versionChange() {
+		getView().refreshDataAndGoToFirstPage();
 	}
 	
 	@Override
@@ -173,7 +161,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 
 
 	@Override
-	public void onBtnClearClick() {
+	public void clearValue() {
 		dereferenceValue = null;
 		setValue(null, true);
 	}

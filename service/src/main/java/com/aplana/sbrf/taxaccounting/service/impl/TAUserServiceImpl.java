@@ -16,7 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 
-@Service
+@Service("taUserService")
 @Transactional
 public class TAUserServiceImpl implements TAUserService {
 

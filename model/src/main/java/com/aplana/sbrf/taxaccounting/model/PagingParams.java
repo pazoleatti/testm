@@ -51,4 +51,17 @@ public class PagingParams implements Serializable{
 	public void setCount(Integer count) {
 		this.count = count;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("PagingParams [startIndex=");
+		builder.append(startIndex);
+		builder.append(", count=");
+		builder.append(count);
+		builder.append("]");
+		return builder.toString();
+	}
+	
+	
 }

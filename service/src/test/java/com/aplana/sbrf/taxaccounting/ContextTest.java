@@ -1,11 +1,18 @@
 package com.aplana.sbrf.taxaccounting;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.naming.NamingException;
+
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,9 +23,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration({"/testServiceContext.xml", "service.xml"})
 public class ContextTest implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
+	
+	@BeforeClass
+	public static void setUp() throws MalformedURLException, NamingException  {
+		URL url = new URL("http://ignore/");
+		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder
+				.emptyActivatedContextBuilder();
+		builder.bind("services/aplana/taxaccounting/Sign", url);
+	}
 
 	@Test
 	public void testContext(){
+		
+		
 		Assert.assertNotNull(applicationContext);
 	}
 

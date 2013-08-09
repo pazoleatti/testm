@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
@@ -37,7 +36,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     // Выбранное подразделение
     private Integer currentDepartmentId;
-    private String currentDepartmentName;
 
     // Выбранный период
     private ReportPeriod currentReportPeriod;
@@ -59,8 +57,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @UiField
     ListBox bookerReportType;
-
-    private DataRowColumnFactory factory = new DataRowColumnFactory();
 
     @Inject
     @UiConstructor
@@ -91,7 +87,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 }
 
                 BookerStatementsView.this.currentDepartmentId = selDepartmentId;
-                BookerStatementsView.this.currentDepartmentName = selDepartmentName;
 
                 currentReportPeriod = null;
 
@@ -120,7 +115,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             }});
         }
         this.currentDepartmentId = department != null ? department.getId() : null;
-        this.currentDepartmentName = department != null ? department.getName() : null;
     }
 
     @Override
@@ -155,6 +149,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 bookerReportType.addItem(e.getValue(), e.getKey());
             }
         }
+        bookerReportType.setSelectedIndex(bookerReportTypes.size()-1);
         reloadTaxPeriods();
     }
 

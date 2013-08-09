@@ -5,7 +5,7 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({DateColumn.class, StringColumn.class, NumericColumn.class})
+@XmlSeeAlso({DateColumn.class, StringColumn.class, NumericColumn.class, RefBookColumn.class})
 public class FormTemplateContent {
 	@XmlElement
 	private FormType type;
