@@ -51,7 +51,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         if (pagingParams != null) {
             sql.append(" WHERE rnum BETWEEN :offset AND :count");
             Map<String, Integer> params = new HashMap<String, Integer>();
-            params.put("count", pagingParams.getCount());
+            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("offset", pagingParams.getStartIndex());
             records = getNamedParameterJdbcTemplate().query(sql.toString(), params, new RefBookValueMapper(refBook));
         } else {

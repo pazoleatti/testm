@@ -1,4 +1,3 @@
-drop table blob_data;
 drop sequence seq_log_system;
 drop table log_system;
 drop index i_form_data_signer_formdataid;
@@ -55,6 +54,7 @@ drop index i_ref_book_record_refbookid;
 drop table ref_book_record;
 drop table ref_book_attribute;
 drop table ref_book;
+drop table blob_data;
 drop sequence seq_form_style;
 drop table form_style;
 drop table form_template;
