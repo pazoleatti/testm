@@ -18,6 +18,8 @@
  * 12. Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.) - outcome269st
  * 13. Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.) - outcomeTax
  */
+
+import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 
 // дата начала отчетного периода
@@ -170,12 +172,11 @@ def fillForm(){
 
         // графа 9, 10
         // A=«графа8» - «графа7»
-        def BigDecimal a = row.salePrice?:0 - row.acquisitionPrice?:0
+        BigDecimal a = (row.salePrice?:0) - (row.acquisitionPrice?:0)
         // B=ОКРУГЛ(A;2),
-        def BigDecimal b = a.setScale(2, BigDecimal.ROUND_HALF_UP)
+        BigDecimal b = roundTo2(a)
         // C= ОКРУГЛ(ABS(A);2),
-        def BigDecimal c = a.abs().setScale(2, BigDecimal.ROUND_HALF_UP)
-
+        BigDecimal c = roundTo2(a.abs())
         /**
         *    Если  .A>0, то
              «графа 9» = B
@@ -199,13 +200,13 @@ def fillForm(){
 
 
         // Графа 11
-        row.rateBR = calculateColumn11(row)
+        row.rateBR = roundTo2(calculateColumn11(row,row.part2REPODate))
 
         // графа 12
-        row.outcome269st = calculateColumn12(row)
+        row.outcome269st = roundTo2(calculateColumn12(row))
 
         // Графа 13
-        row.outcomeTax = calculateColumn13(row)
+        row.outcomeTax = roundTo2(calculateColumn13(row))
 
         // экономим на итерациях, подсчитаем сумму для граф 7-10, 12-13
         newRow.nominalPrice += row.nominalPrice ?:0
@@ -281,19 +282,19 @@ def logicalCheck(){
             }
 
             // Арифметическая проверка графы 11
-            def col11 = calculateColumn11(row)
+            def col11 = roundTo2(calculateColumn11(row,row.part2REPODate))
             if (col11 != null && col11 != row.rateBR){
                 logger.error('Неверно рассчитана графа «Ставка Банка России (%%)»!')
             }
 
             // Арифметическая проверка графы 12
-            def col12 = calculateColumn12(row)
+            def col12 = roundTo2(calculateColumn12(row))
             if (col12 != null && col12 != row.outcome269st){
                 logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, рассчитанные с учётом ст. 269 НК РФ (руб.коп.)»!')
             }
 
             // Арифметическая проверка графы 13
-            def col13 = calculateColumn13(row)
+            def col13 = roundTo2(calculateColumn13(row))
             if (col13 != null && col13 != row.outcomeTax){
                 logger.error('Неверно рассчитана графа «Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)»!')
             }
@@ -327,7 +328,7 @@ def logicalCheck(){
 }
 
 /**
- * Проверка является ли строка итововой (любой итоговой, т.е. по коду, либо основной)
+ * Проверка является ли строка итоговой (любой итоговой, т.е. по коду, либо основной)
  */
 def isTotalRow(row){
     row.getAlias()=='total'
@@ -338,27 +339,24 @@ def isTotalRow(row){
  * Логика выделена в отдельный метод так как
  * логика используется при расчетах и при логических проверкат
  * @param row
+ * @param rateDate
  */
-def calculateColumn11(DataRow row){
-    Date date01_09_2008 = new Date(1220227200000)       // 1220227200000 - 01.09.2008 00:00 GMT
-    Date date31_12_2009 = new Date(1262217600000)       // 1262217600000 - 31.12.2009 00:00 GMT
-    Date date01_01_2011 = new Date(1293840000000)       // 1293840000000 - 01.01.2011 00:00 GMT
-    Date date31_12_2012 = new Date(1356912000000)       // 1356912000000 - 31.12.2012 00:00 GMT
+def calculateColumn11(DataRow row, def rateDate){
+    def currency = getCurrency(row.currencyCode)
+    def rate = getRate(rateDate)
     // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
     if (!isTotalRow(row) && row.outcome != 0 && row.currencyCode != null){
         // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «графа 6»,
-        if (row.currencyCode == 810)    {
-            // TODO справочника «Ставки рефинансирования ЦБ РФ» еще нет
-            return '';
+        if (currency == '810')    {
+            return rate
         } else{ // Если «графа 3» ≠ 810), то
             // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
-            if (row.part2REPODate.compareTo(date01_09_2008) >= 0 && row.part2REPODate.compareTo(date31_12_2009) <= 0){
+            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
                 return 22
-            } else if (row.part2REPODate.compareTo(date01_01_2011) >= 0 && row.part2REPODate.compareTo(date31_12_2012) <= 0){
+            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
                 // Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
                 // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «графа 6»;
-                // TODO справочник не готов
-                return ''
+                return rate
             } else{
                 //Если  «графа 6» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
                 //то  «графа 11» = 15.
@@ -485,3 +483,49 @@ def getData(def formData) {
     return null
 }
 
+/**
+ * Хелпер для округления чисел
+ * @param value
+ * @return
+ */
+BigDecimal roundTo2(BigDecimal value) {
+    if (value != null) {
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return value
+    }
+}
+
+/**
+ * Проверить попадает ли указанная дата в период
+ */
+def inPeriod(def date, def from, to) {
+    if (date == null) {
+        return false
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def dateFrom = format.parse(from)
+    def dateTo = format.parse(to)
+    return (dateFrom < date && date <= dateTo)
+}
+
+/**
+ * Получить ставку рефинансирования ЦБ РФ
+ * @param date
+ */
+def getRate(def date) {
+    def refDataProvider = refBookFactory.getDataProvider(23)
+    def res = refDataProvider.getRecords(date, null, null, null);
+    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+
+}
+
+/**
+ * Получить цифровой код валюты
+*/
+def getCurrency(def currencyCode) {
+    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
+    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
+    return  resCurrency.get('CODE').getStringValue()
+
+}

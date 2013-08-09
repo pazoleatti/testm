@@ -267,16 +267,9 @@ def logicalCheck(){
                 (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
                 (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
         )){
-            // TODO возможно нужно в сообщении указать номер строки
             logger.error('Дата совершения операции вне границ отчетного периода!')
         }
 
-        // Проверка на уникальность поля «№ пп»
-        // TODO не реализовано
-        /**
-         * @author Ivildanov
-         *  не тестировано
-         */
         getRows(data).each { rowItem ->
             if (!isTotalRow(row) && row.number == rowItem.number && !row.equals(rowItem)) {
                 logger.error('Нарушена уникальность номера по порядку!')

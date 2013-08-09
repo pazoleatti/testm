@@ -95,9 +95,9 @@ void logicalCheck() {
 
     for (DataRow row in data.getAllCached()) {
         if (row.getAlias() == null) {
-            if (row.currency == 0) {
+            if (row.current == 0) {
                 // LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
-                if (row.reserveCalcValuePrev != row.currency) {
+                if (row.reserveCalcValuePrev != row.current) {
                     logger.warn("Графы 8 и 17 неравны!")
                 }
                 // LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
@@ -161,7 +161,7 @@ void logicalCheck() {
                 }
             }
             //Проверка на уникальность поля «№ пп»
-            if (row.currency == 'RUR') {
+            if (getCurrency(row.currency) == 'RUR') {
                 // LC Проверка графы 11
                 if (row.marketQuotation != null) {
                     logger.error("Неверно заполнена графа «Рыночная котировка одной ценной бумаги в иностранной валюте»!")
@@ -181,7 +181,6 @@ void logicalCheck() {
             // Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
             List checks = ['currency', 'reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
             Map<String, Object> value = [:]
-            value.put('currency', calc5(row))
             value.put('reserveCalcValuePrev', calc8(row))
             value.put('marketQuotation', calc11(row))
             value.put('rubCourse', calc12(row))
@@ -508,7 +507,6 @@ void calc() {
         for (DataRow row in data.getAllCached()) {
             i++
             row.number = i  // @todo http://jira.aplana.com/browse/SBRFACCTAX-2548 блокирует
-            row.currency = calc5(row)
             row.reserveCalcValuePrev = calc8(row)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)
@@ -520,14 +518,6 @@ void calc() {
         }
         data.save(data.getAllCached());
     }
-}
-
-/**
- * Расчет графы 5
- */
-@SuppressWarnings("GroovyUnusedDeclaration")
-String calc5(DataRow row) {
-    return 'RUR'    // @todo  Расчёт графы 5 после http://jira.aplana.com/browse/SBRFACCTAX-2376 сейчаз проставим принудительно
 }
 
 /**
@@ -557,7 +547,7 @@ BigDecimal calc8(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc11(DataRow row) {
-    if (row.currency == 'RUR') {
+    if (getCurrency(row.currency) == 'RUR') {
         return null
     }
     return row.marketQuotation
@@ -568,7 +558,7 @@ BigDecimal calc11(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc12(DataRow row) {
-    if (row.currency == 'RUR') {
+    if (getCurrency(row.currency) == 'RUR') {
         return null
     }
     return row.rubCourse
@@ -826,4 +816,14 @@ def getData(def formData) {
         return formDataService.getDataRowHelper(formData)
     }
     return null
+}
+
+/**
+ * Получить буквенный код валюты
+ */
+def getCurrency(def currencyCode) {
+    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
+    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
+    return  resCurrency.get('CODE_2').getStringValue()
+
 }

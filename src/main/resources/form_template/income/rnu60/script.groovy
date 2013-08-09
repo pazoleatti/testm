@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService
 
+import java.text.SimpleDateFormat
+
 /**
  * 6.41 (РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
@@ -119,7 +121,7 @@ void logicalCheck() {
             Map<String, BigDecimal> value = [:]
             value.put('income', calc9(row))
             value.put('outcome', calc10(row))
-            value.put('rateBR', calc11(row))
+            value.put('rateBR', calc11(row,row.part2REPODate))
             value.put('outcome269st', calc12(row))
             value.put('outcomeTax', calc13(row))
             for (String check in checks) {
@@ -220,7 +222,7 @@ BigDecimal calc9(DataRow row) {
     } else {
         result = 0
     }
-    return roundTo2(result, 2)
+    return roundTo2(result)
 }
 
 /**
@@ -229,9 +231,9 @@ BigDecimal calc9(DataRow row) {
  * @param newScale
  * @return
  */
-BigDecimal roundTo2(BigDecimal value, int newScale) {
+BigDecimal roundTo2(BigDecimal value) {
     if (value != null) {
-        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP)
     } else {
         return value
     }
@@ -269,62 +271,65 @@ BigDecimal calc10(DataRow row) {
     } else {
         result = 0
     }
-    return roundTo2(result, 2)
+    return roundTo2(result)
 }
 
-BigDecimal calc11(DataRow row) {
-    Date date01_09_2008 = new Date(1220227200000)       // 1220227200000 - 01.09.2008 00:00 GMT
-    Date date31_12_2009 = new Date(1262217600000)       // 1262217600000 - 31.12.2009 00:00 GMT
-    Date date01_01_2011 = new Date(1293840000000)       // 1293840000000 - 01.01.2011 00:00 GMT
-    Date date31_12_2012 = new Date(1356912000000)       // 1356912000000 - 31.12.2012 00:00 GMT
-    BigDecimal result
-    BigDecimal stavka = new BigDecimal(5)   // @todo Ставка рефенансирования  block http://jira.aplana.com/browse/SBRFACCTAX-2711
-    /**
-     * В следущих проверках нет надобности но они зачеме то указаны в чтз если что разкомитить.
-     if (row.outcome == 0) {result = null}if (row.currencyCode == null) {result = null}*/
-    if (row.currencyCode == 810) {
-        result = stavka
-    } else {
-        if (row.part2REPODate != null && row.part2REPODate.compareTo(date01_09_2008) >= 0 && row.part2REPODate.compareTo(date31_12_2009) <= 0) {
-            result = 22
-        } else if (row.part2REPODate != null && row.part2REPODate.compareTo(date01_01_2011) >= 0 && row.part2REPODate.compareTo(date31_12_2012) <= 0) {
-            result = stavka
-        } else {
-            result = 15
+/**
+ * Метод возвращает значение для графы 11
+ * Логика выделена в отдельный метод так как
+ * логика используется при расчетах и при логических проверкат
+ * @param row
+ * @param rateDate
+ */
+def calc11(DataRow row, def rateDate){
+    def currency = getCurrency(row.currencyCode)
+    def rate = getRate(rateDate)
+    // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
+    if (!isItogoRow(row) && row.outcome != 0 && row.currencyCode != null){
+        // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «графа 6»,
+        if (currency == '810')    {
+            return rate
+        } else{ // Если «графа 3» ≠ 810), то
+            // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
+            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
+                return 22
+            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
+                // Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
+                // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «графа 6»;
+                return rate
+            } else{
+                //Если  «графа 6» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
+                //то  «графа 11» = 15.
+                return 15
+            }
         }
     }
-    return roundTo2(result, 2)
 }
 
 BigDecimal calc12(DataRow row) {
-    Date date01_09_2008 = new Date(1220227200000)       // 1220227200000 - 01.09.2008 00:00 GMT
-    Date date31_12_2009 = new Date(1262217600000)       // 1262217600000 - 31.12.2009 00:00 GMT
-    Date date01_01_2011 = new Date(1293840000000)       // 1293840000000 - 01.01.2011 00:00 GMT
-    Date date31_12_2012 = new Date(1356912000000)       // 1356912000000 - 31.12.2012 00:00 GMT
-    Date date01_01_2010 = new Date(1262282400000)       // 1262282400000 - 01.01.2010 00:00 GMT
-    Date date30_06_2010 = new Date(1277834400000)       // 1277834400000 - 30.06.2010 00:00 GMT
-    Date date01_11_2009 = new Date(1257012000000)       // 1257012000000 - 01.11.2009 00:00 GMT
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    Date date01_11_2009 = format.parse('01.11.2009')
     BigDecimal result = null
+    def countDaysInYear = getCountDaysInYear()
+    def currency = getCurrency(row.currencyCode)
     if (row.outcome != null && row.outcome > 0) {
-        // FIXME http://jira.aplana.com/browse/SBRFACCTAX-2848 убедиться что я правильно понял
         long difference = row.part2REPODate.getTime() - row.part1REPODate.getTime() / (1000 * 60 * 60 * 24) // необходимо получить кол-во в днях
         difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
-        // @todo Возможно надо исправить 365 на 366 смотри и какой год проверять на высокостность http://jira.aplana.com/browse/SBRFACCTAX-2844
-        if (row.currencyCode == 810) {
-            if (row.part2REPODate.compareTo(date01_09_2008) >= 0 && row.part2REPODate.compareTo(date31_12_2009) <= 0) {
+        if (currency == '810') {
+            if (inPeriod(row.part2REPODate, '01.09.2008', '31.12.2009')) {
                 /*
                 a.  Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
                     «графа 12» = («графа 7» ? «графа 11» ? 1,5) ? ((«графа6» - «графа5») / 365 (366)) / 100;
 
                  */
                 result = (row.acquisitionPrice * (row.rateBR ?: 0) * 1.5) * (difference / countDaysInYear) / 100
-            } else if (row.part2REPODate.compareTo(date01_01_2010) >= 0 && row.part2REPODate.compareTo(date30_06_2010) <= 0 && row.part1REPODate.compareTo(date01_11_2009) < 0) {
+            } else if (inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate.compareTo(date01_11_2009) < 0) {
                 /*
                 b.  Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 и одновременно сделка открыта до 01.11.2009 («графа 5» < 01.11.2009 г.), то
                     «графа 12» = («графа 7» ? «графа 11» ? 2) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
                  */
                 result = (row.acquisitionPrice * (row.rateBR ?: 0) * 2) * (difference / countDaysInYear) / 100
-            } else if (row.part2REPODate.compareTo(date01_01_2010) >= 0 && row.part2REPODate.compareTo(date31_12_2012) <= 0) {
+            } else if (inPeriod(row.part2REPODate, '01.01.2010', '31.12.2012')) {
                 /*
                 c.  Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
                     «графа 12» = («графа 7» ? «графа 11» ? 1,8) ? ((«графа6» - «графа5») / 365(366)) / 100.
@@ -339,7 +344,7 @@ BigDecimal calc12(DataRow row) {
             }
         } else {
             result = (row.acquisitionPrice * (row.rateBR ?: 0)) * (difference / countDaysInYear) / 100
-            if (row.part2REPODate.compareTo(date01_01_2011) >= 0 && row.part2REPODate.compareTo(date31_12_2012) <= 0) {
+            if (inPeriod(row.part2REPODate, '01.01.2011', '31.12.2012')) {
                 result = (row.acquisitionPrice * (row.rateBR ?: 0) * 0.8) * (difference / countDaysInYear) / 100
             }
         }
@@ -348,7 +353,7 @@ BigDecimal calc12(DataRow row) {
         result = 0
     }
 
-    return roundTo2(result, 2)
+    return roundTo2(result)
 }
 
 BigDecimal calc13(DataRow row) {
@@ -376,7 +381,7 @@ void calc() {
         if (row.getAlias() == null) {
             row.income = calc9(row)
             row.outcome = calc10(row)
-            row.rateBR = calc11(row)
+            row.rateBR = calc11(row,row.part2REPODate)
             row.outcome269st = calc12(row)
             row.outcomeTax = calc13(row)
         }
@@ -536,3 +541,45 @@ def getRows(def data) {
     def cached = data.getAllCached()
     return cached
 }
+
+/**
+ * Получить ставку рефинансирования ЦБ РФ
+ * @param date
+ */
+def getRate(def date) {
+    def refDataProvider = refBookFactory.getDataProvider(23)
+    def res = refDataProvider.getRecords(date, null, null, null);
+    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+
+}
+
+/**
+ * Получить цифровой код валюты
+ */
+def getCurrency(def currencyCode) {
+    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
+    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
+    return  resCurrency.get('CODE').getStringValue()
+
+}
+
+/**
+ * Проверить попадает ли указанная дата в период
+ */
+def inPeriod(def date, def from, to) {
+    if (date == null) {
+        return false
+    }
+    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+    def dateFrom = format.parse(from)
+    def dateTo = format.parse(to)
+    return (dateFrom < date && date <= dateTo)
+}
+
+/**
+ * Проверка является ли строка итоговой (любой итоговой, т.е. по коду, либо основной)
+ */
+def isItogoRow(row){
+    row.getAlias()=='itogo'
+}
+
