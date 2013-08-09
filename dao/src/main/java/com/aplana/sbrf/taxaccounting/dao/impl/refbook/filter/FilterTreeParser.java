@@ -23,10 +23,12 @@ public class FilterTreeParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		T__1=1, T__0=2, LINK_TYPE_OR=3, LINK_TYPE_AND=4, EQUAL=5, NOTEQUAL=6, 
-		MORE=7, LESS=8, LIKE=9, NUMBER=10, ALIAS=11, FLOAT=12, STRING=13, SPACE=14;
+		MORE=7, LESS=8, LIKE=9, IS_NULL=10, NUMBER=11, ALIAS=12, FLOAT=13, STRING=14, 
+		SPACE=15;
 	public static final String[] tokenNames = {
 		"<INVALID>", "')'", "'('", "LINK_TYPE_OR", "LINK_TYPE_AND", "'='", "'!='", 
-		"'>'", "'<'", "LIKE", "NUMBER", "ALIAS", "FLOAT", "STRING", "' '"
+		"'>'", "'<'", "LIKE", "IS_NULL", "NUMBER", "ALIAS", "FLOAT", "STRING", 
+		"' '"
 	};
 	public static final int
 		RULE_query = 0, RULE_condition = 1, RULE_link_type = 2, RULE_expr = 3, 
@@ -263,6 +265,17 @@ public class FilterTreeParser extends Parser {
 	}
 
 	public static class ExprContext extends ParserRuleContext {
+		public ExprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_expr; }
+	 
+		public ExprContext() { }
+		public void copyFrom(ExprContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class StandartExprContext extends ExprContext {
 		public OperandContext operand(int i) {
 			return getRuleContext(OperandContext.class,i);
 		}
@@ -272,17 +285,29 @@ public class FilterTreeParser extends Parser {
 		public List<OperandContext> operand() {
 			return getRuleContexts(OperandContext.class);
 		}
-		public ExprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_expr; }
+		public StandartExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterExpr(this);
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterStandartExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitExpr(this);
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitStandartExpr(this);
+		}
+	}
+	public static class IsNullExprContext extends ExprContext {
+		public TerminalNode IS_NULL() { return getToken(FilterTreeParser.IS_NULL, 0); }
+		public OperandContext operand() {
+			return getRuleContext(OperandContext.class,0);
+		}
+		public IsNullExprContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).enterIsNullExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof FilterTreeListener ) ((FilterTreeListener)listener).exitIsNullExpr(this);
 		}
 	}
 
@@ -290,11 +315,26 @@ public class FilterTreeParser extends Parser {
 		ExprContext _localctx = new ExprContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_expr);
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(36); operand();
-			setState(37); operand_type();
-			setState(38); operand();
+			setState(43);
+			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
+			case 1:
+				_localctx = new StandartExprContext(_localctx);
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(36); operand();
+				setState(37); operand_type();
+				setState(38); operand();
+				}
+				break;
+
+			case 2:
+				_localctx = new IsNullExprContext(_localctx);
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(40); operand();
+				setState(41); match(IS_NULL);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -333,7 +373,7 @@ public class FilterTreeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(40);
+			setState(45);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NUMBER) | (1L << ALIAS) | (1L << STRING))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -379,7 +419,7 @@ public class FilterTreeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(42);
+			setState(47);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQUAL) | (1L << NOTEQUAL) | (1L << MORE) | (1L << LESS) | (1L << LIKE))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -399,19 +439,20 @@ public class FilterTreeParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\20/\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\6\2\20\n\2\r\2\16\2\21\3\3\5\3"+
-		"\25\n\3\3\3\3\3\5\3\31\n\3\3\3\3\3\6\3\35\n\3\r\3\16\3\36\3\3\3\3\5\3"+
-		"#\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\6\3\6\3\7\3\7\3\7\2\b\2\4\6\b\n\f\2\5"+
-		"\3\2\5\6\4\2\f\r\17\17\3\2\7\13-\2\17\3\2\2\2\4\"\3\2\2\2\6$\3\2\2\2\b"+
-		"&\3\2\2\2\n*\3\2\2\2\f,\3\2\2\2\16\20\5\4\3\2\17\16\3\2\2\2\20\21\3\2"+
-		"\2\2\21\17\3\2\2\2\21\22\3\2\2\2\22\3\3\2\2\2\23\25\5\6\4\2\24\23\3\2"+
-		"\2\2\24\25\3\2\2\2\25\26\3\2\2\2\26#\5\b\5\2\27\31\5\6\4\2\30\27\3\2\2"+
-		"\2\30\31\3\2\2\2\31\32\3\2\2\2\32\34\7\4\2\2\33\35\5\4\3\2\34\33\3\2\2"+
-		"\2\35\36\3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2\37 \3\2\2\2 !\7\3\2\2!#\3"+
-		"\2\2\2\"\24\3\2\2\2\"\30\3\2\2\2#\5\3\2\2\2$%\t\2\2\2%\7\3\2\2\2&\'\5"+
-		"\n\6\2\'(\5\f\7\2()\5\n\6\2)\t\3\2\2\2*+\t\3\2\2+\13\3\2\2\2,-\t\4\2\2"+
-		"-\r\3\2\2\2\7\21\24\30\36\"";
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\21\64\4\2\t\2\4\3"+
+		"\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\6\2\20\n\2\r\2\16\2\21\3\3\5"+
+		"\3\25\n\3\3\3\3\3\5\3\31\n\3\3\3\3\3\6\3\35\n\3\r\3\16\3\36\3\3\3\3\5"+
+		"\3#\n\3\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5.\n\5\3\6\3\6\3\7\3\7\3"+
+		"\7\2\b\2\4\6\b\n\f\2\5\3\2\5\6\4\2\r\16\20\20\3\2\7\13\63\2\17\3\2\2\2"+
+		"\4\"\3\2\2\2\6$\3\2\2\2\b-\3\2\2\2\n/\3\2\2\2\f\61\3\2\2\2\16\20\5\4\3"+
+		"\2\17\16\3\2\2\2\20\21\3\2\2\2\21\17\3\2\2\2\21\22\3\2\2\2\22\3\3\2\2"+
+		"\2\23\25\5\6\4\2\24\23\3\2\2\2\24\25\3\2\2\2\25\26\3\2\2\2\26#\5\b\5\2"+
+		"\27\31\5\6\4\2\30\27\3\2\2\2\30\31\3\2\2\2\31\32\3\2\2\2\32\34\7\4\2\2"+
+		"\33\35\5\4\3\2\34\33\3\2\2\2\35\36\3\2\2\2\36\34\3\2\2\2\36\37\3\2\2\2"+
+		"\37 \3\2\2\2 !\7\3\2\2!#\3\2\2\2\"\24\3\2\2\2\"\30\3\2\2\2#\5\3\2\2\2"+
+		"$%\t\2\2\2%\7\3\2\2\2&\'\5\n\6\2\'(\5\f\7\2()\5\n\6\2).\3\2\2\2*+\5\n"+
+		"\6\2+,\7\f\2\2,.\3\2\2\2-&\3\2\2\2-*\3\2\2\2.\t\3\2\2\2/\60\t\3\2\2\60"+
+		"\13\3\2\2\2\61\62\t\4\2\2\62\r\3\2\2\2\b\21\24\30\36\"-";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {
