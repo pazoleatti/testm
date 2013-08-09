@@ -20,8 +20,8 @@ public abstract class AbstractXlsxReportBuilder {
 
     protected Sheet sheet;
 
-    private final int cellWidthMin = 20;
-    private static final int cellWidthMax = 50;
+    protected static final int cellWidthMin = 20;
+    protected static final int cellWidthMax = 100;
 
     protected Map<Integer, Integer> widthCellsMap;
 
@@ -29,8 +29,6 @@ public abstract class AbstractXlsxReportBuilder {
      * Нужно создать в классе наследнике блок static, для определения в нем имени файла
      */
     protected static String fileName;
-
-    protected static final int cellWidth = 30;
 
     protected AbstractXlsxReportBuilder() {
         widthCellsMap = new HashMap<Integer, Integer>();
