@@ -186,9 +186,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql.append("row_number()");
             if (sortAttribute != null) {
                 // Надо делать сортировку
-                sql.append(" over (order by ");
-				sql.append(sortAttribute.getAlias());
-				sql.append("\"");
+                sql.append(" over (order by \'");
+                sql.append("a");
+                sql.append(sortAttribute.getAlias());
+                sql.append(".");
+                sql.append(sortAttribute.getAttributeType().toString());
+                sql.append("_value");
+				sql.append("\')");
             }
             sql.append(" as row_number_over,\n");
         } else {

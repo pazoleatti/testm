@@ -25,7 +25,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         fileName = "Журнал_аудита_";
     }
 
-    private int rowNumber = 3;
+    private int rowNumber = 0;
     private int cellNumber = 0;
 
     private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm";
@@ -50,7 +50,6 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
         super();
         this.workBook = new SXSSFWorkbook(50);
         this.sheet = workBook.createSheet("Журнал аудита");
-        this.sheet.setColumnWidth(2, cellWidth * 256);
         sheet.getLastRowNum();
         this.items = items;
         logger.info("Report initialize " + fileName);
