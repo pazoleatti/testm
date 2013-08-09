@@ -69,20 +69,17 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	 */
 	@Override public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) { }
 
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterExpr(@NotNull FilterTreeParser.ExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitExpr(@NotNull FilterTreeParser.ExprContext ctx) { }
+    @Override
+    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 
-	/**
+    @Override
+    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
@@ -125,7 +122,17 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	 */
 	@Override public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
 
-	/**
+    @Override
+    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+        query.append(" is null");
+    }
+
+    /**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
