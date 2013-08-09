@@ -224,7 +224,7 @@ create table form_template (
   type_id number(9) not null,
   data_rows clob,
   version varchar2(20) not null,
-  is_active number(9) default 1 not null,
+  is_active number(1) default 1 not null,
   edition number(9) not null,
   numbered_columns NUMBER(1) not null,
   fixed_rows number(1) not null,
