@@ -385,7 +385,6 @@ comment on column ref_book_value.number_value is 'Численное значе�
 comment on column ref_book_value.date_value is 'Значение даты';
 comment on column ref_book_value.reference_value is 'Значение ссылки';
 ------------------------------------------------------------------------------------------------------
---2013-07-12 Марат: удалить dictionary_code
 create table form_column (
   id number(9) not null,
   name varchar(1000) not null,
@@ -395,7 +394,6 @@ create table form_column (
   type char(1) not null,
   width number(9) not null,
   precision number(9),
-  dictionary_code varchar2(30),
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
@@ -419,7 +417,6 @@ alter table form_column add constraint form_column_fk_attribute_id foreign key (
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
-comment on column form_column.dictionary_code is 'Код справочника (для строковых и числовых столбцов)';
 comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
