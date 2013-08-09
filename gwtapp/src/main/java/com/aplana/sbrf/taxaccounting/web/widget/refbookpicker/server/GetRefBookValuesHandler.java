@@ -89,7 +89,7 @@ public class GetRefBookValuesHandler extends
 						resultSearch.append(" or ");
 					}
 					resultSearch.append(attribute.getAlias()).append(" like ")
-							.append("'" + serachPattern.trim() + "'");
+							.append("'%" + serachPattern.trim() + "%'");
 				}/*
 				 * else if
 				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType
