@@ -10,6 +10,9 @@
  * @author rtimerbaev
  */
 
+def dataRowsHelper = null
+if (formData.id != null) dataRowsHelper = formDataService.getDataRowHelper(formData)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         checkCreation()
