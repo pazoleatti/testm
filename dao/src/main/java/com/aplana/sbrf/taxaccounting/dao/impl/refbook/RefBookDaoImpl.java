@@ -154,7 +154,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         RefBook refBook = get(refBookId);
 
         /**
-         * создаем StringBuffer для передачи в FilterTreeListener, псле обхода дерева
+         * создаем StringBuffer для передачи в FilterTreeListener, после обхода дерева
          * stringBuffer будет содержать строку с xml
          */
         StringBuffer stringBuffer = new StringBuffer();
@@ -182,8 +182,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			sql.append(alias);
 			sql.append(".");
 			sql.append(attribute.getAttributeType().toString());
-			sql.append("_value as ");
+			sql.append("_value as \"");
 			sql.append(alias);
+			sql.append("\"");
 			if (i < attributes.size() - 1) {
 				sql.append(",\n");
 			}
@@ -211,8 +212,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 
 		if (sortAttribute != null) {
-			sql.append("order by\n");
+			sql.append("order by\n\"");
 			sql.append(sortAttribute.getAlias());
+			sql.append("\"");
 		}
 		return sql.toString();
 	}
