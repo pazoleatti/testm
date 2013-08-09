@@ -10,8 +10,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -21,7 +19,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
@@ -60,30 +57,14 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@UiField
 	FlexiblePager pager;
-
-	Timer timer = new Timer() {
-		public void run() {
-			uiHandlers.onSearchPatternChange();
-		}
-	};
 	
-	private MyDataProvider dataProvider = new MyDataProvider();
-
-	
-	private class MyDataProvider extends AsyncDataProvider<RefBookItem> {
-
-		public void update() {
-			for (HasData<RefBookItem> display: getDataDisplays()) {
-				onRangeChanged(display);
-			}
-		}
-
+	private AsyncDataProvider<RefBookItem> dataProvider = new AsyncDataProvider<RefBookItem>() {
 		@Override
 		public void onRangeChanged(HasData<RefBookItem> display) {
 			Range range = display.getVisibleRange();
 			uiHandlers.rangeChanged(range.getStart(), range.getLength());
 		}
-	}
+	};
 	
 	
 	public RefBookPickerWidget() {
@@ -145,23 +126,15 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		txtFind.setCursorPos(txtFind.getText().length());
 	}
 
-	@UiHandler("txtFind")
-	public void onTxtFindKeyUp(KeyUpEvent event) {
-		int keyCode = event.getNativeEvent().getKeyCode();
-		if (keyCode == KeyCodes.KEY_PAGEDOWN) {
-			pager.nextPage();
-		} else if (keyCode == KeyCodes.KEY_PAGEUP) {
-			pager.previousPage();
-			// Не ищем, если пользователь просто передвигает курсор внутри поля
-			// для поиска
-		} else if (keyCode == KeyCodes.KEY_ENTER) {
-			timer.schedule(500);
-		}
-	}
 
-	@UiHandler("btnClear")
+	@UiHandler("clearButton")
 	void onBtnClearClick(ClickEvent event) {
-		uiHandlers.onBtnClearClick();
+		uiHandlers.clearValue();
+	}
+	
+	@UiHandler("searchButton")
+	void onSearchButtonClick(ClickEvent event) {
+		uiHandlers.searche();
 	}
 
 	@Override
@@ -236,12 +209,23 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@Override
 	public void setAcceptableValues(long refBookAttrId) {
-		uiHandlers.init(refBookAttrId, null, null);
+		uiHandlers.init(refBookAttrId, null, null, null);
 	}
 
 	@Override
 	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
-		uiHandlers.init(refBookAttrId, date1, date2);
+		uiHandlers.init(refBookAttrId, null, date1, date2);
+	}
+	
+	@Override
+	public void setAcceptableValues(long refBookAttrId, String filter) {
+		uiHandlers.init(refBookAttrId, filter, null, null);
+	}
+
+	@Override
+	public void setAcceptableValues(long refBookAttrId, String filter,
+			Date date1, Date date2) {
+		uiHandlers.init(refBookAttrId, filter, date1, date2);
 	}
 
 	@Override
@@ -261,8 +245,12 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	}
 
 	@Override
-	public void refreshData() {
-		dataProvider.update();
+	public void refreshDataAndGoToFirstPage() {
+		if (pager.getPage() != 0){
+			pager.firstPage();
+		} else {
+			cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
+		}
 	}
 
 	@Override
@@ -286,5 +274,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	public String getDereferenceValue() {
 		return uiHandlers.getDereferenceValue();
 	}
+
+
 
 }

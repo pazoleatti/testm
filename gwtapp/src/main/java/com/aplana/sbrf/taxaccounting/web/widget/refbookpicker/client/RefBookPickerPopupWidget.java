@@ -25,7 +25,11 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {
     }
 
-    private Long attrId;
+	private Long attributeId;
+
+	private Date date1;
+    private Date date2;
+    private String filter;
 
     private static Binder binder = GWT.create(Binder.class);
 
@@ -44,11 +48,19 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         popupPanel = new PopupPanel(true, true);
         refBookPiker = new RefBookPickerWidget();
         popupPanel.add(refBookPiker);
+        refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Long> event) {
+                text.setText(refBookPiker.getDereferenceValue());
+                setValue(event.getValue(), true);
+                popupPanel.hide();
+            }
+        });
     }
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
-        refBookPiker.setAcceptableValues(attrId);
+        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.date1, this.date2);
         popupPanel.setPopupPosition(text.getAbsoluteLeft(), text.getAbsoluteTop() + text.getOffsetHeight());
         popupPanel.show();
     }
@@ -87,33 +99,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         selectButton.setVisible(enabled);
     }
 
-	@Override
-	public void setAcceptableValues(long refBookAttrId) {
-		setAcceptableValues(refBookAttrId, null, null);
-	}
-
-    // Для совместимости с uibinder'ом
-    /**
-     * @see com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget#setAcceptableValues
-     * @param refBookAttrId
-     */
-    public void setAcceptableIntValues(int refBookAttrId) {
-        setAcceptableValues((long)refBookAttrId);
-    }
-
-	@Override
-	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
-        attrId = refBookAttrId;
-
-        refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Long> event) {
-                text.setText(refBookPiker.getDereferenceValue());
-                setValue(event.getValue(), true);
-                popupPanel.hide();
-            }
-        });
-	}
 
 	@Override
 	public String getDereferenceValue() {
@@ -130,6 +115,46 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
      * @return
      */
     public Long getAttributeId() {
-        return attrId;
+        return attributeId;
     }
+    
+    public void setAttributeId(long attributeId) {
+		this.attributeId = attributeId;
+	}
+    
+
+    /**
+     * Для совместимости с UiBinder
+     * 
+     * @param attributeId
+     */
+    public void setAttributeIdInt(int attributeId) {
+		this.attributeId = Long.valueOf(attributeId);
+	}
+
+	public Date getDate1() {
+		return date1;
+	}
+
+	public void setDate1(Date date1) {
+		this.date1 = date1;
+	}
+
+	public Date getDate2() {
+		return date2;
+	}
+
+	public void setDate2(Date date2) {
+		this.date2 = date2;
+	}
+
+	public String getFilter() {
+		return filter;
+	}
+
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
+
+
 }

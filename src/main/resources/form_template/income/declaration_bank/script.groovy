@@ -1,12 +1,11 @@
+package form_template.income.declaration_bank
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+
 /**
  * Формирование XML для декларации налога на прибыль.
  *
  * @version 4
- *
- * TODO:
- *      - приложение к декларации не доделано, задан вопрос заказчику про заполнение
- *      - параметр externalTaxSum - будет удален
- *      - не хватает параметров в настройках подразделения
  *
  * @author rtimerbaev
  */
@@ -49,16 +48,40 @@ def isBank = true
 def departmentId = declarationData.departmentId
 def reportPeriodId = declarationData.reportPeriodId
 
-/** Настройки подразделения. */
-// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-def departmentParam = departmentService.getDepartmentParam(departmentId)
-if (departmentParam == null) {
-    throw new Exception("Ошибка при получении настроек обособленного подразделения")
+// справочник "Параметры подразделения по налогу на прибыль" - начало
+def departmentParamIncomeRefDataProvider = refBookFactory.getDataProvider(33)
+def departmentParamIncomeRecords = departmentParamIncomeRefDataProvider.getRecords(new Date(), null,
+        "DEPARTMENT_ID = '" + departmentId + "'", null);
+if (departmentParamIncomeRecords == null || departmentParamIncomeRecords.getRecords().isEmpty()) {
+   throw new Exception("Не удалось получить настройки обособленного подразделения.")
 }
-
-/** Параметры подразделения по налогу на прибыль. */
-// TODO: переделать на версионные справочники (Marat Fayzullin 2013-08-02)
-def departmentParamIncome = departmentService.getDepartmentParamIncome(departmentId)
+def incomeParams = departmentParamIncomeRecords.getRecords().getAt(0)
+if (incomeParams == null) {
+    throw new Exception("Ошибка при получении настроек обособленного подразделения.")
+}
+def reorgFormCode = getValue(incomeParams, 'REORG_FORM_CODE')
+def taxOrganCode = getValue(incomeParams, 'TAX_ORGAN_CODE')
+def okvedCode =  getValue(incomeParams, 'OKVED_CODE')
+def phone = getValue(incomeParams, 'PHONE')
+def name = getValue(incomeParams, 'NAME')
+def inn = getValue(incomeParams, 'INN')
+def kpp = getValue(incomeParams, 'KPP')
+def reorgInn = getValue(incomeParams, 'REORG_INN')
+def reorgKpp = getValue(incomeParams, 'REORG_KPP')
+def okato = getValue(incomeParams, 'OKATO')
+def signatoryId = getValue(incomeParams, 'SIGNATORY_ID')
+def taxRate = getValue(incomeParams, 'TAX_RATE')
+def sumTax = getValue(incomeParams, 'SUM_TAX') // вместо departmentParamIncome.externalTaxSum
+def appVersion = getValue(incomeParams, 'APP_VERSION')
+def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
+def taxPlaceTypeCode = getValue(incomeParams, 'TAX_PLACE_TYPE_CODE')
+def signatorySurname = getValue(incomeParams, 'SIGNATORY_SURNAME')
+def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
+def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
+def approveDocName = getValue(incomeParams, 'APPROVE_DOC_NAME')
+def approveOrgName = getValue(incomeParams, 'APPROVE_ORG_NAME')
+def sumDividends = getValue(incomeParams, 'SUM_DIVIDENDS')
+// справочник "Параметры подразделения по налогу на прибыль" - конец
 
 /** Отчётный период. */
 def reportPeriod = reportPeriodService.get(reportPeriodId)
@@ -217,7 +240,7 @@ if (dataRowsHelperComplexIncomeOld2 != null && dataRowsHelperSimpleIncomeOld2 !=
 
 /** Период. */
 def period = 0
-if (departmentParam.reorgFormCode == 50) {
+if (reorgFormCode == 50) {
     period = 50
 } else if (reportPeriod.order != null) {
     def values = [21, 31, 33, 34]
@@ -242,7 +265,7 @@ def sumBeznalDolg = empty;
 def ubitPriravnVs = ubitProshPer + sumBeznalDolg
 
 /** ПрПодп. */
-def prPodp = departmentParamIncome.signatoryId
+def prPodp = signatoryId
 /** ВырРеалТовСоб. Код строки декларации 011. */
 def virRealTovSob = getVirRealTovSob(dataRowsHelperComplexIncome, dataRowsHelperSimpleIncome)
 /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
@@ -321,21 +344,21 @@ def nalBaza = getLong(pribUb - dohIsklPrib - 0 - 0 + 0)
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
-def nalIschislFB = getNalIschislFB(nalBazaIsch, departmentParamIncome.taxRate)
+def nalIschislFB = getNalIschislFB(nalBazaIsch, taxRate)
 /** НалИсчислСуб. Код строки декларации 200. Столбец «Сумма налога». */
 def nalIschislSub = getTotalFromForm(dataRowsHelperAdvance, 'taxSum')
 /** НалИсчисл. Код строки декларации 180. */
 def nalIschisl = getLong(nalIschislFB + nalIschislSub)
 /** НалВыпл311. */
-def nalVipl311 = getLong(departmentParamIncome.externalTaxSum) // TODO (Ramil Timerbaev) externalTaxSum - будет удален
+def nalVipl311 = getLong(sumTax)
 /** НалВыпл311ФБ. Код строки декларации 250. */
-def nalVipl311FB = getLong(departmentParamIncome.externalTaxSum * 2 / 20) // TODO (Ramil Timerbaev) externalTaxSum - будет удален
+def nalVipl311FB = getLong(sumTax * 2 / 20)
 /** НалВыпл311Суб. Код строки декларации 260. */
-def nalVipl311Sub = getLong(departmentParamIncome.externalTaxSum - nalVipl311FB) // TODO (Ramil Timerbaev) externalTaxSum - будет удален
+def nalVipl311Sub = getLong(sumTax - nalVipl311FB)
 /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
 def nalVipl311FBOld = nalVipl311FB
 /** НалВыпл311Суб за предыдущий отчетный период. Код строки декларации 260. */
-def nalVipl311SubOld = getLong(departmentParamIncome.externalTaxSum - nalVipl311FBOld) // TODO (Ramil Timerbaev) externalTaxSum - будет удален
+def nalVipl311SubOld = getLong(sumTax - nalVipl311FBOld)
 
 /*
  * Расчет значении декларации за ПРЕД_ПРЕД_ыдущий период.
@@ -386,7 +409,7 @@ def nalBazaOld2 = getLong(pribUbOld2 - dohIsklPribOld2 - 0 - 0 + 0)
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIschOld2 = getNalBazaIsch(nalBazaOld2, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
-def nalIschislFBOld2 = getNalIschislFB(nalBazaIschOld2, departmentParamIncome.taxRate)
+def nalIschislFBOld2 = getNalIschislFB(nalBazaIschOld2, taxRate)
 /** НалИсчислСуб. Столбец «Сумма налога». */
 def nalIschislSubOld2 = getTotalFromForm(dataRowsHelperAdvance, 'taxSum')
 
@@ -439,7 +462,7 @@ def nalBazaOld = getLong(pribUbOld - dohIsklPribOld - 0 - 0 + 0)
 /** НалБазаИсч, НалБазаОрг. */
 def nalBazaIschOld = getNalBazaIsch(nalBazaOld, 0)
 /** НалИсчислФБ. Код строки декларации 190. */
-def nalIschislFBOld = getNalIschislFB(nalBazaIschOld, departmentParamIncome.taxRate)
+def nalIschislFBOld = getNalIschislFB(nalBazaIschOld, taxRate)
 /** НалИсчислСуб. Столбец «Сумма налога». */
 def nalIschislSubOld = getTotalFromForm(dataRowsHelperAdvance, 'taxSum')
 // /** НалИсчисл. */ // TODO (Ramil Timerbaev) если не надо, то убрать
@@ -658,12 +681,14 @@ if (xml == null) {
  * Формирование XML'ки.
  */
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import groovy.xml.MarkupBuilder;
 def xmlbuilder = new MarkupBuilder(xml)
 xmlbuilder.Файл(
         ИдФайл : declarationService.generateXmlFileId(2, departmentId),
-        ВерсПрог : departmentParamIncome.appVersion,
-        ВерсФорм : departmentParamIncome.formatVersion) {
+        ВерсПрог : appVersion,
+        ВерсФорм : formatVersion) {
 
     // Титульный лист
     Документ(
@@ -671,37 +696,37 @@ xmlbuilder.Файл(
             ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
             Период : period,
             ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
-            КодНО : departmentParam.taxOrganCode,
+            КодНО : taxOrganCode,
             НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
-            ПоМесту : departmentParamIncome.taxPlaceTypeCode) {
+            ПоМесту : taxPlaceTypeCode) {
 
         СвНП(
-                ОКВЭД : departmentParam.okvedCode,
-                Тлф : departmentParam.phone) {
+                ОКВЭД : okvedCode,
+                Тлф : phone) {
 
             НПЮЛ(
-                    НаимОрг : departmentParam.name,
-                    ИННЮЛ : departmentParam.inn,
-                    КПП : departmentParam.kpp) {
+                    НаимОрг : name,
+                    ИННЮЛ : inn,
+                    КПП : kpp) {
 
-                if (departmentParam.reorgFormCode != null) {
+                if (reorgFormCode != null) {
                     СвРеоргЮЛ(
-                            ФормРеорг : departmentParam.reorgFormCode,
-                            ИННЮЛ : departmentParam.reorgInn,
-                            КПП : departmentParam.reorgKpp)
+                            ФормРеорг : reorgFormCode,
+                            ИННЮЛ : reorgInn,
+                            КПП : reorgKpp)
                 }
             }
         }
 
         Подписант(ПрПодп : prPodp) {
             ФИО(
-                    Фамилия : departmentParamIncome.signatorySurname,
-                    Имя : departmentParamIncome.signatoryFirstName,
-                    Отчество : departmentParamIncome.signatoryLastName)
+                    Фамилия : signatorySurname,
+                    Имя : signatoryFirstName,
+                    Отчество : signatoryLastName)
             if (prPodp != 1) {
                 СвПред(
-                        [НаимДок : departmentParamIncome.approveDocName] +
-                                (departmentParamIncome.approveOrgName != null ? [НаимОрг : departmentParamIncome.approveOrgName] : [:] )
+                        [НаимДок : approveDocName] +
+                                (approveOrgName != null ? [НаимОрг : approveOrgName] : [:] )
                 )
             }
         }
@@ -713,7 +738,7 @@ xmlbuilder.Файл(
                 // 0..n // всегда один
                 НалПУАв(
                         ТипНП : typeNP,
-                        ОКАТО : departmentParam.okato) {
+                        ОКАТО : okato) {
 
                     def nalPu = isBank ? (nalDoplFB != 0 ? nalDoplFB : -nalUmenFB) : empty
                     // 0..1
@@ -722,7 +747,7 @@ xmlbuilder.Файл(
                             НалПУ : nalPu)
 
                     // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
-                    def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+                    def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                     tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
                     nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
                     // 0..1
@@ -746,7 +771,7 @@ xmlbuilder.Файл(
                     НалПУМес(
                             [ТипНП : typeNP] +
                                     (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                    [ОКАТО : departmentParam.okato]) {
+                                    [ОКАТО : okato]) {
 
                         def avPlat1 = empty
                         def avPlat2 = empty
@@ -772,7 +797,7 @@ xmlbuilder.Файл(
                             // (как определять пока не ясно, толи по id, толи по id сбербанка,
                             // толи по КПП = 775001001), при формировании декларации подразделения
                             // надо брать строку appl5List02Row120 относящегося к этому подразделению
-                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+                            def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                             appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                             avPlat1 = (long) appl5List02Row120 / 3
                             avPlat2 = avPlat1
@@ -846,7 +871,7 @@ xmlbuilder.Файл(
                         НалБазаИсч : nalBazaIsch,
                         НалБазаИсчСуб : empty,
                         СтавНалВсего : empty,
-                        СтавНалФБ : departmentParamIncome.taxRate,
+                        СтавНалФБ : taxRate,
                         СтавНалСуб : empty,
                         СтавНалСуб284 : empty,
                         НалИсчисл : nalIschisl,
@@ -1109,7 +1134,7 @@ xmlbuilder.Файл(
                 def mesAvPlat1CvSled = emptyNull
 
                 // получение из нф авансовых платежей строки соответствующей текущему подразделению
-                def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, departmentParam.kpp)
+                def tmpRow = getRowAdvanceForCurrentDepartment(dataRowsHelperAdvance, kpp)
                 if (tmpRow != null) {
                     obRasch = row.calcFlag
                     naimOP = row.regionBankDivision
@@ -1345,24 +1370,24 @@ xmlbuilder.Файл(
 
                 switch (it) {
                     case 1:
-                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13655, 13675, 13705, 13780, 13785, 13790])
+                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13655, 13675, 13705, 13780, 13785, 13790])
                         stavNal = 15
 
-                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13655, 13675, 13705, 13780, 13785, 13790])
+                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13655, 13675, 13705, 13780, 13785, 13790])
                         stavNalOld = 15
                         break
                     case 2:
-                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13660, 13680, 13695, 13710])
+                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13660, 13680, 13695, 13710])
                         stavNal = 9
 
-                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13660, 13680, 13695, 13710])
+                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13660, 13680, 13695, 13710])
                         stavNalOld = 9
                         break
                     case 3:
-                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13665, 13685, 13690])
+                        nalBaza04 = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13665, 13685, 13690])
                         stavNal = 0
 
-                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexConsumption, [13665, 13685, 13690])
+                        nalBaza04Old = getComplexIncomeSumRows9(dataRowsHelperComplexIncome, [13665, 13685, 13690])
                         stavNalOld = 0
                         break
                     case 4:
@@ -1374,7 +1399,7 @@ xmlbuilder.Файл(
                         nalBaza04 = getSimpleIncomeSumRows8(dataRowsHelperSimpleIncome, [14010])
                         stavNal = 9
                         nalDivNeRFPred = nalDivNeRFPredOld + nalDivNeRFOld
-                        nalDivNeRF = 0 // TODO (Ramil Timerbaev) этой переменной пока нету в настройках
+                        nalDivNeRF = sumDividends
                         break
                     case 5:
                         nalBaza04 = 0
@@ -2023,9 +2048,33 @@ def getOldXmlData(def prevReportPeriod, def departmentId) {
 
 /**
  * Получить данные нф.
- * 
+ *
  * @param form нф
  */
 def getDataRowHelper(def form) {
-    return (form != null ? formDataService.getDataRowHelper(form) : null)
+    if (form != null && form.id != null) {
+        return formDataService.getDataRowHelper(form)
+    }
+    return null
+}
+
+/**
+ * Получить значение атрибута строки справочника.
+
+ * @param record строка справочника
+ * @param alias алиас
+ */
+def getValue(def record, def alias) {
+    def value = record.get(alias)
+    switch (value.getAttributeType()) {
+        case RefBookAttributeType.DATE :
+            return value.getDateValue()
+        case RefBookAttributeType.NUMBER :
+            return value.getNumberValue()
+        case RefBookAttributeType.STRING :
+            return value.getStringValue()
+        case RefBookAttributeType.REFERENCE :
+            return value.getReferenceValue()
+    }
+    return null
 }

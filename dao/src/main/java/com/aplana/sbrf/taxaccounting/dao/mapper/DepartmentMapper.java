@@ -39,7 +39,4 @@ public interface DepartmentMapper {
     @Select("select form_type_id from department_form_type where department_id = #{departmentId}")
     Set<Integer> getDepartmentFormTypes(@Param("departmentId") int departmentId);
 
-	//TODO: Изменить на версионные справочники (Marat Fayzullin 2013-08-02)
-    @Select("select * from department inner join department_param on department.id = department_param.department_id")
-    List<Department> getIsolatedDepartments();
 }

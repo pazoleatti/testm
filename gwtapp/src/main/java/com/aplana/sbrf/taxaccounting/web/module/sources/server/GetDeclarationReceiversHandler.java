@@ -1,24 +1,25 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentDeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentDeclarationTypeComparator;
-import com.aplana.sbrf.taxaccounting.web.module.sources.server.comparators.DepartmentFormTypeComparator;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDeclarationReceiversResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP')")
@@ -45,22 +46,9 @@ public class GetDeclarationReceiversHandler
 		List<DepartmentDeclarationType> receivers =
 				departmentDeclarationTypeService.getByTaxType(action.getDepartmentId(), action.getTaxType());
 
-		// для декларации ОП (по налогу на прибыль) отсутствует механизм источники-приёмники —
-		// данный вид декларации в таблице "Приёмники" не отображается
-		if (TaxType.INCOME.equals(action.getTaxType())) {
-			List<Department> isolatedDepartments = departmentService.getIsolatedDepartments();
-			Set<Integer> ids = new HashSet<Integer>(isolatedDepartments.size());
-			for (Department department : isolatedDepartments) {
-				ids.add(department.getId());
-			}
-
-			Iterator<DepartmentDeclarationType> iterator = receivers.iterator();
-			while (iterator.hasNext()) {
-				if (ids.contains(iterator.next().getDepartmentId())) {
-					iterator.remove();
-				}
-			}
-		}
+		// Требование - не отображать декларации обособленных подразделений удалено из постановки 
+		// http://conf.aplana.com/pages/viewpage.action?pageId=9583288&focusedCommentId=9597316#comment-9597316
+		// http://jira.aplana.com/browse/SBRFACCTAX-3320
 
 		Map<Integer, DeclarationType> declarationTypes = new HashMap<Integer, DeclarationType>();
 		for (DepartmentDeclarationType receiver : receivers) {
