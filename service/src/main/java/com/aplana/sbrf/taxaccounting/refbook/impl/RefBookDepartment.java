@@ -11,6 +11,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,10 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        // нет нужды реализовывать смотри коментарии http://jira.aplana.com/browse/SBRFACCTAX-3245
-        return null;
+        // В справочнике департментов нет версий там всегда актуальная информация, по крайне мере на текущий момент
+        List<Date> result = new ArrayList<Date>(1);
+        result.add(new Date());
+        return result;
     }
 
     @Override

@@ -37,19 +37,22 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             sql.append(", ");
             sql.append(attribute.getAlias());
         }
-        sql.append(" FROM (SELECT rownum rnum, d.* FROM DEPARTMENT d");
+        sql.append(" FROM (SELECT ");
+        if (isSupportOver() && sortAttribute != null){
+            sql.append("row_number() over (order by '" + sortAttribute.getAlias() + "') as row_number_over");
+        } else {
+            sql.append("rownum row_number_over");
+        }
+        sql.append(", d.* FROM DEPARTMENT d");
         if (sb.length() > 0){
             sql.append(" WHERE\n ");
             sql.append(sb.toString());
             sql.append("\n");
         }
-        if (sortAttribute != null && sortAttribute.getAlias() != null) {
-            sql.append(" ORDER BY ").append(sortAttribute.getAlias());
-        }
         sql.append(")");
         List<Map<String, RefBookValue>> records;
         if (pagingParams != null) {
-            sql.append(" WHERE rnum BETWEEN :offset AND :count");
+            sql.append(" WHERE row_number_over BETWEEN :offset AND :count");
             Map<String, Integer> params = new HashMap<String, Integer>();
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("offset", pagingParams.getStartIndex());
