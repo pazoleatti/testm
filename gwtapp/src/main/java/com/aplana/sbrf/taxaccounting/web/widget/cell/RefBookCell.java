@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
-import java.util.Date;
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
@@ -28,15 +26,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 
-
 /**
- * Ячейка для редактирования значений из справочника.
- * Код и идея работы основаны на коде DatePickerCell: при клике на ячейке отображается popup-окно, в котором,
- * отображается виджет для выбора элемента.
- *
+ * Ячейка для редактирования значений из справочника. Код и идея работы основаны
+ * на коде DatePickerCell: при клике на ячейке отображается popup-окно, в
+ * котором, отображается виджет для выбора элемента.
+ * 
  * Не просто постичь высокую философию {@link AbstractEditableCell}.
- *
- * @param <ValueType> тип значения справочника
+ * 
+ * @param <ValueType>
+ *            тип значения справочника
  */
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
@@ -51,24 +49,19 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	private int lastColumn;
 	private PopupPanel panel;
 	protected final SafeHtmlRenderer<String> renderer;
-	//private ValueUpdater<Long> valueUpdater;
+
 	private RefBookPicker refBookPiker = new RefBookPickerWidget();
-	private Long refBookAttrId;
-	private String columnAlias;
+
 	private boolean refBookPikerAlredyInit;
-	private Date startDate;
-	private Date endDate;
-	private String filter;
+
+	private ColumnContext columnContext;
+	private RefBookColumn column;
 
 	public RefBookCell(ColumnContext columnContext) {
 		super(CLICK, KEYDOWN);
-		this.refBookAttrId = ((RefBookColumn) columnContext.getColumn()).getRefBookAttributeId();
-		this.columnAlias = columnContext.getColumn().getAlias();
+		this.columnContext = columnContext;
+		this.column = (RefBookColumn) columnContext.getColumn();
 		this.renderer = SimpleSafeHtmlRenderer.getInstance();
-		this.startDate = columnContext.getStartDate();
-		this.endDate = columnContext.getEndDate();
-		this.filter = ((RefBookColumn) columnContext.getColumn()).getFilter();
-		
 
 		// Create popup panel
 		this.panel = new PopupPanel(true, true) {
@@ -78,12 +71,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
 						// Dismiss when escape is pressed
 						panel.hide();
-						//selectWidget.clear();
+						// selectWidget.clear();
 					}
 				}
 			}
 		};
-
+		
 		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {
 				lastKey = null;
@@ -91,19 +84,18 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 				lastIndex = -1;
 				lastColumn = -1;
 				if (lastParent != null && !event.isAutoClosed()) {
-					// Refocus on the containing cell after the user selects a value, but
+					// Refocus on the containing cell after the user selects a
+					// value, but
 					// not if the popup is auto closed.
 					lastParent.focus();
 				}
 				lastParent = null;
-				//selectWidget.clear();
+				// selectWidget.clear();
 			}
 		});
-		
-		
+
 		panel.add(refBookPiker);
 	}
-
 
 	@Override
 	public boolean isEditing(Context context, Element parent, Long value) {
@@ -112,64 +104,70 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	@Override
 	public void onBrowserEvent(Context context, Element parent, Long value,
-							   NativeEvent event, final ValueUpdater<Long> valueUpdater) {
+			NativeEvent event, final ValueUpdater<Long> valueUpdater) {
+		boolean editableCell = ((DataRow<Cell>) context.getKey()).getCell(
+				column.getAlias()).isEditable();
+		if ((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
+				|| (columnContext.getMode() != ColumnContext.Mode.DEFAULT_MODE && !editableCell)) {
+			return;
+		}
+
 		super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		if (CLICK.equals(event.getType())) {
-			refBookPiker.addValueChangeHandler(
-					new ValueChangeHandler<Long>() {
-						@Override
-						public void onValueChange(ValueChangeEvent<Long> event) {
-							// Remember the values before hiding the popup.
-							Element cellParent = lastParent;
-							// Не очень понял зачем запоминать старые значения.
-							//Long oldValue = lastValue;
-							Object key = lastKey;
-							int index = lastIndex;
-							int column = lastColumn;
-							panel.hide();
+			refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
+				@Override
+				public void onValueChange(ValueChangeEvent<Long> event) {
+					// Remember the values before hiding the popup.
+					Element cellParent = lastParent;
+					// Не очень понял зачем запоминать старые значения.
+					// Long oldValue = lastValue;
+					Object key = lastKey;
+					int index = lastIndex;
+					int column = lastColumn;
+					panel.hide();
 
-							// Update the cell and value updater.
-							Long value = event.getValue();
-							//setViewData(key, String.valueOf(value));
-							
-							@SuppressWarnings("unchecked")
-							DataRow<Cell> dataRow = (DataRow<Cell>) key;
-							Cell cell = dataRow.getCell(columnAlias);
-							cell.setRefBookDereference(refBookPiker.getDereferenceValue());
-							
-							setValue(new Context(index, column, key), cellParent, value);
-							if (valueUpdater != null) {
-								valueUpdater.update(value);
-							}
-						}
+					// Update the cell and value updater.
+					Long value = event.getValue();
+					// setViewData(key, String.valueOf(value));
+
+					@SuppressWarnings("unchecked")
+					DataRow<Cell> dataRow = (DataRow<Cell>) key;
+					Cell cell = dataRow.getCell(RefBookCell.this.column.getAlias());
+					cell.setRefBookDereference(refBookPiker
+							.getDereferenceValue());
+
+					setValue(new Context(index, column, key), cellParent, value);
+					if (valueUpdater != null) {
+						valueUpdater.update(value);
 					}
-			);
+				}
+			});
 			onEnterKeyDown(context, parent, value, event, valueUpdater);
 		}
 	}
 
-
 	@Override
 	protected void onEnterKeyDown(Context context, Element parent, Long value,
-								  NativeEvent event, ValueUpdater<Long> valueUpdater) {
+			NativeEvent event, ValueUpdater<Long> valueUpdater) {
 		this.lastKey = context.getKey();
 		this.lastParent = parent;
 		this.lastValue = value;
 		this.lastIndex = context.getIndex();
 		this.lastColumn = context.getColumn();
-		//this.valueUpdater = valueUpdater;
+		// this.valueUpdater = valueUpdater;
 
-		if (!refBookPikerAlredyInit){
-			refBookPiker.setAcceptableValues(refBookAttrId, filter, startDate, endDate);
+		if (!refBookPikerAlredyInit) {
+			refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+					columnContext.getEndDate());
 			refBookPikerAlredyInit = true;
 		}
-		
+
 		refBookPiker.setValue(lastValue);
 
 		panel.setPopupPositionAndShow(new PositionCallback() {
 			public void setPosition(int offsetWidth, int offsetHeight) {
-				int windowHeight= Window.getClientHeight();
-				int windowWidth=Window.getClientWidth();
+				int windowHeight = Window.getClientHeight();
+				int windowWidth = Window.getClientWidth();
 
 				int exceedOffsetX = offsetX;
 				int exceedOffsetY = offsetY;
@@ -183,23 +181,22 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					exceedOffsetY -= panel.getOffsetHeight();
 				}
 
-				panel.setPopupPosition(
-						lastParent.getAbsoluteLeft() + exceedOffsetX,
-						lastParent.getAbsoluteTop() + exceedOffsetY
-				);
+				panel.setPopupPosition(lastParent.getAbsoluteLeft()
+						+ exceedOffsetX, lastParent.getAbsoluteTop()
+						+ exceedOffsetY);
 			}
 		});
 
-		//selectWidget.asWidget().focus();
+		// selectWidget.asWidget().focus();
 	}
 
 	@Override
 	public void render(Context context, Long value, SafeHtmlBuilder sb) {
 		@SuppressWarnings("unchecked")
 		DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
-		Cell cell = dataRow.getCell(columnAlias);
+		Cell cell = dataRow.getCell(column.getAlias());
 		String rendValue = cell.getRefBookDereference();
-		if (rendValue == null){
+		if (rendValue == null) {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
