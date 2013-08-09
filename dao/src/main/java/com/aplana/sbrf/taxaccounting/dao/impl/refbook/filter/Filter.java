@@ -20,22 +20,22 @@ public class Filter
         if (query == null){
             return;
         }
-        // создаем InputStream из query
+        // Создаем InputStream из query
         ANTLRInputStream input = new ANTLRInputStream(query);
 
-        // создаем лексер которому скормим InputStream
+        // Создаем лексер которому скормим InputStream
         FilterTreeLexer lexer = new FilterTreeLexer(input);
 
-        //  TokenStream  из токенов вытянутых из лексера
+        // TokenStream  из токенов вытянутых из лексера
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-        // создадим парсер и отправим ему буфер токенов
+        // Создадим парсер и отправим ему буфер токенов
         FilterTreeParser parser = new FilterTreeParser(tokens);
 
         ParseTree tree = parser.query(); // начинаем разбор с первого правила
         //System.out.println(tree.toStringTree(parser)); // выыести LISP-подобное дерево
 
-        // создадим стандартный ходунок  для разбора дерева методом вызова коллбэков
+        // Создадим стандартный ходунок  для разбора дерева методом вызова коллбэков
         ParseTreeWalker walker = new ParseTreeWalker();
         // Передадим листнера для прохода по дереву, лисенер содержит методы которые будут вызваны по мере обхода дерева
         walker.walk(listener, tree);

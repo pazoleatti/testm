@@ -178,15 +178,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
         sql.append("SELECT * FROM ");
         sql.append("(select\n");
-        sql.append("  r.id as ");
+        sql.append("  r.id as \"");
         sql.append(RefBook.RECORD_ID_ALIAS);
-        sql.append(",\n");
+        sql.append("\",\n");
         if (isSupportOver()) {
             // Значит база данных Oracle а не HSQL и она поддеживает row_number()
             sql.append("row_number()");
             if (sortAttribute != null) {
                 // Надо делать сортировку
-                sql.append(" over (order by name)");
+                sql.append(" over (order by \"");
+				sql.append(sortAttribute.getAlias());
+				sql.append("\"");
             }
             sql.append(" as row_number_over,\n");
         } else {
@@ -200,8 +202,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql.append(alias);
             sql.append(".");
             sql.append(attribute.getAttributeType().toString());
-            sql.append("_value as ");
+            sql.append("_value as \"");
             sql.append(alias);
+			sql.append("\"");
             if (i < attributes.size() - 1) {
                 sql.append(",\n");
             }
@@ -229,7 +232,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append(")");
 
         if (pagingParams != null) {
-            sql.append(" WHERE row_number_over between " + pagingParams.getStartIndex() + " AND " + String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
+            sql.append(" where row_number_over between " + pagingParams.getStartIndex() + " and " + String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
 
         return sql.toString();
@@ -249,9 +252,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         StringBuilder sql = new StringBuilder();
         sql.append("select\n");
-        sql.append("  r.id as ");
+        sql.append("  r.id as \"");
         sql.append(RefBook.RECORD_ID_ALIAS);
-        sql.append(",\n");
+        sql.append("\",\n");
         List<RefBookAttribute> attributes = refBook.getAttributes();
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -260,8 +263,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql.append(alias);
             sql.append(".");
             sql.append(attribute.getAttributeType().toString());
-            sql.append("_value as ");
+            sql.append("_value as \"");
             sql.append(alias);
+			sql.append("\"");
             if (i < attributes.size() - 1) {
                 sql.append(",\n");
             }

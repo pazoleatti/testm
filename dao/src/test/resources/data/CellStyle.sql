@@ -12,14 +12,14 @@ insert into data_row(id, form_data_id, alias, ord, type) values (2, 1, null, 2, 
 insert into data_row(id, form_data_id, alias, ord, type) values (3, 1, 'alias 3', 3, 0);
 insert into data_row(id, form_data_id, alias, ord, type) values (4, 1, 'alias 4', 4, 0);
 
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, dictionary_code, group_name, max_length, checking)
-	values (1, 'Строковый столбец', 1, 1, 'alias 1', 'S', 10, null, null, null, 500, 1);
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, dictionary_code, group_name, max_length, checking)
-	values (2, 'Числовой столбец', 1, 1, 'alias 2', 'N', 10, 2, null, null, 15, 0);
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, dictionary_code, group_name, checking)
-	values (3, 'Дата-столбец', 1, 1, 'alias 3' , 'D', 10, null, null, null, 0);
-insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, dictionary_code, group_name, max_length, checking)
-	values (4, 'Строковый столбец', 1, 1, 'alias 4', 'S', 10, null, null, null, 500, 1);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking)
+	values (1, 'Строковый столбец', 1, 1, 'alias 1', 'S', 10, null, null, 500, 1);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking)
+	values (2, 'Числовой столбец', 1, 1, 'alias 2', 'N', 10, 2, null, 15, 0);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, checking)
+	values (3, 'Дата-столбец', 1, 1, 'alias 3' , 'D', 10, null, null, 0);
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, group_name, max_length, checking)
+	values (4, 'Строковый столбец', 1, 1, 'alias 4', 'S', 10, null, null, 500, 1);
 
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (1, 'alias 1', 1, 3, 2, 1, 0);
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (2, 'alias 2', 1, 2, 3, 0, 1);
