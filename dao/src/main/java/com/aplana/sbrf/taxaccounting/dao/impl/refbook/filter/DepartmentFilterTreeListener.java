@@ -52,12 +52,12 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
     }
 
     @Override
-    public void enterExpr(@NotNull FilterTreeParser.ExprContext ctx) {
+    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void exitExpr(@NotNull FilterTreeParser.ExprContext ctx) {
+    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -82,6 +82,16 @@ public class DepartmentFilterTreeListener implements FilterTreeListener {
     @Override
     public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+        query.append(" is null");
     }
 
     @Override

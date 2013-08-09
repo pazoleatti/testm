@@ -22,7 +22,7 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 	
 	private List<LogEntry> list;
 
-	private int rowNumber = 5;
+	private int rowNumber = 0;
 	private int cellNumber = 0;
 
 	
@@ -31,7 +31,7 @@ public class LogEntryReportBuilder extends AbstractXlsxReportBuilder {
 		this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");
-        this.sheet.setColumnWidth(2, cellWidth * 256);
+        this.sheet.setColumnWidth(2, cellWidthMin * 256 * 4);
 	}
 	
 	protected void createTableHeaders(){

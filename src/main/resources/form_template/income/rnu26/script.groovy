@@ -7,7 +7,6 @@
  * TODO:
  *      - нет условии в проверках соответствия НСИ (потому что нету справочников)
  *      - графа 8, 14-17 расчитываются, но в перечне полей они могут редактироваться
- *      - графа 7: алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
  *
  * @author rtimerbaev
  */
@@ -160,14 +159,6 @@ void calc() {
     getRows(data).eachWithIndex { row, index ->
         // графа 1
         row.rowNumber = index + 1
-
-        // графа 6
-        row.lotSizePrev = getValueForColumn6(row)
-
-        // графа 7
-        // TODO (Ramil Timerbaev) алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
-        // возможно алгоритм расчета будет аналогичен расчету графы 6
-        // row.lotSizeCurrent = getValueForColumn7(row)
 
         // графа 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
@@ -387,23 +378,6 @@ def logicalCheck(def useLog) {
             i += 1
 
             // 17. Арифметическая проверка графы 8, 14..17
-            // графа 6
-            row.lotSizePrev = getValueForColumn6(row)
-
-            // графа 6
-            if (row.lotSizePrev != getValueForColumn6(row)) {
-                name = getColumnName(row, 'lotSizePrev')
-                logger.warn("Неверно рассчитана графа «$name»!")
-            }
-
-            // графа 7
-            // TODO (Ramil Timerbaev) алгоритм расчета не реализован т.к. в чтз пометка о том что оно изменится
-            // возможно алгоритм расчета будет аналогичен расчету графы 6
-            // if (row.lotSizeCurrent != getValueForColumn7(row)) {
-            //     name = getColumnName(row, 'lotSizeCurrent')
-            //     logger.warn("Неверно рассчитана графа «$name»!")
-            // }
-
             // графа 8
             if (row.reserveCalcValuePrev != getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)) {
                 name = getColumnName(row, 'reserveCalcValuePrev')

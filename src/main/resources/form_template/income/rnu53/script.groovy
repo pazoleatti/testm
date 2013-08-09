@@ -142,35 +142,21 @@ void calc() {
         b = 0
         c = 0
         if (a > 0) {
-            c = roundTo2(Math.abs(a), 2)
+            c = roundTo2(Math.abs(a))
         } else if (a < 0) {
-            b = roundTo2(a, 2)
+            b = roundTo2(a)
         }
         row.income = b
         row.outcome = c
 
         def currency = getCurrency(row.currencyCode)
         // графа 11
-        if (row.outcome == 0 || isEmpty(row.currencyCode)) {
-            tmp = null
-        }
-        if (currency == '810') {
-            tmp = getRate(reportDate)
-        } else {
-            if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
-                tmp = 22
-            } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                tmp = getRate(reportDate)
-            } else {
-                tmp = 15
-            }
-        }
-        row.rateBR = roundTo2(tmp, 2)
+        row.rateBR = roundTo2(calculateColumn11(row, reportDate))
 
         // графа 12
         if (row.outcome == 0) {
             tmp = 0
-        } else if (row.outcome > 0 && row.currencyCode == '810') {
+        } else if (row.outcome > 0 && currency == '810') {
             if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                 tmp = calc12Value(row, 1.5, reportDate, daysInYear)
             } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -180,14 +166,14 @@ void calc() {
             } else {
                 tmp = calc12Value(row, 1.1, reportDate, daysInYear)
             }
-        } else if (row.outcome > 0 && row.currencyCode != '810') {
+        } else if (row.outcome > 0 && currency != '810') {
             if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
                 tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
             } else {
                 tmp = calc12Value(row, 1, reportDate, daysInYear) * course
             }
         }
-        row.outcome269st = tmp
+        row.outcome269st = roundTo2(tmp)
 
         // графа 13
         if (row.outcome == 0) {
@@ -197,7 +183,7 @@ void calc() {
         } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
             tmp = row.outcome269st
         }
-        row.outcomeTax = tmp
+        row.outcomeTax = roundTo2(tmp)
     }
     data.save(getRows(data))
 
@@ -273,19 +259,19 @@ def logicalCheck(def useLog) {
 
             // 5. Проверка финансого результата
 
-            if (row.outcome != 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
+            if (row.outcome == 0 && (row.outcome269st != 0 || row.outcomeTax != 0)) {
                 logger.error('Задвоение финансового результата!')
                 return false
             }
 
             // 5. Проверка финансового результата
             tmp = ((row.salePrice - row.acquisitionPrice) * (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
-            if (tmp > 0 && row.income != roundTo2(Math.abs(tmp), 2)) {
+            if (tmp > 0 && row.income != roundTo2(Math.abs(tmp))) {
                 logger.warn('Неверно определены доходы')
             }
 
             // 6. Проверка финансового результата
-            if (tmp < 0 && row.outcome != roundTo2(Math.abs(tmp), 2)) {
+            if (tmp < 0 && row.outcome != roundTo2(Math.abs(tmp))) {
                 logger.warn('Неверно определены расходы')
             }
 
@@ -295,9 +281,9 @@ def logicalCheck(def useLog) {
             b = 0
             c = 0
             if (a < 0) {
-                c = roundTo2(Math.abs(a), 2)
+                c = roundTo2(Math.abs(a))
             } else if (a > 0) {
-                b = roundTo2(a, 2)
+                b = roundTo2(a)
             }
             // графа 9
             if (row.income != b) {
@@ -311,31 +297,16 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
-            def currency = getCurrency(row.currencyCode)
-            def rate = getRate(reportDate)
-            if (row.outcome == 0 || isEmpty(row.currencyCode)) {
-                tmp = null
-            }
-            if (currency == '810') {
-                tmp = rate
-            } else {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
-                    tmp = 22
-                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                    tmp = rate
-                } else {
-                    tmp = 15
-                }
-            }
-            if (row.rateBR != roundTo2(tmp, 2)) {
+            if (row.rateBR != roundTo2(calculateColumn11(row,reportDate))) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
 
             // графа 12
+            def currency = getCurrency(row.currencyCode)
             if (row.outcome == 0) {
                 tmp = 0
-            } else if (row.outcome > 0 && row.currencyCode == '810') {
+            } else if (row.outcome > 0 && currency == '810') {
                 if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
                     tmp = calc12Value(row, 1.5, reportDate, daysInYear)
                 } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -345,7 +316,7 @@ def logicalCheck(def useLog) {
                 } else {
                     tmp = calc12Value(row, 1.1, reportDate, daysInYear)
                 }
-            } else if (row.outcome > 0 && row.currencyCode != '810') {
+            } else if (row.outcome > 0 && currency != '810') {
                 if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
                     tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
                 } else {
@@ -408,24 +379,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def BigDecimal tmp
-            def currency = getCurrency(row.currencyCode)
-            def rate = getRate(reportDate)
-            if (row.outcome == 0 || isEmpty(row.currencyCode)) {
-                tmp = null
-            }
-            if (currency == '810') {
-                tmp = rate
-            } else {
-                if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
-                    tmp = 22
-                } else if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
-                    tmp = rate
-                } else {
-                    tmp = 15
-                }
-            }
-            if(row.rateBR!=roundTo2(tmp, 2)){
+            if(row.rateBR!=roundTo2(calculateColumn11(row, reportDate))){
                 logger.error('Неверно указана ставка Банка России!')
                 return false
             }
@@ -530,7 +484,7 @@ def getDate(def value) {
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
     def tmp = (row.acquisitionPrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return roundTo2(tmp, 2)
+    return roundTo2(tmp)
 }
 
 /**
@@ -663,6 +617,38 @@ def calcAForColumn9or10(def row, def reportDate, def course) {
 }
 
 /**
+ * Метод возвращает значение для графы 11
+ * Логика выделена в отдельный метод так как
+ * логика используется при расчетах и при логических проверкат
+ * @param row
+ * @param rateDate
+ */
+def calculateColumn11(DataRow row, def rateDate){
+    def currency = getCurrency(row.currencyCode)
+    def rate = getRate(rateDate)
+    // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
+    if (!isTotal(row) && row.outcome != 0 && row.currencyCode != null){
+        // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «отчетная дата»,
+        if (currency == '810')    {
+            return rate
+        } else{ // Если «графа 3» ≠ 810), то
+            // Если «отчетная дата» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
+            if (inPeriod(rateDate, '01.09.2008', '31.12.2009')){
+                return 22
+            } else if (inPeriod(rateDate, '01.01.2011', '31.12.2012')){
+                // Если «отчетная дата» принадлежит периоду с 01.01.2011 по 31.12.2012 (включительно), то
+                // графа 11 = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ»  на дату «отчетная дата»;
+                return rate
+            } else{
+                //Если  «отчетная дата» не принадлежит отчётным периодам с 01.09.2008 по 31.12.2009 (включительно), с 01.01.2011 по 31.12.2012 (включительно)),
+                //то  «графа 11» = 15.
+                return 15
+            }
+        }
+    }
+}
+
+/**
  * Получить данные формы.
  *
  * @param formData форма
@@ -687,17 +673,17 @@ def getRows(def data) {
 /**
  * Хелпер для округления чисел
  * @param value
- * @param newScale
  * @return
  */
-BigDecimal roundTo2(BigDecimal value, int newScale) {
+BigDecimal roundTo2(BigDecimal value) {
     if (value != null) {
-        return value.setScale(newScale, BigDecimal.ROUND_HALF_UP)
+        return value.setScale(2, BigDecimal.ROUND_HALF_UP)
     } else {
         return value
     }
 }
 
+//Получить ставку рефинансирования ЦБ РФ
 def getRate(def date) {
     def refDataProvider = refBookFactory.getDataProvider(23)
     def res = refDataProvider.getRecords(date, null, null, null);
@@ -705,6 +691,7 @@ def getRate(def date) {
 
 }
 
+//Получить цифровой код валюты
 def getCurrency(def currencyCode) {
     def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
     def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);

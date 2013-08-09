@@ -224,7 +224,7 @@ create table form_template (
   type_id number(9) not null,
   data_rows clob,
   version varchar2(20) not null,
-  is_active number(9) default 1 not null,
+  is_active number(1) default 1 not null,
   edition number(9) not null,
   numbered_columns NUMBER(1) not null,
   fixed_rows number(1) not null,
@@ -284,17 +284,39 @@ comment on column form_style.italic is 'Признак использовани�
 comment on column form_style.bold is 'Признак жирного шрифта';
 
 create sequence seq_form_style start with 10000;
+------------------------------------------------------------------------------------------------------
+create table blob_data (
+  id            varchar2(36) not null,
+  name          varchar2(200) null,
+  data          blob not null,
+  creation_date date not null,
+  type          number(1) default 0 not null,
+  data_size     number(9) default 0 not null
+);
+alter table blob_data add constraint blob_data_pk primary key(id);
+alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
+
+comment on table blob_data is 'Файловое хранилище';
+comment on column blob_data.id is 'Уникальный идентификатор';
+comment on column blob_data.name is 'Название файла';
+comment on column blob_data.data is 'Бинарные данные';
+comment on column blob_data.creation_date is 'Дата создания';
+comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
+comment on column blob_data.data_size is 'Размер файла в байтах';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
   id number(9,0) not null,
-  name varchar2(200) not null
+  name varchar2(200) not null,
+  script_id varchar2(36)
 );
 
 alter table ref_book add constraint ref_book_pk primary key (id);
+alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
 
 comment on table ref_book is 'Справочник';
 comment on column ref_book.id is 'Уникальный идентификатор';
 comment on column ref_book.name is 'Название справочника';
+comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(9) not null,
@@ -385,7 +407,6 @@ comment on column ref_book_value.number_value is 'Численное значе�
 comment on column ref_book_value.date_value is 'Значение даты';
 comment on column ref_book_value.reference_value is 'Значение ссылки';
 ------------------------------------------------------------------------------------------------------
---2013-07-12 Марат: удалить dictionary_code
 create table form_column (
   id number(9) not null,
   name varchar(1000) not null,
@@ -395,7 +416,6 @@ create table form_column (
   type char(1) not null,
   width number(9) not null,
   precision number(9),
-  dictionary_code varchar2(30),
   group_name varchar(1000),
   max_length number(4),
   checking  number(1) default 0 not null,
@@ -419,7 +439,6 @@ alter table form_column add constraint form_column_fk_attribute_id foreign key (
 
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
-comment on column form_column.dictionary_code is 'Код справочника (для строковых и числовых столбцов)';
 comment on column form_column.form_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column form_column.group_name is 'Название группы столбцов';
 comment on column form_column.id is 'Первичный ключ';
@@ -1078,23 +1097,4 @@ comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_id is 'Код подразделения пользователя';
 
 create sequence seq_log_system start with 10000;
-------------------------------------------------------------------------------------------------------
-create table blob_data (
-  id            varchar2(36) not null,
-  name          varchar2(200) null,
-  data          blob not null,
-  creation_date date not null,
-  type          number(1) default 0 not null,
-  data_size     number(9) default 0 not null
-);
-alter table blob_data add constraint blob_data_pk primary key(id);
-alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
-
-comment on table blob_data is 'Файловое хранилище';
-comment on column blob_data.id is 'Уникальный идентификатор';
-comment on column blob_data.name is 'Название файла';
-comment on column blob_data.data is 'Бинарные данные';
-comment on column blob_data.creation_date is 'Дата создания';
-comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
-comment on column blob_data.data_size is 'Размер файла в байтах';
 ------------------------------------------------------------------------------------------------------
