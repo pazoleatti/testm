@@ -8,10 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -309,5 +309,26 @@ public class RefBookDaoTest {
     public void testGetValue2() {
         // Не существующее значение
         refBookDao.getValue(-1L, 2L);
+    }
+
+    @Test(expected = DuplicateKeyException.class)
+    public void testDeleteAllRecords1() {
+        // Нельзя удалить на дату занесения записи
+        refBookDao.deleteAllRecords(1L, getDate(1, 1, 2013));
+    }
+
+    @Test
+    public void testDeleteAllRecords2() {
+        Date delDate = getDate(15, 1, 2013);
+        Long rbId = 1L;
+        // До удаления
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null,
+                null);
+        Assert.assertTrue(data.getRecords().size() == 2);
+        // Удаление
+        refBookDao.deleteAllRecords(rbId, delDate);
+        // После удаления
+        data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null, null);
+        Assert.assertTrue(data.getRecords().size() == 0);
     }
 }

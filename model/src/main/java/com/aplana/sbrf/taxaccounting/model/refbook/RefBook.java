@@ -28,6 +28,9 @@ public class RefBook implements Serializable {
 	/** Атрибуты справочника */
 	private List<RefBookAttribute> attributes;
 
+    /** Скрипт справочника */
+    private String scriptId;
+
 	/**
 	 * Возвращает код справочника
 	 * @return код справочника
@@ -136,14 +139,29 @@ public class RefBook implements Serializable {
 		return result;
 	}
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("RefBook{");
-		sb.append("id=").append(id);
-		sb.append(", name='").append(name).append('\'');
-		sb.append(", attributes=").append(attributes);
-		sb.append('}');
-		return sb.toString();
-	}
+    /**
+     * Id скрипта справочника в BLOB_DATA
+     * @return
+     */
+    public String getScriptId() {
+        return scriptId;
+    }
 
+    /**
+     * Id скрипта справочника в BLOB_DATA
+     * @param scriptId
+     */
+    public void setScriptId(String scriptId) {
+        this.scriptId = scriptId;
+    }
+
+    @Override
+    public String toString() {
+        return "RefBook{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", attributes=" + attributes +
+                ", scriptId=" + scriptId +
+                '}';
+    }
 }

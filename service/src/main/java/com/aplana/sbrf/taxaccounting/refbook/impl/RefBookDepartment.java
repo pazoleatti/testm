@@ -69,6 +69,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public void deleteAllRecords(Date version) {
+        // Не нужно
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         return null;
     }

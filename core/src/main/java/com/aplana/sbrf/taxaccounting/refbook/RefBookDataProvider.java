@@ -80,6 +80,12 @@ public interface RefBookDataProvider {
 	void deleteRecords(Date version, List<Long> recordIds);
 
     /**
+     * Удаление всех записей справочника
+     * @param version Дата удаления записей
+     */
+    void deleteAllRecords(Date version);
+
+    /**
      * Значение справочника по Id записи и Id атрибута
      * @param recordId
      * @param attributeId
