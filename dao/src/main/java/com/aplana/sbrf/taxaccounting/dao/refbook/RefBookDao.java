@@ -109,6 +109,13 @@ public interface RefBookDao {
 	void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
 
     /**
+     * Удаление всех записей справочника
+     * @param refBookId Id справочника
+     * @param version Дата удаления записей
+     */
+    void deleteAllRecords(Long refBookId, Date version);
+
+    /**
      * Проверка и поиск Id записи по:
      * @param refBookId Id справочника
      * @param version Версия

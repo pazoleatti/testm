@@ -10,6 +10,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -25,9 +27,6 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
 
     @Override
     public void attributeAdded(HttpSessionBindingEvent event) {
-        String attributeName = event.getName();
-        Object attributeValue = event.getValue();
-        System.out.println("Attribute added : " + attributeName + " : " + attributeValue);
     }
 
     @Override
@@ -42,6 +41,8 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
             String name = ((UserDetails)(((SecurityContext)attributeValue).getAuthentication().getPrincipal())).getUsername();
             TAUserInfo userInfo = new TAUserInfo();
             userInfo.setUser(userService.getUser(name));
+            userInfo.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                    .getRequest().getRemoteAddr());
 
             logger.info("Exit: " + userInfo);
             FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
@@ -57,8 +58,5 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
 
     @Override
     public void attributeReplaced(HttpSessionBindingEvent event) {
-        String attributeName = event.getName();
-        Object attributeValue = event.getValue();
-        System.out.println("Attribute replaced : " + attributeName + " : " + attributeValue);
     }
 }

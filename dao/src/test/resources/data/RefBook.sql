@@ -1,7 +1,11 @@
+insert into blob_data(id, name, data, creation_date, type, data_size) values ('24af57ef-ec1c-455f-a4fa-f0fb29483066', 'Скрипт', '', sysdate, 1, 0)
+
 insert into ref_book(id, name) values
 (1, 'Книга');
 insert into ref_book(id, name) values
 (2, 'Человек');
+insert into ref_book(id, name, script_id) values
+(3, 'Библиотека', '24af57ef-ec1c-455f-a4fa-f0fb29483066');
 
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
   (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10);

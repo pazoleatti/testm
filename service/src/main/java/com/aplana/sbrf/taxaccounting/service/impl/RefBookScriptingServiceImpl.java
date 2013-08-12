@@ -6,12 +6,13 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 @Service
+@Transactional
 public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements RefBookScriptingService {
 
     private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
@@ -37,14 +39,22 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
-        // TODO брать идентификатор из RefBookDao http://jira.aplana.com/browse/SBRFACCTAX-3353
+        RefBook refBook = refBookFactory.get(refBookId);
 
-        BlobData bd = blobDao.get("test-test");
+        if (refBook == null || refBook.getScriptId() == null) {
+            return;
+        }
+
+        BlobData bd = blobDao.get(refBook.getScriptId());
 
         if (bd == null) {
             return;
         }
 
+        // TODO Переписать этот блок позле избавления от getInputStream в BlobData
+        // Заполнить переменную script из массива байт:
+        // примерно так: String script = new String(bd.getBytes(), "UTF-8")
+        // Начало блока
         StringWriter writer = new StringWriter();
 
         try {
@@ -53,11 +63,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             logger.error(e);
             return;
         }
-
         String script = writer.toString();
-        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
+        // Конец блока
 
-        if (script == null || script.trim().isEmpty() || refBookDataProvider == null) {
+        if (script == null || script.trim().isEmpty() || refBookFactory == null) {
             return;
         }
 
@@ -66,7 +75,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         bindings.put("formDataEvent", event);
         bindings.put("logger", logger);
-        bindings.put("refBookDataProvider", refBookDataProvider);
+        bindings.put("refBookFactory", refBookFactory);
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());
@@ -88,6 +97,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     /**
      * Перехват ошибок и исключений
+     *
      * @param bindings
      * @param script
      * @param logger

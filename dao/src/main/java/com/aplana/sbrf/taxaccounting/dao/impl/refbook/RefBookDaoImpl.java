@@ -34,7 +34,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name from ref_book where id = ?",
+                    "select id, name, script_id from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -45,16 +45,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<RefBook> getAll() {
         return getJdbcTemplate().query(
-                "select id, name from ref_book order by name",
+                "select id, name, script_id from ref_book order by name",
                 new RefBookRowMapper());
     }
-
 
     @Override
     public RefBook getByAttribute(long attributeId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select r.id, r.name from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
+                    "select r.id, r.name, r.script_id from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -70,6 +69,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             RefBook result = new RefBook();
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
+            result.setScriptId(rs.getString("script_id"));
             result.setAttributes(getAttributes(result.getId()));
             return result;
         }
@@ -503,6 +503,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
         JdbcTemplate jt = getJdbcTemplate();
         jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL, refBookId, sdf.format(version)), values);
+    }
+
+    private static final String DELETE_ALL_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, " +
+            "version, status, record_id) " +
+            "select seq_ref_book_record.nextval, ref_book_id, trunc(?, 'DD'), -1, record_id " +
+            "from ref_book_record " +
+            "where version = (select max(version) from ref_book_record where ref_book_id = ? " +
+            "and version <= trunc(?, 'DD')) " +
+            "and ref_book_id = ?";
+
+    @Override
+    public void deleteAllRecords(Long refBookId, Date version) {
+        getJdbcTemplate().update(DELETE_ALL_REF_BOOK_RECORD_SQL, new Object[] {version, refBookId, version, refBookId},
+                new int[] { Types.TIMESTAMP, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC });
     }
 
     @Override
