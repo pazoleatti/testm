@@ -125,15 +125,6 @@ void calc() {
         }
     }
 
-    // дополнительная проверка графы 10
-    for (def row : getRows(data)) {
-        // дополнительная проверка графы 10
-        if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
-            logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
-            return
-        }
-    }
-
     /*
      * Расчеты.
      */
@@ -162,6 +153,9 @@ void calc() {
 
         // графа 8
         row.reserveCalcValuePrev = getPrevPeriodValue('reserveCalcValue', 'tradeNumber', row.tradeNumber)
+
+        // графа 12 курс валют
+        row.rubCourse = getCourse(row.currency,reportDate)
 
         // графа 13
         if (row.marketQuotation != null && row.rubCourse != null) {
@@ -290,12 +284,6 @@ def logicalCheck(def useLog) {
             // 15. Обязательность заполнения поля графы 1..3, 5..10, 13, 14
             if (!checkRequiredColumns(row, columns, useLog)) {
                 return false
-            }
-
-            // дополнительная проверка графы 10
-            if (row.signSecurity != '+' && row.signSecurity != '-') {
-                logger.error('Графа 10 может принимать только следующие значения: "+" или "-".')
-                return
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
@@ -489,26 +477,25 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
-    if (false) {
-        logger.warn('Неверный курс валюты!')
-    }
+    def data = getData(formData)
+    getRows (data).each { row->
+        if (!isTotal(row)) {
+            // 1. Проверка актуальности поля «Валюта выпуска ценной бумаги»
+            if (row.currency!=null && getCurrency(row.currency)==null) {
+                logger.warn('Валюта выпуска ценной бумаги указана неверно!')
+            }
 
-    // 1. Проверка актуальности поля «Валюта выпуска ценной бумаги» Какой алгоритм?
-    if (false) {
-        logger.warn('Валюта выпуска ценной бумаги указана неверно!')
-    }
+            // 1. Проверка курса валюты со справочным - Проверка актуальности значения» графы 6» на дату по «графе 5»
+            if (row.rubCourse!=null && row.rubCourse!=getCourse(row.currency,reportDate)) {
+                logger.warn('Неверный курс валюты!')
+            }
 
-    // 2. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
-    if (false) {
-        logger.warn('')
+            // 2. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
+            if (row.signSecurity!=null && getSign(row.signSecurity)==null) {
+                logger.warn('Признак ценной бумаги в справочнике отсутствует!')
+            }
+        }
     }
-
-    // 3. Проверка актуальности поля «Курс рубля к валюте рыночной котировки»
-    if (false) {
-        logger.warn('')
-    }
-    return true
 }
 
 /**
@@ -791,5 +778,40 @@ def getData(def formData) {
 def getRows(def data) {
     def cached = data.getAllCached()
     return cached
+}
+
+/**
+ * Получить курс валюты
+ */
+def getCourse(def currency, def date) {
+    if (currency!=null) {
+        def refCourseDataProvider = refBookFactory.getDataProvider(22)
+        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    } else {
+        return null;
+    }
+}
+
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
+}
+
+/**
+ * Получить признак ценной бумаги
+ */
+def getSign(def sign) {
+    return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Получить буквенный код валюты
+ */
+def getCurrency(def currencyCode) {
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
 }
 

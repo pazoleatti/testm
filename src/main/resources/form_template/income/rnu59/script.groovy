@@ -48,7 +48,7 @@ switch (formDataEvent){
         //1. Логические проверки значений налоговой формы
         logicalCheck()
         //2. Проверки соответствия НСИ
-        //NCICheck()
+        checkNSI()
         break
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
@@ -62,24 +62,31 @@ switch (formDataEvent){
         //2.    Логические проверки значений налоговой формы.
         logicalCheck()
         //3.    Проверки соответствия НСИ.
+        checkNSI()
         break
 // Инициирование Пользователем  выполнение перехода «Утвердить»
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Утверждена».
         //2.    Логические проверки значений налоговой формы.
+        logicalCheck()
         //3.    Проверки соответствия НСИ.
+        checkNSI()
         break
 // Инициирование Пользователем  выполнение перехода «Принять»
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Принята».
         //2.    Логические проверки значений налоговой формы.
+        logicalCheck()
         //3.    Проверки соответствия НСИ.
+        checkNSI()
         break
 // Инициирование Пользователем выполнения перехода «Отменить принятие»
     case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         //2.    Логические проверки значений налоговой формы.
+        logicalCheck()
         //3.    Проверки соответствия НСИ.
+        checkNSI()
         break
 
 // Событие добавить строку
@@ -138,6 +145,33 @@ def deleteRow(){
 //    getData(formData).getAllCached().each{rowItem->
 //        rowItem.rowNumber = i++
 //    }
+}
+
+/**
+ * Проверки соответствия НСИ.
+ */
+def checkNSI() {
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
+
+        for (def row : getRows(data)) {
+            if (isTotal(row)) {
+                continue
+            }
+
+            // 1. Проверка кода валюты со справочным (графа 3)
+            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
+                logger.warn('Неверный код валюты!')
+            }
+
+            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
+            if (row.rateBR!=roundTo2(calculateColumn11(row,row.part2REPODate))) {
+                logger.error('Неверно указана ставка Банка России!')
+                return false
+            }
+        }
+    }
+    return true
 }
 
 /**
@@ -311,7 +345,7 @@ def logicalCheck(){
 
     // Проверка итоговых значений по всей форме
     for(def dataRow:data.getAllCached()){
-        if (dataRow.getAlias()=="total"){
+        if (isTotalRow(dataRow)){
             def totalRow = data.getDataRow(data.getAllCached(),"total")
             if (totalRow != null && totalRow.nominalPrice != nominalPrice ||
                     totalRow.acquisitionPrice != acquisitionPrice ||
@@ -516,7 +550,7 @@ def inPeriod(def date, def from, to) {
 def getRate(def date) {
     def refDataProvider = refBookFactory.getDataProvider(23)
     def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+    tmp = res.getRecords().get(0).RATE.getNumberValue()
 
 }
 
@@ -524,8 +558,6 @@ def getRate(def date) {
  * Получить цифровой код валюты
 */
 def getCurrency(def currencyCode) {
-    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
-    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
-    return  resCurrency.get('CODE').getStringValue()
+    return refBookService.getStringValue(15,currencyCode,'CODE')
 
 }

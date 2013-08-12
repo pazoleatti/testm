@@ -130,12 +130,14 @@ void calc() {
     def daysInYear = getCountDaysInYear(new Date())
 
     /** Курс ЦБ РФ на отчётную дату. */
-    def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+    def course = 1
 
     def tmp
     def a, b ,c
 
     getRows(data).eachWithIndex { row, i ->
+
+        course = getCourse(row.currencyCode, reportDate)
 
         // графа 9, 10
         a = calcAForColumn9or10(row, reportDate, course)
@@ -223,7 +225,7 @@ def logicalCheck(def useLog) {
         def daysInYear = getCountDaysInYear(new Date())
 
         /** Курс ЦБ РФ на отчётную дату. */
-        def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+        def course = 1
 
         def hasTotalRow = false
         def BigDecimal tmp
@@ -234,6 +236,8 @@ def logicalCheck(def useLog) {
                 hasTotalRow = true
                 continue
             }
+
+            course = getCourse(row.currencyCode,reportDate)
 
             // 1. Обязательность заполнения поля графы 12 и 13
             if (!checkRequiredColumns(row, requiredColumns, true)) {
@@ -374,7 +378,7 @@ def checkNSI() {
             }
 
             // 1. Проверка кода валюты со справочным (графа 3)
-            if (false) {
+            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
                 logger.warn('Неверный код валюты!')
             }
 
@@ -683,18 +687,28 @@ BigDecimal roundTo2(BigDecimal value) {
     }
 }
 
-//Получить ставку рефинансирования ЦБ РФ
+/**
+ * Получить ставку рефинансирования ЦБ РФ
+ */
 def getRate(def date) {
     def refDataProvider = refBookFactory.getDataProvider(23)
     def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+    tmp = res.getRecords().get(0).RATE.getNumberValue()
 
 }
 
-//Получить цифровой код валюты
+/**
+ * Получить цифровой код валюты
+ */
 def getCurrency(def currencyCode) {
-    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
-    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
-    return  resCurrency.get('CODE').getStringValue()
+    return  refBookService.getStringValue(15,currencyCode,'CODE')
+}
 
+/**
+ * Получить курс валюты
+ */
+def getCourse(def currency, def date) {
+    def refCourseDataProvider = refBookFactory.getDataProvider(22)
+    def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+    return res.getRecords().get(0).RATE.getNumberValue()
 }

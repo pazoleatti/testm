@@ -20,7 +20,7 @@ switch (formDataEvent) {
         sort()
         calc()
         addAllStatic()
-        //allCheck()
+        allCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRowwarnrmData()
@@ -78,7 +78,11 @@ void logicalCheck() {
     for (DataRow row in data) {
         if (row.getAlias() == null) {
             // 1.Проверка цены приобретения для целей налогообложения (графа 12)
-            if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax == row.marketPriceInRub) {
+            if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub) {
+                logger.error("Неверно определена цена приобретения для целей налогообложения")
+            }
+
+            if (row.acquisitionPrice <= row.marketPriceInRub && row.acquisitionPriceTax != row.acquisitionPrice) {
                 logger.error("Неверно определена цена приобретения для целей налогообложения")
             }
 
@@ -472,15 +476,21 @@ BigDecimal calc12(DataRow row) {
  */
 void deleteAllStatic() {
     def data = getData(formData)
-    data.delete(getRealItogo())
-    data.delete(getRealItogoKvartal())
+    def rItogo = getRealItogo()
+    if (rItogo!=null) {
+        data.delete(rItogo)
+    }
+    def rItogoKvartal = getRealItogoKvartal()
+    if (rItogoKvartal!=null) {
+        data.delete(rItogoKvartal)
+    }
 }
 
 /**
  * Сортирует форму в соответвие с требованиями 6.11.2.1	Перечень полей формы
  */
 void sort() {
-    getData(formData).getAllCached().sort({ DataRow a, DataRow b ->
+    getRows(getData(formData)).sort({ DataRow a, DataRow b ->
         if (a.tradeNumber == b.tradeNumber && a.singSecurirty == b.singSecurirty) {
             return a.issue <=> b.issue
         }
@@ -498,6 +508,20 @@ void addAllStatic() {
 
 void allCheck() {
     logicalCheck()
+    checkNSI()
+}
+
+void checkNSI() {
+    getRows(getData(formData)).each{ DataRow row ->
+        if (row.getAlias()==null) {
+            if (row.tradeNumber!=null && getCode(row.tradeNumber)==null){
+                logger.warn('Код сделки в справочнике отсутствует!');
+            }
+            if (row.singSecurirty!=null && getSign(row.singSecurirty)==null){
+                logger.warn('Признак ценной бумаги в справочнике отсутствует!');
+            }
+        }
+    }
 }
 
 /**
@@ -545,7 +569,7 @@ void consolidation() {
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { DataRow row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
-                        getData(formData).insert(row,getData(formData).getAllCached().size())
+                        getData(formData).insert(row,getData(formData).getAllCached().size()+1)
                     }
                 }
             }
@@ -590,3 +614,16 @@ def getRows(def data){
     return data.getAllCached()
 }
 
+/**
+ * Получить код сделки
+ */
+def getCode(def code) {
+    return  refBookService.getNumberValue(61,code,'CODE')
+}
+
+/**
+ * Получить признак ценной бумаги
+ */
+def getSign(def sign) {
+    return  refBookService.getStringValue(62,sign,'CODE')
+}
