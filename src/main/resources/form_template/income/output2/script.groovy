@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import java.text.SimpleDateFormat
 
 /**
  * 6.3.2    Расчет налога на прибыль с доходов, удерживаемого налоговым агентом
@@ -50,7 +52,7 @@ switch (formDataEvent) {
         deleteRow()
         break
     case FormDataEvent.IMPORT :
-        // importData()
+        importData()
         break
 }
 
@@ -74,13 +76,14 @@ switch (formDataEvent) {
 
 void deleteRow() {
     if (currentDataRow != null) {
-        dataRowsHelper.getAllCached().remove(currentDataRow)
+        dataRowsHelper.delete(currentDataRow)
     }
 }
 
 void addRow() {
     dataRowsHelper.insert(getNewRow(), dataRowsHelper.getAllCached().size() + 1)
 }
+
 /**
  * Проверяет уникальность в отчётном периоде и вид
  */
@@ -108,6 +111,9 @@ void checkDecl() {
 }
 
 void logicCheck() {
+    // справочник "Коды субъектов Российской Федерации"
+    def refDataProvider = refBookFactory.getDataProvider(4)
+
     for (row in dataRowsHelper.getAllCached()) {
 
         for (alias in ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']) {
@@ -121,223 +127,196 @@ void logicCheck() {
             logger.error('Неправильно указан почтовый индекс!')
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            // @todo Вызывать работу со справочником по новому
-            if (!dictionaryRegionService.isValidCode((String) row.subdivisionRF)) {
-                logger.error('Неверное наименование субъекта РФ!')
+            // графа 3 - справочник "Коды субъектов Российской Федерации"
+            def record = refDataProvider.getRecordData(row.subdivisionRF);
+            if (record == null) {
+                logger.warn('Неверное наименование субъекта РФ!')
             }
         }
     }
 }
 
-///**
-// * Получить строку по алиасу.
-// *
-// * @param data данные нф (helper)
-// */
-//DataRow<Cell> getRows(def data) {
-//    return data.getAllCached();
-//}
+/**
+* Вставить новую строку в конец нф.
+*
+* @param data данные нф
+* @param row строка
+*/
+void insert(def data, def row) {
+    data.insert(row, getRows(data).size() + 1)
+}
 
-///**
-// * Сохранить измененные значения нф.
-// *
-// * @param data данные нф (helper)
-// */
-//void save(def data) {
-//    data.save(getRows(data))
-//}
+/**
+* Получение импортируемых данных.
+*/
+void importData() {
+    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
+    def fileName = 'fileName.xls'
 
-///**
-// * Вставить новую строку в конец нф.
-// *
-// * @param data данные нф
-// * @param row строка
-// */
-//void insert(def data, def row) {
-//    data.insert(row, getRows(data).size() + 1)
-//}
-//
-///**
-// * Удалить строку из нф
-// *
-// * @param data данные нф (helper)
-// * @param row строка для удаления
-// */
-//void deleteRow(def data, def row) {
-//    data.delete(row)
-//}
+    def is = ImportInputStream
+    if (is == null) {
+        return
+    }
 
-///**
-// * Получить данные формы.
-// *
-// * @param form форма
-// */
-//def getData(FormData form) {
-//    form
-//    if (form != null && form.id != null) {
-//        return formDataService.getDataRowHelper(form)
-//    }
-//    return null
-//}
+    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null);
+    if (xmlString == null) {
+        return
+    }
 
-///**
-// * Проверить наличие итоговой строки.
-// *
-// * @param data данные нф (helper)
-// */
-//def hasTotal(FormData data) {
-//    for (DataRow row: getRows(data)) {
-//        if (row.getAlias() == 'total') {
-//            return true
-//        }
-//    }
-//    return false
-//}
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        return
+    }
 
-///**
-// * Получение импортируемых данных.
-// */
-//void importData() {
-//    // TODO (Ramil Timerbaev) Костыль! это значение должно передаваться в скрипт
-//    def fileName = 'fileName.xls'
-//
-//    def is = ImportInputStream
-//    if (is == null) {
-//        return
-//    }
-//
-//    def xmlString = importService.getData(is, fileName, 'windows-1251', '№ стр.', null);
-//    if (xmlString == null) {
-//        return
-//    }
-//
-//    def xml = new XmlSlurper().parseText(xmlString)
-//    if (xml == null) {
-//        return
-//    }
-//
-//    // количество строк в шапке
-//    def headRowCount = 4
-//
-//    // проверка заголовка таблицы
-//    if (!checkTableHead(xml, headRowCount)) {
-//        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
-//        return
-//    }
-//    // TODO (Ramil Timerbaev) Проверка корректности данных (типы данных)
-//    // TODO (Ramil Timerbaev) Проверка корректности данных
-//    // добавить данные в форму
-//    addData(xml, headRowCount)
-//}
+    // количество строк в шапке
+    def headRowCount = 4
 
-///**
-// * Заполнить форму данными.
-// *
-// * @param xml данные
-// * @param headRowCount количество строк в шапке
-// */
-//void addData(def xml, headRowCount) {
-//    if (xml == null) {
-//        return
-//    }
-//    def data = getData(formData)
-//
-//    // количество графов в таблице
-//    def columnCount = 12
-//
-//    def tmp
-//    for (def row : xml.row) {
-//        // пропустить шапку таблицы
-//        if (indexRow < headRowCount) {
-//            continue
-//        }
-//
-//        // проверить по грн итоговая ли это строка
-//        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
-//        if (tmp != null && tmp.contains('Итог')) {
-//            continue
-//        }
-//        if (row.cell.size() == columnCount) {
-//            // проверить по номеру договора повторяющиеся записи
-//            tmp = (row.cell[1] != null ? row.cell[1].text() : null)
-//            def newRow = getRowByTradeNumber(data, tmp)
-//            if (newRow == null) {
-//                newRow = getNewRow()
-//                insert(data, newRow)
-//            }
-//
-//            // графа 1
-//            newRow.title = row.cell[2].text()
-//
-//            // графа 2
-//            newRow.zipCode = row.cell[7].text()
-//
-//            // графа 3
-//            newRow.subdivisionRF = row.cell[8].text()
-//
-//            // графа 4
-//            newRow.area = row.cell[10].text()
-//
-//            // графа 5
-//            newRow.city = row.cell[11].text()
-//
-//            // графа 6
-//            newRow.region = row.cell[12].text()
-//
-//            // графа 7
-//            newRow.street = row.cell[13].text()
-//
-//            // графа 8
-//            newRow.homeNumber = row.cell[14].text()
-//
-//            // графа 9
-//            newRow.corpNumber = row.cell[15].text()
-//
-//            // графа 10
-//            newRow.apartment = row.cell[16].text()
-//
-//            // TODO (Ramil Timerbaev) разбиение ФИО
-//
-//            'данные не представлены'
-//            // графа 11 - newRow.surname = row.cell[index].text()
-//            index++
-//            // графа 12 - newRow.name = row.cell[index].text()
-//            index++
-//            // графа 13 - newRow.patronymic = row.cell[index].text()
-//
-//            // графа 14
-//            newRow.phone = row.cell[18].text()
-//
-//            // графа 15
-//            newRow.dividendDate = row.cell[19].text()
-//
-//            // графа 16
-//            newRow.sumDividend = getNumber(row.cell[20].text())
-//
-//            // графа 17
-//            newRow.sumTax = getNumber(row.cell[22].text())
-//        }
-//    }
-//    save(data)
-//}
-//
-///**
-// * Получить числовое значение.
-// *
-// * @param value строка
-// */
-//def getNumber(def value) {
-//    if (value == null) {
-//        return null
-//    }
-//    def tmp = value.trim()
-//    if ("".equals(tmp)) {
-//        return null
-//    }
-//    // поменять запятую на точку и убрать пробелы
-//    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
-//    return new BigDecimal(tmp)
-//}
+    // проверка заголовка таблицы
+    if (!checkTableHead(xml, headRowCount)) {
+        logger.error('Заголовок таблицы не соответствует требуемой структуре!')
+        return
+    }
+
+    // добавить данные в форму
+    addData(xml, headRowCount)
+}
+
+/**
+* Заполнить форму данными.
+*
+* @param xml данные
+* @param headRowCount количество строк в шапке
+*/
+void addData(def xml, headRowCount) {
+    if (xml == null) {
+        return
+    }
+    def data = getDataRowsHelper()
+
+    // количество графов в таблице
+    def columnCount = 12
+
+    def tmp
+    def newRows = []
+
+    // справочник "Коды субъектов Российской Федерации"
+    def refDataProvider = refBookFactory.getDataProvider(4)
+
+    def indexRow = 0
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+    // TODO (Ramil Timerbaev) Проверка корректности данных
+    for (def row : xml.row) {
+        indexRow++
+
+        // пропустить шапку таблицы
+        if (indexRow <= headRowCount) {
+            continue
+        }
+
+        // проверить по грн итоговая ли это строка
+        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
+        if (tmp != null && tmp.contains('Итог')) {
+            continue
+        }
+
+        if (row.cell.size() >= columnCount) {
+            // проверить по номеру договора повторяющиеся записи
+            def newRow = getNewRow()
+
+            // графа 1
+            newRow.title = row.cell[2].text()
+
+            // графа 2
+            newRow.zipCode = row.cell[7].text()
+
+            // графа 3 - справочник "Коды субъектов Российской Федерации"
+            def records = refDataProvider.getRecords(new Date(), null, "CODE = '" + row.cell[8].text() + "'", null);
+            if (records == null || records.getRecords().isEmpty()) {
+                logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
+            } else {
+                def record = records.getRecords().getAt(0)
+                if (record == null) {
+                    logger.error("Строка $indexRow столбец 9 содержит неверный код субъекта РФ!")
+                }
+                newRow.subdivisionRF = getValue(record, 'record_id')
+            }
+
+            // графа 4
+            newRow.area = row.cell[10].text()
+
+            // графа 5
+            newRow.city = row.cell[11].text()
+
+            // графа 6
+            newRow.region = row.cell[12].text()
+
+            // графа 7
+            newRow.street = row.cell[13].text()
+
+            // графа 8
+            newRow.homeNumber = row.cell[14].text()
+
+            // графа 9
+            newRow.corpNumber = row.cell[15].text()
+
+            // графа 10
+            newRow.apartment = row.cell[16].text()
+
+            // разбиение ФИО
+            def fio = row.cell[17].text()
+            if (fio != null &&
+                    !"".equals(fio.trim()) &&
+                    !'данные не представлены'.equals(fio.trim().toLowerCase())) {
+                tmp = fio.trim().split(',', 3)
+                // графа 11
+                newRow.surname = tmp[0]
+                // графа 12
+                newRow.name = (tmp.size() > 1 ? tmp[1] : null)
+                // графа 13
+                newRow.patronymic = (tmp.size() > 2 ? tmp[2] : null)
+            }
+
+            // графа 14
+            newRow.phone = row.cell[18].text()
+
+            // графа 15
+            newRow.dividendDate = (row.cell[19].text() ? dateFormat.parse(row.cell[19].text()) : null)
+
+            // графа 16
+            newRow.sumDividend = getNumber(row.cell[20].text())
+
+            // графа 17
+            newRow.sumTax = getNumber(row.cell[21].text())
+
+            newRows.add(newRow)
+        }
+    }
+    data.clear()
+    newRows.each { newRow ->
+        insert(data, newRow)
+    }
+    data.commit()
+    logger.info('Данные загружены')
+}
+
+/**
+* Получить числовое значение.
+*
+* @param value строка
+*/
+def getNumber(def value) {
+    if (value == null) {
+        return null
+    }
+    def tmp = value.trim()
+    if ("".equals(tmp)) {
+        return null
+    }
+    // поменять запятую на точку и убрать пробелы
+    tmp = tmp.replaceAll(',', '.').replaceAll('[^\\d.,-]+', '')
+    return new BigDecimal(tmp)
+}
 
 /**
  * Получить новую стролу с заданными стилями.
@@ -353,41 +332,66 @@ DataRow<Cell> getNewRow() {
     return row
 }
 
-///**
-// * Проверить шапку таблицы.
-// *
-// * @param xml данные
-// * @param headRowCount количество строк в шапке
-// */
-//def checkTableHead(def xml, def headRowCount) {
-//    def colCount = 21
-//    // проверить количество строк и голонок в шапке
-//    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
-//        return false
-//    }
-//    def result = (xml.row[0].cell[0] == '№ стр.' &&
-//            xml.row[0].cell[1] == 'Код территориального банка' &&
-//            xml.row[0].cell[2] == 'Наименование территориального банка' &&
-//            xml.row[0].cell[3] == 'Наименование получателя' &&
-//            xml.row[0].cell[4] == 'ИНН' &&
-//            xml.row[0].cell[5] == 'КПП' &&
-//            xml.row[0].cell[6] == 'Юридический адрес ( место жительства )' &&
-//            xml.row[0].cell[7] == 'Юридический адрес ( место нахождения )' &&
-//            xml.row[1].cell[7] == 'Почтовый индекс' &&
-//            xml.row[1].cell[8] == 'Субъект Российской Федерации' &&
-//            xml.row[2].cell[8] == 'Код' &&
-//            xml.row[2].cell[9] == 'Наименование субъекта РФ' &&
-//            xml.row[1].cell[10] == 'Район' &&
-//            xml.row[1].cell[11] == 'Город' &&
-//            xml.row[1].cell[12] == 'Населенный пункт (село, поселок и т.п.)' &&
-//            xml.row[1].cell[13] == 'Улица (проспект, переулок и т.д.)' &&
-//            xml.row[1].cell[14] == 'Номер дома (владения)' &&
-//            xml.row[1].cell[15] == 'Номер корпуса (строения)' &&
-//            xml.row[1].cell[16] == 'Номер офиса (квартиры)' &&
-//            xml.row[0].cell[17] == 'Руководитель организации (Ф.И.О.)' &&
-//            xml.row[0].cell[18] == 'Контактный телефон' &&
-//            xml.row[0].cell[19] == 'Дата перечисления дивидентов' &&
-//            xml.row[0].cell[20] == 'Сумма дивидентов' &&
-//            xml.row[0].cell[21] == 'Сумма налога')
-//    return result
-//}
+/**
+* Проверить шапку таблицы.
+*
+* @param xml данные
+* @param headRowCount количество строк в шапке
+*/
+def checkTableHead(def xml, def headRowCount) {
+    logger.info('checkTableHead >>')
+    def colCount = 22
+    // проверить количество строк и голонок в шапке
+    if (xml.row.size() < headRowCount || xml.row[0].cell.size() < colCount) {
+        logger.info('row = ' + xml.row.size() + ' != ' + headRowCount + ', col = '+ xml.row[0].cell.size() + ' != ' + colCount)
+        logger.info('checkTableHead 0')
+        return false
+    }
+    def result = (xml.row[0].cell[0] == '№ стр.' &&
+            xml.row[0].cell[1] == 'Код территориального банка' &&
+            xml.row[0].cell[2] == 'Наименование территориального банка' &&
+            xml.row[0].cell[3] == 'Наименование получателя' &&
+            xml.row[0].cell[4] == 'ИНН' &&
+            xml.row[0].cell[5] == 'КПП' &&
+            xml.row[0].cell[6] == 'Юридический адрес ( место жительства )' &&
+            xml.row[0].cell[7] == 'Юридический адрес ( место нахождения )' &&
+            xml.row[1].cell[7] == 'Почтовый индекс' &&
+            xml.row[1].cell[8] == 'Субъект Российской Федерации' &&
+            xml.row[2].cell[8] == 'Код' &&
+            xml.row[2].cell[9] == 'Наименование субъекта РФ' &&
+            xml.row[1].cell[10] == 'Район' &&
+            xml.row[1].cell[11] == 'Город' &&
+            xml.row[1].cell[12] == 'Населенный пункт (село, поселок и т.п.)' &&
+            xml.row[1].cell[13] == 'Улица (проспект, переулок и т.д.)' &&
+            xml.row[1].cell[14] == 'Номер дома (владения)' &&
+            xml.row[1].cell[15] == 'Номер корпуса (строения)' &&
+            xml.row[1].cell[16] == 'Номер офиса (квартиры)' &&
+            xml.row[0].cell[17] == 'Руководитель организации (Ф.И.О.)' &&
+            xml.row[0].cell[18] == 'Контактный телефон' &&
+            xml.row[0].cell[19] == 'Дата перечисления дивидентов' &&
+            xml.row[0].cell[20] == 'Сумма дивидентов' &&
+            xml.row[0].cell[21] == 'Сумма налога')
+    logger.info('checkTableHead !!!')
+    return result
+}
+
+/**
+* Получить значение атрибута строки справочника.
+
+* @param record строка справочника
+* @param alias алиас
+*/
+def getValue(def record, def alias) {
+    def value = record.get(alias)
+    switch (value.getAttributeType()) {
+        case RefBookAttributeType.DATE :
+            return value.getDateValue()
+        case RefBookAttributeType.NUMBER :
+            return value.getNumberValue()
+        case RefBookAttributeType.STRING :
+            return value.getStringValue()
+        case RefBookAttributeType.REFERENCE :
+            return value.getReferenceValue()
+    }
+    return null
+}

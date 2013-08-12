@@ -5,9 +5,12 @@ import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 
 @Service("importService")
@@ -19,6 +22,7 @@ public class ImportServiceImpl implements ImportService {
     private final String ENTER = "\r\n";
     private final String TAB = "\t";
     private static HSSFDataFormatter formatter = new HSSFDataFormatter();
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public String getData(InputStream inputStream, String fileName, String charset) {
@@ -150,11 +154,11 @@ public class ImportServiceImpl implements ImportService {
             indexRow += 1;
             HSSFRow row = (HSSFRow) rows.next();
 
-            // брать колонки с позиции начала таблицы
+            // брать строки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
                 continue;
             }
-            // брать строки
+            // брать строки до позиции конца таблицы
             if (endP != null && indexRow >= endP.getY()) {
                 break;
             }
@@ -223,6 +227,7 @@ public class ImportServiceImpl implements ImportService {
      * Получить в строковом виде строку из таблицы экселя
      *
      * @param row строка из таблицы
+     * @param colP номер ячейки с которой брать данные
      */
     private String getRowString(HSSFRow row, Integer colP) {
         if (row == null) {
@@ -234,10 +239,10 @@ public class ImportServiceImpl implements ImportService {
         Iterator<Cell> iterator = row.cellIterator();
         int indexCol = -1;
         while (iterator.hasNext()) {
-            indexCol += 1;
+            indexCol++;
             // получить значение ячейки
             cellValue = getCellValue((HSSFCell)iterator.next());
-            if (colP != null && indexCol < colP) {
+            if (colP != null && indexCol + row.getFirstCellNum() < colP.shortValue()) {
                 continue;
             }
             sb.append(TAB).append(TAB).append("<cell>");
@@ -263,10 +268,19 @@ public class ImportServiceImpl implements ImportService {
         if (type == HSSFCell.CELL_TYPE_STRING) {
             value = cell.getRichStringCellValue().toString();
         } else if (type == HSSFCell.CELL_TYPE_NUMERIC) {
-            value = formatter.formatCellValue(cell);
-            if (value != null) {
-                // поменять запятую на точку и убрать пробелы
-                value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
+            if (DateUtil.isCellDateFormatted(cell)) {
+                // дата
+                Date date = cell.getDateCellValue();
+                if (date != null) {
+                    value = dateFormat.format(date);
+                }
+            } else {
+                // число
+                value = formatter.formatCellValue(cell);
+                if (value != null) {
+                    // поменять запятую на точку и убрать пробелы
+                    value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
+                }
             }
         } else if (type == HSSFCell.CELL_TYPE_BLANK) {
             value = null;
@@ -290,20 +304,21 @@ public class ImportServiceImpl implements ImportService {
         int firstCol = 0;
         boolean isFind = false;
         while (rows.hasNext() && !isFind) {
-            firstRow += 1;
-            firstCol = 0;
+            firstRow++;
+            firstCol = -1;
             HSSFRow row = (HSSFRow) rows.next();
             if (row == null) {
                 continue;
             }
             Iterator<Cell> cells = row.cellIterator();
             while (cells.hasNext()) {
+                firstCol++;
                 String cell = getCellValue((HSSFCell)cells.next());
                 if (value.equals(cell)) {
+                    firstCol = firstCol + row.getFirstCellNum();
                     isFind = true;
                     break;
                 }
-                firstCol += 1;
             }
         }
         if (isFind) {
