@@ -215,7 +215,7 @@ public class LogSystemReportBuilder extends AbstractXlsxReportBuilder {
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getIp());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
+            fillWidth(cellNumber, cell.getStringCellValue()!= null?cell.getStringCellValue().length():0);
             cellNumber++;
 
             cellNumber = 0;
