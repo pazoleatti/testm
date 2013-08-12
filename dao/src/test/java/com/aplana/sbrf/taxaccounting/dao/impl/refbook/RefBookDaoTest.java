@@ -43,6 +43,12 @@ public class RefBookDaoTest {
 		Assert.assertEquals(1, refBook2.getAttributes().size());
 	}
 
+    @Test
+    public void testGet3() {
+        RefBook refBook3 = refBookDao.get(3L);
+        Assert.assertEquals("24af57ef-ec1c-455f-a4fa-f0fb29483066", refBook3.getScriptId());
+    }
+
 	@Test
 	public void testGetData1() throws Exception {
 		RefBook refBook = refBookDao.get(1L);
@@ -133,7 +139,7 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetAll() {
 		List<RefBook> refBooks = refBookDao.getAll();
-		Assert.assertEquals(2, refBooks.size());
+		Assert.assertEquals(3, refBooks.size());
 	}
 
 	@Test
