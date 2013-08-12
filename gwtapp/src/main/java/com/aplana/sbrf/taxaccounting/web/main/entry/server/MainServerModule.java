@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionCon
 		AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class, TaxFormNominationServerModule.class,
 		DeclarationServerModule.class,ProjectVersionControlServerModule.class, HistoryServerModule.class, UserListServerModule.class, FormDataImportServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class, DepartmentConfigServerModule.class, RefBookPickerServerModule.class,
-        RefBookListServerModule.class})
+        RefBookListServerModule.class, RefBookDataServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

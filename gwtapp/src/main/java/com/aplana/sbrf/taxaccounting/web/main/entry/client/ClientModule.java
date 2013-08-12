@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
@@ -87,5 +88,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new BookerStatementsModule());
         install(new RefBookListModule());
         install(new TaxFormNominationModule());
+		install(new RefBookDataModule());
 	}
 }
