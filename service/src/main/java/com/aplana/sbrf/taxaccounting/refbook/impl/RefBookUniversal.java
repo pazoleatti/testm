@@ -62,6 +62,11 @@ public class RefBookUniversal implements RefBookDataProvider {
 	}
 
     @Override
+    public void deleteAllRecords(Date version) {
+        refBookDao.deleteAllRecords(refBookId, version);
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         return refBookDao.getValue(recordId, attributeId);
     }

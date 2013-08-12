@@ -9,6 +9,6 @@
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.impl"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.refbook.impl"/>
 
-    <jee:jndi-lookup id="signDataPath" jndi-name="services/aplana/taxaccounting/Sign"/>
+    <jee:jndi-lookup id="signDataPath" jndi-name="url/Sign"/>
 
 </beans>

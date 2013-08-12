@@ -113,7 +113,7 @@
 	</New>
 
     <New class="org.mortbay.jetty.plus.naming.EnvEntry">
-        <Arg>java:comp/env/services/aplana/taxaccounting/Sign</Arg>
+        <Arg>java:comp/env/url/Sign</Arg>
         <Arg type="java.net.URL">http://ignore/</Arg>
     </New>
 

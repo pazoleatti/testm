@@ -29,13 +29,11 @@ public class ContextTest implements ApplicationContextAware {
 		URL url = new URL("http://ignore/");
 		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder
 				.emptyActivatedContextBuilder();
-		builder.bind("services/aplana/taxaccounting/Sign", url);
+		builder.bind("url/Sign", url);
 	}
 
 	@Test
 	public void testContext(){
-		
-		
 		Assert.assertNotNull(applicationContext);
 	}
 

@@ -143,7 +143,7 @@
 
     <resource-ref>
         <description>Адрес публичных ключей для проверки подписи</description>
-        <res-ref-name>services/aplana/taxaccounting/Sign</res-ref-name>
+        <res-ref-name>url/Sign</res-ref-name>
         <res-type>java.net.URL</res-type>
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
@@ -189,7 +189,7 @@
 		<web-resource-collection>
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
-            <url-pattern>/logout</url-pattern>
+            <!--<url-pattern>/logout</url-pattern>-->
 			<url-pattern>/favicon.ico</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
