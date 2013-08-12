@@ -33,10 +33,9 @@
         }
 
     </ui:style>
+    <g:DockLayoutPanel>
 
-    <g:SplitLayoutPanel>
-
-        <g:north size="100">
+        <g:north size="120">
             <g:VerticalPanel>
                 <g:Label addStyleNames="{style.titleLabel}">Назначение налоговых форм и деклараций</g:Label>
 
@@ -70,49 +69,55 @@
 
         <g:center>
             <g:SplitLayoutPanel>
-                <g:west size="600">
-                    <g:DockLayoutPanel>
-                        <g:north size="30">
-                            <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
-                        </g:north>
-                        <g:center>
-                            <t:PopUpWithTree ui:field="tree"/>
-                        </g:center>
-                    </g:DockLayoutPanel>
-                </g:west>
-                <g:center>
-                    <g:DockLayoutPanel ui:field="panelFormDataKind">
-                        <g:west size="200" >
-                            <g:DockLayoutPanel ui:field="panelFormDataKind2" >
+                <g:north size="350">
+                    <g:SplitLayoutPanel>
+                        <g:west size="600">
+                            <g:DockLayoutPanel>
                                 <g:north size="30">
-                                    <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
+                                    <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
                                 </g:north>
                                 <g:center>
-                                    <m:MyValueListBox ui:field="boxFormDataKind" width="100%" visibleItemCount="15"/>
+                                    <t:PopUpWithTree ui:field="tree"/>
                                 </g:center>
                             </g:DockLayoutPanel>
                         </g:west>
                         <g:center>
-                            <g:DockLayoutPanel>
-                                <g:north size="30">
-                                    <g:Label addStyleNames="{style.label}" ui:field="labelKind"/>
-                                </g:north>
+                            <g:DockLayoutPanel ui:field="panelFormDataKind">
+                                <g:west size="200">
+                                    <g:DockLayoutPanel ui:field="panelFormDataKind2">
+                                        <g:north size="30">
+                                            <g:Label addStyleNames="{style.label}">Тип налоговой формы</g:Label>
+                                        </g:north>
+                                        <g:center>
+                                            <m:MyValueListBox ui:field="boxFormDataKind" width="100%"
+                                                              visibleItemCount="15"/>
+                                        </g:center>
+                                    </g:DockLayoutPanel>
+                                </g:west>
                                 <g:center>
-                                    <m:MyValueListBox ui:field="boxTaxFormKind" width="100%" visibleItemCount="15"/>
+                                    <g:DockLayoutPanel>
+                                        <g:north size="30">
+                                            <g:Label addStyleNames="{style.label}" ui:field="labelKind"/>
+                                        </g:north>
+                                        <g:center>
+                                            <m:MyValueListBox ui:field="boxTaxFormKind" width="100%"
+                                                              visibleItemCount="15"/>
+                                        </g:center>
+                                    </g:DockLayoutPanel>
                                 </g:center>
+
                             </g:DockLayoutPanel>
                         </g:center>
+                    </g:SplitLayoutPanel>
+                </g:north>
 
-                    </g:DockLayoutPanel>
+                <g:center>
+                    <style:GenericDataGrid ui:field="grid" width="100%" height="100%"/>
                 </g:center>
             </g:SplitLayoutPanel>
         </g:center>
 
-        <g:south size="400">
-            <style:GenericDataGrid ui:field="grid" width="100%" height="100%"/>
-        </g:south>
 
-    </g:SplitLayoutPanel>
-
+    </g:DockLayoutPanel>
 
 </ui:UiBinder>
