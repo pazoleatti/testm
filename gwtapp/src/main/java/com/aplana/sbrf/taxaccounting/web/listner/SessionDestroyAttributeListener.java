@@ -4,14 +4,11 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -37,12 +34,8 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
         if(SPRING_SECURITY_CONTEXT.equals(attributeName)){
             WebApplicationContext springContext =
                     WebApplicationContextUtils.getWebApplicationContext(event.getSession().getServletContext());
-            TAUserService userService = (TAUserService)springContext.getBean("taUserService");
-            String name = ((UserDetails)(((SecurityContext)attributeValue).getAuthentication().getPrincipal())).getUsername();
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(userService.getUser(name));
-            userInfo.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                    .getRequest().getRemoteAddr());
+            UserAuthenticationToken principal = ((UserAuthenticationToken)(((SecurityContext)attributeValue).getAuthentication().getPrincipal()));
+            TAUserInfo userInfo = principal.getUserInfo();
 
             logger.info("Exit: " + userInfo);
             FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");

@@ -55,14 +55,14 @@
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 
-	<!--<servlet>
+	<servlet>
 		<servlet-name>logout</servlet-name>
 		<servlet-class>com.aplana.sbrf.taxaccounting.web.servlet.LogoutServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>logout</servlet-name>
 		<url-pattern>/logout</url-pattern>
-	</servlet-mapping>-->
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>login</servlet-name>
