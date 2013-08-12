@@ -30,7 +30,7 @@ void importFromXML() {
     def Map<String, RefBookValue> recordsMap = new HashMap<String, RefBookValue>() // аттрибут и его значение
     def List<Map<String, RefBookValue>> recordsList = new ArrayList<Map<String, RefBookValue>>() // данные для записи в бд
     def Map<String, Model> mapper = new HashMap<String, Model>() // соответствие имён аттрибутов в бд и xml
-    def final INSERT_SIZE = 10000 // размер одной порции данных
+    def final INSERT_SIZE = 1000 // размер одной порции данных // 10000 Превышает таймаут
 
     refBook.attributes.each {
         if (it.alias.equals("NAME"))
@@ -45,14 +45,17 @@ void importFromXML() {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
         reader = factory.createXMLStreamReader(inputStream)
 
+        println("begin")
+
         while (reader.hasNext()) {
+
             if (reader.startElement) {
 
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("rollout"))) {
                     version = sdf.parse(reader.getAttributeValue(null, "dateSet"))
-                    // TODO dataProvider.deleteAllRecords(version)
                 }
+
 
                 // Список значений для вставки в бд
                 if (reader.getName().equals(QName.valueOf("field"))) {
@@ -77,7 +80,8 @@ void importFromXML() {
             if (reader.endElement && reader.getName().equals(QName.valueOf("record"))) {
                 recordsList.add(recordsMap)
                 recordsMap = new HashMap<String, RefBookValue>()
-                if (recordsList.size() > INSERT_SIZE) {
+                if (recordsList.size() >= INSERT_SIZE) {
+                    println("recordsList.size() = " + recordsList.size())
                     dataProvider.insertRecords(version, recordsList)
                     recordsList.clear()
                 }
@@ -88,7 +92,7 @@ void importFromXML() {
     } finally {
         reader?.close()
     }
-
+    dataProvider.deleteAllRecords(version)
     dataProvider.insertRecords(version, recordsList)
 
 //дебаг
