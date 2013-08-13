@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetRefBookDataRowAction extends UnsecuredActionImpl<GetRefBookDataRowResult> implements ActionName {
+public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTableDataResult> implements ActionName {
 
 	long refbookId;
 
