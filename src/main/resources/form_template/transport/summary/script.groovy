@@ -94,11 +94,6 @@ switch (formDataEvent) {
 // графа 21 - taxSumToPay
 
 
-def test(){
-    def  refDataProvider = refBookFactory.getDataProvider(3)
-    refDataProvider.getRecords(new Date(), null, "OKATO = '82227897001'", null)
-}
-
 /**
  * Скрипт для добавления новой строки.
  */
@@ -145,6 +140,7 @@ void calculationTotal() {
     sums.each {
         totalRow[it[0]] = it[1]
     }
+    data.insert(totalRow, data.getAllCached().size + 1)
     save(data)
 }
 
@@ -309,7 +305,7 @@ void deleteTotal() {
     }
     def row = (data.getAllCached().size() > 0 ? getRow(data, 'total') : null)
     if (row != null) {
-        data.getAllCached().delete(row)
+        formDataService.getDataRowHelper(formData).delete(row)
         save(data)
     }
 }
@@ -503,11 +499,12 @@ void fillForm() {
          * Графа 20 - Сумма налоговой льготы (руб.)
          */
         if (row.taxBenefitCode != null) {
-            if (row.taxBenefitCode == '20210' || row.taxBenefitCode == '30200') {
-                row.benefitSum = round(row.taxBase * row.coefKl * row.taxRate, 0)
-            } else if (row.taxBenefitCode == '20220') {
+            def taxBenefitCode = getRefBookValue(6, row.taxBenefitCode, 'CODE').stringValue
+            if (taxBenefitCode == '20210' || taxBenefitCode == '30200') {
+                row.benefitSum = (row.taxBase * row.coefKl * row.taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
+            } else if (taxBenefitCode == '20220') {
                 row.benefitSum = round(row.taxBase * row.taxRate * row.coefKl * reducingPerc / 100, 0)
-            } else if (row.taxBenefitCode == '20230') {
+            } else if (taxBenefitCode == '20230') {
                 row.benefitSum = round(row.coefKl * row.taxRate * (row.taxRate - loweringRates), 0)
             } else {
                 row.benefitSum = 0
@@ -518,8 +515,8 @@ void fillForm() {
          * Графа 21 - Исчисленная сумма налога, подлежащая уплате в бюджет.
          * Скрипт для вычисления значения столбца "Исчисленная сумма налога, подлежащая уплате в бюджет".
          */
-        if (row.calculatedTaxSum != null && row.benefitSum != null) {
-            row.taxSumToPay = round(row.calculatedTaxSum - row.benefitSum, 0)
+        if (row.calculatedTaxSum != null) {
+            row.taxSumToPay = round(row.calculatedTaxSum - (row.benefitSum?:0), 0)
         } else {
             row.taxSumToPay = null
 
@@ -620,7 +617,7 @@ void logicalChecks() {
  */
 void setRowIndex() {
     def data = getData(formData)
-    def index = 1
+    def index = 0
     for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
             continue
