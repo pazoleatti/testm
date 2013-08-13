@@ -4,4 +4,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface RefBookDataUiHandlers extends UiHandlers {
 	void onCancelClicked();
+	void onAddRowClicked();
+	void onSelectionChanged(Long recordId);
 }

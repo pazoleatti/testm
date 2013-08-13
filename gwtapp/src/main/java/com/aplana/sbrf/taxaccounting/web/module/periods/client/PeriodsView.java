@@ -1,8 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,15 +16,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
@@ -45,7 +46,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	GenericCellTable periodsTable;
 
 	@UiField
-	DepartmentPicker departmentPicker;
+	DepartmentPickerPopupWidget departmentPicker;
 
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
 
@@ -102,13 +103,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments, Map<String, Integer> selectedDepartments, int yearFrom, int yearTo) {
+	public void setFilterData(List<Department> departments, List<Integer> selectedDepartments, int yearFrom, int yearTo) {
 		Set<Integer> available = new HashSet<Integer>();
 		for (Department dep : departments) {
 			available.add(dep.getId());
 		}
-		departmentPicker.setTreeValues(departments, available);
-		departmentPicker.setSelectedItems(selectedDepartments);
+		departmentPicker.setAvalibleValues(departments, available);
+		departmentPicker.setValue(selectedDepartments);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 
@@ -124,8 +125,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			getUiHandlers().applyFilter(
 					Integer.valueOf(fromBox.getValue()),
 					Integer.valueOf(toBox.getValue()),
-					departmentPicker.getSelectedItems().values().isEmpty() ?
-							0 : departmentPicker.getSelectedItems().values().iterator().next()
+					departmentPicker.getValue().isEmpty() ?
+							0 : departmentPicker.getValue().iterator().next()
 			);
 		}
 	}

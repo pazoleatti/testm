@@ -1,9 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -19,16 +29,18 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
-
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
-		implements SourcesPresenter.MyView, SelectDepartmentsEventHandler {
+		implements SourcesPresenter.MyView, ValueChangeHandler<List<Integer>> {
 
 	interface Binder extends UiBinder<Widget, SourcesView> { }
 
@@ -41,8 +53,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private boolean canCancel;
 
 	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
-	private static final String SOURCE_DEPARTMENT_HEADER = "Выберите источник";
-	private static final String RECEIVER_DEPARTMENT_HEADER = "Выберите приёмник";
 
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
@@ -69,9 +79,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	GenericDataGrid<CheckedDepartmentFormType> receiverSourcesTable;
 
 	@UiField
-	DepartmentPicker departmentReceiverPicker;
+	DepartmentPickerPopupWidget departmentReceiverPicker;
 	@UiField
-	DepartmentPicker departmentSourcePicker;
+	DepartmentPickerPopupWidget departmentSourcePicker;
 
 	@UiField
 	Anchor formAnchor;
@@ -113,8 +123,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 		departmentReceiverPicker.setWidth(500);
 		departmentSourcePicker.setWidth(500);
-		departmentReceiverPicker.addDepartmentsReceivedEventHandler(this);
-		departmentSourcePicker.addDepartmentsReceivedEventHandler(this);
+		departmentReceiverPicker.addValueChangeHandler(this);
+		departmentSourcePicker.addValueChangeHandler(this);
 
 		setupSourcesTables();
 		setupReceiversTables();
@@ -131,8 +141,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		declarationReceiversTable.setVisible(!isForm);
 		taxTypePicker.setValue(TaxType.INCOME);
 
-		departmentReceiverPicker.setSelectedItems(null);
-		departmentSourcePicker.setSelectedItems(null);
+		departmentReceiverPicker.setValue(null);
+		departmentSourcePicker.setValue(null);
 
 		enableButtonLink(assignButton, false);
 		enableButtonLink(cancelButton, false);
@@ -185,8 +195,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		for (Department department : departments) {
 			availableDepartments.add(department.getId());
 		}
-		departmentReceiverPicker.setTreeValues(departments, availableDepartments);
-		departmentSourcePicker.setTreeValues(departments, availableDepartments);
+		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
+		departmentSourcePicker.setAvalibleValues(departments, availableDepartments);
 	}
 
 	public void setupReceiversTables() {
@@ -400,34 +410,24 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	}
 
-	// Тут мы завязываемся на хидер как на id, тк у нас два пикера департаментов.
-	@Override
-	public void onDepartmentsReceived(SelectDepartmentsEvent event) {
-		if (SOURCE_DEPARTMENT_HEADER.equals(event.getHeader())) {
-			setSources();
-		} else if (RECEIVER_DEPARTMENT_HEADER.equals(event.getHeader())) {
-			setReceivers();
-			receiverSourcesTable.setRowCount(0);
-		}
-	}
 
 	private void setSources() {
 		if (taxTypePicker.getValue() != null
-				&& departmentSourcePicker.getSelectedItems().values().iterator().hasNext()) {
+				&& departmentSourcePicker.getValue().iterator().hasNext()) {
 			getUiHandlers().getFormSources(
-					departmentSourcePicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+					departmentSourcePicker.getValue().iterator().next(), taxTypePicker.getValue());
 		}
 	}
 
 	private void setReceivers() {
 		if (taxTypePicker.getValue() != null
-				&& departmentReceiverPicker.getSelectedItems().values().iterator().hasNext()) {
+				&& departmentReceiverPicker.getValue().iterator().hasNext()) {
 			if (isForm) {
 				getUiHandlers().getFormReceivers(
-						departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+						departmentReceiverPicker.getValue().iterator().next(), taxTypePicker.getValue());
 			} else {
 				getUiHandlers().getDeclarationReceivers(
-						departmentReceiverPicker.getSelectedItems().values().iterator().next(), taxTypePicker.getValue());
+						departmentReceiverPicker.getValue().iterator().next(), taxTypePicker.getValue());
 			}
 		}
 	}
@@ -468,6 +468,16 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 		private void setIndex(int index) {
 			this.index = index;
+		}
+	}
+
+	@Override
+	public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+		if (departmentSourcePicker == event.getSource()) {
+			setSources();
+		} else if (departmentReceiverPicker == event.getSource()) {
+			setReceivers();
+			receiverSourcesTable.setRowCount(0);
 		}
 	}
 

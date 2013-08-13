@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -30,7 +30,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker periodPicker;
-	private DepartmentPicker departmentPicker;
+	private DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField
 	Panel reportPeriodPanel;
@@ -102,17 +102,15 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 	@Override
 	public void setDepartments(List<Department> departments) {
 		departmentPickerPanel.clear();
-		departmentPicker = new DepartmentPicker(DEPARTMENT_PICKER_HEADER, false);
-		departmentPicker.setTreeValues(departments, filterValues.getDepartmentIds());
+		departmentPicker = new DepartmentPickerPopupWidget(DEPARTMENT_PICKER_HEADER, false);
+		departmentPicker.setAvalibleValues(departments, filterValues.getDepartmentIds());
 		departmentPickerPanel.add(departmentPicker);
 
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			Integer departmentId = filter.getDepartmentIds().iterator().next();
 			for (Department department : departments) {
 				if (department.getId() == departmentId) {
-					Map<String, Integer> value = new HashMap<String, Integer>(1);
-					value.put(department.getName(), departmentId);
-					departmentPicker.setSelectedItems(value);
+					departmentPicker.setValue(Arrays.asList(departmentId));
 					return;
 				}
 			}
@@ -135,10 +133,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 			filter.setReportPeriodIds(Arrays.asList(periodPicker.
 					getSelectedReportPeriods().entrySet().iterator().next().getKey()));
 		}
-		if (departmentPicker.getSelectedItems().entrySet().iterator().hasNext() ) {
-			filter.setDepartmentIds(departmentPicker.getSelectedItems().isEmpty() ? new ArrayList<Integer>() :
+		if (departmentPicker.getValue().iterator().hasNext() ) {
+			filter.setDepartmentIds(departmentPicker.getValue().isEmpty() ? new ArrayList<Integer>() :
 					Arrays.asList(departmentPicker.
-							getSelectedItems().entrySet().iterator().next().getValue()));
+							getValue().iterator().next()));
 		}
 		if(declarationType.getValue() != null) {
 			filter.setDeclarationTypeId(declarationType.getValue().getId());

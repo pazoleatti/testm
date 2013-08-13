@@ -4,13 +4,22 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class RefBookDataRow implements Serializable {
-	Map<String, RefBookTableCell> values;
+	Long refBookRowId;
+	Map<String, String> values;
 
-	public Map<String, RefBookTableCell> getValues() {
+	public Long getRefBookRowId() {
+		return refBookRowId;
+	}
+
+	public void setRefBookRowId(Long refBookRowId) {
+		this.refBookRowId = refBookRowId;
+	}
+
+	public Map<String, String> getValues() {
 		return values;
 	}
 
-	public void setValues(Map<String, RefBookTableCell> values) {
+	public void setValues(Map<String, String> values) {
 		this.values = values;
 	}
 }
