@@ -51,17 +51,15 @@ switch (formDataEvent) {
         break
     case FormDataEvent.ADD_ROW:
         addRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
     case FormDataEvent.DELETE_ROW:
         deleteRow()
-        dataRowsHelper.save(dataRowsHelper.getAllCached());
         break
 }
 
 void deleteRow() {
     if (currentDataRow != null) {
-        dataRowsHelper.getAllCached().remove(currentDataRow)
+        dataRowsHelper.delete(currentDataRow)
     }
 }
 
@@ -76,7 +74,7 @@ void addRow() {
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias('Редактируемая')
     }
-    dataRowsHelper.getAllCached().add(row)
+    dataRowsHelper.insert(row, dataRowsHelper.getAllCached().size() + 1)
 
 }
 

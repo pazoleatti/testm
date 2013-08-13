@@ -10,8 +10,8 @@
 	<!-- Exclude some URL's from spring security. See also web.xml. -->
 	<http pattern="/login" security="none"/>
     <!--<http pattern="/logout" security="none"/>-->
-	<http pattern="/favicon.ico" security="none"/>
-	<http pattern="/j_security_check" security="none"/>
+    <http pattern="/favicon.ico" security="none"/>
+    <http pattern="/j_security_check" security="none"/>
 	<http pattern="/GenericAccountManagementService" security="none"/>
 	<http pattern="/GenericAccountManagementService/**" security="none"/>
 	<http pattern="/TaxAccountingSupportingData" security="none"/>
@@ -19,7 +19,9 @@
 
     <http create-session="never" use-expressions="true" auto-config="false" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
         <intercept-url pattern="/**" access="isAuthenticated()"/>
-        <custom-filter position="PRE_AUTH_FILTER" ref="preAuthFilter"/>
+        <custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
+        <form-login login-processing-url="/j_security_check"/>
+        <logout logout-success-url="/logout" />
     </http>
     <sec:global-method-security pre-post-annotations="enabled" proxy-target-class = "true"/>
 </beans:beans>

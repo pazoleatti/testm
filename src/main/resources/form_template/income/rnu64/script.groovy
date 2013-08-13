@@ -113,6 +113,8 @@ switch (formDataEvent){
         consolidation()
         fillForm()
         logicalCheck()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 

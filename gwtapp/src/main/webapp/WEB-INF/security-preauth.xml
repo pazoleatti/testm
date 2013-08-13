@@ -8,26 +8,47 @@
              http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.listner" />
-	<beans:bean id="taxAccountingAuthenticationUserDetailsService" class="com.aplana.sbrf.taxaccounting.web.main.api.server.AuthenticationUserDetailsServiceImpl" />
-	<beans:bean id="preAuthenticatedProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
-	<beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
-		<beans:property name="preAuthenticatedUserDetailsService" ref="taxAccountingAuthenticationUserDetailsService" />
-	</beans:bean>
 
-	<beans:bean id="simpleAttributes2GrantedAuthoritiesMapper" class="org.springframework.security.core.authority.mapping.SimpleAttributes2GrantedAuthoritiesMapper">
-		<beans:property name="attributePrefix" value="" />
-	</beans:bean>
-	<beans:bean id="webXmlMappableAttributesRetriever" class="org.springframework.security.web.authentication.preauth.j2ee.WebXmlMappableAttributesRetriever" />
+    <!--used docs:  http://javaworkbench.blogspot.ru/2012/10/container-based-authentication-with.html-->
 
-	<beans:bean id="j2eeBasedPreAuthenticatedWebAuthenticationDetailsSource" class="org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource">
-		<beans:property name="mappableRolesRetriever" ref="webXmlMappableAttributesRetriever" />
-		<beans:property name="userRoles2GrantedAuthoritiesMapper" ref="simpleAttributes2GrantedAuthoritiesMapper" />
-	</beans:bean>
+    <beans:bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+        <filter-chain-map path-type="ant">
+            <filter-chain pattern="/**" filters="securityContextFilter, j2eePreAuthFilter, logoutFilter, exceptionFilter"/>
+        </filter-chain-map>
+    </beans:bean>
 
-	<beans:bean id="preAuthFilter" class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
+    <beans:bean id="securityContextFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter"/>
+
+	<beans:bean id="j2eePreAuthFilter" class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
 		<beans:property name="authenticationManager" ref="appControlAuthenticationManager" />
-		<beans:property name="authenticationDetailsSource" ref="j2eeBasedPreAuthenticatedWebAuthenticationDetailsSource" />
+		<beans:property name="authenticationDetailsSource">
+            <beans:bean class="org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource">
+                <beans:property name="mappableRolesRetriever">
+                    <beans:bean class="org.springframework.security.web.authentication.preauth.j2ee.WebXmlMappableAttributesRetriever" />
+                </beans:property>
+                <beans:property name="userRoles2GrantedAuthoritiesMapper">
+                    <beans:bean class="org.springframework.security.core.authority.mapping.SimpleAttributes2GrantedAuthoritiesMapper">
+                        <beans:property name="convertAttributeToUpperCase" value="true"/>
+                    </beans:bean>
+                </beans:property>
+            </beans:bean>
+		</beans:property>
 	</beans:bean>
+
+    <beans:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+        <beans:constructor-arg value="/"/>
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean>
+
+    <beans:bean id="preAuthenticatedProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+
+    <beans:bean id="exceptionFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
+        <beans:property name="authenticationEntryPoint" ref="preAuthenticatedProcessingFilterEntryPoint"/>
+    </beans:bean>
 
     <!--Настройка фильтра для события удаления сессии-->
     <beans:bean id="sessionAuthStrategy" class="org.springframework.security.web.session.SimpleRedirectInvalidSessionStrategy">
@@ -37,4 +58,11 @@
 	<authentication-manager alias="appControlAuthenticationManager">
 		<authentication-provider ref="preAuthenticatedAuthenticationProvider" />
 	</authentication-manager>
+
+    <beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <beans:property name="preAuthenticatedUserDetailsService">
+            <beans:bean class="com.aplana.sbrf.taxaccounting.web.main.api.server.AuthenticationUserDetailsServiceImpl" />
+        </beans:property>
+    </beans:bean>
+
 </beans:beans>
