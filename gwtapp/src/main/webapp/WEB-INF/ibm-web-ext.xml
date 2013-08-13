@@ -6,7 +6,7 @@
 	version="1.0">
 
 	<reload-interval value="3"/>
-	<context-root uri="/taxaccounting-0.2.2/gwtapp" />
+	<context-root uri="/taxaccounting/gwtapp" />
 	<enable-directory-browsing value="false"/>
 	<enable-file-serving value="false"/>
 	<enable-reloading value="true"/>
