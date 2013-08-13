@@ -48,7 +48,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void updateDepartmentPicker();
 
-		Map<String, Integer> getSelectedDepartments();
+		List<Integer> getSelectedDepartments();
 
 		Integer getSelectedDeclarationTypeId();
 
@@ -58,14 +58,14 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
-		void setSelectedDepartments(Map<String, Integer> values);
+		void setSelectedDepartments(List<Integer> values);
 	}
 
 	private final DispatchAsync dispatchAsync;
 	
 	private TaxType taxType;
 	private static Map<TaxType, DeclarationDataFilter> savedFilterData = new HashMap<TaxType, DeclarationDataFilter>();
-	private static Map<TaxType, Map<String, Integer>> savedDepartmentsMap = new HashMap<TaxType, Map<String, Integer>>();
+	private static Map<TaxType, List<Integer>> savedDepartmentsMap = new HashMap<TaxType, List<Integer>>();
 	private List<TARole> userRoles = null;
 	private List<TaxPeriod> taxPeriods;
 	private List<Department> departments;
@@ -86,7 +86,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
 
 		declarationFilter.setReportPeriodIds(new ArrayList<Integer>(getView().getSelectedReportPeriods()));
-		declarationFilter.setDepartmentIds(new ArrayList<Integer>(getView().getSelectedDepartments().values()));
+		declarationFilter.setDepartmentIds(new ArrayList<Integer>(getView().getSelectedDepartments()));
 		declarationFilter.setTaxType(this.taxType);
 		declarationFilter.setDeclarationTypeId(getView().getSelectedDeclarationTypeId());
 		return declarationFilter;
@@ -119,8 +119,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 	public void updateSavedFilterData(DeclarationDataFilter declarationFilter){
 		savedFilterData.put(this.taxType, declarationFilter);
-		Map<String, Integer> selectedDepartments = new HashMap<String, Integer>();
-		selectedDepartments.putAll(getView().getSelectedDepartments());
+		List<Integer> selectedDepartments = new ArrayList<Integer>();
+		selectedDepartments.addAll(getView().getSelectedDepartments());
 		savedDepartmentsMap.put(this.taxType, selectedDepartments);
 	}
 
@@ -188,9 +188,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 				String departmentName = getDepartmentNameById(departments, departmentId);
 				//Если пользователь ни разу не выполнял фильтрацию, то ставим значения фильтра по-умолчанию
 				List<Integer> defaultDepartment = new ArrayList<Integer>(Arrays.asList(departmentId));
-				Map<String, Integer> defaultSelectedDepartment = new HashMap<String, Integer>();
-				defaultSelectedDepartment.put(departmentName, departmentId);
-				getView().setSelectedDepartments(defaultSelectedDepartment);
+				getView().setSelectedDepartments(Arrays.asList(departmentId));
 				formDataFilter.setDepartmentIds(defaultDepartment);
 			} else {
 				formDataFilter.setDepartmentIds(null);

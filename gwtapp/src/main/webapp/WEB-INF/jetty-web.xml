@@ -105,12 +105,12 @@
 		</Arg>
 	</New>
 	
-	<New class="org.mortbay.jetty.plus.naming.Resource">
+	<!--<New class="org.mortbay.jetty.plus.naming.Resource">
 		<Arg>java:comp/env/services/cache/aplana/taxaccounting/DataBlobsCache</Arg>
 		<Arg>
 			<New class="java.util.concurrent.ConcurrentHashMap" />
 		</Arg>
-	</New>
+	</New>-->
 
     <New class="org.mortbay.jetty.plus.naming.EnvEntry">
         <Arg>java:comp/env/url/Sign</Arg>

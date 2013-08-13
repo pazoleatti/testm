@@ -68,8 +68,6 @@ def reorgInn = getValue(incomeParams, 'REORG_INN')
 def reorgKpp = getValue(incomeParams, 'REORG_KPP')
 def okato = getValue(incomeParams, 'OKATO')
 def signatoryId = getValue(incomeParams, 'SIGNATORY_ID')
-def taxRate = getValue(incomeParams, 'TAX_RATE')
-def sumTax = getValue(incomeParams, 'SUM_TAX') // вместо departmentParamIncome.externalTaxSum
 def appVersion = getValue(incomeParams, 'APP_VERSION')
 def formatVersion = getValue(incomeParams, 'FORMAT_VERSION')
 def taxPlaceTypeCode = getValue(incomeParams, 'TAX_PLACE_TYPE_CODE')
@@ -78,7 +76,6 @@ def signatoryFirstName = getValue(incomeParams, 'SIGNATORY_FIRSTNAME')
 def signatoryLastName = getValue(incomeParams, 'SIGNATORY_LASTNAME')
 def approveDocName = getValue(incomeParams, 'APPROVE_DOC_NAME')
 def approveOrgName = getValue(incomeParams, 'APPROVE_ORG_NAME')
-def sumDividends = getValue(incomeParams, 'SUM_DIVIDENDS')
 // справочник "Параметры подразделения по налогу на прибыль" - конец
 
 /** Отчётный период. */

@@ -25,7 +25,7 @@
                 <g:Label styleName="{style.titleLabel}" text="Настройки подразделений"/>
                 <g:HorizontalPanel spacing="5">
                     <g:Label styleName="{style.boldLabel}" text="Подразделение:"/>
-                    <d:DepartmentPicker ui:field="departmentPicker" withCheckBox="false"
+                    <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
                                         header="Выберите подразделение"/>
                     <g:Label styleName="{style.boldLabel}" text="Вид налога:"/>
                     <g:ListBox width="200px" ui:field="taxType"/>
@@ -67,7 +67,7 @@
                                 <g:Label text="ИНН" width="40px"/>
                                 <g:TextBox width="100px" ui:field="inn"/>
                                 <g:Label text="ОКАТО" styleName="{style.sps}" width="60px"/>
-                                <r:RefBookPickerPopupWidget ui:field="okato" width="115px" />
+                                <r:RefBookPickerPopupWidget ui:field="okato" width="115px" attributeIdInt="7"/>
                                 <g:Label text="Код налогового органа" width="160px" styleName="{style.sps}"/>
                                 <g:TextBox width="100px" ui:field="taxOrganCode"/>
                             </g:HorizontalPanel>

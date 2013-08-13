@@ -1,0 +1,72 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
+    <ui:style>
+        .titleLabel {
+            font-size: 26px;
+            margin: 10px;
+        }
+
+        .pager {
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .titleText{
+            font-size: 26px;
+        }
+
+        .titleDesc{
+            font-size: 16px;
+        }
+
+        .titlePanel{
+            padding-left: 10px
+        }
+    </ui:style>
+    <g:DockLayoutPanel>
+        <g:north size="100">
+            <g:HorizontalPanel>
+                <g:cell width="335px">
+                    <g:VerticalPanel width="310px" addStyleNames="{style.titlePanel}">
+                        <g:cell height="45px">
+                            <g:Label styleName="{style.titleText}">Справочник</g:Label>
+                        </g:cell>
+                        <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:VerticalPanel width="100%">
+                    <style:ButtonLink title="Добавить строку" img="resources/img/exclamation_mark.png">Добавить строку</style:ButtonLink>
+                    <style:ButtonLink title="Удалить строку" img="resources/img/exclamation_mark.png">Удалить строку</style:ButtonLink>
+                    <g:Button>Сохранить</g:Button>
+                    <g:Button ui:field="cancel">Отмена</g:Button>
+                </g:VerticalPanel>
+            </g:HorizontalPanel>
+        </g:north>
+        <g:center>
+            <g:SplitLayoutPanel>
+                <g:center>
+                    <g:DockLayoutPanel>
+                        <g:center>
+                            <g:ResizeLayoutPanel>
+                                <style:GenericDataGrid height="100%" ui:field="refbookDataTable"/>
+                            </g:ResizeLayoutPanel>
+                        </g:center>
+                        <g:south size="30">
+                            <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                                 showFastForwardButton="false" fastForwardRows="0"
+                                                 showLastPageButton="true" rangeLimited="true" styleName="{style.pager}"/>
+                        </g:south>
+                    </g:DockLayoutPanel>
+                </g:center>
+                <g:east size="600">
+                    <g:VerticalPanel ui:field="content">
+
+                    </g:VerticalPanel>
+                </g:east>
+            </g:SplitLayoutPanel>
+        </g:center>
+
+    </g:DockLayoutPanel>
+</ui:UiBinder>

@@ -4,11 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -25,9 +24,6 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
 
     @Override
     public void attributeAdded(HttpSessionBindingEvent event) {
-        String attributeName = event.getName();
-        Object attributeValue = event.getValue();
-        System.out.println("Attribute added : " + attributeName + " : " + attributeValue);
     }
 
     @Override
@@ -38,10 +34,8 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
         if(SPRING_SECURITY_CONTEXT.equals(attributeName)){
             WebApplicationContext springContext =
                     WebApplicationContextUtils.getWebApplicationContext(event.getSession().getServletContext());
-            TAUserService userService = (TAUserService)springContext.getBean("taUserService");
-            String name = ((UserDetails)(((SecurityContext)attributeValue).getAuthentication().getPrincipal())).getUsername();
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(userService.getUser(name));
+            UserAuthenticationToken principal = ((UserAuthenticationToken)(((SecurityContext)attributeValue).getAuthentication().getPrincipal()));
+            TAUserInfo userInfo = principal.getUserInfo();
 
             logger.info("Exit: " + userInfo);
             FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
@@ -57,8 +51,5 @@ public class SessionDestroyAttributeListener implements HttpSessionAttributeList
 
     @Override
     public void attributeReplaced(HttpSessionBindingEvent event) {
-        String attributeName = event.getName();
-        Object attributeValue = event.getValue();
-        System.out.println("Attribute replaced : " + attributeName + " : " + attributeValue);
     }
 }

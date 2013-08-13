@@ -68,6 +68,7 @@ switch (formDataEvent) {
 
 void allCheck() {
     logicalCheck()
+    checkNSI()
 }
 
 /**
@@ -142,6 +143,33 @@ void logicalCheck() {
             }
         }
     }
+}
+
+/**
+ * Проверки соответствия НСИ.
+ */
+def checkNSI() {
+    def data = getData(formData)
+    if (!getRows(data).isEmpty()) {
+
+        for (def row : getRows(data)) {
+            if (isItogoRow(row)) {
+                continue
+            }
+
+            // 1. Проверка кода валюты со справочным (графа 3)
+            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
+                logger.warn('Неверный код валюты!')
+            }
+
+            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
+            if (row.rateBR!=roundTo2(calc11(row,row.part2REPODate))) {
+                logger.error('Неверно указана ставка Банка России!')
+                return false
+            }
+        }
+    }
+    return true
 }
 
 void setError(Column c) {
@@ -549,7 +577,7 @@ def getRows(def data) {
 def getRate(def date) {
     def refDataProvider = refBookFactory.getDataProvider(23)
     def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+    tmp = res.getRecords().get(0).RATE.getNumberValue()
 
 }
 
@@ -557,10 +585,7 @@ def getRate(def date) {
  * Получить цифровой код валюты
  */
 def getCurrency(def currencyCode) {
-    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
-    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
-    return  resCurrency.get('CODE').getStringValue()
-
+    return  refBookService.getStringValue(15,currencyCode,'CODE')
 }
 
 /**

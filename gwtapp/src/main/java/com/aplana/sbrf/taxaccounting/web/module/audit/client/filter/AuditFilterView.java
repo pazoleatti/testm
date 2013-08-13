@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -46,7 +46,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<Integer> userId;
 
     @UiField
-    DepartmentPicker departmentSelectionTree;
+    DepartmentPickerPopupWidget departmentSelectionTree;
 
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> formTypeId;
@@ -80,7 +80,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void setDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentSelectionTree.setTreeValues(list,availableValues);
+        departmentSelectionTree.setAvalibleValues(list,availableValues);
     }
 
     @Override
@@ -130,9 +130,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         }
 
         List<Integer> departments = new ArrayList<Integer>();
-        for (Map.Entry<String, Integer> department : departmentSelectionTree.getSelectedItems().entrySet()) {
-            departments.add(department.getValue());
-        }
+        departments.addAll(departmentSelectionTree.getValue());
+        
         lsf.setDepartmentIds(departments);
         lsf.setFormTypeId((null == formTypeId.getValue()) ? 0 : formTypeId.getValue());
         lsf.setDeclarationTypeId((null == declarationTypeId.getValue()) ? 0 : declarationTypeId.getValue());

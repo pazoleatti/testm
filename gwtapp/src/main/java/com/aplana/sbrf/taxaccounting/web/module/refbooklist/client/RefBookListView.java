@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.Type;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -85,7 +86,7 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
                         if (model == null) {
                             return;
                         }
-                        sb.appendHtmlConstant("<a href=\"#" + RefBookListTokens.refbookList + ";"
+                        sb.appendHtmlConstant("<a href=\"#" + RefBookDataTokens.refBookData + ";"
                                 // TODO поменять на токен
                                 + "id=" +
                                 +model.getId() + "\">"

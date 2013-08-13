@@ -134,7 +134,7 @@ void calc() {
     def daysInYear = getCountDaysInYaer(new Date())
 
     /** Курс ЦБ РФ на отчётную дату. */
-    def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+    def course = 1
 
     def tmp
     def a, b ,c
@@ -142,6 +142,8 @@ void calc() {
     getRows(data).eachWithIndex { row, i ->
 
         def currency = getCurrency(row.currencyCode)
+        course = getCourse(row.currencyCode,reportDate)
+
         // графа 9, 10
         a = calcAForColumn9or10(row, reportDate, course)
         b = 0
@@ -226,7 +228,7 @@ def logicalCheck(def useLog) {
         def daysInYear = getCountDaysInYaer(new Date())
 
         /** Курс ЦБ РФ на отчётную дату. */
-        def course = 1 // TODO (Ramil Timerbaev) откуда брать курс ЦБ РФ на отчётную дату
+        def course = 1
 
         def hasTotalRow = false
         def hasError
@@ -239,6 +241,7 @@ def logicalCheck(def useLog) {
                 continue
             }
             def currency = getCurrency(row.currencyCode)
+            course= getCourse(row.currencyCode,reportDate)
 
             // 1. Обязательность заполнения поля графы 12 и 13
             if (!checkRequiredColumns(row, requiredColumns, true)) {
@@ -371,19 +374,18 @@ def checkNSI() {
         /** Отчетная дата. */
         def reportDate = getReportDate()
 
-        def hasError
         for (def row : getRows(data)) {
             if (isTotal(row)) {
                 continue
             }
 
             // 1. Проверка кода валюты со справочным (графа 3)
-            if (false) {
+            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
                 logger.warn('Неверный код валюты!')
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            if (row.rateBR!=calc11Value(row,reportDate)) {
+            if (row.rateBR!=roundTo2(calc11Value(row,reportDate))) {
                 logger.error('Неверно указана ставка Банка России!')
                 return false
             }
@@ -680,7 +682,7 @@ BigDecimal roundTo2(BigDecimal value) {
 def getRate(def date) {
     def refDataProvider = refBookFactory.getDataProvider(23)
     def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).get('RATE').getNumberValue()
+    tmp = res.getRecords().get(0).RATE.getNumberValue()
 
 }
 
@@ -688,8 +690,5 @@ def getRate(def date) {
  * Получить цифровой код валюты
  */
 def getCurrency(def currencyCode) {
-    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
-    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
-    return  resCurrency.get('CODE').getStringValue()
-
+    return refBookService.getStringValue(15,currencyCode,'CODE')
 }

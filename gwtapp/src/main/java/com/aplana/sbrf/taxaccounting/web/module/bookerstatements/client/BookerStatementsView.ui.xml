@@ -30,7 +30,7 @@
                 </g:HorizontalPanel>
                 <g:HorizontalPanel verticalAlignment="MIDDLE">
                     <g:cell width="220px">
-                        <d:DepartmentPicker width="200px" ui:field="departmentPicker" withCheckBox="false" header="Выберите подразделение"/>
+                        <d:DepartmentPickerPopupWidget width="200px" ui:field="departmentPicker" multiselection="false" header="Выберите подразделение"/>
                     </g:cell>
                     <g:cell width="220px">
                         <g:SimplePanel ui:field="reportPeriodPanel" width="200px"/>

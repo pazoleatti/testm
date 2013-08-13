@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.servlet;
 
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,13 +16,13 @@ import java.util.regex.Pattern;
 public class LogoutServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String contextPath = request.getContextPath();
-		WebApplicationContext springContext =
+		/*WebApplicationContext springContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		SecurityService securityService = (SecurityService)springContext.getBean("securityService");
 		if (securityService.currentUserInfo() != null) {
 			FormDataService unlockFormData =(FormDataService)springContext.getBean("unlockFormData");
 			unlockFormData.unlockAllByUser(securityService.currentUserInfo());
-		}
+		}*/
 		if (Pattern.compile("Web\\s*Sphere", Pattern.CASE_INSENSITIVE).matcher(getServletContext().getServerInfo()).find()) {
 			response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=login");
 		} else {
