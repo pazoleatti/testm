@@ -12,8 +12,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -35,8 +33,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
     @UiField
     AbstractPager pager;
-
-    private MyDataProvider dataProvider = new MyDataProvider();
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
@@ -171,29 +167,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     }
 
     @Override
-    public void assignDataProvider(int pageSize) {
+    public void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider) {
         auditTable.setPageSize(pageSize);
-        dataProvider.addDataDisplay(auditTable);
-    }
-
-    @Override
-    public void updateDataTable() {
-        dataProvider.update();
-    }
-
-    private class MyDataProvider extends AsyncDataProvider<LogSystemSearchResultItem> {
-
-        public void update() {
-            for (HasData<LogSystemSearchResultItem> display: getDataDisplays()) {
-                onRangeChanged(display);
-            }
-        }
-
-        @Override
-        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
-            final Range range = display.getVisibleRange();
-            getUiHandlers().onRangeChange(range.getStart(), range.getLength());
-        }
+        provider.addDataDisplay(auditTable);
     }
 
 }
