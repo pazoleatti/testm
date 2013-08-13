@@ -309,9 +309,28 @@ DataRow getPrevRowWithoutAlias(DataRow row) {
     throw new IllegalArgumentException()
 }
 
-// todo Проверки НСИ: нет справочников
-void checkNSI() {
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
+    return (tmp ? tmp.getTime() + 1 : null)
+}
 
+void checkNSI() {
+    getRows(getData(formData)).each{ DataRow row ->
+        if (row.getAlias() == null) {
+            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null){
+                logger.warn('Валюта выпуска облигации указана неверно!');
+            }
+            if (row.signSecurity!=null && getSign(row.signSecurity)==null){
+                logger.warn('Признак ценной бумаги в справочнике отсутствует!');
+            }
+            if (row.currencyCode!=null && getCourse(row.currencyCode,reportDate)==null){
+                logger.warn('Неверный курс валют!');
+            }
+        }
+    }
 }
 
 void allCheck() {
@@ -555,13 +574,9 @@ BigDecimal calc11(DataRow row) {
 
 /**
  * Расчет графы 12
- * @author ivildanov
  */
 BigDecimal calc12(DataRow row) {
-    if (getCurrency(row.currency) == 'RUR') {
-        return null
-    }
-    return row.rubCourse
+    return getCourse(row.currencyCode,reportDate)
 }
 
 /**
@@ -822,8 +837,22 @@ def getData(def formData) {
  * Получить буквенный код валюты
  */
 def getCurrency(def currencyCode) {
-    def refCurrencyDataProvider = refBookFactory.getDataProvider(15)
-    def resCurrency = refCurrencyDataProvider.getRecordData(currencyCode);
-    return  resCurrency.get('CODE_2').getStringValue()
-
+    return  refBookService.getStringValue(15,currencyCode,'CODE_2')
 }
+
+/**
+ * Получить признак ценной бумаги
+ */
+def getSign(def sign) {
+    return  refBookService.getStringValue(62,sign,'CODE')
+}
+
+/**
+ * Получить курс валюты
+ */
+def getCourse(def currency, def date) {
+    def refCourseDataProvider = refBookFactory.getDataProvider(22)
+    def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER='+currency, null);
+    return res.getRecords().get(0).RATE.getNumberValue()
+}
+

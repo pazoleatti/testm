@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -57,7 +56,7 @@ public class AuthenticationUserDetailsServiceImpl implements
         auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
 		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
 		// возможно в будущем задействуем и их
-		return new User(userName, "notused", grantedAuthorities);
+		return new UserAuthenticationToken(info, grantedAuthorities);
 	}
 
 }

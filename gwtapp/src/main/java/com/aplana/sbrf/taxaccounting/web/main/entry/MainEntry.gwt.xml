@@ -24,6 +24,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.sources.Sources"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
 
 
 

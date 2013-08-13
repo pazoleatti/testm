@@ -534,11 +534,13 @@ def logicalCheck(def useLog) {
  * Проверки соответствия НСИ.
  */
 def checkNSI() {
-    // 1. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
-    if (false) {
-        logger.warn('Признак ценной бумаги на текущую отчётную дату указан неверно!')
+    def data = getData(formData)
+    getRows (data).each { row->
+        // 1. Проверка актуальности поля «Признак ценной бумаги на текущую отчётную дату»
+        if (!isTotal(row) && row.signSecurity!=null && getSign(row.signSecurity)==null) {
+            logger.warn('Признак ценной бумаги на текущую отчётную дату указан неверно!')
+        }
     }
-    return true
 }
 
 /**
@@ -1050,4 +1052,11 @@ def checkAlias(def list, def rowAlias) {
         }
     }
     return false
+}
+
+/**
+ * Получить признак ценной бумаги
+ */
+def getSign(def sign) {
+    return  refBookService.getStringValue(62,sign,'CODE')
 }

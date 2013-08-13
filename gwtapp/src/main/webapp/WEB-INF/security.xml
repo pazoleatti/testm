@@ -20,7 +20,6 @@
     <http create-session="never" use-expressions="true" auto-config="false" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
         <intercept-url pattern="/**" access="isAuthenticated()"/>
         <custom-filter position="PRE_AUTH_FILTER" ref="preAuthFilter"/>
-        <logout logout-url="/logout" logout-success-url="/login"/>
     </http>
     <sec:global-method-security pre-post-annotations="enabled" proxy-target-class = "true"/>
 </beans:beans>
