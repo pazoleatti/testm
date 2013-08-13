@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -52,7 +52,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	private final PopupPanel widget;
 	private ReportPeriodPicker reportPeriodPicker;
-	private DepartmentPicker departmentPicker;
+	private DepartmentPickerPopupWidget departmentPicker;
 
 	@Inject
 	@UiConstructor
@@ -90,8 +90,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void createDepartmentFilter(List<Department> list, Set<Integer> availableValues){
-		departmentPicker = new DepartmentPicker("Выберите подразделение", false);
-		departmentPicker.setTreeValues(list, availableValues);
+		departmentPicker = new DepartmentPickerPopupWidget("Выберите подразделение", false);
+		departmentPicker.setAvalibleValues(list, availableValues);
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		FormDataFilter formDataFilter = new FormDataFilter();
 		formDataFilter.setFormDataKind(formKind.getValue());
 		formDataFilter.setFormTypeId(formType.getValue() != null ? formType.getValue().getId() : null);
-		formDataFilter.setDepartmentId(new ArrayList<Integer>(departmentPicker.getSelectedItems().values()));
+		formDataFilter.setDepartmentId(new ArrayList<Integer>(departmentPicker.getValue()));
 		formDataFilter.setReportPeriodIds(new ArrayList<Integer>(reportPeriodPicker.getSelectedReportPeriods().keySet()));
 		return formDataFilter;
 	}
@@ -155,8 +155,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	}
 
 	@Override
-	public void setDepartmentValue(Map<String, Integer> value){
-		departmentPicker.setSelectedItems(value);
+	public void setDepartmentValue(List<Integer> value){
+		departmentPicker.setValue(value, true);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@Override
 	public void clearInput(){
 		reportPeriodPicker.setSelectedReportPeriods(null);
-		departmentPicker.setSelectedItems(null);
+		departmentPicker.setValue(null);
 		formKind.setValue(null);
 		formType.setValue(null);
 	}

@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:m='urn:import:com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup'>
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'>
 
 
     <ui:style field="css"
@@ -77,7 +77,7 @@
                                     <g:Label addStyleNames="{style.label}">Подразделение</g:Label>
                                 </g:north>
                                 <g:center>
-                                    <t:PopUpWithTree ui:field="tree"/>
+                                    <t:DepartmentPickerWidget ui:field="tree"/>
                                 </g:center>
                             </g:DockLayoutPanel>
                         </g:west>

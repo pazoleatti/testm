@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
@@ -59,9 +59,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	VerticalPanel reportPeriodPanel;
 
 	private final Map<TaxType, ReportPeriodPicker> taxTypeReportPeriodPickerMap = new HashMap<TaxType, ReportPeriodPicker>();
-	private final Map<TaxType, DepartmentPicker> taxTypeDepartmentSelectionTree = new HashMap<TaxType, DepartmentPicker>();
+	private final Map<TaxType, DepartmentPickerPopupWidget> taxTypeDepartmentSelectionTree = new HashMap<TaxType, DepartmentPickerPopupWidget>();
 	private ReportPeriodPicker currentReportPeriod;
-	private DepartmentPicker currentDepartment;
+	private DepartmentPickerPopupWidget currentDepartment;
 
 	private Map<Integer, String> formTypesMap;
 
@@ -104,7 +104,8 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 
 	    for (TaxType taxType : TaxType.values()){
 		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
-		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPicker("Выберите подразделение", true));
+		    // Убрал мультивыбор подразделения (http://jira.aplana.com/browse/SBRFACCTAX-3401)
+		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPickerPopupWidget("Выберите подразделение", false));
 	    }
     }
 
@@ -185,14 +186,14 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	@Override
 	public void setDepartmentsList(List<Department> list, Set<Integer> availableValues){
 		if(getUiHandlers() != null){
-			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setTreeValues(list, availableValues);
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setAvalibleValues(list, availableValues);
 		}
 	}
 
 	@Override
-	public void setSelectedDepartments(Map<String, Integer> values){
+	public void setSelectedDepartments(List<Integer> values){
 		if(getUiHandlers() != null){
-			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setSelectedItems(values);
+			taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).setValue(values, true);
 		}
 	}
 
@@ -204,9 +205,9 @@ public class FilterView extends ViewWithUiHandlers<FilterUIHandlers> implements 
 	}
 
 	@Override
-	public Map<String, Integer> getSelectedDepartments(){
+	public List<Integer> getSelectedDepartments(){
 		if(getUiHandlers() != null){
-			return taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).getSelectedItems();
+			return taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType()).getValue();
 		}
 		return null;
 	}

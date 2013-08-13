@@ -81,8 +81,8 @@
                     <g:cell verticalAlignment="middle">
                         <g:Label text="Подразделение: " styleName="{style.searchLabel}" />
                     </g:cell>
-                    <d:DepartmentPicker ui:field="departmentReceiverPicker"
-                                           header="Выберите приёмник" withCheckBox="false"/>
+                    <d:DepartmentPickerPopupWidget ui:field="departmentReceiverPicker"
+                                           header="Выберите приёмник" multiselection="false"/>
                 </g:HorizontalPanel>
                 <style:GenericDataGrid ui:field="formReceiversTable" width="100%" height="350px" />
                 <style:GenericDataGrid ui:field="declarationReceiversTable" width="100%" height="350px" />
@@ -94,8 +94,8 @@
                     <g:cell verticalAlignment="middle">
                         <g:Label text="Подразделение: " styleName="{style.searchLabel}" />
                     </g:cell>
-                    <d:DepartmentPicker ui:field="departmentSourcePicker"
-                                           header="Выберите источник" withCheckBox="false"/>
+                    <d:DepartmentPickerPopupWidget ui:field="departmentSourcePicker"
+                                           header="Выберите источник" multiselection="false"/>
                 </g:HorizontalPanel>
                 <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px" />
             </g:FlowPanel>

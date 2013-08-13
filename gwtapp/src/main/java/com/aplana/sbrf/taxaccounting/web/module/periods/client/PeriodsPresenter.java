@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -7,7 +10,13 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -17,11 +26,10 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers {
@@ -39,7 +47,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
 		void setTableData(List<TableRow> data);
 		void setDepartmentPickerEnable(boolean enable);
-		void setFilterData(List<Department> departments, Map<String, Integer> selectedDepartments, int yearFrom, int yearTo);
+		void setFilterData(List<Department> departments, List<Integer> selectedDepartments, int yearFrom, int yearTo);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -122,9 +130,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					public void onSuccess(PeriodsGetFilterDataResult result) {
 						departments = result.getDepartments();
 						dictionaryTaxPeriods = result.getDictionaryTaxPeriods();
-						Map<String, Integer> selectedDepartments = new HashMap<String, Integer>();
-						selectedDepartments.put(result.getSelectedDepartment().getName(),
-								result.getSelectedDepartment().getId());
+						List<Integer> selectedDepartments = new ArrayList<Integer>();
+						selectedDepartments.add(result.getSelectedDepartment().getId());
 						getView().setFilterData(departments, selectedDepartments, result.getYearFrom(), result.getYearTo());
 						openDialogPresenter.setDepartments(departments, selectedDepartments);
 						openDialogPresenter.setDictionaryTaxPeriod(dictionaryTaxPeriods);

@@ -60,7 +60,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		FormDataFilter getFilterData();
 		void setFormTypeValue(FormType value);
 		void setFormKindValue(FormDataKind value);
-		void setDepartmentValue(Map<String, Integer> value);
+		void setDepartmentValue(List<Integer> value);
 		void setReportPeriodValue(List<ReportPeriod> value);
 	}
 
@@ -150,10 +150,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 			getView().setFormKindValue(formDataFilter.getFormDataKind());
 		}
 		if(formDataFilter.getDepartmentId().size() == 1){
-			Map<String, Integer> value = new HashMap<String, Integer>();
+			List<Integer> value = new ArrayList<Integer>();
 			Integer departmentId = formDataFilter.getDepartmentId().iterator().next();
-			String departmentName = departmentMap.get(departmentId).getName();
-			value.put(departmentName, departmentId);
+			//String departmentName = departmentMap.get(departmentId).getName();
+			value.add(departmentId);
 			getView().setDepartmentValue(value);
 		}
 

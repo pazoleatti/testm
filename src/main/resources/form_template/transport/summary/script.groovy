@@ -14,14 +14,15 @@ switch (formDataEvent) {
     // расчитать
     case FormDataEvent.CALCULATE :
         deleteTotal()
-        fillForm()
-        determinationTransportType()
-        checkRequiredField()
-        checkNSI()
-        logicalChecks()
-        sort()
-        calculationTotal()
-        setRowIndex()
+        if (checkRequiredField()) {
+            fillForm()
+            determinationTransportType()
+            checkNSI()
+            logicalChecks()
+            sort()
+            calculationTotal()
+            setRowIndex()
+        }
         break
     // обобщить
     case FormDataEvent.COMPOSE :
@@ -29,15 +30,16 @@ switch (formDataEvent) {
         break
     // проверить
     case FormDataEvent.CHECK :
-        checkRequiredField()
-        deleteTotal()
-        determinationTransportType()
-        fillForm()
-        checkNSI()
-        logicalChecks()
-        sort()
-        calculationTotal()
-        setRowIndex()
+        if (checkRequiredField()){
+            deleteTotal()
+            determinationTransportType()
+            fillForm()
+            checkNSI()
+            logicalChecks()
+            sort()
+            calculationTotal()
+            setRowIndex()
+        }
         break
     // утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :
@@ -61,7 +63,7 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW :
         deleteTotal()
         addRow()
-        calculationTotal()
+        //calculationTotal()
         setRowIndex()
         break
     case FormDataEvent.DELETE_ROW :
@@ -91,6 +93,12 @@ switch (formDataEvent) {
 // графа 20 - benefitSum
 // графа 21 - taxSumToPay
 
+
+def test(){
+    def  refDataProvider = refBookFactory.getDataProvider(3)
+    refDataProvider.getRecords(new Date(), null, "OKATO = '82227897001'", null)
+}
+
 /**
  * Скрипт для добавления новой строки.
  */
@@ -98,14 +106,13 @@ void addRow() {
     def data = getData(formData)
 
     def row = formData.createDataRow()
-    data.getAllCached().add(row)
+    data.insert(row, data.getAllCached().size + 1)
     ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
             'taxBaseOkeiUnit', 'ecoClass', 'years', 'ownMonths',
             'taxBenefitCode', 'benefitStartDate', 'benefitEndDate'].each { alias ->
         row.getCell(alias).editable = true
         row.getCell(alias).setStyleAlias("Редактируемое поле")
     }
-    save(data)
 }
 
 /**
@@ -131,7 +138,8 @@ void calculationTotal() {
     // добавление строки ИТОГО
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.tsType = 'ИТОГО:'
+    totalRow.getCell("fix").setColSpan(2)
+    totalRow.fix = 'ИТОГО:'
 
     // вставка подсчитанных сумм в строку ИТОГО
     sums.each {
@@ -171,39 +179,63 @@ void checkNSI() {
             continue
         }
 
-        // Проверка совпадения ОКАТО со справочным
-        if (row.okato != null) {
-            if (!transportTaxDao.validateOkato(row.okato)) {
-                logger.error('Неверный код ОКАТО')
-            }
+        /*
+         * Проверка совпадения ОКАТО со справочным
+         *
+         * В справочнике «Коды ОКАТО» должна быть строка для которой выполняется условие:
+         * «графа 2» текущей строки формы =  «графа 1» строки справочника
+         */
+        //def refOkatoCodeDataProvider = refBookFactory.getDataProvider(3)
+        if (row.okato != null && getRefBookValue(3, row.okato, "OKATO") == null){ // refOkatoCodeDataProvider.getRecords(new Date(), null, "OKATO like '"+getRefBookValue(3, row.okato, "OKATO")+"'", null).getRecords().size == 0){
+            logger.error('Неверный код ОКАТО')
         }
 
-        // Проверка совпадения кода вида ТС со справочным
-        if (row.tsTypeCode != null) {
-            if(transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
-                // Проверка наименования вида ТС коду вида ТС
-                if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
-                    logger.error('Название вида ТС не совпадает с Кодом вида ТС')
-                }
-            } else {
-                logger.error('Неверный код вида транспортного средства!')
-            }
+        /*
+         * Проверка совпадения кода вида ТС со справочным
+         *
+         * В справочнике  «Коды видов транспортного средства» должна быть строка для которой выполняется условие:
+         * «графа 3» (поле «Код вида транспортного средства (ТС)») текущей строки формы = «графа 2» (поле  «Код вида ТС») строки справочника
+         */
+
+        if (row.tsTypeCode != null && getRefBookValue(42, row.tsTypeCode, "CODE") == null){//refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+row.tsTypeCode+"'", null).getRecords().size == 0) {
+            logger.error('Неверный код вида транспортного средства!')
         }
 
+        /**
+         * Проверка наименования вида ТС коду вида ТС
+         *
+         * Значение «графы 4» (поле «Вид транспортного средства») совпадает со значение поля «Наименование вида транспортного средства» строки справочника «Коды видов транспортных средств»,  для которой
+         * «графа 3» (поле «Код вида транспортного средства (ТС)») текущей строки формы = «графа 2» (поле  «Код вида ТС») строки справочника
+         * TODO
+         */
+        def refTransportCodeDataProvider = refBookFactory.getDataProvider(42)
+        def tsTypeCode = getRefBookValue(42, row.tsTypeCode, "CODE")
+        def tsType = getRefBookValue(42, row.tsType, "NAME")
 
-
-        // Проверка совпадения единицы измерения налоговой базы по ОКЕИ со справочной
-        if (row.taxBaseOkeiUnit != null) {
-            if (!transportTaxDao.validateTaxBaseUnit(row.taxBaseOkeiUnit)) {
-                logger.error('Недопустимый код единицы измерения налоговой базы.')
-            }
+        if (row.tsType != null && row.tsTypeCode != null &&(tsTypeCode == null || tsType == null || refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+tsTypeCode+"' and NAME LIKE '"+tsType+"'", null).getRecords().size == 0)){
+            logger.error('Название вида ТС не совпадает с Кодом вида ТС')
         }
 
-        // Проверка совпадения экологического класса со справочным
-        if (row.ecoClass!=null) {
-            if(!transportTaxDao.validateEcoClass(row.ecoClass)) {
-                logger.error('Недопустимый экологический класс')
-            }
+        /*
+         * Проверка совпадения единицы измерения налоговой базы по ОКЕИ со справочной
+         *
+         * В справочнике «Коды единиц измерения налоговой базы на основании ОКЕИ» должна быть строка, для которой выполняется условие:
+         * «графа 9» текущей строки формы = «графа 1» строки справочника
+         */
+        //def refTaxBaseCodeDataProvider = refBookFactory.getDataProvider(12)
+        if (row.taxBaseOkeiUnit != null && getRefBookValue(12, row.taxBaseOkeiUnit, "CODE") == null) {//refTaxBaseCodeDataProvider.getRecords(new Date(), null, "CODE LIKE '"+row.taxBaseOkeiUnit+"'", null).getRecords().size == 0){
+            logger.error("Неверный код единицы измерения налоговой базы")
+        }
+
+        /**
+         * Проверка совпадения экологического класса со справочным
+         *
+         * В справочнике «Экологические классы» должна быть строка, для которой выполняется условие:
+         * «графа 10» текущей строки формы = «графа 1» строки справочника
+         */
+        def refEcoClassDataProvider = refBookFactory.getDataProvider(40)
+        if (row.ecoClass!=null && getRefBookValue(40, row.ecoClass, "NAME") == null) {// refEcoClassDataProvider.getRecords(new Date(), null, "NAME LIKE '"+row.ecoClass+"'", null).getRecords().size == 0) {
+            logger.error("Неверный экологический класс")
         }
     }
 }
@@ -214,7 +246,7 @@ void checkNSI() {
  * @author rtimerbaev
  * @since 19.02.2013 13:30
  */
-void checkRequiredField() {
+def checkRequiredField() {
     def data = getData(formData)
     for (def row : data.getAllCached()) {
         if (row.getAlias() == 'total') {
@@ -224,18 +256,17 @@ void checkRequiredField() {
         def errorMsg = ''
 
         // 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 20 , 21
-        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
-                'taxBaseOkeiUnit', 'ownMonths','coef362', 'calculatedTaxSum', 'taxSumToPay'].each {
-            // Тут у меня непонятки при мерже произошли. Старая строка закомментирована на всякий
-            // ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'taxBaseOkeiUnit', 'ownMonths','coef362', 'taxRate', 'calculatedTaxSum', 'benefitSum', 'taxSumToPay'].each {
+        ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase', 'ownMonths'].each {
             if (row.getCell(it) != null && (row.getCell(it).getValue() == null || ''.equals(row.getCell(it).getValue()))) {
                 errorMsg += (!''.equals(errorMsg) ? ', ' : '') + '"' + row.getCell(it).getColumn().getName() + '"'
             }
         }
         if (!''.equals(errorMsg)) {
             logger.error("Не заполнены поля в колонках : $errorMsg.")
+            return false
         }
     }
+    return true
 }
 
 /**
@@ -255,7 +286,7 @@ void deleteRow() {
     def row = currentDataRow
     if (row != null && row.getAlias() != 'total'){
         // удаление строки
-        deleteRow(data, row)
+        data.delete(row)
 
         // пересчет номеров строк
         def n = 1
@@ -291,7 +322,8 @@ void determinationTransportType() {
     def data = getData(formData)
     data.getAllCached().each { row ->
         if (row.tsTypeCode != null){
-            row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
+            def refTransportCodeDataProvider = refBookFactory.getDataProvider(42)
+            row.tsType = refTransportCodeDataProvider.getRecords(new Date(), null, "CODE like '"+getRefBookValue(42, row.tsTypeCode, "CODE") +"'", null).getRecords().get(0).record_id.numberValue
         }
     }
     save(data)
@@ -323,17 +355,21 @@ void fillForm() {
     def index = 1
     data.getAllCached().each { row ->
         // получение региона по ОКАТО
-        def region = dictionaryRegionService.getRegionByOkatoOrg(row.okato)
-
+        def region = getRegionByOkatoOrg(row.okato)
         // получение параметров региона
         if (row.taxBenefitCode){
-            def taxBenefitParam = dictionaryTaxBenefitParamService.get(region.code, row.taxBenefitCode)
-            if (taxBenefitParam == null){
+            // датапровайдер для справочника "Параметры налоговых льгот"
+            def  refDataProvideTaxBenefit = refBookFactory.getDataProvider(7)
+            // запрос по выборке данных из справочника
+            def query = "TAX_BENEFIT_ID = "+row.taxBenefitCode+" and DICT_REGION_ID = "+region.record_id
+            def records = refDataProvideTaxBenefit.getRecords(new Date(), null, query, null).getRecords()
+
+            if (records.size() == 0){
                 logger.error('Ошибка при получении параметров региона')
             }
             else{
-                reducingPerc = taxBenefitParam.percent
-                loweringRates = taxBenefitParam.rate
+                reducingPerc = records.get(0).percent
+                loweringRates = records.get(0).rate
             }
         }
 
@@ -351,7 +387,9 @@ void fillForm() {
          * если это значение не задано.
          */
         if (row.taxBaseOkeiUnit == null) {
-            row.taxBaseOkeiUnit = 251
+            def refTaxBaseCodeDataProvider = refBookFactory.getDataProvider(12)
+            def taxBaseOkeiUnitData = refTaxBaseCodeDataProvider.getRecords(new Date(), null, "CODE LIKE '251'", null).getRecords()
+            row.taxBaseOkeiUnit = taxBaseOkeiUnitData.get(0).record_id.numberValue
         }
 
 
@@ -378,7 +416,26 @@ void fillForm() {
          */
         row.taxRate = null
         if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-            row.taxRate = transportTaxDao.getTaxRate(row.tsTypeCode, row.years, row.taxBase, region.code)
+            def tsTypeCode = getRefBookValue(42 ,row.tsTypeCode, "CODE")
+            // Провайдер для справочника «Ставки транспортного налога»
+            def  refDataProvideTransportRate = refBookFactory.getDataProvider(41)
+            // запрос по выборке данных из справочника
+            def query = " and ((MIN_POWER is null or MIN_POWER < "+row.taxBase+") and (MAX_POWER is null or MAX_POWER > "+row.taxBase+"))"+
+                    "and ((MIN_AGE is null or MIN_AGE < "+row.years+") and (MAX_AGE is null or MAX_AGE > "+row.years+"))"+
+                    "and DICT_REGION_ID = "+region.record_id; // DICT_REGION_ID типа REFERENCE
+
+            def queryLikeStrictly = "CODE LIKE '"+tsTypeCode.toString()+"'"+query;
+            def record = refDataProvideTransportRate.getRecords(new Date(), null, queryLikeStrictly, null).getRecords()
+            if (record.size() == 0){
+                def queryLike = "CODE LIKE '"+tsTypeCode.toString().substring(0, 2)+"%'"+  query
+                record = refDataProvideTransportRate.getRecords(new Date(), null, queryLike, null).getRecords()
+            }
+            if (record.size() != 0){
+                row.taxRate = record.get(0).record_id.numberValue
+            } else{
+                logger.error("Ошибка определения налоговой ставки")
+            }
+            // TODO удалить этот старый код -> row.taxRate = transportTaxDao.getTaxRate(row.tsTypeCode, row.years, row.taxBase, region.code)
         } else {
             row.taxRate = null
             def fields = []
@@ -537,7 +594,7 @@ void logicalChecks() {
         def allCellsFill = true
         // все ячейки пустые
         def allCellsEmpty = true
-        ['benefitStartDate', 'benefitEndDate', 'coefKl', 'benefitSum', 'taxBenefitCode'].each {
+        ['benefitStartDate', 'benefitEndDate'].each {
             if (row[it]){
                 allCellsEmpty = false
             } else {
@@ -612,16 +669,6 @@ void save(def dataRows) {
 }
 
 /**
- * Удалить строку из нф
- *
- * @param dataRows данные нф (helper)
- * @param row строка для удаления
- */
-void deleteRow(def dataRows, def row) {
-    dataRows.delete(row)
-}
-
-/**
  * Получить данные формы.
  *
  * @param formData форма
@@ -645,4 +692,60 @@ def hasTotal(def data) {
         }
     }
     return false
+}
+
+/**
+ * Получение региона по коду ОКАТО
+ * @param okato
+ */
+def getRegionByOkatoOrg(okatoCell){
+    /*
+    * первые две цифры проверяемого кода ОКАТО
+    * совпадают со значением поля «Определяющая часть кода ОКАТО»
+    * справочника «Коды субъектов Российской Федерации»
+    */
+    // провайдер для справочника - Коды субъектов Российской Федерации
+    def okato =  getRefBookValue(3, okatoCell, "OKATO")
+    def  refDataProvider = refBookFactory.getDataProvider(4)
+    def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '"+okato.toString().substring(0, 2)+"%'", null).getRecords()
+
+    if (records.size == 1){
+        return records.get(0);
+    } else if (records.size == 0){
+        logger.error("Не удалось определить регион по коду ОКАТО")
+        return null;
+    } else{
+        /**
+         * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
+         * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg89 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71140")}
+        if (reg89 != null) return reg89;
+
+        /**
+         * Если первые пять цифр кода равны "71100" то
+         * код ОКАТО соответствует Ханты-мансийскому АО
+         * (код 86 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg86 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("71100")}
+        if (reg86 != null) return reg86;
+
+        /**
+         * Если первые четыре цифры кода равны "1110"
+         * то код ОКАТО соответствует Ненецкому АО
+         * (код 83 в справочнике «Коды субъектов Российской Федерации»)
+         */
+        def reg83 = records.find{ it.OKATO_DEFINITION.substring(0, 4).equals("1110")}
+        if (reg83 != null) return reg83;
+    }
+}
+
+/**
+ * Получение значения (разменовываение)
+ */
+def getRefBookValue(refBookID, recordId, alias){
+    def  refDataProvider = refBookFactory.getDataProvider(refBookID)
+    def records = refDataProvider.getRecordData(recordId)
+
+    return records != null ? records.get(alias) : null;
 }

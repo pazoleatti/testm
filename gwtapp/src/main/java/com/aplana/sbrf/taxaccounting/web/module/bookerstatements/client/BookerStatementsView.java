@@ -1,13 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.google.gwt.editor.client.Editor;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,8 +27,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.*;
 
 /**
  * View для формы "Загрузка бухгалтерской отчётности"
@@ -53,7 +61,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     FlexiblePager pager;
 
     @UiField
-    DepartmentPicker departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
     ListBox bookerReportType;
@@ -69,16 +77,17 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     private void initListeners() {
         // Подразделение
-        departmentPicker.addDepartmentsReceivedEventHandler(new SelectDepartmentsEventHandler() {
-            @Override
-            public void onDepartmentsReceived(SelectDepartmentsEvent event) {
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
 
-                if (event == null || event.getItems().isEmpty()) {
+                if (event == null || event.getValue().isEmpty()) {
                     return;
                 }
 
-                Integer selDepartmentId = event.getItems().values().iterator().next();
-                String selDepartmentName = event.getItems().keySet().iterator().next();
+                Integer selDepartmentId = event.getValue().iterator().next();
+                //String selDepartmentName = event.ge.keySet().iterator().next();
 
                 // Проверка совпадения выбранного подразделения с текущим
                 if (BookerStatementsView.this.currentDepartmentId != null
@@ -92,7 +101,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
                 // Обновление налоговых периодов
                 reloadTaxPeriods();
-            }
+			}
         });
     }
 
@@ -103,14 +112,14 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
-        departmentPicker.setTreeValues(departments, availableDepartments);
+        departmentPicker.setAvalibleValues(departments, availableDepartments);
     }
 
     @Override
     public void setDepartment(final Department department) {
         if (department != null) {
-            departmentPicker.setSelectedItems(new HashMap<String, Integer>() {{
-                put(department.getName(), department.getId());
+            departmentPicker.setValue(new ArrayList<Integer>() {{
+                add(department.getId());
                 reloadTaxPeriods();
             }});
         }
