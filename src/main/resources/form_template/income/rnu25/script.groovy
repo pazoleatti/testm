@@ -137,15 +137,6 @@ void calc() {
         }
     }
 
-    // дополнительная проверка графы 8
-    for (def row : getRows(data)) {
-        // дополнительная проверка графы 8
-        if (!isTotal(row) && row.signSecurity != '+' && row.signSecurity != '-') {
-            logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
-            return
-        }
-    }
-
     /*
      * Расчеты.
      */
@@ -330,12 +321,6 @@ def logicalCheck(def useLog) {
             // 15. Обязательность заполнения поля графы 1..3, 5..13
             if (!checkRequiredColumns(row, columns, useLog)) {
                 return false
-            }
-
-            // дополнительная проверка графы 8
-            if (row.signSecurity != '+' && row.signSecurity != '-') {
-                logger.error('Графа 8 может принимать только следующие значения: "+" или "-".')
-                return
             }
 
             // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
@@ -565,6 +550,7 @@ void consolidation() {
             }
         }
     }
+    data.commit()
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 

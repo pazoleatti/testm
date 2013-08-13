@@ -44,6 +44,8 @@ switch (formDataEvent) {
         calc()
         logicalCheck(false)
         checkNSI()
+        // для сохранения изменений приемников
+        getData(formData).commit()
         break
 }
 
@@ -301,7 +303,8 @@ def logicalCheck(def useLog) {
             }
 
             // графа 11
-            if (row.rateBR != roundTo2(calculateColumn11(row,reportDate))) {
+            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
+            if (col11!=null && col11!=row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn("Неверно рассчитана графа «$name»!")
             }
@@ -383,7 +386,8 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            if(row.rateBR!=roundTo2(calculateColumn11(row, reportDate))){
+            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
+            if (col11!=null && col11!=row.rateBR) {
                 logger.error('Неверно указана ставка Банка России!')
                 return false
             }
@@ -691,10 +695,13 @@ BigDecimal roundTo2(BigDecimal value) {
  * Получить ставку рефинансирования ЦБ РФ
  */
 def getRate(def date) {
-    def refDataProvider = refBookFactory.getDataProvider(23)
-    def res = refDataProvider.getRecords(date, null, null, null);
-    tmp = res.getRecords().get(0).RATE.getNumberValue()
-
+    if (date!=null) {
+        def refDataProvider = refBookFactory.getDataProvider(23)
+        def res = refDataProvider.getRecords(date, null, null, null);
+        return res.getRecords().get(0).RATE.getNumberValue()
+    }else{
+        return null;
+    }
 }
 
 /**
