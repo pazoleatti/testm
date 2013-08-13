@@ -234,7 +234,6 @@ def fillForm(){
     newRowQuarter.costs = getQuarterTotal()
     newRowQuarter.setAlias("totalQuarter")
     data.insert(newRowQuarter, getRows(data).size()+1)
-    getRows(data).add(newRowQuarter)
 
     // строка Итого за текущий отчетный (налоговый) период
     def newRowTotal = formData.createDataRow()
@@ -244,7 +243,6 @@ def fillForm(){
     newRowTotal.costs = getTotalValue()
     newRowTotal.setAlias("total")
     data.insert(newRowTotal, getRows(data).size()+1)
-    getRows(data).add(newRowTotal)
 }
 
 /**
@@ -280,6 +278,10 @@ def logicalCheck(){
         if (row.costs == 0){
             logger.error('Все суммы по операции нулевые!')
         }
+        // Проверка актуальности поля «Часть сделки»; не фатальная;
+        if (row.part!=null && getPart(row.part)==null){
+            logger.warn('Поле ”Часть сделки” указано неверно!');
+        }
     }
 
     // проверка на наличие итоговых строк, иначе будет ошибка
@@ -296,9 +298,6 @@ def logicalCheck(){
             logger.error('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
         }
     }
-
-    // Проверка актуальности поля «Часть сделки»; не фатальная; Поле ”Наименование поля” указано неверно не заполнено!
-    // TODO не реализован сравочник
 
 }
 
@@ -503,4 +502,11 @@ def getData(def formData) {
 def getRows(def data) {
     def cached = data.getAllCached()
     return cached
+}
+
+/**
+ * Получить код части сделки
+ */
+def getPart(def part) {
+    return refBookService.getNumberValue(60,part,'CODE');
 }

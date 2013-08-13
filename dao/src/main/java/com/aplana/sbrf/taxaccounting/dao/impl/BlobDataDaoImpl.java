@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -65,7 +63,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)
+    /*@CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)*/
     public void delete(String uuid) {
         try{
             getJdbcTemplate().update("delete from blob_data where id = ?",
@@ -77,7 +75,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @CacheEvict(value = "DataBlobsCache", key = "#blobData.uuid", beforeInvocation = true)
+    /*@CacheEvict(value = "DataBlobsCache", key = "#blobData.uuid", beforeInvocation = true)*/
     public void save(final BlobData blobData) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
@@ -104,7 +102,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    @Cacheable("DataBlobsCache")
+    /*@Cacheable("DataBlobsCache")*/
     public BlobData get(String uuid) {
         try{
             return getJdbcTemplate().queryForObject("select * from blob_data where id = ?",
