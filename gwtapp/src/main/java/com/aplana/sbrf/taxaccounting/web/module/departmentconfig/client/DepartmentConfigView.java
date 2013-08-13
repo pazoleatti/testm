@@ -1,16 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.SelectDepartmentsEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.SelectDepartmentsEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ButtonLink;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -18,16 +22,27 @@ import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.*;
 
 /**
  * View для формы настроек подразделений
@@ -55,7 +70,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     // Выбранное подразделение
     private Integer currentDepartmentId;
-    private String currentDepartmentName;
 
     // Выбранный период
     private ReportPeriod currentReportPeriod;
@@ -129,7 +143,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    DepartmentPicker departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
     @Ignore
@@ -148,24 +162,23 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     private void initListeners() {
         // Подразделение
-        departmentPicker.addDepartmentsReceivedEventHandler(new SelectDepartmentsEventHandler() {
-            @Override
-            public void onDepartmentsReceived(SelectDepartmentsEvent event) {
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
 
-                if (event == null || event.getItems().isEmpty()) {
+                if (event == null || event.getValue().isEmpty()) {
                     return;
                 }
 
-                Integer selDepartmentId = event.getItems().values().iterator().next();
-                String selDepartmentName = event.getItems().keySet().iterator().next();
+                Integer selDepartmentId = event.getValue().iterator().next();
+                //String selDepartmentName = event.getItems().keySet().iterator().next();
 
                 boolean checkPass = checkUnsaved(new CheckUnsavedHandler() {
                     @Override
                     public void onCancel() {
                         // Вернуть старое подразделение
-                        departmentPicker.setSelectedItems(new HashMap<String, Integer>() {{
-                            put(DepartmentConfigView.this.currentDepartmentName, DepartmentConfigView.this.currentDepartmentId);
-                        }});
+                        departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
                     }
                 });
 
@@ -180,7 +193,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 }
 
                 DepartmentConfigView.this.currentDepartmentId = selDepartmentId;
-                DepartmentConfigView.this.currentDepartmentName = selDepartmentName;
 
                 currentReportPeriod = null;
 
@@ -189,8 +201,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
                 // Обновление налоговых периодов
                 reloadTaxPeriods();
-            }
-        });
+				
+			}
+		});
+        		
 
         // Вид налога
         taxType.addChangeHandler(new ChangeHandler() {
@@ -406,19 +420,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
-        departmentPicker.setTreeValues(departments, availableDepartments);
+        departmentPicker.setAvalibleValues(departments, availableDepartments);
     }
 
     @Override
     public void setDepartment(final Department department) {
         if (department != null) {
-            departmentPicker.setSelectedItems(new HashMap<String, Integer>() {{
-                put(department.getName(), department.getId());
-                reloadDepartmentParams();
-            }});
+        	departmentPicker.setValue(Arrays.asList(department.getId()));
+            reloadDepartmentParams();
         }
+        
         this.currentDepartmentId = department != null ? department.getId() : null;
-        this.currentDepartmentName = department != null ? department.getName() : null;
     }
 
     @Override

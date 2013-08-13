@@ -1,10 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DictionaryTaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ChangeActivePeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenException;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -13,9 +24,6 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
-
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -27,7 +35,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	public interface MyView extends PopupView, HasUiHandlers<OpenDialogUiHandlers> {
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 		void setTaxPeriods(List<TaxPeriod> taxPeriods);
-		void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments);
+		void setDepartments(List<Department> departments, List<Integer> selectedDepartments);
 		void setCurrentReportPeriod(ReportPeriod reportPeriod);
 		void setDictionaryTaxPeriod(List<DictionaryTaxPeriod> dictionaryTaxPeriod);
 		void setYear(int year);
@@ -55,7 +63,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		getView().setTaxPeriods(taxPeriods);
 	}
 
-	public void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments) {
+	public void setDepartments(List<Department> departments, List<Integer> selectedDepartments) {
 		getView().setDepartments(departments, selectedDepartments);
 	}
 

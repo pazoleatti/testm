@@ -24,7 +24,7 @@
 
                 <g:HorizontalPanel height="10px" >
                     <g:Label text="Подразделение: " />
-                    <picker:DepartmentPicker header="Подразделение"  ui:field="departmentPicker"  withCheckBox="false"/>
+                    <picker:DepartmentPickerPopupWidget header="Подразделение"  ui:field="departmentPicker"  multiselection="false"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel height="10px">

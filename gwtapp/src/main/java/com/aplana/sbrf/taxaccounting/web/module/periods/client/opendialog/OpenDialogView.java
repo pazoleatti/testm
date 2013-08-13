@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
@@ -33,7 +33,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
     //private NewDepartmentPicker departmentPicker;
 
 	@UiField
-	DepartmentPicker departmentPicker;
+	DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField
 	Button continueButton;
@@ -78,9 +78,9 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	}
 
 	@Override
-	public void setDepartments(List<Department> departments, Map<String, Integer> selectedDepartments) {
-		departmentPicker.setTreeValues(departments, new HashSet<Integer>());
-		departmentPicker.setSelectedItems(selectedDepartments);
+	public void setDepartments(List<Department> departments, List<Integer> selectedDepartments) {
+		departmentPicker.setAvalibleValues(departments, new HashSet<Integer>());
+		departmentPicker.setValue(selectedDepartments);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		OpenFilterData openFilterData = new OpenFilterData();
 		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
-		openFilterData.setDepartmentId(departmentPicker.getSelectedItems().entrySet().iterator().next().getValue());
+		openFilterData.setDepartmentId(departmentPicker.getValue().iterator().next());
 		openFilterData.setDictionaryTaxPeriod(period.getValue());
 		openFilterData.setEndDate(term.getValue());
 

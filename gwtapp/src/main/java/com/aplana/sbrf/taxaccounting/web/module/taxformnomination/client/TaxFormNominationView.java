@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.popup.PopUpWithTree;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -74,7 +74,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     GenericDataGrid<TableModel> grid;
     @UiField(provided = true)
-    PopUpWithTree tree;
+    DepartmentPickerWidget tree;
     @UiField
     DockLayoutPanel panelFormDataKind;
     @UiField
@@ -99,7 +99,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     private void initTree() {
-        tree = new PopUpWithTree("", false);
+        tree = new DepartmentPickerWidget("", false);
         tree.ok.setVisible(false);
 
     }
@@ -338,7 +338,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
-        tree.setItems(departments, availableDepartment);
+        tree.setAvalibleValues(departments, availableDepartment);
 
         cbMap.clear();
         Iterator<TreeItem> treeItemIterator = tree.tree.treeItemIterator();
