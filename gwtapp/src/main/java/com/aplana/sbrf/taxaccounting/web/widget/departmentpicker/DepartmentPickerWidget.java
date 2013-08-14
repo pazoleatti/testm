@@ -108,6 +108,9 @@ public class DepartmentPickerWidget extends Composite implements
 					&& itemsIdToSelect.contains(((Pair<Integer, String>) item
 							.getUserObject()).first)) {
 				checkBox.setValue(true);
+                this.valueDereference = new ArrayList<String>();
+                this.valueDereference.add(((Pair<Integer, String>) item
+                        .getUserObject()).getSecond());
 			} else {
 				checkBox.setValue(false);
 			}
@@ -196,6 +199,7 @@ public class DepartmentPickerWidget extends Composite implements
 				return o1h.size() - o2h.size();
 			}
 		});
+        this.value = new ArrayList<Integer>();
 		for (Department department : list) {
 			CheckBox checkBox;
 			if (multiselection) {
@@ -216,6 +220,7 @@ public class DepartmentPickerWidget extends Composite implements
 				nested.add(newItem);
 			}
 			lookup.put(department.getId(), newItem);
+            this.value.add(department.getId());
 		}
 		Collections.sort(nested, new Comparator<TreeItem>() {
 			@Override

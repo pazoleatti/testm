@@ -130,7 +130,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         }
 
         List<Integer> departments = new ArrayList<Integer>();
-        departments.addAll(departmentSelectionTree.getValue());
+        departments.addAll(departmentSelectionTree.getValue()!=null?departmentSelectionTree.getValue():new ArrayList<Integer>());
         
         lsf.setDepartmentIds(departments);
         lsf.setFormTypeId((null == formTypeId.getValue()) ? 0 : formTypeId.getValue());

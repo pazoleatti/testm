@@ -8,6 +8,9 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSe
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -17,6 +20,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
@@ -30,14 +34,15 @@ import java.util.List;
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
         implements AuditClientSearchEvent.MyHandler, AuditClientUIHandler {
 
+    private MyDataProvider dataProvider = new MyDataProvider();
+
     @ProxyEvent
     @Override
     public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
-        getView().updateDataTable();
+        dataProvider.update();
         getProxy().manualReveal(AuditClientPresenter.this);
     }
 
-    @Override
     public void onRangeChange(final int start, int length) {
         GetAuditDataListAction action = new GetAuditDataListAction();
         LogSystemFilter filter = auditFilterPresenter.getLogSystemFilter();
@@ -58,8 +63,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
 
     interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count,  List<LogSystemSearchResultItem> itemList);
-        void assignDataProvider(int pageSize);
-        void updateDataTable();
+        void assignDataProvider(int pageSize, AsyncDataProvider<LogSystemSearchResultItem> provider);
     }
 
     @ProxyCodeSplit
@@ -79,15 +83,20 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;
-        this.auditFilterPresenter.initFilterData();
         getView().setUiHandlers(this);
-        getView().assignDataProvider(PAGE_SIZE);
+        getView().assignDataProvider(PAGE_SIZE, dataProvider);
     }
 
     @Override
     protected void revealInParent() {
         RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
                 this);
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        super.prepareFromRequest(request);
+        this.auditFilterPresenter.initFilterData();
     }
 
     @Override
@@ -100,6 +109,21 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     protected void onReveal() {
         super.onReveal();
         setInSlot(TYPE_auditFilterPresenter, auditFilterPresenter);
+    }
+
+    private class MyDataProvider extends AsyncDataProvider<LogSystemSearchResultItem> {
+
+        public void update() {
+            for (HasData<LogSystemSearchResultItem> display: getDataDisplays()) {
+                onRangeChanged(display);
+            }
+        }
+
+        @Override
+        protected void onRangeChanged(HasData<LogSystemSearchResultItem> display) {
+            final Range range = display.getVisibleRange();
+            onRangeChange(range.getStart(), range.getLength());
+        }
     }
 
 }
