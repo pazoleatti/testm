@@ -2,7 +2,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.dao.script.TransportTaxDao
 
 /**
  * Форма "Сведения о транспортных средствах, по которым уплачивается транспортный налог".
@@ -242,7 +241,8 @@ void checkNSI() {
 
         // 3. Проверка кода вида ТС
         if (row.tsTypeCode != null) {
-            if (transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
+            // TODO Переписать. Переехали в версионные справочники
+            // if (transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
 
                 // 4. Проверка вида ТС
                 // TODO Переписать. Переехали в версионные справочники
@@ -250,9 +250,9 @@ void checkNSI() {
                 //    logger.error('Неверный вид ТС!')
                 //}
 
-            } else {
-                logger.error('Неверный код вида транспортного средства!')
-            }
+            // } else {
+            //     logger.error('Неверный код вида транспортного средства!')
+            // }
         }
 
         // 5. Проверка кода экологического класса
@@ -265,9 +265,10 @@ void checkNSI() {
 
         // 6. Проверка кода ед. измерения мощности
         if (row.baseUnit != null) {
-            if (!transportTaxDao.validateTaxBaseUnit(row.baseUnit)) {
-                logger.error('Неверный код ед. измерения мощности!')
-            }
+            // TODO Переписать. Переехали в версионные справочники
+            // if (!transportTaxDao.validateTaxBaseUnit(row.baseUnit)) {
+            //    logger.error('Неверный код ед. измерения мощности!')
+            //}
         }
     }
 }
