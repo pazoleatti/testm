@@ -375,7 +375,7 @@ alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreig
 
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
-create sequence seq_ref_book_record start with 100000;
+create sequence seq_ref_book_record start with 100000 increment by 100;
 create sequence seq_ref_book_record_row_id start with 100000;
 
 comment on table ref_book_record is 'Запись справочника';

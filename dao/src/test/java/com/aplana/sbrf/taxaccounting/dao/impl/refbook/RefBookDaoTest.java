@@ -317,10 +317,18 @@ public class RefBookDaoTest {
         refBookDao.getValue(-1L, 2L);
     }
 
-    @Test(expected = DuplicateKeyException.class)
+    @Test
     public void testDeleteAllRecords1() {
-        // Нельзя удалить на дату занесения записи
-        refBookDao.deleteAllRecords(1L, getDate(1, 1, 2013));
+        // Удаление на дату совпадающую с какой-либо версией
+        Date delDate = getDate(1, 1, 2013);
+        Long rbId = 1L;
+
+        refBookDao.deleteAllRecords(1L, delDate);
+
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(rbId, delDate, new PagingParams(), null,
+                null);
+
+        Assert.assertEquals(data.getRecords().size(), 0);
     }
 
     @Test
