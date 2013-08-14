@@ -228,6 +228,7 @@ def bildXml(){
                                             *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                             dictRegionId
                                             */
+                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
                                             def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
                                                 def x = l == 30200 ? "" : ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
@@ -258,6 +259,7 @@ def bildXml(){
                                             /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
                                             *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                             */
+                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
                                             def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
                                                 def valX = ((param.section.toString().size() < 4 ? ("0"*(4 - param.section.toString().size())) : param.section.toString())
@@ -284,6 +286,7 @@ def bildXml(){
                                             /* 	2.2. Получить в справочнике «Параметры налоговых льгот» запись,
                                             *	соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
                                             */
+                                            // TODO Переписать. Сервис удален, параметры перенесены в версионный справочник
                                             def param = dictionaryTaxBenefitParamService.get(region.code, tRow.taxBenefitCode)
                                             if (param != null) {
                                                 def valX = ((param.section.toString().size() < 4 ? "0"*(4 - param.section.toString().size()) : param.section.toString())
