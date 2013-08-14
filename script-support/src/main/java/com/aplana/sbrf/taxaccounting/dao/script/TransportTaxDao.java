@@ -7,26 +7,6 @@ import java.math.BigDecimal;
 
 @ScriptExposed(taxTypes = TaxType.TRANSPORT)
 public interface TransportTaxDao {
-
-	/**
-	 * Возвращает значение ставки транспортного налога
-	 *
-	 * @param code  код типа транспортного средства
-	 * @param age   срок использования в годах
-	 * @param power мощность в л.с.
-	 * @param regionId Код региона субъекта РФ
-	 * 
-	 * @return значение ставки налога в рублях
-	 */
-	int getTaxRate(String code, BigDecimal age, BigDecimal power, String regionId);
-
-	/**
-	 * Возвращает название вида транспортного средства
-	 *
-	 * @return название вида транспортного средства или null, если передан несуществующий код
-	 */
-	String getTsTypeName(String tsTypeCode);
-
 	/**
 	 * Проверяет существование кода транспортного средства
 	 *

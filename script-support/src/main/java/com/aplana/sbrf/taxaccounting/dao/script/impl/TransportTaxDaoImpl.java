@@ -16,42 +16,6 @@ import java.util.List;
 @Repository("transportTaxDao")
 @Transactional(readOnly = true)
 public class TransportTaxDaoImpl extends AbstractDao implements TransportTaxDao {
-	@Autowired
-	private TransportTaxMapper transportTaxMapper;
-
-	@Override
-	public int getTaxRate(String code, BigDecimal age, BigDecimal power, String regionId) {
-		List<Integer> list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue(), regionId);
-
-		if (list.size() <= 0 && code.length() == 5) {
-			// Если не найдём совпадения по точному коду, то ищем совпадение по коду с плейсхолдерами
-			code = code.substring(0, 3) + "??";
-			list = transportTaxMapper.getTransportTaxRate(code, age.intValue(), power.intValue(), regionId);
-		}
-
-		if (list.size() == 1) {
-			return list.get(0);
-		} else if (list.size() <= 0) {
-			throw new DaoException("Не удалось определить значение ставки налога для транспортного средства.");
-		} else {
-			throw new DaoException(
-					"Не удалось определить значение ставки налога для транспортного средства, " +
-							"т.к. в справчонике существует более 1й записи, " +
-							"удовлетворяющей заданным параметрам транспортного средства."
-			);
-		}
-	}
-
-	/**
-	 * Возвращает название типа транспортного средства по коду
-	 *
-	 * @param tsTypeCode код типа транспортного средства
-	 * @return название типа транспортного средства
-	 */
-	@Override
-	public String getTsTypeName(String tsTypeCode) {
-		return transportTaxMapper.getTsTypeName(tsTypeCode);
-	}
 
 	/**
 	 * Проверяет существование кода транспортного средства

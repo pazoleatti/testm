@@ -245,9 +245,10 @@ void checkNSI() {
             if (transportTaxDao.validateTransportTypeCode(row.tsTypeCode)) {
 
                 // 4. Проверка вида ТС
-                if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
-                    logger.error('Неверный вид ТС!')
-                }
+                // TODO Переписать. Переехали в версионные справочники
+                // if (transportTaxDao.getTsTypeName(row.tsTypeCode) != row.tsType) {
+                //    logger.error('Неверный вид ТС!')
+                //}
 
             } else {
                 logger.error('Неверный код вида транспортного средства!')
@@ -256,7 +257,7 @@ void checkNSI() {
 
         // 5. Проверка кода экологического класса
         if (row.ecoClass != null) {
-            // TODO Переписать. Экологические классы переехали в версионные справочникию
+            // TODO Переписать. Экологические классы переехали в версионные справочники
             // if (!transportTaxDao.validateEcoClass(row.ecoClass)) {
             //    logger.error('Неверный код экологического класса!')
             // }
@@ -279,13 +280,14 @@ void fillForm() {
 
         // заполнение графы 3 на основе графы 2
         if (row.codeOKATO != null) {
-            // TODO Переписать
+            // TODO Переписать. Переехали в версионные справочники
             //row.regionName = transportTaxDao.getRegionName(row.codeOKATO)
         }
 
         // заполнение графы 5 на основе графы 4
         if (row.tsTypeCode != null) {
-            row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
+            // TODO Переписать. Переехали в версионные справочники
+            // row.tsType = transportTaxDao.getTsTypeName(row.tsTypeCode)
         }
     }
 }
