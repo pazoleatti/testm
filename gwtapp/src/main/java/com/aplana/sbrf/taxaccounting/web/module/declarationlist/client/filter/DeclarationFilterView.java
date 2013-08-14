@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodSelectHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.reportperiodpicker.ReportPeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -41,8 +44,25 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder) {
 	    for (TaxType taxType : TaxType.values()){
-		    taxTypeReportPeriodPickerMap.put(taxType, new ReportPeriodPicker(this));
-		    taxTypeDepartmentSelectionTree.put(taxType, new DepartmentPickerPopupWidget("Выберите подразделение", true));
+	    	final ReportPeriodPicker periodPiker = new ReportPeriodPicker(this);
+	    	periodPiker.setEnabled(false);
+		    taxTypeReportPeriodPickerMap.put(taxType, periodPiker);
+		    // Убрал мультивыбор подразделения (http://jira.aplana.com/browse/SBRFACCTAX-3401)
+		    DepartmentPickerPopupWidget depPiker = new DepartmentPickerPopupWidget("Выберите подразделение", false);
+		    depPiker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+				@Override
+				public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+					if (event.getValue().isEmpty()){
+						periodPiker.clearReportPeriods();
+						periodPiker.setEnabled(false);
+					} else {
+						periodPiker.clearReportPeriods();
+						periodPiker.setEnabled(true);
+					}
+					
+				}
+			});
+		    taxTypeDepartmentSelectionTree.put(taxType, depPiker);
 	    }
 
 	    declarationType = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
@@ -104,8 +124,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void onTaxPeriodSelected(TaxPeriod taxPeriod) {
-		if(getUiHandlers() != null){
-			getUiHandlers().onTaxPeriodSelected(taxPeriod);
+		DepartmentPicker depPiker = taxTypeDepartmentSelectionTree.get(getUiHandlers().getCurrentTaxType());
+		if (taxPeriod!=null && !depPiker.getValue().isEmpty()){
+			getUiHandlers().onTaxPeriodSelected(taxPeriod, depPiker.getValue().iterator().next());
 		}
 	}
 
